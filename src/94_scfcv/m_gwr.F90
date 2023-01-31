@@ -95,7 +95,6 @@
 !!        [1] <var=xsum, A@xmpi_sum.finc:2551, addr=0x14aa2fce9010, size_mb=379.688>
 !!        [2] <var=gt_scbox, A@m_gwr.F90:4338, addr=0x14aa4f64f010, size_mb=379.688>
 !!        [3] <var=allcg_k, A@m_wfd.F90:4631, addr=0x14aa56b57010, size_mb=217.865>
-!!        [4] <var=chit_scbox, A@m_gwr.F90:3396, addr=0x14aa4789a010, size_mb=189.844>
 !!        [5] <var=wct_scbox, A@m_gwr.F90:4339, addr=0x14aa43876010, size_mb=189.844>
 !!        [6] <var=xsum, A@xmpi_sum.finc:2476, addr=0x14aa31bb0010, size_mb=189.844>
 !!        [7] <var=cg_k, A@m_wfd.F90:4623, addr=0x14aa64535010, size_mb=108.932>
@@ -3742,7 +3741,7 @@ subroutine gwr_build_tchi(gwr)
 !Local variables-------------------------------
 !scalars
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi !, ii !, my_iki ! my_iqf,
- integer :: idat, ndat, sc_nfft, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2 !, ig1
+ integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2 !, ig1
  !integer(kind=XMPI_ADDRESS_KIND) :: buf_size
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit !, spin_fact, sc_ucvol, ik_ibz,
@@ -3757,13 +3756,13 @@ subroutine gwr_build_tchi(gwr)
  integer,allocatable :: green_scgvec(:,:), chi_scgvec(:,:)
  integer :: mask_qibz(gwr%nqibz), need_kibz(gwr%nkibz), got_kibz(gwr%nkibz)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2) !, qq_bz(3) ! kk_ibz(3),
- complex(gwpc),allocatable :: gt_scbox(:,:,:), chit_scbox(:,:)
+ complex(gwpc),allocatable :: gt_scbox(:,:,:)
  complex(gwpc),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) ! uc_ceikr(:)
  type(__slkmat_t) :: gkq_rpr_pm(2), chiq_rpr(gwr%my_nqibz), gk_rpr_pm(2)  !gt_gpr(2, gwr%my_nkbz), chiq_gpr(gwr%my_nqibz)
  type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:)
  type(desc_t), target, allocatable :: desc_mykbz(:)
  !type(desc_t), target :: desc_mykbz(gwr%my_nkbz)
- type(fftbox_plan3_t) :: plan_gp2rp, plan_rp2gp
+ type(fftbox_plan3_t) :: green_plan
  type(uplan_t) :: uplan_q
 
 ! *************************************************************************
@@ -3788,9 +3787,8 @@ subroutine gwr_build_tchi(gwr)
 
    ! Set FFT mesh in the supercell
    sc_ngfft = gwr%g_ngfft
-   sc_ngfft(1:3) = gwr%ngkpt * gwr%g_ngfft(1:3)
-   sc_ngfft(4:6) = sc_ngfft(1:3)
-   sc_nfft = product(sc_ngfft(1:3))
+   sc_ngfft(1:3) = gwr%ngkpt * gwr%g_ngfft(1:3); sc_ngfft(4:6) = sc_ngfft(1:3)
+   sc_nfft = product(sc_ngfft(1:3)); sc_nfftsp = sc_nfft * gwr%nspinor
 
    call wrtout(std_out, " Building chi0 with FFTs in the supercell:", pre_newlines=2)
    call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
@@ -3805,35 +3803,26 @@ subroutine gwr_build_tchi(gwr)
 
    ! Be careful when using the FFT plan with ndat as ndat can change inside the loop if we start to block.
    ! Perhaps the safest approach would be to generate the plan on the fly.
-   ndat = gwr%sc_batch_size
+   max_ndat = gwr%sc_batch_size
 
    !use_shmem_for_k = gwr%sc_batch_size > 1 .and. mod(gwr%sc_batch_size, gwr%kpt_comm%nproc) == 0
    !use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
    !if (use_shmem_for_k) then
-   !  buf_size = 2 * (sc_nfft * gwr%nspinor * ndat * 2)
+   !  buf_size = 2 * (sc_nfftsp * max_ndat * 2)
    !  call gwr%kpt_comm%allocate_shared_master(buf_size, gwpc, info, void_ptr, gt_scbox_win)
-   !  call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfft * gwr%nspinor * ndat, 2)
-   !  buf_size = 2 * (sc_nfft * gwr%nspinor * ndat)
-   !  call gwr%kpt_comm%allocate_shared_master(buf_size, gwpc, info, chit_scbox, chit_scbox_win)
-   !  call c_f_pointer(void_ptr, chit_scbox, shape=[sc_nfft * gwr%nspinor * ndat])
+   !  call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp * max_ndat, 2)
    !end if
    !if (use_shmem_for_k) then
    !  call xmpi_win_free(gt_scbox_win, ierr)
    !  call xmpi_win_free(chit_scbox_win, ierr)
    !end if
 
-   ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor, ndat, 2))
-   !ABI_CALLOC(chit_scbox, (sc_nfft * gwr%nspinor, ndat))
-
-   mem_mb = (sc_nfft * gwr%nspinor * ndat * 3 * 2 * gwpc) * b2Mb
+   ABI_CALLOC(gt_scbox, (sc_nfftsp, max_ndat, 2))
+   mem_mb = (sc_nfftsp * max_ndat * 2 * gwpc) * b2Mb
    call wrtout(std_out, sjoin(" Memory for scbox arrays:", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
-   ! This for the version with my_nkbz FFTs in the unit cell
-   !ABI_CALLOC(gt_ucbox, (gwr%g_nfft * gwr%nspinor * ndat, 2))
-
-   ! Build plans for dense FFTs.
-   call plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda)
-   call plan_rp2gp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda)
+   ! Build plan for dense FFTs.
+   call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%use_gpu_cuda)
 
    ! The g-vectors in the supercell for G and tchi.
    ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
@@ -3903,18 +3892,18 @@ subroutine gwr_build_tchi(gwr)
          if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
 
          ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
-         call plan_gp2rp%execute(gt_scbox(:,1,1), -1)
+         call green_plan%execute(gt_scbox(:,1,1), -1)
          call xscal(size(gt_scbox), real(sc_nfft, kind=gwpc), gt_scbox(:,1,1), 1)  ! gt_scbox *= sc_nfft
 
          ! Compute tchi(R',r) for this r and store it in (:,:,1).
          ! Note that results are real so one might use r2c FFT.
+         !do idat=1,ndat
          gt_scbox(:,:,1) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
-         !chit_scbox(:,:) = gt_scbox(:,:,1) * conjg(gt_scbox(:,:,2))
-         !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(chit_scbox))))
+         !end do
+         !max_abs_imag_chit = max(max_abs_imag_chit, maxval(abs(aimag(gt_scbox(:,:,1)))))
 
          ! Back to tchi(G'=q+g',r) immediately with isign + 1.
-         !call plan_rp2gp%execute(chit_scbox(:,1), +1)
-         call plan_rp2gp%execute(gt_scbox(:,1,1), +1)
+         call green_plan%execute(gt_scbox(:,1,1), +1)
 !else
 !         idat = gwr%kpt_comm%me + 1
 !         gt_scbox(:,idat,:) = zero
@@ -3954,7 +3943,6 @@ subroutine gwr_build_tchi(gwr)
 
            call box2gsph(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, chi_scgvec, &
                          gt_scbox(:,1,1), chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))
-                         !chit_scbox(:,1), chiq_gpr(my_iqi)%buffer_cplx(:, my_ir))
 
            ! Alternatively, one can avoid the above FFT,
            ! use zero-padded to go from the supercell to the ecuteps g-sphere inside the my_iqi loop.
@@ -4027,18 +4015,14 @@ subroutine gwr_build_tchi(gwr)
    end do ! my_is
 
    ABI_FREE(gt_scbox)
-   !ABI_FREE(chit_scbox)
    ABI_FREE(green_scgvec)
    ABI_FREE(chi_scgvec)
    ABI_FREE(cemiqr)
    ABI_FREE(gt_gpr)
    ABI_FREE(desc_mykbz)
-   !ABI_SFREE(gt_ucbox)
    call slk_array_free(chiq_gpr)
    ABI_FREE(chiq_gpr)
-
-   call plan_gp2rp%free()
-   call plan_rp2gp%free()
+   call green_plan%free()
 
   else
     ! ===================================================================
@@ -4742,7 +4726,7 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, ndat !, ii !sc_mgfft,
+ integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, max_ndat, ndat !, ii !sc_mgfft,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, ibeg, nrsp ! npwsp, my_iqi, sc_ir
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
@@ -4763,7 +4747,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(gwpc),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
- type(fftbox_plan3_t) :: gt_plan_gp2rp, wt_plan_gp2rp
+ type(fftbox_plan3_t) :: green_plan, wt_plan
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
  real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf, eshift
  complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev
@@ -4845,13 +4829,13 @@ if (gwr%use_supercell_for_sigma) then
  ! The first option requires less memory provided we are interested in a small set of KS states.
  ! The second option is interesting if we need to compute several matrix elements, including off-diagonal terms.
 
- ndat = gwr%sc_batch_size
- ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * ndat, 2))
- ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * ndat))
+ max_ndat = gwr%sc_batch_size
+ ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * max_ndat, 2))
+ ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * max_ndat))
 
  ! Build plans for dense FFTs.
- call gt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat * 2, gwr%dtset%use_gpu_cuda)
- call wt_plan_gp2rp%from_ngfft(sc_ngfft, gwr%nspinor * ndat,     gwr%dtset%use_gpu_cuda)
+ call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%use_gpu_cuda)
+ call wt_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat  , gwr%dtset%use_gpu_cuda)
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -4954,13 +4938,13 @@ if (gwr%use_supercell_for_sigma) then
 
        ! G(G',r) --> G(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
-       call gt_plan_gp2rp%execute(gt_scbox(:,1), -1)
+       call green_plan%execute(gt_scbox(:,1), -1)
        !gt_scbox = gt_scbox * (sc_nfft / sck_ucvol)
        call xscal(size(gt_scbox), real(sc_nfft / sck_ucvol, kind=gwpc), gt_scbox(:,1), 1)
 
        ! Wc(G',r) --> Wc(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
-       call wt_plan_gp2rp%execute(wct_scbox, -1)
+       call wt_plan%execute(wct_scbox, -1)
        !wct_scbox = wct_scbox * (sc_nfft / scq_ucvol)
        call xscal(size(wct_scbox), real(sc_nfft / scq_ucvol, kind=gwpc), wct_scbox, 1)
 
@@ -5023,8 +5007,8 @@ if (gwr%use_supercell_for_sigma) then
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
  ABI_FREE(gt_scbox)
  ABI_FREE(wct_scbox)
- call gt_plan_gp2rp%free()
- call wt_plan_gp2rp%free()
+ call green_plan%free()
+ call wt_plan%free()
 
 else
  ! ===================================================================
