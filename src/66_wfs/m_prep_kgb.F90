@@ -836,7 +836,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    ! (ndatarecv*my_nspinor*bandpp might be greater than the declared size of cwavef)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
     if (l_use_gpu_cuda == 1) then
-       call copy_gpu_to_gpu(C_LOC(cwavef_alltoall2), C_LOC(cwavef), 2*ndatarecv*my_nspinor*bandpp*dp)
+       call copy_gpu_to_gpu(C_LOC(cwavef_alltoall2), C_LOC(cwavef), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
     else
        call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
     end if
@@ -960,7 +960,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    ! TODO check other usages, maybe
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
     if (l_use_gpu_cuda == 1) then
-       call copy_gpu_to_gpu(C_LOC(gsc), C_LOC(gsc_alltoall2), 2*ndatarecv*my_nspinor*bandpp*dp)
+       call copy_gpu_to_gpu(C_LOC(gsc), C_LOC(gsc_alltoall2), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
     else
        call DCOPY(2*ndatarecv*my_nspinor*bandpp, gsc_alltoall2, 1, gsc, 1)
     end if
