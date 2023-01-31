@@ -286,10 +286,11 @@ int version_2_cores(int major, int minor)
 /* Print memory information (total amount and free available)                 */
 /*============================================================================*/
 
-extern "C" void check_gpu_mem_(){
+extern "C" void check_gpu_mem_(const char* str)
+{
   size_t free,total;
   cudaMemGetInfo(&free,&total);
-  printf("*** GPU memory : Free =>  %4.2fMo   | Total =>  %4.2fMo ***\n",free*1e-6,total*1e-6);
+  printf("[%s] *** GPU memory : Free =>  %4.2fMo   | Total =>  %4.2fMo ***\n", str, free*1e-6, total*1e-6);
   fflush(stdout);
 }
 
@@ -299,10 +300,14 @@ extern "C" void check_gpu_mem_(){
 /* OUTPUT gpu_ptr= C_PTR on gpu memory location that has been allocated       */
 /*============================================================================*/
 
-extern "C" void alloc_on_gpu_(void **gpu_ptr, int* size){
+extern "C" void alloc_on_gpu_(void **gpu_ptr, const size_t* size)
+{
 
-  if(cudaMalloc(gpu_ptr,*size)!=cudaSuccess){
-    printf("ERROR: alloc_on_gpu failed:%s\n",cudaGetErrorString(cudaGetLastError()));
+  //check_gpu_mem_("alloc_on_gpu_");
+
+  if (cudaMalloc(gpu_ptr,*size) != cudaSuccess)
+  {
+    printf("ERROR: alloc_on_gpu failed allocating %ld bytes :%s\n", *size, cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
   }
@@ -315,10 +320,13 @@ extern "C" void alloc_on_gpu_(void **gpu_ptr, int* size){
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void dealloc_on_gpu_(void **gpu_ptr){
+extern "C" void dealloc_on_gpu_(void **gpu_ptr)
+{
   if(*gpu_ptr==NULL)
     return;
-  if(cudaFree(*gpu_ptr)!=cudaSuccess){
+
+  if (cudaFree(*gpu_ptr) != cudaSuccess)
+  {
     printf("ERROR: dealloc_on_gpu failed :%s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
@@ -337,8 +345,10 @@ extern "C" void dealloc_on_gpu_(void **gpu_ptr){
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void copy_on_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
-  if(cudaMemcpy(*gpu_ptr, *cpu_ptr, *size, cudaMemcpyHostToDevice)!=cudaSuccess){
+extern "C" void copy_on_gpu_(void **cpu_ptr, void **gpu_ptr, const size_t* size)
+{
+  if (cudaMemcpy(*gpu_ptr, *cpu_ptr, *size, cudaMemcpyHostToDevice) != cudaSuccess)
+  {
     printf("ERROR: copy_on_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
@@ -354,8 +364,10 @@ extern "C" void copy_on_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
 /*  cpu_ptr = host memory location (LOC of an allocated array)                */
 /*============================================================================*/
 
-extern "C" void copy_from_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
-  if(cudaMemcpy(*cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost)!=cudaSuccess){
+extern "C" void copy_from_gpu_(void **cpu_ptr, void **gpu_ptr, const size_t* size)
+{
+  if (cudaMemcpy(*cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost) != cudaSuccess)
+  {
     printf("ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
@@ -373,8 +385,10 @@ extern "C" void copy_from_gpu_(void **cpu_ptr, void **gpu_ptr, int* size){
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, int* size){
-  if(cudaMemcpy(*dest_gpu_ptr, *src_gpu_ptr, *size, cudaMemcpyDeviceToDevice)!=cudaSuccess){
+extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, const size_t* size)
+{
+  if (cudaMemcpy(*dest_gpu_ptr, *src_gpu_ptr, *size, cudaMemcpyDeviceToDevice) != cudaSuccess)
+  {
     printf("ERROR: copy_gpu_to_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
     abi_cabort();
@@ -393,7 +407,8 @@ extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, int* s
 /*  None                                                                      */
 /*============================================================================*/
 
-extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const size_t* size_in_bytes){
+extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const size_t* size_in_bytes)
+{
   if(cudaMemset(*gpu_ptr, *value, *size_in_bytes)!=cudaSuccess){
     printf("ERROR: gpu_memset at address %p failed : %s\n",*gpu_ptr,cudaGetErrorString(cudaGetLastError()));
     fflush(stdout);
@@ -457,7 +472,7 @@ extern "C" void gpu_managed_ptr_status_(void **gpu_ptr)
            attributes.hostPointer,
            attributes.devicePointer);
   } else {
-    printf("ptr %p is not memory managed.\n");
+    printf("ptr %p is not memory managed.\n", *gpu_ptr);
   }
 
 } // gpu_managed_ptr_status_

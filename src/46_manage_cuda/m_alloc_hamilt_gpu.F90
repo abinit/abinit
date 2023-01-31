@@ -324,16 +324,15 @@ subroutine alloc_nonlop_kokkos(dtset,&
 
   if (gemm_nonlop_kokkos % allocated .eqv. .false.) then
     ! These will store the non-local factors for vectin, svectout and vectout respectively
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%    projections_gpu, (cplex * nprojs * dtset%nspinor*dtset%bandpp * dp))
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  s_projections_gpu, (cplex * nprojs * dtset%nspinor*dtset%bandpp * dp))
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu, (2     * nprojs * dtset%nspinor*dtset%bandpp * dp))
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%    projections_gpu, INT(cplex, c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  s_projections_gpu, INT(cplex, c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu, INT(2    , c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
 
     allocated_size_bytes = allocated_size_bytes + (2*cplex+2)*nprojs * dtset%nspinor*dtset%bandpp * dp
 
-
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectin_gpu,  2*npwin * dtset%nspinor*dtset%bandpp * dp)
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectout_gpu, 2*npwout * dtset%nspinor*dtset%bandpp * dp)
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos% svectout_gpu, 2*npwout * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectin_gpu,  INT(2, c_size_t) * npwin  * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectout_gpu, INT(2, c_size_t) * npwout * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_kokkos% svectout_gpu, INT(2, c_size_t) * npwout * dtset%nspinor*dtset%bandpp * dp)
 
     allocated_size_bytes = allocated_size_bytes + &
       & 2 * (npwin+2*npwout) * dtset%nspinor * dtset%bandpp * dp
