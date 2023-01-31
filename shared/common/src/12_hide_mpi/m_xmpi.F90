@@ -178,6 +178,7 @@ module m_xmpi
    procedure :: prep_gatherv => xcomm_prep_gatherv     ! Prepare a typical gatherv operation.
    procedure :: print_names => xcomm_print_names
    procedure :: can_use_shmem => xcomm_can_use_shmem
+   !procedure :: allocate_shared_master => xcomm_allocate_shared_master
  end type xcomm_t
 
  public :: xcomm_from_mpi_int

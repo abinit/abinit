@@ -44,7 +44,7 @@ MODULE m_fft
  use m_fstrings,      only : sjoin, itoa
  use m_geometry,      only : metric
  use m_hide_blas,     only : xscal
- use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft, sphere_fft1, sphere, change_istwfk,&
+ use m_fftcore,       only : get_cache_kb, kpgsph, get_kg, sphere_fft, sphere_fft1, sphere, change_istwfk, &
                              fftalg_info, fftalg_has_mpi, print_ngfft, getng, sphereboundary
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
@@ -98,14 +98,12 @@ MODULE m_fft
  end interface fft_ug
 
  interface fft_ur
-   !module procedure fft_ur_sp  TODO
    module procedure fft_ur_dp
    module procedure fft_ur_spc
    module procedure fft_ur_dpc
  end interface fft_ur
 
  interface fftpad
-   !module procedure fftpad_dp  TODO
    module procedure fftpad_spc
    module procedure fftpad_dpc
  end interface fftpad
@@ -131,7 +129,7 @@ MODULE m_fft
 
    ! TODO: ndat should be replaced by batch_size
    ! There are cases, indeed, in which ndat < batch_size where ndat is computed inside the loop.
-   integer :: ndat = -1       ! Number of FFTs associated to the plan.
+   integer :: ndat = -1       ! Max number of FFTs associated to the plan.
    integer :: dims(3) = -1    ! The number of FFT divisions.
    integer :: embed(3) = -1   ! Leading dimensions of the input, output arrays.
    integer :: use_gpu = 0     ! /= 0 if FFTs should be offloaded to the GPU.
@@ -211,21 +209,17 @@ MODULE m_fft
 
    integer :: npw = -1
    integer :: nspinor = -1
+   integer :: batch_size = -1  ! MAXIMUM number of FFTs associated to the plan.
    integer :: istwfk = -1
    integer :: kind = -1
-   integer :: mgfft = -1
+   integer :: use_gpu = 0      ! /= 0 if FFTs should be offloaded to the GPU.
    integer :: nfft = -1       ! Total number of points in the FFT box.
+   integer :: mgfft = -1
    integer :: ngfft(18)
-   ! TODO: ndat should be replaced by batch_size
-   ! There are cases, indeed, in which ndat < batch_size where ndat is computed inside the loop.
    integer, contiguous, pointer :: kg_k(:,:)
    integer, allocatable :: gbound(:,:)
 
-   integer :: batch_size = -1  ! Max number of FFTs associated to the plan.
-   integer :: use_gpu = 0      ! /= 0 if FFTs should be offloaded to the GPU.
-
  contains
-
    procedure :: init => uplan_init    ! Build object
    procedure :: free => uplan_free    ! Free dynamic memory
 
