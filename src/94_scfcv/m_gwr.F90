@@ -3807,7 +3807,7 @@ subroutine gwr_build_tchi(gwr)
    !use_shmem_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
    use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc
    use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
-   !use_shmem_for_k = .False.
+   use_shmem_for_k = .False.
    if (use_shmem_for_k) then
      buf_count = 2 * (sc_nfftsp * max_ndat * 2)
      call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
