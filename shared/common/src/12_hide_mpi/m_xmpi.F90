@@ -719,6 +719,8 @@ interface xmpi_isum_ip
   module procedure xmpi_isum_ip_dpc1d
   module procedure xmpi_isum_ip_spc2d
   module procedure xmpi_isum_ip_dpc2d
+  module procedure xmpi_isum_ip_spc3d
+  module procedure xmpi_isum_ip_dpc3d
 end interface xmpi_isum_ip
 !!***
 
