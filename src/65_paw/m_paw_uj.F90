@@ -271,16 +271,16 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,dtset,dtfil,ures,comm)
 !Arguments ------------------------------------
 !scalars
 !arrays
- integer                        :: ndtpawuj, comm
- type(macro_uj_type),intent(in) :: dtpawuj(0:ndtpawuj)
+ integer                            :: ndtpawuj, comm
+ type(macro_uj_type),intent(in)     :: dtpawuj(0:ndtpawuj)
  type(dataset_type),intent(in)      :: dtset
- type(datafiles_type),intent(in) :: dtfil
- real(dp),intent(out)           :: ures
+ type(datafiles_type),intent(in)    :: dtfil
+ real(dp),intent(out)               :: ures
 
 !Local variables-------------------------------
 !scalars
  integer,parameter           :: natmax=2,nwfchr=6
- integer                     :: ii,jj,nat_org,jdtset,nspden,macro_uj,kdtset,marr
+ integer                     :: ii,jj,nat_org,jdtset,nspden,macro_uj,marr
  integer                     :: im1,ndtuj,idtset, nsh_org, nsh_sc,nat_sc,maxnat
  integer                     :: pawujat,pawprtvol,pawujoption
  integer                     :: dmatpuopt,invopt,ipert
@@ -293,13 +293,12 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,dtset,dtfil,ures,comm)
  character(len=5)            :: pertname
  character(len=1)            :: parname
  character(len=14)           :: occmag
- type(crystal_t) :: cryst
+ type(crystal_t)             :: cryst
 !arrays
  integer                     :: ext(3)
  real(dp)                    :: rprimd_sc(3,3),vsh(ndtpawuj),a(5),b(5)
- integer,allocatable         :: narrm(:)
- integer,allocatable         :: idum2(:,:),jdtset_(:),smult_org(:),smult_sc(:)
- real(dp),allocatable        :: luocc(:,:),dqarr(:,:),dqarrr(:,:),dparr(:,:),dparrr(:,:),xred_org(:,:),drarr(:,:)
+ integer,allocatable         :: jdtset_(:),smult_org(:),smult_sc(:),intmagv_org(:),intmagv_sc(:)
+ real(dp),allocatable        :: luocc(:,:),xred_org(:,:)
  real(dp),allocatable        :: magv_org(:),magv_sc(:),chi(:),chi0(:),chi0_sc(:), chi_sc(:), xred_sc(:,:)
  real(dp),allocatable        :: sdistv_org(:),sdistv_sc(:),distv_org(:),distv_sc(:)
  integer,parameter           :: ncid0 = 0, master = 0
@@ -330,7 +329,9 @@ call wrtout(std_out,message,'COLL')
 
  nspden=dtpawuj(jdtset)%nspden
  nat_org=dtpawuj(jdtset)%nat
- ABI_CHECK(nat_org == 1, "MG: I'm not sure we access data with the right index if nat_org > 1")
+ write(message,'(a,i3)')'natom,nat_org',nat_org
+ call wrtout(std_out,message,'COLL')
+! ABI_CHECK(nat_org == 1, "MG: I'm not sure we access data with the right index if nat_org > 1")
 
  macro_uj=dtpawuj(jdtset)%macro_uj
  pawujat=dtpawuj(jdtset)%pawujat
@@ -344,110 +345,26 @@ call wrtout(std_out,message,'COLL')
  if (dmatpuopt==1) eyp=eyp+3.0_dp
  if (dmatpuopt>=3) eyp=(eyp+3.0_dp-dmatpuopt)
 
+!DEBUG
+ write(message,'(a,i3)')'pawujdet dmatpuopt',dmatpuopt
+ call wrtout(std_out,message,'COLL')
+!END DEBUG
+
  ABI_MALLOC(luocc,(ndtpawuj,nat_org))
- ABI_MALLOC(idum2,(marr,0:ndtuj))
- ABI_MALLOC(drarr,(marr,0:ndtuj))
  ABI_MALLOC(magv_org,(nat_org))
+ ABI_MALLOC(intmagv_org,(nat_org))
  ABI_MALLOC(xred_org,(3,nat_org))
  ABI_MALLOC(chi0,(nat_org))
  ABI_MALLOC(chi,(nat_org))
- ABI_MALLOC(dparr,(marr,0:ndtuj))
- ABI_MALLOC(dparrr,(marr,0:ndtuj))
- ABI_MALLOC(dqarr,(marr,0:ndtuj))
- ABI_MALLOC(dqarrr,(marr,0:ndtuj))
  ABI_MALLOC(distv_org,(nat_org))
- ABI_MALLOC(narrm,(0:ndtuj))
- dparr=-one ;  dparrr=-one ;  dqarr=-one ;  dqarrr=-one
 !DEBUG
 !write(message,fmt='((a,i3,a))')'pawuj_det init sg'
 !call wrtout(std_out,message,'COLL')
 !END DEBUG
- idum2=1 ; drarr=one
  luocc=zero
 
-!write(std_out,*) 'pawuj 03'
 !###########################################################
-!### 03. Write out the input for the ujdet utility
-
- write(message, '(3a)' ) ch10,&
-& ' # input for ujdet, cut it using ''sed -n "/MARK/,/MARK/p" abi.out > ujdet.in ''------- ',ch10
- call wrtout(ab_out,message,'COLL')
-
- if (ndtuj/=4) then
-   write (hstr,'(I0)') jdtset              ! convert integer to string
- else
-   hstr=''
- end if
- if (ndtuj>=2.or.jdtset==1) then
-   idum2(1,1:ndtuj)=4 !dtpawuj(:)%ndtuj
-   call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'ndtset','INT',0)
- end if
- idum2(1,0:ndtuj)=pack(dtpawuj(:)%nat,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'nat'//trim(hstr),'INT',0)
-
- idum2(1,0:ndtuj)=pack(dtpawuj(:)%nspden,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'nspden'//trim(hstr),'INT',0)
-
- idum2(1,0:ndtuj)=pack(dtpawuj(:)%macro_uj,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'macro_uj'//trim(hstr),'INT',0)
-
- idum2(1,0:ndtuj)=pack(dtpawuj(:)%pawujat,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujat'//trim(hstr),'INT',0)
-
- dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawujga,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujga'//trim(hstr),'DPR',0)
-
- dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawujrad,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujrad'//trim(hstr),'DPR',0)
-
- dparr(1,0:ndtuj)=pack(dtpawuj(:)%pawrad,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawrad'//trim(hstr),'DPR',0)
-
- dparr(1,0:ndtuj)=pack(dtpawuj(:)%ph0phiint,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'ph0phiint'//trim(hstr),'DPR',0)
-
- idum2(1,0:ndtuj)=pack(dtpawuj(:)%pawprtvol,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawprtvol'//trim(hstr),'INT',0)
-
- idum2(1,0:ndtuj)=pack(dtpawuj(:)%option,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'pawujopt'//trim(hstr),'INT',0)
-
- idum2(1,0:ndtuj)=pack(dtpawuj(:)%dmatpuopt,dtpawuj(:)%iuj/=-1)
- call prttagm(dparr,idum2,ab_out,jdtset_,1,marr,1,narrm,ncid0,ndtuj,'dmatpuopt'//trim(hstr),'INT',0)
-
- kdtset=0
-
- do idtset=0,ndtpawuj
-   if (dtpawuj(idtset)%iuj/=-1) then
-     dparr(1:nspden*nat_org,kdtset)=reshape(dtpawuj(idtset)%vsh,(/nspden*nat_org/))
-     dparrr(1:nspden*nat_org,kdtset)=reshape(dtpawuj(idtset)%occ,(/nspden*nat_org/))
-     dqarr(1:nat_org*3,kdtset)=reshape(dtpawuj(idtset)%xred,(/nat_org*3/))
-     dqarrr(1:3*3,kdtset)=reshape(dtpawuj(idtset)%rprimd,(/3*3/))
-     idum2(1:3,kdtset)=reshape(dtpawuj(idtset)%scdim,(/3/))
-     drarr(1:nwfchr,kdtset)=reshape(dtpawuj(idtset)%wfchr,(/nwfchr/))
-     kdtset=kdtset+1
-   end if
- end do
-
- call prttagm(dparr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid0,ndtuj,'vsh'//trim(hstr),'DPR',0)
- call prttagm(dparrr,idum2,ab_out,jdtset_,2,marr,nspden*nat_org,narrm,ncid0,ndtuj,'occ'//trim(hstr),'DPR',0)
- call prttagm(dqarr,idum2,ab_out,jdtset_,2,marr,nat_org*3,narrm,ncid0,ndtuj,'xred'//trim(hstr),'DPR',0)
- call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3*3,narrm,ncid0,ndtuj,'rprimd'//trim(hstr),'DPR',0)
- call prttagm(dqarrr,idum2,ab_out,jdtset_,2,marr,3,narrm,ncid0,ndtuj,'scdim'//trim(hstr),'INT',0)
- call prttagm(drarr,idum2,ab_out,jdtset_,2,marr,nwfchr,narrm,ncid0,ndtuj,'wfchr'//trim(hstr),'DPR',0)
- ABI_FREE(narrm)
-
- write(message, '( 15a )'  ) ch10,' # further possible options: ',ch10,&
-& ' #    scdim    2 2 2 ',ch10,&
-& ' #    mdist    10.0  ',ch10,&
-& ' #  pawujga    2 '    ,ch10,&
-& ' # pawujopt    2 '    ,ch10,&
-& ' # pawujrad    3.0'   ,ch10,&
-& ' # ------- end input for ujdet: end-MARK  -------- ',ch10
- call wrtout(ab_out,message,'COLL')
-
-!###########################################################
-!### 04. Testing consistency of parameters and outputting info
+!### 02. Testing consistency of parameters and outputting info
 
 !LMac
 ! if (ndtuj/=4)  return
@@ -530,7 +447,7 @@ call wrtout(std_out,message,'COLL')
    if (pawprtvol==-3) then
      write(message,fmt='(2a,i3,a,f15.12)') ch10,' Potential shift vsh(',jdtset,') =',vsh(jdtset)
      call wrtout(std_out,message,'COLL')
-     write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',luocc(jdtset,1:nat_org)
+     write(message,fmt='( a,i3,a,120f15.9)') ' Occupations occ(',jdtset,') ',( luocc(jdtset,ii),ii=1,nat_org )
      call wrtout(std_out,message,'COLL')
    end if
  end do
@@ -569,11 +486,12 @@ call wrtout(std_out,message,'COLL')
  else
    magv_org=(/(1,im1=1,nat_org)/)
  end if
+ intmagv_org=(/(int(magv_org(im1)),im1=1,nat_org)/)
 
- if (pawprtvol==-3) then
+! if (pawprtvol==-3) then
    write(message,fmt='(3a, 150f4.1)') ch10,' Magnetization',trim(message),magv_org
    call wrtout(std_out,message,'COLL')
- end if
+! end if
 
 !Case of extrapolation to larger r_paw: calculate intg
  if (all(dtpawuj(1)%wfchr(:)/=0).and.ph0phiint/=1) then
@@ -611,8 +529,7 @@ call wrtout(std_out,message,'COLL')
  write(message,fmt='(a)')' pawuj_det: determine U in primitive cell'
  call wrtout(std_out,message,'COLL')
 
- call lcalcu(int(magv_org),nat_org,dtpawuj(1)%rprimd,dtpawuj(1)%xred,chi,chi0,pawujat,ures,pawprtvol,pawujga,pawujoption)
-
+ call lcalcu(intmagv_org,nat_org,dtpawuj(1)%rprimd,dtpawuj(1)%xred,chi,chi0,pawujat,ures,pawprtvol,pawujga,pawujoption)
 !Begin calculate U in supercell
 
 !Analyze shell structure of primitive cell
@@ -620,7 +537,7 @@ call wrtout(std_out,message,'COLL')
  ABI_MALLOC(smult_org,(nat_org))
  ABI_MALLOC(sdistv_org,(nat_org))
  call shellstruct(dtpawuj(1)%xred,dtpawuj(1)%rprimd,nat_org,&
-& int(magv_org),distv_org,smult_org,sdistv_org,nsh_org,pawujat,pawprtvol)
+& intmagv_org,distv_org,smult_org,sdistv_org,nsh_org,pawujat,pawprtvol)
 
 
 !LMac: Printing relevant information about the Hubbard parameter just calculated.
@@ -762,12 +679,13 @@ call wrtout(std_out,message,'COLL')
    ABI_MALLOC(chi_sc,(nat_sc))
    ABI_MALLOC(distv_sc,(nat_sc))
    ABI_MALLOC(magv_sc,(nat_sc))
+   ABI_MALLOC(intmagv_sc,(nat_sc))
    ABI_MALLOC(sdistv_sc,(nat_sc))
    ABI_MALLOC(smult_sc,(nat_sc))
    ABI_MALLOC(xred_sc,(3,nat_sc))
 
 !  Determine positions=xred_sc and supercell dimensions=rpimd_sc
-   call mksupercell(dtpawuj(1)%xred,int(magv_org),dtpawuj(1)%rprimd,nat_org,&
+   call mksupercell(dtpawuj(1)%xred,intmagv_org,dtpawuj(1)%rprimd,nat_org,&
 &   nat_sc,xred_sc,magv_sc,rprimd_sc,ext,pawprtvol)
 
 !  Determine shell structure of supercell: multiplicities (smult_sc), radii of shells (sdistv_sc)
@@ -776,7 +694,8 @@ call wrtout(std_out,message,'COLL')
    write(message,fmt='(a,3i3,a)')' pawuj_det: determine shell structure of ',ext(1:3),' supercell'
    call wrtout(std_out,message,'COLL')
 
-   call shellstruct(xred_sc,rprimd_sc,nat_sc,int(magv_sc),distv_sc,smult_sc,sdistv_sc,nsh_sc,pawujat,pawprtvol)
+   intmagv_sc=(/(int(magv_sc(im1)),im1=1,nat_sc)/)
+   call shellstruct(xred_sc,rprimd_sc,nat_sc,intmagv_sc,distv_sc,smult_sc,sdistv_sc,nsh_sc,pawujat,pawprtvol)
 
    if (pawprtvol>=2) then
      write(message,fmt='(a)')' pawuj_det: ionic distances in supercell (distv_sc) '
@@ -806,8 +725,7 @@ call wrtout(std_out,message,'COLL')
 !  write(message,fmt='(a)')'pawuj_det:   U in supercell'
 !  call wrtout(std_out,message,'COLL')
 !  END DEBUG
-   call lcalcu(int(magv_sc),nat_sc,rprimd_sc,xred_sc,chi_sc,chi0_sc,pawujat,ures,pawprtvol,pawujga,pawujoption)
-
+   call lcalcu(intmagv_sc,nat_sc,rprimd_sc,xred_sc,chi_sc,chi0_sc,pawujat,ures,pawprtvol,pawujga,pawujoption)
    write(message, fmt='(a,2i7,4f12.5)') ' URES ',ii,nat_sc,maxval(abs(distv_sc)),signum*ures,signum*ures*exp(log(intg)*eyp),&
 &   signum*ures*exp(log(ph0phiint)*eyp)
    call wrtout(units,message)
@@ -816,6 +734,7 @@ call wrtout(std_out,message,'COLL')
    ABI_FREE(chi_sc)
    ABI_FREE(distv_sc)
    ABI_FREE(magv_sc)
+   ABI_FREE(intmagv_sc)
    ABI_FREE(sdistv_sc)
    ABI_FREE(smult_sc)
    ABI_FREE(xred_sc)
@@ -839,19 +758,14 @@ call wrtout(std_out,message,'COLL')
  write(message, '(3a)' )ch10,' ---------- calculate U, (J) end -------------- ',ch10
  call wrtout(ab_out,message,'COLL')
 
- ABI_FREE(dparrr)
- ABI_FREE(dqarr)
- ABI_FREE(dqarrr)
  ABI_FREE(jdtset_)
  ABI_FREE(chi)
  ABI_FREE(chi0)
  ABI_FREE(smult_org)
  ABI_FREE(sdistv_org)
  ABI_FREE(luocc)
- ABI_FREE(idum2)
- ABI_FREE(drarr)
- ABI_FREE(dparr)
  ABI_FREE(magv_org)
+ ABI_FREE(intmagv_org)
  ABI_FREE(xred_org)
  ABI_FREE(distv_org)
 
@@ -983,7 +897,7 @@ subroutine pawuj_red(istep, pert_state, dtfil, &
 
    iuj=maxval(dtpawuj(:)%iuj)
    write(std_out,*)' pawuj_red: iuj',iuj
-   write(std_out,*)' pawuj_red: dtpawuj(:)%iuj ',dtpawuj(:)%iuj
+!   write(std_out,*)' pawuj_red: dtpawuj(:)%iuj ',(dtpawuj(ii)%iuj,ii=1,ndtpawuj)
 
    !If this is the unperturbed state, then unscreened and screened occupancies
    !are the same. Also set perturbation vsh to zero.
@@ -1243,7 +1157,7 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
 !Local variables -------------------------
  character(len=500)             :: message
  character(len=500)             :: bastrin,gastrin
- integer                        :: info,nnat,optionn
+ integer                        :: info,nnat,optionn,ii,jj
  integer,allocatable            :: ipvt(:)
  real(dp),allocatable           :: hma(:,:),work(:)
 
@@ -1271,8 +1185,6 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
    write(message,fmt='(a,a)')' ',trim(nam)//trim(bastrin)
    call lprtmat(message,1,prtvol,oumat,nat+1)
    oumat=oumat+gam
-   write(message,fmt='(a,a)')' ',trim(nam)//trim(bastrin) ! //trim(gastrin)
-   call lprtmat(message,1,prtvol,oumat-gam,nat+1)
    nnat=nat+1
  else
    nnat=nat
@@ -1421,7 +1333,8 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
  integer                     :: optt,prtvoll,nnatom
  real(dp)                    :: gamm
 !arrays
- real(dp),allocatable        :: tab(:,:,:)
+ real(dp),allocatable        :: chi0matrix1(:,:),chimatrix2(:,:),auginvchi0matrix3(:,:)
+ real(dp),allocatable        :: auginvchimatrix4(:,:),uresmatrix(:,:)
 
 ! *********************************************************************
 
@@ -1449,29 +1362,37 @@ subroutine lcalcu(magv,natom,rprimd,xred,chi,chi0,pawujat,ures,prtvol,gam,opt)
    nnatom=natom
  end if
 
- ABI_MALLOC(tab,(4,nnatom,nnatom))
+ ABI_MALLOC(chi0matrix1,(natom,natom))
+ ABI_MALLOC(chimatrix2,(natom,natom))
+ ABI_MALLOC(auginvchi0matrix3,(nnatom,nnatom))
+ ABI_MALLOC(auginvchimatrix4,(nnatom,nnatom))
+ ABI_MALLOC(uresmatrix,(nnatom,nnatom))
 
- call ioniondist(natom,rprimd,xred,tab(1,1:natom,1:natom),3,chi0,magv,pawujat,prtvoll)
- call ioniondist(natom,rprimd,xred,tab(2,1:natom,1:natom),3,chi,magv,pawujat,prtvoll)
-
+ call ioniondist(natom,rprimd,xred,chi0matrix1,3,chi0,magv,pawujat,prtvoll)
+ call ioniondist(natom,rprimd,xred,chimatrix2,3,chi,magv,pawujat,prtvoll)
 
  write(message,fmt='(a)')'response chi_0'
- call linvmat(tab(1,1:natom,1:natom),tab(3,1:nnatom,1:nnatom),natom,message,optt,gamm,prtvoll)
+ call linvmat(chi0matrix1,auginvchi0matrix3,natom,message,optt,gamm,prtvoll)
  call wrtout(std_out,message,'COLL')
 
  write(message,fmt='(a)')'response chi'
- call linvmat(tab(2,1:natom,1:natom),tab(4,1:nnatom,1:nnatom),natom,message,optt,gamm,prtvoll)
+ call linvmat(chimatrix2,auginvchimatrix4,natom,message,optt,gamm,prtvoll)
  call wrtout(std_out,message,'COLL')
 
- tab(1,1:nnatom,1:nnatom)=(tab(3,1:nnatom,1:nnatom)-tab(4,1:nnatom,1:nnatom))*Ha_eV
+ uresmatrix=(auginvchi0matrix3-auginvchimatrix4)*Ha_eV
 
  write(message,fmt='(a,i3,a)')' (chi_0)^(-1)-(chi)^(-1) (eV)'
- call lprtmat(message,2,prtvoll,tab(1,1:nnatom,1:nnatom),nnatom)
+ call lprtmat(message,2,prtvoll,uresmatrix,nnatom)
  call wrtout(std_out,message,'COLL')
 
- ures=tab(1,1,pawujat)
+ ures=uresmatrix(1,pawujat)
 
- ABI_FREE(tab)
+ ABI_FREE(chi0matrix1)
+ ABI_FREE(chimatrix2)
+ ABI_FREE(auginvchi0matrix3)
+ ABI_FREE(auginvchimatrix4)
+ ABI_FREE(uresmatrix)
+
 
 end subroutine lcalcu
 !!***

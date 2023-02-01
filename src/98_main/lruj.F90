@@ -10,11 +10,11 @@
 !!  is that of the SCF linear response for the Hubbard U (Phys. Rev. B 71,035105)
 !!  and the Hund's J (Phys. Rev. B 98, 235157) parameters.
 !!  This protocol was coded up in November 2022 by Lorien MacEnulty (macenulty.com),
-!!  doctoral student in the Quantum Theory of Materials group (theoryofmaterials.com)
+!!  doctoral researcher in the Quantum Theory of Materials group (theoryofmaterials.com)
 !!  at Trinity College Dublin, headed by Dr. David O'Regan.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DJA)
+!!  Copyright (C) 1998-2022 ABINIT group (LMac)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -358,6 +358,11 @@ program lruj
    end if
  end if
  write(std_out,'(a,i2)') ' Maximum degree of polynomials analyzed: ',mdegree
+
+ !Write warning about response matrices
+ write(std_out,'(5a)') ' NOTE: Unlike the ujdet utility, lruj treats the ',ch10,&
+' response functions as scalars, not matrices!',ch10,&
+' See lruj tutorial for more information.'
 
  !Allocate the response and error arrays
  ABI_MALLOC(chi0err,(mdegree))

@@ -14,44 +14,44 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 29 Nov 2022.
-- ( at 21h47 )
+.Starting date : Tue 31 Jan 2023.
+- ( at 20h24 )
   
- Number of perturbations detected:  6
- Including unperturbed state, we have  7 data points.
- Hunds J determination, implemented by L. MacEnulty August 2021
- Maximum degree of polynomials analyzed:  5
+ Number of perturbations detected:  5
+ Including unperturbed state, we have  6 data points.
+ Standard determination of the Hubbard U parameter.
+ Maximum degree of polynomials analyzed:  3
+ NOTE: Unlike the ujdet utility, lruj treats the 
+ response functions as scalars, not matrices!
+ See lruj tutorial for more information.
  
  
 *************************************************************************************************
-**************************************  Linear Response J  **************************************
+**************************************  Linear Response U  **************************************
  
  Index of perturbed atom:    1
- Value of macro_uj:     4
- Value of dmatpuopt:     2
+ Value of macro_uj:     1
+ Value of dmatpuopt:     3
  Mixing constant factored out of Chi0:   0.450
  Percentage of AE orbital within the PAW sphere of perturbed subspace:     90.46723%
  
-  Perturbations         Magnetizations
+  Perturbations           Occupations 
  --------------- -----------------------------
-    beta  [eV]     Unscreened      Screened
+    alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
-   0.0000000000   1.3770425147   1.3770425147
-  -0.1500000676   1.4002218118   1.4354807995
-  -0.1000000451   1.3926777071   1.4169820826
-  -0.0500000225   1.3849536207   1.3975443683
-   0.0500000225   1.3689358749   1.3553223709
-   0.1000000451   1.3606264421   1.3321920753
-   0.1500000676   1.3521056003   1.3074064375
+   0.0000000000   8.6380190174   8.6380190174
+  -0.1500000676   8.6964896369   8.6520721437
+  -0.1000000451   8.6747136520   8.6474273205
+  -0.0500000225   8.6560255526   8.6427483480
+   0.0500000225   8.6192448590   8.6332170576
+   0.1000000451   8.5980174277   8.6283157193
                                                                        RMS Errors
                                                          ---------------------------------------
- Regression   Chi0 [eV^-1]   Chi [eV^-1]      J [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     J [eV]
+ Regression   Chi0 [eV^-1]   Chi [eV^-1]      U [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     U [eV]
 --------------------------------------------------------|---------------------------------------
- Linear:        -0.3562997    -0.4257320     0.4577306  |    0.0008120    0.0023379    0.1389076
- Quadratic:     -0.3562997    -0.4257320     0.4577306  |    0.0000175    0.0001776    0.0334339
- Cubic:         -0.3558918    -0.4216006     0.4379299  |    0.0000002    0.0000144    0.0090910
- Degree 4       -0.3558918    -0.4216006     0.4379299  |    0.0000002    0.0000011    0.0027166
- Degree 5       -0.3558912    -0.4216512     0.4382187  |    0.0000002    0.0000001    0.0013348
+ Linear:        -0.8593951    -0.0949384     9.3695387  |    0.0023935    0.0000876    0.1138301
+ Quadratic:     -0.8574915    -0.0955721     9.2971081  |    0.0023794    0.0000131    0.0683615
+ Cubic:         -0.8007716    -0.0952592     9.2488751  |    0.0001546    0.0000009    0.0184229
 *************************************************************************************************
 *************************************************************************************************
  
