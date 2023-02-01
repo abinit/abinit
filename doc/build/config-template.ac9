@@ -308,6 +308,10 @@
 #
 #FCFLAGS_OPENMP="-fopenmp"
 
+# Fortran compiler custom OpenMP GPU offload flags
+#
+#FCFLAGS_OPENMP_OFFLOAD="-fopenmp"
+
 # Fortran compiler custom optimization flags (when with_optim_flavor=custom)
 #
 #FCFLAGS_OPTIM="-O5"
@@ -611,6 +615,15 @@
 # GPU link flags (default is unset)
 #
 #GPU_LIBS="-L/usr/local/cuda/lib64 -lcublas -lcufft -lcudart"
+
+# GPU arch, useful for autosetting OpenMP offload flags (default is NVIDIA Ampere)
+# Example values : - 60 (NVIDIA Pascal)
+#                  - 70 (NVIDIA Volta)
+#                  - 75 (NVIDIA Turing)
+#                  - 80 (NVIDIA Ampere)
+#                  - 90 (NVIDIA Hopper)
+#
+#GPU_ARCH=80
 
                        # ------------------------------ #
 
