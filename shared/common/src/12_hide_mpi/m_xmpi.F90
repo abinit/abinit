@@ -5326,7 +5326,7 @@ subroutine xmpi_win_fence(win, assert)
 end subroutine xmpi_win_fence
 
 subroutine xmpi_win_free(win)
-  integer,intent(in) :: win
+  integer,intent(inout) :: win
 #ifdef HAVE_MPI
   integer :: ierr
   call MPI_WIN_FREE(win, ierr)
