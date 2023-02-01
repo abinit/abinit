@@ -160,6 +160,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
+ real(dp) :: efield(3)  
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename,md_hist_name
  character(len=fnlen) :: name_file
@@ -572,7 +573,7 @@ ABI_FREE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:))
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),efield=inp%efield(:))
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
