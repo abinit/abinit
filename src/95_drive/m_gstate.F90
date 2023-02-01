@@ -2546,6 +2546,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
    dtpawuj(iuj)%pawujat=dtset%pawujat
    dtpawuj(iuj)%nspden=dtset%nspden
    dtpawuj(iuj)%rprimd=dtset%rprimd_orig(1:3,1:3,1)
+   dtpawuj(iuj)%dmatpuopt=dtset%dmatpuopt
  end do
 
  iuj=1 !LMac Flag to collect occupancies for unperturbed calculation

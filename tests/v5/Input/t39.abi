@@ -96,9 +96,6 @@
 #%% [files]
 #%% files_to_test = 
 #%%   t39.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
-#%% [shell]
-#%% post_commands = 
-#%%   lruj *_LRUJ.nc --d 3 > lruj.out
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
