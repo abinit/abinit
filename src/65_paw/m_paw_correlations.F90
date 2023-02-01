@@ -3038,27 +3038,21 @@ if (me_atom==0) then   !!!!!!!!
 
 sum_orb_mom=zero
 
-
+lmin=1
 do my_iatom=1,natom
 itypat=pawrhoij_all(my_iatom)%itypat
 lmax=((pawtab(itypat)%l_size)-1)/2
-
-lmin = 1
-if (pawtab(itypat)%lpawu/=-1) then
-    lmin = pawtab(itypat)%lpawu
-end if
 
 do my_lcur=lmin,lmax
  cplex_dij=paw_ij_all(my_iatom)%cplex_dij
  ndij=paw_ij_all(my_iatom)%ndij
 
 
-
  ABI_MALLOC(op_l,(2*my_lcur+1,2*my_lcur+1,3))
  ABI_MALLOC(my_l_occmat,(cplex_dij,2*my_lcur+1,2*my_lcur+1,ndij))
  ABI_MALLOC(cmfoccmat,(2*my_lcur+1,2*my_lcur+1,ndij))
 
-call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,natom,natom,&
+call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom,l_orbmom=my_lcur,atom_orbmom=my_iatom,my_l_occmat=my_l_occmat)
