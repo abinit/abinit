@@ -1745,17 +1745,13 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
 
  select case (trim(vcgen%mode))
  case ('MINIBZ', 'MINIBZ-ERFC', 'MINIBZ-ERF')
-
    call vcgen%mc%init(cryst%rprimd, cryst%ucvol, cryst%gprimd, cryst%gmet, kptrlatt)
-
    rcut2 = vcgen%rcut**2
    call vcgen%mc%integrate(vcgen%mode, q_gamma, 1, gvec0, rcut2, nkbz, vcoul0, xmpi_comm_self)
-
    ! Treat the limit q --> 0.
    vcgen%i_sz = vcoul0(1)
 
  case ('SPHERE')
-
    ! A non-positive value of rcut activates the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
    if (vcgen%rcut < tol12) then
      vcgen%rcut = (cryst%ucvol * nkbz * 3.d0 / four_pi) ** third
@@ -1836,7 +1832,7 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcgen%mode))
  end select
 
- call wrtout(std_out, sjoin("vcgen%i_sz", ftoa(vcgen%i_sz)))
+ !call wrtout(std_out, sjoin(" vcgen%i_sz", ftoa(vcgen%i_sz)))
 
 end subroutine vcgen_init
 !!***

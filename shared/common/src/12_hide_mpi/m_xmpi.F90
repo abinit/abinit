@@ -315,6 +315,9 @@ module m_xmpi
  public :: xmpi_land              ! allreduce with MPI_LAND
  public :: xmpi_lor               ! allreduce with MPI_LOR
 
+ public :: xmpi_win_fence
+ public :: xmpi_win_free
+
 #ifdef HAVE_MPI_IO
  public :: xmpio_max_address      !  Returns .TRUE. if offset cannot be stored in integer(kind=XMPI_ADDRESS_KIND).
  public :: xmpio_type_struct
@@ -2687,8 +2690,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
 ! *************************************************************************
 
 #ifdef HAVE_MPI
- if (XMPI_ADDRESS_KIND<int64) &
-&  call xmpi_abort(msg="Too much data to communicate for this architecture!")
+ if (XMPI_ADDRESS_KIND<int64) call xmpi_abort(msg="Too much data to communicate for this architecture!")
 
 !Divide data in chunks
  cc=int(largecount,kind=int32)/INT_MAX
@@ -5133,10 +5135,10 @@ logical function xcomm_can_use_shmem(self) result(ok)
 end function xcomm_can_use_shmem
 !!***
 
-subroutine xcomm_allocate_shared_master(self, size, kind, info, baseptr, win)
+subroutine xcomm_allocate_shared_master(self, count, kind, info, baseptr, win)
 
  class(xcomm_t),intent(inout) :: self
- integer(kind=XMPI_ADDRESS_KIND), intent(in) :: size
+ integer(kind=XMPI_ADDRESS_KIND), intent(in) :: count
  integer,intent(in) :: kind, info
  type(c_ptr),intent(out) :: baseptr
  !INTEGER(KIND=XMPI_ADDRESS_KIND) :: baseptr
@@ -5159,15 +5161,20 @@ subroutine xcomm_allocate_shared_master(self, size, kind, info, baseptr, win)
  end select
 
 #ifdef HAVE_MPI
- my_size = 0; if (self%me == 0) my_size = size
+ my_size = 0; if (self%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, self%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
                               !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
 
- if (self%me /= 0) call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+ if (self%me /= 0) then
+   call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+   !print *, "my_size:", my_size
+ end if
  !MPI_WIN_SHARED_QUERY(WIN, RANK, SIZE, DISP_UNIT, BASEPTR, IERROR)
  !       INTEGER WIN, RANK, DISP_UNIT, IERROR
  !       INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
+
+ if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="allocated_shared returned ierr /= 0")
 #endif
 
 end subroutine xcomm_allocate_shared_master
@@ -5249,21 +5256,21 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
  call xmpi_comm_free(new_comm)
 
  if (present(rectangular)) then
- if (rectangular) then
-   if (pool%comm%nproc == 1 .or. is_rectangular_grid(pool%comm%nproc, grid_dims)) return
+   if (rectangular) then
+     if (pool%comm%nproc == 1 .or. is_rectangular_grid(pool%comm%nproc, grid_dims)) return
 
-   do jj=pool%comm%nproc-1,1,-1
-     if (is_rectangular_grid(jj, grid_dims)) then
-       color = merge(1, 0, pool%comm%me < jj)
-       call xmpi_comm_split(pool%comm%value, color, pool%comm%me, new_comm, mpierr)
-       call pool%comm%free()
-       pool%comm = xcomm_from_mpi_int(new_comm)
-       call xmpi_comm_free(new_comm)
-       if (color == 0) pool%treats = .False.
-       exit
-     end if
-   end do
- end if
+     do jj=pool%comm%nproc-1,1,-1
+       if (is_rectangular_grid(jj, grid_dims)) then
+         color = merge(1, 0, pool%comm%me < jj)
+         call xmpi_comm_split(pool%comm%value, color, pool%comm%me, new_comm, mpierr)
+         call pool%comm%free()
+         pool%comm = xcomm_from_mpi_int(new_comm)
+         call xmpi_comm_free(new_comm)
+         if (color == 0) pool%treats = .False.
+         exit
+       end if
+     end do
+   end if
  end if
 
 contains
@@ -5274,15 +5281,16 @@ logical function is_rectangular_grid(nproc, grid_dims) result (ans)
 !----------------------------------------------------------------------
  integer :: i
  ! Search for a rectangular grid of processors
- i=INT(SQRT(float(nproc)))
+ i = INT(SQRT(float(nproc)))
  do while (MOD(nproc,i) /= 0)
-   i = i-1
+   i = i - 1
  end do
- i=max(i,1)
+ i = max(i, 1)
 
  grid_dims(1) = i
- grid_dims(2) = INT(nproc/i)
+ grid_dims(2) = int(nproc / i)
  ans = grid_dims(1) > 1 .and. grid_dims(2) > 1
+
 end function is_rectangular_grid
 
 end subroutine pool2d_from_dims
@@ -5305,6 +5313,25 @@ subroutine pool2d_free(pool)
  call pool%comm%free()
 
 end subroutine pool2d_free
+!!***
+
+subroutine xmpi_win_fence(win, assert)
+  integer,intent(in) :: win
+  integer,optional,intent(in) :: assert
+  integer :: assert__, ierr
+  assert__ = 0; if (present(assert)) assert__ = assert
+#ifdef HAVE_MPI
+  call MPI_WIN_FENCE(assert__, win, ierr)
+#endif
+end subroutine xmpi_win_fence
+
+subroutine xmpi_win_free(win)
+  integer,intent(in) :: win
+#ifdef HAVE_MPI
+  integer :: ierr
+  call MPI_WIN_FREE(win, ierr)
+#endif
+end subroutine xmpi_win_free
 !!***
 
 end module m_xmpi
