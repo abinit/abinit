@@ -56,6 +56,9 @@ integer :: npw=-1
 
 ! GPU ffts buffers
 real(dp),allocatable,target :: work_gpu(:,:,:,:)
+#ifdef HAVE_GPU_HIP
+type(c_ptr),target,save :: fofr_amdref
+#endif
 
 #endif
 
@@ -81,6 +84,7 @@ end function ompgpu_fourwf_work_mem
 
 !Tested usecases :
 ! - Nvidia GPUs : FC_NVHPC + CUDA
+! - AMD GPUs    : FC_LLVM + HIP
 ! An eventual Intel implementation would use the OneAPI LLVM compiler.
 ! Homemade CUDA/HIP interfaces would allow the use of GCC.
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
@@ -175,6 +179,18 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
      !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i) NOWAIT DEPEND(OUT:weight_r,weight_i)
    endif
 
+#ifdef HAVE_GPU_HIP
+#ifdef FC_LLVM
+   !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
+   ! For some reason, fofr won't be processed normally when passed as argument
+   ! of FFT routine within TARGET DATA directives
+   !$OMP TARGET MAP(to:fofr) MAP(from:fofr_amdref)
+   fofr_amdref=c_loc(fofr)
+   !$OMP END TARGET
+#endif
+#endif
+
+
    ! GPU_SPHERE_IN
 
    cfft_size = 2*n1*n2*n3*ndat
@@ -233,6 +249,11 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
          i2inv = modulo(shift_inv2 - i2, n2) + 1
          i3inv = modulo(shift_inv3 - i3, n3) + 1
 #endif
+#ifdef HAVE_GPU_HIP
+         i1inv = (shift_inv1-i1) - ( ((shift_inv1-i1)/n1) * n1 ) + 1
+         i2inv = (shift_inv2-i2) - ( ((shift_inv2-i2)/n2) * n2 ) + 1
+         i3inv = (shift_inv3-i3) - ( ((shift_inv3-i3)/n3) * n3 ) + 1
+#endif
          work_gpu(1, i1inv, i2inv, i3inv+n3*(idat-1)) =  fofgin(1, (ipw + npwin*(idat-1)))
          work_gpu(2, i1inv, i2inv, i3inv+n3*(idat-1)) = -fofgin(2, (ipw + npwin*(idat-1)))
        end do
@@ -240,9 +261,16 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    end if
 
    ! call backward fourrier transform on gpu work_gpu => fofr_gpu
+#ifdef HAVE_GPU_CUDA
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
    call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
+#endif
+#ifdef HAVE_GPU_HIP
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
+   call gpu_fft_exec_z2z(c_loc(work_gpu), fofr_amdref, FFT_INVERSE)
+   !$OMP END TARGET DATA
+#endif
    call gpu_fft_stream_synchronize()
  end if
 
@@ -278,6 +306,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option==2) then
    ! We finished denpot transfert
    !!$OMP TASKWAIT depend(in:denpot)
+   !$OMP TASKWAIT
 
    ! call gpu routine to  Apply local potential
    !!$OMP TARGET TEAMS LOOP &
@@ -298,9 +327,16 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option==2 .or. option==3) then
 
    ! call forward fourier transform on gpu: fofr_gpu ==> work_gpu
+#if defined HAVE_GPU_CUDA
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
    call gpu_fft_exec_z2z(c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
+#endif
+#if defined HAVE_GPU_HIP
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
+   call gpu_fft_exec_z2z(fofr_amdref, c_loc(work_gpu), FFT_FORWARD)
+   !$OMP END TARGET DATA
+#endif
    call gpu_fft_stream_synchronize()
 
    one=1
