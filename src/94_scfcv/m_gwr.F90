@@ -478,7 +478,7 @@ module m_gwr
    ! (nkibz)
    ! Descriptor for self-energy
 
-   integer :: coords_gtks(4) = 0
+   integer :: coords_stgk(4) = 0
    ! Cartesian coordinates of this processor in the Cartesian grid.
 
    type(xcomm_t) :: comm
@@ -1277,7 +1277,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  if (any(dtset%gwr_np_kgts /= 0)) then
    ! Use grid from input file.
    np_k = dtset%gwr_np_kgts(1); np_g = dtset%gwr_np_kgts(2); np_t = dtset%gwr_np_kgts(3); np_s = dtset%gwr_np_kgts(4)
-
    !call xmpi_comm_multiple_of(product(dtset%gwr_np_kgts), input_comm, gwr%idle_proc, gwr%comm)
    !if (gwr%idle_proc) return
    gwr%comm = xcomm_from_mpi_int(input_comm)
@@ -1411,7 +1410,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! ================================
  dims_kgts = [np_k, np_g, np_t, np_s]
  gwr%dtset%gwr_np_kgts = dims_kgts
- periods(:) = .False.; reorder = .True.
+ periods(:) = .False.; reorder = .False.
 
  ! Consistency check.
  if (product(dims_kgts) /= all_nproc) then
@@ -1423,29 +1422,34 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
 
 #ifdef HAVE_MPI
+block
+ !integer,parameter :: k=1, g=2, t=3, s=4  ! Bad placement
+ integer,parameter :: k=4, g=3, t=2, s=1   ! Much better placement
+ dims_kgts = dims_kgts(4:1:-1)
  call MPI_CART_CREATE(gwr%comm%value, ndims, dims_kgts, periods, reorder, comm_cart, ierr)
 
  ! Find the index and coordinates of the current processor
  call MPI_COMM_RANK(comm_cart, me_cart, ierr)
- call MPI_CART_COORDS(comm_cart, me_cart, ndims, gwr%coords_gtks, ierr)
+ call MPI_CART_COORDS(comm_cart, me_cart, ndims, gwr%coords_stgk, ierr)
 
  ! k-point communicator
- keepdim = .False.; keepdim(1) = .True.; call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(k) = .True.; call gwr%kpt_comm%from_cart_sub(comm_cart, keepdim)
  ! g-communicator
- keepdim = .False.; keepdim(2) = .True.; call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(g) = .True.; call gwr%g_comm%from_cart_sub(comm_cart, keepdim)
  ! tau-communicator
- keepdim = .False.; keepdim(3) = .True.; call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(t) = .True.; call gwr%tau_comm%from_cart_sub(comm_cart, keepdim)
  ! spin-communicator
- keepdim = .False.; keepdim(4) = .True.; call gwr%spin_comm%from_cart_sub(comm_cart, keepdim)
- ! Communicator for the (X, g, tau, X) 2D grid.
- keepdim = .False.; keepdim(2) = .True.; keepdim(3) = .True.; call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
- ! Communicator for the (k, g, X, X) 2D grid.
- keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.; call gwr%kg_comm%from_cart_sub(comm_cart, keepdim)
- ! Communicator for the (k, g, tau, X) 3D subgrid.
- keepdim = .True.; keepdim(4) = .False.; call gwr%kgt_comm%from_cart_sub(comm_cart, keepdim)
- ! Communicator for the (k, X, tau, spin) 3D subgrid.
- keepdim = .True.; keepdim(2) = .False.; call gwr%kts_comm%from_cart_sub(comm_cart, keepdim)
+ keepdim = .False.; keepdim(s) = .True.; call gwr%spin_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the g-tau 2D grid.
+ keepdim = .False.; keepdim(g) = .True.; keepdim(t) = .True.; call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the k-g 2D grid.
+ keepdim = .False.; keepdim(k) = .True.; keepdim(g) = .True.; call gwr%kg_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the (k-g-tau 3D subgrid.
+ keepdim = .True.; keepdim(s) = .False.; call gwr%kgt_comm%from_cart_sub(comm_cart, keepdim)
+ ! Communicator for the k-tau-spin 3D subgrid.
+ keepdim = .True.; keepdim(g) = .False.; call gwr%kts_comm%from_cart_sub(comm_cart, keepdim)
  call xmpi_comm_free(comm_cart)
+end block
 #endif
 
  !call gwr%kpt_comm%print_names()
@@ -3808,6 +3812,7 @@ subroutine gwr_build_tchi(gwr)
    use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc
    use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
    use_shmem_for_k = .False.
+
    if (use_shmem_for_k) then
      buf_count = 2 * (sc_nfftsp * max_ndat * 2)
      call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
@@ -3889,9 +3894,9 @@ if (.not. use_shmem_for_k) then
          end do ! my_ikf
 
          if (.not. use_mpi_for_k) then
-           ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
            if (gwr%kpt_comm%nproc > 1) call xmpi_sum(gt_scbox, gwr%kpt_comm%value, ierr)
 
+           ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
            call green_plan%execute(gt_scbox(:,1,1), -1)
            call xscal(size(gt_scbox), real(sc_nfft, kind=gwpc), gt_scbox(:,1,1), 1)  ! gt_scbox *= sc_nfft
 
@@ -4771,11 +4776,11 @@ subroutine gwr_build_sigmac(gwr)
  integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, max_ndat, ndat !, ii !sc_mgfft,
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
- integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, ibeg, nrsp ! npwsp, my_iqi, sc_ir
+ integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, ibeg, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol !, spin_fact
- logical :: k_is_gamma !, q_is_gamma
+ logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k !q_is_gamma,
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
@@ -4786,7 +4791,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
- complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:,:), wct_scbox(:)
+ complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
@@ -4833,7 +4838,7 @@ subroutine gwr_build_sigmac(gwr)
  sc_size = product(gwr%ngkpt)
  sc_ngfft(1:3) = gwr%ngkpt * gwr%g_ngfft(1:3)
  sc_ngfft(4:6) = sc_ngfft(1:3)
- sc_nfft = product(sc_ngfft(1:3))
+ sc_nfft = product(sc_ngfft(1:3)); sc_nfftsp = sc_nfft * gwr%nspinor
  !sc_mgfft = maxval(sc_ngfft(1:3))
  sck_ucvol = gwr%cryst%ucvol * product(gwr%ngkpt)
  scq_ucvol = gwr%cryst%ucvol * product(gwr%ngqpt)
@@ -4873,8 +4878,28 @@ if (gwr%use_supercell_for_sigma) then
  ! The second option is interesting if we need to compute several matrix elements, including off-diagonal terms.
 
  max_ndat = gwr%sc_batch_size
- ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor * max_ndat, 2))
- ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor * max_ndat))
+
+ !use_mpi_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
+ use_mpi_for_k = .False.
+
+ !!use_shmem_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
+ !use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc
+ !use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
+ !use_shmem_for_k = .False.
+
+ !if (use_shmem_for_k) then
+ !  buf_count = 2 * (sc_nfftsp * max_ndat * 2)
+ !  call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
+ !  call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp, max_ndat, 2])
+ !end if
+
+ call wrtout(std_out, sjoin(" use_mpi_for_k:", yesno(use_mpi_for_k)))
+ call wrtout(std_out, sjoin(" use_shmem_for_k:", yesno(use_shmem_for_k)))
+ mem_mb = 3 * (sc_nfftsp * max_ndat * gwpc) * b2Mb
+ call wrtout(std_out, sjoin(" Memory for gt_scbox/wct_scbox arrays:", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+
+ ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor, max_ndat, 2))
+ ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor, max_ndat))
 
  ! Build plans for dense FFTs.
  call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%use_gpu_cuda)
@@ -4939,19 +4964,15 @@ if (gwr%use_supercell_for_sigma) then
        ! Take the union of (k,g') for k in the BZ.
        gt_scbox = czero_gw
        do my_ikf=1,gwr%my_nkbz
-         ik_bz = gwr%my_kbz_inds(my_ikf)
-         ik_ibz = gwr%kbz2ibz(1, ik_bz)
-
+         ik_bz = gwr%my_kbz_inds(my_ikf); ik_ibz = gwr%kbz2ibz(1, ik_bz)
+         gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
          ! Compute k+g'
-         desc_k => desc_mykbz(my_ikf)
-         gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
          do ig=1,desc_k%npw
            green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
          end do
-
          do ipm=1,2
-           call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scgvec, &
-                         gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), gt_scbox(:, ipm))
+           call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor*ndat, green_scgvec, &
+                         gt_gpr(ipm, my_ikf)%buffer_cplx(:, my_ir), gt_scbox(:,1,ipm))
          end do
        end do ! my_ikf
 
@@ -4962,18 +4983,14 @@ if (gwr%use_supercell_for_sigma) then
        ! Take the union of (q,g') for q in the BZ. Also, note ngqpt instead of ngkpt.
        wct_scbox = czero_gw
        do my_iqf=1,gwr%my_nqbz
-         iq_bz = gwr%my_qbz_inds(my_iqf)
-         iq_ibz = gwr%qbz2ibz(1, iq_bz)
-
+         iq_bz = gwr%my_qbz_inds(my_iqf); iq_ibz = gwr%qbz2ibz(1, iq_bz)
+         gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt); desc_q => desc_myqbz(my_iqf)
          ! Compute q+g' vectors.
-         desc_q => desc_myqbz(my_iqf)
-         gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
          do ig=1,desc_q%npw
            wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig)
          end do
-
          call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, wc_scgvec, &
-                       wc_gpr(my_iqf)%buffer_cplx(:, my_ir), wct_scbox)
+                       wc_gpr(my_iqf)%buffer_cplx(:, my_ir), wct_scbox(:,1))
        end do ! my_iqf
 
        ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
@@ -4981,26 +4998,19 @@ if (gwr%use_supercell_for_sigma) then
 
        ! G(G',r) --> G(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
-       call green_plan%execute(gt_scbox(:,1), -1)
+       call green_plan%execute(gt_scbox(:,1,1), -1)
        !gt_scbox = gt_scbox * (sc_nfft / sck_ucvol)
-       call xscal(size(gt_scbox), real(sc_nfft / sck_ucvol, kind=gwpc), gt_scbox(:,1), 1)
+       call xscal(size(gt_scbox), real(sc_nfft / sck_ucvol, kind=gwpc), gt_scbox(:,1,1), 1)
 
        ! Wc(G',r) --> Wc(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
-       call wt_plan%execute(wct_scbox, -1)
+       call wt_plan%execute(wct_scbox(:,1), -1)
        !wct_scbox = wct_scbox * (sc_nfft / scq_ucvol)
-       call xscal(size(wct_scbox), real(sc_nfft / scq_ucvol, kind=gwpc), wct_scbox, 1)
-
-       !DEBUG
-       !if (itau == 1) print *, "W(r,r):", wct_scbox(uc_ir)
-       !max_abs_re_wct = max(max_abs_re_wct, maxval(abs(real(wct_scbox))))
-       !max_abs_imag_wct = max(max_abs_imag_wct, maxval(abs(aimag(wct_scbox))))
-       !wct_scbox(uc_ir) = zero; wct_scbox = real(wct_scbox)
-       !END DEBUG
+       call xscal(size(wct_scbox), real(sc_nfft / scq_ucvol, kind=gwpc), wct_scbox(:,1), 1)
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this r.
-       gt_scbox(:,1) = gt_scbox(:,1) * wct_scbox(:)
-       gt_scbox(:,2) = gt_scbox(:,2) * wct_scbox(:)
+       gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:)
+       gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:)
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
        ! Integrate self-energy matrix elements in the R-supercell for fixed set of ndat r-points.
@@ -5015,9 +5025,11 @@ if (gwr%use_supercell_for_sigma) then
              ir = uc_ir + idat - 1
              cpsi_r = conjg(uc_psi_bk(ir, band, ikcalc))
              do ipm=1,2
-               ibeg = 1 + (idat - 1) * sc_nfft * gwr%nspinor
+               !ibeg = 1 + (idat - 1) * sc_nfft * gwr%nspinor
                call sc_sum(gwr%ngkpt, gwr%g_ngfft, gwr%nspinor, scph1d_kcalc(:,:,ikcalc), k_is_gamma, &
-                           cpsi_r, gt_scbox(ibeg:, ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
+                           cpsi_r, gt_scbox(:,idat,ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
+                           !cpsi_r, gt_scbox(ibeg:, ipm), uc_psi_bk(:, band, ikcalc), sigc_pm(ipm))
+
              end do
 
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = &
