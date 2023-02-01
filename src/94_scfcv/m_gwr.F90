@@ -3752,7 +3752,7 @@ subroutine gwr_build_tchi(gwr)
  integer,allocatable :: green_scgvec(:,:), chi_scgvec(:,:)
  integer :: mask_qibz(gwr%nqibz), need_kibz(gwr%nkibz), got_kibz(gwr%nkibz)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2)
- complex(gwpc),contiguous, pointer :: gt_scbox(:,:,:)
+ complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
  complex(gwpc),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) ! gt_scbox(:,:,:),
  type(__slkmat_t) :: gkq_rpr_pm(2), chiq_rpr(gwr%my_nqibz), gk_rpr_pm(2)
  type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:)
@@ -3874,7 +3874,7 @@ subroutine gwr_build_tchi(gwr)
 if (.not. use_shmem_for_k) then
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
          ! Note that we need to take the union of (k, g') for k in the BZ so we need to communicate in kpt_comm.
-         gt_scbox = zero
+         gt_scbox = czero_gw
          do my_ikf=1,gwr%my_nkbz
            ! Compute k+g
            ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
@@ -3930,6 +3930,7 @@ else
          do ipm=1,2
            gt_scbox(:,idat,ipm) = czero_gw
          end do
+         !IF (.NOT. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          call xmpi_win_fence(gt_scbox_win)
 
          kproc_list = [(ii+1, ii=1,gwr%kpt_comm%nproc)]
