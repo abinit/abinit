@@ -389,6 +389,24 @@ if test "${abi_openmp_enable}" != "yes"; then
   FCFLAGS_OPENMP=""
 fi
 
+# Handling OpenMP offload
+if test "${abi_openmp_offload_enable}" = "yes"; then
+  # Fail if GPU support is not enabled
+  if test "${abi_gpu_enable}" = "no"; then
+    AC_MSG_ERROR([OpenMP offload is enabled with no GPU support (ie: CUDA), please check your config.])
+  fi
+  # Enable OpenMP if OpenMP offload is requested, to remain consistent
+  abi_openmp_enable="yes"
+  if test "${GPU_ARCH}" = ""; then
+    AC_MSG_WARN([GPU arch wasn't not set (empty GPU_ARCH variable), defaulting to NVIDIA Ampere (=80)])
+    GPU_ARCH=80
+  fi
+  # Perform pattern replacement in OpenMP offload flags with requested GPU arch
+  FCFLAGS_OPENMP_OFFLOAD=`echo "${FCFLAGS_OPENMP_OFFLOAD}" | sed "s/__GPU_ARCH__/$GPU_ARCH/"`
+else
+  FCFLAGS_OPENMP_OFFLOAD=""
+fi
+
 # Set Fortran preprocessing flags
 if test "${abi_fc_wrap}" = "yes"; then
   test "${FPPFLAGS}" = "" && FPPFLAGS="${FPPFLAGS_HINTS_EXT}"
@@ -548,7 +566,7 @@ test "${CXX_LIBS}" = "" && \
 # Final adjustments for Fortran
 # Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
 test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_EXTRA} ${FCFLAGS_OPENMP}"
+  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_EXTRA} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD}"
 test "${FC_LDFLAGS}" = "" && \
   FC_LDFLAGS="${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
 test "${FC_LIBS}" = "" && \
