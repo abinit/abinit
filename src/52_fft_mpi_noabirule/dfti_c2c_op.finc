@@ -37,7 +37,7 @@
 
 #else 
  ABI_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,isign/))
+ ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign/))
  ABI_UNUSED(ff)
  ABI_UNUSED(gg)
 #endif

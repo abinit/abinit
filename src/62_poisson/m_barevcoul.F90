@@ -275,9 +275,10 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 
  barev(:)=zero
 
- a1=Cryst%rprimd(:,1); b1=two_pi*gprimd(:,1)
- a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
- a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
+ ! MG: This triggers SIGFPE as cryst is not initialized
+ !a1=Cryst%rprimd(:,1); b1=two_pi*gprimd(:,1)
+ !a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
+ !a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
 
  SELECT CASE (TRIM(vcut%mode))
  CASE('SPHERE') ! Spencer-Alavi method
