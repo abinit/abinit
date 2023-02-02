@@ -2199,7 +2199,7 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
   logical :: err_eng, err_for
   logical*1 :: update_dens
   logical :: need_elec_eval
-  logical :: has_ext_filed
+  logical :: has_ext_field
   integer :: icell,ierr,kk
   integer, parameter:: master = 0
 !array
@@ -2241,11 +2241,11 @@ subroutine effective_potential_evaluate(eff_pot,energy,fcart,gred,strten,natom,r
     need_anharmonic = compute_anharmonic
   end if
 
-  has_ext_filed = .FALSE.
+  has_ext_field = .FALSE.
   ext_field = zero
   if(present(efield)) then
       if (any(abs(efield(:))>tol10)) then
-          has_ext_filed=.TRUE.
+          has_ext_field=.TRUE.
           ext_field = efield
       end if
   end if
@@ -2570,7 +2570,7 @@ if (has_ext_filed)  then
   temp_pol = zero
   energy_part = zero
   fcart_part(:,:)  = zero
-  ext_field = -1*ext_field*eV_Ha*Bohr_meter  
+  ext_field = -1*ext_field !*eV_Ha*Bohr_meter  
 
  do icell = 1,eff_pot%mpi_coeff%my_ncell
     ii = eff_pot%mpi_coeff%my_index_cells(4,icell)
