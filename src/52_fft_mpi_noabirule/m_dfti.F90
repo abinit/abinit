@@ -212,6 +212,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: iscale1 = 1
  integer :: ii,jj
  complex(spc), allocatable :: work_sp(:)
 
@@ -231,7 +232,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
        ABI_BUG("Wrong isign")
      end if
 
-     call dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,work_sp)
+     call dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,iscale1, isign,work_sp)
 
      if (isign == +1) then
        jj = 1
@@ -1247,11 +1248,11 @@ end subroutine dfti_fftur_dpc
 !!
 !! SOURCE
 
-subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
+subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign,ff)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
 !arrays
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
@@ -1279,6 +1280,7 @@ end subroutine dfti_c2c_ip_spc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => ff(R); -1 : ff(R) => ff(G)
 !!
 !! SIDE EFFECTS
@@ -1288,11 +1290,11 @@ end subroutine dfti_c2c_ip_spc
 !!
 !! SOURCE
 
-subroutine dfti_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff)
+subroutine dfti_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
 !arrays
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
@@ -1321,6 +1323,7 @@ end subroutine dfti_c2c_ip_dpc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !!
@@ -1329,11 +1332,11 @@ end subroutine dfti_c2c_ip_dpc
 !!
 !! SOURCE
 
-subroutine dfti_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
+subroutine dfti_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, gg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat, iscale
 !arrays
  complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(spc),intent(out) :: gg(ldx*ldy*ldz*ndat)
@@ -1363,6 +1366,7 @@ end subroutine dfti_c2c_op_spc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !!
@@ -1371,11 +1375,11 @@ end subroutine dfti_c2c_op_spc
 !!
 !! SOURCE
 
-subroutine dfti_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg)
+subroutine dfti_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, gg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat,iscale
 !arrays
  complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
@@ -1487,6 +1491,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: iscale1 = 1
  type(C_ptr) :: finout_cptr
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: finout_fptr(:)
@@ -1498,7 +1503,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
  call C_F_pointer(finout_cptr,finout_fptr, shape=(/ldx*ldy*ldz*ndat/))
 
  ! Call complex version --> a lot of boilerplate code avoided
- call dfti_c2c_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout_fptr)
+ call dfti_c2c_ip(nx,ny,nz,ldx,ldy,ldz,ndat,iscale1,isign,finout_fptr)
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")

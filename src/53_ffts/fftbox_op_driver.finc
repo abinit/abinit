@@ -16,10 +16,10 @@ block
 
  select case (fftalga)
  case (FFT_FFTW3) 
-   call fftw3_c2c_op(nx, ny, nz, ldx, ldy, ldz, ndat__, isign, ff, gg)
+   call fftw3_c2c_op(nx, ny, nz, ldx, ldy, ldz, ndat__, iscale__, isign, ff, gg)
 
  case (FFT_DFTI) 
-   call dfti_c2c_op(nx, ny, nz, ldx, ldy, ldz, ndat__, isign, ff, gg)
+   call dfti_c2c_op(nx, ny, nz, ldx, ldy, ldz, ndat__, iscale__, isign, ff, gg)
 
  case (FFT_SG, FFT_SG2002)
    ! Fallback to sg_fft_cc 
@@ -49,6 +49,7 @@ block
      if (isign == -1) then  
        ! Copy and scale the transform
        fact = one/plan%nfft
+       if (iscale__ == 0) fact = one
        do iz=1,nz
          do iy=1,ny
            do ix=1,nx

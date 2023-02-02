@@ -174,17 +174,17 @@ MODULE m_fft
      use iso_c_binding
      type(c_ptr),intent(inout) :: dev_pp
    end subroutine devpp_free
-   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, h_ff, plan_pp, d_ff) bind(C)
+   subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, plan_pp, d_ff) bind(C)
      use iso_c_binding
      integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-     integer(c_int),value, intent(in) :: ndat, isign, kind
+     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
      type(c_ptr),intent(in) :: h_ff
      type(c_ptr),intent(inout) :: plan_pp, d_ff
    end subroutine xgpu_fftbox_c2c_ip
-   subroutine xgpu_fftbox_c2c_op(f_dims, f_embed, ndat, isign, kind, h_ff, h_gg, plan_pp, d_ff, d_gg) bind(C)
+   subroutine xgpu_fftbox_c2c_op(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, h_gg, plan_pp, d_ff, d_gg) bind(C)
      use iso_c_binding
      integer(c_int),intent(in) :: f_dims(3), f_embed(3)
-     integer(c_int),value, intent(in) :: ndat, isign, kind
+     integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
      type(c_ptr),intent(in) :: h_ff, h_gg
      type(c_ptr),intent(inout) :: plan_pp, d_ff, d_gg
    end subroutine xgpu_fftbox_c2c_op
@@ -393,6 +393,7 @@ end subroutine fftbox_plan3_free
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
+!!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
 !!  ff(plan%ldxyz*plan%batch_size) =
@@ -401,24 +402,25 @@ end subroutine fftbox_plan3_free
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat)
+subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
  complex(spc),target,intent(inout) :: ff(*)
 
 ! *************************************************************************
 
- integer :: ndat__
+ integer :: ndat__, iscale__
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, spc, c_loc(ff), &
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), &
                            plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
    return
  end if
@@ -444,6 +446,7 @@ end subroutine fftbox_execute_ip_spc
 !! INPUTS
 !!  plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !!  isign= Sign of the exponential in the FFT
+!!  [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! SIDE EFFECTS
 !!  ff(plan%ldxyz*plan%batch_size) =
@@ -452,24 +455,25 @@ end subroutine fftbox_execute_ip_spc
 !!
 !! SOURCE
 
-subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat)
+subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),target,intent(inout) :: plan
  integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
  complex(dpc),target,intent(inout) :: ff(*)
 
 ! *************************************************************************
 
- integer :: ndat__
+ integer :: ndat__, iscale__
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
-   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dpc, c_loc(ff), &
+   call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), &
                            plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
    return
  end if
@@ -496,31 +500,33 @@ end subroutine fftbox_execute_ip_dpc
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
+!! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
 !!  gg(plan%ldxyz*plan%batch_size)= The FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat)
+subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
  complex(spc),target,intent(in) :: ff(*)
  complex(spc),target,intent(inout) :: gg(*)
 
 ! *************************************************************************
 
- integer :: ndat__
+ integer :: ndat__, iscale__
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, spc, c_loc(ff), c_loc(gg), &
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
    return
  end if
@@ -547,31 +553,33 @@ end subroutine fftbox_execute_op_spc
 !! plan<fftbox_plan3_t>=Structure with the parameters defining the transform.
 !! ff(plan%ldxyz*plan%batch_size)=The input array to be transformed.
 !! isign= Sign of the exponential in the FFT
+!! [iscale]= 0 if G --> R FFT should not be scaled. Default: 1 i.e. scale
 !!
 !! OUTPUT
 !!  gg(plan%ldxyz*plan%batch_size)= The FFT results.
 !!
 !! SOURCE
 
-subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat)
+subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(inout) :: plan
  integer,intent(in) :: isign
- integer,optional,intent(in) :: ndat
+ integer,optional,intent(in) :: ndat, iscale
 !arrays
  complex(dpc),target,intent(in) :: ff(*)
  complex(dpc),target,intent(inout) :: gg(*)
 
 ! *************************************************************************
 
- integer :: ndat__
+ integer :: ndat__, iscale__
  ndat__ = plan%batch_size; if (present(ndat) ) ndat__ = ndat
+ ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
  if (plan%use_gpu /= 0) then
-   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dpc, c_loc(ff), c_loc(gg), &
+   call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
    return
  end if
