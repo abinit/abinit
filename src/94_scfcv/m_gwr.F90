@@ -3867,13 +3867,12 @@ if (.not. use_shmem_for_k) then
          ! Note that we need to take the union of (k, g') for k in the BZ so we need to communicate in kpt_comm.
          gt_scbox = czero_gw
          do my_ikf=1,gwr%my_nkbz
-           ! Compute k+g
            ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
            do ig=1,desc_k%npw
-             green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
+             green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)  ! k + g
            end do
            do ipm=1,2
-             call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat, green_scgvec, &
+             call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor*ndat, green_scgvec, &
                            gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir), gt_scbox(:,1,ipm))
            end do
          end do ! my_ikf
@@ -3914,41 +3913,38 @@ else
          kproc_list = [(iproc+1, iproc=1,gwr%kpt_comm%nproc)]
          idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
 
-         call xmpi_win_fence(gt_scbox_win)
-         idat = gwr%kpt_comm%me + 1
-         do ipm=1,2
-           gt_scbox(:,idat,ipm) = czero_gw
-         end do
-         !if (gwr%kpt_comm%me == 0) gt_scbox = czero_gw
-         !if (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-         call xmpi_win_fence(gt_scbox_win)
-
          do iproc=1,gwr%kpt_comm%nproc
-           !idat = idat_list(iproc); if (idat > ndat) goto 10
-           if (iproc /= gwr%kpt_comm%me + 1) goto 10
-           do idat=1,ndat
+           !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+           call xmpi_win_fence(gt_scbox_win)
+           idat = idat_list(iproc); if (idat > ndat) goto 10
+           if (iproc == 1) then
+             do ipm=1,2
+               gt_scbox(:,idat,ipm) = czero_gw
+             end do
+           end if
+
            do my_ikf=1,gwr%my_nkbz
              ! Compute k+g
              ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
              do ig=1,desc_k%npw
                green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
              end do
+             !if (idat > ndat) cycle
              do ipm=1,2
-               if (idat > ndat) cycle
                call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
                              gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir+idat-1), gt_scbox(:,idat,ipm))
              end do
            end do ! my_ikf
-           end do
-           10 call xmpi_win_fence(gt_scbox_win)
+           !end do ! idat
+           10 call xmpi_barrier(gwr%kpt_comm%value)
+           !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+           call xmpi_win_fence(gt_scbox_win)
          end do ! iproc
 
+         ! Now each proc operates on different idat entries.
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          call xmpi_win_fence(gt_scbox_win)
-
          idat = gwr%kpt_comm%me + 1
-         !do idat=1,ndat
-         !if (gwr%kpt_comm%me /= 0) cycle
          if (idat <= ndat) then
            do ipm=1,2
              call green_plan%execute(gt_scbox(:,idat,ipm), -1, ndat=gwr%nspinor, iscale=0)
@@ -3956,17 +3952,15 @@ else
            gt_scbox(:,idat,1) = gt_scbox(:,idat,1) * conjg(gt_scbox(:,idat,2))
            call green_plan%execute(gt_scbox(:,idat,1), +1, ndat=gwr%nspinor)
          end if
-         !end do
-
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+         call xmpi_barrier(gwr%kpt_comm%value)
          call xmpi_win_fence(gt_scbox_win)
 end if
 
          ! Now extract tchi_q(g',r) on the ecuteps (q+g)-sphere from the FFT box in the supercell
          ! and save data in chiq_gpr PBLAS matrix. Only my q-points in the IBZ are considered.
-         ! Alternatively, one can avoid the above FFT,
-         ! use zero-padded to go from the supercell to the ecuteps g-sphere inside the my_iqi loop.
-         ! This approach should play well with k-point parallelism.
+         ! Alternatively, one can avoid the above FFT, use zero-padded to go from the supercell
+         ! to the ecuteps g-sphere inside the my_iqi loop. This approach should play well with k-point parallelism.
          do my_iqi=1,gwr%my_nqibz
            ! Compute q+g vectors.
            iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz); desc_q => gwr%tchi_desc_qibz(iq_ibz)
@@ -4768,7 +4762,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol !, spin_fact
- logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k !q_is_gamma,
+ logical :: k_is_gamma !, use_shmem_for_k, use_mpi_for_k !q_is_gamma,
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
@@ -4868,7 +4862,7 @@ if (gwr%use_supercell_for_sigma) then
  max_ndat = gwr%sc_batch_size
 
  !use_mpi_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
- use_mpi_for_k = .False.
+ !use_mpi_for_k = .False.
 
  !!use_shmem_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
  !use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc

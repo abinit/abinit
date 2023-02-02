@@ -5177,6 +5177,9 @@ subroutine xcomm_allocate_shared_master(self, count, kind, info, baseptr, win)
  !       INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
 
  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="allocated_shared returned ierr /= 0")
+
+ ! No local operations prior to this epoch, so give an assertion
+ call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 #endif
 
 end subroutine xcomm_allocate_shared_master
@@ -5346,7 +5349,7 @@ subroutine xmpi_get_nodes_in_comm(in_comm, num_nodes, nprocs_per_node)
  integer,optional,allocatable,intent(out) :: nprocs_per_node(:)
 
 !Local variables-------------------
- integer :: ierr, in_rank, node_comm, node_rank, masters_comm, color, np
+ integer :: ierr, in_rank, node_comm, node_rank !, masters_comm, color, np
 !----------------------------------------------------------------------
 
 #ifndef HAVE_MPI
