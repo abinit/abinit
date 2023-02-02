@@ -3913,32 +3913,61 @@ else
          kproc_list = [(iproc+1, iproc=1,gwr%kpt_comm%nproc)]
          idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
 
-         do iproc=1,gwr%kpt_comm%nproc
-           !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-           call xmpi_win_fence(gt_scbox_win)
-           idat = idat_list(iproc); if (idat > ndat) goto 10
-           if (iproc == 1) then
-             do ipm=1,2
-               gt_scbox(:,idat,ipm) = czero_gw
-             end do
-           end if
+         !do iproc=1,gwr%kpt_comm%nproc
+         !  !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+         !  call xmpi_win_fence(gt_scbox_win)
+         !  idat = idat_list(iproc); if (idat > ndat) goto 10
+         !  if (iproc == 1) then
+         !    do ipm=1,2
+         !      gt_scbox(:,idat,ipm) = czero_gw
+         !    end do
+         !  end if
 
+         !  do my_ikf=1,gwr%my_nkbz
+         !    ! Compute k+g
+         !    ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
+         !    do ig=1,desc_k%npw
+         !      green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
+         !    end do
+         !    !if (idat > ndat) cycle
+         !    do ipm=1,2
+         !      call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
+         !                    gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir+idat-1), gt_scbox(:,idat,ipm))
+         !    end do
+         !  end do ! my_ikf
+         !  !end do ! idat
+         !  10 call xmpi_barrier(gwr%kpt_comm%value)
+         !  !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+         !  call xmpi_win_fence(gt_scbox_win)
+         !end do ! iproc
+
+         ! This one is OK but it's slower than the version above.
+         call xmpi_win_fence(gt_scbox_win)
+         idat = gwr%kpt_comm%me + 1
+         do ipm=1,2
+           gt_scbox(:,idat,ipm) = czero_gw
+         end do
+         call xmpi_win_fence(gt_scbox_win)
+
+         do iproc=1,gwr%kpt_comm%nproc
+           call xmpi_win_fence(gt_scbox_win)
+           idat = idat_list(iproc) !; if (idat > ndat) goto 10
+           if (iproc /= gwr%kpt_comm%me + 1) goto 10
+           do idat=1,ndat
            do my_ikf=1,gwr%my_nkbz
              ! Compute k+g
              ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
              do ig=1,desc_k%npw
                green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)
              end do
-             !if (idat > ndat) cycle
+             if (idat > ndat) cycle
              do ipm=1,2
                call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
                              gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir+idat-1), gt_scbox(:,idat,ipm))
              end do
            end do ! my_ikf
-           !end do ! idat
-           10 call xmpi_barrier(gwr%kpt_comm%value)
-           !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-           call xmpi_win_fence(gt_scbox_win)
+           end do ! idat
+           10 call xmpi_win_fence(gt_scbox_win)
          end do ! iproc
 
          ! Now each proc operates on different idat entries.
@@ -3962,11 +3991,10 @@ end if
          ! Alternatively, one can avoid the above FFT, use zero-padded to go from the supercell
          ! to the ecuteps g-sphere inside the my_iqi loop. This approach should play well with k-point parallelism.
          do my_iqi=1,gwr%my_nqibz
-           ! Compute q+g vectors.
            iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz); desc_q => gwr%tchi_desc_qibz(iq_ibz)
            gg = nint(qq_ibz * gwr%ngqpt)
            do ig=1,desc_q%npw
-             chi_scgvec(:,ig) = gg + gwr%ngqpt(:) * desc_q%gvec(:,ig)
+             chi_scgvec(:,ig) = gg + gwr%ngqpt(:) * desc_q%gvec(:,ig) ! q+g
            end do
            !ABI_CHECK_IEQ(size(chiq_gpr(my_iqi)%buffer_cplx, dim=1), desc_q%npw, "desc_q!")
            !ABI_CHECK(chiq_gpr(my_iqi)%check_local_shape([desc_q%npw], msg), msg)
