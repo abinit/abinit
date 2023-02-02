@@ -807,7 +807,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !scalars
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
- integer :: my_nshiftq, iq_bz, iq_ibz, ikq_ibz, npw_, ncid !, ig
+ integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig, ikq_ibz
  integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt !np_work,
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
@@ -2760,7 +2760,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, ipm_list)
 !Local variables-------------------------------
 !scalars
  integer :: ig2, ipm, npwsp, col_bsize, ir1, ndat, ii, num_pm, ipm_list__(2)
- real(dp) :: cpu, wall, gflops
+ !real(dp) :: cpu, wall, gflops
  type(__slkmat_t) :: rgp, gt_pm(2), gpr
  type(desc_t) :: desc_kbz
  type(uplan_t) :: uplan_k
@@ -3167,7 +3167,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, iq_bz, itau, spin, wc_rpr)
  type(desc_t) :: desc_qbz
  type(__slkmat_t) :: wc_ggp, rgp, gpr
  type(uplan_t) :: uplan_k
- complex(dp),allocatable :: ceiqr(:)
+ !complex(dp),allocatable :: ceiqr(:)
 
 ! *************************************************************************
 
@@ -3587,7 +3587,8 @@ subroutine gwr_print(gwr, units, header)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, spin, my_it, itau, my_iki, ik_ibz, unt, ii
+ integer :: ii
+ !integer :: my_is, my_it, itau, my_iki, spin, unt, ik_ibz
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
 
@@ -3882,7 +3883,6 @@ if (.not. use_shmem_for_k) then
 
            ! G(G',r) --> G(R',r) = sum_{k,g'} e^{-i(k+g').R'} G_k(g',r)
            call green_plan%execute(gt_scbox(:,1,1), -1, iscale=0)
-           !call xscal(size(gt_scbox), real(sc_nfft, kind=gwpc), gt_scbox(:,1,1), 1)  ! gt_scbox *= sc_nfft
 
            ! Compute tchi(R',r) for this r and store it in (:,:,1). Note that results are real so one might use r2c FFT.
            ! Then back to tchi(G'=q+g',r) immediately with isign + 1.
@@ -3901,7 +3901,6 @@ if (.not. use_shmem_for_k) then
            idat = gwr%kpt_comm%me + 1
            do ipm=1,2
              call green_plan%execute(gt_scbox(:,idat,ipm), -1, ndat=gwr%nspinor, iscale=0)
-             !gt_scbox(:,idat,ipm) = gt_scbox(:,idat,ipm) * sc_nfft
            end do
            gt_scbox(:,idat,1) = gt_scbox(:,idat,1) * conjg(gt_scbox(:,idat,2))
            call green_plan%execute(gt_scbox(:,idat,1), +1, ndat=gwr%nspinor)
@@ -3912,16 +3911,17 @@ if (.not. use_shmem_for_k) then
 
 else
          ! use_shmem_for_k --> MPI shared window version. Only gt_scbox is being shared.
-         !idat = gwr%kpt_comm%me + 1
-         !do ipm=1,2
-         !  gt_scbox(:,idat,ipm) = czero_gw
-         !end do
-         if (gwr%kpt_comm%me == 0) gt_scbox = czero_gw
+         kproc_list = [(iproc+1, iproc=1,gwr%kpt_comm%nproc)]
+         idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
+
+         idat = gwr%kpt_comm%me + 1
+         do ipm=1,2
+           gt_scbox(:,idat,ipm) = czero_gw
+         end do
+         !if (gwr%kpt_comm%me == 0) gt_scbox = czero_gw
          !if (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          call xmpi_win_fence(gt_scbox_win)
 
-         kproc_list = [(iproc+1, iproc=1,gwr%kpt_comm%nproc)]
-         idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
          do iproc=1,gwr%kpt_comm%nproc
            !idat = idat_list(iproc) !; if (idat > ndat) cycle
            if (iproc /= gwr%kpt_comm%me + 1) goto 10
@@ -3946,18 +3946,16 @@ else
          call xmpi_win_fence(gt_scbox_win)
 
          idat = gwr%kpt_comm%me + 1
-         !do idat=1,ndat
-         !if (gwr%kpt_comm%me /= 0) cycle
+         do idat=1,ndat
+         if (gwr%kpt_comm%me /= 0) cycle
          if (idat <= ndat) then
            do ipm=1,2
              call green_plan%execute(gt_scbox(:,idat,ipm), -1, ndat=gwr%nspinor, iscale=0)
-             !gt_scbox(:,idat,ipm) = gt_scbox(:,idat,ipm) * sc_nfft
            end do
            gt_scbox(:,idat,1) = gt_scbox(:,idat,1) * conjg(gt_scbox(:,idat,2))
            call green_plan%execute(gt_scbox(:,idat,1), +1, ndat=gwr%nspinor)
-           !gt_scbox(:,idat,1) = gt_scbox(:,idat,1) * two
          end if
-         !end do
+         end do
 
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          call xmpi_win_fence(gt_scbox_win)
@@ -4988,12 +4986,10 @@ if (gwr%use_supercell_for_sigma) then
        ! G(G',r) --> G(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(gt_request, ierr)
        call green_plan%execute(gt_scbox(:,1,1), -1, iscale=0)
-       !call xscal(size(gt_scbox), real(sc_nfft / sck_ucvol, kind=gwpc), gt_scbox(:,1,1), 1)
 
        ! Wc(G',r) --> Wc(R',r)
        if (gwr%kpt_comm%nproc > 1) call xmpi_wait(wct_request, ierr)
        call wt_plan%execute(wct_scbox(:,1), -1, iscale=0)
-       !call xscal(size(wct_scbox), real(sc_nfft / scq_ucvol, kind=gwpc), wct_scbox(:,1), 1)
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this r.
        sigma_fact = one / (sck_ucvol * scq_ucvol)

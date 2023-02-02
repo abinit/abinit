@@ -232,7 +232,7 @@ subroutine dfti_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr)
        ABI_BUG("Wrong isign")
      end if
 
-     call dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,iscale1, isign,work_sp)
+     call dfti_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale1, isign, work_sp)
 
      if (isign == +1) then
        jj = 1
@@ -1430,7 +1430,9 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: iscale1 = 1
  type(C_ptr) :: fin_cptr, fout_cptr
+
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: fin_fptr(:),fout_fptr(:)
 
@@ -1438,13 +1440,13 @@ subroutine dfti_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout)
 
  ! Associate complex pointers with real inputs via the C pointers
  fin_cptr = C_loc(fin)
- call C_F_pointer(fin_cptr,fin_fptr, shape=(/ldx*ldy*ldz*ndat/))
+ call C_F_pointer(fin_cptr,fin_fptr, shape=[ldx*ldy*ldz*ndat])
 
  fout_cptr = C_loc(fout)
- call C_F_pointer(fout_cptr,fout_fptr, shape=(/ldx*ldy*ldz*ndat/))
+ call C_F_pointer(fout_cptr,fout_fptr, shape=[ldx*ldy*ldz*ndat])
 
  ! Call complex version --> a lot of boilerplate code avoided
- call dfti_c2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin_fptr,fout_fptr)
+ call dfti_c2c_op(nx, ny, nz, ldx, ldy, ldz, ndat, iscale1, isign, fin_fptr, fout_fptr)
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")
@@ -1503,7 +1505,7 @@ subroutine dfti_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout)
  call C_F_pointer(finout_cptr,finout_fptr, shape=(/ldx*ldy*ldz*ndat/))
 
  ! Call complex version --> a lot of boilerplate code avoided
- call dfti_c2c_ip(nx,ny,nz,ldx,ldy,ldz,ndat,iscale1,isign,finout_fptr)
+ call dfti_c2c_ip(nx, ny, nz, ldx, ldy, ldz, ndat, iscale1, isign, finout_fptr)
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")
