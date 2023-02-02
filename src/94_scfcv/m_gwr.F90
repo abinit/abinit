@@ -3914,6 +3914,7 @@ else
          kproc_list = [(iproc+1, iproc=1,gwr%kpt_comm%nproc)]
          idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
 
+         call xmpi_win_fence(gt_scbox_win)
          idat = gwr%kpt_comm%me + 1
          do ipm=1,2
            gt_scbox(:,idat,ipm) = czero_gw
@@ -3923,7 +3924,7 @@ else
          call xmpi_win_fence(gt_scbox_win)
 
          do iproc=1,gwr%kpt_comm%nproc
-           !idat = idat_list(iproc) !; if (idat > ndat) cycle
+           !idat = idat_list(iproc); if (idat > ndat) goto 10
            if (iproc /= gwr%kpt_comm%me + 1) goto 10
            do idat=1,ndat
            do my_ikf=1,gwr%my_nkbz
@@ -3946,8 +3947,8 @@ else
          call xmpi_win_fence(gt_scbox_win)
 
          idat = gwr%kpt_comm%me + 1
-         do idat=1,ndat
-         if (gwr%kpt_comm%me /= 0) cycle
+         !do idat=1,ndat
+         !if (gwr%kpt_comm%me /= 0) cycle
          if (idat <= ndat) then
            do ipm=1,2
              call green_plan%execute(gt_scbox(:,idat,ipm), -1, ndat=gwr%nspinor, iscale=0)
@@ -3955,7 +3956,7 @@ else
            gt_scbox(:,idat,1) = gt_scbox(:,idat,1) * conjg(gt_scbox(:,idat,2))
            call green_plan%execute(gt_scbox(:,idat,1), +1, ndat=gwr%nspinor)
          end if
-         end do
+         !end do
 
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          call xmpi_win_fence(gt_scbox_win)
