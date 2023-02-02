@@ -3461,6 +3461,8 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(3x,a12)',advance='no')'    qmass  '
      write(nunit,'(3x,15F12.10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
    end if
+     
+! TODO: print the value of the efield here if it is present. 
 
    if(any(multibinit_dtset%iatfix /= 0))then
       natfix = 0
