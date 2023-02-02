@@ -302,6 +302,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: iscale1 = 1
  integer :: my_flags,ii,jj
  complex(spc), allocatable :: work_sp(:)
 
@@ -323,7 +324,7 @@ subroutine fftw3_seqfourdp(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,isign,fofg,fofr,fftw_
        ABI_BUG("Wrong isign")
      end if
 
-     call fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, work_sp, fftw_flags=my_flags)
+     call fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale1, isign, work_sp, fftw_flags=my_flags)
 
      if (isign == ABI_FFTW_BACKWARD) then ! +1
        jj = 1
@@ -1423,6 +1424,7 @@ end subroutine fftw3_fftur_dpc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => ff(R); -1 : ff(R) => ff(G)
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
 !!   Defaults to ABI_FFTW_ESTIMATE.
@@ -1434,11 +1436,11 @@ end subroutine fftw3_fftur_dpc
 !!
 !! SOURCE
 
-subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, fftw_flags)
+subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
@@ -1468,7 +1470,7 @@ subroutine fftw3_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, fftw_fla
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then ! -1, FFTW returns not normalized FTs
    call xscal(ldx*ldy*ldz*ndat, REAL(one/(nx*ny*nz),KIND=sp), ff, 1)
  end if
 
@@ -1553,6 +1555,7 @@ end subroutine fftw3_fftpad_spc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => ff(R); -1 : ff(R) => ff(G)
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
 !!   Defaults to ABI_FFTW_ESTIMATE.
@@ -1564,11 +1567,11 @@ end subroutine fftw3_fftpad_spc
 !!
 !! SOURCE
 
-subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
+subroutine fftw3_c2c_ip_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,isign
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
@@ -1599,8 +1602,8 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
  call fftw3_destroy_plan(my_plan)
 
  ! -1, FFTW returns not normalized FTs
- if (isign == ABI_FFTW_FORWARD) then
-  call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), ff, 1)
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then
+   call ZDSCAL(ldx*ldy*ldz*ndat, one/(nx*ny*nz), ff, 1)
  end if
 
 #else
@@ -1629,6 +1632,7 @@ end subroutine fftw3_c2c_ip_dpc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
@@ -1639,11 +1643,11 @@ end subroutine fftw3_c2c_ip_dpc
 !!
 !! SOURCE
 
-subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw_flags)
+subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, gg, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,iscale,isign,ndat
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
@@ -1674,7 +1678,7 @@ subroutine fftw3_c2c_op_spc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then ! -1, FFTW returns not normalized FTs
    call xscal(ldx*ldy*ldz*ndat, REAL(one/(nx*ny*nz), KIND=sp), gg, 1)
  end if
 
@@ -1705,6 +1709,7 @@ end subroutine fftw3_c2c_op_spc
 !! nx,ny,nz=Number of points along the three directions.
 !! ldx,ldy,ldz=Physical dimensions of the array.
 !! ndat=Number of FFTs to be done.
+!! iscale=0 if G --> R FFT should not be scaled.
 !! isign= +1 : ff(G) => gg(R); -1 : ff(R) => gg(G)
 !! ff(ldx*ldy*ldz*ndat)=The array to be transformed.
 !! [fftw_flags]=Flags used to create the plan. They can be combined with the "+" operator.
@@ -1715,11 +1720,11 @@ end subroutine fftw3_c2c_op_spc
 !!
 !! SOURCE
 
-subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw_flags)
+subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff, gg, fftw_flags)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat
+ integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,isign,ndat,iscale
  integer,optional,intent(in) :: fftw_flags
 !arrays
  complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
@@ -1750,7 +1755,7 @@ subroutine fftw3_c2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, isign, ff, gg, fftw
 
  call fftw3_destroy_plan(my_plan)
 
- if (isign==ABI_FFTW_FORWARD) then ! -1, FFTW returns not normalized FTs
+ if (isign == ABI_FFTW_FORWARD .and. iscale /= 0) then ! -1, FFTW returns not normalized FTs
    call xscal(ldx*ldy*ldz*ndat, one/(nx*ny*nz), gg, 1)
  end if
 

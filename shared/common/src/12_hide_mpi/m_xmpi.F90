@@ -5306,7 +5306,6 @@ end subroutine pool2d_from_dims
 !!  Free memory
 
 subroutine pool2d_free(pool)
-
 !Arguments-------------------------
  class(xmpi_pool2d_t),intent(inout) :: pool
 !----------------------------------------------------------------------
@@ -5324,6 +5323,7 @@ subroutine xmpi_win_fence(win, assert)
   assert__ = 0; if (present(assert)) assert__ = assert
 #ifdef HAVE_MPI
   call MPI_WIN_FENCE(assert__, win, ierr)
+  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="MPI_WIN_FENCE return ierr /= 0")
 #endif
 end subroutine xmpi_win_fence
 
@@ -5334,6 +5334,51 @@ subroutine xmpi_win_free(win)
   call MPI_WIN_FREE(win, ierr)
 #endif
 end subroutine xmpi_win_free
+!!***
+
+! Return the number of nodes `num_nodes` in the `in_comm` communicator.
+
+subroutine xmpi_get_nodes_in_comm(in_comm, num_nodes, nprocs_per_node)
+
+!Arguments-------------------------
+ integer,intent(in) :: in_comm
+ integer,intent(out) :: num_nodes
+ integer,optional,allocatable,intent(out) :: nprocs_per_node(:)
+
+!Local variables-------------------
+ integer :: ierr, in_rank, node_comm, node_rank, masters_comm, color, np
+!----------------------------------------------------------------------
+
+#ifndef HAVE_MPI
+ num_nodes = 1
+ if (present(nprocs_per_node)) then
+   ABI_MALLOC(nprocs_per_node, (num_nodes))
+   nprocs_per_node = 1
+ end if
+
+#else
+ in_rank = xmpi_comm_rank(in_comm)
+ call MPI_COMM_SPLIT_TYPE(in_comm, MPI_COMM_TYPE_SHARED, in_rank, MPI_INFO_NULL, node_comm, ierr)
+ node_rank = xmpi_comm_rank(node_comm)
+ num_nodes = merge(1, 0, node_rank == 0)
+ call xmpi_sum(num_nodes, in_comm, ierr)
+
+ if (present(nprocs_per_node)) then
+  !ABI_MALLOC(nprocs_per_node, (num_nodes))
+  !color = merge(0, 1, node_rank == 0)
+  !call xmpi_comm_split(in_comm, color, in_rank, masters_comm, ierr)
+  !if (color == 0) then
+  !  np = xmpi_comm_size(node_comm)
+  !  call MPI_GATHER(np, 1, MPI_INT, nprocs_per_node, 1, MPI_INT, 0, masters_comm, ierr)
+  !end if
+  !call xmpi_comm_free(masters_comm)
+ end if
+
+ call xmpi_comm_free(node_comm)
+
+#endif
+
+end subroutine xmpi_get_nodes_in_comm
 !!***
 
 end module m_xmpi

@@ -16,7 +16,7 @@
  status = DftiSetValue(Desc1, DFTI_OUTPUT_STRIDES,  (/0,1,ldx,ldx*ldy/) )
  status = DftiSetValue(Desc1, DFTI_PLACEMENT, DFTI_NOT_INPLACE)
 
- if (isign==-1) then
+ if (isign == -1 .and. iscale /= 0) then
    status = DftiSetValue(Desc1, DFTI_FORWARD_SCALE, one/DBLE(nx*ny*nz) )
  end if
                                                                                      

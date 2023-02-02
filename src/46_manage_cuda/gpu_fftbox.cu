@@ -61,7 +61,7 @@ devpp_free(void **dev_pp) {
 }
 
 extern "C" void
-xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
+xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind, int iscale,
                    void **h_ff, void **plan_pp, void **d_ff) {
 
   const int RANK = 3, stride = 1;
@@ -109,14 +109,14 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
   /* Transform the signal in place. */
   if (type == CUFFT_C2C) {
     CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_ff, direction));
-    if (direction == CUFFT_FORWARD){
+    if (direction == CUFFT_FORWARD and iscale != 0){
         float alpha_sp = 1.0f / nfft;
         CHECK_CUDA_ERROR(cublasCsscal(cublas_handle, dist*ndat, &alpha_sp, (cuComplex *) *d_ff, 1));
     }
   }
   if (type == CUFFT_Z2Z) {
     CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_ff, direction));
-    if (direction == CUFFT_FORWARD){
+    if (direction == CUFFT_FORWARD and iscale != 0){
         double alpha_dp = 1.0 / nfft;
         CHECK_CUDA_ERROR(cublasZdscal(cublas_handle, dist*ndat, &alpha_dp, (cuDoubleComplex *) *d_ff, 1));
     }
@@ -132,7 +132,7 @@ xgpu_fftbox_c2c_ip(int *f_dims, int *f_embed, int ndat, int isign, int kind,
 
 
 extern "C" void
-xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
+xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind, int iscale,
                    void **h_ff, void **h_gg, void **plan_pp, void **d_ff, void **d_gg) {
 
   const int RANK = 3, stride = 1;
@@ -180,14 +180,14 @@ xgpu_fftbox_c2c_op(int *f_dims, int *f_embed, int ndat, int isign, int kind,
   /* Transform the signal out of place. */
   if (type == CUFFT_C2C) {
      CHECK_CUDA_ERROR(cufftExecC2C(plan, (cufftComplex *) *d_ff, (cufftComplex *) *d_gg, direction));
-     if (direction == CUFFT_FORWARD){
+     if (direction == CUFFT_FORWARD and iscale != 0){
          float alpha_sp = 1.0f / nfft;
          CHECK_CUDA_ERROR(cublasCsscal(cublas_handle, dist*ndat, &alpha_sp, (cuComplex *) *d_gg, 1));
      }
   }
   if (type == CUFFT_Z2Z) {
      CHECK_CUDA_ERROR(cufftExecZ2Z(plan, (cufftDoubleComplex *) *d_ff, (cufftDoubleComplex *) *d_gg, direction));
-     if (direction == CUFFT_FORWARD){
+     if (direction == CUFFT_FORWARD and iscale != 0){
          double alpha_dp = 1.0 / nfft;
          CHECK_CUDA_ERROR(cublasZdscal(cublas_handle, dist*ndat, &alpha_dp, (cuDoubleComplex *) *d_gg, 1));
      }
