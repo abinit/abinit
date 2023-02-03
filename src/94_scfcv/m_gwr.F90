@@ -808,7 +808,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig, ikq_ibz
- integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt !np_work,
+ integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
@@ -2344,7 +2344,6 @@ subroutine gwr_build_green(gwr, free_ugb)
  if (gwr%scf_iteration == 1) then
    call wrtout(units, " Building Green's functions from KS orbitals and KS energies...", &
                pre_newlines=2, newlines=1, do_flush=.True.)
-
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
    msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%ks_ebands%fermie))
    ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, msg)
@@ -2402,7 +2401,7 @@ subroutine gwr_build_green(gwr, free_ugb)
            work%buffer_cplx(:,il_b) = work%buffer_cplx(:,il_b) * sqrt(real(gt_cfact))
          end do ! il_b
 
-         ! Build G(g,g',ipm)
+         ! Build G(g,g',ipm) with PZGEMM
          isgn = merge(1, -1, ipm == 2)
          ! TODO: optimize
          ija = [1,1]; ijb=[1, 1]
@@ -2763,7 +2762,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, ipm_list)
      ! G_k(g',r) -> G_k(r',r) and store results in rgp.
      ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
      ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
-     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), gk_rpr_pm(ipm)%buffer_cplx(:, ir1)) !isign=+1, scale=.False.)
+     call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), gk_rpr_pm(ipm)%buffer_cplx(:, ir1)) !isign=+1, iscale=0)
    end do ! ir1
    call gpr%free()
 
@@ -2832,7 +2831,7 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
  ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
  do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), rpr%buffer_cplx(:, ir1)) !isign=+1, scale=.False.)
+   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), rpr%buffer_cplx(:, ir1)) !isign=+1, iscale=0)
  end do
 
  call uplan_k%free()
@@ -2883,7 +2882,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rpr, ggp)
  ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
  do ir2=1, rpr%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rpr%sizeb_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, rpr%buffer_cplx(:, ir2), gpr%buffer_cplx(:, ir2)) ! isign=+1, scale=.False.)
+   call uplan_k%execute_rg(ndat, rpr%buffer_cplx(:, ir2), gpr%buffer_cplx(:, ir2)) ! isign=+1, iscale=0)
  end do
 
  ! F(g',r) --> F(r,g')
@@ -3157,7 +3156,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, iq_bz, itau, spin, wc_rpr)
  ! FFT Wc(g,g') -> Wc(r,g') and stored results in rgp
  do ig2=1,wc_ggp%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, wc_ggp%sizeb_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))  ! isign=+1, scale=.False.)
+   call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:, ig2), rgp%buffer_cplx(:, ig2))  ! isign=+1, iscale=0)
 
    ! Multiply by e^{iq.r}
    !if (.not. q_is_gamma) then
@@ -3177,7 +3176,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, iq_bz, itau, spin, wc_rpr)
    ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the FFT API)
    ! FFT Wc_q(g',r) -> Wc_q(r',r) and store results in wc_rgp.
    ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1)) !isign=+1, scale=.False.)
+   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1)) !isign=+1, iscale=0)
  end do ! ir1
 
  call uplan_k%free()
@@ -3760,7 +3759,7 @@ subroutine gwr_build_tchi(gwr)
 
    if (use_shmem_for_k) then
      buf_count = 2 * (sc_nfftsp * max_ndat * 2)
-     call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
+     !call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
      call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp, max_ndat, 2])
    end if
 
@@ -4965,7 +4964,7 @@ if (gwr%use_supercell_for_sigma) then
        gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
 
-       ! Integrate self-energy matrix elements in the R-supercell for fixed set of ndat r-points.
+       ! Integrate Sigma matrix elements in the R-supercell for fixed set of ndat r-points.
        do ikcalc=1,gwr%nkcalc
          k_is_gamma = normv(gwr%kcalc(:,ikcalc), gwr%cryst%gmet, "G") < GW_TOLQ0
          ! FIXME: Temporary hack till I find a better MPI algo for k-points.
