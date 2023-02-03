@@ -3759,7 +3759,7 @@ subroutine gwr_build_tchi(gwr)
 
    if (use_shmem_for_k) then
      buf_count = 2 * (sc_nfftsp * max_ndat * 2)
-     !call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
+     call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
      call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp, max_ndat, 2])
    end if
 
@@ -3819,6 +3819,7 @@ subroutine gwr_build_tchi(gwr)
 if (.not. use_shmem_for_k) then
          ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
          ! Note that we need to take the union of (k, g') for k in the BZ so we need to communicate in kpt_comm.
+         !call gwr%gk_to_box(ndat, my_ir, sc_ngfft, green_scgvec, gt_gpr, gt_scbox)
          gt_scbox = czero_gw
          do my_ikf=1,gwr%my_nkbz
            ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
@@ -4737,7 +4738,7 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ik_ibz, ikcalc_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, max_ndat, ndat !, ii !sc_mgfft,
+ integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, max_ndat, ndat !, ii
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
@@ -4878,7 +4879,7 @@ if (gwr%use_supercell_for_sigma) then
    ABI_MALLOC(ur, (gwr%g_nfft * gwr%nspinor))
    ABI_MALLOC(uc_ceikr, (gwr%g_nfft * gwr%nspinor))
 
-   ! Precompute one-dimensional factors to get 3d e^{ik.L}
+   ! Pre-compute one-dimensional factors to get 3d e^{ik.L}
    call get_1d_sc_phases(gwr%ngkpt, gwr%nkcalc, gwr%kcalc, scph1d_kcalc)
 
    do ikcalc=1,gwr%nkcalc
@@ -4918,9 +4919,10 @@ if (gwr%use_supercell_for_sigma) then
 
        ! Insert G_k(g',r) in G'-space in the supercell FFT box for fixed r.
        ! Take the union of (k,g') for k in the BZ.
+       !call gwr%gk_to_box(ndat, my_ir, sc_ngfft, green_scgvec, gt_gpr, gt_scbox)
        gt_scbox = czero_gw
        do my_ikf=1,gwr%my_nkbz
-         ik_bz = gwr%my_kbz_inds(my_ikf); ik_ibz = gwr%kbz2ibz(1, ik_bz)
+         ik_bz = gwr%my_kbz_inds(my_ikf)
          gg = nint(gwr%kbz(:,ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
          do ig=1,desc_k%npw
            green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig) ! k+g'
@@ -4935,7 +4937,8 @@ if (gwr%use_supercell_for_sigma) then
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box for fixed r.
-       ! Take the union of (q,g') for q in the BZ. Also, note ngqpt instead of ngkpt.
+       ! Take the union of (q,g') for q in the BZ. Note ngqpt instead of ngkpt.
+       !call gwr%gk_to_box(ndat, my_ir, sc_ngfft, wc_scgvec, wc_gpr, gt_scbox)
        wct_scbox = czero_gw
        do my_iqf=1,gwr%my_nqbz
          iq_bz = gwr%my_qbz_inds(my_iqf); iq_ibz = gwr%qbz2ibz(1, iq_bz)

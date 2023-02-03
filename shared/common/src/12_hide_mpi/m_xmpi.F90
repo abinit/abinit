@@ -5140,8 +5140,8 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  class(xcomm_t),intent(inout) :: xcomm
  integer(kind=XMPI_ADDRESS_KIND), intent(in) :: count
  integer,intent(in) :: kind, info
- !type(c_ptr),intent(out) :: baseptr
- INTEGER(KIND=XMPI_ADDRESS_KIND) :: baseptr
+ type(c_ptr),intent(out) :: baseptr
+ !INTEGER(KIND=XMPI_ADDRESS_KIND) :: baseptr
  integer,intent(out) :: win
 
 !Local variables-------------------
