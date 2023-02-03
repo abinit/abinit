@@ -2074,7 +2074,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  integer :: nbsum, npwsp, bstart, bstop, band_step, nb !my_nband ! nband_k,
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
- logical :: have_band, need_block
+ logical :: have_band, need_block, io_in_kcomm
  type(ebands_t) :: wfk_ebands
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
@@ -2222,8 +2222,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  else
    ! Master reads and broadcasts. Much faster on lumi
    call wrtout(std_out, " Using IO version based on master reads and brodcasts ...")
-   io_comm => gwr%comm
-   io_comm => gwr%kpt_comm
+   io_comm => gwr%comm; io_in_kcomm = .False.
+   io_comm => gwr%kpt_comm; io_in_kcomm = .True.
 
    if (io_comm%me == master) then
      call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
@@ -2234,6 +2234,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
    do spin=1,gwr%nsppol
      do ik_ibz=1,gwr%nkibz
+       if (io_in_kcomm .and. .not. (any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz))) cycle
+
        call cwtime(cpu_green, wall_green, gflops_green, "start")
        kk_ibz = gwr%kibz(:, ik_ibz)
        npw_k = wfk_hdr%npwarr(ik_ibz)
