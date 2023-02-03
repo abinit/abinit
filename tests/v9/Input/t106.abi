@@ -91,18 +91,17 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t38.abi,t39.abi,t39j.abi,t40.abi
+#%% test_chain = t105.abi, t106.abi, t107.abi, t108.abi, t109.abi
 #%% need_cpp_vars = 
 #%% [files]
 #%% files_to_test = 
-#%%   t39.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
+#%%   t106.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Torrent, D.J. Adams, L. MacEnulty
-#%% keywords = 
-#%% description = Compute U in bcc Fe in 2 atomic supercell, once with the ujdet
-#%%    intrinsic subroutine (using a two-point linear regression), and then with
-#%%    the lruj post-processing utility
+#%% keywords = PAW,lruj,ujdet 
+#%% description = Compute U in bcc Fe in 2 atomic supercell with the ujdet
+#%%    intrinsic subroutine (using a two-point linear regression).
 #%% topics = DFT+U
 #%%<END TEST_INFO>

@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 29 Nov 2022.
-- ( at 12h06 )
+.Starting date : Thu  2 Feb 2023.
+- ( at 16h13 )
   
-- input  file    -> t39.abi
-- output file    -> t39.abo
-- root for input  files -> t39i
-- root for output files -> t39o
+- input  file    -> t106.abi
+- output file    -> t106.abo
+- root for input  files -> t106i
+- root for output files -> t106o
  
  
  Symmetries : space group Pm -3 m (#221); Bravais cP (primitive cubic)
@@ -31,12 +31,12 @@
      natom =       2  nloc_mem =       2    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       1    ntypat =       1
     occopt =       4   xclevel =       2
--    mband =          25        mffmem =           1         mkmem =           1
+-    mband =          25        mffmem =           1         mkmem =           4
        mpw =         178          nfft =        3375          nkpt =           4
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        32    nfftf =     32768
 ================================================================================
-P This job should need less than                      18.445 Mbytes of memory.
+P This job should need less than                      18.895 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.545 Mbytes ; DEN or POT disk file :      0.502 Mbytes.
 ================================================================================
@@ -49,7 +49,7 @@ _ WF disk file :      0.545 Mbytes ; DEN or POT disk file :      0.502 Mbytes.
 -   iomode0 =  0 , fftalg0 =512 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    1
+-  max_nthreads =   40
 -
  -outvars: echo values of preprocessed input variables --------
             acell      5.4200000000E+00  5.4200000000E+00  5.4200000000E+00 Bohr
@@ -74,7 +74,7 @@ _ WF disk file :      0.545 Mbytes ; DEN or POT disk file :      0.502 Mbytes.
           kptrlen      1.62600000E+01
             lpawu           2
          macro_uj        1
-P           mkmem           1
+P           mkmem           4
             natom           2
             nband          25
         natvshift        5
@@ -127,7 +127,6 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000
            occopt           4
--      paral_atom           0
         pawecutdg      4.00000000E+01 Hartree
          pawujrad      2.6686600000E+00 Bohr
            prtden           0
@@ -179,8 +178,7 @@ P           mkmem           1
  
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 32, omp_nthreads: 1 (-1 if OMP is not activated)
--    --> not optimal distribution: autoparal keyword recommended in input file <--
+-   mpi_nproc: 1, omp_nthreads: 40 (-1 if OMP is not activated)
  
 
 --- !DatasetInfo
@@ -238,7 +236,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
    2.32160999E+03                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
  
--inwffil : will read wavefunctions from disk file t39i_WFK
+-inwffil : will read wavefunctions from disk file t106i_WFK
 _setup2: Arith. and geom. avg. npw (full set) are     173.333     173.266
  
  
@@ -255,17 +253,17 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
  
      iter   Etot(hartree)     deltaE(h) residm    nres2    magn
- ETOT  1  -248.64724996139    -2.49E+02 4.96E-10 1.03E-01 4.593
- ETOT  2  -248.64938112221    -2.13E-03 6.45E-08 2.26E+00 4.593
- ETOT  3  -248.64713317667     2.25E-03 5.34E-04 2.83E-03 4.593
+ ETOT  1  -248.64724996138    -2.49E+02 4.53E-10 1.03E-01 4.593
+ ETOT  2  -248.64938112056    -2.13E-03 6.45E-08 2.26E+00 4.593
+ ETOT  3  -248.64713317663     2.25E-03 5.34E-04 2.83E-03 4.593
  ETOT  4  -248.64714453025    -1.14E-05 1.38E-07 3.38E-03 4.593
  ETOT  5  -248.64714116498     3.37E-06 1.94E-06 1.33E-04 4.593
  ETOT  6  -248.64714123649    -7.15E-08 8.39E-08 2.44E-05 4.593
  ETOT  7  -248.64714126498    -2.85E-08 4.72E-08 6.68E-06 4.593
  ETOT  8  -248.64714125817     6.81E-09 1.54E-09 4.38E-07 4.593
- ETOT  9  -248.64714125836    -1.87E-10 1.57E-11 2.78E-07 4.593
- ETOT 10  -248.64714125880    -4.42E-10 8.65E-11 1.68E-08 4.593
- ETOT 11  -248.64714125875     5.19E-11 6.16E-12 2.26E-09 4.593
+ ETOT  9  -248.64714125836    -1.87E-10 1.57E-11 2.79E-07 4.593
+ ETOT 10  -248.64714125880    -4.41E-10 8.65E-11 1.68E-08 4.593
+ ETOT 11  -248.64714125875     5.12E-11 6.16E-12 2.26E-09 4.593
  
  At SCF step   11       nres2   =  2.26E-09 < tolvrs=  1.00E-08 =>converged.
  
@@ -285,7 +283,7 @@ lattice_vectors:
 lattice_lengths: [   5.42000,    5.42000,    5.42000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.5922009E+02
-convergence: {deltae:  5.187E-11, res2:  2.258E-09, residm:  6.164E-12, diffor: null, }
+convergence: {deltae:  5.122E-11, res2:  2.258E-09, residm:  6.164E-12, diffor: null, }
 etotal    :  -2.48647141E+02
 entropy   :   0.00000000E+00
 fermie    :   2.51178359E-01
@@ -317,8 +315,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     19.149958927140183
- Compensation charge over fine fft grid    =     19.149947956491548
+ Compensation charge over spherical meshes =     19.149958927328498
+ Compensation charge over fine fft grid    =     19.149947956467980
  
  ==== Results concerning PAW augmentation regions ====
  
@@ -537,48 +535,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  
  
  
- # input for ujdet, cut it using 'sed -n "/MARK/,/MARK/p" abi.out > ujdet.in '------- 
- 
-           ndtset        4
-              nat        2
-           nspden        2
-         macro_uj        1
-           pawrad      2.02984247E+00
-        ph0phiint      8.54332879E-01
-        pawprtvol        0
-              vsh1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00
-              vsh2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00
-              vsh3     3.6749325398E-03  3.6749325398E-03  0.0000000000E+00
-                       0.0000000000E+00
-              vsh4     3.6749325398E-03  3.6749325398E-03  0.0000000000E+00
-                       0.0000000000E+00
-              occ1     4.1221982951E+00  1.6933688457E+00  4.1221982951E+00
-                       1.6933688457E+00
-              occ2     4.1221982951E+00  1.6933688457E+00  4.1221982951E+00
-                       1.6933688457E+00
-              occ3     4.1143258261E+00  1.6703524749E+00  4.1251256647E+00
-                       1.7123048026E+00
-              occ4     4.1220490761E+00  1.6839286426E+00  4.1179968737E+00
-                       1.6987556741E+00
-             xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
-           rprimd      5.4200000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  5.4200000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  5.4200000000E+00
-            wfchr      4.3772661697E+00  3.0000000000E+00  2.0000000000E+00
-                       1.4530610236E+00 -7.4483924347E-01  1.1680994649E-01
- 
- # further possible options: 
- #    scdim    2 2 2 
- #    mdist    10.0  
- #  pawujga    2 
- # pawujopt    2 
- # pawujrad    3.0
- # ------- end input for ujdet: end-MARK  -------- 
- 
- 
  ---------- calculate U, (J) start ---------- 
  
  All pawujat  ok and equal to   1
@@ -594,8 +550,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
-   0.0000000000   5.8155671408   5.8155671408
-   0.1000000000   5.7846783010   5.8059777186
+   0.0000000000   5.8155671406   5.8155671406
+   0.1000000000   5.7846783103   5.8059777194
  
                     Scalar response functions:
                     Chi0 [eV^-1]:     -0.68642
@@ -610,7 +566,7 @@ See the LRUJ protocol for more information.
  
  
  URES      ii    nat       r_max    U(J)[eV]   U_ASA[eV]   U_inf[eV]
- URES       1      2     4.69390     4.59799     3.56540     3.10196
+ URES       1      2     4.69390     4.59799     3.56541     3.10196
  URES       2     16     9.38770     8.37814     6.49664     5.65217
  URES       3     54    14.08160     8.73853     6.77609     5.89530
  URES       4    128    18.77540     8.81759     6.83739     5.94864
@@ -622,7 +578,7 @@ See the LRUJ protocol for more information.
  
  ----iterations are completed or convergence reached----
  
- Mean square residual over all n,k,spin=   15.699E-13; max=  61.636E-13
+ Mean square residual over all n,k,spin=   15.701E-13; max=  61.641E-13
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -678,32 +634,32 @@ See the LRUJ protocol for more information.
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.88342084638184E+01
-hartree             :  4.68095094803110E+01
-xc                  : -2.34850560186068E+01
+kinetic             :  1.88342084638254E+01
+hartree             :  4.68095094801631E+01
+xc                  : -2.34850560185927E+01
 Ewald energy        : -1.71889993187126E+02
 psp_core            :  1.45811374803457E+01
-local_psp           : -1.18681199096519E+02
-spherical_terms     : -1.48371422444256E+01
-internal            : -2.48668535122203E+02
-'-kT*entropy'       :  5.08873107441570E-05
-total_energy        : -2.48668484234892E+02
-total_energy_eV     : -6.76661357840001E+03
+local_psp           : -1.18681199096331E+02
+spherical_terms     : -1.48371422443686E+01
+internal            : -2.48668535122085E+02
+'-kT*entropy'       :  5.08873107441182E-05
+total_energy        : -2.48668484234774E+02
+total_energy_eV     : -6.76661357839679E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.92626492906330E+01
+band_energy         : -2.92626492905575E+01
 Ewald energy        : -1.71889993187126E+02
 psp_core            :  1.45811374803457E+01
-xc_dc               : -3.96338108877774E+01
-spherical_terms     : -2.24418762608671E+01
+xc_dc               : -3.96338108876355E+01
+spherical_terms     : -2.24418762610848E+01
 internal            : -2.48647192146058E+02
-'-kT*entropy'       :  5.08873107441570E-05
-total_energy_dc     : -2.48647141258747E+02
-total_energy_dc_eV  : -6.76603280648342E+03
+'-kT*entropy'       :  5.08873107441182E-05
+total_energy_dc     : -2.48647141258748E+02
+total_energy_dc_eV  : -6.76603280648343E+03
 ...
 
  
@@ -746,7 +702,7 @@ total_energy_dc_eV  : -6.76603280648342E+03
           kptrlen      1.62600000E+01
             lpawu           2
          macro_uj        1
-P           mkmem           1
+P           mkmem           4
             natom           2
             nband          25
         natvshift        5
@@ -799,7 +755,6 @@ P           mkmem           1
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000
            occopt           4
--      paral_atom           0
         pawecutdg      4.00000000E+01 Hartree
          pawujrad      2.6686600000E+00 Bohr
            prtden           0
@@ -931,10 +886,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          3.2
+- Proc.   0 individual time (sec): cpu=        225.0  wall=          6.4
  
 ================================================================================
  
  Calculation completed.
-.Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         98.7  wall=         99.8
+.Delivered  10 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=        225.0  wall=          6.4
