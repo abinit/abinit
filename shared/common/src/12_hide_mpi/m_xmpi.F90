@@ -5017,51 +5017,51 @@ type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
 #endif
 end function xcomm_from_mpi_int
 
-! Skip iteration `iter` according to rank in self.
+! Skip iteration `iter` according to rank in xcomm.
 ! [root]: Rank of the proc treating iteration `iter`
 
-logical function xcomm_skip(self, iter, root)
- class(xcomm_t),intent(in) :: self
+logical function xcomm_skip(xcomm, iter, root)
+ class(xcomm_t),intent(in) :: xcomm
  integer,intent(in) :: iter
  integer,optional,intent(out) :: root
 
  integer :: root__
 
- root__ = mod(iter, self%nproc)
- xcomm_skip = root__ /= self%me
+ root__ = mod(iter, xcomm%nproc)
+ xcomm_skip = root__ /= xcomm%me
  if (present(root)) root = root__
 end function xcomm_skip
 
-subroutine xcomm_set_to_self(self)
- class(xcomm_t),intent(inout) :: self
- call self%free()
- self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
+subroutine xcomm_set_to_self(xcomm)
+ class(xcomm_t),intent(inout) :: xcomm
+ call xcomm%free()
+ xcomm%value = xmpi_comm_self; xcomm%me = 0; xcomm%nproc = 1
 end subroutine xcomm_set_to_self
 
-subroutine xcomm_set_to_null(self)
- class(xcomm_t),intent(inout) :: self
- call self%free()
- self%value = xmpi_comm_null
+subroutine xcomm_set_to_null(xcomm)
+ class(xcomm_t),intent(inout) :: xcomm
+ call xcomm%free()
+ xcomm%value = xmpi_comm_null
 end subroutine xcomm_set_to_null
 
-subroutine xcomm_free(self)
- class(xcomm_t),intent(inout) :: self
- call xmpi_comm_free(self%value)
- self%me = -1; self%nproc = 0
+subroutine xcomm_free(xcomm)
+ class(xcomm_t),intent(inout) :: xcomm
+ call xmpi_comm_free(xcomm%value)
+ xcomm%me = -1; xcomm%nproc = 0
 end subroutine xcomm_free
 
 ! Build sub-communicators in a Cartesian grid.
-subroutine xcomm_from_cart_sub(self, comm_cart, keepdim)
- class(xcomm_t),intent(out) :: self
+subroutine xcomm_from_cart_sub(xcomm, comm_cart, keepdim)
+ class(xcomm_t),intent(out) :: xcomm
  integer,intent(in) :: comm_cart
  logical,intent(in) :: keepdim(:)
  integer :: ierr
 
 #ifdef HAVE_MPI
- call MPI_CART_SUB(comm_cart, keepdim, self%value, ierr)
+ call MPI_CART_SUB(comm_cart, keepdim, xcomm%value, ierr)
 #endif
- self%me = xmpi_comm_rank(self%value)
- self%nproc = xmpi_comm_size(self%value)
+ xcomm%me = xmpi_comm_rank(xcomm%value)
+ xcomm%nproc = xmpi_comm_size(xcomm%value)
 
 end subroutine xcomm_from_cart_sub
 
@@ -5069,9 +5069,9 @@ end subroutine xcomm_from_cart_sub
 ! `nitems_per_rank(rank+1)` items and each item has length `nelem_per_item`.
 ! Final results are packed according to the rank of the processor.
 
-subroutine xcomm_prep_gatherv(self, nelem_per_item, nitems_per_rank, sendcount, recvcounts, displs)
- class(xcomm_t),intent(in) :: self
- integer,intent(in) :: nelem_per_item, nitems_per_rank(self%nproc)
+subroutine xcomm_prep_gatherv(xcomm, nelem_per_item, nitems_per_rank, sendcount, recvcounts, displs)
+ class(xcomm_t),intent(in) :: xcomm
+ integer,intent(in) :: nelem_per_item, nitems_per_rank(xcomm%nproc)
  integer,intent(out) :: sendcount
  integer, allocatable, intent(out) :: recvcounts(:), displs(:)
 
@@ -5079,34 +5079,33 @@ subroutine xcomm_prep_gatherv(self, nelem_per_item, nitems_per_rank, sendcount, 
  integer :: ii
 !----------------------------------------------------------------------
 
- ABI_MALLOC(recvcounts, (self%nproc))
- ABI_MALLOC(displs, (self%nproc))
-
- sendcount = nelem_per_item * nitems_per_rank(self%me + 1)
+ ABI_MALLOC(recvcounts, (xcomm%nproc))
+ ABI_MALLOC(displs, (xcomm%nproc))
+ sendcount = nelem_per_item * nitems_per_rank(xcomm%me + 1)
 
  recvcounts(:) = nelem_per_item * nitems_per_rank
  displs(1) = 0
- do ii=2,self%nproc
+ do ii=2,xcomm%nproc
    displs(ii) = nelem_per_item * sum(nitems_per_rank(1:ii-1))
  end do
 end subroutine xcomm_prep_gatherv
 !!***
 
 ! Debugging tool to print the hostname of the procs in the communicator
-subroutine xcomm_print_names(self)
- class(xcomm_t),intent(in) :: self
+subroutine xcomm_print_names(xcomm)
+ class(xcomm_t),intent(in) :: xcomm
 
 !Local variables-------------------
  integer :: ip, ierr
- character(20) :: my_name, names(self%nproc)
+ character(20) :: my_name, names(xcomm%nproc)
 !----------------------------------------------------------------------
 
  call xmpi_name(my_name, ierr)
- call xmpi_allgather(my_name, names, self%value, ierr)
+ call xmpi_allgather(my_name, names, xcomm%value, ierr)
 
- if (self%me == 0) then
+ if (xcomm%me == 0) then
    write(std_out, "(a5,2x,a20)")"rank", "hostname"
-   do ip=0,self%nproc-1
+   do ip=0,xcomm%nproc-1
      write(std_out, "(i5,2x,a20)")ip, trim(names(ip+1))
    end do
  end if
@@ -5114,10 +5113,9 @@ subroutine xcomm_print_names(self)
 end subroutine xcomm_print_names
 !!***
 
-! Return True if all procs in self can create a shared memory region. Cache the result.
-logical function xcomm_can_use_shmem(self) result(ok)
-
- class(xcomm_t),intent(inout) :: self
+! Return True if all procs in xcomm can create a shared memory region. Cache the result.
+logical function xcomm_can_use_shmem(xcomm) result(ok)
+ class(xcomm_t),intent(inout) :: xcomm
 
 !Local variables-------------------
  integer :: ierr, new_comm
@@ -5125,21 +5123,21 @@ logical function xcomm_can_use_shmem(self) result(ok)
 
  ok = .False.
 #ifdef HAVE_MPI
- if (self%can_use_shmem__ == - 1) then
+ if (xcomm%can_use_shmem__ == - 1) then
    ! First call --> cache result
-   call MPI_COMM_SPLIT_TYPE(self%value, MPI_COMM_TYPE_SHARED, self%me, MPI_INFO_NULL, new_comm, ierr)
-   self%can_use_shmem__ = merge(1, 0, xmpi_comm_size(new_comm) == self%nproc)
+   call MPI_COMM_SPLIT_TYPE(xcomm%value, MPI_COMM_TYPE_SHARED, xcomm%me, MPI_INFO_NULL, new_comm, ierr)
+   xcomm%can_use_shmem__ = merge(1, 0, xmpi_comm_size(new_comm) == xcomm%nproc)
    call xmpi_comm_free(new_comm)
  end if
- ok = self%can_use_shmem__ == 1
+ ok = xcomm%can_use_shmem__ == 1
 #endif
 
 end function xcomm_can_use_shmem
 !!***
 
-subroutine xcomm_allocate_shared_master(self, count, kind, info, baseptr, win)
+subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
- class(xcomm_t),intent(inout) :: self
+ class(xcomm_t),intent(inout) :: xcomm
  integer(kind=XMPI_ADDRESS_KIND), intent(in) :: count
  integer,intent(in) :: kind, info
  type(c_ptr),intent(out) :: baseptr
@@ -5151,7 +5149,7 @@ subroutine xcomm_allocate_shared_master(self, count, kind, info, baseptr, win)
  integer(kind=XMPI_ADDRESS_KIND) :: my_size
 !----------------------------------------------------------------------
 
- if (.not. self%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
+ if (.not. xcomm%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
 
  select case (kind)
  case (sp)
@@ -5163,20 +5161,16 @@ subroutine xcomm_allocate_shared_master(self, count, kind, info, baseptr, win)
  end select
 
 #ifdef HAVE_MPI
- my_size = 0; if (self%me == 0) my_size = count * disp_unit
- call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, self%value, baseptr, win, ierr)
+ my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
+ call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
                               !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
 
- if (self%me /= 0) then
-   call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
-   !print *, "my_size:", my_size
- end if
+ if (xcomm%me /= 0) call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+ if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="allocated_shared returned ierr /= 0")
  !MPI_WIN_SHARED_QUERY(WIN, RANK, SIZE, DISP_UNIT, BASEPTR, IERROR)
  !       INTEGER WIN, RANK, DISP_UNIT, IERROR
  !       INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
-
- if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="allocated_shared returned ierr /= 0")
 
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)

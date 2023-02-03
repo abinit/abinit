@@ -28,7 +28,7 @@ module m_abi_linalg
  use m_xmpi
  use m_xomp
  use m_slk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 !#ifdef HAVE_LINALG_ELPA
 ! use m_elpa
 !#endif
