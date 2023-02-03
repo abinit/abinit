@@ -2074,7 +2074,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  integer :: nbsum, npwsp, bstart, bstop, band_step, nb !my_nband ! nband_k,
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
- logical :: have_band, need_block, io_in_kcomm
+ logical :: have_band, need_block_ks, io_in_kcomm
  type(ebands_t) :: wfk_ebands
  type(hdr_type) :: wfk_hdr
  type(wfk_t) :: wfk
@@ -2231,11 +2231,10 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
    ! TODO This to be able to maximize the size of cg_work
    !call xmpi_get_vmrss(vmem_mb, gwr%comm%value)
-
    do spin=1,gwr%nsppol
-     do ik_ibz=1,gwr%nkibz
-       if (io_in_kcomm .and. .not. (any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz))) cycle
+     if (io_in_kcomm .and. .not. any(gwr%my_spins == spin)) cycle
 
+     do ik_ibz=1,gwr%nkibz
        call cwtime(cpu_green, wall_green, gflops_green, "start")
        kk_ibz = gwr%kibz(:, ik_ibz)
        npw_k = wfk_hdr%npwarr(ik_ibz)
@@ -2244,8 +2243,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        npwsp = npw_k * gwr%nspinor
 
        ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
-       need_block = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
-       color = merge(1, 0, (need_block .or. io_comm%me == master))
+       need_block_ks = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
+       color = merge(1, 0, (need_block_ks .or. io_comm%me == master))
        call xmpi_comm_split(io_comm%value, color, io_comm%me, bcast_comm, ierr)
 
        ! Find band_step that gives good compromise between memory and efficiency.
@@ -2265,7 +2264,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
          endif
 
          ! Copy my portion of cg_work to buffer_cplx (here we have dp --> sp conversion).
-         if (need_block) then
+         if (need_block_ks) then
            associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
            ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
            do band=bstart, bstop
