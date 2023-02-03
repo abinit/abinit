@@ -398,7 +398,7 @@ call wrtout(std_out,message,'COLL')
 &   ' determination of (not Hunds) J-parameter on single spin channel (experimental)'
  else if (macro_uj==4.and.nspden==2) then
    write(message,fmt='(2a)') ' macro_uj=4 and nspden=2,',&
-&   ' Hunds J determination – L. MacEnulty August 2021'
+&   ' Hunds J determination -- L. MacEnulty August 2021'
  end if
  call wrtout(ab_out,message,'COLL')
 

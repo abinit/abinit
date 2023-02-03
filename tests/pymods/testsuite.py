@@ -3587,7 +3587,7 @@ class AbinitTestSuite(object):
 
         # Rules for the test id:
         # Simple case: t01, tgw1_1
-        # test chain (no MPI): t81-t82-t83-t84, tudet_1-tudet_2-tudet_3
+        # test chain (no MPI): t81-t82-t83-t84, tlruj_1-tlruj_2-tlruj_3
         # multi-parallel tests:  t74_MPI2, t51_MPI1-t52_MPI1-t53_MPI1, tdfpt_01_MPI2 ...
 
         test_list = []
