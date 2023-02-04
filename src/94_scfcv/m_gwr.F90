@@ -2579,7 +2579,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, i
  integer,optional,intent(inout) :: wct_scbox_win
 
 !Local variables-------------------------------
- integer :: my_iqf, iq_bz, ig, gg(3)
+ integer :: my_iqf, iq_bz, ig, gg(3), idat, ii
 
 ! *************************************************************************
 
@@ -2600,7 +2600,32 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, i
    end do ! my_iqf
 
  else
-   ABI_ERROR("Not implemented yet")
+   ! This one is OK but it's supposed to be slower than the version below.
+   call xmpi_win_fence(wct_scbox_win)
+   idat = gwr%kpt_comm%me + 1
+   wct_scbox(:,idat) = czero_gw
+   call xmpi_win_fence(wct_scbox_win)
+
+   do ii=1,gwr%kpt_comm%nproc
+     call xmpi_win_fence(wct_scbox_win)
+     idat = idat_list(ii) !; if (idat > ndat) goto 10
+     if (ii /= gwr%kpt_comm%me + 1) goto 10
+     do idat=1,ndat
+     do my_iqf=1,gwr%my_nkbz
+       iq_bz = gwr%my_qbz_inds(my_iqf)
+       gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
+       associate (desc_q => desc_myqbz(my_iqf))
+       do ig=1,desc_q%npw
+         wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig) ! q + g'
+       end do
+       if (idat > ndat) cycle
+       call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, wc_scgvec, &
+                     wc_gpr(my_iqf)%buffer_cplx(:,my_ir+idat-1), wct_scbox(:,idat))
+       end associate
+     end do ! my_iqf
+     end do ! idat
+     10 call xmpi_win_fence(wct_scbox_win)
+   end do ! ii
  end if
 
 end subroutine gwr_wcq_to_scbox
@@ -4027,7 +4052,7 @@ if (.not. use_shmem_for_k) then
          end if
 
 else
-         ! use_shmem_for_k --> MPI shared window version. Only gt_scbox is being shared.
+         ! use_shmem_for_k --> MPI shared window version. Only gt_scbox is shared.
          call gwr%gk_to_scbox(sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat, idat_list, gt_gpr, gt_scbox, &
                               gt_scbox_win=gt_scbox_win)
 
@@ -4846,16 +4871,16 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, max_ndat, ndat, ii
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
- !integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- !integer :: gt_scbox_win, wct_scbox_win
+ integer(kind=XMPI_ADDRESS_KIND) :: buf_count
+ integer :: gt_scbox_win, wct_scbox_win
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol !, spin_fact
- logical :: k_is_gamma !, use_shmem_for_k, use_mpi_for_k
+ logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
- !type(c_ptr) :: void_ptr
+ type(c_ptr) :: void_ptr
 !arrays
  integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(3), gg(3), g0_q(3)
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
@@ -4864,7 +4889,8 @@ subroutine gwr_build_sigmac(gwr)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
- complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:,:,:), wct_scbox(:,:)
+ !complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:,:,:), wct_scbox(:,:)
+ complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc),allocatable :: uc_psi_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
@@ -4952,32 +4978,32 @@ if (gwr%use_supercell_for_sigma) then
 
  max_ndat = gwr%sc_batch_size
 
- !use_mpi_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
- !use_mpi_for_k = .False.
+ use_mpi_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
+ use_mpi_for_k = .False.
 
- !!use_shmem_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
- !use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc
- !use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
+ !use_shmem_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
+ use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc
+ use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
  !use_shmem_for_k = .False.
 
- !if (use_shmem_for_k) then
- !  buf_count = 2 * (sc_nfftsp * max_ndat * 2)
- !  call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
- !  call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp, max_ndat, 2])
- !  buf_count = 2 * (sc_nfftsp * max_ndat)
- !  call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, wct_scbox_win)
- !  call c_f_pointer(void_ptr, wct_scbox, shape=[sc_nfftsp, max_ndat])
- !  call xmpi_win_free(gt_scbox_win)
- !  call xmpi_win_free(wct_scbox_win)
- !end if
+ if (use_shmem_for_k) then
+   buf_count = 2 * (sc_nfftsp * max_ndat * 2)
+   call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, gt_scbox_win)
+   call c_f_pointer(void_ptr, gt_scbox, shape=[sc_nfftsp, max_ndat, 2])
+   buf_count = 2 * (sc_nfftsp * max_ndat)
+   call gwr%kpt_comm%allocate_shared_master(buf_count, gwpc, xmpi_info_null, void_ptr, wct_scbox_win)
+   call c_f_pointer(void_ptr, wct_scbox, shape=[sc_nfftsp, max_ndat])
+ end if
 
- !call wrtout(std_out, sjoin(" use_mpi_for_k:", yesno(use_mpi_for_k)))
- !call wrtout(std_out, sjoin(" use_shmem_for_k:", yesno(use_shmem_for_k)))
+ call wrtout(std_out, sjoin(" use_mpi_for_k:", yesno(use_mpi_for_k)))
+ call wrtout(std_out, sjoin(" use_shmem_for_k:", yesno(use_shmem_for_k)))
  mem_mb = 3 * (sc_nfftsp * max_ndat * gwpc) * b2Mb
  call wrtout(std_out, sjoin(" Memory for gt_scbox/wct_scbox arrays:", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
- ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor, max_ndat, 2))
- ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor, max_ndat))
+ if (.not. use_shmem_for_k) then
+   ABI_CALLOC(gt_scbox, (sc_nfft * gwr%nspinor, max_ndat, 2))
+   ABI_CALLOC(wct_scbox, (sc_nfft * gwr%nspinor, max_ndat))
+ end if
 
  ! Build plans for dense FFTs.
  call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%use_gpu_cuda)
@@ -5026,27 +5052,28 @@ if (gwr%use_supercell_for_sigma) then
 
      !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out, ab_out], reload=.True.)
 
+     kproc_list = [(ii+1, ii=1,gwr%kpt_comm%nproc)]
+     idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
+     sigma_fact = one / (sck_ucvol * scq_ucvol)
+
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
 
-     kproc_list = [(ii+1, ii=1,gwr%kpt_comm%nproc)]
-     idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
-
-     ! Loop over r in the unit cell that is now MPI-distributed in g_comm.
+     ! Loop over r in the unit cell that is now MPI-distributed inside g_comm.
      do my_ir=1, my_nr, gwr%sc_batch_size
        if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0) call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
        ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
        uc_ir = gt_gpr(1,1)%loc2gcol(my_ir)  ! FIXME: This won't work if nspinor 2
 
+       ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
+if (.not. use_shmem_for_k) then
+
        ! Insert G_k(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir).
        call gwr%gk_to_scbox(sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat, idat_list, gt_gpr, gt_scbox)
-
-       ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(gt_scbox, gwr%kpt_comm%value, gt_request, ierr)
 
        ! Insert Wc_q(g',r) in G'-space in the supercell FFT box (ndat vectors starting at my_ir)
        call gwr%wcq_to_scbox(sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, idat_list, wc_gpr, wct_scbox)
-       ! TODO: Should block using nproc in kpt_comm, scatter data and perform multiple FFTs in parallel.
        if (gwr%kpt_comm%nproc > 1) call xmpi_isum_ip(wct_scbox, gwr%kpt_comm%value, wct_request, ierr)
 
        ! G(G',r) --> G(R',r)
@@ -5058,10 +5085,33 @@ if (gwr%use_supercell_for_sigma) then
        call wt_plan%execute(wct_scbox(:,1), -1, iscale=0)
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this set of ndat r-point
-       sigma_fact = one / (sck_ucvol * scq_ucvol)
+
        gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
        gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
+
+else
+       ! use_shmem_for_k --> MPI shared window version. Only gt_scbox are wct_scbox are shared.
+       call gwr%gk_to_scbox(sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat, idat_list, gt_gpr, gt_scbox, &
+                              gt_scbox_win=gt_scbox_win)
+
+       call gwr%wcq_to_scbox(sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, idat_list, wc_gpr, wct_scbox, &
+                              wct_scbox_win=wct_scbox_win)
+
+       ! Now each proc operates on different idat entries.
+       call xmpi_win_fence(gt_scbox_win)
+       idat = gwr%kpt_comm%me + 1
+       if (idat <= ndat) then
+         call wt_plan%execute(wct_scbox(:,idat), -1, ndat=gwr%nspinor, iscale=0)
+         do ipm=1,2
+           call green_plan%execute(gt_scbox(:,idat,ipm), -1, ndat=gwr%nspinor, iscale=0)
+           gt_scbox(:,idat,ipm) = gt_scbox(:,idat,ipm) * wct_scbox(:,idat) * sigma_fact
+         end do
+       end if
+       !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+       !call xmpi_barrier(gwr%kpt_comm%value)
+       call xmpi_win_fence(gt_scbox_win)
+end if
 
        ! Integrate Sigma matrix elements in the R-supercell for fixed set of ndat r-points.
        do ikcalc=1,gwr%nkcalc
@@ -5106,8 +5156,14 @@ if (gwr%use_supercell_for_sigma) then
 
  !call wrtout(std_out, sjoin(" Maxval abs re W:", ftoa(max_abs_re_wct)))
  !call wrtout(std_out, sjoin(" Maxval abs imag W:", ftoa(max_abs_imag_wct)))
- ABI_FREE(gt_scbox)
- ABI_FREE(wct_scbox)
+ if (.not. use_shmem_for_k) then
+   ABI_FREE(gt_scbox)
+   ABI_FREE(wct_scbox)
+ else
+   call xmpi_win_free(gt_scbox_win)
+   call xmpi_win_free(wct_scbox_win)
+ end if
+
  call green_plan%free()
  call wt_plan%free()
 
