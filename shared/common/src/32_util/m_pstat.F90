@@ -48,30 +48,45 @@ module m_pstat
 !! NB: This file is only available on Linux hence one should always check the value of pstat%ok
 !! before using quantities such as vmrss_mb.
 !!
+!! Usage:
+!!
+!!   call ps%from_pid()
+!!   call ps%print([std_out])
+!!   ! reload data and print it
+!!   call ps%update()
+!!   call ps%print([std_out])
+!!
 !! SOURCE
 
  type, public :: pstat_t
 
   logical :: ok = .False.
+  ! False if stat file is not available
 
   integer :: pid = -1
+  ! Process identifier.
 
   integer :: threads = -1
-  ! number of threads
+  ! number of threads.
 
   integer :: fdsize = -1
-   ! number of file descriptor slots currently allocated
+   ! Number of file descriptor slots currently allocated
 
   real(dp) :: vmrss_mb = -one
-  ! size of memory portions. It contains the three following parts (VmRSS = RssAnon + RssFile + RssShmem)
+  ! Size of memory portions.
+  ! It contains the three following parts (VmRSS = RssAnon + RssFile + RssShmem)
 
   real(dp) :: vmpeak_mb = -one
-  ! peak virtual memory size
+  ! Peak virtual memory size
 
   real(dp) :: vmstk_mb = -one
-  ! size of stack segments
+  ! Size of stack segments
+
+  character(len=fnlen) :: filepath = ""
+  ! Path of status file
 
   character(len=500) :: iomsg = ""
+  ! Error message returned when parsing filepath
 
  contains
    procedure :: from_pid => pstat_from_pid     ! Init object from process identifier (main entry point).
@@ -90,7 +105,7 @@ contains
 !!  pstat_from_pid
 !!
 !! FUNCTION
-!!   Init object from process identifier (main entry point).
+!!   Init object from process identifier (main entry point for client code).
 !!
 !! SOURCE
 
@@ -134,15 +149,11 @@ subroutine pstat_from_file(ps, filepath)
 ! *************************************************************************
 
  ps%ok = .False.
+ ps%filepath = filepath
 
- !inquire(file=trim(filepath), exist=exist)
- !if (.not. exist) then
- !  ierr = 1; return
- !end if
- open(newunit=unit, file=trim(filepath), action="read", status='old', iostat=ierr, iomsg=ps%iomsg)
+ open(newunit=unit, file=trim(ps%filepath), action="read", status="old", iostat=ierr, iomsg=ps%iomsg)
  if (ierr /= 0) then
-   close(unit)
-   return
+   close(unit); return
  end if
 
  do
@@ -204,26 +215,31 @@ end subroutine pstat_from_file
 !!
 !! SOURCE
 
-subroutine pstat_print(ps, units, header)
+subroutine pstat_print(ps, units, header, reload)
 
- class(pstat_t),intent(in) :: ps
+ class(pstat_t),intent(inout) :: ps
  integer,intent(in) :: units(:)
  character(len=*),optional,intent(in) :: header
+ logical,optional,intent(in) :: reload
 
 !Local variables-------------------------------
  character(len=500) :: header__
  type(yamldoc_t) :: ydoc
 ! *************************************************************************
 
+ if (present(reload)) then
+   if (reload) call ps%from_file(ps%filepath)
+ end if
+
  header__ = "unknown"; if (present(header)) header__ = header
  ydoc = yamldoc_open(header__) !, width=11, real_fmt='(3f8.3)')
 
  call ydoc%add_int("pid", ps%pid)
- call ydoc%add_int("threads", ps%threads)
- call ydoc%add_int("fdsize", ps%fdsize)
- call ydoc%add_real("vmrss_mb", ps%vmrss_mb)
- call ydoc%add_real("vmpeak_mb", ps%vmpeak_mb)
- call ydoc%add_real("vmstk_mb", ps%vmstk_mb)
+ call ydoc%add_int("threads", ps%threads) !, comment="")
+ call ydoc%add_int("fdsize", ps%fdsize) !, comment="")
+ call ydoc%add_real("vmrss_mb", ps%vmrss_mb) !, comment="")
+ call ydoc%add_real("vmpeak_mb", ps%vmpeak_mb) !, comment="")
+ call ydoc%add_real("vmstk_mb", ps%vmstk_mb) !, comment="")
 
  call ydoc%write_units_and_free(units)
 
@@ -246,7 +262,7 @@ end subroutine pstat_print
 
 subroutine pstat_gather(ps, vmrss_mb, comm)
 
- class(pstat_t),intent(out) :: ps
+ class(pstat_t),intent(inout) :: ps
  real(dp),intent(out) :: vmrss_mb
  integer,intent(in) :: comm
 
@@ -257,9 +273,12 @@ subroutine pstat_gather(ps, vmrss_mb, comm)
  real_list = [ps%vmrss_mb, ps%vmpeak_mb, ps%vmstk_mb]
  !call xmpi_max_ip(real_list, comm, ierr)
 
+ ps%vmrss_mb = real_list(1)
+ ps%vmpeak_mb = real_list(2)
+ ps%vmstk_mb = real_list(3)
+
 end subroutine pstat_gather
 !!***
-
 #endif
 
 end module m_pstat

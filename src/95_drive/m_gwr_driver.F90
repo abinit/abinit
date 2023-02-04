@@ -794,10 +794,10 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      call gwr%build_sigxme()
    case ("EGEW", "EGW0", "G0EW")
      call gwr%run_energy_scf()
-   !case ("CHI0_HEAD_WINGS")
-   !  call compute_chi0_head_wings(wfk_path)
    !case ("CHI0")
    !  call compute_chi0(wfk_path)
+   !case ("CHI0_HEAD_WINGS")
+   !  call compute_chi0_head_wings(wfk_path)
    case default
      ABI_ERROR(sjoin("Invalid gwr_task:", dtset%gwr_task))
    end select

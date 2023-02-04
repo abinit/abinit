@@ -2330,15 +2330,17 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 !  Check if nkpt and nproc_spkpt match
    if(nproc_spkpt>nkpt*nsppol) then
 !    Too many proc. with respect to nkpt
-     write(msg,'(a,i0,a,i0,a,i0,2a)')&
+     write(msg,'(a,i0,a,i0,a,i0,4a)')&
       'nproc_spkpt= ',nproc_spkpt,' >= nkpt= ',nkpt,'* nsppol= ',nsppol,ch10,&
-      'The number of processors is larger than nkpt*nsppol. This is a waste. (Ignore this warning if this is not a GS run)'
+      'The number of processors is larger than nkpt*nsppol. This is a WASTE.',ch10,&
+      ' Ignore this warning if this is not a GS run'
      ABI_WARNING(msg)
    else if (mod(nkpt*nsppol,nproc_spkpt) /= 0) then
 !    nkpt not a multiple of nproc_spkpt
-     write(msg,'(a,i0,a,i0,3a)')&
+     write(msg,'(a,i0,a,i0,5a)')&
       'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_spkpt (',nproc_spkpt, ')', ch10,&
-      'The k-point parallelisation is inefficient. (Ignore this warning if this is not a GS run)'
+      'The k-point parallelisation is INEFFICIENT. ',ch10,&
+      'Ignore this warning if this is not a GS run.'
      ABI_WARNING(msg)
    end if
  end if
