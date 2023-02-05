@@ -3968,12 +3968,12 @@ subroutine gwr_build_tchi(gwr)
        call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
        itau = gwr%my_itaus(my_it)
 
-       if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out, ab_out], reload=.True.)
+       if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
 
-       if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out, ab_out], reload=.True.)
+       if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
        ! Loop over r in the unit cell that is now MPI-distributed inside g_comm.
        ! This is a bottleneck but perhaps one can take advantage of localization.
@@ -4025,7 +4025,7 @@ else
          call gwr%gk_to_scbox(sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat, gt_gpr, gt_scbox, &
                               gt_scbox_win=gt_scbox_win)
 
-         ! Now each proc operates on different idat entries.
+         ! Now each MPI proc operates on different idat entries.
          !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
          call xmpi_win_fence(gt_scbox_win)
          idat = gwr%kpt_comm%me + 1
@@ -4837,7 +4837,7 @@ subroutine gwr_build_sigmac(gwr)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, sc_size, my_ir, my_nr, iw, idat, max_ndat, ndat, ii
+ integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
@@ -4902,7 +4902,6 @@ subroutine gwr_build_sigmac(gwr)
  ! Perhaps the safest approach would be to generate the plan on the fly.
 
  sc_ngfft = gwr%g_ngfft
- sc_size = product(gwr%ngkpt)
  sc_ngfft(1:3) = gwr%ngkpt * gwr%g_ngfft(1:3)
  sc_ngfft(4:6) = sc_ngfft(1:3)
  sc_nfft = product(sc_ngfft(1:3)); sc_nfftsp = sc_nfft * gwr%nspinor
@@ -5012,7 +5011,7 @@ if (gwr%use_supercell_for_sigma) then
      call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
      itau = gwr%my_itaus(my_it)
 
-     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out, ab_out], reload=.True.)
+     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
      call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
@@ -5020,7 +5019,7 @@ if (gwr%use_supercell_for_sigma) then
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
      call gwr%get_myq_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
 
-     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out, ab_out], reload=.True.)
+     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
@@ -5063,7 +5062,7 @@ else
        call gwr%wcq_to_scbox(sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, wc_gpr, wct_scbox, &
                              wct_scbox_win=wct_scbox_win)
 
-       ! Now each proc operates on different idat entries.
+       ! Now each MPI proc operates on different idat entries.
        call xmpi_win_fence(gt_scbox_win)
        idat = gwr%kpt_comm%me + 1
        if (idat <= ndat) then
@@ -5078,7 +5077,7 @@ else
        call xmpi_win_fence(gt_scbox_win)
 end if
 
-       ! Integrate Sigma matrix elements in the R-supercell for fixed set of ndat r-points.
+       ! Integrate Sigma matrix elements in the R-supercell for ndat r-points and accumulate.
        do ikcalc=1,gwr%nkcalc
          k_is_gamma = normv(gwr%kcalc(:,ikcalc), gwr%cryst%gmet, "G") < GW_TOLQ0
          if (gwr%kpt_comm%skip(ikcalc)) cycle ! FIXME: Temporary hack till I find a better MPI algo for k-points.
@@ -5086,6 +5085,7 @@ end if
          do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
            ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
            do idat=1,ndat
+             !if (use_shmem_for_k .and. idat /= gwt%kpt_comm + 1) cycle
              ir = uc_ir + idat - 1
              cpsi_r = conjg(uc_psi_bk(ir, band, ikcalc))
              do ipm=1,2
@@ -5095,9 +5095,11 @@ end if
 
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = &
              sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) + sigc_pm(:)
-           end  do
+           end do
           end do
        end do ! ikcalc
+
+       !if (use_shmem_for_k) call xmpi_sum
 
        if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0) then
          write(msg,'(4x,3(a,i0),a)')"Sigma_c my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
@@ -5224,7 +5226,7 @@ else
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
 
      ! Integrate self-energy matrix elements in the unit cell.
-     ! Remember that Sigma is stored as (r',r) and that the second dimension MPI-distributed.
+     ! Remember that Sigma is stored as (r',r) and that the second dimension is MPI-distributed.
      do ikcalc=1,gwr%nkcalc
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          call diag_braket("T", sigc_rpr(1, ikcalc), gwr%g_nfft * gwr%nspinor, uc_psi_bk(:, band, ikcalc), sigc_pm(1))
