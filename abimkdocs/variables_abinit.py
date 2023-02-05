@@ -22936,7 +22936,7 @@ future.
 In case of electronic SCF cycle convergency problems, try to set a number of
 unoccupied bands in the buffer with [[extfpmd_nbdbuf]] input variable.
 
-  * **useextfpmd** = 1 *(Recommanded)*, the energy shift will be evaluated
+  * **useextfpmd** = 1 *(Recommended)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
 contributions will be computed with integrals over the band number.
 

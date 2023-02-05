@@ -804,6 +804,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vtrial",dtfil%fnameabo_app_pot,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vtrial,mpi_enreg,ebands=ebands)
    end if
+   
+!  EIG
+#if defined HAVE_NETCDF
+   if (dtset%prteig==2 .and. me == master) then
+     fname=trim(dtfil%fnameabo_app_eig)//'.nc'
+     call write_eig(eigen,occ,e_fermie,fname,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
+   end if
+#endif
 
    call timab(1160,2,tsec)
    call timab(1161,1,tsec)
