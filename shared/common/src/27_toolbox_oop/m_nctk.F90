@@ -2822,28 +2822,31 @@ end subroutine write_var_netcdf
 !!
 !! SOURCE
 
-subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
+subroutine write_eig(eigen,occ,fermie,filename,kptns,mband,nband,nkpt,nsppol)
 
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(in) :: nkpt,nsppol,mband
+ real(dp),intent(in) :: fermie
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+ real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: kptns(3,nkpt)
 
 !Local variables-------------------------------
 !scalars
  integer :: ncerr,ncid,ii, cmode
  integer :: xyz_id,nkpt_id,mband_id,nsppol_id
- integer :: eig_id,kpt_id,nbk_id,nbk
+ integer :: eig_id,occ_id,fermie_id,kpt_id,nbk_id,nbk
  integer :: ikpt,isppol,nband_k,band_index
  real(dp):: convrt
 !arrays
  integer :: dimEIG(3),dimKPT(2),dimNBK(2)
  integer :: count2(2),start2(2)
  integer :: count3(3),start3(3)
+ integer :: dim0(0)
  real(dp):: band(mband)
 
 ! *********************************************************************
@@ -2880,11 +2883,16 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
  dimNBK = (/ nkpt_id, nsppol_id /)
 
 !3. Define variables
-
+ call ab_define_var(ncid,dim0,fermie_id,NF90_DOUBLE,&
+& "fermie","Chemical potential","Hartree")
  call ab_define_var(ncid, dimEIG, eig_id, NF90_DOUBLE,&
 & "Eigenvalues",&
 & "Values of eigenvalues",&
 & "Hartree")
+ call ab_define_var(ncid, dimEIG, occ_id, NF90_DOUBLE,&
+& "Occupations",&
+& "Values of occupations",&
+& "Dimensionless")
  call ab_define_var(ncid, dimKPT, kpt_id, NF90_DOUBLE,"Kptns",&
 & "Positions of K-points in reciprocal space",&
 & "Dimensionless")
@@ -2907,6 +2915,9 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
    NCF_CHECK_MSG(ncerr," write variable kptns")
  end do
 
+!6 Write chemical potential
+ ncerr = nf90_put_var(ncid, fermie_id, fermie)
+ NCF_CHECK_MSG(ncerr," write variable fermie")
 
 !6 Write eigenvalues
  band_index=0
@@ -2924,6 +2935,27 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
 &     start = start3,&
 &     count = count3)
      NCF_CHECK_MSG(ncerr," write variable band")
+
+     band_index=band_index+nband_k
+   end do
+ end do
+
+!6 Write occupations
+ band_index=0
+ do isppol=1,nsppol
+   do ikpt=1,nkpt
+     nband_k=nband(ikpt+(isppol-1)*nkpt)
+     start3 = (/ 1, ikpt, isppol /)
+     count3 = (/ mband, 1, 1 /)
+     band(:)=zero
+     do ii=1,nband_k
+       band(ii)=occ(band_index+ii)
+     end do
+     ncerr = nf90_put_var(ncid, occ_id,&
+&     band,&
+&     start = start3,&
+&     count = count3)
+     NCF_CHECK_MSG(ncerr," write variable occupations")
 
      band_index=band_index+nband_k
    end do
