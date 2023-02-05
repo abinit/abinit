@@ -368,6 +368,9 @@ module m_gwr
   logical :: idle_proc = .False.
   ! True if there are idle procs i.e. if processes in the input_comm have been excluded.
 
+  !logical :: use_shmem_for_k = .False.
+  !logical :: use_mpi_for_k = .False.
+
   integer,allocatable :: bstart_ks(:,:)
    ! bstart_ks(nkcalc, nsppol)
    ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
@@ -2328,11 +2331,11 @@ subroutine gwr_build_green(gwr, free_ugb)
 
 !Local variables-------------------------------
 !scalars
- integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it
- real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_green, wall_green, gflops_green
+ integer :: my_is, my_iki, spin, ik_ibz, band, itau, ipm, il_b, npwsp, isgn, my_it, nb_occ
+ real(dp) :: f_nk, eig_nk, cpu, wall, gflops, cpu_k, wall_k, gflops_k
  character(len=500) :: msg
- complex(dp) :: gt_cfact
- type(__slkmat_t), target :: work, green
+ real(dp) :: gt_rfact
+ type(__slkmat_t), target :: work_gb, green
 !arrays
  integer :: mask_kibz(gwr%nkibz), units(2), ija(2), ijb(2)
  real(dp) :: tsec(2)
@@ -2370,59 +2373,66 @@ subroutine gwr_build_green(gwr, free_ugb)
    spin = gwr%my_spins(my_is)
    ! Loop over my k-points in the IBZ
    do my_iki=1,gwr%my_nkibz
-     call cwtime(cpu_green, wall_green, gflops_green, "start")
+     call cwtime(cpu_k, wall_k, gflops_k, "start")
      ik_ibz = gwr%my_kibz_inds(my_iki)
      associate (ugb_ks => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
      npwsp = desc_k%npw * gwr%nspinor
 
-     call ugb_ks%copy(work)
-     !call ugb_ks%change_size_blocs(work, size_blocs=, processor=)
-     !call work%copy(green, empty=.True.)
+     call ugb_ks%copy(work_gb)
+     !call ugb_ks%change_size_blocs(work_gb, size_blocs=, processor=)
+     !call work_gb%copy(green, empty=.True.)
 
      ! Init output of pzgemm in g-communicator
      call green%init(npwsp, npwsp, gwr%g_slkproc, istwfk1) ! size_blocs=[-1, col_bsize])
 
-     ! Loop over my_ntau as pzgemm is parallelized in g_comm
+     ! Loop over my_ntau as pzgemm is parallelized inside g_comm.
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
        do ipm=1,2
          ! Multiply columns by exponentials in imaginary time.
-         work%buffer_cplx = ugb_ks%buffer_cplx
+         work_gb%buffer_cplx = ugb_ks%buffer_cplx
 
-         !$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_cfact)
-         do il_b=1, work%sizeb_local(2)
-           band = work%loc2gcol(il_b)
+         !$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_rfact)
+         do il_b=1, work_gb%sizeb_local(2)
+           band = work_gb%loc2gcol(il_b)
            f_nk = qp_occ(band, ik_ibz, spin)
            eig_nk = qp_eig(band, ik_ibz, spin)
-           gt_cfact = zero
+           gt_rfact = zero
            if (ipm == 2) then
-             if (eig_nk < -tol6) gt_cfact = exp(gwr%tau_mesh(itau) * eig_nk)
+             if (eig_nk < -tol6) gt_rfact = exp(gwr%tau_mesh(itau) * eig_nk)
            else
-             if (eig_nk > tol6) gt_cfact = exp(-gwr%tau_mesh(itau) * eig_nk)
+             if (eig_nk > tol6) gt_rfact = exp(-gwr%tau_mesh(itau) * eig_nk)
            end if
 
-           work%buffer_cplx(:,il_b) = work%buffer_cplx(:,il_b) * sqrt(real(gt_cfact))
+           !work_gb%buffer_cplx(:,il_b) = work_gb%buffer_cplx(:,il_b) * sqrt(gt_rfact)
+           call xscal(npwsp, real(sqrt(gt_rfact), kind=gwpc), work_gb%buffer_cplx(:,il_b), 1)
          end do ! il_b
 
          ! Build G(g,g',ipm) with PZGEMM
          isgn = merge(1, -1, ipm == 2)
+         ija = [1, 1]; ijb = [1, 1]
          ! TODO: optimize
-         ija = [1,1]; ijb=[1, 1]
-         call slk_pgemm("N", "C", work, isgn * cone_gw, work, czero_gw, green, ija=ija, ijb=ijb)
+         !nb_occ = -1
+         !if (ipm == 1) then
+         !  ija = [1, nb_occ]; ijb = ija
+         !else
+         !  ija = [nb_occ+1, gwr%ugb_nband]; ijb = ija
+         !end if
+         call slk_pgemm("N", "C", work_gb, isgn * cone_gw, work_gb, czero_gw, green, ija=ija, ijb=ijb)
 
-         ! Redistribute data from gtau_comm to g_comm.
+         ! Redistribute data.
          call gwr%gt_kibz(ipm, ik_ibz, itau, spin)%take_from(green)
        end do ! ipm
      end do ! itau
 
-     call work%free()
+     call work_gb%free()
      call green%free()
      ! Free wavefunctions if asked for.
      if (free_ugb) call ugb_ks%free()
 
      if (my_iki < LOG_MODK .or. mod(my_iki, LOG_MODK) == 0) then
        write(msg,'(4x,3(a,i0),a)')"G_ikbz [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
-       call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (my_iki == LOG_MODK) call wrtout(std_out, " ...")
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (my_iki == LOG_MODK) call wrtout(std_out, " ...")
      end if
      end associate
    end do ! my_iki
@@ -2465,12 +2475,16 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
 
 !Local variables-------------------------------
  integer :: my_ikf, ik_bz, ig, ipm, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc)
+ real(dp) :: cpu, wall, gflops
 
 ! *************************************************************************
+
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Take the union of (k,g') for k in the BZ.
  ! Note gwr%ngkpt instead of gwr%ngqpt.
  if (.not. present(gt_scbox_win)) then
+
    gt_scbox = czero_gw
    do my_ikf=1,gwr%my_nkbz
      ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
@@ -2486,7 +2500,6 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
    end do ! my_ikf
 
  else
-
    ! Each MPI proc operates on a different idat vector at each epoch
    idat_list = cshift([(ii, ii=1,gwr%kpt_comm%nproc)], shift=-gwr%kpt_comm%me)
 
@@ -2519,6 +2532,8 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
      call xmpi_win_fence(gt_scbox_win)
    end do ! iepoch
  end if
+
+ call cwtime_report(" gwr_gk_to_scbox:", cpu, wall, gflops)
 
 end subroutine gwr_gk_to_scbox
 !!***
@@ -2559,6 +2574,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
  ! Note gwr%ngqpt instead of gwr%ngkpt.
 
  if (.not. present(wct_scbox_win)) then
+
    wct_scbox = czero_gw
    do my_iqf=1,gwr%my_nqbz
      iq_bz = gwr%my_qbz_inds(my_iqf)
@@ -2573,7 +2589,6 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
    end do ! my_iqf
 
  else
-
    ! Each MPI proc operates on a different idat vector at each epoch
    idat_list = cshift([(ii, ii=1,gwr%kpt_comm%nproc)], shift=-gwr%kpt_comm%me)
 
@@ -3434,7 +3449,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    end do
  end do
 
- ! And now perform inhomogeneous FT in parallel.
+ ! Perform inhomogeneous FT in parallel.
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
    do my_iqi=1,gwr%my_nqibz
@@ -3451,7 +3466,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
      it0 = gwr%my_itaus(1)
      loc1_size = mats(it0)%sizeb_local(1)
      loc2_size = mats(it0)%sizeb_local(2)
-     !
+
      ! batch_size in terms of columns
      ! TODO: Determine batch_size automatically to avoid going OOM
      !batch_size = 1
@@ -3478,11 +3493,6 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
 
        ! Compute contribution to itau matrix
        do idat=1,ndat
-         !do ig1=1,mats(it0)%sizeb_local(1)
-         ! do itau=1,gwr%ntau
-         !   glob_cwork(itau, ig1, idat) = dot_product(wgt_globmy(itau, :), cwork_myit(:, ig1, idat))
-         ! end do
-         !end do
          call ZGEMM("N", "N", gwr%ntau, loc1_size, gwr%my_ntau, cone, &
                     wgt_globmy, gwr%ntau, cwork_myit(1,1,idat), gwr%my_ntau, czero, glob_cwork(1,1,idat), gwr%ntau)
          !call xmpi_isum_ip(glob_cwork(:,:,idat), gwr%tau_comm%value, requests(idat), ierr)
@@ -3750,22 +3760,6 @@ subroutine gwr_print(gwr, units, header)
  end do
 
  call ydoc%write_units_and_free(units)
-
- !if (gwr%dtset%prtvol >= 30) then
- !  do my_is=1,gwr%my_nspins
- !    spin = gwr%my_spins(my_is)
- !    do my_it=1,gwr%my_ntau
- !      itau = gwr%my_itaus(my_it)
- !      do my_iki=1,gwr%my_nkibz
- !        ik_ibz = gwr%my_kibz_inds(my_iki)
- !        associate (gt => gwr%gt_kibz(:, ik_ibz, itau, spin))
- !        call gt(1)%print(header=sjoin("gt_kibz(1) for ik_ibz:", itoa(ik_ibz)), unit=unt)
- !        call gt(2)%print(header=sjoin("gt_kibz(2) for ik_ibz:", itoa(ik_ibz)), unit=unt)
- !        end associate
- !      end do
- !    end do
- !  end do
- !end if
 
 end subroutine gwr_print
 !!***
@@ -4108,6 +4102,7 @@ end if
              gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx(:, ig2 + idat) * tchi_rfact
            end do
            !call gwr%tchi_qibz(iq_ibz, itau, spin)%scale_rows(ig2, ndat, tchi_rfact)
+           !call xscal(npwsp, real(sqrt(gt_rfact), kind=gwpc), work_gb%buffer_cplx(:,il_b), 1)
          end do ! ig2
 
          call uplan_q%free()
@@ -5011,7 +5006,7 @@ if (gwr%use_supercell_for_sigma) then
      call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
      itau = gwr%my_itaus(my_it)
 
-     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
+     !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
      call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
@@ -5019,7 +5014,7 @@ if (gwr%use_supercell_for_sigma) then
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
      call gwr%get_myq_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
 
-     if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
+     !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
@@ -5079,8 +5074,8 @@ end if
 
        ! Integrate Sigma matrix elements in the R-supercell for ndat r-points and accumulate.
        do ikcalc=1,gwr%nkcalc
-         k_is_gamma = normv(gwr%kcalc(:,ikcalc), gwr%cryst%gmet, "G") < GW_TOLQ0
          if (gwr%kpt_comm%skip(ikcalc)) cycle ! FIXME: Temporary hack till I find a better MPI algo for k-points.
+         k_is_gamma = normv(gwr%kcalc(:,ikcalc), gwr%cryst%gmet, "G") < GW_TOLQ0
 
          do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
            ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
