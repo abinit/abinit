@@ -21,7 +21,7 @@
 module m_nvtx_data
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
-  use m_nvtx, only : nvtxStartRange, nvtxEndRange
+  use m_nvtx, only : nvtxStartRange, nvtxEndRange, nvtxProfilerStart, nvtxProfilerStop
 #endif
 
   implicit none
