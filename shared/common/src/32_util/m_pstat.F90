@@ -139,7 +139,7 @@ end subroutine pstat_from_pid
 subroutine pstat_from_file(ps, filepath)
 
 !Arguments ------------------------------------
- class(pstat_t),intent(out) :: ps
+ class(pstat_t),intent(inout) :: ps
  character(len=*),intent(in) :: filepath
 
 !Local variables-------------------------------
@@ -157,7 +157,7 @@ subroutine pstat_from_file(ps, filepath)
  end if
 
  do
-   read(unit, "(a)", iostat=ierr, end=10) line
+   read(unit, "(a)", iostat=ierr, end=10, iomsg=ps%iomsg) line
    if (ierr > 0) then ! EOF
      close(unit); return
    end if
@@ -173,7 +173,7 @@ subroutine pstat_from_file(ps, filepath)
    if (index(line, "VmStk:") == 1) call get_mem_mb(line, ps%vmstk_mb)
  end do
 
-10  close(unit)
+10 close(unit)
   ps%ok = .True.
 
 contains
@@ -240,6 +240,7 @@ subroutine pstat_print(ps, units, header, reload)
  call ydoc%add_real("vmrss_mb", ps%vmrss_mb) !, comment="")
  call ydoc%add_real("vmpeak_mb", ps%vmpeak_mb) !, comment="")
  call ydoc%add_real("vmstk_mb", ps%vmstk_mb) !, comment="")
+ if (len_trim(ps%iomsg) > 0) call ydoc%add_string("iomsg", trim(ps%iomsg))
 
  call ydoc%write_units_and_free(units)
 
