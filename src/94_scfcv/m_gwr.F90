@@ -2488,6 +2488,8 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
    end do ! my_ikf
 
  else
+
+#if 1
    ! This one is OK but it's supposed to be slower than the version below.
    call xmpi_win_fence(gt_scbox_win)
    idat = gwr%kpt_comm%me + 1
@@ -2518,33 +2520,39 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
      10 call xmpi_win_fence(gt_scbox_win)
    end do ! ii
 
+#else
    ! This one is buggy but it's supposed to be the most efficient one.
-   !do ii=1,gwr%kpt_comm%nproc
-   !  !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-   !  call xmpi_win_fence(gt_scbox_win)
-   !  idat = idat_list(ii); if (idat > ndat) goto 10
-   !  if (ii == 1) then
-   !    do ipm=1,2
-   !      gt_scbox(:,idat,ipm) = czero_gw
-   !    end do
-   !  end if
+   do ii=1,gwr%kpt_comm%nproc
+     !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+     !call xmpi_barrier(gwr%kpt_comm%value)
+     call xmpi_win_fence(gt_scbox_win)
+     idat = idat_list(ii)
+     !write(std_err, *)" me, epoch, idat", gwr%kpt_comm%me, ii, idat
+     if (idat > ndat) goto 10
+     if (ii == 1) then
+       do ipm=1,2
+         gt_scbox(:,idat,ipm) = czero_gw
+       end do
+     end if
 
-   !  do my_ikf=1,gwr%my_nkbz
-   !    ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt); desc_k => desc_mykbz(my_ikf)
-   !    do ig=1,desc_k%npw
-   !      green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig) ! k+g
-   !    end do
-   !    !if (idat > ndat) cycle
-   !    do ipm=1,2
-   !      call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
-   !                    gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir+idat-1), gt_scbox(:,idat,ipm))
-   !    end do
-   !  end do ! my_ikf
-   !  !end do ! idat
-   !  10 call xmpi_barrier(gwr%kpt_comm%value)
-   !  !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
-   !  call xmpi_win_fence(gt_scbox_win)
-   !end do ! ii
+     do my_ikf=1,gwr%my_nkbz
+       ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
+       associate (desc_k => desc_mykbz(my_ikf))
+       do ig=1,desc_k%npw
+         green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig) ! k+g
+       end do
+       do ipm=1,2
+         call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
+                       gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir+idat-1), gt_scbox(:,idat,ipm))
+       end do
+       end associate
+     end do ! my_ikf
+     10 call xmpi_barrier(gwr%kpt_comm%value)
+     !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(gt_scbox)
+     call xmpi_win_fence(gt_scbox_win)
+   end do ! ii
+   !stop
+#endif
  end if
 
 end subroutine gwr_gk_to_scbox
@@ -2583,7 +2591,8 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, i
 
 ! *************************************************************************
 
- ! Take the union of (q,g') for q in the BZ. Note ngqpt instead of ngkpt.
+ ! Take the union of (q,g') for q in the BZ.
+ ! Note gwr%ngqpt instead of gwr%ngkpt.
 
  if (.not. present(wct_scbox_win)) then
    wct_scbox = czero_gw
@@ -2600,6 +2609,8 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, i
    end do ! my_iqf
 
  else
+
+#if 1
    ! This one is OK but it's supposed to be slower than the version below.
    call xmpi_win_fence(wct_scbox_win)
    idat = gwr%kpt_comm%me + 1
@@ -2626,6 +2637,36 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, i
      end do ! idat
      10 call xmpi_win_fence(wct_scbox_win)
    end do ! ii
+
+#else
+   ! This one is buggy but it's supposed to be the most efficient one.
+   do ii=1,gwr%kpt_comm%nproc
+     !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(wct_scbox)
+     !call xmpi_barrier(gwr%kpt_comm%value)
+     call xmpi_win_fence(wct_scbox_win)
+     idat = idat_list(ii)
+     !write(std_err, *)" me, epoch, idat", gwr%kpt_comm%me, ii, idat
+     if (idat > ndat) goto 10
+     if (ii == 1) then
+       wct_scbox(:,idat) = czero_gw
+     end if
+
+     do my_iqf=1,gwr%my_nkbz
+       iq_bz = gwr%my_qbz_inds(my_iqf)
+       gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
+       associate (desc_q => desc_myqbz(my_iqf))
+       do ig=1,desc_q%npw
+         wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig) ! q + g'
+       end do
+       call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, wc_scgvec, &
+                     wc_gpr(my_iqf)%buffer_cplx(:,my_ir+idat-1), wct_scbox(:,idat))
+       end associate
+     end do ! my_iqf
+     10 call xmpi_barrier(gwr%kpt_comm%value)
+     !IF (.not. MPI_ASYNC_PROTECTS_NONBLOCKING) CALL MPI_F_SYNC_REG(wct_scbox)
+     call xmpi_win_fence(wct_scbox_win)
+   end do ! ii
+#endif
  end if
 
 end subroutine gwr_wcq_to_scbox
@@ -3989,6 +4030,10 @@ subroutine gwr_build_tchi(gwr)
    mem_mb = sum(slk_array_locmem_mb(chiq_gpr))
    call wrtout(std_out, sjoin(' Local memory for chiq_gpr: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
+   kproc_list = [(ii, ii=1,gwr%kpt_comm%nproc)]
+   idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
+   !write(std_err, *)" me, idat_list", gwr%kpt_comm%me, idat_list
+
    ! Loop over my spins and my taus.
    do my_is=1,gwr%my_nspins
      spin = gwr%my_spins(my_is)
@@ -4008,9 +4053,6 @@ subroutine gwr_build_tchi(gwr)
        ! Also, one can save all the FFTs in a matrix G(mnfft * ndat, my_nkbz) multiply by the e^{-ikr} phase
        ! and then use zgemm to compute Out(r,L) = [e^{-ikr}G_k(r)] e^{-ikL} with precomputed e^{-iLk} phases.
        my_nr = gt_gpr(1,1)%sizeb_local(2)
-
-       kproc_list = [(ii+1, ii=1,gwr%kpt_comm%nproc)]
-       idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
 
        do my_ir=1, my_nr, gwr%sc_batch_size
          ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
@@ -5009,6 +5051,10 @@ if (gwr%use_supercell_for_sigma) then
  call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%use_gpu_cuda)
  call wt_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat  , gwr%dtset%use_gpu_cuda)
 
+ kproc_list = [(ii, ii=1,gwr%kpt_comm%nproc)]
+ idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
+ sigma_fact = one / (sck_ucvol * scq_ucvol)
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
 
@@ -5052,10 +5098,6 @@ if (gwr%use_supercell_for_sigma) then
 
      !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out, ab_out], reload=.True.)
 
-     kproc_list = [(ii+1, ii=1,gwr%kpt_comm%nproc)]
-     idat_list = cshift(kproc_list, shift=-gwr%kpt_comm%me)
-     sigma_fact = one / (sck_ucvol * scq_ucvol)
-
      my_nr = gt_gpr(1,1)%sizeb_local(2)
      ABI_CHECK(my_nr == wc_gpr(1)%sizeb_local(2), "my_nr != wc_gpr(1)%sizeb_local(2)")
 
@@ -5085,7 +5127,6 @@ if (.not. use_shmem_for_k) then
        call wt_plan%execute(wct_scbox(:,1), -1, iscale=0)
 
        ! Use gt_scbox to store GW (R',r, +/- i tau) for this set of ndat r-point
-
        gt_scbox(:,:,1) = gt_scbox(:,:,1) * wct_scbox(:,:) * sigma_fact
        gt_scbox(:,:,2) = gt_scbox(:,:,2) * wct_scbox(:,:) * sigma_fact
        !print *, "Maxval abs imag G:", maxval(abs(aimag(gt_scbox)))
@@ -5093,10 +5134,10 @@ if (.not. use_shmem_for_k) then
 else
        ! use_shmem_for_k --> MPI shared window version. Only gt_scbox are wct_scbox are shared.
        call gwr%gk_to_scbox(sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat, idat_list, gt_gpr, gt_scbox, &
-                              gt_scbox_win=gt_scbox_win)
+                            gt_scbox_win=gt_scbox_win)
 
        call gwr%wcq_to_scbox(sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, idat_list, wc_gpr, wct_scbox, &
-                              wct_scbox_win=wct_scbox_win)
+                             wct_scbox_win=wct_scbox_win)
 
        ! Now each proc operates on different idat entries.
        call xmpi_win_fence(gt_scbox_win)
@@ -6760,7 +6801,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  ABI_FREE(ur_prod)
  ABI_FREE(rhotwg)
  ABI_FREE(u_gbound)
-
  call vkbr_free(vkbr)
  ABI_FREE(vkbr)
 
@@ -6883,7 +6923,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  type(littlegroup_t) :: ltg_k
  type(desc_t),pointer :: desc_ki
 !arrays
- integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18)
+ integer :: g0(3), gmax(3), spinor_padx(2,4), u_ngfft(18), work_ngfft(18), units(2)
  integer,allocatable :: gbound_kcalc(:,:), gvec_x(:,:), gbound_x(:,:), kg_k(:,:), gbound_ksum(:,:)
  real(dp) :: ksum(3), kk_ibz(3), kgw(3), kgw_m_ksum(3), qq_bz(3), tsec(2) !, kk_bz(3), q0(3) !, spinrot_kbz(4), spinrot_kgw(4)
  real(dp),contiguous, pointer :: ks_eig(:,:,:), qp_eig(:,:,:), qp_occ(:,:,:), cg2_ptr(:,:) ! cg1_ptr(:,:),
@@ -6901,6 +6941,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
  call timab(1920, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
+ units = [std_out, ab_out]
 
  nsppol = gwr%nsppol; nspinor = gwr%nspinor; cryst => gwr%cryst; dtset => gwr%dtset
  nsig_ab = nspinor ** 2
@@ -6919,17 +6960,17 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  ABI_FREE(Sigcij_tab)
 
  if (only_diago) then
-   call wrtout([std_out, ab_out], " Computing diagonal matrix elements of Sigma_x", pre_newlines=1)
+   call wrtout(units, " Computing diagonal matrix elements of Sigma_x", pre_newlines=1)
  else
-   call wrtout([std_out, ab_out], " Computing diagonal + off-diagonal matrix elements of Sigma_x", pre_newlines=1)
+   call wrtout(units, " Computing diagonal + off-diagonal matrix elements of Sigma_x", pre_newlines=1)
  end if
 
  ks_eig => gwr%ks_ebands%eig
  if (gwr%scf_iteration == 1) then
-   call wrtout([std_out, ab_out], " Using KS orbitals and KS energies...", newlines=1, do_flush=.True.)
+   call wrtout(units, " Using KS orbitals and KS energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
  else
-   call wrtout([std_out, ab_out], " Using KS orbitals and QP energies...", newlines=1, do_flush=.True.)
+   call wrtout(units, " Using KS orbitals and QP energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
  end if
 
@@ -7332,7 +7373,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  ! Compute QP results. Done usually when gwr_task == G0v i.e. Hartree-Fock with KS states.
  compute_qp__ = .False.; if (present(compute_qp)) compute_qp__ = compute_qp
  if (compute_qp__ .and. gwr%comm%me == 0) then
-   call write_notations([std_out, ab_out])
+   call write_notations(units)
  end if
 
  call cwtime_report(" gwr_build_sigxme:", cpu_all, wall_all, gflops_all)
