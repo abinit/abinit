@@ -69,12 +69,25 @@ module m_nvtx
        import:: nvtxEventAttributes
        type(nvtxEventAttributes):: event
      end subroutine nvtxRangePushEx
+
   end interface nvtxRangePush
 
   interface nvtxRangePop
      subroutine nvtxRangePop() bind(C, name='nvtxRangePop')
      end subroutine nvtxRangePop
   end interface nvtxRangePop
+
+  interface
+
+    ! start profiling
+    subroutine nvtxProfilerStart() bind(C, name='cudaProfilerStart')
+    end subroutine nvtxProfilerStart
+
+    ! stop profiling
+    subroutine nvtxProfilerStop() bind(C, name='cudaProfilerStop')
+    end subroutine nvtxProfilerStop
+
+  end interface
 
 contains
 
