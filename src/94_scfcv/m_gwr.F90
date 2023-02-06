@@ -211,7 +211,7 @@ module m_gwr
    ! Index of g=0 in gvec.
 
    logical :: kin_sorted
-   ! True if gvec is sorted by |q+g|^2/2
+   ! True if gvec are sorted by |q+g|^2/2
 
    integer,allocatable :: gvec(:,:)
    ! (3, npw)
@@ -221,6 +221,11 @@ module m_gwr
    integer,allocatable :: gbound(:,:)
    ! (2*mgfft+8, 2)
    ! sphere boundary info for zero-padded FFT
+
+   integer,allocatable :: g2box(:)
+   ! (npw)
+
+   integer :: cached_sc_ngfft(6) = -1
 
    complex(gwpc),allocatable :: vc_sqrt(:)
    ! (npw)
@@ -234,6 +239,9 @@ module m_gwr
    ! Initialize the object
 
    procedure :: copy => desc_copy
+   ! Copy object.
+
+   procedure :: to_scbox => desc_to_scbox
    ! Copy object.
 
    procedure :: get_vc_sqrt => desc_get_vc_sqrt
@@ -2467,8 +2475,8 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
  class(gwr_t),target,intent(in) :: gwr
  integer,intent(in) :: sc_ngfft(18)
  integer,intent(out) :: green_scgvec(3, gwr%green_mpw)
- type(desc_t),intent(in) :: desc_mykbz(gwr%my_nkbz)
-type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
+ type(desc_t),intent(inout) :: desc_mykbz(gwr%my_nkbz)
+ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
  integer,intent(in) :: my_ir, ndat
  complex(gwpc),intent(out) :: gt_scbox(product(sc_ngfft(4:6))*gwr%nspinor, gwr%sc_batch_size, 2)
  !complex(gwpc),intent(out) :: gt_scbox(:,:,:)
@@ -2489,17 +2497,23 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
 
    gt_scbox = czero_gw
    do my_ikf=1,gwr%my_nkbz
-     ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
+     ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:,ik_bz) * gwr%ngkpt)
+#if 1
+     do ipm=1,2
+       call desc_mykbz(my_ikf)%to_scbox(gwr%kbz(:,ik_bz), gwr%ngkpt, sc_ngfft, gwr%nspinor*ndat, &
+                                        gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir), gt_scbox(:,:,ipm))
+     end do
+#else
      associate (desc_k => desc_mykbz(my_ikf))
      do ig=1,desc_k%npw
        green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)  ! k+g
      end do
-     !call desc_k%gsph2box(sc_ngfft, gwr%nkpt)
      do ipm=1,2
        call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor*ndat, green_scgvec, &
                      gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir), gt_scbox(:,:,ipm))
      end do
      end associate
+#endif
    end do ! my_ikf
 
  else
@@ -2518,6 +2532,12 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
 
      do my_ikf=1,gwr%my_nkbz
        ik_bz = gwr%my_kbz_inds(my_ikf); gg = nint(gwr%kbz(:, ik_bz) * gwr%ngkpt)
+#if 1
+       do ipm=1,2
+         call desc_mykbz(my_ikf)%to_scbox(gwr%kbz(:,ik_bz), gwr%ngkpt, sc_ngfft, gwr%nspinor * ndat1, &
+                                          gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir+idat-1), gt_scbox(:,idat,ipm))
+       end do
+#else
        associate (desc_k => desc_mykbz(my_ikf))
        do ig=1,desc_k%npw
          green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig) ! k+g
@@ -2527,6 +2547,7 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
                        gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir+idat-1), gt_scbox(:,idat,ipm))
        end do
        end associate
+#endif
      end do ! my_ikf
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
@@ -2562,7 +2583,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
  class(gwr_t),target,intent(in) :: gwr
  integer,intent(in) :: sc_ngfft(18)
  integer,intent(out) :: wc_scgvec(3, gwr%tchi_mpw)
- type(desc_t),intent(in) :: desc_myqbz(gwr%my_nqbz)
+ type(desc_t),intent(inout) :: desc_myqbz(gwr%my_nqbz)
  type(__slkmat_t),intent(in) :: wc_gpr(gwr%my_nqbz)
  integer,intent(in) :: my_ir, ndat
  complex(gwpc),intent(out) :: wct_scbox(product(sc_ngfft(4:6))*gwr%nspinor, gwr%sc_batch_size)
@@ -3679,7 +3700,98 @@ subroutine desc_copy(in_desc, new_desc)
  call alloc_copy(in_desc%gbound, new_desc%gbound)
  if (allocated(in_desc%vc_sqrt)) call alloc_copy(in_desc%vc_sqrt, new_desc%vc_sqrt)
 
+ !if (allocated(in_desc%g2box)) then
+ !  call alloc_copy(in_desc%g2box, new_desc%g2box)
+ !  new_desc%cached_sc_ngfft = in_desc%cached_sc_ngfft
+ !end if
+
 end subroutine desc_copy
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/desc_to_scbox
+!! NAME
+!! desc_to_scbox
+!!
+!! FUNCTION
+!! Insert cg_k array defined on the k-centered g-sphere with npw vectors inside the FFT box.
+!! The main difference wrt to sphere is that cfft is not initialized to zero. See notes below.
+!!
+!! INPUTS
+!! sc_ngfft:
+!!   n1,n2,n3=physical dimension of the FFT box
+!!   n4,n5,n6=memory dimension of cfft
+!! npw=number of G vectors in basis at this k point
+!! ndat=number of items to process
+!! cg(npw*ndat)= contains values for npw G vectors in basis sphere
+!!
+!! OUTPUT
+!! cfft(n4,n5,n6*ndat) = array on FFT box filled with cg data
+!!      Note that cfft is intent(inout) so that we can add contributions from different k-points.
+!!
+!! SOURCE
+
+subroutine desc_to_scbox(desc, kk, ngkpt, sc_ngfft, ndat, cg, cfft)
+
+!Arguments ------------------------------------
+!scalars
+ class(desc_t),intent(inout) :: desc
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: ngkpt(3)
+ integer,intent(in) :: sc_ngfft(6), ndat
+!arrays
+ complex(gwpc),intent(in) :: cg(desc%npw, ndat)
+ complex(gwpc),intent(inout) :: cfft(sc_ngfft(4)*sc_ngfft(5)*sc_ngfft(6),ndat)
+
+!Local variables-------------------------------
+integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
+ logical :: compute_mapping
+ real(dp) :: tsec(2) !, cpu, wall, gflops
+ !character(len=500) :: msg
+
+! *************************************************************************
+
+ call timab(1931, 1, tsec)
+
+ n1 = sc_ngfft(1); n2 = sc_ngfft(2); n3 = sc_ngfft(3)
+ n4 = sc_ngfft(4); n5 = sc_ngfft(5); n6 = sc_ngfft(6)
+ gg = nint(kk * ngkpt)
+
+ compute_mapping = .not. allocated(desc%g2box) .or. &
+                    any(desc%cached_sc_ngfft /= sc_ngfft(1:6))
+ !compute_mapping = .True.
+
+ if (compute_mapping) then
+   ABI_REMALLOC(desc%g2box, (desc%npw))
+   desc%cached_sc_ngfft = sc_ngfft(1:6)
+   do ipw=1,desc%npw
+     kg = gg + ngkpt * desc%gvec(:,ipw)  ! k+g
+     i1 = modulo(kg(1), n1) !+ 1
+     i2 = modulo(kg(2), n2) !+ 1
+     i3 = modulo(kg(3), n3) !+ 1
+     desc%g2box(ipw) = 1 + i1 + n4*(i2+i3*n5)
+     !desc%g2box(ipw) = i1 + n1*(i2+i3*n2)
+   end do
+ end if
+
+ ! Insert cg into cfft
+!$OMP PARALLEL DO PRIVATE(i1, i2, i3) IF (ndat > 1)
+ do idat=1,ndat
+   do ipw=1,desc%npw
+     !if (any(kg_k(:,ipw) > sc_ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(sc_ngfft(1:3)-1)/2) ) then
+     !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
+     !  ABI_ERROR(msg)
+     !end if
+     ifft = desc%g2box(ipw)
+     cfft(ifft,idat) = cg(ipw,idat)
+     !cfft_ptr(i1,i2,i3,idat) = cg(ipw,idat)
+   end do
+ end do
+
+ call timab(1931, 2, tsec)
+
+end subroutine desc_to_scbox
 !!***
 
 !----------------------------------------------------------------------
@@ -3702,6 +3814,8 @@ subroutine desc_free(desc)
  ABI_SFREE(desc%gvec)
  ABI_SFREE(desc%gbound)
  ABI_SFREE(desc%vc_sqrt)
+ ABI_SFREE(desc%g2box)
+ desc%cached_sc_ngfft = -1
 
 end subroutine desc_free
 !!***
@@ -3970,12 +4084,12 @@ subroutine gwr_build_tchi(gwr)
        call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
        itau = gwr%my_itaus(my_it)
 
-       if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
+       !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
        ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
        call gwr%get_myk_green_gpr(itau, spin, desc_mykbz, gt_gpr)
 
-       if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
+       !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
        ! Loop over r in the unit cell that is now MPI-distributed inside g_comm.
        ! This is a bottleneck but perhaps one can take advantage of localization.
@@ -6276,7 +6390,7 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
    end do
  end do
 
- call timab(1931, 1, tsec)
+ call timab(1931, 2, tsec)
 
 end subroutine gsph2box
 !!***
