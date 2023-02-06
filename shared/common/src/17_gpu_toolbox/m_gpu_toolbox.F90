@@ -44,6 +44,36 @@ module m_gpu_toolbox
 #ifdef HAVE_FC_ISO_C_BINDING
 #if defined HAVE_GPU_CUDA
 
+  ! mirroring cuda enum cudaMemoryAdvise usually defined in
+  ! /usr/local/cuda/targets/x86_64-linux/include/driver_types.h
+  !
+  ! to be used as 3rd arg of gpu_memory_advise_f
+  !
+  ! I didn't find a clean way of using an existing enum defined in C
+  ! without redefining it in fortran
+  ! I didn't found a way to do it through iso_c_binding, strange...
+  ! It means this enum will have to be updated if ever the C defined enum
+  ! changes.
+  enum, bind(c)
+    ! Data will mostly be read and only occassionally be written to
+    enumerator :: CUDA_MEM_ADVISE_SET_READ_MOSTLY          = 1
+
+    ! Undo the effect of ::cudaMemAdviseSetReadMostly
+    enumerator :: CUDA_MEM_ADVISE_UNSET_READ_MOSTLY        = 2
+
+    ! Set the preferred location for the data as the specified device
+    enumerator :: CUDA_MEM_ADVISE_SET_PREFERRED_LOCATION   = 3
+
+    ! Clear the preferred location for the data
+    enumerator :: CUDA_MEM_ADVISE_UNSET_PREFERRED_LOCATION = 4
+
+    ! Data will be accessed by the specified device, so prevent page faults as much as possible
+    enumerator :: CUDA_MEM_ADVISE_SET_ACCESSED_BY          = 5
+
+    ! Let the Unified Memory subsystem decide on the page faulting policy for the specified device
+    enumerator :: CUDA_MEM_ADVISE_UNSET_ACCESSED_BY        = 6
+  end enum
+
   interface
 
     !  integer(C_INT) function cuda_func() bind(C)
@@ -69,6 +99,15 @@ module m_gpu_toolbox
       integer(kind=C_SIZE_T),  value :: count
       integer(kind=C_INT32_T), value :: deviceId
     end subroutine gpu_data_prefetch_async_f
+
+    subroutine gpu_memory_advise_f(dev_ptr, count, advice, deviceId) bind(c, name='gpu_memory_advise_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                       value :: dev_ptr
+      integer(kind=C_SIZE_T),            value :: count
+      integer(kind=C_INT),               value :: advice
+      integer(kind=C_INT32_T),           value :: deviceId
+    end subroutine gpu_memory_advise_f
 
   end interface
 
