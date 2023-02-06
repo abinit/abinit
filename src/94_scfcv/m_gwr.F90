@@ -2605,6 +2605,11 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
    wct_scbox = czero_gw
    do my_iqf=1,gwr%my_nqbz
      iq_bz = gwr%my_qbz_inds(my_iqf)
+
+#if 1
+       call desc_myqbz(my_iqf)%to_scbox(gwr%qbz(:,iq_bz), gwr%ngqpt, sc_ngfft, gwr%nspinor*ndat, &
+                                        wc_gpr(my_iqf)%buffer_cplx(1,my_ir), wct_scbox)
+#else
      gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
      associate (desc_q => desc_myqbz(my_iqf))
      do ig=1,desc_q%npw
@@ -2613,6 +2618,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
      call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, wc_scgvec, &
                    wc_gpr(my_iqf)%buffer_cplx(1,my_ir), wct_scbox)
      end associate
+#endif
    end do ! my_iqf
 
  else
@@ -2627,6 +2633,10 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
 
      do my_iqf=1,gwr%my_nkbz
        iq_bz = gwr%my_qbz_inds(my_iqf)
+#if 1
+       call desc_myqbz(my_iqf)%to_scbox(gwr%qbz(:,iq_bz), gwr%ngqpt, sc_ngfft, gwr%nspinor * ndat1, &
+                                        wc_gpr(my_iqf)%buffer_cplx(1,my_ir+idat-1), wct_scbox(:,idat))
+#else
        gg = nint(gwr%qbz(:, iq_bz) * gwr%ngqpt)
        associate (desc_q => desc_myqbz(my_iqf))
        do ig=1,desc_q%npw
@@ -2635,6 +2645,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
        call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, wc_scgvec, &
                      wc_gpr(my_iqf)%buffer_cplx(1,my_ir+idat-1), wct_scbox(:,idat))
        end associate
+#endif
      end do ! my_iqf
      10 continue
      !call xmpi_barrier(gwr%kpt_comm%value)
@@ -3700,10 +3711,10 @@ subroutine desc_copy(in_desc, new_desc)
  call alloc_copy(in_desc%gbound, new_desc%gbound)
  if (allocated(in_desc%vc_sqrt)) call alloc_copy(in_desc%vc_sqrt, new_desc%vc_sqrt)
 
- !if (allocated(in_desc%g2box)) then
- !  call alloc_copy(in_desc%g2box, new_desc%g2box)
- !  new_desc%cached_sc_ngfft = in_desc%cached_sc_ngfft
- !end if
+ if (allocated(in_desc%g2box)) then
+   call alloc_copy(in_desc%g2box, new_desc%g2box)
+   new_desc%cached_sc_ngfft = in_desc%cached_sc_ngfft
+ end if
 
 end subroutine desc_copy
 !!***
@@ -3771,7 +3782,6 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
      i2 = modulo(kg(2), n2) !+ 1
      i3 = modulo(kg(3), n3) !+ 1
      desc%g2box(ipw) = 1 + i1 + n4*(i2+i3*n5)
-     !desc%g2box(ipw) = i1 + n1*(i2+i3*n2)
    end do
  end if
 
@@ -3785,7 +3795,6 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
      !end if
      ifft = desc%g2box(ipw)
      cfft(ifft,idat) = cg(ipw,idat)
-     !cfft_ptr(i1,i2,i3,idat) = cg(ipw,idat)
    end do
  end do
 
