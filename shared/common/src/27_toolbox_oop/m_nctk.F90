@@ -2822,24 +2822,26 @@ end subroutine write_var_netcdf
 !!
 !! SOURCE
 
-subroutine write_eig(eigen,occ,fermie,filename,kptns,mband,nband,nkpt,nsppol)
+subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
+& shiftfactor_extfpmd) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(in) :: nkpt,nsppol,mband
  real(dp),intent(in) :: fermie
+ real(dp),optional,intent(in) :: shiftfactor_extfpmd
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
- real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: kptns(3,nkpt)
 
 !Local variables-------------------------------
 !scalars
  integer :: ncerr,ncid,ii, cmode
  integer :: xyz_id,nkpt_id,mband_id,nsppol_id
- integer :: eig_id,occ_id,fermie_id,kpt_id,nbk_id,nbk
+ integer :: eig_id,fermie_id,kpt_id,nbk_id,nbk
+ integer :: shiftfactor_extfpmd_id
  integer :: ikpt,isppol,nband_k,band_index
  real(dp):: convrt
 !arrays
@@ -2889,16 +2891,16 @@ subroutine write_eig(eigen,occ,fermie,filename,kptns,mband,nband,nkpt,nsppol)
 & "Eigenvalues",&
 & "Values of eigenvalues",&
 & "Hartree")
- call ab_define_var(ncid, dimEIG, occ_id, NF90_DOUBLE,&
-& "Occupations",&
-& "Values of occupations",&
-& "Dimensionless")
  call ab_define_var(ncid, dimKPT, kpt_id, NF90_DOUBLE,"Kptns",&
 & "Positions of K-points in reciprocal space",&
 & "Dimensionless")
  call ab_define_var(ncid, dimNBK, nbk_id, NF90_INT,"NBandK",&
 & "Number of bands per kpoint and Spin",&
 & "Dimensionless")
+ if(present(shiftfactor_extfpmd)) then
+    call ab_define_var(ncid,dim0,shiftfactor_extfpmd_id,NF90_DOUBLE,&
+&    "shiftfactor_extfpmd","Extended FPMD shiftfactor","Hartree")
+ end if
 
 !4. End define mode
  ncerr = nf90_enddef(ncid)
@@ -2915,11 +2917,17 @@ subroutine write_eig(eigen,occ,fermie,filename,kptns,mband,nband,nkpt,nsppol)
    NCF_CHECK_MSG(ncerr," write variable kptns")
  end do
 
-!6 Write chemical potential
+!6.1 Write chemical potential
  ncerr = nf90_put_var(ncid, fermie_id, fermie)
  NCF_CHECK_MSG(ncerr," write variable fermie")
 
-!6 Write eigenvalues
+!6.2 Write extfpmd shiftfactor
+ if(present(shiftfactor_extfpmd)) then
+   ncerr = nf90_put_var(ncid, shiftfactor_extfpmd_id, shiftfactor_extfpmd)
+   NCF_CHECK_MSG(ncerr," write variable shiftfactor_extfpmd")
+ end if
+
+!6.3 Write eigenvalues
  band_index=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
@@ -2940,28 +2948,7 @@ subroutine write_eig(eigen,occ,fermie,filename,kptns,mband,nband,nkpt,nsppol)
    end do
  end do
 
-!6 Write occupations
- band_index=0
- do isppol=1,nsppol
-   do ikpt=1,nkpt
-     nband_k=nband(ikpt+(isppol-1)*nkpt)
-     start3 = (/ 1, ikpt, isppol /)
-     count3 = (/ mband, 1, 1 /)
-     band(:)=zero
-     do ii=1,nband_k
-       band(ii)=occ(band_index+ii)
-     end do
-     ncerr = nf90_put_var(ncid, occ_id,&
-&     band,&
-&     start = start3,&
-&     count = count3)
-     NCF_CHECK_MSG(ncerr," write variable occupations")
-
-     band_index=band_index+nband_k
-   end do
- end do
-
-!6 Write Number of bands per kpoint and Spin
+!6.4 Write Number of bands per kpoint and Spin
 
  do isppol=1,nsppol
    do ikpt=1,nkpt
