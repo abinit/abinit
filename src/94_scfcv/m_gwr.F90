@@ -224,6 +224,7 @@ module m_gwr
 
    integer,allocatable :: g2box(:)
    ! (npw)
+   ! Index of gvec in the supercell FFT box.
 
    integer :: cached_sc_ngfft(6) = -1
 
@@ -1831,6 +1832,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
  call wrtout(std_out, "")
  call gwr%print_mem(unit=std_out)
+ print *, "After malloc_free_mats"
 
 end subroutine gwr_malloc_free_mats
 !!***
@@ -3929,7 +3931,7 @@ subroutine gwr_print_mem(gwr, unit)
  if (allocated(gwr%tchi_qibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%tchi_qibz))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin("- Local memory for chi(g,g',qibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(std_out, sjoin("- Local memory for Chi(g,g',qibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
  if (allocated(gwr%wc_qibz)) then
@@ -3941,13 +3943,13 @@ subroutine gwr_print_mem(gwr, unit)
  if (allocated(gwr%sigc_kibz)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%sigc_kibz))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin("- Local memory for Sigmac(g,g',kibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(std_out, sjoin("- Local memory for Sigma_c(g,g',kibz,itau): ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
  if (allocated(gwr%ugb)) then
    mem_mb = sum(slk_array_locmem_mb(gwr%ugb))
    if (mem_mb > zero) then
-     call wrtout(std_out, sjoin('- Local memory for ugb wavefunctions: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+     call wrtout(std_out, sjoin('- Local memory for u_gb wavefunctions: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
    end if
  end if
  call wrtout(std_out, " ")
@@ -4585,9 +4587,14 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
    call gwr%malloc_free_mats(got_qibz, what, "malloc")
 
    ! MPI communication
+
    do iq_ibz=1,gwr%nqibz
      if (do_mpi_qibz(iq_ibz) == 0) cycle
+     ! This is needed because not all procs have allocated this matrix
+     ! TODO: Can create subcommunicators with color and bcast only inside subcomm.
      lsize = gwr%gt_kibz(1, iq_ibz, itau, spin)%sizeb_local(:)
+     call xmpi_bcast(lsize, sender_qibz(iq_ibz), gwr%kpt_comm%value, ierr)
+
      ABI_MALLOC(cbuf_q, (lsize(1), lsize(2)))
      if (gwr%kpt_comm%me == sender_qibz(iq_ibz)) then
        if (what == "tchi") cbuf_q = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx
@@ -5266,7 +5273,7 @@ else
  ! ===================================================================
  call wrtout(std_out, " Building Sigma_c with convolutions in k-space:", pre_newlines=2)
 
- ! Allocate PBLAS matrices to store Wc(r',r,tau), and Sigma_kcalc(r',r,+/-tau)
+ ! Allocate PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell
  nrsp = gwr%g_nfft * gwr%nspinor
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 
@@ -5279,7 +5286,7 @@ else
  end do
 
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
- call wrtout(std_out, sjoin(' Memory for local PBLAS matrices: ', ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+ call wrtout(std_out, sjoin(" Memory for local PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ! Define tables to account for symmetries:
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
