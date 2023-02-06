@@ -2476,11 +2476,12 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
 
 !Local variables-------------------------------
  integer :: my_ikf, ik_bz, ig, ipm, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc)
- real(dp) :: cpu, wall, gflops
+ real(dp) :: tsec(2) !, cpu, wall, gflops
 
 ! *************************************************************************
 
- call cwtime(cpu, wall, gflops, "start")
+ !call cwtime(cpu, wall, gflops, "start")
+ call timab(1929, 1, tsec)
 
  ! Take the union of (k,g') for k in the BZ.
  ! Note gwr%ngkpt instead of gwr%ngqpt.
@@ -2534,7 +2535,8 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
    end do ! iepoch
  end if
 
- call cwtime_report(" gwr_gk_to_scbox:", cpu, wall, gflops)
+ !call cwtime_report(" gwr_gk_to_scbox:", cpu, wall, gflops)
+ call timab(1929, 2, tsec)
 
 end subroutine gwr_gk_to_scbox
 !!***
@@ -2569,11 +2571,13 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
 
 !Local variables-------------------------------
  integer :: my_iqf, iq_bz, ig, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc)
+ real(dp) :: tsec(2) !, cpu, wall, gflops
 
 ! *************************************************************************
 
  ! Take the union of (q,g') for q in the BZ.
  ! Note gwr%ngqpt instead of gwr%ngkpt.
+ call timab(1930, 1, tsec)
 
  if (.not. present(wct_scbox_win)) then
 
@@ -2617,6 +2621,8 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
      call xmpi_win_fence(wct_scbox_win)
    end do ! iepoch
  end if
+
+ call timab(1930, 2, tsec)
 
 end subroutine gwr_wcq_to_scbox
 
