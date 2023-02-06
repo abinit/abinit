@@ -4587,13 +4587,18 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
    call gwr%malloc_free_mats(got_qibz, what, "malloc")
 
    ! MPI communication
-
    do iq_ibz=1,gwr%nqibz
      if (do_mpi_qibz(iq_ibz) == 0) cycle
+
      ! This is needed because not all procs have allocated this matrix
-     ! TODO: Can create subcommunicators with color and bcast only inside subcomm.
      lsize = gwr%gt_kibz(1, iq_ibz, itau, spin)%sizeb_local(:)
      call xmpi_bcast(lsize, sender_qibz(iq_ibz), gwr%kpt_comm%value, ierr)
+
+     ! TODO: Can create subcommunicators with color and bcast only inside subcomm.
+     !need_block_ks = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
+     !color = merge(1, 0, (need_block_ks .or. io_comm%me == master))
+     !call xmpi_comm_split(gwr%kpt_comm%value, color, gwr%kpt_comm%me, bcast_comm, ierr)
+     !call xmpi_comm_free(bcast_comm)
 
      ABI_MALLOC(cbuf_q, (lsize(1), lsize(2)))
      if (gwr%kpt_comm%me == sender_qibz(iq_ibz)) then
@@ -4973,12 +4978,13 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
+ integer :: isym_k, trev_k, g0_k(3), tsign_k
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  integer :: gt_scbox_win, wct_scbox_win
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol !, spin_fact
- logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k
+ logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
@@ -5332,9 +5338,16 @@ else
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      call slk_array_set(sigc_rpr, czero)
 
+     ! Sum over k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
        ik_bz = gwr%my_kbz_inds(my_ikf)
        kk_bz = gwr%kbz(:, ik_bz)
+
+       ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
+       trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
+       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+       tsign_k = merge(1, -1, trev_k == 0)
+       if (.not. isirr_k) cycle
 
        ! Use symmetries to get G_k from the IBZ. Then G_k(g,g') --> G_k(r,r')
        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
