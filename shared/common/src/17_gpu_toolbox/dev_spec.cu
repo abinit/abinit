@@ -53,8 +53,9 @@ static __host__ void  prt_dev_info()
 
 // Explicit Cuda Error ---------------------
 __host__  void
-check_err(int line ){
-/* cuda check errors */
+check_err(int line)
+{
+  /* cuda check errors */
   cudaError_t cudaError;
   cudaError = cudaGetLastError();
   if(cudaError != cudaSuccess)
@@ -152,6 +153,16 @@ void gpu_data_prefetch_async_cpp(const void* devPtr, size_t count, int deviceId)
 {
 
   CHECK_CUDA_ERROR( cudaMemPrefetchAsync(devPtr, count, deviceId) );
+
+  return;
+}
+
+//
+extern "C"  __host__
+void gpu_memory_advise_cpp(const void* devPtr, size_t count, cudaMemoryAdvise advice, int deviceId)
+{
+
+  CHECK_CUDA_ERROR( cudaMemAdvise(devPtr, count, advice, deviceId) );
 
   return;
 }
