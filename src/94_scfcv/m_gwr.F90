@@ -2470,7 +2470,8 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
  type(desc_t),intent(in) :: desc_mykbz(gwr%my_nkbz)
 type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
  integer,intent(in) :: my_ir, ndat
- complex(gwpc),intent(out) :: gt_scbox(:,:,:)  ! (sc_nfft*gwr%nspinor,max_ndat,2)
+ complex(gwpc),intent(out) :: gt_scbox(product(sc_ngfft(4:6))*gwr%nspinor, gwr%sc_batch_size, 2)
+ !complex(gwpc),intent(out) :: gt_scbox(:,:,:)
  integer,optional,intent(inout) :: gt_scbox_win
 
 !Local variables-------------------------------
@@ -2494,7 +2495,7 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
      end do
      do ipm=1,2
        call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor*ndat, green_scgvec, &
-                     gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir), gt_scbox(:,:,ipm))
+                     gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir), gt_scbox(:,:,ipm))
      end do
      end associate
    end do ! my_ikf
@@ -2522,7 +2523,7 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
        end do
        do ipm=1,2
          call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor * ndat1, green_scgvec, &
-                       gt_gpr(ipm, my_ikf)%buffer_cplx(:,my_ir+idat-1), gt_scbox(:,idat,ipm))
+                       gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir+idat-1), gt_scbox(:,idat,ipm))
        end do
        end associate
      end do ! my_ikf
@@ -2562,7 +2563,8 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
  type(desc_t),intent(in) :: desc_myqbz(gwr%my_nqbz)
  type(__slkmat_t),intent(in) :: wc_gpr(gwr%my_nqbz)
  integer,intent(in) :: my_ir, ndat
- complex(gwpc),intent(out) :: wct_scbox(:,:)  ! (sc_nfft * gwr%nspinor, max_ndat)
+ complex(gwpc),intent(out) :: wct_scbox(product(sc_ngfft(4:6))*gwr%nspinor, gwr%sc_batch_size)
+ !complex(gwpc),intent(out) :: wct_scbox(:,:)
  integer,optional,intent(inout) :: wct_scbox_win
 
 !Local variables-------------------------------
@@ -2584,7 +2586,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
        wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig) ! q + g'
      end do
      call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat, wc_scgvec, &
-                   wc_gpr(my_iqf)%buffer_cplx(:, my_ir), wct_scbox)
+                   wc_gpr(my_iqf)%buffer_cplx(1,my_ir), wct_scbox)
      end associate
    end do ! my_iqf
 
@@ -2606,7 +2608,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
          wc_scgvec(:,ig) = gg + gwr%ngqpt * desc_q%gvec(:,ig) ! q + g'
        end do
        call gsph2box(sc_ngfft, desc_q%npw, gwr%nspinor * ndat1, wc_scgvec, &
-                     wc_gpr(my_iqf)%buffer_cplx(:,my_ir+idat-1), wct_scbox(:,idat))
+                     wc_gpr(my_iqf)%buffer_cplx(1,my_ir+idat-1), wct_scbox(:,idat))
        end associate
      end do ! my_iqf
      10 continue
