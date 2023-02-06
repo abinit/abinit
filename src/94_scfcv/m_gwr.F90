@@ -1832,7 +1832,7 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
  call wrtout(std_out, "")
  call gwr%print_mem(unit=std_out)
- print *, "After malloc_free_mats"
+ !print *, "After malloc_free_mats"
 
 end subroutine gwr_malloc_free_mats
 !!***
@@ -5342,6 +5342,7 @@ else
      do my_ikf=1,gwr%my_nkbz
        ik_bz = gwr%my_kbz_inds(my_ikf)
        kk_bz = gwr%kbz(:, ik_bz)
+       !if (ik_bz not in any lg_kcalc) cycle
 
        ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
        trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
@@ -5359,6 +5360,7 @@ else
          iq_ibz = gwr%qbz2ibz(1, iq_bz)
          call gwr%get_wc_rpr_qbz(iq_bz, itau, spin, wc_rpr)
 
+         !wgt_lg = ??
          do ipm=1,2
            sigc_rpr(ipm, ikcalc)%buffer_cplx = sigc_rpr(ipm, ikcalc)%buffer_cplx + &
              gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
