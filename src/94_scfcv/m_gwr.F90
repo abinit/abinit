@@ -2494,6 +2494,7 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
      do ig=1,desc_k%npw
        green_scgvec(:,ig) = gg + gwr%ngkpt * desc_k%gvec(:,ig)  ! k+g
      end do
+     !call desc_k%gsph2box(sc_ngfft, gwr%nkpt)
      do ipm=1,2
        call gsph2box(sc_ngfft, desc_k%npw, gwr%nspinor*ndat, green_scgvec, &
                      gt_gpr(ipm, my_ikf)%buffer_cplx(1,my_ir), gt_scbox(:,:,ipm))
@@ -2508,7 +2509,6 @@ type(__slkmat_t),intent(in) :: gt_gpr(2, gwr%my_nkbz)
    do iepoch=1,gwr%kpt_comm%nproc
      call xmpi_win_fence(gt_scbox_win)
      idat = idat_list(iepoch)
-     !write(std_err, *)" me, epoch, idat", gwr%kpt_comm%me, iepoch, idat
      if (idat > ndat) goto 10
      if (iepoch == 1) then
        do ipm=1,2
@@ -6249,9 +6249,12 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 !Local variables-------------------------------
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw
  complex(gwpc),contiguous,pointer :: cfft_ptr(:,:,:,:)
+ real(dp) :: tsec(2) !, cpu, wall, gflops
  !character(len=500) :: msg
 
 ! *************************************************************************
+
+ call timab(1931, 1, tsec)
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
@@ -6272,6 +6275,8 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
      cfft_ptr(i1,i2,i3,idat) = cg(ipw+npw*(idat-1))
    end do
  end do
+
+ call timab(1931, 1, tsec)
 
 end subroutine gsph2box
 !!***
