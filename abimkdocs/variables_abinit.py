@@ -15544,6 +15544,16 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 If set to 1, a file *_EIG, containing the k-points and one-electron eigenvalues is printed.
+
+If set to 2, with [[ionmov]] /= 0, eigenenergies file will be output at each time step, with
+the name being made of
+
+  * the root output name,
+  * followed by _TIMx, where x is related to the time step (see later)
+  * then followed by _EIG.
+
+The file structure of this unformatted output file is described in [[help:abinit#localpotfile|this section]].
+No output is provided by a negative value of this variable.
 """,
 ),
 
