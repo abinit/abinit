@@ -980,9 +980,9 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, cryst, ugb)
 
        call uplan_m%execute_rg(n2dat, ur12_batch(:,1), ug12_batch(:,1))
 
-      !do idat2=1,n2dat
-      !  write(std_out, *)ug12_batch(1, idat2), idat2, "ug12_batch(1, idat2), idat"
-      !end do
+       !do idat2=1,n2dat
+       !  write(std_out, *)ug12_batch(1, idat2), idat2, "ug12_batch(1, idat2), idat"
+       !end do
 
      end do ! idat1
    end do ! my_ib2
