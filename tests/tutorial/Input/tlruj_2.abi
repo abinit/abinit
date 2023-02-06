@@ -65,9 +65,9 @@ macro_uj 1                           #Turn on linear response functionality for 
 dmatpuopt 3                          #PAW projector for density matrix
 
 #Printing Info
-outdata_prefix = "tlruj_2.o"
+outdata_prefix "tlruj_2.o"
 prtvol 3                             #More information on DFT+U
-pawprtvol -3                         #More information on linear response
+pawprtvol -3                         #More information on ujdet
 prtwf 0                              #Don't print WFK
 prteig 0                             #Don't print eigenvalues
 prtden 0                             #Don't print density

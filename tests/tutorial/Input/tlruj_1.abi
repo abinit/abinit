@@ -55,7 +55,7 @@ jpawu 0.0 0.0 0.0 eV
 dmatpuopt 3
 
 #Printing Info
-outdata_prefix = "tlruj_1.o"
+outdata_prefix "tlruj_1.o"
 prtvol 3                          #More information on DFT+U
 prtwf 1                           #Default: make sure WFK are printed
 
