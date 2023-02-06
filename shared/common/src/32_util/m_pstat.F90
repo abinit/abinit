@@ -159,7 +159,6 @@ subroutine pstat_from_file(ps, filepath)
  do
    read(unit, "(a)", iostat=ierr, end=10, iomsg=ps%iomsg) line
    if (ierr > 0) then ! EOF
-     ps%iomsg = ""
      close(unit); return
    end if
 
@@ -176,6 +175,7 @@ subroutine pstat_from_file(ps, filepath)
 
 10 close(unit)
   ps%ok = .True.
+  ps%iomsg = ""
 
 contains
 
