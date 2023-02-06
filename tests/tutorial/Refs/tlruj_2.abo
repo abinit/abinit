@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 31 Jan 2023.
-- ( at 20h20 )
+.Starting date : Mon  6 Feb 2023.
+- ( at 18h06 )
   
 - input  file    -> tlruj_2.abi
 - output file    -> tlruj_2.abo
@@ -5155,10 +5155,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=       7881.0  wall=        205.0
+- Proc.   0 individual time (sec): cpu=       7920.4  wall=        206.1
  
 ================================================================================
  
  Calculation completed.
 .Delivered  20 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       7881.0  wall=        205.0
++Overall time at end (sec) : cpu=       7920.4  wall=        206.1
