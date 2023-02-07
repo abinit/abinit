@@ -516,10 +516,14 @@ module m_xgTransposer
    !integer, allocatable :: request(:), status(:)
    type(ptr_t), allocatable :: sendptrbuf(:)
    integer, pointer :: nrowsLinalg(:)
-   integer(c_size_t) :: buffer_size
    double precision :: tsec(2)
 
-    call timab(tim_toLinalg,1,tsec)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+   double precision, allocatable :: recvbuf_mpi(:,:)
+   integer(c_size_t) :: buffer_size
+#endif
+
+   call timab(tim_toLinalg,1,tsec)
 
    ncpu = xgTransposer%mpiData(MPI_COLS)%size
    comm = xgTransposer%mpiData(MPI_COLS)%comm
@@ -551,6 +555,9 @@ module m_xgTransposer
       buffer_size = size(recvbuf) * dp
       call gpu_data_prefetch_async(C_LOC(recvbuf), buffer_size, CPU_DEVICE_ID)
       call gpu_device_synchronize()
+
+      ABI_MALLOC(recvbuf_mpi, (size(recvbuf,1), size(recvbuf,2)) )
+
    end if
 #endif
 
@@ -567,14 +574,39 @@ module m_xgTransposer
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
-     call timab(tim_all2allv,1,tsec)
-     call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
-                         recvbuf, recvcounts, rdispls, &
-                         comm, ierr)
-     call timab(tim_all2allv,2,tsec)
-     !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
-     !                    recvbuf, recvcounts, rdispls, &
-     !                    comm, request(myrequest))
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+     if( xgTransposer%use_gpu == 1) then
+
+       call timab(tim_all2allv,1,tsec)
+       call xmpi_alltoallv(sendbuf,     sendcounts, sdispls, &
+                           recvbuf_mpi, recvcounts, rdispls, &
+                           comm, ierr)
+       call timab(tim_all2allv,2,tsec)
+       !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
+       !                    recvbuf, recvcounts, rdispls, &
+       !                    comm, request(myrequest))
+
+       ! copy back recvbuf_mpi into recvbuf
+       recvbuf(:,:) = recvbuf_mpi(:,:)
+
+       ABI_FREE(recvbuf_mpi)
+
+     end if
+#endif
+
+
+    if( xgTransposer%use_gpu == 0) then
+
+      call timab(tim_all2allv,1,tsec)
+      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
+                          recvbuf, recvcounts, rdispls, &
+                          comm, ierr)
+      call timab(tim_all2allv,2,tsec)
+      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
+      !                    recvbuf, recvcounts, rdispls, &
+      !                    comm, request(myrequest))
+   end if
+
    case (TRANS_GATHER)
      !ABI_MALLOC(request,(ncpu))
      me = xgTransposer%mpiData(MPI_COLS)%rank
@@ -659,6 +691,11 @@ module m_xgTransposer
    integer, pointer :: nrowsLinalg(:)
    double precision :: tsec(2)
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+   double precision, allocatable :: sendbuf_mpi(:,:)
+   integer(c_size_t) :: buffer_size
+#endif
+
     call timab(tim_toColsRows,1,tsec)
 
    ncpu = xgTransposer%mpiData(MPI_COLS)%size
@@ -697,15 +734,45 @@ module m_xgTransposer
      call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf, &
 &      xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
      !write(*,*) "Before ialltoall"
-     call timab(tim_all2allv,1,tsec)
-     call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
-                         recvbuf, recvcounts, rdispls, &
-                         comm, ierr)
-     call timab(tim_all2allv,2,tsec)
-     !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
-     !                    recvbuf, recvcounts, rdispls, &
-     !                    comm, request(myrequest))
-     !write(*,*) "After ialltoall"
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+    ! if gpu is enabled, data are located in GPU memory, so we copy them on a host buffer
+    if( xgTransposer%use_gpu == 1) then
+      ABI_MALLOC(sendbuf_mpi, (size(sendbuf,1), size(sendbuf,2)) )
+
+      ! sync sendbuf on host and then copy to sendbuf_mpi
+      buffer_size = size(sendbuf) * dp
+      call gpu_data_prefetch_async(C_LOC(sendbuf), buffer_size, CPU_DEVICE_ID)
+      call gpu_device_synchronize()
+
+      sendbuf_mpi(:,:) = sendbuf(:,:)
+
+      call timab(tim_all2allv,1,tsec)
+      ! this is a cpu mpi comm
+      call xmpi_alltoallv(sendbuf_mpi, sendcounts, sdispls, &
+                          recvbuf,     recvcounts, rdispls, &
+                          comm, ierr)
+      call timab(tim_all2allv,2,tsec)
+      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
+      !                    recvbuf, recvcounts, rdispls, &
+      !                    comm, request(myrequest))
+      !write(*,*) "After ialltoall"
+
+      ABI_FREE(sendbuf_mpi)
+    end if
+#endif
+
+    if( xgTransposer%use_gpu == 0) then
+      call timab(tim_all2allv,1,tsec)
+      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
+                          recvbuf, recvcounts, rdispls, &
+                          comm, ierr)
+      call timab(tim_all2allv,2,tsec)
+      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
+      !                    recvbuf, recvcounts, rdispls, &
+      !                    comm, request(myrequest))
+      !write(*,*) "After ialltoall"
+    end if
 
    case (TRANS_GATHER)
      !ABI_MALLOC(request,(ncpu))
