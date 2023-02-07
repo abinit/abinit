@@ -268,9 +268,10 @@ program lruj
     'the Hubbard parameter.')
   ABI_ERROR(msg)
  else if (ndata==2) then
-   ABI_ERROR(sjoin('Only two data points found. The scalar Hubbard Parameter from',ch10,&
-&    'the two-point linear regression scheme has already been printed in your .abo file. Try bashing',ch10,&
-&    '==>   grep "two-point regression" <run_name.abo> ',ch10,'to find the result of this calculation.'))
+   msg = sjoin('Only two data points found. The scalar Hubbard Parameter from',ch10,&
+    'the two-point linear regression scheme has already been printed in your .abo file. Try bashing',ch10,&
+    '==>   grep "two-point regression" <run_name.abo> ',ch10,'to find the result of this calculation.')
+  ABI_ERROR(msg)
  end if
 
  !pawujat consistency check.
