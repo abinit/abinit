@@ -102,7 +102,7 @@
 #%% files_to_test = 
 #%%   t107.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Torrent, D.J. Adams, L. MacEnulty
 #%% keywords = lruj,ujdet,DFTU,PAW
