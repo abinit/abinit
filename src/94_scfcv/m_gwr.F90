@@ -3327,7 +3327,7 @@ end subroutine gwr_get_myq_wc_gpr
 !!  gwr_get_wc_rpr_qbz
 !!
 !! FUNCTION
-!!  Compute Wc_q(r',r') with q in the BZ
+!!  Compute Wc_q(r',r') for q in the BZ
 !!
 !! INPUTS
 !!
@@ -3367,7 +3367,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, iq_bz, itau, spin, wc_rpr)
  !call calc_ceikr(qq_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceiqr)
  !end if
 
- ! Get W_q in the BZ.
+ ! Get W_q(g,g') in the BZ.
  call gwr%rotate_wc(iq_bz, itau, spin, desc_qbz, wc_ggp)
 
  ! Allocate rgp PBLAS matrix to store Wc(r,g')
@@ -3483,7 +3483,7 @@ subroutine gwr_cos_transform(gwr, what, mode, sum_spins)
    ABI_ERROR(sjoin("Wrong mode:", mode))
  end select
 
- ! Extract my weights.
+ ! Extract my weights from global array.
  do my_it=1,gwr%my_ntau
    itau = gwr%my_itaus(my_it)
    do iw=1,gwr%ntau
@@ -4295,6 +4295,7 @@ end if
         do my_ikf=1,gwr%my_nkbz
           ik_bz = gwr%my_kbz_inds(my_ikf)
           kk_bz = gwr%kbz(:, ik_bz)
+
           do my_iqi=1,gwr%my_nqibz
             iq_ibz = gwr%my_qibz_inds(my_iqi)
             qq_ibz = gwr%qibz(:, iq_ibz)
@@ -4499,7 +4500,7 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
    end do
 
  case ("free")
-   ! Use got_kibz to free previously allocated memory
+   ! Use got_kibz to free previously allocated memory.
    do ik_ibz=1,gwr%nkibz
      if (got_kibz(ik_ibz) == 1) call gwr%green_desc_kibz(ik_ibz)%free()
    end do
@@ -4980,9 +4981,9 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
  integer :: isym_k, trev_k, g0_k(3), tsign_k
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- integer :: gt_scbox_win, wct_scbox_win
+ integer :: gt_scbox_win, wct_scbox_win, use_umklp
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
- real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir
+ real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol !, spin_fact
  logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k
  character(len=500) :: msg
@@ -5002,6 +5003,7 @@ subroutine gwr_build_sigmac(gwr)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: green_plan, wt_plan
+ type(littlegroup_t) :: ltg_kcalc(gwr%nkcalc)
  integer :: band_val, ibv, ncerr, unt_it, unt_iw, unt_rw
  real(dp) :: e0, ks_gap, qp_gap, sigx, vxc_val, vu, v_meanf, eshift, sigma_fact
  complex(dp) :: zz, zsc, sigc_e0, dsigc_de0, z_e0, sig_xc, hhartree_bk, qp_ene, qp_ene_prev
@@ -5298,6 +5300,13 @@ else
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
  !  - when accumulating the self-energy, we have to include weights that depend on x.
 
+ ! * The little group is used only if symsigma == 1
+ ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
+ use_umklp = 1
+ do ikcalc=1,gwr%nkcalc
+   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:, ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
+ end do
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
 
@@ -5340,15 +5349,16 @@ else
 
      ! Sum over k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
+       if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODR) == 0) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
        ik_bz = gwr%my_kbz_inds(my_ikf)
        kk_bz = gwr%kbz(:, ik_bz)
-       !if (ik_bz not in any lg_kcalc) cycle
+       !if (ik_bz .not. in any lg_kcalc) cycle
 
-       ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
-       trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
-       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-       tsign_k = merge(1, -1, trev_k == 0)
-       if (.not. isirr_k) cycle
+       !ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
+       !trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
+       !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+       !tsign_k = merge(1, -1, trev_k == 0)
+       !if (.not. isirr_k) cycle
 
        ! Use symmetries to get G_k from the IBZ. Then G_k(g,g') --> G_k(r,r')
        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
@@ -5368,10 +5378,22 @@ else
        end do ! ikcalc
 
        !call slk_array_free(gk_rpr_pm)
+       if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0) then
+         write(msg,'(4x,3(a,i0),a)')"Sigma_c my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
+         if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
+       end if
+
      end do ! my_ikf
 
      ! Deallocate extra Wc matrices defined by got_qibz
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
+
+     ! Symmetrize sigc_rpr by applying the operations of the little group of kcalc.
+     !do ikcalc=1,gwr%nkcalc
+     !  do ipm=1,2
+     !    call gwr%symmetrize_ltg(sigc_rpr(ipm, ikcalc), ltg_ikcalc(ikcalc))
+     !  end do
+     !end do
 
      ! Integrate self-energy matrix elements in the unit cell.
      ! Remember that Sigma is stored as (r',r) and that the second dimension is MPI-distributed.
@@ -5396,6 +5418,10 @@ else
  call wc_rpr%free()
  call slk_array_free(sigc_rpr)
  call slk_array_free(gk_rpr_pm)
+ do ikcalc=1,gwr%nkcalc
+   call ltg_kcalc(ikcalc)%free()
+ end do
+
  call wrtout(std_out, " Mixed space algorithm for sigma completed")
 end if
 
