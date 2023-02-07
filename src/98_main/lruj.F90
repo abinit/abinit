@@ -20,12 +20,13 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!  For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! NOTES
 !! INPUTS
 !!  -d <n> = Command line argument: highest degree of intended polynomial fits
 !!  *DS*_LRUJ.nc files = gives data from perturbative Abinit calculations
+!!
 !! OUTPUT
 !!  std_out = log file
+!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -318,7 +319,7 @@ program lruj
  else if (macro_uj==4.and.nspden==2) then
    write(message,'(a)') ' Hunds J determination, implemented by L. MacEnulty August 2021'
  end if
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
 
  !Tests compatibility of nspden and macro_uj
  if (macro_uj>1.and.nspden==1) then
@@ -392,36 +393,39 @@ program lruj
 !#############################  Printing information on Hubbard Parameters ################################
 
  !Printing relevant information about the Hubbard parameter just calculated.
- write(message,'(3a)') ch10,ch10,'*************************************************************************************************'
- call wrtout(std_out,message,'COLL')
- write(message,'(4a)') '**************************************  Linear Response ',parname,'  **************************************',ch10
- call wrtout(std_out,message,'COLL')
+ write(message,'(3a)') ch10,ch10, &
+   '*************************************************************************************************'
+ call wrtout(std_out,message)
+ write(message,'(4a)') &
+     '**************************************  Linear Response ',parname,'  **************************************',ch10
+ call wrtout(std_out,message)
  write(message, '(a,i4)' ) ' Index of perturbed atom: ',pawujat
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
  write(message, '(a,i4)' ) ' Value of macro_uj:  ',macro_uj
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
  write(message, '(a,i4)' ) ' Value of dmatpuopt:  ',dmatpuopt
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
  write(message, '(a,f6.3)' ) ' Mixing constant factored out of Chi0:  ',diem
- call wrtout(std_out,message,'COLL')
- write(message, '(a,f12.5,2a)' ) ' Percentage of AE orbital within the PAW sphere of perturbed subspace: ',ph0phiint*100.00,'%',ch10
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
+ write(message, '(a,f12.5,2a)' )&
+     ' Percentage of AE orbital within the PAW sphere of perturbed subspace: ',ph0phiint*100.00,'%',ch10
+ call wrtout(std_out,message)
 
  write(message, fmt='(10a)')'  Perturbations         ',occmag,ch10,&
 ' --------------- -----------------------------',ch10,&
 '    ',pertname,' [eV]     Unscreened      Screened',ch10,&
 ' --------------- -----------------------------'
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
  do ipert=0,nfiles
    write(message, fmt='(3f15.10)') perts(ipert),occs0(ipert),occs(ipert)
-   call wrtout(std_out,message,'COLL')
+   call wrtout(std_out,message)
  end do
 
  write(message, fmt='(11a)') '                                                                       RMS Errors',&
-&   ch10,'                                                         ---------------------------------------',ch10,&
-&   ' Regression   Chi0 [eV^-1]   Chi [eV^-1]      ',parname,' [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     ',parname,&
-&   ' [eV]',ch10,'--------------------------------------------------------|---------------------------------------'
- call wrtout(std_out,message,'COLL')
+   ch10,'                                                         ---------------------------------------',ch10,&
+   ' Regression   Chi0 [eV^-1]   Chi [eV^-1]      ',parname,' [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     ',parname,&
+   ' [eV]',ch10,'--------------------------------------------------------|---------------------------------------'
+ call wrtout(std_out,message)
  do degree=1,mdegree
    if (degree==1) then
      regname=' Linear:    '
@@ -434,13 +438,14 @@ program lruj
      regname=' Degree'//degreename//': '
    end if
    write(message,fmt='(a,3f14.7,a,3f13.7)') regname,chi0(degree),chi(degree),hubpar(degree),&
-&     '  |',chi0err(degree),chierr(degree),hubparerr(degree)
-   call wrtout(std_out,message,'COLL')
+     '  |',chi0err(degree),chierr(degree),hubparerr(degree)
+   call wrtout(std_out,message)
  end do
 
- write(message,'(3a)') '*************************************************************************************************',ch10,&
-'*************************************************************************************************'
- call wrtout(std_out,message,'COLL')
+ write(message,'(3a)') &
+   '*************************************************************************************************',ch10,&
+   '*************************************************************************************************'
+ call wrtout(std_out,message)
 
 
 !##########################################################################################################
@@ -469,18 +474,18 @@ program lruj
 
  !Ending herald.
  write(std_out,*) ch10,'Linear Response UJ (LRUJ) program complete. Live long and prosper. ~LMac',ch10
- goto 100
+
+ ! Writes information on file about the memory before ending mpi module, if memory profiling is enabled
+ call abinit_doctor("__lruj")
 
  100 call xmpi_end()
-
-
 
 !##########################################################################################################
 !#####################################  Subroutines and Functions  ########################################
 
 contains
 
-!!****f* abitk/lruj_show_help
+!!****f* lruj/lruj_show_help
 !! NAME
 !! lruj_show_help
 !!
@@ -598,15 +603,10 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
 
   !Call LAPACK subroutines DGETRF and DGETRI
   call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,ipiv,info)
-  if (info/=0) then
-    ABI_ERROR('Problem returned from LAPACK DGETRF in polynomial regression routine.')
-    return
-  end if
+  ABI_CHECK(info == 0, sjoin('LAPACK DGETRF in polynomial regression returned:', itoa(info)))
+
   call DGETRI(ncoeffs,ATA,ncoeffs,ipiv,work,ncoeffs,info)
-  if (info/=0) then
-    ABI_ERROR('Problem returned from LAPACK DGETRI in polynomial regression routine.')
-    return
-  end if
+  ABI_CHECK(info == 0, sjoin('LAPACK DGETRI in polynomial regression returned:', itoa(info)))
 
   coeffs = matmul(matmul(ATA,AT),yvals)
 
@@ -635,7 +635,6 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
 
 end subroutine polynomial_regression
 !!***
-
 
 end program lruj
 !!***
