@@ -767,7 +767,7 @@ end subroutine fft_ug_dpc
 !!
 !! SOURCE
 
-subroutine fft_ur_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
+subroutine fft_ur_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
 
 !Arguments ------------------------------------
 !scalars
@@ -820,7 +820,7 @@ end subroutine fft_ur_dp
 !!
 !! SOURCE
 
-subroutine fft_ur_spc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ur,ug)
+subroutine fft_ur_spc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ur, ug)
 
 !Arguments ------------------------------------
 !scalars
@@ -3346,10 +3346,7 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
 !*************************************************************************
 
  nproc_fft=ngfft(10)
-
- fftcache=ngfft(8)
- fftalg  =ngfft(7)
- fftalga =fftalg/100; fftalgb=mod(fftalg,100)/10; fftalgc=mod(fftalg,10)
+ fftcache=ngfft(8); fftalg  =ngfft(7); fftalga =fftalg/100; fftalgb=mod(fftalg,100)/10; fftalgc=mod(fftalg,10)
 
  if(fftalga==2)then
    ABI_ERROR("Machine dependent FFTs are not supported anymore")
@@ -4785,19 +4782,18 @@ end subroutine uplan_free
 !!
 !! SOURCE
 
-subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, scale)
+subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
 
 !Arguments ------------------------------------
  class(uplan_t),intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(sp),intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(sp),intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign
- logical,optional,intent(in) :: scale
+ integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__
- logical :: scale__
+ integer :: isign__, iscale__
+ integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -4805,13 +4801,28 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, scale)
  ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
- scale__ = .True.; if (present(scale)) scale__ = scale
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
 
- if (uplan%use_gpu /= 0) then
-   NOT_IMPLEMENTED_ERROR()
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%use_gpu == 0) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+                      uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+                      isign=isign__, iscale=iscale__)
+   !case (FFT_DFTI)
+   !  call dfti_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+   !                  uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+   !                  isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
  else
-   call fft_ug(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
-               uplan%istwfk, uplan%kg_k, uplan%gbound, ug, ur)
+   NOT_IMPLEMENTED_ERROR()
  end if
 
 end subroutine uplan_execute_gr_spc
@@ -4829,19 +4840,18 @@ end subroutine uplan_execute_gr_spc
 !!
 !! SOURCE
 
-subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, scale)
+subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
 
 !Arguments ------------------------------------
  class(uplan_t),intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(dp),intent(in) :: ug(uplan%npw*uplan%nspinor*ndat)
  complex(dp),intent(out) :: ur(uplan%nfft*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign
- logical,optional,intent(in) :: scale
+ integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__
- logical :: scale__
+ integer :: isign__, iscale__
+ integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -4849,13 +4859,28 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, scale)
  ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
 
  isign__ = +1; if (present(isign)) isign__ = isign
- scale__ = .True.; if (present(scale)) scale__ = scale
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
 
- if (uplan%use_gpu /= 0) then
-   NOT_IMPLEMENTED_ERROR()
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%use_gpu == 0) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+                      uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+                      isign=isign__, iscale=iscale__)
+   !case (FFT_DFTI)
+   !  call dfti_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
+   !                  uplan%istwfk, uplan%mgfft, uplan%kg_k, uplan%gbound, ug, ur, &
+   !                  isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
  else
-   call fft_ug(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
-               uplan%istwfk, uplan%kg_k, uplan%gbound, ug, ur)
+   NOT_IMPLEMENTED_ERROR()
  end if
 
 end subroutine uplan_execute_gr_dpc
@@ -4873,19 +4898,18 @@ end subroutine uplan_execute_gr_dpc
 !!
 !! SOURCE
 
-subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, scale)
+subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
 
 !Arguments ------------------------------------
  class(uplan_t),intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(sp),intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(sp),intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign
- logical,optional,intent(in) :: scale
+ integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__
- logical :: scale__
+ integer :: isign__, iscale__
+ integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -4893,13 +4917,26 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, scale)
  ABI_CHECK_IEQ(sp, uplan%kind, "Incosistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
- scale__ = .True.; if (present(scale)) scale__ = scale
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
 
- if (uplan%use_gpu /= 0) then
-   NOT_IMPLEMENTED_ERROR()
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%use_gpu == 0) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+                      uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   !case (FFT_DFTI)
+   !  call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+   !                  uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
  else
-   call fft_ur(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
-               uplan%istwfk, uplan%kg_k, uplan%gbound, ur, ug)
+   NOT_IMPLEMENTED_ERROR()
  end if
 
 end subroutine uplan_execute_rg_spc
@@ -4917,32 +4954,44 @@ end subroutine uplan_execute_rg_spc
 !!
 !! SOURCE
 
-subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, scale)
+subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
 
 !Arguments ------------------------------------
  class(uplan_t),intent(in) :: uplan
  integer,intent(in) :: ndat
  complex(dp),intent(inout) :: ur(uplan%nfft*uplan%nspinor*ndat)
  complex(dp),intent(out) :: ug(uplan%npw*uplan%nspinor*ndat)
- integer,optional,intent(in) :: isign
- logical,optional,intent(in) :: scale
+ integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__
- logical :: scale__
+ integer :: isign__, iscale__
+ integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")
  ABI_CHECK_IEQ(dp, uplan%kind, "Incosistent kind!")
 
  isign__ = -1; if (present(isign)) isign__ = isign
- scale__ = .True.; if (present(scale)) scale__ = scale
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
 
- if (uplan%use_gpu /= 0) then
-   NOT_IMPLEMENTED_ERROR()
+ fftalg = uplan%ngfft(7); fftcache = uplan%ngfft(8); fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
+ nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
+ ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
+
+ if (uplan%use_gpu == 0) then
+   select case (fftalga)
+   case (FFT_FFTW3)
+     call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+                      uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   !case (FFT_DFTI)
+   !  call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+   !                  uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   case default
+     ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
+   end select
+
  else
-   call fft_ur(uplan%npw, uplan%nfft, uplan%nspinor, ndat, uplan%mgfft, uplan%ngfft, &
-               uplan%istwfk, uplan%kg_k, uplan%gbound, ur, ug)
+   NOT_IMPLEMENTED_ERROR()
  end if
 
 end subroutine uplan_execute_rg_dpc

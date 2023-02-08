@@ -153,8 +153,8 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  real(dp),intent(in)        :: qphon(3)
  real(dp),intent(inout)     :: gmet(3,3)
  real(dp),intent(inout)     :: barev(nfft)
- real(dp)                   :: a1(3),a2(3),a3(3)
- real(dp)                   :: b1(3),b2(3),b3(3),gprimd(3,3),rmet(3,3)
+ !real(dp)                   :: a1(3),a2(3),a3(3)
+ real(dp)                   :: b1(3),b2(3),b3(3),rmet(3,3) !,gprimd(3,3),
  type(dataset_type)         :: dtset
  type(MPI_type)             :: mpi_enreg   !!!!
  type(crystal_t)            :: Cryst       !!!!
@@ -398,7 +398,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    ! Beigi"s method: the surface must be along x-y and R must be L_Z/2.
    if (opt_surface==1) then
      ABI_CHECK(ALL(vcut%pdir == (/1,1,0/)),"Surface must be in the x-y plane")
-     vcut%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
+     !vcut%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
    ABI_BUG("cutoff surface API has changed!")
