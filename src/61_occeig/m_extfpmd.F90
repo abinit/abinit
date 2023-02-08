@@ -212,7 +212,7 @@ contains
     ! Computes U_0 from the sum of local
     ! potentials (vtrial), averaging over all space.
     ! Simplest and most precise way to evaluate U_0.
-    if(this%version==1) then
+    if(this%version==1.or.this%version==4.or.this%version==10) then
       this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
 
       ! Computes the relative error of the model vs last eigenvalues
@@ -267,7 +267,6 @@ contains
     ! over lasts nbcut bands.
     if(this%version==3) then
       this%shiftfactor=zero
-      this%e_bcut=0
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
@@ -276,20 +275,14 @@ contains
             this%shiftfactor=this%shiftfactor+&
             & wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
           end do
-          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)
           band_index=band_index+nband_k
         end do
       end do
       this%shiftfactor=this%shiftfactor/this%nbcut
     end if
 
-
-    ! Computes U_0 from the sum of local
-    ! potentials (vtrial), averaging over all space.
-    ! Should not be required to compute quantities in
-    ! this case.
-    if(this%version==4) then
-      this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
+    ! Get extended FPMD band energy cutoff for version 10, 3 and 4.
+    if(this%version==10.or.this%version==3.or.this%version==4) then
       this%e_bcut=0
       band_index=0
       do isppol=1,nsppol
@@ -333,6 +326,7 @@ contains
     ! Scalars
     integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
+    character(len=500) :: msg
 
     ! *********************************************************************
 
@@ -350,7 +344,7 @@ contains
     ! Computes extfpmd contribution to nelect integrating
     ! over energy from e_bcut to infinity with order 1/2
     ! incomplete Fermi-Dirac integral.
-    if(this%version==3) then
+    if(this%version==3.or.this%version==4) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
@@ -359,7 +353,7 @@ contains
     ! Computes extfpmd contribution to nelect using a sum
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
-    if(this%version==4) then
+    if(this%version==10) then
       do ifft=1,this%nfft
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
@@ -369,6 +363,14 @@ contains
         end do
       end do
       nelect=nelect+sum(this%nelectarr)/(this%nfft*this%nspden)
+    end if
+
+    if (xcut.lt.zero) then
+      write(msg,'(5a)')&
+      & 'Extended FPMD could not compute the contribution to the number of electrons.',ch10,&
+      & 'This can be due to a too low number of bands in the calculation.',ch10,&
+      & 'Action: slightly increase nband.'
+      ABI_ERROR(msg)
     end if
   end subroutine compute_nelect
   !!***
@@ -419,7 +421,7 @@ contains
     ! Computes extfpmd contribution to kinetic energy integrating
     ! over energy from e_bcut to infinity with order 3/2
     ! incomplete Fermi-Dirac integral.
-    if(this%version==3) then
+    if(this%version==3.or.this%version==4) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
@@ -428,7 +430,7 @@ contains
     ! Computes extfpmd contribution to kinetic energy using a sum
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
-    if(this%version==4) then
+    if(this%version==10) then
       do ifft=1,this%nfft
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
@@ -443,9 +445,9 @@ contains
     ! Computes the double counting term from the shiftfactor, and
     ! from the contributions to the kinetic energy and
     ! the number of electrons
-    if(this%version==1.or.this%version==2.or.this%version==3) then
+    if(this%version==1.or.this%version==2.or.this%version==3.or.this%version==4) then
       this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
-    else if(this%version==4) then
+    else if(this%version==10) then
       this%edc_kinetic=zero
       do ifft=1,this%nfft
         do ispden=1,this%nspden
@@ -495,7 +497,7 @@ contains
     ! Computes extfpmd contribution to the entropy integrating
     ! over accessible states with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
-    if(this%version==1.or.this%version==2.or.this%version==4) then
+    if(this%version==1.or.this%version==2.or.this%version==10) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
@@ -524,7 +526,7 @@ contains
     ! Computes extfpmd contribution to the entropy integrating
     ! over energy with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
-    if(this%version==3) then
+    if(this%version==3.or.this%version==4) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
@@ -555,7 +557,7 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid,
     ! as we do for version=1 and version=2.
     ! Warning: This is not yet operational. Work in progress.
-    if(this%version==5) then
+    if(this%version==10) then
       this%entropy=zero
       do ifft=1,this%nfft
         do ispden=1,this%nspden
