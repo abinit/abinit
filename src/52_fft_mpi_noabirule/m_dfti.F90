@@ -578,7 +578,8 @@ end subroutine dfti_seqfourwf
 !! SOURCE
 
 subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+                           mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option, &
+                           weight_r,weight_i, abi_convention, iscale)
 
 !Arguments ------------------------------------
 !scalars
@@ -591,6 +592,8 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz)
  real(sp),intent(inout) :: fofr(2,ldx*ldy*ldz)
  real(sp),intent(inout) :: fofgout(2,npwout)    !vz_i
+ logical,optional,intent(in) :: abi_convention
+ integer,optional,intent(in) :: iscale
 
 ! *************************************************************************
 
@@ -694,7 +697,8 @@ end subroutine dfti_fftrisc_sp
 !! SOURCE
 
 subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+                           mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option, &
+                           weight_r, weight_i, abi_convention, iscale)
 
 !Arguments ------------------------------------
 !scalars
@@ -707,6 +711,8 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
  real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz)
  real(dp),intent(inout) :: fofr(2,ldx*ldy*ldz)
  real(dp),intent(inout) :: fofgout(2,npwout)    !vz_i
+ logical,optional,intent(in) :: abi_convention
+ integer,optional,intent(in) :: iscale
 
 ! *************************************************************************
 
@@ -752,7 +758,8 @@ end subroutine dfti_fftrisc_dp
 !! SOURCE
 
 subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,kg_kin,kg_kout,&
-& mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
+                                 mgfft,ngfft,npwin,npwout,ldx,ldy,ldz,option,&
+                                 weight_r,weight_i, abi_convention, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -765,6 +772,8 @@ subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gbound
  real(dp),intent(inout) :: denpot(cplex*ldx,ldy,ldz)
  real(dp),intent(inout) :: fofr(2,ldx*ldy*ldz)
  real(dp),intent(inout) :: fofgout(2,npwout)    !vz_i
+ logical,optional,intent(in) :: abi_convention
+ integer,optional,intent(in) :: iscale
 
 ! *************************************************************************
 
@@ -827,7 +836,9 @@ end subroutine dfti_fftrisc_mixprec
 !!
 !! SOURCE
 
-subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
+subroutine dfti_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                         istwf_k, mgfft, kg_k, gbound, ug, ur, &
+                         isign, iscale)  ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -837,15 +848,19 @@ subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  real(dp),target,intent(in) :: ug(2*npw_k*ndat)
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
+ integer,optional,intent(in) :: isign, iscale
 
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
-!scalars
  integer,parameter :: dist=2
+ integer :: iscale__, isign__
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
+
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+ isign__ = +1; if (present(isign)) isign__ = isign
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
@@ -860,7 +875,7 @@ subroutine dfti_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
 #else
  ! Silence compiler warning
  ABI_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1), isign, iscale/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
@@ -896,12 +911,15 @@ end subroutine dfti_fftug_dp
 !!
 !! SOURCE
 
-subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
+subroutine dfti_fftug_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                          istwf_k, mgfft, kg_k, gbound, ug, ur, &
+                          isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
+ integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(spc),target,intent(in) :: ug(npw_k*ndat)
@@ -911,10 +929,14 @@ subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
  real(sp) :: fofgout(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
+
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+ isign__ = +1; if (present(isign)) isign__ = isign
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
@@ -929,7 +951,7 @@ subroutine dfti_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 #else
  ! Silence compiler warning
  ABI_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1), iscale, isign/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
@@ -965,7 +987,9 @@ end subroutine dfti_fftug_spc
 !!
 !! SOURCE
 
-subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ug,ur)
+subroutine dfti_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                          istwf_k, mgfft, kg_k, gbound, ug, ur, &
+                          isign, iscale)  ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -975,16 +999,21 @@ subroutine dfti_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(dpc),target,intent(in) :: ug(npw_k*ndat)
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)    !vz_i
+ integer,optional,intent(in) :: isign, iscale
 
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
 !arrays
  real(dp) :: fofgout(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
+
+ iscale__ = 0; if (present(iscale)) iscale__ = iscale
+ isign__ = +1; if (present(isign)) isign__ = isign
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
@@ -1037,12 +1066,15 @@ end subroutine dfti_fftug_dpc
 !!
 !! SOURCE
 
-subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
+subroutine dfti_fftur_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                         istwf_k, mgfft, kg_k, gbound, ur, ug, &
+                         isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
+ integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
@@ -1052,11 +1084,15 @@ subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
+ integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
+
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+ isign__ = -1; if (present(isign)) isign__ = isign
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cg_,name)
@@ -1072,7 +1108,7 @@ subroutine dfti_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k
  ! Silence compiler warning
  ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
- ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1),iscale,isign/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
@@ -1111,7 +1147,9 @@ end subroutine dfti_fftur_dp
 !!
 !! SOURCE
 
-subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
+subroutine dfti_fftur_spc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                          istwf_k, mgfft, kg_k, gbound, ur, ug, &
+                          isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1121,16 +1159,21 @@ subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(spc),target,intent(inout) :: ug(npw_k*ndat)    !vz_i
+ integer,optional,intent(in) :: isign, iscale
 
 #ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
 !arrays
  real(sp) :: dum_ugin(2,0)
  real(sp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
+
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+ isign__ = -1; if (present(isign)) isign__ = isign
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
@@ -1146,7 +1189,7 @@ subroutine dfti_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  ! Silence compiler warning
  ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
- ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1),isign,iscale/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
@@ -1184,12 +1227,15 @@ end subroutine dfti_fftur_spc
 !!
 !! SOURCE
 
-subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k,gbound,ur,ug)
+subroutine dfti_fftur_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, ndat, &
+                          istwf_k, mgfft, kg_k, gbound, ur, ug, &
+                          isign, iscale) ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftalg,fftcache
  integer,intent(in) :: npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft
+ integer,optional,intent(in) :: isign, iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2),kg_k(3,npw_k)
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
@@ -1199,11 +1245,15 @@ subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
+ integer :: iscale__, isign__
 !arrays
  real(dp) :: dum_ugin(2,0)
  real(dp),ABI_CONTIGUOUS pointer :: real_ug(:,:),real_ur(:,:)
 
 ! *************************************************************************
+
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
+ isign__ = -1; if (present(isign)) isign__ = isign
 
 #undef TK_PREF
 #define TK_PREF(name) CONCAT(cplx_,name)
@@ -1219,7 +1269,7 @@ subroutine dfti_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  ! Silence compiler warning
  ABI_ERROR("FFT_DFTI support not activated")
  ABI_UNUSED((/fftalg,fftcache/))
- ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_UNUSED((/npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1),iscale,isign/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
@@ -1248,7 +1298,7 @@ end subroutine dfti_fftur_dpc
 !!
 !! SOURCE
 
-subroutine dfti_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,iscale,isign,ff)
+subroutine dfti_c2c_ip_spc(nx, ny, nz, ldx, ldy, ldz, ndat, iscale, isign, ff)
 
 !Arguments ------------------------------------
 !scalars
@@ -1543,7 +1593,7 @@ end subroutine dfti_many_dft_ip
 !!
 !! SOURCE
 
-subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine dfti_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound, iscale)
 
 !Arguments ------------------------------------
 !scalars
@@ -1551,15 +1601,19 @@ subroutine dfti_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  real(dp),target,intent(inout) :: ff(2*ldx*ldy*ldz*ndat)
+ integer,optional,intent(in) :: iscale
 
 !Local variables-------------------------------
 #ifdef HAVE_DFTI
 !scalars
  type(C_ptr) :: cptr
+ integer :: iscale__
 !arrays
  complex(dpc),ABI_CONTIGUOUS pointer :: fptr(:)
 
 ! *************************************************************************
+
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
 
  ! Associate complex fptr with real ff via the C pointer
  cptr = C_loc(ff)
@@ -1605,19 +1659,23 @@ end subroutine dfti_fftpad_dp
 !!
 !! SOURCE
 
-subroutine dfti_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
+subroutine dfti_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound, iscale)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
+ integer,optional,intent(in) :: iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 !Local variables-------------------------------
 #ifdef HAVE_DFTI
+ integer :: iscale__
 
 ! *************************************************************************
+
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
 
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
@@ -1662,17 +1720,22 @@ end subroutine dfti_fftpad_dpc
 !!
 !! SOURCE
 
-subroutine dfti_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine dfti_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound, iscale)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign
+ integer,optional,intent(in) :: iscale
 !arrays
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
+
 #ifdef HAVE_DFTI
+ integer :: iscale__
 
 ! *************************************************************************
+
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
 
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
@@ -1710,7 +1773,7 @@ end subroutine dfti_fftpad_spc
 !!
 !! SOURCE
 
-subroutine dfti_r2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
+subroutine dfti_r2c_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 
 !Arguments ------------------------------------
 !scalars
@@ -1833,7 +1896,7 @@ end subroutine dfti_r2c_op_dpc
 !!
 !! SOURCE
 
-subroutine dfti_r2c_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
+subroutine dfti_r2c_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 
 !Arguments ------------------------------------
 !scalars
@@ -1886,7 +1949,7 @@ end subroutine dfti_r2c_op_dp
 !!
 !! SOURCE
 
-subroutine dfti_c2r_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
+subroutine dfti_c2r_op_dpc(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 
 !Arguments ------------------------------------
 !scalars
@@ -1983,7 +2046,7 @@ end subroutine dfti_c2r_op_dpc
 !!
 !! SOURCE
 
-subroutine dfti_c2r_op_dp(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg)
+subroutine dfti_c2r_op_dp(nx, ny, nz, ldx, ldy, ldz, ndat, ff, gg)
 
 !Arguments ------------------------------------
 !scalars
@@ -2033,7 +2096,7 @@ end subroutine dfti_c2r_op_dp
 
 #ifdef HAVE_DFTI
 
-subroutine dfti_check_status(status,file,line)
+subroutine dfti_check_status(status, file, line)
 
 !Arguments ------------------------------------
 !scalars
@@ -2093,13 +2156,12 @@ end subroutine dfti_check_status
 !!
 !! SOURCE
 
-function dfti_spawn_threads_here(ndat,nthreads) result(ans)
+function dfti_spawn_threads_here(ndat, nthreads) result(ans)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ndat,nthreads
  logical :: ans
-!arrays
 
 ! *************************************************************************
 
@@ -2154,7 +2216,7 @@ end subroutine dfti_use_lib_threads
 
 #ifdef HAVE_DFTI
 
-subroutine dfti_alloc_real_dp(size,cptr,fptr)
+subroutine dfti_alloc_real_dp(size, cptr, fptr)
 
 !Arguments ------------------------------------
 !scalars
@@ -2193,14 +2255,13 @@ end subroutine dfti_alloc_real_dp
 
 #ifdef HAVE_DFTI
 
-subroutine dfti_alloc_complex_spc(size,cptr,fptr)
+subroutine dfti_alloc_complex_spc(size, cptr, fptr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: size
  complex(spc),ABI_CONTIGUOUS pointer :: fptr(:)
  type(C_PTR),intent(out) :: cptr
-!arrays
 
 ! *************************************************************************
 
@@ -2232,7 +2293,7 @@ end subroutine dfti_alloc_complex_spc
 
 #ifdef HAVE_DFTI
 
-subroutine dfti_alloc_complex_dpc(size,cptr,fptr)
+subroutine dfti_alloc_complex_dpc(size, cptr, fptr)
 
 !Arguments ------------------------------------
 !scalars
