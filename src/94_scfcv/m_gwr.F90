@@ -5318,7 +5318,7 @@ else
  end do
 
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
- call wrtout(std_out, sjoin(" Memory for local PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
+ call wrtout(std_out, sjoin(" Local memory for PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
 
  ! Define tables to account for symmetries:
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
@@ -5417,11 +5417,11 @@ else
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
 
      ! Symmetrize sigc_rpr by applying the operations of the little group of kcalc.
-     !do ikcalc=1,gwr%nkcalc
-     !  do ipm=1,2
-     !    call gwr%symmetrize_ltg(sigc_rpr(ipm, ikcalc), ltg_ikcalc(ikcalc))
-     !  end do
-     !end do
+     do ikcalc=1,gwr%nkcalc
+       do ipm=1,2
+         !call gwr%symmetrize_with_ltg(sigc_rpr(ipm, ikcalc), ltg_ikcalc(ikcalc))
+       end do
+     end do
 
      ! Integrate self-energy matrix elements in the unit cell.
      ! Remember that Sigma is stored as (r',r) and that the second dimension is MPI-distributed.

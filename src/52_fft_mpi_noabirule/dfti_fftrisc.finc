@@ -5,7 +5,7 @@
  integer :: ny,nz,nfft,ngbin,ngbout,nthreads,ldxy,ng2_pos,ng2_neg,pt,status
  integer :: lot,nlot,lotin,lotout,fftcache,cidx,sidx,xyplane,padx
  integer :: nxhalf1,nxhalfm,nyhalf1,cidx_inv,pidx,fidx,padz,padc
- integer :: igb_inv,iiy,ixmax,iz_inv
+ integer :: igb_inv,iiy,ixmax,iz_inv, G_TO_R, R_TO_G, iscale__
  real(dp) :: fraction,arg
  complex(MYKIND) :: vloc,phase
  character(len=500) :: msg
@@ -24,6 +24,15 @@
 #if defined HAVE_OPENMP && defined __GFORTRAN__ 
 #define DEV_USE_ABIMALLOC
 #endif
+
+ !G_TO_R = +1
+ !R_TO_G = -1
+ !if (present(abi_convention)) then
+ !  if (.not. abi_convention) then
+ !    G_TO_R = -1; R_TO_G = +1
+ !  end if
+ !end if
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
 
  if (istwf_k>2 .and. option==0) then
    write(msg,'(a,i0)')' option=0 is not allowed with istwf_k=',istwf_k
@@ -122,7 +131,7 @@ if (istwf_k==1) then
    status = DftiCommitDescriptor(bw_plan)
    DFTI_CHECK(status)
 
-   status =  DftiComputeBackward(bw_plan, cuboid)
+   status = DftiComputeBackward(bw_plan, cuboid)
    DFTI_CHECK(status)
 
 #else
@@ -1146,3 +1155,39 @@ end if ! End time-reversal symmetry
  if (option==2 .or. option==3) then
    ABI_FREE(indpw_kout)
  end if
+
+contains
+
+subroutine compute_ip(desc, isign, io_data)
+  type(DFTI_DESCRIPTOR) :: desc 
+  integer,intent(in) :: isign
+  complex(MYKIND),intent(inout) :: io_data(*)
+
+  select case (isign)
+  case (1)
+    DFTI_CHECK(DftiComputeForward(desc, io_data)
+  case (-1)
+    DFTI_CHECK(DftiComputeBackward(desc, iodata)
+  case default
+    ABI_ERROR("Invalid isign:", itoa(isign))
+  end select
+
+end subroutine compute_ip
+
+subroutine compute_op(desc, isign, in_data, out_data)
+  type(DFTI_DESCRIPTOR) :: desc 
+  integer,intent(in) :: isign
+  complex(MYKIND),intent(in) :: in_data(*)
+  complex(MYKIND),intent(out) :: out_data(*)
+
+  select case (isign)
+  case (1)
+    DFTI_CHECK(DftiComputeForward(desc, in_data, out_data)
+  case (-1)
+    DFTI_CHECK(DftiComputeBackward(desc, in_data, out_data)
+  case default
+    ABI_ERROR("Invalid isign:", itoa(isign))
+  end select
+end subroutine compute_op
+
+

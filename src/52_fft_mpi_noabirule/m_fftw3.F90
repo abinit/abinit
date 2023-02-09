@@ -1059,7 +1059,7 @@ subroutine fftw3_fftug_dp(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 #else
  ! Silence compiler warning
  ABI_ERROR("FFT_FFTW3 support not activated")
- ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1),iscale,isign/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
