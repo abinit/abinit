@@ -1165,9 +1165,9 @@ subroutine compute_ip(desc, isign, io_data)
 
   select case (isign)
   case (1)
-    DFTI_CHECK(DftiComputeForward(desc, io_data)
+    DFTI_CHECK(DftiComputeForward(desc, io_data))
   case (-1)
-    DFTI_CHECK(DftiComputeBackward(desc, iodata)
+    DFTI_CHECK(DftiComputeBackward(desc, iodata))
   case default
     ABI_ERROR("Invalid isign:", itoa(isign))
   end select
@@ -1182,9 +1182,9 @@ subroutine compute_op(desc, isign, in_data, out_data)
 
   select case (isign)
   case (1)
-    DFTI_CHECK(DftiComputeForward(desc, in_data, out_data)
+    DFTI_CHECK(DftiComputeForward(desc, in_data, out_data))
   case (-1)
-    DFTI_CHECK(DftiComputeBackward(desc, in_data, out_data)
+    DFTI_CHECK(DftiComputeBackward(desc, in_data, out_data))
   case default
     ABI_ERROR("Invalid isign:", itoa(isign))
   end select
