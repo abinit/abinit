@@ -1671,11 +1671,8 @@ subroutine dfti_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
 
 !Local variables-------------------------------
 #ifdef HAVE_DFTI
- integer :: iscale__
 
 ! *************************************************************************
-
- iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
 
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
@@ -1731,11 +1728,6 @@ subroutine dfti_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
 #ifdef HAVE_DFTI
- integer :: iscale__
-
-! *************************************************************************
-
- iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
 
 ! Include Fortran template
 #undef DEV_DFTI_PRECISION
