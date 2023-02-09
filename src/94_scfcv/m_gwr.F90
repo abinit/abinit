@@ -4564,9 +4564,12 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
  character(len=*),intent(in) :: action
 
 !Local variables-------------------------------
- integer :: iq_ibz, ierr, lsize(2), do_mpi_qibz(gwr%nqibz), sender_qibz(gwr%nqibz)
+ integer :: iq_ibz, ierr, lsize(2), bcast_comm, color, do_mpi_qibz(gwr%nqibz), sender_qibz(gwr%nqibz)
+ logical :: im_sender
+ integer from_ranks(1), to_ranks(1)
  real(dp) :: qq_ibz(3), cpu, wall, gflops
  complex(gwpc),allocatable :: cbuf_q(:,:)
+ complex(gwpc),contiguous, pointer :: cq_ptr(:,:)
 
 ! *************************************************************************
 
@@ -4589,7 +4592,7 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
 
    call xmpi_sum(do_mpi_qibz, gwr%kpt_comm%value, ierr)
 
-   ! All procs enter the loop.
+   ! All procs enter the loop. Sender_qibz stores the rank of the sender in gwr%kpt_comm
    got_qibz = 0; sender_qibz(:) = huge(1)
    do iq_ibz=1,gwr%nqibz
      if (do_mpi_qibz(iq_ibz) == 0) cycle
@@ -4613,15 +4616,26 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
    do iq_ibz=1,gwr%nqibz
      if (do_mpi_qibz(iq_ibz) == 0) cycle
 
+     ! TODO: Can create subcommunicators with color and bcast only inside subcomm.
+     ! FIXME: MPI error on lumi
+#if 1
+     im_sender = gwr%kpt_comm%me == sender_qibz(iq_ibz)
+     color = merge(1, 0, im_sender .or. need_qibz(iq_ibz) /= 0)
+     call xmpi_comm_split(gwr%kpt_comm%value, color, gwr%kpt_comm%me, bcast_comm, ierr)
+
+     if (color == 1) then
+       from_ranks(1) = sender_qibz(iq_ibz)
+       call xmpi_comm_translate_ranks(gwr%kpt_comm%value, 1, from_ranks, bcast_comm, to_ranks)
+       if (what == "tchi") cq_ptr => gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx
+       if (what == "wc")   cq_ptr => gwr%wc_qibz(iq_ibz, itau, spin)%buffer_cplx
+       call xmpi_bcast(cq_ptr, to_ranks(1), bcast_comm, ierr)
+     end if
+     call xmpi_comm_free(bcast_comm)
+
+#else
      ! This is needed because not all procs have allocated this matrix
      lsize = gwr%gt_kibz(1, iq_ibz, itau, spin)%sizeb_local(:)
      call xmpi_bcast(lsize, sender_qibz(iq_ibz), gwr%kpt_comm%value, ierr)
-
-     ! TODO: Can create subcommunicators with color and bcast only inside subcomm.
-     !need_block_ks = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
-     !color = merge(1, 0, (need_block_ks .or. io_comm%me == master))
-     !call xmpi_comm_split(gwr%kpt_comm%value, color, gwr%kpt_comm%me, bcast_comm, ierr)
-     !call xmpi_comm_free(bcast_comm)
 
      ABI_MALLOC(cbuf_q, (lsize(1), lsize(2)))
      if (gwr%kpt_comm%me == sender_qibz(iq_ibz)) then
@@ -4634,7 +4648,9 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
        if (what == "wc")   gwr%wc_qibz(iq_ibz, itau, spin)%buffer_cplx = cbuf_q
      end if
      ABI_FREE(cbuf_q)
-   end do
+#endif
+
+   end do ! iq_ibz
 
  case ("free")
    ! Use got_qibz table to free previously allocated memory

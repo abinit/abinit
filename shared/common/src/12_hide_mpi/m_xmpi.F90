@@ -1765,7 +1765,7 @@ end subroutine xmpi_group_translate_ranks
 !!
 !! SOURCE
 
-subroutine xmpi_comm_translate_ranks(from_comm,nrank,from_ranks,to_comm,to_ranks)
+subroutine xmpi_comm_translate_ranks(from_comm, nrank, from_ranks, to_comm, to_ranks)
 
 !Arguments-------------------------
 !scalars
