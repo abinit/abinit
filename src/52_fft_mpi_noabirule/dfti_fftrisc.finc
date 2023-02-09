@@ -1156,38 +1156,37 @@ end if ! End time-reversal symmetry
    ABI_FREE(indpw_kout)
  end if
 
-!contains
-!
-!subroutine compute_ip(desc, isign, io_data)
-!  type(DFTI_DESCRIPTOR) :: desc 
-!  integer,intent(in) :: isign
-!  complex(MYKIND),intent(inout) :: io_data(*)
-!
-!  select case (isign)
-!  case (1)
-!    DFTI_CHECK(DftiComputeForward(desc, io_data))
-!  case (-1)
-!    DFTI_CHECK(DftiComputeBackward(desc, iodata))
-!  case default
-!    ABI_ERROR(sjoin("Invalid isign:", itoa(isign)))
-!  end select
-!
-!end subroutine compute_ip
-!
-!subroutine compute_op(desc, isign, in_data, out_data)
-!  type(DFTI_DESCRIPTOR) :: desc 
-!  integer,intent(in) :: isign
-!  complex(MYKIND),intent(in) :: in_data(*)
-!  complex(MYKIND),intent(out) :: out_data(*)
-!
-!  select case (isign)
-!  case (1)
-!    DFTI_CHECK(DftiComputeForward(desc, in_data, out_data))
-!  case (-1)
-!    DFTI_CHECK(DftiComputeBackward(desc, in_data, out_data))
-!  case default
-!    ABI_ERROR(sjoin("Invalid isign:", itoa(isign)))
-!  end select
-!end subroutine compute_op
+contains
 
+subroutine compute_ip(desc, isign, io_data)
+  type(DFTI_DESCRIPTOR),pointer :: desc 
+  integer,intent(in) :: isign
+  complex(MYKIND),intent(inout) :: io_data(*)
+
+  select case (isign)
+  case (1)
+    DFTI_CHECK(DftiComputeForward(desc, io_data))
+  case (-1)
+    DFTI_CHECK(DftiComputeBackward(desc, io_data))
+  case default
+    ABI_ERROR(sjoin("Invalid isign:", itoa(isign)))
+  end select
+
+end subroutine compute_ip
+
+subroutine compute_op(desc, isign, in_data, out_data)
+  type(DFTI_DESCRIPTOR),pointer :: desc 
+  integer,intent(in) :: isign
+  complex(MYKIND),intent(in) :: in_data(*)
+  complex(MYKIND),intent(out) :: out_data(*)
+
+  select case (isign)
+  case (1)
+    DFTI_CHECK(DftiComputeForward(desc, in_data, out_data))
+  case (-1)
+    DFTI_CHECK(DftiComputeBackward(desc, in_data, out_data))
+  case default
+    ABI_ERROR(sjoin("Invalid isign:", itoa(isign)))
+  end select
+end subroutine compute_op
 
