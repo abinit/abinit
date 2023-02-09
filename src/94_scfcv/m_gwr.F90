@@ -2217,7 +2217,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
          band = ugb%loc2gcol(il_b)
          bmask(band) = .True.
        end do
-       ! FIXME: This is wrong is spc
+       ! FIXME: This is wrong if spc
        call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
        call wfk%read_bmask(bmask, ik_ibz, spin, &
                            !xmpio_single, &
@@ -2988,7 +2988,6 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, ipm_list)
    do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
      !ABI_CHECK(allocated(gk_rpr_pm(ipm)%buffer_cplx),  sjoin("ipm", itoa(ipm), "not allocated"))
      ! G_k(g',r) -> G_k(r',r) and store results in rgp.
-     ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
      ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
      call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), gk_rpr_pm(ipm)%buffer_cplx(:,ir1), isign=-1, iscale=0)
    end do ! ir1
@@ -3056,7 +3055,6 @@ subroutine gwr_ggp_to_rpr(gwr, desc, ggp, rpr)
  call rgp%ptrans("N", gpr, free=.True.)
 
  ! F(g',r) -> F(r',r) and store results in rpr%buffer
- ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
  do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
    call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), rpr%buffer_cplx(:, ir1), isign=-1, iscale=0)
@@ -3107,7 +3105,6 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rpr, ggp)
                    desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
  ! F(r',r) --> F(g',r) and store results in gpr
- ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the API)
  do ir2=1, rpr%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rpr%sizeb_local(2), gwr%uc_batch_size)
    call uplan_k%execute_rg(ndat, rpr%buffer_cplx(:, ir2), gpr%buffer_cplx(:, ir2), isign=+1, iscale=0)
@@ -3392,7 +3389,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
 
  ! Wc(g',r) -> Wc(r',r)
  do ir1=1,gpr%sizeb_local(2), gwr%uc_batch_size
-   ! FIXME: FFT sign is wrong (should be - instead of + but I need to change the FFT API)
    ! FFT Wc_q(g',r) -> Wc_q(r',r) and store results in wc_rgp.
    ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
    call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:, ir1), wc_rpr%buffer_cplx(:, ir1), isign=-1, iscale=0)
@@ -4481,11 +4477,11 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
 
  select case (action)
  case ("communicate")
+
    do_mpi_kibz = need_kibz
    do ik_ibz=1,gwr%nkibz
      if (allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) do_mpi_kibz(ik_ibz) = 0
    end do
-
    call xmpi_sum(do_mpi_kibz, gwr%kpt_comm%value, ierr)
 
    ! All procs enter the loop.
@@ -4547,7 +4543,7 @@ end subroutine gwr_redistrib_gt_kibz
 !!      Redistribute chi_q (wc_q) for fixed (itau, spin) according to `need_qibz` table.
 !!      Also, set `got_qibz` to 1 for each IBZ q-point that has been received.
 !!  If action == "free":
-!!      Use `got_qibz` to deallocate matrices received in a previous "communicate".
+!!      Use `got_qibz` to deallocate matrices received in a previous call with "communicate".
 !!
 !! INPUTS
 !!
@@ -4565,11 +4561,10 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
  character(len=*),intent(in) :: action
 
 !Local variables-------------------------------
- integer :: iq_ibz, ierr, lsize(2), bcast_comm, color, do_mpi_qibz(gwr%nqibz), sender_qibz(gwr%nqibz)
+ integer :: iq_ibz, ierr, bcast_comm, color, do_mpi_qibz(gwr%nqibz), sender_qibz(gwr%nqibz), sender_in_bcast_comm ! lsize(2),
  logical :: im_sender
- integer from_ranks(1), to_ranks(1)
  real(dp) :: qq_ibz(3), cpu, wall, gflops
- complex(gwpc),allocatable :: cbuf_q(:,:)
+ !complex(gwpc),allocatable :: cbuf_q(:,:)
  complex(gwpc),contiguous, pointer :: cq_ptr(:,:)
 
 ! *************************************************************************
@@ -4592,6 +4587,7 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
    end do
 
    call xmpi_sum(do_mpi_qibz, gwr%kpt_comm%value, ierr)
+   !do_mpi_qibz = 1
 
    ! All procs enter the loop. Sender_qibz stores the rank of the sender in gwr%kpt_comm
    got_qibz = 0; sender_qibz(:) = huge(1)
@@ -4601,7 +4597,8 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
      if (allocated(gwr%tchi_desc_qibz(iq_ibz)%gvec)) sender_qibz(iq_ibz) = gwr%kpt_comm%me
      if (need_qibz(iq_ibz) /= 0 .and. .not. allocated(gwr%tchi_desc_qibz(iq_ibz)%gvec)) then
        got_qibz(iq_ibz) = 1
-       call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, gwr%dtset%ecuteps, gwr)
+       ! NB: Use same args as those used to init the descriptors in gwr_init.
+       call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, gwr%dtset%ecuteps, gwr, kin_sorted=.True.)
      end if
    end do
    !call wrtout(std_out, sjoin(" Will get:", itoa(count(got_qibz /= 0)), "new matrices"))
@@ -4617,39 +4614,36 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
    do iq_ibz=1,gwr%nqibz
      if (do_mpi_qibz(iq_ibz) == 0) cycle
 
-     ! TODO: Can create subcommunicators with color and bcast only inside subcomm.
-     ! FIXME: MPI error on lumi
-#if 1
+     ! Create subcommunicators with color and bcast only inside subcomm.
      im_sender = gwr%kpt_comm%me == sender_qibz(iq_ibz)
      color = merge(1, 0, im_sender .or. need_qibz(iq_ibz) /= 0)
      call xmpi_comm_split(gwr%kpt_comm%value, color, gwr%kpt_comm%me, bcast_comm, ierr)
 
      if (color == 1) then
-       from_ranks(1) = sender_qibz(iq_ibz)
-       call xmpi_comm_translate_ranks(gwr%kpt_comm%value, 1, from_ranks, bcast_comm, to_ranks)
        if (what == "tchi") cq_ptr => gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx
        if (what == "wc")   cq_ptr => gwr%wc_qibz(iq_ibz, itau, spin)%buffer_cplx
-       call xmpi_bcast(cq_ptr, to_ranks(1), bcast_comm, ierr)
+       sender_in_bcast_comm = translate_rank(sender_qibz(iq_ibz), gwr%kpt_comm%value, bcast_comm)
+       call xmpi_bcast(cq_ptr, sender_in_bcast_comm, bcast_comm, ierr)
      end if
      call xmpi_comm_free(bcast_comm)
 
-#else
+     !#else
      ! This is needed because not all procs have allocated this matrix
-     lsize = gwr%gt_kibz(1, iq_ibz, itau, spin)%sizeb_local(:)
-     call xmpi_bcast(lsize, sender_qibz(iq_ibz), gwr%kpt_comm%value, ierr)
+     !lsize = gwr%gt_kibz(1, iq_ibz, itau, spin)%sizeb_local(:)
+     !call xmpi_bcast(lsize, sender_qibz(iq_ibz), gwr%kpt_comm%value, ierr)
 
-     ABI_MALLOC(cbuf_q, (lsize(1), lsize(2)))
-     if (gwr%kpt_comm%me == sender_qibz(iq_ibz)) then
-       if (what == "tchi") cbuf_q = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx
-       if (what == "wc")   cbuf_q = gwr%wc_qibz(iq_ibz, itau, spin)%buffer_cplx
-     end if
-     call xmpi_bcast(cbuf_q, sender_qibz(iq_ibz), gwr%kpt_comm%value, ierr)
-     if (need_qibz(iq_ibz) /= 0) then
-       if (what == "tchi") gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx = cbuf_q
-       if (what == "wc")   gwr%wc_qibz(iq_ibz, itau, spin)%buffer_cplx = cbuf_q
-     end if
-     ABI_FREE(cbuf_q)
-#endif
+     !ABI_MALLOC(cbuf_q, (lsize(1), lsize(2)))
+     !if (gwr%kpt_comm%me == sender_qibz(iq_ibz)) then
+     !  if (what == "tchi") cbuf_q = gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx
+     !  if (what == "wc")   cbuf_q = gwr%wc_qibz(iq_ibz, itau, spin)%buffer_cplx
+     !end if
+     !call xmpi_bcast(cbuf_q, sender_qibz(iq_ibz), gwr%kpt_comm%value, ierr)
+     !if (need_qibz(iq_ibz) /= 0) then
+     !  if (what == "tchi") gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx = cbuf_q
+     !  if (what == "wc")   gwr%wc_qibz(iq_ibz, itau, spin)%buffer_cplx = cbuf_q
+     !end if
+     !ABI_FREE(cbuf_q)
+     !#endif
 
    end do ! iq_ibz
 
@@ -4668,6 +4662,19 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
  end select
 
  call cwtime_report(" gwr_redistrib_mats_qibz:", cpu, wall, gflops)
+
+contains
+
+! TODO: Move to xmpi
+integer function translate_rank(from_rank, from_comm, to_comm) result(to_rank)
+
+ integer,intent(in) :: from_rank, from_comm, to_comm
+
+ integer :: from_ranks(1), to_ranks(1)
+ from_ranks(1) = from_rank
+ call xmpi_comm_translate_ranks(from_comm, 1, from_ranks, to_comm, to_ranks)
+ to_rank = to_ranks(1)
+end function translate_rank
 
 end subroutine gwr_redistrib_mats_qibz
 !!***
@@ -5391,7 +5398,7 @@ else
      call slk_array_set(sigc_rpr, czero)
 
      ! Sum over my k-points in the BZ.
-     ! FIXME: Different results if k-point parallelism.
+     ! FIXME: Different results if k-point parallelism if kcalc != 0
      do my_ikf=1,gwr%my_nkbz
        if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODR) == 0) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
        ik_bz = gwr%my_kbz_inds(my_ikf)
