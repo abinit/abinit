@@ -615,10 +615,11 @@ subroutine dfti_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 #else
  ABI_ERROR("DFTI support not activated")
- ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
+ ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1),iscale/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),weight_r,weight_i/))
  ABI_UNUSED((/fofgin(1,1),fofgout(1,1),fofr(1,1)/))
+ ABI_UNUSED(abi_convention)
 #endif
 
 end subroutine dfti_fftrisc_sp
@@ -734,9 +735,10 @@ subroutine dfti_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,i
 
 #else
  ABI_ERROR("DFTI support not activated")
- ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
+ ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1),iscale/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
+ ABI_UNUSED(abi_convention)
 #endif
 
 end subroutine dfti_fftrisc_dp
@@ -799,9 +801,10 @@ subroutine dfti_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gbound
 
 #else
  ABI_ERROR("DFTI support not activated")
- ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1)/))
+ ABI_UNUSED((/cplex,gboundin(1,1),gboundout(1,1),istwf_k,kg_kin(1,1),kg_kout(1,1),iscale/))
  ABI_UNUSED((/mgfft,ngfft(1),npwin,npwout,ldx,ldy,ldz,option/))
  ABI_UNUSED((/denpot(1,1,1),fofgin(1,1),fofgout(1,1),fofr(1,1),weight_r,weight_i/))
+ ABI_UNUSED(abi_convention)
 #endif
 
 end subroutine dfti_fftrisc_mixprec
@@ -1028,7 +1031,7 @@ subroutine dfti_fftug_dpc(fftalg, fftcache, npw_k, nx, ny, nz, ldx, ldy, ldz, nd
 #else
  ! Silence compiler warning
  ABI_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1)/))
+ ABI_UNUSED((/fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_k,mgfft,kg_k(1,1),gbound(1,1),isign,iscale/))
  ABI_UNUSED((/ug(1),ur(1)/))
 #endif
 
@@ -1624,7 +1627,7 @@ subroutine dfti_fftpad_dp(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbo
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
+ ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,iscale/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
 #endif
@@ -1685,7 +1688,7 @@ subroutine dfti_fftpad_dpc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
+ ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,iscale/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
 #endif
@@ -1745,7 +1748,7 @@ subroutine dfti_fftpad_spc(ff, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gb
 
 #else
  ABI_ERROR("FFT_DFTI support not activated")
- ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign/))
+ ABI_UNUSED((/nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,iscale/))
  ABI_UNUSED(gbound(1,1))
  ABI_UNUSED(ff(1))
 #endif
