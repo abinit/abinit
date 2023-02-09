@@ -2264,6 +2264,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        color = merge(1, 0, (need_block_ks .or. io_comm%me == master))
        call xmpi_comm_split(io_comm%value, color, io_comm%me, bcast_comm, ierr)
 
+       ! TODO: Optimize this part
        ! Find band_step that gives good compromise between memory and efficiency.
        band_step = memlimited_step(1, nbsum, 2*npwsp, xmpi_bsize_dp, 1024.0_dp)
        do bstart=1, nbsum, band_step
@@ -5338,7 +5339,7 @@ else
 
  ! Define tables to account for symmetries:
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
- !  - when accumulating the self-energy, we have to include weights that depend on x.
+ !  - when accumulating the self-energy, we have to use weights that depend on x.
 
  ! * The little group is used only if symsigma == 1
  ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
@@ -5365,31 +5366,32 @@ else
    end do
    ABI_FREE(ur)
 
+   need_qibz = 0
+   do my_ikf=1,gwr%my_nkbz
+     ik_bz = gwr%my_kbz_inds(my_ikf)
+     kk_bz = gwr%kbz(:, ik_bz)
+     do ikcalc=1,gwr%nkcalc
+       qq_bz = gwr%kcalc(:,ikcalc) - kk_bz
+       !qq_bz = -qq_bz
+       ! TODO: here I may need to take into account the umklapp
+       call findqg0(iq_bz, g0_q, qq_bz, gwr%nqbz, gwr%qbz, gwr%mG0)
+       !ABI_CHECK(all(g0_q == 0), sjoin("g0_q != 0, kcalc", ktoa(gwr%kcalc(:,ikcalc)), "kk_bz:", ktoa(kk_bz)))
+       iq_ibz = gwr%qbz2ibz(1, iq_bz)
+       need_qibz(iq_ibz) = 1
+     end do
+   end do
+
    ! Construct Sigma(itau) using convolutions in k-space and real-space representation in the unit cell.
    do my_it=1,gwr%my_ntau
      call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
      itau = gwr%my_itaus(my_it)
 
      ! Redistribute W_q(g,g') in the IBZ so that each MPI proc can reconstruct Wc_q in the BZ inside the loops
-     need_qibz = 0
-     do my_ikf=1,gwr%my_nkbz
-       ik_bz = gwr%my_kbz_inds(my_ikf)
-       kk_bz = gwr%kbz(:, ik_bz)
-       do ikcalc=1,gwr%nkcalc
-         qq_bz = gwr%kcalc(:,ikcalc) - kk_bz
-         !qq_bz = -qq_bz
-         ! TODO: here I may need to take into account the umklapp
-         call findqg0(iq_bz, g0_q, qq_bz, gwr%nqbz, gwr%qbz, gwr%mG0)
-         !ABI_CHECK(all(g0_q == 0), sjoin("g0_q != 0, kcalc", ktoa(gwr%kcalc(:,ikcalc)), "kk_bz:", ktoa(kk_bz)))
-         iq_ibz = gwr%qbz2ibz(1, iq_bz)
-         need_qibz(iq_ibz) = 1
-       end do
-     end do
-
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "communicate")
      call slk_array_set(sigc_rpr, czero)
 
-     ! Sum over k-points in the BZ.
+     ! Sum over my k-points in the BZ.
+     ! FIXME: Different results if k-point parallelism.
      do my_ikf=1,gwr%my_nkbz
        if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODR) == 0) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
        ik_bz = gwr%my_kbz_inds(my_ikf)
@@ -5414,8 +5416,10 @@ else
          !iq_ibz = gwr%qbz2ibz(1, iq_bz)
          call gwr%get_wc_rpr_qbz(g0_q, iq_bz, itau, spin, wc_rpr)
 
+         ! The weight depends on ikcalc
          weight_ikf = one / gwr%nkbz
          !weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
+
          do ipm=1,2
            sigc_rpr(ipm, ikcalc)%buffer_cplx = sigc_rpr(ipm, ikcalc)%buffer_cplx + &
              weight_ikf * gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
@@ -5467,7 +5471,6 @@ else
  do ikcalc=1,gwr%nkcalc
    call ltg_kcalc(ikcalc)%free()
  end do
-
  call wrtout(std_out, " Mixed space algorithm for sigma completed")
 end if
 

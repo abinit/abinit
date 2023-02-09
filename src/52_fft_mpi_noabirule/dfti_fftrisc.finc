@@ -5,7 +5,7 @@
  integer :: ny,nz,nfft,ngbin,ngbout,nthreads,ldxy,ng2_pos,ng2_neg,pt,status
  integer :: lot,nlot,lotin,lotout,fftcache,cidx,sidx,xyplane,padx
  integer :: nxhalf1,nxhalfm,nyhalf1,cidx_inv,pidx,fidx,padz,padc
- integer :: igb_inv,iiy,ixmax,iz_inv, G_TO_R, R_TO_G, iscale__
+ integer :: igb_inv,iiy,ixmax,iz_inv, G_TO_R, R_TO_G, iscale__, G_TO_R_SCALE, R_TO_G_SCALE
  real(dp) :: fraction,arg
  complex(MYKIND) :: vloc,phase
  character(len=500) :: msg
@@ -25,11 +25,12 @@
 #define DEV_USE_ABIMALLOC
 #endif
 
- G_TO_R = +1
- R_TO_G = -1
+ G_TO_R = +1; R_TO_G = -1
+ R_TO_G_SCALE = DFTI_FORWARD_SCALE; G_TO_R_SCALE = DFTI_BACKWARD_SCALE
  if (present(abi_convention)) then
    if (.not. abi_convention) then
      G_TO_R = -1; R_TO_G = +1
+     R_TO_G_SCALE = DFTI_BACKWARD_SCALE; G_TO_R_SCALE = DFTI_FORWARD_SCALE
    end if
  end if
  iscale__ = 1; if (present(iscale)) iscale__ = iscale
@@ -466,7 +467,7 @@ end if
    status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
    status = DftiSetValue(fw_plan, DFTI_INPUT_DISTANCE,  1)
    status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
-   status = DftiSetValue(fw_plan, DFTI_FORWARD_SCALE, one/DBLE(nfft)) ! normalization
+   status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
 
    status = DftiCommitDescriptor(fw_plan)
    DFTI_CHECK(status)
@@ -482,7 +483,7 @@ end if
 
    status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
    status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nthreads)
-   status = DftiSetValue(fw_plan, DFTI_FORWARD_SCALE, one/DBLE(nfft)) ! normalization
+   status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
    DFTI_CHECK(status)
 
    status = DftiCommitDescriptor(fw_plan)
@@ -1131,7 +1132,9 @@ else if (istwf_k>=2) then
      status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
      status = DftiSetValue(fw_plan, DFTI_INPUT_DISTANCE,  1)
      status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
-     status = DftiSetValue(fw_plan, DFTI_FORWARD_SCALE, one/DBLE(nfft)) ! normalization
+     if (iscale__ == 1) then
+        status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
+     end if
                                                                                         
      status = DftiCommitDescriptor(fw_plan)
      DFTI_CHECK(status)
