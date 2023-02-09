@@ -4983,9 +4983,9 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
    case (FFT_FFTW3)
      call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
                       uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
-   !case (FFT_DFTI)
-   !  call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
-   !                  uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
+   case (FFT_DFTI)
+     call dfti_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
+                     uplan%kg_k, uplan%gbound, ur, ug, isign=isign__, iscale=iscale__)
    case default
      ABI_ERROR(sjoin("Wrong fftalga:", itoa(fftalga)))
    end select
