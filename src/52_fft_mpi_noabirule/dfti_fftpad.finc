@@ -1,8 +1,10 @@
 #ifdef HAVE_DFTI
- integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads
+ integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads, iscale__
  character(len=500) :: msg
  type(zpad_t) :: zpad
  type(DFTI_DESCRIPTOR),pointer :: Desc1,Desc2,Desc3
+
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
 
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
