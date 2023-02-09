@@ -2485,7 +2485,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
  integer,optional,intent(inout) :: gt_scbox_win
 
 !Local variables-------------------------------
- integer :: my_ikf, ik_bz, ig, ipm, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc)
+ integer :: my_ikf, ik_bz, ipm, ig, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc)
  real(dp) :: tsec(2) !, cpu, wall, gflops
 
 ! *************************************************************************
