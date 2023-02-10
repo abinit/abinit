@@ -351,7 +351,7 @@ module m_bz_mesh
 
   integer,allocatable :: wtksym(:,:,:)
   ! wtksym(timrev,nsym_sg,kbz)
-  ! 1 if IS belongs to the little group, 0 otherwise !(should invert firt dimensions.
+  ! 1 if IS belongs to the little group, 0 otherwise TODO (should invert the first two dimensions)
 
   real(dp) :: ext_pt(3)
   ! The external point defining the little group.
