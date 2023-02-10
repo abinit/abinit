@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 51
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 52
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -83,6 +83,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2_RR_HEGV = 49
   integer, parameter :: NVTX_CHEBFI2_RR_XNP = 50
   integer, parameter :: NVTX_CHEBFI2_RR_GEMM = 51
+  integer, parameter :: NVTX_FORSTR_NONLOP = 52
 
 contains
 
@@ -148,7 +149,8 @@ contains
          & "CHEBFI2_RR_SCALE", &
          & "CHEBFI2_RR_HEGV", &
          & "CHEBFI2_RR_XNP", &
-         & "CHEBFI2_RR_GEMM" &
+         & "CHEBFI2_RR_GEMM", &
+         & "FORSTR_NONLOP" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -202,6 +204,7 @@ contains
     nvtx_ids(49)= NVTX_CHEBFI2_RR_HEGV
     nvtx_ids(50)= NVTX_CHEBFI2_RR_XNP
     nvtx_ids(51)= NVTX_CHEBFI2_RR_GEMM
+    nvtx_ids(52)= NVTX_FORSTR_NONLOP
 
   end subroutine nvtx_init
 
