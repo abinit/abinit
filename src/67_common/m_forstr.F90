@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_forstr
 
  use defs_basis
@@ -79,6 +82,10 @@ module m_forstr
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  use gator_mod
  use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -1014,6 +1021,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          call timab(924,-1,tsec)
 
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
+         ABI_NVTX_START_RANGE(NVTX_FORSTR_NONLOP)
          if (mpi_enreg%paral_kgb/=1) then
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
@@ -1022,6 +1030,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,use_gpu_cuda=0)
          end if
+         ABI_NVTX_END_RANGE()
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
            call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
