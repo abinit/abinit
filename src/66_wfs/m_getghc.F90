@@ -1816,68 +1816,33 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  spacedim_prj = size(cwaveprj,dim=2)/ndat
 
 
-#ifdef HAVE_GPU
- usegvnlxc=1
- if (size(gvnlxc)==0) usegvnlxc=0
-
- if ( present(kg_fft_k) ) then
-   if (present(kg_fft_kp)) then
-     call getghc(cpopt,cwavef,cwaveprj,&
-       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
-       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
-       &      prtvol,sij_opt,tim_getghc,type_calc,&
-       &      select_k=select_k_default,kg_fft_k=kg_fft_k,kg_fft_kp=kg_fft_kp)
-   else
-     call getghc(cpopt,cwavef,cwaveprj,&
-       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
-       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
-       &      prtvol,sij_opt,tim_getghc,type_calc,&
-       &      select_k=select_k_default,kg_fft_k=kg_fft_k)
-   end if
- else
-   if (present(kg_fft_kp)) then
-     call getghc(cpopt,cwavef,cwaveprj,&
-       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
-       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
-       &      prtvol,sij_opt,tim_getghc,type_calc,&
-       &      select_k=select_k_default,kg_fft_kp=kg_fft_kp)
-   else
-     call getghc(cpopt,cwavef,cwaveprj,&
-       &      ghc,gsc(:,1:ndat*spacedim*gs_ham%usepaw),&
-       &      gs_ham,gvnlxc(:,1:ndat*spacedim*usegvnlxc),lambda, mpi_enreg,ndat,&
-       &      prtvol,sij_opt,tim_getghc,type_calc,&
-       &      select_K=select_k_default)
-   end if
- end if
-
- ! end GPU version
-#else
-
-    !$omp parallel default (none) &
-    !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt,firstprj,lastprj,is_nested,usegvnlxc), &
-    !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
-    !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default)
-#ifdef HAVE_OPENMP
- ithread = omp_get_thread_num()
- nthreads = omp_get_num_threads()
-! is_nested = omp_get_nested()
- is_nested = .false.
-! call omp_set_nested(.false.)
-!Ensure that libs are used without threads (mkl, openblas, fftw3, ...)
-#ifdef HAVE_LINALG_MKL_THREADS
- call mkl_set_num_threads(1)
-#endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
- call openblas_set_num_threads(1)
-#endif
-#ifdef HAVE_FFTW3_THREADS
- fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
- call fftw3_use_lib_threads(.false.)
-#endif
-#else
+ ! Disabling multithreading for GPU variants (getghc_ompgpu is not thread-safe for now)
+ !$omp parallel default (none) &
+ !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt,firstprj,lastprj,is_nested,usegvnlxc), &
+ !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
+ !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) IF(gs_ham%use_gpu_impl==0)
  ithread = 0
  nthreads = 1
+ if(gs_ham%use_gpu_impl/=666) then
+#ifdef HAVE_OPENMP
+   ithread = omp_get_thread_num()
+   nthreads = omp_get_num_threads()
+!   is_nested = omp_get_nested()
+   is_nested = .false.
+!   call omp_set_nested(.false.)
+!Ensure that libs are used without threads (mkl, openblas, fftw3, ...)
+#ifdef HAVE_LINALG_MKL_THREADS
+   call mkl_set_num_threads(1)
 #endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+   call openblas_set_num_threads(1)
+#endif
+#ifdef HAVE_FFTW3_THREADS
+   fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
+   call fftw3_use_lib_threads(.false.)
+#endif
+#endif
+ end if
  chunk = ndat/nthreads ! Divide by 2 to construct chunk of even number of bands
  residuchunk = ndat - nthreads*chunk
  if ( ithread < nthreads-residuchunk ) then
@@ -1926,23 +1891,22 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
      end if
    end if
  end if
+ if(gs_ham%use_gpu_impl/=666) then
 #ifdef HAVE_OPENMP
-! call omp_set_nested(is_nested)
-!Restire libs behavior (mkl, openblas, fftw3, ...)
+  ! call omp_set_nested(is_nested)
+  !Restore libs behavior (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
- call mkl_set_num_threads(nthreads)
+   call mkl_set_num_threads(nthreads)
 #endif
 #ifdef HAVE_LINALG_OPENBLAS_THREADS
- call openblas_set_num_threads(nthreads)
+   call openblas_set_num_threads(nthreads)
 #endif
 #ifdef HAVE_FFTW3_THREADS
- call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
+   call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
 #endif
 #endif
+ end if
     !$omp end parallel
-
-! end HAVE_GPU
-#endif
 
 end subroutine multithreaded_getghc
 !!***
