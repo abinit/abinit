@@ -231,6 +231,7 @@ module m_xmpi
  public :: xmpi_comm_free             ! Hides MPI_COMM_FREE from MPI library.
  public :: xmpi_comm_group            ! Hides MPI_COMM_GROUP from MPI library.
  public :: xmpi_comm_translate_ranks  ! Hides MPI_GROUP_TRANSLATE_RANKS from MPI library.
+ public :: xmpi_comm_translate_rank   ! Translate one rank
  public :: xmpi_comm_split            ! Hides MPI_COMM_SPLIT from MPI library.
  public :: xmpi_subcomm               ! Creates a sub-communicator from an input communicator.
  public :: xmpi_comm_multiple_of      ! Creates sub-communicator with number of procs multiple of a certain number.
@@ -1791,6 +1792,32 @@ subroutine xmpi_comm_translate_ranks(from_comm, nrank, from_ranks, to_comm, to_r
  call xmpi_group_free(to_group)
 
 end subroutine xmpi_comm_translate_ranks
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_comm_translate_rank
+!! NAME
+!!  xmpi_comm_translate_rank
+!!
+!! FUNCTION
+!!  Helper function to translate a single rank `from_rank` in communicator `from_rank` to
+!!  the rank in communicator `to_comm`.
+
+integer function xmpi_comm_translate_rank(from_comm, from_rank, to_comm) result(to_rank)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: from_comm, from_rank, to_comm
+
+!Local variables-------------------------------
+ integer :: from_ranks(1), to_ranks(1)
+! *************************************************************************
+
+ from_ranks(1) = from_rank
+ call xmpi_comm_translate_ranks(from_comm, 1, from_ranks, to_comm, to_ranks)
+ to_rank = to_ranks(1)
+
+end function xmpi_comm_translate_rank
 !!***
 
 !----------------------------------------------------------------------
