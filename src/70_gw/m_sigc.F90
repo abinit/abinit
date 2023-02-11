@@ -664,13 +664,13 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! If symsigma, symmetrize the matrix elements.
      ! Sum only q"s in IBZ_k. In this case elements are weighted
      ! according to wtqp and wtqm. wtqm is for time-reversal.
-     wtqp=1; wtqm=0
+     wtqp = 1; wtqm = 0
      if (can_symmetrize(spin)) then
        if (Ltg_k%ibzq(iq_bz)/=1) CYCLE
-       wtqp=0; wtqm=0
+       wtqp = 0; wtqm = 0
        do isym=1,Ltg_k%nsym_sg
-         wtqp=wtqp+Ltg_k%wtksym(1,isym,iq_bz)
-         wtqm=wtqm+Ltg_k%wtksym(2,isym,iq_bz)
+         wtqp = wtqp + Ltg_k%wtksym(1,isym,iq_bz)
+         wtqm = wtqm + Ltg_k%wtksym(2,isym,iq_bz)
        end do
      end if
 

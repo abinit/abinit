@@ -821,7 +821,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig, ikq_ibz
  integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt
- integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum !, it, iw ! jj,
+ integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj !, it, iw
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
@@ -1025,9 +1025,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
  ABI_MALLOC(gwr%kcalc2ibz, (gwr%nkcalc, 6))
- if (abs(gwr%dtset%symsigma) == 1) then
-   ABI_MALLOC(gwr%degtab, (gwr%nkcalc, gwr%nsppol))
- end if
 
  ! Workspace arrays used to compute degeneracy tables.
  ABI_ICALLOC(degblock_all, (2, mband, gwr%nkcalc, gwr%nsppol))
@@ -1096,14 +1093,16 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ABI_CHECK(ierr == 0, "kptgw wavevectors must be in the IBZ read from the WFK file.")
 
+#if 1
  ! FIXME: This trigger SIGSEGV on lumi, don't know why!
-#if 0
  ! Build degtab tables.
  if (abs(gwr%dtset%symsigma) == 1) then
-   call xmpi_sum(ndeg_all, input_comm, ierr)
-   call xmpi_sum(degblock_all, input_comm, ierr)
+   ABI_MALLOC(gwr%degtab, (gwr%nkcalc, gwr%nsppol))
+   !call xmpi_sum(ndeg_all, input_comm, ierr)
+   !call xmpi_sum(degblock_all, input_comm, ierr)
    do ikcalc=1,gwr%nkcalc
      do spin=1,gwr%nsppol
+       !print *, "degtab for ikcalc:", ikcalc, "spin:", spin
        ndeg = ndeg_all(ikcalc, spin)
        ABI_MALLOC(gwr%degtab(ikcalc, spin)%bids, (ndeg))
        do ii=1,ndeg
@@ -1112,6 +1111,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
          gwr%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
            degblock_all(1, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1, &
            degblock_all(2, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1)]
+         !print *, "   bids:", gwr%degtab(ikcalc, spin)%bids(ii)%vals
        end do
      end do
    end do
@@ -1827,7 +1827,6 @@ subroutine gwr_malloc_free_mats(gwr, mask_ibz, what, action)
 
  call wrtout(std_out, "")
  call gwr%print_mem(unit=std_out)
- !print *, "After malloc_free_mats"
 
 end subroutine gwr_malloc_free_mats
 !!***
@@ -4989,11 +4988,11 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
  integer :: isym_k, trev_k, g0_k(3), tsign_k
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- integer :: gt_scbox_win, wct_scbox_win, use_umklp
+ integer :: gt_scbox_win, wct_scbox_win, use_umklp, wtqm, wtqp, isym, ideg, nstates
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, weight_ikf
- logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k
+ logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, compute_kbz
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
@@ -5003,7 +5002,7 @@ subroutine gwr_build_sigmac(gwr)
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
- complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau)
+ complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
  !complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
@@ -5314,7 +5313,7 @@ else
  ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
  use_umklp = 1
  do ikcalc=1,gwr%nkcalc
-   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:, ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
+   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
  end do
 
  do my_is=1,gwr%my_nspins
@@ -5364,7 +5363,6 @@ else
        if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODR) == 0) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
        ik_bz = gwr%my_kbz_inds(my_ikf)
        kk_bz = gwr%kbz(:,ik_bz)
-       !if (ik_bz .not. in any lg_kcalc) cycle
 
        ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
        trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
@@ -5372,10 +5370,23 @@ else
        tsign_k = merge(1, -1, trev_k == 0)
        !if (.not. isirr_k) cycle
 
-       ! Use symmetries to get G_k from the IBZ. Then G_k(g,g') --> G_k(r,r')
+       ! Skip this BZ k-point if it's not in the IBZ(ikcalc) of some ikcalc.
+       compute_kbz = .False.
+       if (gwr%dtset%symsigma /= 0) then
+         do ikcalc=1,gwr%nkcalc
+           if (ltg_kcalc(ikcalc)%ibzq(ik_bz) == 1) then
+             compute_kbz = .True.; exit
+           end if
+         end do
+       end if
+       if (.not. compute_kbz) cycle
+
+       ! Use symmetries to get G_kbz from the IBZ then G_k(g,g') --> G_k(r',r)
        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
 
        do ikcalc=1,gwr%nkcalc
+         if (gwr%dtset%symsigma /= 0 .and. ltg_kcalc(ikcalc)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
+
          qq_bz = gwr%kcalc(:, ikcalc) - kk_bz
          !qq_bz = -qq_bz
          ! TODO: here I may need to take into account the umklapp
@@ -5387,6 +5398,23 @@ else
          ! The integration weight depends on ikcalc
          weight_ikf = one / gwr%nkbz
          !weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
+         if (gwr%dtset%symsigma /= 0) then
+           weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
+           ! If symsigma, symmetrize the matrix elements.
+           ! Sum only q"s in IBZ_k. In this case elements are weighted
+           ! according to wtqp and wtqm. wtqm is for time-reversal.
+           associate (ltg_k => ltg_kcalc(ikcalc))
+           wtqp = 1; wtqm = 0
+           !if (can_symmetrize(spin)) then
+             !if (Ltg_k%ibzq(iq_bz)/=1) CYCLE
+             wtqp = 0; wtqm = 0
+             do isym=1,Ltg_k%nsym_sg
+               wtqp = wtqp + Ltg_k%wtksym(1, isym, iq_bz)  ! FIXME: iq_bz or ikq?
+               wtqm = wtqm + Ltg_k%wtksym(2, isym, iq_bz)
+             end do
+           !end if
+           end associate
+         end if
 
          do ipm=1,2
            sigc_rpr(ipm, ikcalc)%buffer_cplx = sigc_rpr(ipm, ikcalc)%buffer_cplx + &
@@ -5394,7 +5422,6 @@ else
          end do
        end do ! ikcalc
 
-       !call slk_array_free(gk_rpr_pm)
        if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0) then
          write(msg,'(4x,3(a,i0),a)')"Sigma_c my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
          if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
@@ -5403,13 +5430,6 @@ else
 
      ! Deallocate extra Wc matrices defined by got_qibz
      call gwr%redistrib_mats_qibz("wc", itau, spin, need_qibz, got_qibz, "free")
-
-     ! Symmetrize sigc_rpr by applying the operations of the little group of kcalc.
-     do ikcalc=1,gwr%nkcalc
-       do ipm=1,2
-         !call gwr%symmetrize_with_ltg(sigc_rpr(ipm, ikcalc), ltg_ikcalc(ikcalc))
-       end do
-     end do
 
      ! Integrate self-energy matrix elements in the unit cell.
      ! Remember that Sigma is stored as (r',r) and that the second dimension is MPI-distributed.
@@ -5453,6 +5473,25 @@ end if
 
  !sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2
  call xmpi_sum(sigc_it_diag_kcalc, gwr%comm%value, ierr)
+
+ if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
+   ! Average self-energy matrix elements in the degenerate subspace.
+   do spin=1,gwr%nsppol
+   do ikcalc=1,gwr%nkcalc
+     !print *, "degtab for ikcalc:", ikcalc, "spin:", spin
+     do ideg=1,size(gwr%degtab(ikcalc, spin)%bids)
+       associate (bids => gwr%degtab(ikcalc, spin)%bids(ideg)%vals)
+       nstates = size(bids)
+       !print *, "   bids:", bids, ", nstates:", nstates
+       avg_2ntau = sum(sigc_it_diag_kcalc(:,:,bids(:), ikcalc, spin), dim=3) / nstates
+       do ii=1,nstates
+         sigc_it_diag_kcalc(:,:,bids(ii),ikcalc,spin) = avg_2ntau
+       end do
+       end associate
+     end do ! ideg
+   end do
+   end do
+ end if ! symsigma == +1
 
  imag_zmesh(:) = j_dpc * gwr%iw_mesh
  sigc_iw_diag_kcalc = zero; qp_solver_ierr = 0
