@@ -222,40 +222,58 @@ end subroutine echo_xc_name
 !! INPUTS
 !!  ixc = internal code for xc functional
 !!  optdriver=type of calculation (ground-state, response function, GW, ...)
+!!  [check_k3xc]= optional ; check also k3xc availability
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine check_kxc(ixc,optdriver)
+subroutine check_kxc(ixc,optdriver,check_k3xc)
 
 !Arguments -------------------------------
  integer, intent(in) :: ixc,optdriver
+ logical,intent(in),optional :: check_k3xc
 
 !Local variables -------------------------
- logical :: kxc_available
+ logical :: check_k3xc_,kxc_available,k3xc_available
  character(len=500) :: msg
 
 ! *********************************************************************
 
- kxc_available=.false.
+ check_k3xc_=.false. ; if (present(check_k3xc)) check_k3xc_=check_k3xc
+ kxc_available=.false.  ; k3xc_available=.false.
 
  if (ixc>=0) then
    kxc_available=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27)
+   k3xc_available=(ixc==0.or.ixc==3.or.(ixc>=7.and.ixc<=15).or. &
+&    ixc==23.or.ixc==24.or.ixc==41.or.ixc==42.or.ixc==1402000)
    if (.not.kxc_available) then
      write(msg,'(a,i0,3a)') &
 &     'The selected XC functional (ixc=',ixc,')',ch10,&
 &     'does not provide Kxc (dVxc/drho) !'
    end if
+   if (check_k3xc_.and.(.not.k3xc_available)) then
+     write(msg,'(a,i0,3a)') &
+&     'The selected XC functional (ixc=',ixc,')',ch10,&
+&     'does not provide K3xc (d^2Vxc/drho^2) !'
+   end if
  else if (ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456)then
    kxc_available=.true.
+   k3xc_available=.false.
  else ! ixc<0 and not one of the allowed hybrids
    kxc_available=libxc_functionals_has_kxc()
+   k3xc_available=libxc_functionals_has_k3xc()
    if (.not.kxc_available) then
      write(msg,'(a,i0,7a)') &
 &     'The selected XC functional (ixc=',ixc,'):',ch10,&
 &     '   <<',trim(libxc_functionals_fullname()),'>>',ch10,&
 &     'does not provide Kxc (dVxc/drho) !'
+   end if
+   if (check_k3xc_.and.(.not.k3xc_available)) then
+     write(msg,'(a,i0,7a)') &
+&     'The selected XC functional (ixc=',ixc,'):',ch10,&
+&     '   <<',trim(libxc_functionals_fullname()),'>>',ch10,&
+&     'does not provide K3xc (d^2Vxc/d^2rho) !'
    end if
  end if
 
@@ -273,6 +291,15 @@ subroutine check_kxc(ixc,optdriver)
 &     '>Possible action (3):',ch10,&
 &     'Switch to another value of densfor_pred (=5, for instance).'
    end if
+   ABI_ERROR(msg)
+ else if (check_k3xc_.and.(.not.k3xc_available)) then
+   write(msg,'(13a)') trim(msg),ch10,&
+&   'However, with the current input options, ABINIT needs K3xc.',ch10,&
+&   '>Possible actions:',ch10,&
+&   '- Recompile libXC using --enable-kxc.',ch10,&
+&   '  or',ch10,&
+&   '- Change the XC functional in psp file or input file:',ch10,&
+&   '  use one of the internal LDA (ixc=3, 7 to 15, 23, 24).'
    ABI_ERROR(msg)
  end if
 
@@ -324,7 +351,7 @@ subroutine size_dvxc(ixc,order,nspden,&
  type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
 
 !Local variables----------------
- logical :: libxc_isgga,libxc_ismgga,libxc_ishybrid,my_add_tfw
+ logical :: libxc_has_kxc,libxc_has_k3xc,libxc_isgga,libxc_ismgga,libxc_ishybrid,my_add_tfw
  logical :: need_gradient,need_laplacian,need_kden
 
 ! *************************************************************************
@@ -334,10 +361,14 @@ subroutine size_dvxc(ixc,order,nspden,&
  libxc_isgga=.false. ; libxc_ismgga=.false. ; libxc_ishybrid=.false.
  if(ixc<0)then
    if(present(xc_funcs))then
+     libxc_has_kxc=libxc_functionals_has_kxc(xc_funcs)
+     libxc_has_k3xc=libxc_functionals_has_k3xc(xc_funcs)
      libxc_isgga=libxc_functionals_isgga(xc_functionals=xc_funcs)
      libxc_ismgga=libxc_functionals_ismgga(xc_functionals=xc_funcs)
      libxc_ishybrid=libxc_functionals_is_hybrid(xc_functionals=xc_funcs)
    else
+     libxc_has_kxc=libxc_functionals_has_kxc()
+     libxc_has_k3xc=libxc_functionals_has_k3xc()
      libxc_isgga=libxc_functionals_isgga()
      libxc_ismgga=libxc_functionals_ismgga()
      libxc_ishybrid=libxc_functionals_is_hybrid()
@@ -397,7 +428,7 @@ subroutine size_dvxc(ixc,order,nspden,&
    if (abs(order)>=2) then
      if (ixc==1.or.ixc==7.or.ixc==8.or.ixc==9.or.ixc==10.or.ixc==13.or. &
 &        ixc==21.or.ixc==22) then
-       ndvxc=min(nspden,2)+1  
+       ndvxc=min(nspden,2)+1
      else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=35).or.ixc==50) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
@@ -406,8 +437,10 @@ subroutine size_dvxc(ixc,order,nspden,&
 &             ixc==23.or.ixc==41.or.ixc==42.or.ixc==1402000) then
        ndvxc=15
      else if (ixc<0) then
-       ndvxc=2*min(nspden,2)+1 ; if (order==-2) ndvxc=2
-       if (need_gradient) ndvxc=15
+       if (libxc_has_kxc.or.ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456) then
+         ndvxc=2*min(nspden,2)+1 ; if (order==-2) ndvxc=2
+         if (need_gradient) ndvxc=15
+       end if
      end if
    end if
  end if
@@ -422,7 +455,9 @@ subroutine size_dvxc(ixc,order,nspden,&
      else if ((ixc>=7.and.ixc<=10).or.ixc==13.or.ixc==1402000) then
        nd2vxc=3*min(nspden,2)-2
      else if (ixc<0) then
-       if (.not.need_gradient) nd2vxc=3*min(nspden,2)-2
+       if (libxc_has_k3xc) then
+         if (.not.need_gradient) nd2vxc=3*min(nspden,2)-2
+       end if
      end if
    end if
  end if
