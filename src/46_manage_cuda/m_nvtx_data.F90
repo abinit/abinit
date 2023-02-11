@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 47
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 51
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -79,6 +79,10 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2_INIT = 45
   integer, parameter :: NVTX_INIT_INWFFIL = 46
   integer, parameter :: NVTX_INIT_INWFFIL2 = 47
+  integer, parameter :: NVTX_CHEBFI2_RR_SCALE = 48
+  integer, parameter :: NVTX_CHEBFI2_RR_HEGV = 49
+  integer, parameter :: NVTX_CHEBFI2_RR_XNP = 50
+  integer, parameter :: NVTX_CHEBFI2_RR_GEMM = 51
 
 contains
 
@@ -140,7 +144,11 @@ contains
          & "CHEBFI2_SQRT2", &
          & "CHEBFI2_INIT", &
          & "INIT_INWFFIL", &
-         & "INIT_INWFFIL2" &
+         & "INIT_INWFFIL2", &
+         & "CHEBFI2_RR_SCALE", &
+         & "CHEBFI2_RR_HEGV", &
+         & "CHEBFI2_RR_XNP", &
+         & "CHEBFI2_RR_GEMM" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -190,6 +198,10 @@ contains
     nvtx_ids(45)= NVTX_CHEBFI2_INIT
     nvtx_ids(46)= NVTX_INIT_INWFFIL
     nvtx_ids(47)= NVTX_INIT_INWFFIL2
+    nvtx_ids(48)= NVTX_CHEBFI2_RR_SCALE
+    nvtx_ids(49)= NVTX_CHEBFI2_RR_HEGV
+    nvtx_ids(50)= NVTX_CHEBFI2_RR_XNP
+    nvtx_ids(51)= NVTX_CHEBFI2_RR_GEMM
 
   end subroutine nvtx_init
 
