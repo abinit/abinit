@@ -214,7 +214,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  do ii=1,ndtset_alloc
    mtypalch=max(dtsets(ii)%ntypalch,mtypalch)
  end do
- call psps_init_global(mtypalch, npsp, psps, pspheads)
+ call psps_init_global(psps, mtypalch, npsp, pspheads)
 
  ABI_MALLOC(jdtset_,(0:ndtset))
  if(ndtset/=0)then
@@ -621,7 +621,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  ****************************************************************************
 !  Treat the pseudopotentials: initialize the psps/PAW variable
 
-   call psps_init_from_dtset(dtset, idtset, psps, pspheads)
+   call psps_init_from_dtset(psps, dtset, idtset, pspheads)
 
 !  The correct dimension of pawrad/tab is ntypat. In case of alchemical psps
 !  pawrad/tab(ipsp) is invoked with ipsp<=npsp. So, in order to avoid any problem,
