@@ -408,12 +408,15 @@ extern "C" void gpu_xsygvd_(const int* cplx,
                             void** W_ptr,
                             void** work_ptr,
                             int* lwork,
-                            int* devInfo)
+                            int* info)
 {
 
   const cusolverEigType_t itype_cu = select_eigen_type(*itype);
   const cusolverEigMode_t jobz_cu  = select_eigen_mode(jobz);
   const cublasFillMode_t  fillMode = select_cublas_fill_mode(uplo);
+
+  int* devInfo;
+  CUDA_API_CHECK( cudaMalloc( (void**) &devInfo, 1*sizeof(int)) );
 
   if (*cplx == 1)
     {
@@ -436,6 +439,9 @@ extern "C" void gpu_xsygvd_(const int* cplx,
                                        *lwork, devInfo) );
     }
 
+  CUDA_API_CHECK( cudaMemcpy(info, devInfo, 1*sizeof(int), cudaMemcpyDefault) );
+
+  CUDA_API_CHECK( cudaFree(devInfo) );
 
 } // gpu_xsygvd_
 
