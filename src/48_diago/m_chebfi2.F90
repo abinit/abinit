@@ -1047,7 +1047,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   select case (eigenSolver)
   case (EIGENVD)
     call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info, &
-      &              use_gpu_cuda=0*chebfi%use_gpu_cuda)
+      &              use_gpu_cuda=1*chebfi%use_gpu_cuda)
   case (EIGENV)
     call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
   case default

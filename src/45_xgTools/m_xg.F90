@@ -1784,6 +1784,10 @@ contains
 
       case (SPACE_C)
 
+        !call xgBlock_prefetch_async(xgBlockA, 0)
+        !call xgBlock_prefetch_async(xgBlockB, 0)
+        !call xgBlock_prefetch_async(xgBlockW, 0)
+
         ! probe needed bufferSize
         call gpu_xsygvd_buffersize(2, itype, jobz, uplo, &
           &             xgBlockA%rows, &
@@ -1803,7 +1807,10 @@ contains
           &             c_loc(xgBlockW%vecR), &
           &             c_loc(cwork), bufferSize, info)
 
+        call gpu_device_synchronize()
+
       end select
+
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
