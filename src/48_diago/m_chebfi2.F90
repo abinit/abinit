@@ -1008,6 +1008,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
   call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
 
+  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_SCALE)
   call timab(tim_RR_gemm_1,1,tsec)
   call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self, &
     &               use_gpu_cuda=chebfi%use_gpu_cuda)
@@ -1042,7 +1043,9 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     end if
   end if
   call timab(tim_RR_scale,2,tsec)
+  ABI_NVTX_END_RANGE()
 
+  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_HEGV)
   call timab(tim_RR_hegv,1,tsec)
   select case (eigenSolver)
   case (EIGENVD)
@@ -1054,9 +1057,11 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     ABI_ERROR("Error for Eigen Solver HEGV")
   end select
   call timab(tim_RR_hegv,2,tsec)
+  ABI_NVTX_END_RANGE()
 
   remainder = mod(nline, 3) !3 buffer swap, keep the info which one contains X_data at the end of loop
 
+  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_XNP)
   call timab(tim_RR_XNP_reset,1,tsec)
   !resize X_NP from colrwos to linalg since it will be used in RR
   if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then
@@ -1069,7 +1074,9 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_zero(chebfi%X_NP%self, chebfi%use_gpu_cuda)
   end if
   call timab(tim_RR_XNP_reset,2,tsec)
+  ABI_NVTX_END_RANGE()
 
+  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_GEMM)
   call timab(tim_RR_gemm_2,1,tsec)
   if (remainder == 1) then
     call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, spacedim, neigenpairs)
@@ -1121,6 +1128,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call gpu_device_synchronize()
   end if
 #endif
+  ABI_NVTX_END_RANGE()
 
   call xg_free(A_und_X)
   call xg_free(B_und_X)
