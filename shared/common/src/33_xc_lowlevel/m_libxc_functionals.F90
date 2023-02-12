@@ -2192,7 +2192,6 @@ subroutine libxc_functionals_set_temp(xc_functional,temperature)
  real(C_DOUBLE) :: temp_c,param_c(1)
  character(len=50) :: par_name
  character(kind=C_CHAR,len=1),target :: name_c(2)
- character(kind=C_CHAR,len=1),pointer :: strg_c
 #endif
 
 ! *************************************************************************
@@ -2220,6 +2219,7 @@ subroutine libxc_functionals_set_temp(xc_functional,temperature)
 #endif
 
 end subroutine libxc_functionals_set_temp
+!!***
 
 !----------------------------------------------------------------------
 
