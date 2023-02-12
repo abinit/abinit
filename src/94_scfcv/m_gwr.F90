@@ -4248,7 +4248,7 @@ end if
    ABI_FREE(chiq_gpr)
    call green_plan%free()
 
-  else
+  else  ! not gwr%use_supercell_for_tchi)
     ! ===================================================================
     ! Mixed-space algorithm in the unit cell with convolutions in k-space
     ! ===================================================================
@@ -4278,7 +4278,6 @@ end if
         do my_ikf=1,gwr%my_nkbz
           ik_bz = gwr%my_kbz_inds(my_ikf)
           kk_bz = gwr%kbz(:, ik_bz)
-
           do my_iqi=1,gwr%my_nqibz
             iq_ibz = gwr%my_qibz_inds(my_iqi)
             qq_ibz = gwr%qibz(:, iq_ibz)
@@ -4292,7 +4291,7 @@ end if
 
         ! Redistribute G_k(g,g') with k in the IBZ so that each MPI proc
         ! can reconstruct G_{k+q} in the BZ inside the MPI-distributed loops.
-        ! TOD: support for ipm_list?
+        ! TODO: support for ipm_list?
         call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate")
 
         do my_ikf=1,gwr%my_nkbz
@@ -4332,7 +4331,7 @@ end if
           end do ! my_iqi
 
           if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0) then
-            write(msg,'(4x,3(a,i0),a)')"Sigma_c my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
+            write(msg,'(4x,3(a,i0),a)')"tChi my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
             if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
           end if
         end do ! my_ikf
@@ -4440,15 +4439,17 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
  !integer,optional,intent(in) :: ipm_list(:)
 
 !Local variables-------------------------------
- integer :: ik_ibz, ipm, ierr, lsize(2), do_mpi_kibz(gwr%nkibz), sender_kibz(gwr%nkibz)
- !integer :: ii, num_pm, ipm_list__(2)
+ integer :: ik_ibz, ipm, ierr, do_mpi_kibz(gwr%nkibz), sender_kibz(gwr%nkibz) ! lsize(2),
+ integer :: bcast_comm, sender_in_bcast_comm, color
+ logical :: im_sender
+ !integer :: num_pm, ipm_list__(2)
  real(dp) :: kk_ibz(3), cpu, wall, gflops
- complex(gwpc),allocatable :: cbuf_k(:,:)
+ complex(gwpc),contiguous, pointer :: ck_ptr(:,:)
+ !complex(gwpc),allocatable :: cbuf_k(:,:)
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
-
  !num_pm = 2; ipm_list__ = [1, 2]
  !if (present(ipm_list)) then
  !  num_pm = size(ipm_list)
@@ -4458,21 +4459,21 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
 
  select case (action)
  case ("communicate")
-
    do_mpi_kibz = need_kibz
    do ik_ibz=1,gwr%nkibz
      if (allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) do_mpi_kibz(ik_ibz) = 0
    end do
    call xmpi_sum(do_mpi_kibz, gwr%kpt_comm%value, ierr)
+   !do_mpi_kibz = 1
 
-   ! All procs enter the loop.
-   got_kibz = 0
+   ! All procs enter the loop. Sender_kibz stores the rank of the sender in gwr%kpt_comm
+   got_kibz = 0; sender_kibz(:) = huge(1)
    do ik_ibz=1,gwr%nkibz
      if (do_mpi_kibz(ik_ibz) == 0) cycle
      kk_ibz = gwr%kibz(:, ik_ibz)
-     sender_kibz(ik_ibz) = huge(1)
      if (allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) sender_kibz(ik_ibz) = gwr%kpt_comm%me
      if (need_kibz(ik_ibz) /= 0 .and. .not. allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) then
+       ! NB: Use same args as those used to init the descriptors in gwr_init.
        got_kibz(ik_ibz) = 1
        call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, gwr%dtset%ecut, gwr)
      end if
@@ -4489,15 +4490,30 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
    ! MPI communication
    do ik_ibz=1,gwr%nkibz
      if (do_mpi_kibz(ik_ibz) == 0) cycle
+
+     ! Create subcommunicators with color and bcast only inside subcomm.
+     im_sender = gwr%kpt_comm%me == sender_kibz(ik_ibz)
+     color = merge(1, 0, im_sender .or. need_kibz(ik_ibz) /= 0)
+     call xmpi_comm_split(gwr%kpt_comm%value, color, gwr%kpt_comm%me, bcast_comm, ierr)
+
+     if (color == 1) then
+       sender_in_bcast_comm = xmpi_comm_translate_rank(gwr%kpt_comm%value, sender_kibz(ik_ibz), bcast_comm)
+       do ipm=1,2
+         ck_ptr => gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx
+         call xmpi_bcast(ck_ptr, sender_in_bcast_comm, bcast_comm, ierr)
+       end do
+     end if
+     call xmpi_comm_free(bcast_comm)
+
      ! TODO: Split communicator and translate rank
-     lsize = gwr%gt_kibz(1, ik_ibz, itau, spin)%sizeb_local(:)
-     ABI_MALLOC(cbuf_k, (lsize(1), lsize(2)))
-     do ipm=1,2
-       if (gwr%kpt_comm%me == sender_kibz(ik_ibz)) cbuf_k = gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx
-       call xmpi_bcast(cbuf_k, sender_kibz(ik_ibz), gwr%kpt_comm%value, ierr)
-       if (need_kibz(ik_ibz) == 1) gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = cbuf_k
-     end do
-     ABI_FREE(cbuf_k)
+     !lsize = gwr%gt_kibz(1, ik_ibz, itau, spin)%sizeb_local(:)
+     !ABI_MALLOC(cbuf_k, (lsize(1), lsize(2)))
+     !do ipm=1,2
+     !  if (gwr%kpt_comm%me == sender_kibz(ik_ibz)) cbuf_k = gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx
+     !  call xmpi_bcast(cbuf_k, sender_kibz(ik_ibz), gwr%kpt_comm%value, ierr)
+     !  if (need_kibz(ik_ibz) == 1) gwr%gt_kibz(ipm, ik_ibz, itau, spin)%buffer_cplx = cbuf_k
+     !end do
+     !ABI_FREE(cbuf_k)
    end do
 
  case ("free")
@@ -4577,8 +4593,8 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
      qq_ibz = gwr%qibz(:, iq_ibz)
      if (allocated(gwr%tchi_desc_qibz(iq_ibz)%gvec)) sender_qibz(iq_ibz) = gwr%kpt_comm%me
      if (need_qibz(iq_ibz) /= 0 .and. .not. allocated(gwr%tchi_desc_qibz(iq_ibz)%gvec)) then
-       got_qibz(iq_ibz) = 1
        ! NB: Use same args as those used to init the descriptors in gwr_init.
+       got_qibz(iq_ibz) = 1
        call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, gwr%dtset%ecuteps, gwr, kin_sorted=.True.)
      end if
    end do
