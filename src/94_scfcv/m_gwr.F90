@@ -4292,9 +4292,10 @@ end if
     col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 
     ! FIXME: I think we have to loop over nqibz, compute all iq_ibz and reduce if k-parallelism.
-    ABI_MALLOC(chiq_rpr, (gwr%my_nqibz))
-    do my_iqi=1,gwr%my_nqibz
-      call chiq_rpr(my_iqi)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+    ABI_MALLOC(chiq_rpr, (gwr%nqibz))
+    do iq_ibz=1,gwr%nqibz
+    !do my_iqi=1,gwr%my_nqibz
+      call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
     end do
     ! TODO: Can save memory here.
     do ipm=1,2
@@ -4308,9 +4309,10 @@ end if
     need_kibz = 0
     do my_ikf=1,gwr%my_nkbz
       ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
-      !do iq_ibz=1,gwr%nqibz
-      do my_iqi=1,gwr%my_nqibz
-        iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
+      do iq_ibz=1,gwr%nqibz
+      !do my_iqi=1,gwr%my_nqibz
+        !iq_ibz = gwr%my_qibz_inds(my_iqi)
+        qq_ibz = gwr%qibz(:, iq_ibz)
         kpq_bz = kk_bz + qq_ibz
         !kpq_bz = kk_bz - qq_ibz
         ! TODO: here I may need to take into account the umklapp
@@ -4346,9 +4348,10 @@ end if
         ! Use symmetries to get G_kbz(g,g') from the IBZ, then G_kbz(g,g') -> G_kbz(r',r).
         call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm, ipm_list=[1]) ! g0=??
 
-        !do iq_ibz=1,gwr%nqibz
-        do my_iqi=1,gwr%my_nqibz
-          iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
+        do iq_ibz=1,gwr%nqibz
+        !do my_iqi=1,gwr%my_nqibz
+          !iq_ibz = gwr%my_qibz_inds(my_iqi)
+          qq_ibz = gwr%qibz(:, iq_ibz)
           q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
           kpq_bz = kk_bz + qq_ibz
           !kpq_bz = kk_bz - qq_ibz
@@ -4366,7 +4369,7 @@ end if
           weight_ikf = one / gwr%nkbz
           !weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
 
-          chiq_rpr(my_iqi)%buffer_cplx = chiq_rpr(my_iqi)%buffer_cplx + &
+          chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
              weight_ikf * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)
         end do ! my_iqi
 
@@ -4380,10 +4383,14 @@ end if
       call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "free")
 
       ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ treated by me.
-      do my_iqi=1,gwr%my_nqibz
-        iq_ibz = gwr%my_qibz_inds(my_iqi); desc_q => gwr%tchi_desc_qibz(iq_ibz)
+      do iq_ibz=1,gwr%nqibz
+      !do my_iqi=1,gwr%my_nqibz
+        !iq_ibz = gwr%my_qibz_inds(my_iqi)
+        call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
+        if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
+        desc_q => gwr%tchi_desc_qibz(iq_ibz)
         ! TODO: Recheck the API
-        call gwr_rpr_to_ggp(gwr, desc_q, chiq_rpr(my_iqi), gwr%tchi_qibz(iq_ibz, itau, spin))
+        call gwr_rpr_to_ggp(gwr, desc_q, chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz, itau, spin))
       end do ! my_iqi
 
       write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
