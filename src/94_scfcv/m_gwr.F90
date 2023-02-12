@@ -1093,8 +1093,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ABI_CHECK(ierr == 0, "kptgw wavevectors must be in the IBZ read from the WFK file.")
 
-#if 1
- ! FIXME: This trigger SIGSEGV on lumi, don't know why!
  ! Build degtab tables.
  if (abs(gwr%dtset%symsigma) == 1) then
    ABI_MALLOC(gwr%degtab, (gwr%nkcalc, gwr%nsppol))
@@ -1102,7 +1100,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    !call xmpi_sum(degblock_all, input_comm, ierr)
    do ikcalc=1,gwr%nkcalc
      do spin=1,gwr%nsppol
-       !print *, "degtab for ikcalc:", ikcalc, "spin:", spin
        ndeg = ndeg_all(ikcalc, spin)
        ABI_MALLOC(gwr%degtab(ikcalc, spin)%bids, (ndeg))
        do ii=1,ndeg
@@ -1116,7 +1113,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
      end do
    end do
  end if
-#endif
 
  ABI_FREE(degblock_all)
  ABI_FREE(ndeg_all)
@@ -5362,15 +5358,16 @@ else
        !if (.not. isirr_k) cycle
 
        ! Skip this BZ k-point if it's not in the IBZ(ikcalc) of some ikcalc.
-       compute_kbz = .False.
+       compute_kbz = .True.
        if (gwr%dtset%symsigma /= 0) then
+         compute_kbz = .False.
          do ikcalc=1,gwr%nkcalc
            if (ltg_kcalc(ikcalc)%ibzq(ik_bz) == 1) then
              compute_kbz = .True.; exit
            end if
          end do
        end if
-       if (.not. compute_kbz) cycle
+       if (.not. compute_kbz) cycle  ! my_ikf loop
 
        ! Use symmetries to get G_kbz from the IBZ then G_k(g,g') --> G_k(r',r)
        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
@@ -5388,7 +5385,6 @@ else
 
          ! The integration weight depends on ikcalc
          weight_ikf = one / gwr%nkbz
-         !weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
          if (gwr%dtset%symsigma /= 0) then
            weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
            ! If symsigma, symmetrize the matrix elements.
@@ -5456,24 +5452,16 @@ end if
  ABI_FREE(green_scgvec)
  ABI_FREE(wc_scgvec)
 
- ! Store matrix elements of Sigma_c(it), separate even and odd part
- ! then use sine/cosine transform to get Sigma_c(i omega).
- ! Finally, perform analytic continuation with Pade' to go to the real-axis
- ! and compute QP corrections and spectral functions.
- ! All procs execute this part as it's very cheap.
-
  !sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2
  call xmpi_sum(sigc_it_diag_kcalc, gwr%comm%value, ierr)
 
  if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
-   ! Average self-energy matrix elements in the degenerate subspace.
+   call wrtout(std_out, " Averaging self-energy matrix elements in the degenerate subspace.")
    do spin=1,gwr%nsppol
    do ikcalc=1,gwr%nkcalc
-     !print *, "degtab for ikcalc:", ikcalc, "spin:", spin
      do ideg=1,size(gwr%degtab(ikcalc, spin)%bids)
        associate (bids => gwr%degtab(ikcalc, spin)%bids(ideg)%vals)
        nstates = size(bids)
-       !print *, "   bids:", bids, ", nstates:", nstates
        avg_2ntau = sum(sigc_it_diag_kcalc(:,:,bids(:), ikcalc, spin), dim=3) / nstates
        do ii=1,nstates
          sigc_it_diag_kcalc(:,:,bids(ii),ikcalc,spin) = avg_2ntau
@@ -5483,6 +5471,12 @@ end if
    end do
    end do
  end if ! symsigma == +1
+
+ ! Store matrix elements of Sigma_c(it), separate even and odd part
+ ! then use sine/cosine transform to get Sigma_c(i omega).
+ ! Finally, perform analytic continuation with Pade' to go to the real-axis
+ ! and compute QP corrections and spectral functions.
+ ! All procs execute this part as it's very cheap.
 
  imag_zmesh(:) = j_dpc * gwr%iw_mesh
  sigc_iw_diag_kcalc = zero; qp_solver_ierr = 0
