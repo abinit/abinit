@@ -2153,8 +2153,6 @@ end function libpaw_libxc_depends_on_temp
 
 !----------------------------------------------------------------------
 
-!Hartree or SI????
-
 !!****f* m_libpaw_libxc_funcs/libpaw_libxc_set_temp
 !! NAME
 !!  libpaw_libxc_set_temp
@@ -2165,7 +2163,7 @@ end function libpaw_libxc_depends_on_temp
 !!
 !! INPUTS
 !! xc_functional=<type(libpaw_libxc_type)>, handle for XC functional
-!! temperature=electronic temperature (in Kelvin units)
+!! temperature=electronic temperature (in Ha units, i.e. T_kelvin * k_B_in_Ha/K )
 !!
 !! SOURCE
 
@@ -2189,7 +2187,7 @@ subroutine libpaw_libxc_set_temp(xc_functional,temperature)
  if (xc_functional%temperature>zero) then
 
    par_name="T" ; name_c=char_f_to_c(trim(par_name))
-   temp_c=real(temperature*kb_HaK,kind=C_DOUBLE)
+   temp_c=real(temperature,kind=C_DOUBLE)
    iset_c = libpaw_xc_func_set_params_name(xc_functional%conf,c_loc(name_c),temp_c)
    if (iset_c /= 0) then
      !Try this when set_params_name method is not available (libXC<5)

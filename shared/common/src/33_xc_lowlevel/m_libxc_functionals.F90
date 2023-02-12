@@ -2167,8 +2167,6 @@ end function libxc_functionals_depends_on_temp
 
 !----------------------------------------------------------------------
 
-!Hartree or SI????
-
 !!****f* libxc_functionals/libxc_functionals_set_temp
 !! NAME
 !!  libxc_functionals_set_temp
@@ -2179,7 +2177,7 @@ end function libxc_functionals_depends_on_temp
 !!
 !! INPUTS
 !! xc_functional=<type(libxc_functional_type)>, handle for XC functional
-!! temperature=electronic temperature (in Kelvin units)
+!! temperature=electronic temperature (in Ha units, i.e. T_kelvin * k_B_in_Ha/K )
 !!
 !! SOURCE
 
@@ -2203,7 +2201,7 @@ subroutine libxc_functionals_set_temp(xc_functional,temperature)
  if (xc_functional%temperature>zero) then
 
    par_name="T" ; name_c=xc_char_to_c(trim(par_name))
-   temp_c=real(temperature*kb_HaK,kind=C_DOUBLE)
+   temp_c=real(temperature,kind=C_DOUBLE)
    iset_c = xc_func_set_params_name(xc_functional%conf,c_loc(name_c),temp_c)
    if (iset_c /= 0) then
      !Try this when set_params_name method is not available (libXC<5)

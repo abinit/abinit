@@ -681,7 +681,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
-     call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+     call libxc_functionals_init(dtset%ixc,dtset%nspden, &
+&                el_temp=dtset%tphysel,xc_tb09_c=dtset%xc_tb09_c)
 
 #if defined DEV_YP_VDWXC
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
