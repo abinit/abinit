@@ -4029,7 +4029,7 @@ function pade(n, z, f, zz)
    Bz(i+1)=Bz(i)+(zz-z(i))*a(i+1)*Bz(i-1)
  end do
  !write(std_out,*) 'Bz(n)',Bz(n)
- if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
+ !if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
  pade=Az(n)/Bz(n)
  !write(std_out,*) 'pade_approx ', pade_approx
 
@@ -4084,7 +4084,7 @@ function dpade(n, z, f, zz)
    dBz(i+1)=dBz(i)+a(i+1)*Bz(i-1)+(zz-z(i))*a(i+1)*dBz(i-1)
  end do
  !write(std_out,*) 'Bz(n)', Bz(n)
- if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) 'Bz(n)',Bz(n)
+ !if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) 'Bz(n)',Bz(n)
  !pade_approx = Az(n) / Bz(n)
  dpade=dAz(n)/Bz(n) -Az(n)*dBz(n)/(Bz(n)*Bz(n))
  !write(std_out,*) 'pade_approx ', pade_approx
