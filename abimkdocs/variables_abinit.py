@@ -8689,6 +8689,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 40 --> Hartree-Fock
   * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
+  * 50 --> IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter). The electronic temperature is taken from [[tphysel]].
 
 **ETSF Lib XC functionals**
 
@@ -8737,6 +8738,13 @@ This means having [[usekden]] = 1.
   * 029 --> XC_LDA_C_VWN_2  Vosko, Wilk, & Nussair (2) [[cite:Vosko1980]]
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
+
+==LDA temperature-dependent functionals (do not forget to add a minus sign, as discussed above)  
+  The electronic temperature is taken from the [[tphysel]] variable.
+
+  * 259 --> XC_LDA_XC_KSDT, LDA T-dependent functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]]
+  * 318 --> XC_LDA_XC_CORRKSDT, corrected KSDT by Karasiev, Dufty, & Trickey [[cite:Karasiev2018]]
+  * 577 --> XC_LDA_XC_GDSMFB, LDA T-dependent functional: Groth, Dornheim, Sjostrom, Malone, Foulkes, & Bonitz [[cite:Groth2017]]
 
 ==GGA functionals== (do not forget to add a minus sign, as discussed above)
 
@@ -19206,7 +19214,8 @@ has to specify an independent broadening [[tsmear]]. The combination of the
 two parameters [[tphysel]] and [[tsmear]] is described in [[cite:Verstraete2002]].
 Note that the signification of the entropy is modified with respect to the usual entropy.
 The choice has been made to use [[tsmear]] as a prefactor of the entropy, to
-define the entropy contribution to the free energy.
+define the entropy contribution to the free energy.  
+Note that [[tphysel]] might be used as parameter for Free Energy exchange-correlation functionals (see [[ixc]]).
 """,
 ),
 
