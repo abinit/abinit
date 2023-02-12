@@ -8739,7 +8739,7 @@ This means having [[usekden]] = 1.
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
-==LDA temperature-dependent functionals (do not forget to add a minus sign, as discussed above)  
+==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)  
   The electronic temperature is taken from the [[tphysel]] variable.
 
   * 259 --> XC_LDA_XC_KSDT, LDA T-dependent functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]]
