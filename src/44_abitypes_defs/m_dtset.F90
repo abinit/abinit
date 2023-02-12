@@ -281,7 +281,7 @@ type, public :: dataset_type
 
  integer :: gwr_nstep = 50
  integer :: gwr_ntau = 12
- real(dp) :: gwr_boxcutmin = two
+ real(dp) :: gwr_boxcutmin = one
  real(dp) :: gwr_max_hwtene = -one
  character(len=fnlen) :: gwr_task = "None"
 !H
