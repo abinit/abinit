@@ -142,7 +142,7 @@ module m_gwr
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use defs_abitypes,   only : mpi_type
- use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, cone_gw, czero_gw, sigijtab_t, &
+ use m_gwdefs,        only : GW_TOL_DOCC, GW_TOLQ0, GW_TOL_W0, GW_Q0_DEFAULT, cone_gw, czero_gw, j_gw, sigijtab_t, &
                              sigijtab_free, g0g0w
  use m_time,          only : cwtime, cwtime_report, sec2str, timab
  use m_io_tools,      only : iomode_from_fname, get_unit, file_exists, open_file, write_units
@@ -4335,7 +4335,7 @@ end if
 
       ! Sum over my k-points in the BZ.
       do my_ikf=1,gwr%my_nkbz
-        if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODR) == 0) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
+        call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
         ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
 
         !ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
@@ -5028,11 +5028,11 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
  integer :: isym_k, trev_k, g0_k(3), tsign_k
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- integer :: gt_scbox_win, wct_scbox_win, use_umklp, wtqm, wtqp, isym, ideg, nstates
+ integer :: gt_scbox_win, wct_scbox_win, use_umklp, isym, ideg, nstates
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
- real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, weight_ikf
- logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, compute_kbz
+ real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, wtqm, wtqp
+ logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, compute_this_kbz
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
@@ -5047,7 +5047,7 @@ subroutine gwr_build_sigmac(gwr)
  !complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc),allocatable :: uc_psir_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
- type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
+ type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
  type(desc_t), target :: desc_mykbz(gwr%my_nkbz), desc_myqbz(gwr%my_nqbz)
  type(fftbox_plan3_t) :: green_plan, wt_plan
  type(littlegroup_t) :: ltg_kcalc(gwr%nkcalc)
@@ -5328,6 +5328,18 @@ else
  ! ===================================================================
  call wrtout(std_out, " Building Sigma_c with convolutions in k-space:", pre_newlines=2)
 
+ ! Define tables to account for symmetries:
+ !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
+ !  - when accumulating the self-energy, we have to use weights that depend on x.
+
+ ! * The little group is needed when symsigma == 1
+ ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
+ use_umklp = 1
+ do ikcalc=1,gwr%nkcalc
+   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
+   call ltg_kcalc(ikcalc)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
+ end do
+
  ! Allocate PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell
  nrsp = gwr%g_nfft * gwr%nspinor
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
@@ -5335,24 +5347,15 @@ else
  call wc_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
  do ipm=1,2
    call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+   ! For sigma we have to decompose it in hermitian/anti-hermitian part.
    do ikcalc=1,gwr%nkcalc
-     call sigc_rpr(ipm, ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     call sigc_rpr(1,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     call sigc_rpr(2,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
    end do
  end do
 
  mem_mb = slk_array_locmem_mb(wc_rpr) + sum(slk_array_locmem_mb(gk_rpr_pm)) + sum(slk_array_locmem_mb(sigc_rpr))
  call wrtout(std_out, sjoin(" Local memory for PBLAS (r,r') matrices: ", ftoa(mem_mb, fmt="f8.1"), ' [Mb] <<< MEM'))
-
- ! Define tables to account for symmetries:
- !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
- !  - when accumulating the self-energy, we have to use weights that depend on x.
-
- ! * The little group is used only if symsigma == 1
- ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
- use_umklp = 1
- do ikcalc=1,gwr%nkcalc
-   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
- end do
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -5399,9 +5402,8 @@ else
 
      ! Sum over my k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
-       if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODR) == 0) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
-       ik_bz = gwr%my_kbz_inds(my_ikf)
-       kk_bz = gwr%kbz(:,ik_bz)
+       call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
+       ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:,ik_bz)
 
        ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
        trev_k = gwr%kbz2ibz(6, ik_bz); g0_k = gwr%kbz2ibz(3:5, ik_bz)
@@ -5410,23 +5412,22 @@ else
        !if (.not. isirr_k) cycle
 
        ! Skip this BZ k-point if it's not in the IBZ(ikcalc) of some ikcalc.
-       compute_kbz = .True.
+       compute_this_kbz = .True.
        if (gwr%dtset%symsigma /= 0) then
-         compute_kbz = .False.
+         compute_this_kbz = .False.
          do ikcalc=1,gwr%nkcalc
            if (ltg_kcalc(ikcalc)%ibzq(ik_bz) == 1) then
-             compute_kbz = .True.; exit
+             compute_this_kbz = .True.; exit
            end if
          end do
        end if
-       if (.not. compute_kbz) cycle  ! my_ikf loop
+       if (.not. compute_this_kbz) cycle ! my_ikf loop
 
        ! Use symmetries to get G_kbz from the IBZ then G_k(g,g') --> G_k(r',r)
        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm)
 
        do ikcalc=1,gwr%nkcalc
          if (gwr%dtset%symsigma /= 0 .and. ltg_kcalc(ikcalc)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
-
          qq_bz = gwr%kcalc(:, ikcalc) - kk_bz
          !qq_bz = -qq_bz
          ! TODO: here I may need to take into account the umklapp
@@ -5436,29 +5437,47 @@ else
          call gwr%get_wc_rpr_qbz(g0_q, iq_bz, itau, spin, wc_rpr)
 
          ! The integration weight depends on ikcalc
-         weight_ikf = one / gwr%nkbz
+         wtqp = one / gwr%nkbz; wtqm = zero
          if (gwr%dtset%symsigma /= 0) then
-           weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
            ! If symsigma, symmetrize the matrix elements.
            ! Sum only q"s in IBZ_k. In this case elements are weighted
            ! according to wtqp and wtqm. wtqm is for time-reversal.
            associate (ltg_k => ltg_kcalc(ikcalc))
-           wtqp = 1; wtqm = 0
            !if (can_symmetrize(spin)) then
-             !if (Ltg_k%ibzq(iq_bz)/=1) CYCLE
-             wtqp = 0; wtqm = 0
-             do isym=1,Ltg_k%nsym_sg
-               wtqp = wtqp + Ltg_k%wtksym(1, isym, iq_bz)  ! FIXME: iq_bz or ikq?
-               wtqm = wtqm + Ltg_k%wtksym(2, isym, iq_bz)
-             end do
+           wtqp = zero; wtqm = zero
+           do isym=1,Ltg_k%nsym_sg
+             wtqp = wtqp + ltg_k%wtksym(1,isym,ik_bz)  ! FIXME: iq_bz or ik_bz?
+             wtqm = wtqm + ltg_k%wtksym(2,isym,ik_bz)
+           end do
+           !print *, "For kcalc:", trim(ktoa(gwr%kcalc(:,ikcalc))), "wtqp, wtqm", wtqp, wtqm
+           !ABI_CHECK(wtqm == 0, "wtqm != 0")
+           wtqp = wtqp / gwr%nkbz
+           wtqm = wtqm / gwr%nkbz
+           !end if
+           !if (ikcalc == 1) then
+           !  ABI_CHECK(abs(wtqm) < tol12, "abs(wtqm) > tol12")
+           !  ABI_CHECK(abs(wtqp - gwr%ks_ebands%wtk(ik_ibz)) < tol12, "abs(wtqp - wtk) > tol12")
            !end if
            end associate
          end if
 
          do ipm=1,2
-           sigc_rpr(ipm, ikcalc)%buffer_cplx = sigc_rpr(ipm, ikcalc)%buffer_cplx + &
-             weight_ikf * gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
-         end do
+           if (abs(wtqm) < tol12) then
+             sigc_rpr(1,ipm,ikcalc)%buffer_cplx = sigc_rpr(1,ipm,ikcalc)%buffer_cplx + &
+                wtqp * gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
+           else
+             sigc_rpr(1,ipm,ikcalc)%buffer_cplx = sigc_rpr(1,ipm,ikcalc)%buffer_cplx + &
+               wtqp * (gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
+
+             sigc_rpr(2,ipm,ikcalc)%buffer_cplx = sigc_rpr(2,ipm,ikcalc)%buffer_cplx + &
+               wtqm * conjg(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
+
+             !sigc_rpr(1, ipm, ikcalc)%buffer_cplx = sigc_rpr(1, ipm, ikcalc)%buffer_cplx + &
+             !    (wtqp + wtqm) * real(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx, kind=gwpc) &
+             !  + (wtqp - wtqm) * j_gw * aimag(gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
+           end if
+         end do ! ipm
+
        end do ! ikcalc
 
        if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0) then
@@ -5472,11 +5491,10 @@ else
 
      ! Integrate self-energy matrix elements in the unit cell.
      ! Remember that Sigma is stored as (r',r) and that the second dimension is MPI-distributed.
-     ! In case of g-parallelism, sigc_pm is a partial result that will be ALL_REDUCED in gwr%comm afterwards.
+     ! In case of g-parallelism, sigc_pm is a partial 6d integral that will be ALL_REDUCED in gwr%comm afterwards.
      do ikcalc=1,gwr%nkcalc
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-         call diag_braket_rspace("T", sigc_rpr(1,ikcalc), gwr%g_nfft*gwr%nspinor, uc_psir_bk(:,band,ikcalc), sigc_pm(1))
-         call diag_braket_rspace("T", sigc_rpr(2,ikcalc), gwr%g_nfft*gwr%nspinor, uc_psir_bk(:,band,ikcalc), sigc_pm(2))
+         call sig_braket_ur(sigc_rpr(:,:,ikcalc), gwr%g_nfft*gwr%nspinor, uc_psir_bk(:,band,ikcalc), sigc_pm)
          ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
          sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = sigc_pm
         end do
@@ -5859,9 +5877,9 @@ end subroutine write_notations
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/diag_braket_rspace
+!!****f* m_gwr/sig_braket_ur
 !! NAME
-!!  diag_braket_rspace
+!!  sig_braket_ur
 !!
 !! FUNCTION
 !!
@@ -5871,52 +5889,38 @@ end subroutine write_notations
 !!
 !! SOURCE
 
-subroutine diag_braket_rspace(trans, mat, nfftsp, ur_glob, cout, do_mpi_sum)
+subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: trans
  integer,intent(in) :: nfftsp
- class(__slkmat_t),intent(in) :: mat
+ class(__slkmat_t),intent(in) :: sig_rpr(2,2)
  complex(gwpc),intent(in) :: ur_glob(nfftsp)
- complex(gwpc),intent(out) :: cout
- logical,optional,intent(in) :: do_mpi_sum
+ complex(gwpc),intent(out) :: sigm_pm(2)
 
 !Local variables-------------------------------
- integer :: ir1, il_r1, ierr
- logical :: do_mpi_sum__
+ integer :: ipm, ir1, il_r1, ierr
  complex(gwpc),allocatable :: loc_cwork(:)
 
 ! *************************************************************************
 
- do_mpi_sum__ = .False.; if (present(do_mpi_sum)) do_mpi_sum__ = do_mpi_sum
-
- select case (trans)
- case ("T")
-   ABI_CHECK_IEQ(nfftsp, mat%sizeb_local(1), "First dimension should be local to each MPI proc!")
-
-   ! (r',r) with r' local and r-index PBLAS-distributed.
-   ! Integrate over r'
-   ABI_MALLOC(loc_cwork, (mat%sizeb_local(2)))
-   loc_cwork(:) = matmul(transpose(mat%buffer_cplx), ur_glob)
-
+ ! (r',r) with r' local and r-index PBLAS-distributed.
+ ! Integrate over r'
+ sigm_pm = czero_gw
+ do ipm=1,2
+   associate (rp_r => sig_rpr(1,ipm))
+   ABI_CHECK_IEQ(nfftsp, rp_r%sizeb_local(1), "First dimension should be local to each MPI proc!")
+   ABI_MALLOC(loc_cwork, (rp_r%sizeb_local(2)))
+   loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
    ! Integrate over r. Note complex conjugate.
-   cout = czero_gw
-   do il_r1=1, mat%sizeb_local(2)
-     ir1 = mat%loc2gcol(il_r1)
-     cout = cout + conjg(ur_glob(ir1)) * loc_cwork(il_r1)
+   do il_r1=1,rp_r%sizeb_local(2)
+     ir1 = rp_r%loc2gcol(il_r1)
+     sigm_pm(ipm) = sigm_pm(ipm) + conjg(ur_glob(ir1)) * loc_cwork(il_r1)
    end do
-
    ABI_FREE(loc_cwork)
-   if (do_mpi_sum__) call xmpi_sum(cout, mat%processor%comm, ierr)
+   end associate
+ end do
 
- case ("N")
-   ABI_ERROR(sjoin("Not implemented trans:", trans))
-
- case default
-   ABI_ERROR(sjoin("Invalid trans:", trans))
- end select
-
-end subroutine diag_braket_rspace
+end subroutine sig_braket_ur
 !!***
 
 !----------------------------------------------------------------------
