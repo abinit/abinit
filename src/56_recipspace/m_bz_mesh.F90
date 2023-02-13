@@ -307,7 +307,7 @@ module m_bz_mesh
   ! Max kinetic energy of G-G0 in case of umklapp.
 
   integer,allocatable :: G0(:,:,:)
-  ! g0(3,timrev,nsym_sg)
+  ! (3,2,nsym_sg)
   ! Reduced coordinates of the umklapp G0 vector.
 
   integer,allocatable :: ibzq(:)
@@ -323,17 +323,17 @@ module m_bz_mesh
   ! The correspondind index in the BZ array
 
   integer,allocatable :: igmG0(:,:,:)
-  ! iumklp(npw,timrev,nsym_sg)
+  ! iumklp(npw,2,nsym_sg)
   ! Index of G-G0 in the FFT array for each operations IS (I=\pm 1).
 
   integer,allocatable :: flag_umklp(:,:)
-  ! flag_umklp(timrev,nsym_sg)
+  ! flag_umklp(2,nsym_sg)
   ! 1 if the operation IS requires a non null G0 vector to preserve q, 0 otherwise.
 
   integer,allocatable :: preserve(:,:)
-  ! preserve(timrev,nsym_sg)
-  ! preserve(1,S) is 1 if the operation S in rec space preserves the external q-point i.e Sq=q+G0
-  ! preserve(2,S) is 1 if -Sq=q+G0. G0 is a reciprocal lattice vector also called "umklapp vector".
+  ! preserve(2, nsym_sg)
+  ! (1,S) is 1 if the operation S in rec space preserves the external q-point i.e Sq=q+G0
+  ! (2,S) is 1 if -Sq=q+G0. G0 is a reciprocal lattice vector also called "umklapp vector".
 
   integer,allocatable :: tab(:)
   ! tab(nbz)
@@ -350,7 +350,7 @@ module m_bz_mesh
   ! considered in the relation kBZ= IS kIBZ_q (1 => only S; -1 => -S).
 
   integer,allocatable :: wtksym(:,:,:)
-  ! wtksym(timrev,nsym_sg,kbz)
+  ! (2, nsym_sg, kbz)
   ! 1 if IS belongs to the little group, 0 otherwise TODO (should invert the first two dimensions)
 
   real(dp) :: ext_pt(3)
@@ -2234,41 +2234,23 @@ end subroutine findqg0
 !! littlegroup_init
 !!
 !! FUNCTION
-!!  Finds symmetry operations belonging to the little group associated to an external
-!!  point ext_pt and fills symmetry tables.
+!! Finds symmetry operations belonging to the little group associated to an external
+!! point ext_pt and fills symmetry tables.
 !!
 !! INPUTS
 !! ext_pt(3)= External point in the Brillouin zone in reduce coordinated
-!! nbz=number of points in the full BZ
-!! bz(3,nbz)=points in the full Brillouin Zon
-!! Cryst<crystal_t>= Info on symmetries and unit cell
-!! gvec(3,npwe) coordinates of G vectors
+!! nbz=number of points in the full BZ.
+!! bz(3,nbz)=points in the full BZ.
+!! Cryst<crystal_t>= Info on symmetries and unit cell.
+!! use_umklp=flag to include umklapp G0 vectors in the definition of the little group (0:n0,1:yes)
 !! npwe=If greater than 0, the index of G-Go in the gvec(:,1:npwvec) array will be calculated
 !!  and stored in %igmG0 for each symmetry preserving the external q. Note that G is one of the npwe vectors.
-!! use_umklp=flag to include umklapp G0 vectors in the definition of the little group (0:n0,1:yes)
-!!
-!! OUTPUT
-!! Ltg% <littlegroup_t_datatype>.
-!!  %ibzq(nbz)= 1 if the kpoint belongs to the IBZ defined by ext_pt, 0 otherwise
-!!  %bz2ibz(nbz)= sequential index of the point in the IBZ defined by ext_pt
-!!  %ibz2bz(nibz_Ltg) For each nibz_Ltg the correspondind index in the BZ array
-!!  %igmG0(npwepstimrev,nsym)= index of the uklapp vector G_o in the FFT array
-!!  %flag_umklp(timrev,nsym)= flag for umklapp processes
-!!    1 if operation (IS) requires a G_o to preserve ext_pt, 0 otherwise
-!!  %tab(nbz)=table giving, for each k-point in the BZ (kBZ), the corresponding
-!!   irreducible point (kIBZ) in the irreducible zone defined by the little group of ext_pt,
-!!   i.e kBZ= (IS) kIBZ where I is either the inversion or the identity and S is an
-!!   operation in the little group defined by ext_pt
-!!  %tabo(nbz)=the symmetry operation S in the little group that takes kIBZ to each kBZ
-!!  %tabi(nbz)= defines whether inversion has to be considered in the
-!!   relation kBZ=(IS) kIBZ (1 => only S; -1 => -S)
-!!  %preserve(2,nsym)= 1 if ISq=q, 0 otherwise, the first index is for the identity or the time reversal symmetry,
-!!  %wtksym(2,nsym,nbz)= for each kpoint is equal to 1 if the symmetry operation (with or without time reversal)
-!!   must be considered in the calculation of \chi_o, 0 otherwise
+!! gvec(3,npwe) coordinates of G vectors
+!! [timrev]=Optional argument to change the value of time-reversal. If not given, the value from cryst is used.
 !!
 !! SOURCE
 
-subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
+subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec, timrev)
 
 !Arguments ------------------------------------
 !scalars
@@ -2279,11 +2261,12 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
 !arrays
  integer,optional,intent(in) :: gvec(:,:) ! (3,npwe)
  real(dp),intent(in) :: ext_pt(3)
+ integer,optional,intent(in) :: timrev
 
 !Local variables-------------------------------
 !scalars
  integer :: dummy_timrev,enough,idx,ige,igpw,ik,ind,iold,iout,isym,itest,itim
- integer :: nkibzq,nsym,nsym_Ltg,ntest,timrev,ierr,npwvec
+ integer :: nkibzq,nsym,nsym_Ltg,ntest,my_timrev,ierr,npwvec
  real(dp) :: G0len,kin,mG0len,max_kin
  logical :: found,found_identity,use_antiferro
  character(len=500) :: msg
@@ -2297,39 +2280,40 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
 
 !************************************************************************
 
- DBG_ENTER("COLL")
+ ABI_CHECK(any(cryst%timrev == [1, 2]), sjoin("Wrong value for cryst%timrev:", itoa(cryst%timrev)))
 
- ABI_CHECK(any(Cryst%timrev == [1, 2]), sjoin("Wrong value for cryst%timrev:", itoa(cryst%timrev)))
+ ! Destroy structure if it already exists
+ call Ltg%free()
 
  ! Copy useful data.
  nsym          =  Cryst%nsym
- timrev        =  Cryst%timrev
- !if (present(timrev)) timrev = timrev
- !timrev = 1
+ my_timrev     =  Cryst%timrev
+ if (present(timrev)) then
+   my_timrev = timrev
+   ABI_CHECK_ILEQ(my_timrev, cryst%timrev, "my_timrev cannot be greater that cryst%timrev")
+ end if
+
  symrec        => Cryst%symrec
  symafm        => Cryst%symafm
  use_antiferro =  Cryst%use_antiferro
 
- ! Destroy structure if it already exists
- call Ltg%free()
- !
  ! Store dimensions and useful info.
  Ltg%nsym_sg  = nsym
- Ltg%timrev   = timrev
+ Ltg%timrev   = my_timrev
  Ltg%nbz      = nbz
  !Ltg%use_umklp=use_umklp ! 1 if umklapp processes are used
  Ltg%ext_pt(:)=ext_pt(:)
 
- ABI_MALLOC(Ltg%G0, (3,timrev,nsym))
+ ABI_MALLOC(Ltg%G0, (3,2,nsym))
  ABI_MALLOC(Ltg%ibzq, (nbz))
  ABI_MALLOC(Ltg%bz2ibz, (nbz))
- ABI_MALLOC(Ltg%preserve, (timrev, nsym))
- ABI_MALLOC(Ltg%wtksym, (timrev, nsym, nbz))
+ ABI_MALLOC(Ltg%preserve, (2, nsym))
+ ABI_MALLOC(Ltg%wtksym, (2, nsym, nbz))
  ABI_MALLOC(Ltg%tab, (nbz))
  ABI_MALLOC(Ltg%tabi, (nbz))
  ABI_MALLOC(Ltg%tabo, (nbz))
- ABI_MALLOC(Ltg%flag_umklp, (timrev, nsym))
- !
+ ABI_MALLOC(Ltg%flag_umklp, (2, nsym))
+
  ! In the old GW implementation we were removing symmetries related by time-reversal and
  ! sometimes it happened that only the inversion was reported in the KSS file (see outkss.F90).
  identity(:,:)=RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/)) ; found_identity=.FALSE.
@@ -2351,7 +2335,7 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
 
  Ltg%preserve(:,:)=0; Ltg%g0(:,:,:)=0; Ltg%flag_umklp(:,:)=0; mG0len=zero
 
- do itim=1,timrev
+ do itim=1,my_timrev
    do isym=1,nsym
      if (symafm(isym)==-1) CYCLE
 
@@ -2368,7 +2352,7 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
  end do
 
  nop(:) = 0; nopg0(:) = 0
- do itim=1,timrev
+ do itim=1,my_timrev
    nop  (itim) = SUM(Ltg%preserve  (itim,:))
    nopg0(itim) = SUM(Ltg%flag_umklp(itim,:))
  end do
@@ -2379,7 +2363,7 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
  ABI_MALLOC(symrec_Ltg, (3, 3, Ltg%nsym_Ltg))
 
  ind = 1
- do itim=1,timrev
+ do itim=1,my_timrev
    do isym=1,nsym
      if (Ltg%preserve(itim,isym)==1) then
       if (itim==1) symrec_Ltg(:,:,ind) = symrec(:,:,isym)
@@ -2443,7 +2427,7 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
    if (Ltg%ibzq(ik) /= 1) CYCLE
    ! * Loop over symmetry operations S and time-reversal.
    ! * Use spatial inversion instead of time reversal whenever possible.
-   do itim=1,timrev
+   do itim=1,my_timrev
      do isym=1,nsym
 
       ! Form IS k only for (IS) pairs in the (ferromagnetic) little group.
@@ -2504,12 +2488,12 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
    ! The drawback is that the effective G sphere used to calculate the oscillators must be smaller
    ! that gvec if we want to avoid possible aliasing effects. Lifting this constraint would require
    ! a lot of boring coding. (no need to do this if ext_pt=zero, but oh well)
-   ABI_MALLOC(Ltg%igmG0,(npwe,timrev,nsym))
+   ABI_MALLOC(Ltg%igmG0,(npwe,2,nsym))
    Ltg%igmG0(:,:,:)=0
    max_kin=zero
 
    ! Loop over symmetry operations S and time-reversal
-   do itim=1,timrev
+   do itim=1,my_timrev
      do isym=1,nsym
        ! Form IS k only for (IS) pairs in the little group
        if (symafm(isym)==-1) CYCLE
@@ -2527,7 +2511,7 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
                found=.TRUE.; EXIT
              end if
            end do
-           if (.not.found) then
+           if (.not. found) then
              write(msg,'(5a,f8.3,2a,3i5)')&
               'Not able to found G-G0 in the largest G-spere ',ch10,&
               'Decrease the size of epsilon or, if possible, increase ecutwfn (>ecuteps) ',ch10,&

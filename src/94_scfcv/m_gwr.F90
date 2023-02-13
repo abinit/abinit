@@ -863,11 +863,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ABI_MALLOC(gwr%ks_vbik, (gwr%ks_ebands%nkpt, gwr%ks_ebands%nsppol))
  gwr%ks_vbik(:,:) = ebands_get_valence_idx(gwr%ks_ebands)
 
- gwr%nspinor = dtset%nspinor
- gwr%nsppol = dtset%nsppol
- gwr%nspden = dtset%nspden
- gwr%natom = dtset%natom
- gwr%usepaw = dtset%usepaw
+ gwr%nspinor = dtset%nspinor; gwr%nsppol = dtset%nsppol; gwr%nspden = dtset%nspden
+ gwr%natom = dtset%natom; gwr%usepaw = dtset%usepaw
 
  gwr%use_supercell_for_tchi = .True.; if (gwr%dtset%useria == 2) gwr%use_supercell_for_tchi = .False.
  !gwr%use_supercell_for_tchi = .False.
@@ -5334,9 +5331,10 @@ else
 
  ! * The little group is needed when symsigma == 1
  ! * If use_umklp == 1 then symmetries requiring an umklapp to preserve k_gw are included as well.
+ ! * Note that TR is not yet supported so timrev is set to 1 even if TR has been used to generate the GS IBZ.
  use_umklp = 1
  do ikcalc=1,gwr%nkcalc
-   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0)
+   call ltg_kcalc(ikcalc)%init(gwr%kcalc(:,ikcalc), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
    call ltg_kcalc(ikcalc)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
  end do
 
@@ -5347,10 +5345,10 @@ else
  call wc_rpr%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
  do ipm=1,2
    call gk_rpr_pm(ipm)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-   ! For sigma we have to decompose it in hermitian/anti-hermitian part.
    do ikcalc=1,gwr%nkcalc
      call sigc_rpr(1,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
-     call sigc_rpr(2,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
+     ! For sigma we have to decompose it in hermitian/anti-hermitian part.
+     !call sigc_rpr(2,ipm,ikcalc)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
    end do
  end do
 
@@ -5442,6 +5440,7 @@ else
            ! If symsigma, symmetrize the matrix elements.
            ! Sum only q"s in IBZ_k. In this case elements are weighted
            ! according to wtqp and wtqm. wtqm is for time-reversal.
+           !call ltg_kcalc(ikcalc)%get_weigts_ibz(ik_bz, wkbz_pm)
            associate (ltg_k => ltg_kcalc(ikcalc))
            !if (can_symmetrize(spin)) then
            wtqp = zero; wtqm = zero
@@ -5449,15 +5448,8 @@ else
              wtqp = wtqp + ltg_k%wtksym(1,isym,ik_bz)  ! FIXME: iq_bz or ik_bz?
              wtqm = wtqm + ltg_k%wtksym(2,isym,ik_bz)
            end do
-           !print *, "For kcalc:", trim(ktoa(gwr%kcalc(:,ikcalc))), "wtqp, wtqm", wtqp, wtqm
-           !ABI_CHECK(wtqm == 0, "wtqm != 0")
            wtqp = wtqp / gwr%nkbz
            wtqm = wtqm / gwr%nkbz
-           !end if
-           !if (ikcalc == 1) then
-           !  ABI_CHECK(abs(wtqm) < tol12, "abs(wtqm) > tol12")
-           !  ABI_CHECK(abs(wtqp - gwr%ks_ebands%wtk(ik_ibz)) < tol12, "abs(wtqp - wtk) > tol12")
-           !end if
            end associate
          end if
 
@@ -5466,6 +5458,7 @@ else
              sigc_rpr(1,ipm,ikcalc)%buffer_cplx = sigc_rpr(1,ipm,ikcalc)%buffer_cplx + &
                 wtqp * gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
            else
+             ABI_ERROR(sjoin("Not implemented error:", ftoa(wtqm)))
              sigc_rpr(1,ipm,ikcalc)%buffer_cplx = sigc_rpr(1,ipm,ikcalc)%buffer_cplx + &
                wtqp * (gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
 
@@ -5893,7 +5886,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nfftsp
- class(__slkmat_t),intent(in) :: sig_rpr(2,2)
+ type(__slkmat_t),intent(in) :: sig_rpr(2,2)
  complex(gwpc),intent(in) :: ur_glob(nfftsp)
  complex(gwpc),intent(out) :: sigm_pm(2)
 

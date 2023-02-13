@@ -131,10 +131,14 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk2          0
            getwfk3          2
            getwfk4          2
-    gwr_boxcutmin1     2.00000000E+00
-    gwr_boxcutmin2     2.00000000E+00
+    gwr_boxcutmin1     1.00000000E+00
+    gwr_boxcutmin2     1.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
     gwr_boxcutmin4     1.10000000E+00
+-  gwr_ucsc_batch1      -1   -1
+-  gwr_ucsc_batch2      -1   -1
+-  gwr_ucsc_batch3       3    5
+-  gwr_ucsc_batch4      -1   -1
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
@@ -950,10 +954,14 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
            getwfk2          0
            getwfk3          2
            getwfk4          2
-    gwr_boxcutmin1     2.00000000E+00
-    gwr_boxcutmin2     2.00000000E+00
+    gwr_boxcutmin1     1.00000000E+00
+    gwr_boxcutmin2     1.00000000E+00
     gwr_boxcutmin3     1.10000000E+00
     gwr_boxcutmin4     1.10000000E+00
+-  gwr_ucsc_batch1      -1   -1
+-  gwr_ucsc_batch2      -1   -1
+-  gwr_ucsc_batch3       3    5
+-  gwr_ucsc_batch4      -1   -1
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
