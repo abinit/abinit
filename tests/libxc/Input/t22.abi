@@ -1,3 +1,10 @@
+# Added by runtests.py
+output_file = "t22.abo"
+indata_prefix = "t22i"
+outdata_prefix = "t22o"
+tmpdata_prefix = "t22t"
+# end runtests.py section
+
 # -----------------------------------------------------
 # -  Input file for Abinit                            -
 # -  Testing temperature-dependent libxc functionals  -
@@ -8,13 +15,14 @@
 
 # 1- Datasets: functionals, temperatures
 # -----------------------------------------------------
-  ndtset 6
-  ixc1 -529  tphysel1  1000. K  # LDA KSDT, Karasiev/Sjostrom/Dufty/Trickey at 1000K
-  ixc2 -529  tphysel2  5000. K  # LDA KSDT, Karasiev/Sjostrom/Dufty/Trickey at 5000K
-  ixc3 -318  tphysel3  1000. K  # LDA CORRKSDT, corrected KSDT at 1000K
-  ixc4 -318  tphysel4  5000. K  # LDA CORRKSDT, corrected KSDT at 5000K
-  ixc5 -577  tphysel5  1000. K  # LDA GDSMFB, Groth/Dornheim/Sjostrom/Malone/Foulkes/Bonitz at 1000K
-  ixc6 -577  tphysel6  5000. K  # LDA GDSMFB, Groth/Dornheim/Sjostrom/Malone/Foulkes/Bonitz at 5000K 
+  ndtset 7
+  ixc1 -259  occopt1 3  tsmear1  1000. K  # LDA KSDT, at 1000K (Fermi-Dirac occ. scheme)
+  ixc2 -259  occopt2 3  tsmear2  5000. K  # LDA KSDT, at 5000K (Fermi-Dirac occ. scheme)
+  ixc3 -259  occopt3 4  tphysel3 5000. K  # LDA KSDT, at 5000K (Gaussian occ. scheme)
+  ixc4 -318  occopt4 3  tsmear4  1000. K  # LDA CORRKSDT, at 1000K (Fermi-Dirac occ. scheme)
+  ixc5 -318  occopt5 3  tsmear5  5000. K  # LDA CORRKSDT, at 5000K (Fermi-Dirac occ. scheme)
+  ixc6 -577  occopt6 3  tsmear6  1000. K  # LDA GDSMFB, at 1000K (Fermi-Dirac occ. scheme)
+  ixc7 -577  occopt7 3  tsmear7  5000. K  # LDA GDSMFB, at 5000K (Fermi-Dirac occ. scheme)
 
 # 2- Unit cell
 # -----------------------------------------------------
@@ -32,36 +40,36 @@
 # 3- Electronic states
 # -----------------------------------------------------
   nband 6              # Number of electronic bands per cell
-  occopt 7             # Option for metallic occupation numbers (gaussian smearing)
+  occopt 3             # Fermi-Dirac occupation scheme
   tsmear 0.04          # Smearing temperature for occupation scheme
 
 # 4- K-points sampling
 # -----------------------------------------------------
-  ngkpt 3*2            # This is a 2x2x2 FCC grid, based on the primitive vectors
-  nshiftk 4            # We use 4 shifted grids (to improve sampling efficiency)
-  shiftk 0.0 0.0 0.0
+ ngkpt 3*2             # This is a 2x2x2 FCC grid, based on the primitive vectors
+ nshiftk 4             # We use 4 shifted grids (to improve sampling efficiency)
+ shiftk 0.0 0.0 0.0
         0.0 0.5 0.5
         0.5 0.0 0.5
         0.5 0.5 0.0
 
 # 5- Convergence parameters
 # -----------------------------------------------------
-  ecut  6.0            # Energy cut-off of the PW basis, in Hartree
-  pawecutdg 10.        # Energy cut-off of the PAW density PW basis, in Hartree
-  nstep 20             # Maximal number of SCF cycles
-  toldfe 1.0d-10       # Requested total energy difference at convergence
+ecut 6.                # Energy cut-off of the PW basis, in Hartree
+pawecutdg 10.          # Energy cut-off of the PAW density PW basis, in Hartree
+nstep 20               # Maximal number of SCF cycles
+toldfe 1.0d-8          # Total energy difference to achieve
 
 # 6- Options for output
 # -----------------------------------------------------
-  prtdos 0 prtwf 0 prtden 0 prtgsr 0  # Do no output useless files
-  prtwf1 1  getwfk1 0                 # Dataset 1: output wave-functions
-  getwfk 1                            # Other datasets: read wave-functions of dataset 1
+ prtdos 0 prtwf 0 prtden 0 prtgsr 0  # Do no output useless files
+ prtwf1 1  getwfk1 0                 # Dataset 1: output wave-functions
+ getwfk 1                            # Other datasets: read wave-functions of dataset 1
 
 
 # 7- Pseudopotentials
 # -----------------------------------------------------
-  pp_dirpath "$ABI_PSPDIR"
-  pseudos "Pseudodojo_paw_pw_standard/Al.xml"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pw_standard/Al.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
