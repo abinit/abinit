@@ -8693,7 +8693,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 40 --> Hartree-Fock
   * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
-  * 50 --> IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter). The electronic temperature is taken from [[tphysel]].
+  * 50 --> IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter). The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
 
 **ETSF Lib XC functionals**
 
@@ -8744,7 +8744,8 @@ This means having [[usekden]] = 1.
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
 ==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)  
-  The electronic temperature is taken from the [[tphysel]] variable.  
+  The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
+  Use of [[occopt]]=3 is recommended to have a physical meaning of the temperature.  
   As these functionals do not provide Kxc (2nd derivative of Exc), a SCF mixing
   of the potential is automatically selected ([[iscf]]<10).
 
