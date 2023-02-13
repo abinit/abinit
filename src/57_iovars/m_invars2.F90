@@ -1834,7 +1834,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    else if (ixc_current<0) then
      call libxc_functionals_init(ixc_current,dtset%nspden,xc_functionals=xcfunc_tmp)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
-       hyb_range=dtset%hyb_range_dft)
+       hyb_range=dtset%hyb_range_dft,xc_functionals=xcfunc_tmp)
      call libxc_functionals_end(xc_functionals=xcfunc_tmp)
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
