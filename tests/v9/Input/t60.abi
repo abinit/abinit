@@ -162,9 +162,12 @@ getdvdb_filepath10  "t60o_DS20_DVDB"
 # DATASET 11
 ############
 eph_task11  4
-sigma_ngkpt11 2 2 2
-sigma_erange11  0.5 0.5 eV
+sigma_erange11  1.0 1.0 eV
 eph_ngqpt_fine11       4    4    4
+eph_doping11 1e20
+tmesh11 3000 1 1 
+occopt11 3
+
 
 ############
 # DATASET 12
@@ -174,8 +177,9 @@ getsigeph_filepath12 "t60o_DS11_SIGEPH.nc"
 tolcum12 1e-3
 eph_intmeth12          1
 eph_ngqpt_fine12       4    4    4
-sigma_erange12  0.5 0.5 eV
-eph_doping12 -1e20
+sigma_erange12  1.0 1.0 eV
+eph_doping12 1e20
+tmesh12 3000 1 1 
 occopt12 3
 
 
