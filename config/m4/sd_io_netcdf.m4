@@ -274,7 +274,7 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
       #echo " whether NetCDF has parallel I/O"
       AC_MSG_CHECKING([whether NetCDF has parallel I/O])
       AC_LANG_PUSH([C])
-      AC_RUN_IFELSE([AC_LANG_PROGRAM(
+      AC_LINK_IFELSE([AC_LANG_PROGRAM(
         [[
 #         include <mpi.h>
 #         include <netcdf.h>
