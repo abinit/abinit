@@ -2305,6 +2305,7 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec)
  nsym          =  Cryst%nsym
  timrev        =  Cryst%timrev
  !if (present(timrev)) timrev = timrev
+ !timrev = 1
  symrec        => Cryst%symrec
  symafm        => Cryst%symafm
  use_antiferro =  Cryst%use_antiferro
