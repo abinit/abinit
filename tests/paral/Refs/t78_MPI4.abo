@@ -114,9 +114,6 @@ _ WF disk file :      2.033 Mbytes ; DEN or POT disk file :      0.134 Mbytes.
            getwfk1          0
            getwfk2          0
            getwfk3          2
-    gwr_boxcutmin1     2.00000000E+00
-    gwr_boxcutmin2     2.00000000E+00
-    gwr_boxcutmin3     1.00000000E+00
 -     gwr_np_kgts        1    2    2    1
          gwr_ntau1         12
          gwr_ntau2         12
@@ -914,9 +911,6 @@ data: !Tabular |
            getwfk1          0
            getwfk2          0
            getwfk3          2
-    gwr_boxcutmin1     2.00000000E+00
-    gwr_boxcutmin2     2.00000000E+00
-    gwr_boxcutmin3     1.00000000E+00
 -     gwr_np_kgts        1    2    2    1
          gwr_ntau1         12
          gwr_ntau2         12

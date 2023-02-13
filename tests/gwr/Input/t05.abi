@@ -5,13 +5,13 @@ ecut 8     # Cannot go below this else system becomes metallic in HDIAGO!
 timopt 1
 
 # This to compute QP without symmetries for debugging purposes
-#nsym 1 
+#nsym 1
 #kptopt 3
 #kptopt 2
 
 ngkpt      4 4 4   # This mesh has BZ points requiring time-rev and non-zero g0
 nshiftk    1
-shiftk     0 0 0 
+shiftk     0 0 0
 
 ####################
 # Dataset 1: SCF run

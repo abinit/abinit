@@ -78,6 +78,7 @@ pseudos "Pseudodojo_paw_pw_standard/Si.xml, Pseudodojo_paw_pw_standard/O.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
