@@ -2129,8 +2129,8 @@ function libpaw_libxc_depends_on_temp(xc_functional)
      call char_c_to_f(strg_c,par_name)
      if (trim(par_name)=="T") then
        libpaw_libxc_depends_on_temp=.true. ; exit
-       ipar_c=ipar_c+1
      end if
+     ipar_c=ipar_c+1
    else
      ipar_c=-1
    end if

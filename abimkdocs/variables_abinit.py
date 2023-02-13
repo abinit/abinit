@@ -8420,8 +8420,12 @@ convergence, all values are OK)
 compromise between speed and reliability. The value **iscf** =  2 is safer but slower.
 - In the PAW case, default option is **iscf** = 17. In PAW you have the
 possibility to mix density/potential on the fine or coarse FFT grid (see [[pawmixdg]]).
-- Note that a Pulay mixing (**iscf** = 7 or 17) with [[npulayit]] = 1 (resp. 2)
+- Note 1: a Pulay mixing (**iscf** = 7 or 17) with [[npulayit]] = 1 (resp. 2)
 is equivalent to an Anderson mixing with **iscf** = 3 or 13 (resp. 4 or 14).
+- Note 2: when a mixing of the density is activated ([[iscf]]>=10) the density residual
+correction added to forces (see [[densfor_pred]]) needs the second derivative of the
+exchange-correlation functionnal (namely Kxc). When the latter is not provided, [[iscf]]
+is automatically switched to select the coresponding mixing of the potential ([[iscf]]<10).
 - Also note that:
 * when mixing is done on potential (iscf < 10), total energy is computed by "direct" decomposition.
 * when mixing is done on density (iscf >= 10), total energy is computed by "double counting" decomposition.
@@ -8740,7 +8744,9 @@ This means having [[usekden]] = 1.
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
 ==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)  
-  The electronic temperature is taken from the [[tphysel]] variable.
+  The electronic temperature is taken from the [[tphysel]] variable.  
+  As these functionals do not provide Kxc (2nd derivative of Exc), a SCF mixing
+  of the potential is automatically selected ([[iscf]]<10).
 
   * 259 --> XC_LDA_XC_KSDT, LDA T-dependent functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]]
   * 318 --> XC_LDA_XC_CORRKSDT, corrected KSDT by Karasiev, Dufty, & Trickey [[cite:Karasiev2018]]
