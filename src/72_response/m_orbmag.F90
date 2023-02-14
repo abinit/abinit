@@ -43,10 +43,8 @@ module m_orbmag
 
   use defs_datatypes,     only : pseudopotential_type
   use defs_abitypes,      only : MPI_type
-  use m_dfpt_nstwf,       only : gaugetransfo
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : projbd
-  use m_dfpt_nstwf,       only : gaugetransfo
   use m_fft,              only : fftpac
   use m_fourier_interpol, only : transgrid
   use m_geometry,         only : metric
