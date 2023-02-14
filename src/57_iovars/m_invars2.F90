@@ -589,6 +589,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_ntau', tread,'INT')
  if (tread == 1) dtset%gwr_ntau = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_chi_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_chi_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_sigma_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_sigma_algo = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_boxcutmin', tread, 'DPR')
  if (tread == 1) dtset%gwr_boxcutmin = dprarr(1)
 

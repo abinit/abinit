@@ -23315,6 +23315,34 @@ This variable defines the number of imaginary-time points
 ),
 
 Variable(
+    abivarname="gwr_chi_algo",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=1,
+    mnemonics="GWR CHI ALGOrithm.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+""",
+),
+
+Variable(
+    abivarname="gwr_sigma_algo",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=12,
+    mnemonics="GWR SIGMA ALGOrithm.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+""",
+),
+
+Variable(
     abivarname="gwr_boxcutmin",
     varset="gw",
     vartype="real",

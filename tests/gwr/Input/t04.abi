@@ -21,11 +21,11 @@ optdriver2  6        # Activate GWR code
 gwr_task2 "HDIAGO_FULL"   # Direct Diagonalization with nband == npw
 getden2       1
 
-
 #########################################
 # GWR variables common to dataset 3 and 4 
 #########################################
 gwr_ntau   6        # Number of imaginary-time points
+gwr_sigma_algo 1    # Use supercell for Sigma
 gwr_boxcutmin  1.1  # This should be subject to convergence studies
 #mixprec    1       # Mixed precision FFT.
 nband      30       # Bands to be used in the screening calculation

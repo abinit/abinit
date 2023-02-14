@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 14 Feb 2023.
-- ( at 12h51 )
+- ( at 20h56 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t06/t06.abi
 - output file    -> t06.abo
@@ -103,6 +103,9 @@ _ WF disk file :      0.507 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
+   gwr_sigma_algo1          1
+   gwr_sigma_algo2          1
+   gwr_sigma_algo3          2
            istwfk        2    0    3    0    0    0    7    0
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -168,9 +171,6 @@ P           mkmem           8
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
             typat      1  2
-           userib1          0
-           userib2          0
-           userib3          2
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -634,13 +634,17 @@ meta: {optdriver: 6, }
 --- !GWR_params
 iteration_state: {dtset: 3, }
 gwr_task: G0W0
+nband: 30
 ntau: 6
 ngkpt: [4, 4, 4, ]
-nkbz: 64
-nkibz: 8
 ngqpt: [4, 4, 4, ]
-nqbz: 64
+chi_algo: supercell
+sigma_algo: 'BZ-convolutions'
+nkibz: 8
 nqibz: 8
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
 green_mpw: 138
 tchi_mpw: 92
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
@@ -954,6 +958,9 @@ data: !Tabular |
          gwr_ntau1         12
          gwr_ntau2         12
          gwr_ntau3          6
+   gwr_sigma_algo1          1
+   gwr_sigma_algo2          1
+   gwr_sigma_algo3          2
            istwfk        2    0    3    0    0    0    7    0
            jdtset        1    2    3
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1025,9 +1032,6 @@ P           mkmem           8
            tolvrs2     0.00000000E+00
            tolvrs3     0.00000000E+00
             typat      1  2
-           userib1          0
-           userib2          0
-           userib3          2
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -1040,58 +1044,56 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         14.7        0.24      0.004
-- Total wall clock time (s,m,h):         15.0        0.25      0.004
+- Total cpu        time (s,m,h):         14.6        0.24      0.004
+- Total wall clock time (s,m,h):         14.9        0.25      0.004
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           14.7, wall_time =           15.0
+- cpu_time =           14.6, wall_time =           14.9
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- gwr_build_tchi                    8.797  59.9         8.959  59.9              1      -1.00        0.98       0.98
-- gwr_build_sigmac                  3.965  27.0         4.000  26.7              1      -1.00        0.99       0.99
-- gwr_gk_to_scbox                   0.801   5.4         0.807   5.4           3072      -1.00        0.99       0.99
-- gsph2box                          0.465   3.2         0.477   3.2         393216      -1.00        0.97       0.97
-- gwr_init                          0.392   2.7         0.372   2.5              2      -1.00        1.06       1.06
-- fourwf%(pot)                      0.361   2.5         0.389   2.6           4524      -1.00        0.93       0.93
-- pspini                            0.280   1.9         0.297   2.0              3      -1.00        0.94       0.94
-- ugb_from_diago                    0.143   1.0         0.148   1.0              8      -1.00        0.97       0.97
-- gwr_build_head_wings              0.117   0.8         0.117   0.8              1      -1.00        1.00       1.00
-- invars2                           0.114   0.8         0.115   0.8              3      -1.00        1.00       1.00
-- timing timab                      0.101   0.7         0.110   0.7             12      -1.00        0.93       0.93
-- nonlop(apply)                     0.077   0.5         0.083   0.6           4524      -1.00        0.92       0.92
-- others (143)                      0.259   1.8         0.275   1.8             -1      -1.00        0.94       0.94
+- gwr_build_tchi                    8.772  59.9         8.985  60.3              1      -1.00        0.98       0.98
+- gwr_build_sigmac                  3.950  27.0         3.974  26.7              1      -1.00        0.99       0.99
+- gwr_gk_to_scbox                   0.796   5.4         0.815   5.5           3072      -1.00        0.98       0.98
+- gsph2box                          0.463   3.2         0.486   3.3         393216      -1.00        0.95       0.95
+- gwr_init                          0.400   2.7         0.391   2.6              2      -1.00        1.02       1.02
+- fourwf%(pot)                      0.333   2.3         0.336   2.3           4524      -1.00        0.99       0.99
+- pspini                            0.266   1.8         0.268   1.8              3      -1.00        0.99       0.99
+- timing timab                      0.149   1.0         0.150   1.0             13      -1.00        0.99       0.99
+- invars2                           0.116   0.8         0.117   0.8              3      -1.00        0.99       0.99
+- gwr_build_head_wings              0.114   0.8         0.114   0.8              1      -1.00        1.00       1.00
+- ugb_from_diago                    0.111   0.8         0.112   0.8              8      -1.00        1.00       1.00
+- others (144)                      0.306   2.1         0.308   2.1             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                         15.872 108.0        16.149 107.9                                  0.98       0.98
+- subtotal                         15.775 107.8        16.056 107.8                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          14.7, wall_time =          15.0
+- cpu_time =          14.6, wall_time =          14.9
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- gwr_build_tchi                    8.797  59.9         8.959  59.9              1      -1.00        0.98       0.98
-- gwr_build_sigmac                  3.965  27.0         4.000  26.7              1      -1.00        0.99       0.99
-- gwr_gk_to_scbox                   0.801   5.4         0.807   5.4           3072      -1.00        0.99       0.99
-- gsph2box                          0.465   3.2         0.477   3.2         393216      -1.00        0.97       0.97
-- gwr_init                          0.392   2.7         0.372   2.5              2      -1.00        1.06       1.06
-- fourwf%(pot)                      0.361   2.5         0.389   2.6           4524      -1.00        0.93       0.93
-- pspini                            0.280   1.9         0.297   2.0              3      -1.00        0.94       0.94
-- ugb_from_diago                    0.143   1.0         0.148   1.0              8      -1.00        0.97       0.97
-- gwr_build_head_wings              0.117   0.8         0.117   0.8              1      -1.00        1.00       1.00
-- invars2                           0.114   0.8         0.115   0.8              3      -1.00        1.00       1.00
-- timing timab                      0.101   0.7         0.110   0.7             12      -1.00        0.93       0.93
-- nonlop(apply)                     0.077   0.5         0.083   0.6           4524      -1.00        0.92       0.92
-- others (143)                      0.259   1.8         0.275   1.8             -1      -1.00        0.94       0.94
+- gwr_build_tchi                    8.772  59.9         8.985  60.3              1      -1.00        0.98       0.98
+- gwr_build_sigmac                  3.950  27.0         3.974  26.7              1      -1.00        0.99       0.99
+- gwr_gk_to_scbox                   0.796   5.4         0.815   5.5           3072      -1.00        0.98       0.98
+- gsph2box                          0.463   3.2         0.486   3.3         393216      -1.00        0.95       0.95
+- gwr_init                          0.400   2.7         0.391   2.6              2      -1.00        1.02       1.02
+- fourwf%(pot)                      0.333   2.3         0.336   2.3           4524      -1.00        0.99       0.99
+- pspini                            0.266   1.8         0.268   1.8              3      -1.00        0.99       0.99
+- timing timab                      0.149   1.0         0.150   1.0             13      -1.00        0.99       0.99
+- invars2                           0.116   0.8         0.117   0.8              3      -1.00        0.99       0.99
+- gwr_build_head_wings              0.114   0.8         0.114   0.8              1      -1.00        1.00       1.00
+- ugb_from_diago                    0.111   0.8         0.112   0.8              8      -1.00        1.00       1.00
+- others (144)                      0.306   2.1         0.308   2.1             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                         15.872 108.0        16.149 107.9                                  0.98       0.98
+- subtotal                         15.775 107.8        16.056 107.8                                  0.98       0.98
 
 ================================================================================
 
@@ -1175,15 +1177,15 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         14.7  wall=         15.0
+- Proc.   0 individual time (sec): cpu=         14.6  wall=         14.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.7  wall=         15.0
++Overall time at end (sec) : cpu=         14.6  wall=         14.9
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 138 allocations and 138 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 857572 allocations and 857572 deallocations in Fortran
+-   There were 857571 allocations and 857571 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0
