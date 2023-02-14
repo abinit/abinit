@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 17 Dec 2022.
-- ( at 15h34 )
+.Starting date : Tue 14 Feb 2023.
+- ( at 20h55 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t04/t04.abi
 - output file    -> t04.abo
@@ -51,9 +51,9 @@ _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          57          nfft =        3375          nkpt =           1
 ================================================================================
-P This job should need less than                       1.848 Mbytes of memory.
+P This job should need less than                       1.831 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.028 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
 
@@ -456,7 +456,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t04o_DS1_DEN
 
@@ -499,7 +499,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t04o_DS1_DEN
 
@@ -538,18 +538,41 @@ meta: {optdriver: 6, }
   Augmented FFT divisions ...................     8    8    8
   FFT algorithm .............................   312
   FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
+
+- Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
+- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   8.54535E+00   1.00000E+00   1.00000E+00
+-
+- Selected MPI grid:
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   8.54535E+00   1.00000E+00   1.00000E+00
+
+- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):
+- G_k(g,g,tau): 4.7
+- Chi_q(g,g,tau): 1.2
+- u_k(g,b): 0.1
+- Temporary memory allocated inside the tau loops:
+- G_k(r,g): 1.8
+- chi_q(r,g): 0.9
  ==== Info on the GWR object ====
 
 --- !GWR_params
 iteration_state: {dtset: 3, }
 gwr_task: EGW0
+nband: 30
 ntau: 6
 ngkpt: [1, 1, 1, ]
-nkbz: 1
-nkibz: 1
 ngqpt: [1, 1, 1, ]
-nqbz: 1
+chi_algo: supercell
+sigma_algo: supercell
+nkibz: 1
 nqibz: 1
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
@@ -990,7 +1013,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t04o_DS1_DEN
 
@@ -1029,18 +1052,41 @@ meta: {optdriver: 6, }
   Augmented FFT divisions ...................     8    8    8
   FFT algorithm .............................   312
   FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
+
+- Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
+- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   8.54535E+00   1.00000E+00   1.00000E+00
+-
+- Selected MPI grid:
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   8.54535E+00   1.00000E+00   1.00000E+00
+
+- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):
+- G_k(g,g,tau): 4.7
+- Chi_q(g,g,tau): 1.2
+- u_k(g,b): 0.1
+- Temporary memory allocated inside the tau loops:
+- G_k(r,g): 1.8
+- chi_q(r,g): 0.9
  ==== Info on the GWR object ====
 
 --- !GWR_params
 iteration_state: {dtset: 4, }
 gwr_task: EGEW
+nband: 30
 ntau: 6
 ngkpt: [1, 1, 1, ]
-nkbz: 1
-nkibz: 1
 ngqpt: [1, 1, 1, ]
-nqbz: 1
+chi_algo: supercell
+sigma_algo: supercell
+nkibz: 1
 nqibz: 1
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
@@ -1709,7 +1755,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t04o_DS1_DEN
 
@@ -1748,18 +1794,41 @@ meta: {optdriver: 6, }
   Augmented FFT divisions ...................     8    8    8
   FFT algorithm .............................   312
   FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
+
+- Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
+- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   8.54535E+00   1.00000E+00   1.00000E+00
+-
+- Selected MPI grid:
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   8.54535E+00   1.00000E+00   1.00000E+00
+
+- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):
+- G_k(g,g,tau): 4.7
+- Chi_q(g,g,tau): 1.2
+- u_k(g,b): 0.1
+- Temporary memory allocated inside the tau loops:
+- G_k(r,g): 1.8
+- chi_q(r,g): 0.9
  ==== Info on the GWR object ====
 
 --- !GWR_params
 iteration_state: {dtset: 5, }
 gwr_task: G0V
+nband: 30
 ntau: 6
 ngkpt: [1, 1, 1, ]
-nkbz: 1
-nkibz: 1
 ngqpt: [1, 1, 1, ]
-nqbz: 1
+chi_algo: supercell
+sigma_algo: supercell
+nkibz: 1
 nqibz: 1
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]

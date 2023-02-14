@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 17 Dec 2022.
-- ( at 15h33 )
+.Starting date : Tue 14 Feb 2023.
+- ( at 20h38 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t01/t01.abi
 - output file    -> t01.abo
@@ -467,7 +467,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t01o_DS1_DEN
 
@@ -510,7 +510,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t01o_DS1_DEN
 
@@ -563,18 +563,41 @@ meta: {optdriver: 6, }
   Augmented FFT divisions ...................     8    8    8
   FFT algorithm .............................   312
   FFT cache size ............................    16
+- FFT uc_batch_size: 3
+- FFT sc_batch_size: 5
+
+- Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
+- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   3.88782E+01   1.00000E+00   1.00000E+00
+-
+- Selected MPI grid:
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   3.88782E+01   1.00000E+00   1.00000E+00
+
+- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):
+- G_k(g,g,tau): 14.0
+- Chi_q(g,g,tau): 3.5
+- u_k(g,b): 0.2
+- Temporary memory allocated inside the tau loops:
+- G_k(r,g): 14.1
+- chi_q(r,g): 7.1
  ==== Info on the GWR object ====
 
 --- !GWR_params
 iteration_state: {dtset: 3, }
 gwr_task: G0W0
+nband: 30
 ntau: 6
 ngkpt: [2, 2, 2, ]
-nkbz: 8
-nkibz: 3
 ngqpt: [2, 2, 2, ]
-nqbz: 8
+chi_algo: 'super-cell'
+sigma_algo: 'super-cell'
+nkibz: 3
 nqibz: 3
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]
@@ -802,7 +825,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t01o_DS1_DEN
 
@@ -855,18 +878,41 @@ meta: {optdriver: 6, }
   Augmented FFT divisions ...................     8    8    8
   FFT algorithm .............................   312
   FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
+
+- Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
+- Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   3.88782E+01   1.00000E+00   1.00000E+00
+-
+- Selected MPI grid:
+- np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
+-    1     1     1     1   3.88782E+01   1.00000E+00   1.00000E+00
+
+- Resident memory in Mb for G(g,g',+/-tau) and chi(g,g',tau):
+- G_k(g,g,tau): 14.0
+- Chi_q(g,g,tau): 3.5
+- u_k(g,b): 0.2
+- Temporary memory allocated inside the tau loops:
+- G_k(r,g): 14.1
+- chi_q(r,g): 7.1
  ==== Info on the GWR object ====
 
 --- !GWR_params
 iteration_state: {dtset: 4, }
 gwr_task: RPA_ENERGY
+nband: 30
 ntau: 6
 ngkpt: [2, 2, 2, ]
-nkbz: 8
-nkibz: 3
 ngqpt: [2, 2, 2, ]
-nqbz: 8
+chi_algo: 'super-cell'
+sigma_algo: 'super-cell'
+nkibz: 3
 nqibz: 3
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
 green_mpw: 113
 tchi_mpw: 113
 g_ngfft: [8, 8, 8, 8, 8, 8, ]

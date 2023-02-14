@@ -41,6 +41,7 @@ prtsuscep3 1         # Write TCHI file.
                      # DO NOT USE this option for production runs unless you really need a TCHI file.
 
 gwr_ntau3   6        # Number of imaginary-time points
+gwr_sigma_algo3 1    # Use supercell for Sigma
 gwr_boxcutmin3  1.0  # This should be subject to convergence studies
 #gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
 #gw_icutcoul3   0    # Spherical cutoff

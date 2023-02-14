@@ -866,20 +866,24 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%nspinor = dtset%nspinor; gwr%nsppol = dtset%nsppol; gwr%nspden = dtset%nspden
  gwr%natom = dtset%natom; gwr%usepaw = dtset%usepaw
 
- gwr%use_supercell_for_tchi = .True.; if (gwr%dtset%useria == 2) gwr%use_supercell_for_tchi = .False.
+ gwr%use_supercell_for_tchi = .True. !; if (gwr%dtset%useria == 2) gwr%use_supercell_for_tchi = .False.
  !gwr%use_supercell_for_tchi = .False.
  !gwr%dtset%gwr_chi_algo =
+ if (gwr%dtset%gwr_chi_algo == 0) then
+   ! Automatic selection
+   ABI_ERROR("Not implemented Error")
+ else
+   gwr%use_supercell_for_tchi = gwr%dtset%gwr_chi_algo == 1
+ end if
 
- gwr%use_supercell_for_sigma = .True.; if (gwr%dtset%userib == 2) gwr%use_supercell_for_sigma = .False.
+ !gwr%use_supercell_for_sigma = .True. !; if (gwr%dtset%userib == 2) gwr%use_supercell_for_sigma = .False.
  !gwr%use_supercell_for_sigma = .False.
-
- !select case (gwr%dtset%gwr_sigma_algo)
- !case ("super_cell")
- !case ("unit_cell")
- !case ("auto")
- !case default
- !  ABI_ERROR(sjoin("Invalid value for gwr_sigma_algo:", gwr%dtset%gwr_sigma_algo))
- !end select
+ if (gwr%dtset%gwr_sigma_algo == 0) then
+   ! Automatic selection
+   ABI_ERROR("Not implemented Error")
+ else
+   gwr%use_supercell_for_sigma = gwr%dtset%gwr_sigma_algo == 1
+ end if
 
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
  !call wrtout(std_out, sjoin(" Using q0:", ktoa(gwr%q0), "for long-wavelenght limit"))
@@ -1102,8 +1106,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Build degtab tables.
  if (abs(gwr%dtset%symsigma) == 1) then
    ABI_MALLOC(gwr%degtab, (gwr%nkcalc, gwr%nsppol))
-   !call xmpi_sum(ndeg_all, input_comm, ierr)
-   !call xmpi_sum(degblock_all, input_comm, ierr)
    do ikcalc=1,gwr%nkcalc
      do spin=1,gwr%nsppol
        ndeg = ndeg_all(ikcalc, spin)
@@ -1114,7 +1116,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
          gwr%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
            degblock_all(1, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1, &
            degblock_all(2, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1)]
-         !print *, "   bids:", gwr%degtab(ikcalc, spin)%bids(ii)%vals
        end do
      end do
    end do
@@ -3875,7 +3876,6 @@ subroutine gwr_print(gwr, units, header)
  character(len=*),optional,intent(in) :: header
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
@@ -3888,16 +3888,19 @@ subroutine gwr_print(gwr, units, header)
 
  ydoc = yamldoc_open('GWR_params') !, width=11, real_fmt='(3f8.3)')
  call ydoc%add_string("gwr_task", gwr%dtset%gwr_task)
+ call ydoc%add_int("nband", gwr%dtset%nband(1))
  call ydoc%add_int("ntau", gwr%ntau)
  call ydoc%add_int1d("ngkpt", gwr%ngkpt)
- call ydoc%add_int("nkbz", gwr%nkbz)
- call ydoc%add_int("nkibz", gwr%nkibz)
  call ydoc%add_int1d("ngqpt", gwr%ngqpt)
- call ydoc%add_int("nqbz", gwr%nqbz)
+ msg = "supercell"; if (.not. gwr%use_supercell_for_tchi) msg = "BZ-convolutions"
+ call ydoc%add_string("chi_algo", msg)
+ msg = "supercell"; if (.not. gwr%use_supercell_for_sigma) msg = "BZ-convolutions"
+ call ydoc%add_string("sigma_algo", msg)
+ call ydoc%add_int("nkibz", gwr%nkibz)
  call ydoc%add_int("nqibz", gwr%nqibz)
- ! TODO
- !call ydoc%add_int("gw_icutcoul", gwr%dtset%gw_icutcoul)
- !call wrtout(std_out, sjoin(" Using q0:", ktoa(gwr%q0), "for long-wavelenght limit"))
+ call ydoc%add_int("inclvkb", gwr%dtset%inclvkb)
+ call ydoc%add_real1d("q0", gwr%q0)  ! "for long-wavelenght limit"))
+ call ydoc%add_int("gw_icutcoul", gwr%dtset%gw_icutcoul)
  call ydoc%add_int("green_mpw", gwr%green_mpw)
  call ydoc%add_int("tchi_mpw", gwr%tchi_mpw)
  call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:6))
@@ -4008,7 +4011,7 @@ subroutine gwr_build_tchi(gwr)
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit, weight_ikf
  complex(gwpc) :: head_q
  complex(dp) :: chq(3), wng(3)
- logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k
+ logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, print_time
  character(len=5000) :: msg
  type(desc_t),pointer :: desc_k, desc_q
  type(__slkmat_t) :: chi_rgp
@@ -4133,7 +4136,8 @@ subroutine gwr_build_tchi(gwr)
 
        do my_ir=1, my_nr, gwr%sc_batch_size
          ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
-         if (my_ir <= 6 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0) call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
+         print_time = (gwr%comm%me == 0 .and. (my_ir <= 6 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0))
+         if (print_time) call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
 
 if (.not. use_shmem_for_k) then
 
@@ -4207,9 +4211,9 @@ end if
            !                     gt_scbox(:,1,1), chiq_gpr(my_iqi)%buffer_cplx(:,my_ir))
          end do ! my_iqi
 
-         if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0) then
+         if (print_time) then
            write(msg,'(4x,3(a,i0),a)')"tChi my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
-           if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
+           call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
          end if
        end do ! my_ir
 
@@ -4229,7 +4233,7 @@ end if
          q_is_gamma = normv(gwr%qibz(:,iq_ibz), gwr%cryst%gmet, "G") < GW_TOLQ0
          desc_q => gwr%tchi_desc_qibz(iq_ibz)
 
-         ! Note minus sign in q.
+         ! Note the minus sign in q.
          if (.not. q_is_gamma) call calc_ceikr(-gwr%qibz(:,iq_ibz), gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, cemiqr)
 
          ! MPI-transposition: tchi_q(g',r) => tchi_q(r,g')
@@ -4239,7 +4243,6 @@ end if
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
                            desc_q%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
-         !ABI_CHECK_IEQ(size(gwr%tchi_qibz(iq_ibz, itau, spin)%buffer_cplx, dim=2), size(chi_rgp%buffer_cplx, dim=2), "len2")
          do ig2=1, chi_rgp%sizeb_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%sizeb_local(2), gwr%uc_batch_size)
 
@@ -4404,9 +4407,7 @@ end if
    end do ! my_it
    end do ! spin
 
-   call slk_array_free(gk_rpr_pm)
-   call slk_array_free(gkq_rpr_pm)
-   call slk_array_free(chiq_rpr)
+   call slk_array_free(gk_rpr_pm); call slk_array_free(gkq_rpr_pm); call slk_array_free(chiq_rpr)
    ABI_FREE(chiq_rpr)
    call wrtout(std_out, " Mixed space algorithm for chi completed") !; stop
  end if
@@ -4530,8 +4531,6 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
        call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, gwr%dtset%ecut, gwr)
      end if
    end do
-   !call wrtout(std_out, sjoin(" Will get:", itoa(count(got_qibz /= 0)), "new matrices"))
-   !ABI_CHECK_IEQ(count(got_qibz /= 0), 0, "got_qibz")
 
    ! Define the sender for each kibz in do_mpi_kibz
    call xmpi_min_ip(sender_kibz, gwr%kpt_comm%value, ierr)
@@ -4603,13 +4602,14 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
 !Local variables-------------------------------
  integer :: iq_ibz, ierr, bcast_comm, color, do_mpi_qibz(gwr%nqibz), sender_qibz(gwr%nqibz), sender_in_bcast_comm
  logical :: im_sender
+ logical, parameter :: timeit = .False.
  real(dp) :: qq_ibz(3), cpu, wall, gflops
  complex(gwpc),contiguous, pointer :: cq_ptr(:,:)
 
 ! *************************************************************************
 
  ABI_CHECK(what == "tchi" .or. what == "wc", sjoin("Invalid what:", what))
- call cwtime(cpu, wall, gflops, "start")
+ if (timeit) call cwtime(cpu, wall, gflops, "start")
 
  select case (action)
  case ("communicate")
@@ -4640,8 +4640,6 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
        call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, gwr%dtset%ecuteps, gwr, kin_sorted=.True.)
      end if
    end do
-   !call wrtout(std_out, sjoin(" Will get:", itoa(count(got_qibz /= 0)), "new matrices"))
-   !ABI_CHECK_IEQ(count(got_qibz /= 0), 0, "got_qibz")
 
    ! Define the sender for each qibz in do_mpi_qibz
    call xmpi_min_ip(sender_qibz, gwr%kpt_comm%value, ierr)
@@ -4669,9 +4667,6 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
 
  case ("free")
    ! Use got_qibz table to free previously allocated memory
-   !call wrtout(std_out, sjoin(" Will deallocate:", itoa(count(got_qibz /= 0)), "matrices"))
-   !ABI_CHECK_IEQ(count(got_qibz /= 0), 0, "got_qibz")
-
    do iq_ibz=1,gwr%nqibz
      if (got_qibz(iq_ibz) /= 0) call gwr%tchi_desc_qibz(iq_ibz)%free()
    end do
@@ -4681,7 +4676,7 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
    ABI_ERROR(sjoin("Invalid action:", action))
  end select
 
- call cwtime_report(" gwr_redistrib_mats_qibz:", cpu, wall, gflops)
+ if (timeit) call cwtime_report(" gwr_redistrib_mats_qibz:", cpu, wall, gflops)
 
 end subroutine gwr_redistrib_mats_qibz
 !!***
@@ -5038,7 +5033,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, wtqm, wtqp
- logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, compute_this_kbz
+ logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, compute_this_kbz, print_time
  character(len=500) :: msg
  type(desc_t), pointer :: desc_q, desc_k
  type(yamldoc_t) :: ydoc
@@ -5103,10 +5098,6 @@ subroutine gwr_build_sigmac(gwr)
  sck_ucvol = gwr%cryst%ucvol * product(gwr%ngkpt)
  scq_ucvol = gwr%cryst%ucvol * product(gwr%ngqpt)
 
- ! The g-vectors in the supercell for G and tchi.
- ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
- ABI_MALLOC(wc_scgvec, (3, gwr%tchi_mpw))
-
  ! Set FFT mesh used to compute u(r) in the unit cell.
  call gwr%kcalc_wfd%change_ngfft(gwr%cryst, gwr%psps, gwr%g_ngfft)
 
@@ -5126,16 +5117,7 @@ if (gwr%use_supercell_for_sigma) then
  !
  ! The first option requires less memory provided we are interested in a small set of KS states.
  ! The second option is interesting if we need to compute several matrix elements, including off-diagonal terms.
-
- call wrtout(std_out, sjoin(" Building Sigma_c in the supercell with FFT mesh:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
- call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
- call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
- call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
- call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
- call wrtout(std_out, sjoin(" my_ntau:", itoa(gwr%my_ntau), "ntau:", itoa(gwr%ntau)))
- call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkibz:", itoa(gwr%nkibz)))
- call wrtout(std_out, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
- call wrtout(std_out, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
+ call print_sigma_header()
 
  max_ndat = gwr%sc_batch_size
  use_mpi_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
@@ -5169,6 +5151,10 @@ if (gwr%use_supercell_for_sigma) then
  call wt_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat, gwr%dtset%use_gpu_cuda)
 
  sigma_fact = one / (sck_ucvol * scq_ucvol)
+
+ ! The g-vectors in the supercell for G and tchi.
+ ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
+ ABI_MALLOC(wc_scgvec, (3, gwr%tchi_mpw))
 
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
@@ -5218,7 +5204,8 @@ if (gwr%use_supercell_for_sigma) then
 
      ! Loop over r in the unit cell that is now MPI-distributed inside g_comm.
      do my_ir=1, my_nr, gwr%sc_batch_size
-       if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0) call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
+       print_time = (gwr%comm%me == 0 .and. (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0))
+       if (print_time) call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
        ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
        uc_ir = gt_gpr(1,1)%loc2gcol(my_ir)  ! FIXME: This won't work if nspinor 2
 
@@ -5293,9 +5280,9 @@ end if
 
        !if (use_shmem_for_k) call xmpi_sum
 
-       if (my_ir <= 3 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0) then
+       if (print_time) then
          write(msg,'(4x,3(a,i0),a)')"Sigma_c my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
-         if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
+         call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
        end if
      end do ! my_ir
 
@@ -5328,11 +5315,14 @@ end if
  call green_plan%free()
  call wt_plan%free()
 
+ ABI_FREE(green_scgvec)
+ ABI_FREE(wc_scgvec)
+
 else
  ! ===================================================================
  ! Mixed-space algorithm in the unit cell with convolutions in k-space
  ! ===================================================================
- call wrtout([std_out,ab_out], " Building Sigma_c with convolutions in k-space:", pre_newlines=2)
+ call print_sigma_header()
 
  ! Define tables to account for symmetries:
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
@@ -5409,7 +5399,8 @@ else
 
      ! Sum over my k-points in the BZ.
      do my_ikf=1,gwr%my_nkbz
-       call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
+       print_time = (gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0))
+       if (print_time) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
        ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:,ik_bz)
 
        ik_ibz = gwr%kbz2ibz(1, ik_bz); isym_k = gwr%kbz2ibz(2, ik_bz)
@@ -5467,7 +5458,7 @@ else
              sigc_rpr(1,ipm,ikcalc)%buffer_cplx = sigc_rpr(1,ipm,ikcalc)%buffer_cplx + &
                 wtqp * gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx
            else
-             ABI_ERROR(sjoin("Not implemented error:", ftoa(wtqm)))
+             ABI_ERROR(sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
              sigc_rpr(1,ipm,ikcalc)%buffer_cplx = sigc_rpr(1,ipm,ikcalc)%buffer_cplx + &
                wtqp * (gk_rpr_pm(ipm)%buffer_cplx * wc_rpr%buffer_cplx)
 
@@ -5482,9 +5473,9 @@ else
 
        end do ! ikcalc
 
-       if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0) then
+       if (print_time) then
          write(msg,'(4x,3(a,i0),a)')"Sigma_c my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
-         if (gwr%comm%me == 0) call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
+         call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
        end if
      end do ! my_ikf
 
@@ -5493,7 +5484,9 @@ else
 
      ! Integrate self-energy matrix elements in the unit cell.
      ! Remember that Sigma is stored as (r',r) and that the second dimension is MPI-distributed.
-     ! In case of g-parallelism, sigc_pm is a partial 6d integral that will be ALL_REDUCED in gwr%comm afterwards.
+     ! In case of k or g distribution, sigc_pm is a partial 6d integral that will be ALL_REDUCED in gwr%comm afterwards.
+     ! sigc_rpr(1,1,ikcalc=1),
+     !ABI_MALLOC(loc_cwork, (rp_r%sizeb_local(2)))
      do ikcalc=1,gwr%nkcalc
        do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
          call sig_braket_ur(sigc_rpr(:,:,ikcalc), gwr%g_nfft*gwr%nspinor, uc_psir_bk(:,band,ikcalc), sigc_pm)
@@ -5501,6 +5494,7 @@ else
          sigc_it_diag_kcalc(:, itau, ibc, ikcalc, spin) = sigc_pm
         end do
      end do ! ikcalc
+     !ABI_FREE(loc_cwork)
 
      write(msg,'(3(a,i0),a)')" Sigma_c my_itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau)
@@ -5511,6 +5505,7 @@ else
 
  sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (one/gwr%g_nfft) ** 2
  !print *, "ucvol: ", gwr%cryst%ucvol; print *, "g_nfft: ", gwr%g_nfft; print *, "ucvol * g_nfft: ", gwr%cryst%ucvol / gwr%g_nfft
+ !sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2
 
  call wc_rpr%free()
  call slk_array_free(sigc_rpr)
@@ -5521,10 +5516,7 @@ else
  call wrtout(std_out, " Mixed space algorithm for sigma completed")
 end if
 
- ABI_FREE(green_scgvec)
- ABI_FREE(wc_scgvec)
-
- !sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2
+ ! Collect results and average
  call xmpi_sum(sigc_it_diag_kcalc, gwr%comm%value, ierr)
 
  if (gwr%dtset%symsigma == +1 .and. .not. gwr%use_supercell_for_sigma) then
@@ -5550,8 +5542,7 @@ end if
  ! and compute QP corrections and spectral functions.
  ! All procs execute this part as it's very cheap.
 
- imag_zmesh(:) = j_dpc * gwr%iw_mesh
- sigc_iw_diag_kcalc = zero; qp_solver_ierr = 0
+ imag_zmesh(:) = j_dpc * gwr%iw_mesh; sigc_iw_diag_kcalc = zero; qp_solver_ierr = 0
 
  ! Save previous QP bands in qp_ebands_prev (needed for self-consistency)
  ! In the loop below, we also update gwr%qp_ebands%eig with the QP results and recompute occ/fermie.
@@ -5839,6 +5830,25 @@ integer function vid(vname)
  vid = nctk_idname(ncid, vname)
 end function vid
 
+subroutine print_sigma_header()
+
+ if (gwr%comm%me /= 0) return
+
+ if (gwr%use_supercell_for_sigma) then
+   call wrtout(std_out, sjoin(" Building Sigma_c in the supercell with FFT mesh:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
+ else
+   call wrtout([std_out,ab_out], " Building Sigma_c with convolutions in k-space:", pre_newlines=2)
+ end if
+ call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
+ call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
+ call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
+ call wrtout(std_out, sjoin(" my_ntau:", itoa(gwr%my_ntau), "ntau:", itoa(gwr%ntau)))
+ call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkibz:", itoa(gwr%nkibz)))
+ call wrtout(std_out, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
+ call wrtout(std_out, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
+
+end subroutine print_sigma_header
+
 end subroutine gwr_build_sigmac
 !!***
 
@@ -5906,13 +5916,15 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
 ! *************************************************************************
 
  ! (r',r) with r' local and r-index PBLAS-distributed.
- ! Integrate over r'
+
  sigm_pm = czero_gw
  do ipm=1,2
    associate (rp_r => sig_rpr(1,ipm))
-   ABI_CHECK_IEQ(nfftsp, rp_r%sizeb_local(1), "First dimension should be local to each MPI proc!")
+   ! Integrate over r'
+   !ABI_CHECK_IEQ(nfftsp, rp_r%sizeb_local(1), "First dimension should be local to each MPI proc!")
    ABI_MALLOC(loc_cwork, (rp_r%sizeb_local(2)))
    loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
+   !call xgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc )
    ! Integrate over r. Note complex conjugate.
    do il_r1=1,rp_r%sizeb_local(2)
      ir1 = rp_r%loc2gcol(il_r1)
@@ -6640,7 +6652,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  integer :: ib, il_b1, il_b2, nb, block_size, ii, mband, block_counter
  integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
- logical :: isirr_k, use_tr, is_metallic
+ logical :: isirr_k, use_tr, is_metallic, print_time
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk, e0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_k, wall_k, gflops_k
  complex(dpc) :: deltaeKS_b1b2
@@ -6824,7 +6836,8 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      kk_bz = gwr%kbz(:, ik_bz)
 
      if (dtset%symchi == 1 .and. ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only IBZ_q
-     call cwtime(cpu_k, wall_k, gflops_k, "start")
+     print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_k, wall_k, gflops_k, "start")
 
      ! FIXME: Be careful with the symmetry conventions here!
      ! and the interplay between umklapp in q and FFT
@@ -6984,10 +6997,10 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
      ABI_FREE(ug1)
      ABI_FREE(ug2)
-     if (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0) then
+     if (print_time) then
        write(msg,'(4x,3(a,i0),a)')"my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
-       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (my_ikf == LOG_MODK) call wrtout(std_out, " ...")
-       !end_str=select_str("...", mod(my_ikf, LOG_MODK) == 0)
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k)
+       if (my_ikf == LOG_MODK) call wrtout(std_out, " ...")
      end if
    end do ! my_ikf
 

@@ -1,5 +1,5 @@
 
-.Version 9.9.1 of ABINIT 
+.Version 9.9.2 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 17 Dec 2022.
-- ( at 12h20 )
+.Starting date : Tue 14 Feb 2023.
+- ( at 21h03 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t78_MPI4/t78.abi
 - output file    -> t78_MPI4.abo
@@ -524,7 +524,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t78_MPI4o_DS1_DEN
 
@@ -567,7 +567,7 @@ meta: {optdriver: 6, }
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-.Using single precision arithmetic; gwpc =  4
+.Using double precision arithmetic; gwpc =  8
 
 - Reading GS density from: t78_MPI4o_DS1_DEN
 
@@ -620,18 +620,24 @@ meta: {optdriver: 6, }
   Augmented FFT divisions ...................    12   12   15
   FFT algorithm .............................   312
   FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
  ==== Info on the GWR object ====
 
 --- !GWR_params
 iteration_state: {dtset: 3, }
 gwr_task: G0W0
+nband: 80
 ntau: 6
 ngkpt: [2, 2, 2, ]
-nkbz: 8
-nkibz: 4
 ngqpt: [2, 2, 2, ]
-nqbz: 8
+chi_algo: supercell
+sigma_algo: supercell
+nkibz: 4
 nqibz: 4
+inclvkb: 2
+q0: [  1.00000000E-05,   2.00000000E-05,   3.00000000E-05, ]
+gw_icutcoul: 6
 green_mpw: 832
 tchi_mpw: 303
 g_ngfft: [12, 12, 15, 12, 12, 15, ]
@@ -1056,45 +1062,53 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):        306.7        5.11      0.085
-- Total wall clock time (s,m,h):        514.5        8.58      0.143
+- Total cpu        time (s,m,h):        225.8        3.76      0.063
+- Total wall clock time (s,m,h):        269.4        4.49      0.075
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           76.9, wall_time =          128.7
+- cpu_time =           56.5, wall_time =           67.4
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- gwr_build_sigmac                 32.262  10.5        58.755  11.4              1      -1.00        0.55       0.55
-- gwr_build_tchi                   25.858   8.4        45.532   8.8              1      -1.00        0.57       0.57
-- gwr_build_head_wings              9.782   3.2        12.045   2.3              1      -1.00        0.81       0.81
-- others (145)                      7.760   2.5        10.635   2.1             -1      -1.00        0.73       0.73
+- gwr_build_sigmac                 23.135  10.2        28.597  10.6              1      -1.00        0.81       0.81
+- gwr_build_tchi                   20.404   9.0        24.003   8.9              1      -1.00        0.85       0.85
+- gwr_build_head_wings              3.991   1.8         4.333   1.6              1      -1.00        0.92       0.92
+- fourwf%(pot)                      1.671   0.7         1.942   0.7           2123      -1.00        0.86       0.86
+- ewald                             1.384   0.6         1.500   0.6              3      -1.00        0.92       0.92
+- ugb_from_diago                    1.258   0.6         1.434   0.5              1      -1.00        0.88       0.88
+- others (149)                      5.657   2.5         6.692   2.5             -1      -1.00        0.85       0.85
 -<END_TIMER>
 -
-- subtotal                         75.661  24.7       126.968  24.7                                  0.60       0.60
+- subtotal                         57.501  25.5        68.502  25.4                                  0.84       0.84
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =         306.7, wall_time =         514.5
+- cpu_time =         225.8, wall_time =         269.4
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- gwr_build_sigmac                129.014  42.1       235.120  45.7              4      -1.00        0.55       0.55
-- gwr_build_tchi                  103.017  33.6       182.214  35.4              4      -1.00        0.57       0.57
-- gwr_build_head_wings             38.878  12.7        48.172   9.4              4      -1.00        0.81       0.81
-- fourwf%(pot)                      6.734   2.2         8.484   1.6           8499      -1.00        0.79       0.79
-- ewald                             5.502   1.8         6.835   1.3             12      -1.00        0.80       0.80
-- nonlop(apply)                     4.044   1.3         5.081   1.0           8499      -1.00        0.80       0.80
-- pspini                            2.936   1.0         4.385   0.9             12      -1.00        0.67       0.67
-- gwr_build_green                   2.256   0.7         2.902   0.6              4      -1.00        0.78       0.78
-- others (140)                      9.277   3.0        14.437   2.8             -1      -1.00        0.64       0.64
+- gwr_build_sigmac                 92.481  41.0       114.352  42.5              4      -1.00        0.81       0.81
+- gwr_build_tchi                   81.729  36.2        96.141  35.7              4      -1.00        0.85       0.85
+- gwr_build_head_wings             15.999   7.1        17.328   6.4              4      -1.00        0.92       0.92
+- fourwf%(pot)                      6.767   3.0         7.815   2.9           8499      -1.00        0.87       0.87
+- ewald                             5.503   2.4         5.949   2.2             12      -1.00        0.93       0.93
+- ugb_from_diago                    5.128   2.3         5.883   2.2              4      -1.00        0.87       0.87
+- nonlop(apply)                     4.175   1.8         4.896   1.8           8499      -1.00        0.85       0.85
+- pspini                            2.879   1.3         3.264   1.2             12      -1.00        0.88       0.88
+- gwr_build_green                   2.439   1.1         3.821   1.4              4      -1.00        0.64       0.64
+- gwr_gk_to_scbox                   2.046   0.9         2.395   0.9          25920      -1.00        0.85       0.85
+- invars2                           1.750   0.8         1.782   0.7             12      -1.00        0.98       0.98
+- gsph2box                          1.460   0.6         1.758   0.7         518400      -1.00        0.83       0.83
+- gwr_init                          1.229   0.5         1.414   0.5              8      -1.00        0.87       0.87
+- others (142)                      6.461   2.9         7.337   2.7             -1      -1.00        0.88       0.88
 -<END_TIMER>
 
-- subtotal                        301.655  98.3       507.630  98.7                                  0.59       0.59
+- subtotal                        230.047 101.9       274.135 101.8                                  0.84       0.84
 
 ================================================================================
 
@@ -1175,15 +1189,15 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         76.9  wall=        128.7
+- Proc.   0 individual time (sec): cpu=         56.5  wall=         67.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        307.0  wall=        514.9
++Overall time at end (sec) : cpu=        226.0  wall=        269.6
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 140 allocations and 140 deallocations in C code
+-   There were 138 allocations and 138 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 1352824 allocations and 1352824 deallocations in Fortran
+-   There were 1341895 allocations and 1341895 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0
