@@ -47,6 +47,7 @@ module m_invars2
  use m_ipi,       only : ipi_check_initial_consistency
  use m_crystal,   only : crystal_t
  use m_bz_mesh,   only : kmesh_t, find_qmesh
+ use m_drivexc,   only : has_kxc
 
  implicit none
 
@@ -1890,7 +1891,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  end if
 
-!Note iscf has to be read after ixc, usewvl, optdriver, densfor_pred
+!Note iscf has to be read after ixc, usewvl, optdriver, optforces, densfor_pred
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
  if(tread==1) then
    dtset%iscf=intarr(1)
@@ -1907,20 +1908,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    !Only potential mixing available for response function
    dtset%iscf=dtset%iscf-10
  else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and. &
-&         dtset%densfor_pred/=0.and.dtset%densfor_pred/=5) then
+&         dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) then
    !In case of density mixing (iscf>=10) and correction of forces (densfor_pred/=0 and 5)
    !  we need Kxc. If it is not available, we switch to potential mixing (iscf<10)
-   ii=1 ; if(dtset%ixc==16.or.dtset%ixc==17.or.dtset%ixc==26.or.dtset%ixc==27) ii=0
-   if (dtset%ixc<0) then
-     call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_functionals=xcfunc_tmp)
-     if (.not.libxc_functionals_has_kxc(xc_functionals=xcfunc_tmp)) ii=0
-     call libxc_functionals_end(xc_functionals=xcfunc_tmp)
+   if (dtset%ixc<0) call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_functionals=xcfunc_tmp)
+   if (.not.has_kxc(dtset%ixc,xcfunc_tmp)) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
+     if (dtset%optforces/=0.or.intarr(1)/=0) then
+       dtset%iscf=dtset%iscf-10
+       msg='Automatically switching to potential mixing (iscf<10), because XC functional doesnt provide Kxc!'
+       ABI_COMMENT(msg)
+     end if
    end if
-   if (ii==0) then
-     dtset%iscf=dtset%iscf-10
-     msg='Automatically switching to potential mixing (iscf<10), because XC functional doesnt provide Kxc!'
-     ABI_COMMENT(msg)
-   end if
+   if (dtset%ixc<0) call libxc_functionals_end(xc_functionals=xcfunc_tmp)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
