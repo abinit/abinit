@@ -32,6 +32,7 @@ nband2     30        # Number of (occ + empty) bands
 ################################
 optdriver3  6        # Activate GWR code
 gwr_task3 "G0W0"     # One-shot calculation
+userib3 2            # Temporary flag to compute Sigma with convolutions.
 getden3 1
 getwfk3 2            # WFK file with empty states
 
@@ -74,7 +75,7 @@ ecutsigx3   8.0      # Dimension of the G sum in Sigma_x.
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t05.abo, tolnlines = 12, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
+#%%   t06.abo, tolnlines = 12, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [extra_info]
@@ -84,4 +85,5 @@ ecutsigx3   8.0      # Dimension of the G sum in Sigma_x.
 #%%  SiC in zinc-blende structure
 #%%  Calculation of the GW corrections with GWR code.
 #%%  Test symmetrization with time-reversal and umklapp g0 vectors
+#%%  Similar to t05.abi but here Sigma is computed with convolutions in k-space.
 #%%<END TEST_INFO>
