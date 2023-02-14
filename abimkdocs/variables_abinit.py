@@ -303,7 +303,7 @@ distribution if not specified in input file.
 
     Note that this variable is only used when running **ground-state calculations** in parallel with MPI.
     Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
-    not automatically set by [[autoparal]]. Please consult the tutorials to learn how
+    not automatically set by [[autoparal]]. Please consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI.
 
 Given a total number of processors, ABINIT can find a suitable distribution that fill (when possible)
@@ -2947,7 +2947,7 @@ When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
 of k-resolved spectral function (or density of state) is possible.
 However, the calculation requires as input the self-energy computed in the real
 axis using an external analytical continuation code.
-The section 7 of the DFT+DMFT tutorial  details how to obtain this data
+The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]]  details how to obtain this data
 and related informations.
 """,
 ),
@@ -4031,16 +4031,16 @@ einterp consists of 4 entries.
 The first element specifies the interpolation method.
 
   * 0 --> No interpolation (default)
-  * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]
+  * 1 --> Star-function interpolation (modified Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]).
 
 The meaning of the other entries depend on the interpolation technique selected.
 In the case of star-function interpolation:
 
   * einterp(2): Number of star-functions per ab-initio k-point
-  * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[cite:Uehara2000]].
+  * einterp(3): If non-zero, activate Fourier filtering according to Eq. 9 of [[cite:Uehara2000]].
     In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of
     the lattice vectors included in the star expansion
-  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq 9
+  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq. 9
 
 """,
 ),
@@ -4219,7 +4219,7 @@ Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Blochl1994]] except when [[symsigma]] == 0,
+:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Bloechl1994]] except when [[symsigma]] == 0,
     where it is [[eph_intmeth]] == 1.
 """,
 ),
@@ -9671,7 +9671,7 @@ input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
 will be included. Because the PAW input files do not include the core orbitals,
-the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]],
+the user must compute this value separately, from the Lamb formula [[cite:Abragam1961]],
 and input it here.
 """,
 ),
@@ -10069,7 +10069,7 @@ Variable(
 [[mdf_epsinf]] specifies the value of the macroscopic dielectric function used
 to model the screening function (see [[cite:Bechstedt1992]]).
 The proper spatial symmetry of the screening $W(\mathbf{r},\mathbf{r}^\prime)$ is enforced using
-Eq. (7) of [[cite:vonderLinden1988]].
+Eq. (7) of [[cite:VonDerLinden1988]].
 """,
 ),
 
@@ -13326,7 +13326,7 @@ The choice is among:
   * 4 --> self-energy calculation (SIG), routine *sigma*.
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
-  * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 8 --> post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]] or [[lw_qdrpl]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
@@ -15021,7 +15021,7 @@ Variable(
     text=r"""
   * **ppmodel** = 1: PP model of Godby and Needs [[cite:Godby1989]].
   * **ppmodel** = 2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
-  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:vonderLinden1988]].
+  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:VonDerLinden1988]].
   * **ppmodel** = 4: PP model of Farid and Engel [[cite:Engel1993]].
   * **ppmodel** = 0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
 
@@ -15685,7 +15685,8 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph]].
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]] 
+and [[tutorial:eph4zpr]].
 """,
 ),
 
@@ -21574,7 +21575,7 @@ Variable(
     defaultval=0,
     dimensions="scalar",
     requires="[[optdriver]] == 8",
-    mnemonics="WFK TASK",
+    mnemonics="WaveFunction at K TASK",
     added_in_version="9.0.0",
     text=r"""
 
@@ -21586,11 +21587,11 @@ Possible values are:
      This option can be used to interface Abinit with external tools (e.g. lobster)
      requiring $\kk$-points in the full BZ.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the SKW method
+  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
      using the parameters specified by [[einterp]].
 
   * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
-     The code generates three `_EVK.nc` netcdf files with the matrix element of the $ \dfrac{d}{d_{\kk_i}} $
+     The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
      operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
      These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
      without having to call the DFPT part that is much more expensive at the level of memory.
@@ -21608,7 +21609,7 @@ Possible values are:
   * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
      and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
      This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
-     in the optic tutorial for non-linear optical properties but it is much faster and, most importantly,
+     in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
      less memory demanding.
 
   * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
@@ -23314,7 +23315,22 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable ...
+See the corresponding input variable for the usual GS grid [[boxcutmin]].
+""",
+),
+
+Variable(
+    abivarname="optdcmagpawu",
+    varset="paw",
+    vartype="integer",
+    topics=['DFT+U_expert'],
+    dimensions="scalar",
+    defaultval=3,
+    mnemonics="OPTion for Double-Counting MAGnetic term in PAW+U formalism",
+    requires="[[usepaw]] == 1, [[usepawu]] == 1 or 4, and [[nspden]] == 4",
+    added_in_version="9.8.2",
+    text=r"""
+This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), it defines how the double counting term in the PAW+U formalism is computed. The default is 3, but Abinit versions before 9.8 correspond to 1.
 """,
 ),
 

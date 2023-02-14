@@ -445,6 +445,7 @@ type, public :: dataset_type
 !O
  integer :: occopt
  integer :: optcell
+ integer :: optdcmagpawu = 3
  integer :: optdriver
  integer :: optforces
  integer :: optnlxccc
@@ -902,7 +903,7 @@ type, public :: dataset_type
  real(dp) :: strtarget(6)
  real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]  ! [start, stop, num]
  real(dp) :: ucrpa_window(2)
- real(dp) :: vcutgeo(3)
+ real(dp) :: vcutgeo(3) = [0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: vprtrb(2)
  real(dp) :: zeemanfield(3)
  real(dp) :: mdtemp(2)
@@ -1795,6 +1796,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nzchempot          = dtin%nzchempot
  dtout%occopt             = dtin%occopt
  dtout%optcell            = dtin%optcell
+ dtout%optdcmagpawu       = dtin%optdcmagpawu
  dtout%optdriver          = dtin%optdriver
  dtout%optforces          = dtin%optforces
  dtout%optnlxccc          = dtin%optnlxccc
@@ -3399,7 +3401,7 @@ subroutine chkvars(string)
 !O
  list_vars=trim(list_vars)//' objaat objbat objaax objbax objan objbn objarf'
  list_vars=trim(list_vars)//' objbrf objaro objbro objatr objbtr occ'
- list_vars=trim(list_vars)//' occopt omegasimax omegasrdmax optcell optdriver optforces'
+ list_vars=trim(list_vars)//' occopt omegasimax omegasrdmax optcell optdcmagpawu optdriver optforces '
  list_vars=trim(list_vars)//' optnlxccc optstress orbmag ortalg'
  list_vars=trim(list_vars)//' opt_effpot opt_ncoeff opt_coeff output_file outdata_prefix'
 !P

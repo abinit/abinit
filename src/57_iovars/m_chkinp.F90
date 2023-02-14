@@ -2016,7 +2016,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  nproj
 !  If there is more than one projector for some angular momentum channel of some pseudopotential
    do ilang=0,3
-!    nprojmax(ilang)=maxval(pspheads(1:npsp)%nproj(ilang)) ! Likely problems with HP compiler
      nprojmax(ilang)=pspheads(1)%nproj(ilang)
      if(npsp>=2)then
        do ii=2,npsp
@@ -2110,12 +2109,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       'The meta-GGA XC kernel is not yet implemented for non-colinear magnetism case',ch10, &
       'Please use "nspden=1 or 2".'
      ABI_ERROR(msg)
-   end if
-!  When (usepawu/=0) and pawxcdev=0, nspden must be 1 or 2
-   if( dt%usepawu/=0.and.dt%pawxcdev==0)then
-     cond_string(1)='usepawu' ; cond_values(1)=dt%usepawu
-     cond_string(2)='pawxcdev' ; cond_values(2)=dt%pawxcdev
-     call chkint_eq(1,2,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
 !  When abs(usepawu) is not 0, 1, 4, 10 or 14, nspden must be 1 or 2
    if( abs(dt%usepawu)/=0 .and. abs(dt%usepawu)/=1 .and. abs(dt%usepawu)/=4 .and. &
@@ -2337,7 +2330,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  call chkint_eq(1,1,cond_string,cond_values,ierr,'optcell',dt%optcell,1,(/0/),iout)
 !  end if
 
-   ! Check the value of optdriver
+!  optdcmagpawu
+   if (dt%usepawu/=0.and.dt%nspden==4) then
+     call chkint_eq(0,0,cond_string,cond_values,ierr,'optdcmagpawu',dt%optdcmagpawu,3,(/1,2,3/),iout)
+   end if
+
+!  Check the value of optdriver
    call chkint_eq(0, 0, cond_string, cond_values, ierr, 'optdriver', optdriver, 12,&
                   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_GWR, RUNL_BSE, &
                    RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE,RUNL_RTTDDFT], iout)
@@ -3271,7 +3269,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !      If nspinor=2, the spin-orbit contribution should be present in the pseudopotentials,
 !      unless the user explicitly allows not to treat it.
        if ( nspinor==2 .and. dt%so_psp(ipsp)/=0 .and. pspheads(ipsp)%pspso==0 ) then
-         write(msg, '(a,i2,a,i3,9a)' )&
+         write(msg, '(2(a,i0),9a)' )&
          'so_psp(',ipsp,') was input as ',dt%so_psp(ipsp),', with nspinor=2 and usepaw=0.',ch10,&
          'This requires a treatment of the spin-orbit interaction. However, it has been detected ',ch10,&
          'that the pseudopotential that you want to use does not specify the spin-orbit coupling.',ch10,&
