@@ -868,9 +868,18 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  gwr%use_supercell_for_tchi = .True.; if (gwr%dtset%useria == 2) gwr%use_supercell_for_tchi = .False.
  !gwr%use_supercell_for_tchi = .False.
+ !gwr%dtset%gwr_chi_algo =
 
  gwr%use_supercell_for_sigma = .True.; if (gwr%dtset%userib == 2) gwr%use_supercell_for_sigma = .False.
  !gwr%use_supercell_for_sigma = .False.
+
+ !select case (gwr%dtset%gwr_sigma_algo)
+ !case ("super_cell")
+ !case ("unit_cell")
+ !case ("auto")
+ !case default
+ !  ABI_ERROR(sjoin("Invalid value for gwr_sigma_algo:", gwr%dtset%gwr_sigma_algo))
+ !end select
 
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
  !call wrtout(std_out, sjoin(" Using q0:", ktoa(gwr%q0), "for long-wavelenght limit"))
@@ -5094,16 +5103,6 @@ subroutine gwr_build_sigmac(gwr)
  sck_ucvol = gwr%cryst%ucvol * product(gwr%ngkpt)
  scq_ucvol = gwr%cryst%ucvol * product(gwr%ngqpt)
 
- call wrtout(std_out, sjoin(" Building Sigma_c in the supercell with FFT mesh:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
- call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
- call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
- call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
- call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
- call wrtout(std_out, sjoin(" my_ntau:", itoa(gwr%my_ntau), "ntau:", itoa(gwr%ntau)))
- call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkibz:", itoa(gwr%nkibz)))
- call wrtout(std_out, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
- call wrtout(std_out, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
-
  ! The g-vectors in the supercell for G and tchi.
  ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
  ABI_MALLOC(wc_scgvec, (3, gwr%tchi_mpw))
@@ -5127,6 +5126,16 @@ if (gwr%use_supercell_for_sigma) then
  !
  ! The first option requires less memory provided we are interested in a small set of KS states.
  ! The second option is interesting if we need to compute several matrix elements, including off-diagonal terms.
+
+ call wrtout(std_out, sjoin(" Building Sigma_c in the supercell with FFT mesh:", ltoa(sc_ngfft(1:3))), pre_newlines=2)
+ call wrtout(std_out, sjoin(" gwr_np_kgts:", ltoa(gwr%dtset%gwr_np_kgts)))
+ call wrtout(std_out, sjoin(" ngkpt:", ltoa(gwr%ngkpt), " ngqpt:", ltoa(gwr%ngqpt)))
+ call wrtout(std_out, sjoin(" gwr_boxcutmin:", ftoa(gwr%dtset%gwr_boxcutmin)))
+ call wrtout(std_out, sjoin(" sc_ngfft:", ltoa(sc_ngfft(1:8))))
+ call wrtout(std_out, sjoin(" my_ntau:", itoa(gwr%my_ntau), "ntau:", itoa(gwr%ntau)))
+ call wrtout(std_out, sjoin(" my_nkbz:", itoa(gwr%my_nkbz), "nkibz:", itoa(gwr%nkibz)))
+ call wrtout(std_out, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
+ call wrtout(std_out, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 
  max_ndat = gwr%sc_batch_size
  use_mpi_for_k = gwr%sc_batch_size > 1 .and. gwr%sc_batch_size == gwr%kpt_comm%nproc
@@ -5323,7 +5332,7 @@ else
  ! ===================================================================
  ! Mixed-space algorithm in the unit cell with convolutions in k-space
  ! ===================================================================
- call wrtout(std_out, " Building Sigma_c with convolutions in k-space:", pre_newlines=2)
+ call wrtout([std_out,ab_out], " Building Sigma_c with convolutions in k-space:", pre_newlines=2)
 
  ! Define tables to account for symmetries:
  !  - when looping over the BZ, we only need to include the union of IBZ_x for x in kcalc.
@@ -5550,72 +5559,72 @@ end if
  gwr%qp_ebands_prev%occ = gwr%qp_ebands%occ
 
  do spin=1,gwr%nsppol
-   do ikcalc=1,gwr%nkcalc
-     ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
-     do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
-       ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
+ do ikcalc=1,gwr%nkcalc
+   ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+   do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
+     ibc = band - gwr%bstart_ks(ikcalc, spin) + 1
 
-       ! NB: e0 is always set to the KS energy even in case of self-consistency.
-       e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
-       sigx = gwr%x_mat(band, band, ikcalc, spin)
+     ! NB: e0 is always set to the KS energy even in case of self-consistency.
+     e0 = gwr%ks_ebands%eig(band, ik_ibz, spin)
+     sigx = gwr%x_mat(band, band, ikcalc, spin)
 
-       ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
-       vxc_val = gwr%ks_me%vxcval(band, band, ik_ibz, spin)
-       vu = zero
-       if (gwr%dtset%usepawu /= 0) vu = gwr%ks_me%vu(band, band, ik_ibz, spin)
-       v_meanf = vxc_val + vu
+     ! Note vxc[n_val] instead of vxc[n_val + n_nlcc] with the model core charge.
+     vxc_val = gwr%ks_me%vxcval(band, band, ik_ibz, spin)
+     vu = zero
+     if (gwr%dtset%usepawu /= 0) vu = gwr%ks_me%vu(band, band, ik_ibz, spin)
+     v_meanf = vxc_val + vu
 
-       ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
-       associate (vals_pmt => sigc_it_diag_kcalc(:,:, ibc, ikcalc, spin))
-       even_t = (vals_pmt(1,:) + vals_pmt(2,:)) / two
-       odd_t = (vals_pmt(1,:) - vals_pmt(2,:)) / two
-       sigc_iw_diag_kcalc(:, ibc, ikcalc, spin) = matmul(gwr%cosft_wt, even_t) + j_dpc * matmul(gwr%sinft_wt, odd_t)
-       end associate
+     ! f(t) = E(t) + O(t) = (f(t) + f(-t)) / 2  + (f(t) - f(-t)) / 2
+     associate (vals_pmt => sigc_it_diag_kcalc(:,:, ibc, ikcalc, spin))
+     even_t = (vals_pmt(1,:) + vals_pmt(2,:)) / two
+     odd_t = (vals_pmt(1,:) - vals_pmt(2,:)) / two
+     sigc_iw_diag_kcalc(:, ibc, ikcalc, spin) = matmul(gwr%cosft_wt, even_t) + j_dpc * matmul(gwr%sinft_wt, odd_t)
+     end associate
 
-       zz = cmplx(e0, zero)
-       call spade%init(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), branch_cut=">")
+     zz = cmplx(e0, zero)
+     call spade%init(gwr%ntau, imag_zmesh, sigc_iw_diag_kcalc(:, ibc, ikcalc, spin), branch_cut=">")
 
-       ! Solve the QP equation with Newton-Rapson starting from e0
-       call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
-       qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
-       qp_solver_ierr(ibc, ikcalc, spin) = ierr
-       ABI_WARNING_IF(ierr /= 0, msg)
+     ! Solve the QP equation with Newton-Rapson starting from e0
+     call spade%qp_solve(e0, v_meanf, sigx, zz, zsc, msg, ierr)
+     qpe_pade_kcalc(ibc, ikcalc, spin) = zsc
+     qp_solver_ierr(ibc, ikcalc, spin) = ierr
+     ABI_WARNING_IF(ierr /= 0, msg)
 
-       call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
-       ! Z = (1 - dSigma / domega(E0))^{-1}
-       z_e0 = one / (one - dsigc_de0)
+     call spade%eval(zz, sigc_e0, dzdval=dsigc_de0)
+     ! Z = (1 - dSigma / domega(E0))^{-1}
+     z_e0 = one / (one - dsigc_de0)
 
-       ! Compute linearized QP solution and store results
-       qp_ene = e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
-       qpe_zlin_kcalc(ibc, ikcalc, spin) = qp_ene
-       e0_kcalc(ibc, ikcalc, spin) = e0
-       sigc_e0_kcalc(ibc, ikcalc, spin) = sigc_e0
-       ze0_kcalc(ibc, ikcalc, spin) = z_e0
+     ! Compute linearized QP solution and store results
+     qp_ene = e0 + z_e0 * (sigc_e0 + sigx - v_meanf)
+     qpe_zlin_kcalc(ibc, ikcalc, spin) = qp_ene
+     e0_kcalc(ibc, ikcalc, spin) = e0
+     sigc_e0_kcalc(ibc, ikcalc, spin) = sigc_e0
+     ze0_kcalc(ibc, ikcalc, spin) = z_e0
 
-       ! IMPORTANT: Here we update qp_ebands%eig with the new results.
-       gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
+     ! IMPORTANT: Here we update qp_ebands%eig with the new results.
+     gwr%qp_ebands%eig(band, ik_ibz, spin) = real(qp_ene)
 
-       ! Compute Spectral function using linear mesh **centered** around KS e0.
-       rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr)
-       hhartree_bk = gwr%ks_ebands%eig(band, ik_ibz, spin) - v_meanf
-       do iw=1,gwr%nwr
-         zz = rw_mesh(iw)
-         call spade%eval(zz, sigc_e0)
-         sig_xc = sigx + sigc_e0
-         sigxc_rw_diag_kcalc(iw, ibc, ikcalc, spin) = sig_xc
+     ! Compute Spectral function using linear mesh **centered** around KS e0.
+     rw_mesh = arth(e0 - gwr%wr_step * (gwr%nwr / 2), gwr%wr_step, gwr%nwr)
+     hhartree_bk = gwr%ks_ebands%eig(band, ik_ibz, spin) - v_meanf
+     do iw=1,gwr%nwr
+       zz = rw_mesh(iw)
+       call spade%eval(zz, sigc_e0)
+       sig_xc = sigx + sigc_e0
+       sigxc_rw_diag_kcalc(iw, ibc, ikcalc, spin) = sig_xc
 
-         spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = one / pi * abs(aimag(sigc_e0)) &
-           /( (real(rw_mesh(iw) - hhartree_bk - sig_xc)) ** 2 + (aimag(sigc_e0)) ** 2) / Ha_eV
+       spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = one / pi * abs(aimag(sigc_e0)) &
+         /( (real(rw_mesh(iw) - hhartree_bk - sig_xc)) ** 2 + (aimag(sigc_e0)) ** 2) / Ha_eV
 
-         !Sr%hhartree = hdft - KS_me%vxcval
-         !spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = &
-         !  one / pi * abs(aimag(sigc_e0)) &
-         !  /( (real(rw_mesh(iw) - Sr%hhartree(ib, ib, ik_ibz, spin) - sigx_xc)) ** 2 &
-         !    +(aimag(sigc_e0)) ** 2) / Ha_eV
-       end do ! iw
+       !Sr%hhartree = hdft - KS_me%vxcval
+       !spfunc_diag_kcalc(iw, ibc, ikcalc, spin) = &
+       !  one / pi * abs(aimag(sigc_e0)) &
+       !  /( (real(rw_mesh(iw) - Sr%hhartree(ib, ib, ik_ibz, spin) - sigx_xc)) ** 2 &
+       !    +(aimag(sigc_e0)) ** 2) / Ha_eV
+     end do ! iw
 
-     end do ! band
-   end do ! ikcalc
+   end do ! band
+ end do ! ikcalc
  end do ! spin
 
  if (gwr%nkcalc == gwr%nkibz) then
@@ -7144,8 +7153,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  ABI_RECALLOC(gwr%x_mat, (ii:jj, ii:jj, gwr%nkcalc, gwr%nsppol * nsig_ab))
 
  ! Table for \Sigmax_ij matrix elements.
- only_diago = .True.
- sigc_is_herm = .False.
+ only_diago = .True.; sigc_is_herm = .False.
  call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
                          only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
 
