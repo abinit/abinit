@@ -46,8 +46,8 @@ as of v9.2, although the documentation is not yet fully upgraded.
 
 * [[tutorial:rf1|The tutorial Response-Function 1 (RF1)]] presents the basics of DFPT calculations within ABINIT. The example given is the study of dynamical and dielectric properties of AlAs (an insulator): phonons at Gamma, dielectric constant, Born effective charges, LO-TO splitting, phonons in the whole Brillouin zone. The creation of the "Derivative Data Base" (DDB) is presented.
 
-* (Legacy implementation) [[tutorial:eph|The tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
-Also there is a tutorial for [[tutorial:tdepes|the temperature dependence of the electronic structure]]:.
+* (Legacy implementation) [[tutorial:eph_legacy|The legacy tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+Also there is a tutorial for [[tutorial:eph_tdep_legacy|the temperature dependence of the electronic structure]]:.
 
 * (New implementation) Four tutorials for the new procedure are available at [[tutorial:eph_intro|an overview of the EPH code]], 
 [[tutorial:eph4zpr|Zero-point renormalization of the band gap and temperature-dependent band gaps]], 

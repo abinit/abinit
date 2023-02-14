@@ -1,95 +1,76 @@
-# test DDK and orbital magnetism response with nuclear dipole moment
-# AlP solid
-
-
-# unconverged, use at least 20 for convergence
-ecut 5
-pawecutdg 10
-
-#nuclear magnetic dipole moment on Al site
-#size 1 in a.u. along x axis
-nucdipmom
-3*0.0 1.00000 0.0 0.0
-
-# Lamb shielding on Al site
-lambsig 0.0D0 766.76D-6
-
+# Crystalline alpha-quartz: GS calculations with UPF2 pseudos
 ndtset 2
 
-tolvrs1 1.0D-18
-prtwf1 1
+ecut      25 # 35
+rmm_diis  1
+nband1    32
+tolvrs    1.0d-8
 
-tolwfr2 1.0D-20
-getwfk2 -1
-rfddk2 1
-rfdir2 1 1 1
-iscf2 -3
-orbmag2 2
+###################################
+# Dataset 1: SCF run with useylm 0
+###################################
+useylm1     0
 
-istwfk *1
+###################################
+# Dataset 2: SCF run with useylm 1
+###################################
+useylm2     1
+getwfk2    -1
 
-kptopt 3
-nsym 1
-symrel 1 0 0 0 1 0 0 0 1
-symmorphi 0
+#################### COMMON PART #########################
 
-# severely unconverged, use 8 8 8 at least
-# for convergence
-ngkpt 3*2 
-nshiftk 4
-shiftk 3*1/2
-1/2 0 0
-0 1/2 0
-0 0 1/2
+nstep    20
+diemac   4.0
 
-nstep 30
+# Definition of the k-point grid
+occopt 1            # Semiconductor
+ngkpt   2 2 2
+nshiftk 1
+shiftk  0.0 0.0 0.0 # Gamma-centered
 
-prtwf 0
-prteig 0
-prtden 0
+# Definition of the atom types
+npsp   2
+znucl  14  8
+ntypat 2
 
-optforces 0
-optstress 0
-pawcpxocc 2
-usexcnhat 0
-pawxcdev 0
+# Definition of the atoms
+natom 9
+typat 3*1  6*2
 
-paral_atom 0
-paral_kgb 0
+# Experimental parameters (Wyckoff pag 312)
+# u(Si)= 0.465
+# x= 0.415 ; y= 0.272 ; z= 0.120
+acell   2*4.91304  5.40463  Angstrom
 
-nband 4
+xred   0.465   0.000   0.000              #Si
+       0.000   0.465   2/3                #Si
+      -0.465  -0.465   1/3                #Si
+       0.415   0.272   0.120              #O
+      -0.143  -0.415   0.4533333333333333 #O
+      -0.272   0.143   0.7866666666666666 #O
+       0.143  -0.272  -0.120              #O
+       0.272   0.415   0.5466666666666666 #O
+      -0.415  -0.143   0.2133333333333333 #O
 
-acell    3*10.3008969711  
+rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
+        5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
+        0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
-rprim    0.000000000000000   0.500000000000000   0.500000000000000 
-         0.500000000000000   0.000000000000000   0.500000000000000 
-         0.500000000000000   0.500000000000000   0.000000000000000 
-       
-natom    2  
-ntypat   2  
-typat    1 2  
-znucl    15 13  
-xred     0.250000000000000   0.250000000000000   0.250000000000000 
-         0.000000000000000   0.000000000000000   0.000000000000000 
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8"
+pseudos "Si.upf, O.upf"
+#pseudos "Si.psp8, O.psp8"
 
-pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
-pseudos="P.xml, Al.xml"
-
-##############################################################
-# This section is used only for regression testing of ABINIT #
-##############################################################
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t130.abo, tolnlines=  6, tolabs=  1.1E-9, tolrel= 1.6E-5
+#%% files_to_test = t130.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 1.0e-02
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% max_nprocs = 12
 #%% [extra_info]
-#%% authors = J. Zwanziger
-#%% keywords = PAW
-#%% description = 
-#%% topics = DFPT
+#%% authors =  M. Giantomassi
+#%% keywords = NC, UPF2
+#%% description =
+#%%   Crystalline alpha-quartz: GS calculations with UPF2 pseudos.
+#%%   Test scalar-relativistic pseudos with useylm 0 and 1.
 #%%<END TEST_INFO>
-      
