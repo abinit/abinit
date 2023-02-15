@@ -2293,7 +2293,8 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
 
  !call dterm_vxc(atindx,cprj,dimlmn,dtset,psps%dimekb,mcprj,mpi_enreg,occ,&
  !  & paw_an,pawang,pawrad,pawtab)
- 
+
+ dterm%vxc1 = zero 
  call dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,psps%dimekb,mcprj,mpi_enreg,occ,&
    & paw_an,pawang,pawrad,pawtab)
 
@@ -2928,7 +2929,7 @@ subroutine dterm_vxc(atindx,cprj,dimlmn,dtset,lmn2_max,&
   nk3xc = 0
   non_magnetic_xc = .FALSE.
   xc_option = 0 ! energies and potentials
-  usecore = 0 ! no first order contribution from core xc
+  usecore = 1 
   usexcnhat = 0
  
   !dterm%vxc1 = czero
@@ -2995,7 +2996,7 @@ subroutine dterm_vxc(atindx,cprj,dimlmn,dtset,lmn2_max,&
             & four_pi*pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*xcint
         end do ! ipt
 
-        write(std_out,'(a,3i4,es16.8)')'JWZ debug iatom klmn adir dij ',iatom,klmn,adir,dij
+        write(std_out,'(a,2i4,es16.8)')'JWZ debug iatom klmn vxc ',iatom,klmn,dij
 
         !dterm%vxc1(iatom,klmn,1,adir) = CMPLX(dij,0.0D0)
 
@@ -3165,7 +3166,7 @@ subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,lmn2_max,&
             & four_pi*pawang%angwgth(ipt)*pawang%ylmr(ilm,ipt)*pawang%ylmr(jlm,ipt)*xcint
         end do ! ipt
 
-        !write(std_out,'(a,3i4,es16.8)')'JWZ debug iatom klmn adir dij ',iatom,klmn,adir,dij
+        write(std_out,'(a,3i4,es16.8)')'JWZ debug iatom klmn adir dij ',iatom,klmn,adir,dij
 
         dterm%vxc1(iatom,klmn,1,adir) = CMPLX(dij,0.0D0)
 
