@@ -155,6 +155,8 @@ module m_orbmag
   private :: orbmag_output
   private :: dterm_alloc
   private :: dterm_free
+  private :: pack_pawrhoij
+  private :: make_pawrhoij
   
 CONTAINS  !========================================================================================
 !!***
@@ -241,7 +243,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
- logical,allocatable :: distrb_cycle(:)
  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj1_k(:,:,:),cwaveprj(:,:)
 
  !----------------------------------------------
@@ -260,8 +261,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0; ikg1 = 0
 
- ABI_MALLOC(distrb_cycle,(nband_k))
- 
  !Definition of atindx array
  !Generate an index table of atoms, in order for them to be used type after type.
  ABI_MALLOC(atindx,(dtset%natom))
@@ -347,7 +346,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ! note: in make_d, terms will be filled as iatom using atindx
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
 
- call make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
+ call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
+    & mcprj,mpi_enreg,occ,paw_ij,pawrad,pawtab,psps)
 
  icg = 0
  ikg = 0
@@ -364,8 +364,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
    ! if the current kpt is not on the current processor, cycle
    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
    
-   distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_kpt)
-
    kpoint(:)=dtset%kptns(:,ikpt)
    npw_k = npwarr(ikpt)
    npwsp = npw_k*dtset%nspinor
@@ -623,8 +621,6 @@ call orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
  call dterm_free(dterm)
 
- ABI_FREE(distrb_cycle)
- 
  ABI_FREE(orbmag_terms)
  ABI_FREE(orbmag_trace)
 
@@ -2159,29 +2155,71 @@ end subroutine dterm_aij
 !!
 !! SOURCE
 
-subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
+subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
+    & mcprj,mpi_enreg,occ,paw_ij,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
   !scalars
+  integer,intent(in) :: mcprj
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
   type(pseudopotential_type), intent(inout) :: psps
 
   !arrays
-  integer,intent(in) :: atindx(dtset%natom)
+  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom)
+  integer,intent(in) :: dimlmn(dtset%natom)
   real(dp),intent(in) :: gprimd(3,3)
+  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
+  integer :: iat,iatom,itypat,klmn
   integer :: my_lmax,ngnt
+  real(dp) :: err_i,err_r,maxierr,maxrerr
+  type(paw_dmft_type) :: paw_dmft
  
   !arrays
   integer,allocatable :: gntselect(:,:)
   real(dp),allocatable :: realgnt(:)
+  type(pawrhoij_type),allocatable :: pawrhoij(:)
+  type(pawrhoij_type),allocatable :: my_pawrhoij(:)
 !--------------------------------------------------------------------
+ 
+ !make pawrhoij
+ ABI_MALLOC(pawrhoij,(dtset%natom))
+ call pawrhoij_alloc(pawrhoij,dtset%pawcpxocc,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
+   & use_rhoijp=1,use_rhoij_=1,pawtab=pawtab)
+ paw_dmft%use_sc_dmft=0
+ paw_dmft%use_dmft=0
+ call pawmkrhoij(atindx,atindx1,cprj,dimlmn,dtset%istwfk,dtset%kptopt,dtset%mband,dtset%mband,&
+   & mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
+   & occ,dtset%paral_kgb,paw_dmft,pawrhoij,0,dtset%usewvl,dtset%wtk)
+ call pack_pawrhoij(dtset,pawrhoij)
+
+ ABI_MALLOC(my_pawrhoij,(dtset%natom))
+ call pawrhoij_alloc(my_pawrhoij,dtset%pawcpxocc,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
+   & use_rhoijp=1,use_rhoij_=1,pawtab=pawtab)
+ call make_pawrhoij(atindx,cprj,dimlmn,dtset,psps%dimekb,mcprj,mpi_enreg,dtset%mband,occ,my_pawrhoij,pawtab)
+
+ maxrerr = zero; maxierr = zero
+ do iat = 1, dtset%natom
+   iatom = atindx(iat)
+   itypat = dtset%typat(iat)
+   do klmn = 1, pawtab(itypat)%lmn2_size
+     err_r = ABS(my_pawrhoij(iatom)%rhoij_(2*klmn-1,1) - &
+       &            pawrhoij(iatom)%rhoij_(2*klmn-1,1))
+     if(err_r > maxrerr) maxrerr = err_r
+     err_i = ABS(my_pawrhoij(iatom)%rhoij_(2*klmn,1) - &
+       &            pawrhoij(iatom)%rhoij_(2*klmn,1))
+     if(err_i > maxierr) maxierr = err_i
+   end do
+ end do
+ write(std_out,'(a,2es16.8)')'JWZ debug maxrerr maxierr ',maxrerr,maxierr
 
  ! make Gaunt integrals
  my_lmax = psps%mpsang + 1
@@ -2202,7 +2240,253 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
  
+ call pawrhoij_free(pawrhoij)
+ ABI_FREE(pawrhoij)
+ call pawrhoij_free(my_pawrhoij)
+ ABI_FREE(my_pawrhoij)
+ 
 end subroutine make_d
 !!***
+
+!!****f* ABINIT/pack_pawrhoij
+!! NAME
+!! pack_pawrhoij
+!!
+!! FUNCTION
+!! for a pawhoij data structure, add packed data from unpacked
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pack_pawrhoij(dtset,pawrhoij)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dataset_type),intent(in) :: dtset
+  type(pawrhoij_type),intent(inout) :: pawrhoij(dtset%natom)
+
+  !arrays
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iatom,isel,klmn
+  real(dp) :: ri,rr
+  logical :: cprho
+  character(len=500) :: msg
+ 
+  !arrays
+!--------------------------------------------------------------------
+
+  do iatom = 1, dtset%natom
+    if (pawrhoij(iatom)%use_rhoij_ .EQ. 0) then
+      msg='Unpacked rhoij elements not available.'
+      ABI_BUG(msg)
+    end if
+
+    ! count number of nonzero pawrhoij elements
+    isel = 0
+    cprho = (pawrhoij(iatom)%cplex_rhoij .EQ. 2)
+    do klmn = 1, pawrhoij(iatom)%lmn2_size
+      if (cprho) then
+        rr = pawrhoij(iatom)%rhoij_(2*klmn-1,1)
+        ri = pawrhoij(iatom)%rhoij_(2*klmn,1)
+      else
+        rr = pawrhoij(iatom)%rhoij_(klmn,1)
+        ri = zero
+      end if
+      if ( (ABS(rr) .GT. tol16) .OR. (ABS(ri) .GT. tol16) ) then
+        isel = isel + 1
+      end if
+    end do ! end loop over klmn
+    pawrhoij(iatom)%nrhoijsel = isel
+
+    pawrhoij(iatom)%rhoijp = zero
+    pawrhoij(iatom)%rhoijselect = 0
+
+    isel = 0 
+    do klmn = 1, pawrhoij(iatom)%lmn2_size
+      if (cprho) then
+        rr = pawrhoij(iatom)%rhoij_(2*klmn-1,1)
+        ri = pawrhoij(iatom)%rhoij_(2*klmn,1)
+      else
+        rr = pawrhoij(iatom)%rhoij_(klmn,1)
+        ri = zero
+      end if
+      if ( (ABS(rr) .GT. tol16) .OR. (ABS(ri) .GT. tol16) ) then
+        isel = isel + 1
+        pawrhoij(iatom)%rhoijselect(isel) = klmn
+        if (cprho) then
+          pawrhoij(iatom)%rhoijp(2*isel-1,1) = rr
+          pawrhoij(iatom)%rhoijp(2*isel,1) = ri
+        else
+          pawrhoij(iatom)%rhoijp(isel,1) = rr
+        end if ! if cprho
+      end if ! if rhoij nonzero
+    end do ! end loop over klmn
+
+    pawrhoij(iatom)%use_rhoijp=1
+
+  end do ! end loop over iatom
+ 
+end subroutine pack_pawrhoij
+!!***
+
+!!****f* ABINIT/make_pawrhoij
+!! NAME
+!! make_pawrhoij
+!!
+!! FUNCTION
+!! make pawrhoij locally
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine make_pawrhoij(atindx,cprj,dimlmn,dtset,lmn2_max,&
+    & mcprj,mpi_enreg,nband_k,occ,pawrhoij,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  integer,intent(in) :: mcprj,lmn2_max,nband_k
+  type(MPI_type), intent(inout) :: mpi_enreg
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
+  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
+  type(pawrhoij_type),intent(inout) :: pawrhoij(dtset%natom)
+  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: buff_size,iat,iatom,icprj,ierr,ilmn,ikpt,isp,isppol,itypat,jlmn,klmn
+  integer :: mcprjk,me,nn,nnisp,nproc,spaceComm
+  complex(dpc) :: cpi,cpj,cterm
+ 
+  !arrays
+  real(dp),allocatable :: buffer1(:),buffer2(:),rhoij(:,:,:)
+  type(pawcprj_type),allocatable :: cprj_k(:,:)
+!--------------------------------------------------------------------
+
+  isppol = 1
+  spaceComm=mpi_enreg%comm_cell
+  nproc=xmpi_comm_size(spaceComm)
+  me = mpi_enreg%me_kpt
+
+  mcprjk = nband_k*dtset%nspinor
+  ABI_MALLOC(cprj_k,(dtset%natom,mcprjk))
+  call pawcprj_alloc(cprj_k,cprj(1,1)%ncpgr,dimlmn)
+
+  ABI_MALLOC(rhoij,(2,dtset%natom,lmn2_max))
+
+  rhoij = zero
+  
+  icprj = 0
+  do ikpt = 1, dtset%nkpt
+    if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
+    
+    call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
+      & dtset%mkmem,dtset%natom,nband_k,nband_k,dtset%nspinor,dtset%nsppol,0)
+
+    do iat = 1, dtset%natom
+      iatom = atindx(iat)
+      itypat = dtset%typat(iat)
+
+      do klmn = 1, pawtab(itypat)%lmn2_size
+        ilmn = pawtab(itypat)%indklmn(7,klmn)
+        jlmn = pawtab(itypat)%indklmn(8,klmn)
+
+        do nn = 1, nband_k
+          do isp = 1, dtset%nspinor
+
+            nnisp = dtset%nspinor*(nn-1)+isp
+
+            cpi = CMPLX(cprj_k(iatom,nnisp)%cp(1,ilmn),cprj_k(iatom,nnisp)%cp(2,ilmn))
+            cpj = CMPLX(cprj_k(iatom,nnisp)%cp(1,jlmn),cprj_k(iatom,nnisp)%cp(2,jlmn))
+            cterm = occ((ikpt-1)*nband_k+nn)*dtset%wtk(ikpt)*CONJG(cpi)*cpj
+
+            rhoij(1,iatom,klmn) = rhoij(1,iatom,klmn) + REAL(cterm)
+            rhoij(2,iatom,klmn) = rhoij(2,iatom,klmn) + AIMAG(cterm)
+
+          end do ! isp
+        end do ! nn
+
+      end do ! klmn
+    end do ! iat
+    icprj = icprj + mcprjk
+
+  end do ! ikpt
+  
+  if (nproc > 1) then
+    buff_size=size(rhoij)
+    ABI_MALLOC(buffer1,(buff_size))
+    ABI_MALLOC(buffer2,(buff_size))
+    buffer1=zero;buffer2=zero
+    buffer1(1:buff_size) = reshape(rhoij,(/2*dtset%natom*lmn2_max/))
+    call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
+    rhoij(1:2,1:dtset%natom,1:lmn2_max)=reshape(buffer2,(/2,dtset%natom,lmn2_max/))
+    ABI_FREE(buffer1)
+    ABI_FREE(buffer2)
+  end if
+
+  do iat = 1, dtset%natom
+    iatom = atindx(iat)
+    itypat = dtset%typat(iat)
+    do klmn = 1, pawtab(itypat)%lmn2_size
+      pawrhoij(iatom)%rhoij_(2*klmn-1,1) = rhoij(1,iatom,klmn)
+      pawrhoij(iatom)%rhoij_(2*klmn,  1) = rhoij(2,iatom,klmn)
+    end do !klmn
+  end do !iat
+
+  call pawcprj_free(cprj_k)
+  ABI_FREE(cprj_k)
+
+  ABI_FREE(rhoij)
+
+end subroutine make_pawrhoij
+!!***
+
 
 end module m_orbmag
