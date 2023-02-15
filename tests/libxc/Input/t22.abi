@@ -15,15 +15,14 @@ tmpdata_prefix = "t22t"
 
 # 1- Datasets: functionals, temperatures
 # -----------------------------------------------------
-  ndtset 5
+  ndtset 7
   ixc1 -259  occopt1 3  tsmear1  1000. K  # LDA KSDT, at 1000K (Fermi-Dirac occ. scheme)
   ixc2 -259  occopt2 3  tsmear2  5000. K  # LDA KSDT, at 5000K (Fermi-Dirac occ. scheme)
   ixc3 -259  occopt3 4  tphysel3 5000. K  # LDA KSDT, at 5000K (Gaussian occ. scheme)
   ixc4 -577  occopt4 3  tsmear4  1000. K  # LDA GDSMFB, at 1000K (Fermi-Dirac occ. scheme)
   ixc5 -577  occopt5 3  tsmear5  5000. K  # LDA GDSMFB, at 5000K (Fermi-Dirac occ. scheme)
-# The following functional is not available in libxc 4 ; it should be reactivated after all bots include libxc6
-# ixc6 -318  occopt6 3  tsmear6  1000. K  # LDA CORRKSDT, at 1000K (Fermi-Dirac occ. scheme)
-# ixc7 -318  occopt7 3  tsmear7  5000. K  # LDA CORRKSDT, at 5000K (Fermi-Dirac occ. scheme)
+  ixc6 -318  occopt6 3  tsmear6  1000. K  # LDA CORRKSDT, at 1000K (Fermi-Dirac occ. scheme)
+  ixc7 -318  occopt7 3  tsmear7  5000. K  # LDA CORRKSDT, at 5000K (Fermi-Dirac occ. scheme)
 
 # 2- Unit cell
 # -----------------------------------------------------
@@ -78,7 +77,7 @@ toldfe 1.0d-8          # Total energy difference to achieve
 #%% exclude_builders = graphene_gnu_11.2_macports
 #%% [files]
 #%% files_to_test =
-#%%   t22.abo, tolnlines=  0, tolabs= 0.000, tolrel=  0.000, fld_options = -easy
+#%%   t22.abo, tolnlines=  0, tolabs= 0.000, tolrel=  0.000, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
