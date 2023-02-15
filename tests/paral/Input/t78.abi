@@ -121,5 +121,5 @@ pseudos "Si-GGA.psp8, O-GGA.psp8"
 #%% authors =  M. Giantomassi
 #%% keywords = GWR, NC
 #%% description =
-#%%   GWR calculations for crystalline alpha-quartz.  Test g/tau parallelism.
+#%%   GWR calculations for crystalline alpha-quartz.Test g/tau parallelism.
 #%%<END TEST_INFO>
