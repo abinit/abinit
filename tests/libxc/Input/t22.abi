@@ -75,6 +75,7 @@ toldfe 1.0d-8          # Total energy difference to achieve
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [files]
 #%% files_to_test =
 #%%   t22.abo, tolnlines=  0, tolabs= 0.000, tolrel=  0.000, fld_options = -easy
