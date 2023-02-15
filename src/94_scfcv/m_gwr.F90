@@ -3999,7 +3999,7 @@ subroutine gwr_build_tchi(gwr)
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: cpu_ikf, wall_ikf, gflops_ikf
- real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit, weight_ikf
+ real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit, wtqp, wtqm
  complex(gwpc) :: head_q
  complex(dp) :: chq(3), wng(3)
  logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, print_time
@@ -4329,10 +4329,12 @@ end if
 
       ! Redistribute G_k(g,g') with k in the IBZ so that each MPI proc
       ! can reconstruct G_{k+q} in the BZ inside the MPI-distributed loops.
-      call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate") !ipm_list= ! TODO: support for ipm_list?
+      ! TODO: support for ipm_list else we have a memory leak.
+      call gwr%redistrib_gt_kibz(itau, spin, need_kibz, got_kibz, "communicate") !ipm_list=
 
       ! Sum over my k-points in the BZ.
       call slk_array_set(chiq_rpr, czero)
+
       do my_ikf=1,gwr%my_nkbz
         print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
         if (print_time) call cwtime(cpu_ikf, wall_ikf, gflops_ikf, "start")
@@ -4346,10 +4348,10 @@ end if
 
         ! Use symmetries to get G_kbz(g,g') from the IBZ, then G_kbz(g,g') -> G_kbz(r',r).
         ! TODO: here I may need to take into account the umklapp
-        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm, ipm_list=[1,2]) ! g0=??
+        call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm, ipm_list=[1]) ! g0=??
 
         do iq_ibz=1,gwr%nqibz
-          !if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
+          if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
           qq_ibz = gwr%qibz(:,iq_ibz)
           kpq_bz = kk_bz + qq_ibz
           !kpq_bz = qq_ibz - kk_bz
@@ -4360,21 +4362,21 @@ end if
 
           ! Use symmetries to get G_kqbz(g,g') from the IBZ, then G_kqbz(g,g') -> G_kqbz(r',r).
           ! Also, we don't need G(+/-t) for both k, k+q wavevectors.
-          call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=g0_kq, ipm_list=[1,2])
+          call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=g0_kq, ipm_list=[2])
           !call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=-g0_kq, ipm_list=[1,2])
           !call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, ipm_list=[1,2])
 
           ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
-          weight_ikf = one / gwr%nkbz
-          !if (gwr%dtset%symchi /= 0) then
-          !  ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
-          !  weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
-          !  weight_ikf = ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0)
-          !end if
+          wtqp = one / gwr%nkbz; wtqm = zero
+          if (gwr%dtset%symchi /= 0) then
+             wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
+             wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
+             ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
+          end if
 
           chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
-             !weight_ikf * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
-             weight_ikf * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)
+             !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
+             wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works + C
         end do ! my_iqi
 
         if (print_time) then
@@ -4395,7 +4397,6 @@ end if
         if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
         ! TODO: Recheck API and scaling factor.
         call gwr_rpr_to_ggp(gwr, gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz,itau,spin))
-        !tchi_rfact = one / gwr%g_nfft !/ gwr%cryst%ucvol  !/ (gwr%nkbz * gwr%nqbz)
         tchi_rfact = one / gwr%cryst%ucvol  !/ (gwr%nkbz * gwr%nqbz)
         gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx = gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx * tchi_rfact
       end do ! my_iqi
