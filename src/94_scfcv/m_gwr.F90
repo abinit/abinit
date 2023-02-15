@@ -866,9 +866,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%nspinor = dtset%nspinor; gwr%nsppol = dtset%nsppol; gwr%nspden = dtset%nspden
  gwr%natom = dtset%natom; gwr%usepaw = dtset%usepaw
 
- gwr%use_supercell_for_tchi = .True. !; if (gwr%dtset%useria == 2) gwr%use_supercell_for_tchi = .False.
- !gwr%use_supercell_for_tchi = .False.
- !gwr%dtset%gwr_chi_algo =
+ gwr%use_supercell_for_tchi = .True.
  if (gwr%dtset%gwr_chi_algo == 0) then
    ! Automatic selection
    ABI_ERROR("Not implemented Error")
@@ -876,8 +874,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%use_supercell_for_tchi = gwr%dtset%gwr_chi_algo == 1
  end if
 
- !gwr%use_supercell_for_sigma = .True. !; if (gwr%dtset%userib == 2) gwr%use_supercell_for_sigma = .False.
- !gwr%use_supercell_for_sigma = .False.
  if (gwr%dtset%gwr_sigma_algo == 0) then
    ! Automatic selection
    ABI_ERROR("Not implemented Error")
@@ -886,7 +882,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
 
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
- !call wrtout(std_out, sjoin(" Using q0:", ktoa(gwr%q0), "for long-wavelenght limit"))
 
  mband = ks_ebands%mband; nbsum = dtset%nband(1)
  ABI_CHECK_IRANGE(nbsum, 1, mband, "Invalid nbsum")
@@ -1225,47 +1220,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! For the time being no augmentation
  gwr%g_ngfft(4:6) = gwr%g_ngfft(1:3)
 
- ! Define batch sizes for FFT transforms, use multiples of OpenMP threads.
- omp_nt = xomp_get_num_threads(open_parallel=.True.)
-
- if (gwr%dtset%gwr_ucsc_batch(1) > 0) then
-   ! Take it from input file
-   gwr%uc_batch_size = gwr%dtset%gwr_ucsc_batch(1) * omp_nt
- else
-   ! Automatic detection
-   gwr%uc_batch_size = 1 * omp_nt
-   if (gwr%dtset%use_gpu_cuda /= 0) then
-     gwr%uc_batch_size = 4 * omp_nt
-   end if
- end if
-
- if (gwr%dtset%gwr_ucsc_batch(2) > 0) then
-   ! Take it from input file
-   gwr%sc_batch_size = gwr%dtset%gwr_ucsc_batch(2) * omp_nt
- else
-   ! Automatic detection
-   gwr%sc_batch_size = 1 * omp_nt
-   if (gwr%dtset%use_gpu_cuda /= 0) then
-     gwr%sc_batch_size = 4 * omp_nt
-   end if
- end if
-
- !gwr%uc_batch_size = 2; gwr%sc_batch_size = 2
- !gwr%uc_batch_size = 3; gwr%sc_batch_size = 3
- !gwr%uc_batch_size = 4; gwr%sc_batch_size = 4
- !gwr%uc_batch_size = 5; gwr%sc_batch_size = 5
-
- ! Make sure all procs agree.
- !call xmpi_min_ip(gwr%sc_batch_size, input_comm, ierr)
- !call xmpi_min_ip(gwr%uc_batch_size, input_comm, ierr)
-
- if (my_rank == master) then
-   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
-   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
-   call wrtout(units, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
-   call wrtout(units, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
- end if
-
  ! ========================
  ! === MPI DISTRIBUTION ===
  ! ========================
@@ -1405,6 +1359,38 @@ end block
  !call gwr%kpt_comm%print_names()
  !call gwr%g_comm%print_names()
 
+ ! Define batch sizes for FFT transforms taking into account k-point parallelism, OpenMP threads and GPUs.
+ omp_nt = xomp_get_num_threads(open_parallel=.True.)
+
+ if (gwr%dtset%gwr_ucsc_batch(1) > 0) then
+   ! Take it from input file (user is always right)
+   gwr%uc_batch_size = gwr%dtset%gwr_ucsc_batch(1) * omp_nt
+ else
+   ! Automatic detection
+   gwr%uc_batch_size = 1 * omp_nt
+   if (gwr%dtset%use_gpu_cuda /= 0) gwr%uc_batch_size = 4 * omp_nt
+ end if
+
+ if (gwr%dtset%gwr_ucsc_batch(2) > 0) then
+   ! Take it from input file (user is always right)
+   gwr%sc_batch_size = gwr%dtset%gwr_ucsc_batch(2) * omp_nt
+ else
+   ! Automatic detection
+   gwr%sc_batch_size = 1 * omp_nt
+   if (gwr%dtset%use_gpu_cuda /= 0) gwr%sc_batch_size = 4 * omp_nt
+ end if
+
+ ! Make sure all procs agree.
+ !call xmpi_min_ip(gwr%sc_batch_size, gwr%comm%value, ierr)
+ !call xmpi_min_ip(gwr%uc_batch_size, gwr%comm%value, ierr)
+
+ if (my_rank == master) then
+   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
+   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
+   call wrtout(units, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
+   call wrtout(units, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
+ end if
+
  ! Block-distribute dimensions and allocate redirection table local index --> global index.
  call xmpi_split_block(gwr%ntau, gwr%tau_comm%value, gwr%my_ntau, gwr%my_itaus)
  ABI_CHECK(gwr%my_ntau > 0, "my_ntau == 0, decrease number of procs for tau level")
@@ -1514,23 +1500,21 @@ end block
  ABI_MALLOC(gwr%green_desc_kibz, (gwr%nkibz))
 
  do my_iki=1,gwr%my_nkibz
-   ik_ibz = gwr%my_kibz_inds(my_iki)
-   kk_ibz = gwr%kibz(:, ik_ibz)
+   ik_ibz = gwr%my_kibz_inds(my_iki); kk_ibz = gwr%kibz(:, ik_ibz)
    call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, dtset%ecut, gwr)
  end do
 
  ABI_MALLOC(gwr%tchi_desc_qibz, (gwr%nqibz))
 
  do my_iqi=1,gwr%my_nqibz
-   iq_ibz = gwr%my_qibz_inds(my_iqi)
-   qq_ibz = gwr%qibz(:, iq_ibz)
-   q_is_gamma = (normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0)
+   iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
    ! Note ecuteps instead of ecut. Also, sort the g-vectors by |q+g|^2/2 when q is in the IBZ to facilitate
    ! the extrapolation of the RPA energy as a function of ecut_chi
    call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, dtset%ecuteps, gwr, kin_sorted=.True.)
 
    ! Compute sqrt(vc(q,G))
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
+   q_is_gamma = (normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0)
    call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, gwr%gtau_comm%value)
    end associate
  end do
@@ -1584,7 +1568,6 @@ end block
      !nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("kcalc", "dp", "three, nkcalc") &
      !nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
-     !nctkarr_t("qp_done", "int", "nkcalc, nsppol"), &
      !nctkarr_t("vals_e0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      !nctkarr_t("dvals_de0ks", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
      !nctkarr_t("qpoms_enes", "dp", "two, ntemp, max_nbcalc, nkcalc, nsppol"), &
@@ -2924,7 +2907,7 @@ end subroutine gwr_get_myk_green_gpr
 !!
 !! FUNCTION
 !!  Compute G_k(r',r) from G_k(g,g') for k in the BZ and given spin and tau.
-!!  Note that output matrix is transposed i.e. (r',r) instead of (r,r').
+!!  Note that output matrix `gk_rpr_pm` is transposed i.e. (r',r) instead of (r,r').
 !!
 !! INPUTS
 !!
@@ -2979,6 +2962,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
                    desc_kbz%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
+ ! For each tau
  do ii=1,num_pm
    ipm = ipm_list__(ii)
    ! Allocate temporary rgp PBLAS matrix to store G(r,g')
@@ -3119,7 +3103,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  class(__slkmat_t),intent(inout) :: rp_r, g_gp
 
 !Local variables-------------------------------
- integer :: ig2, npwsp, nrsp, col_bsize, ir2, ndat
+ integer :: ig2, npwsp, nrsp, col_bsize, ir2, ndat, isign
  type(__slkmat_t) :: r_gp, gp_r
  character(len=500) :: msg
  type(uplan_t) :: uplan_k
@@ -3135,21 +3119,24 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
                    desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
+ isign = +1 ! This should be ok
+ !isign = -1
+
  ! F(r',r) --> F(g',r) and store results in gp_r.
  do ir2=1, rp_r%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ir2, rp_r%sizeb_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=+1, iscale=0) ! this should be OK
-   !call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=-1, iscale=0)
+   call uplan_k%execute_rg(ndat, rp_r%buffer_cplx(:,ir2), gp_r%buffer_cplx(:,ir2), isign=isign, iscale=0) ! this should be OK
  end do
 
  ! F(g',r) --> F(r,g')
- call gp_r%ptrans("N", r_gp, free=.True.)
+ !call gp_r%ptrans("N", r_gp, free=.True.)
+ ! FIXME: I don't know why by C is needed here.
+ call gp_r%ptrans("C", r_gp, free=.True.)
 
  ! F(r,g') --> F(g,g') and store results in g_gp.
  do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, g_gp%sizeb_local(2), gwr%uc_batch_size)
-   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-1, iscale=0) ! this should be OK
-   !call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=+1, iscale=0)
+   call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0) ! this should be OK
  end do
 
  call uplan_k%free()
@@ -4207,7 +4194,7 @@ end if
          end do ! my_iqi
 
          if (print_time) then
-           write(msg,'(4x,3(a,i0),a)')"tChi my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
+           write(msg,'(4x,3(a,i0),a)')"Chi my_ir [", my_ir, "/", my_nr, "] (tot: ", gwr%g_nfft, ")"
            call cwtime_report(msg, cpu_ir, wall_ir, gflops_ir)
          end if
       end do ! my_ir (end cpu intensive loop)
@@ -4292,10 +4279,9 @@ end if
     call print_chi_header()
 
     ! Allocate memory for G_k(r',r) and chi_q(r',r)
+    ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
     nrsp = gwr%g_nfft * gwr%nspinor
     col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
-
-    ! Need all nqibz matrices here as the iq_ibz loop is the innermost one unlike in the legacy GW code.
     ABI_MALLOC(chiq_rpr, (gwr%nqibz))
     do iq_ibz=1,gwr%nqibz
       call chiq_rpr(iq_ibz)%init(nrsp, nrsp, gwr%g_slkproc, 1, size_blocs=[-1, col_bsize])
@@ -4329,7 +4315,7 @@ end if
         !kpq_bz = kk_bz - qq_ibz
         ! TODO: here I may need to take into account the umklapp
         call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
-        ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
+        !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
         ikq_ibz = gwr%kbz2ibz(1,ikq_bz)
         need_kibz(ikq_ibz) = 1
       end do
@@ -4363,29 +4349,36 @@ end if
         call gwr%get_gkbz_rpr_pm(ik_bz, itau, spin, gk_rpr_pm, ipm_list=[1,2]) ! g0=??
 
         do iq_ibz=1,gwr%nqibz
+          !if (gwr%dtset%symchi /= 0 .and. ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
           qq_ibz = gwr%qibz(:,iq_ibz)
           kpq_bz = kk_bz + qq_ibz
           !kpq_bz = qq_ibz - kk_bz
 
           ! TODO: here I may need to take into account the umklapp if k+q is outside the BZ.
           call findqg0(ikq_bz, g0_kq, kpq_bz, gwr%nkbz, gwr%kbz, gwr%mG0)
-          ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
+          !ABI_CHECK(all(g0_kq == 0), sjoin("g0_kq != 0, kk_bz", ktoa(kpq_bz), "qq_ibz:", ktoa(qq_ibz)))
 
           ! Use symmetries to get G_kqbz(g,g') from the IBZ, then G_kqbz(g,g') -> G_kqbz(r',r).
           ! Also, we don't need G(+/-t) for both k, k+q wavevectors.
           call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=g0_kq, ipm_list=[1,2])
+          !call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=-g0_kq, ipm_list=[1,2])
+          !call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, ipm_list=[1,2])
 
           ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
           weight_ikf = one / gwr%nkbz
-          !weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
+          !if (gwr%dtset%symchi /= 0) then
+          !  ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0) cycle ! FIXME: iq_bz or ikq?
+          !  weight_ikf = gwr%ks_ebands%wtk(ik_ibz)
+          !  weight_ikf = ltg_qibz(iq_ibz)%ibzq(ik_bz) == 0)
+          !end if
 
           chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
-             weight_ikf * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
-             !weight_ikf * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)
+             !weight_ikf * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
+             weight_ikf * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)
         end do ! my_iqi
 
         if (print_time) then
-          write(msg,'(4x,3(a,i0),a)')"tChi my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
+          write(msg,'(4x,3(a,i0),a)')"Chi my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
           call cwtime_report(msg, cpu_ikf, wall_ikf, gflops_ikf)
         end if
       end do ! my_ikf
@@ -4396,13 +4389,15 @@ end if
       ! From chi_q(r',r) to chi_q(g,g') for each q in the IBZ.
       do iq_ibz=1,gwr%nqibz
         call xmpi_sum(chiq_rpr(iq_ibz)%buffer_cplx, gwr%kpt_comm%value, ierr)
+      end do
+
+      do iq_ibz=1,gwr%nqibz
         if (.not. any(iq_ibz == gwr%my_qibz_inds)) cycle
-        ! TODO: Recheck the API and scaling factor.
+        ! TODO: Recheck API and scaling factor.
         call gwr_rpr_to_ggp(gwr, gwr%tchi_desc_qibz(iq_ibz), chiq_rpr(iq_ibz), gwr%tchi_qibz(iq_ibz,itau,spin))
         !tchi_rfact = one / gwr%g_nfft !/ gwr%cryst%ucvol  !/ (gwr%nkbz * gwr%nqbz)
-        !tchi_rfact = one / gwr%cryst%ucvol  !/ (gwr%nkbz * gwr%nqbz)
-        !tchi_rfact = one
-        !gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx = gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx * tchi_rfact
+        tchi_rfact = one / gwr%cryst%ucvol  !/ (gwr%nkbz * gwr%nqbz)
+        gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx = gwr%tchi_qibz(iq_ibz,itau,spin)%buffer_cplx * tchi_rfact
       end do ! my_iqi
 
       write(msg,'(3(a,i0),a)')" My itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
@@ -4416,6 +4411,7 @@ end if
    do iq_ibz=1,gwr%nqibz
      call ltg_qibz(iq_ibz)%free()
    end do
+   ABI_FREE(ltg_qibz)
    !call wrtout(std_out, " Mixed space algorithm for chi completed")
  end if
 
@@ -5314,10 +5310,8 @@ end if
      end do ! my_ir
 
      ! Free descriptors and PBLAS matrices in kBZ and qBZ.
-     call desc_array_free(desc_mykbz)
-     call slk_array_free(gt_gpr)
-     call desc_array_free(desc_myqbz)
-     call slk_array_free(wc_gpr)
+     call desc_array_free(desc_mykbz); call desc_array_free(desc_myqbz)
+     call slk_array_free(gt_gpr); call slk_array_free(wc_gpr)
 
      write(msg,'(1x,3(a,i0),a)')"Sigma_c my_itau [", my_it, "/", gwr%my_ntau, "] (tot: ", gwr%ntau, ")"
      call cwtime_report(msg, cpu_tau, wall_tau, gflops_tau, end_str=ch10)
@@ -5402,8 +5396,7 @@ else
 
    need_qibz = 0
    do my_ikf=1,gwr%my_nkbz
-     ik_bz = gwr%my_kbz_inds(my_ikf)
-     kk_bz = gwr%kbz(:, ik_bz)
+     ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
      do ikcalc=1,gwr%nkcalc
        qq_bz = gwr%kcalc(:,ikcalc) - kk_bz
        !qq_bz = -qq_bz
