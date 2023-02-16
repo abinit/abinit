@@ -1,5 +1,5 @@
 
-.Version 9.9.1 of ABINIT 
+.Version 9.9.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_intel2021.8 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 12 Jan 2023.
-- ( at 15h55 )
+.Starting date : Thu 16 Feb 2023.
+- ( at 15h04 )
   
-- input  file    -> /home/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
+- input  file    -> /media/jzwanzig/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
  
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+-   /media/jzwanzig/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -165,9 +165,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /media/jzwanzig/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /media/jzwanzig/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /media/jzwanzig/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -422,9 +422,9 @@ meta: {optdriver: 1, rfddk: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /media/jzwanzig/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /media/jzwanzig/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /media/jzwanzig/jzwanzig/abinit/abinit/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -639,7 +639,7 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
  
  Orbital magnetic moment, Cartesian directions :
-  3.16198836E-05  1.16504488E-16  1.65200446E-16
+  3.16198757E-05  1.16504488E-16  1.65200446E-16
  
  
  Chern vector, Cartesian directions :
@@ -653,6 +653,7 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   7.22872651E-04  9.31901464E-19  1.49769663E-17
    <L_R> terms :   2.69648385E-04  3.44258708E-17 -5.56436320E-19
  <A0.An> terms :  -9.12549974E-05  2.46844527E-18 -5.67865256E-18
+    vxc1 terms :  -7.92029677E-12 -2.63935072E-34  0.00000000E+00
     Lamb terms :  -3.41860000E-04  0.00000000E+00  0.00000000E+00
  Chern vector, term-by-term breakdown :
   Ch CC :  -6.21436311E-08 -1.56425321E-20  3.16195747E-20
@@ -671,7 +672,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   7.28880988E-04 -1.98423959E-18  1.70738375E-17
    <L_R> terms :   9.84662823E-26 -5.36349000E-27 -1.10572186E-26
  <A0.An> terms :  -8.88412145E-06  2.18090274E-28  6.51747976E-30
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :   1.82302666E-08 -1.02269322E-21  7.71061420E-22
@@ -688,7 +688,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   3.25209611E-02 -3.34148992E-12  5.81387713E-12
    <L_R> terms :   4.06356180E-01 -4.17705225E-11  7.27045933E-11
  <A0.An> terms :  -3.29599387E-05  8.47031129E-16 -1.47434777E-15
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :   6.73390208E-05 -6.91861989E-15  1.20430612E-14
@@ -705,7 +704,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :  -1.78016660E-24  6.67268323E-12 -1.16458098E-11
    <L_R> terms :  -4.70274320E-23  8.33412117E-11 -1.45455019E-10
  <A0.An> terms :  -1.64741757E-05 -1.65653905E-18 -6.42343766E-18
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :  -4.43461989E-10  1.38240084E-14 -2.41269998E-14
@@ -722,7 +720,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :  -3.25269695E-02 -3.33119039E-12  5.83193057E-12
    <L_R> terms :  -4.06086531E-01 -4.15706548E-11  7.27504249E-11
  <A0.An> terms :  -3.29367615E-05 -8.42906144E-16  1.47509256E-15
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :  -6.74228560E-05 -6.90539821E-15  1.20839582E-14
@@ -905,10 +902,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.5
+- Proc.   0 individual time (sec): cpu=         18.3  wall=         18.8
  
 ================================================================================
  
  Calculation completed.
-.Delivered  57 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.0  wall=         15.5
+.Delivered  59 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         18.3  wall=         18.8

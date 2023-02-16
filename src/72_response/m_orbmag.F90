@@ -631,6 +631,7 @@ do adir = 1, 3
   end do
   orbmag_trace(1,adir,imvxc1) = evxc1
 end do
+orbmag_trace(1,1:3,imvxc1) = ucvol*MATMUL(gprimd,orbmag_trace(1,1:3,imvxc1))
  
 call orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
@@ -2678,12 +2679,12 @@ subroutine make_pawrhoij1(atindx,cprj,dimlmn,dtset,gprimd,lmn2_max,&
         dij_red(1,adir) = dij(1); dij_red(2,adir) = dij(2)
 
       end do ! adir
-      dij_cart(1,1:3) = ucvol*MATMUL(gprimd,dij_red(1,1:3))
-      dij_cart(2,1:3) = ucvol*MATMUL(gprimd,dij_red(2,1:3))
+      !dij_cart(1,1:3) = ucvol*MATMUL(gprimd,dij_red(1,1:3))
+      !dij_cart(2,1:3) = ucvol*MATMUL(gprimd,dij_red(2,1:3))
      
       do adir = 1, 3 
-        pawrhoij1(iatom,adir)%rhoij_(2*klmn-1,1) = dij_cart(1,adir)
-        pawrhoij1(iatom,adir)%rhoij_(2*klmn,  1) = dij_cart(2,adir)
+        pawrhoij1(iatom,adir)%rhoij_(2*klmn-1,1) = dij_red(1,adir)
+        pawrhoij1(iatom,adir)%rhoij_(2*klmn,  1) = dij_red(2,adir)
       end do ! adir
 
     end do ! klmn
