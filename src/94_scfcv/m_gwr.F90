@@ -2070,6 +2070,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, spin, ik_ibz, ierr, io_algo, bcast_comm, color
  integer :: npw_k, mpw, istwf_k, il_b, ib, band, iloc !, itau
  integer :: nbsum, npwsp, bstart, bstop, band_step, nb !my_nband ! nband_k,
+ logical :: print_time
  real(dp) :: cpu, wall, gflops, cpu_green, wall_green, gflops_green
  character(len=5000) :: msg
  logical :: have_band, need_block_ks, io_in_kcomm
@@ -2234,12 +2235,12 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      if (io_in_kcomm .and. .not. any(gwr%my_spins == spin)) cycle
 
      do ik_ibz=1,gwr%nkibz
-       call cwtime(cpu_green, wall_green, gflops_green, "start")
+       print_time = gwr%comm%me == 0 .and. (ik_ibz < LOG_MODK .or. mod(my_iki, LOG_MODK) == 0)
+       if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
        kk_ibz = gwr%kibz(:, ik_ibz)
-       npw_k = wfk_hdr%npwarr(ik_ibz)
-       istwf_k = wfk_hdr%istwfk(ik_ibz)
-       ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+       npw_k = wfk_hdr%npwarr(ik_ibz); istwf_k = wfk_hdr%istwfk(ik_ibz)
        npwsp = npw_k * gwr%nspinor
+       ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
 
        ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
        need_block_ks = any(gwr%my_spins == spin) .and. any(gwr%my_kibz_inds == ik_ibz)
@@ -2248,7 +2249,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
        ! TODO: Optimize this part
        ! Find band_step that gives good compromise between memory and efficiency.
-       band_step = memlimited_step(1, nbsum, 2*npwsp, xmpi_bsize_dp, 1024.0_dp)
+       band_step = memb_limited_step(1, nbsum, 2*npwsp, xmpi_bsize_dp, 1024.0_dp)
        do bstart=1, nbsum, band_step
          bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
 
@@ -2280,7 +2281,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
        call xmpi_comm_free(bcast_comm)
 
-       if (ik_ibz <= LOG_MODK .or. mod(ik_ibz, LOG_MODK) == 0) then
+       if (print_time) then
          write(msg,'(4x,2(a,i0),a)')"Read ugb_k: ik_ibz [", ik_ibz, "/", gwr%nkibz, "]"
          call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (ik_ibz == LOG_MODK) call wrtout(std_out, " ...")
        end if
@@ -2582,12 +2583,11 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
 
 ! *************************************************************************
 
- ! Take the union of (q,g') for q in the BZ.
- ! Note gwr%ngqpt instead of gwr%ngkpt.
  call timab(1930, 1, tsec)
 
- if (.not. present(wct_scbox_win)) then
+ ! Take the union of (q,g') for q in the BZ. Note gwr%ngqpt instead of gwr%ngkpt.
 
+ if (.not. present(wct_scbox_win)) then
    wct_scbox = czero_gw
    do my_iqf=1,gwr%my_nqbz
      iq_bz = gwr%my_qbz_inds(my_iqf)
@@ -4302,7 +4302,7 @@ end if
     use_umklp = 1
     do iq_ibz=1,gwr%nqibz
       call ltg_qibz(iq_ibz)%init(gwr%qibz(:,iq_ibz), gwr%nkbz, gwr%kbz, gwr%cryst, use_umklp, npwe=0, timrev=1)
-      call ltg_qibz(iq_ibz)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
+      !call ltg_qibz(iq_ibz)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
     end do
 
     need_kibz = 0
@@ -4363,8 +4363,6 @@ end if
           ! Use symmetries to get G_kqbz(g,g') from the IBZ, then G_kqbz(g,g') -> G_kqbz(r',r).
           ! Also, we don't need G(+/-t) for both k, k+q wavevectors.
           call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=g0_kq, ipm_list=[2])
-          !call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, g0=-g0_kq, ipm_list=[1,2])
-          !call gwr%get_gkbz_rpr_pm(ikq_bz, itau, spin, gkq_rpr_pm, ipm_list=[1,2])
 
           ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
           wtqp = one / gwr%nkbz; wtqm = zero
@@ -4376,7 +4374,8 @@ end if
 
           chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
              !wtqp * gkq_rpr_pm(1)%buffer_cplx * conjg(gk_rpr_pm(2)%buffer_cplx)  ! This should be OK
-             wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works + C
+             wtqp * gk_rpr_pm(1)%buffer_cplx * conjg(gkq_rpr_pm(2)%buffer_cplx)   ! RECHECK EQ. This one works
+                                                                                  ! but requires ptrans with C
         end do ! my_iqi
 
         if (print_time) then
@@ -4592,7 +4591,7 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
    ABI_ERROR(sjoin("Invalid action:", action))
  end select
 
- call cwtime_report(" gwr_redistrib_gt_kibz:", cpu, wall, gflops)
+ if (action == "communicate") call cwtime_report(" gwr_redistrib_gt_kibz:", cpu, wall, gflops)
 
 end subroutine gwr_redistrib_gt_kibz
 !!***
@@ -5069,7 +5068,6 @@ subroutine gwr_build_sigmac(gwr)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
  complex(dp) :: odd_t(gwr%ntau), even_t(gwr%ntau), avg_2ntau(2,gwr%ntau)
  complex(dp),target,allocatable :: sigc_it_diag_kcalc(:,:,:,:,:)
- !complex(gwpc) ABI_ASYNC, allocatable :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:), wct_scbox(:,:)
  complex(gwpc),allocatable :: uc_psir_bk(:,:,:), scph1d_kcalc(:,:,:), uc_ceikr(:), ur(:)
  type(__slkmat_t) :: gt_gpr(2, gwr%my_nkbz), gk_rpr_pm(2), sigc_rpr(2,2,gwr%nkcalc), wc_rpr, wc_gpr(gwr%my_nqbz)
@@ -5464,13 +5462,8 @@ else
            !call ltg_kcalc(ikcalc)%get_weigts_ibz(ik_bz, wkbz_pm)
            associate (ltg_k => ltg_kcalc(ikcalc))
            !if (can_symmetrize(spin)) then
-           wtqp = zero; wtqm = zero
-           do isym=1,Ltg_k%nsym_sg
-             wtqp = wtqp + ltg_k%wtksym(1,isym,ik_bz)  ! FIXME: iq_bz or ik_bz?
-             wtqm = wtqm + ltg_k%wtksym(2,isym,ik_bz)
-           end do
-           wtqp = wtqp / gwr%nkbz
-           wtqm = wtqm / gwr%nkbz
+           wtqp = (one * sum(ltg_k%wtksym(1,:,ik_bz))) / gwr%nkbz   ! FIXME: iq_bz or ik_bz?
+           wtqm = (one * sum(ltg_k%wtksym(2,:,ik_bz))) / gwr%nkbz
            end associate
          end if
 
@@ -6850,8 +6843,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
    ! Loop over my k-points in the BZ.
    do my_ikf=1,gwr%my_nkbz
-     ik_bz = gwr%my_kbz_inds(my_ikf)
-     kk_bz = gwr%kbz(:, ik_bz)
+     ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
 
      if (dtset%symchi == 1 .and. ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only IBZ_q
      print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -6883,6 +6875,26 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      end if
 
      !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_ki, npw_ki, kg_ki)
+
+     !call wfd%copy_cg(ib_v, ik, spin, cg_v)
+     !call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
+
+     !call wfd%copy_cg(ib_c, ik, spin, cg_c)
+     !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
+     !call ddkop%free()
+
+     ! HM: 24/07/2018
+     ! Transform dipoles to be consistent with results from DFPT
+     ! Perturbations with DFPT are along the reciprocal lattice vectors
+     ! Perturbations with Commutator are along real space lattice vectors
+     ! dot(A, DFPT) = X
+     ! dot(B, COMM) = X
+     ! B = 2 pi (A^{-1})^T =>
+     ! dot(B^T B,COMM) = 2 pi DFPT
+     !vr = (2*pi)*(2*pi)*sum(ihrc(:,:),dim=2)
+     !vg(1) = dot_product(Cryst%gmet(1,:), vr)
+     !vg(2) = dot_product(Cryst%gmet(2,:), vr)
+     !vg(3) = dot_product(Cryst%gmet(3,:), vr)
 
      call chi0_bbp_mask(ik_ibz, ik_ibz, spin, spin_fact, use_tr, &
                         gwcomp0, spmeth0, gwr%ugb_nband, mband, now_ebands, bbp_mask)
@@ -7329,11 +7341,8 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      !if (can_symmetrize(spin)) then
      if (gwr%dtset%symsigma == 1) then
        if (ltg_k%ibzq(iq_bz) /= 1) CYCLE
-       wtqp = 0; wtqm = 0
-       do isym=1,ltg_k%nsym_sg
-         wtqp = wtqp + ltg_k%wtksym(1, isym, iq_bz)
-         wtqm = wtqm + ltg_k%wtksym(2, isym, iq_bz)
-       end do
+       wtqp = sum(ltg_k%wtksym(1,:,iq_bz))
+       wtqm = sum(ltg_k%wtksym(2,:,iq_bz))
      end if
 
      qq_bz = gwr%qbz(:, iq_bz)
@@ -7394,7 +7403,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      do il_b=1,ugb_kibz%sizeb_local(2)
        ! Distribute bands inside tau_comm as wavefunctions are replicated
        if (gwr%tau_comm%skip(il_b)) cycle
-
        band_sum = ugb_kibz%loc2gcol(il_b)
 
        ! Skip empty states. MRM: allow negative occ numbers.
@@ -7606,6 +7614,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  compute_qp__ = .False.; if (present(compute_qp)) compute_qp__ = compute_qp
  if (compute_qp__ .and. gwr%comm%me == 0) then
    call write_notations(units)
+   ! TODO
  end if
 
  call cwtime_report(" gwr_build_sigxme:", cpu_all, wall_all, gflops_all)
@@ -7758,7 +7767,6 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
  call c_f_pointer(c_loc(sc_data), sc_data_ptr, &
                   shape=[uc_n1, sc_shape(1), uc_n2, sc_shape(2), uc_n3, sc_shape(3), nspinor])
 
-
  !do spinor=1,nspinor
  !end do
  ABI_CHECK(nspinor == 1, "nspinor 2 not coded")
@@ -7805,7 +7813,7 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
 end subroutine sc_sum
 !!***
 
-integer pure function memlimited_step(start, stop, num_items, bsize, maxmem_mb) result(step)
+integer pure function memb_limited_step(start, stop, num_items, bsize, maxmem_mb) result(step)
  integer,intent(in) :: start, stop, num_items, bsize
  real(dp),intent(in) :: maxmem_mb
 
@@ -7817,7 +7825,7 @@ integer pure function memlimited_step(start, stop, num_items, bsize, maxmem_mb) 
  step = stop - start + 1
  if (totmem_mb > maxmem_mb) step = floor(totmem_mb / maxmem_mb)
 
-end function memlimited_step
+end function memb_limited_step
 !!***
 
 end module m_gwr
