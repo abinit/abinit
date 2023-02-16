@@ -59,6 +59,7 @@ inp_files = [
 "t76.abi",
 "t77.abi",
 "t78.abi", # GWR
+"t79.abi", # GWR
 "t80.abi",
 "t81.abi",
 "t82.abi",

@@ -1,8 +1,7 @@
 # SiC in zinc-blende structure
 
 ndtset 3
-ecut 8     # Cannot go below this else system becomes metallic in HDIAGO!
-timopt 1
+ecut 12     # Cannot go below 8 else system becomes metallic in HDIAGO!
 
 # This to compute QP without symmetries for debugging purposes
 #nsym 1
@@ -18,22 +17,34 @@ shiftk     0 0 0
 ####################
 nband1      15
 tolvrs1 1.e-8
+paral_kgb1  1
+rmm_diis1   1
+autoparal1  1
+npfft1  1      # Direct diago and GWR do not support MPI-FFT and expect an FFT mesh 
+               # computed from ecut and boxcutmin without the extra contraint on the last 
+               # two dimensions that should be divisible by npfft .
+               # Actually, HDIAGO and GWR will stop if the mesh found in the DEN file differs from
+               # the one computed from the input file without MPI-FFT.
+               # As a consequence, we use autoparal 1 but enforce npfft 1.
 
 ###########################################
 # Dataset 2: Direct diago with empty states
 ###########################################
-optdriver2  6        # Activate GWR code
-gwr_task2 "HDIAGO"   # Direct diagonalization
+optdriver2  6             # Activate GWR code
+gwr_task2 "HDIAGO_FULL"   # Direct diagonalization with nband == npw
 getden2     1
-nband2     30        # Number of (occ + empty) bands
+#nband2     30        # Number of (occ + empty) bands
 
 ################################
 # Dataset 3: G0W0 with GWR code
 ################################
 optdriver3  6        # Activate GWR code
 gwr_task3 "G0W0"     # One-shot calculation
-#gwr_chi_algo3  2     # Compute Chi with convolutions in the BZ 
-gwr_sigma_algo3  2   # Compute Sigma with convolutions in the BZ 
+#gwr_chi_algo3  1    # Compute Chi with supercell.
+gwr_sigma_algo3  2   # Compute Sigma with convolutions in the BZ.
+gwr_np_kgts3 2 2 2 1 # k/G/tau/spin parallelism.
+gwr_ucsc_batch3 2 2
+
 getden3 1
 getwfk3 2            # WFK file with empty states
 
@@ -53,6 +64,8 @@ ecuteps3    6        # Cut-off energy of the planewave set to represent the diel
 ecutsigx3   8.0      # Dimension of the G sum in Sigma_x.
                      # ecutsigx = ecut is usually a wise choice
                      # (the dimension in Sigma_c is controlled by ecuteps)
+                     
+gw_qprange3 0        # Compute Fundamental and direct gap only
 
 # Spectral function (very coarse grid to reduce txt file size)
 #nfreqsp3 50
@@ -74,11 +87,12 @@ ecutsigx3   8.0      # Dimension of the G sum in Sigma_x.
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
-#%% files_to_test =
-#%%   t06.abo, tolnlines = 12, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options = -medium
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [paral_info]
-#%% max_nprocs = 12
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
+#%% files_to_test = t79_MPI8.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, GWR
@@ -86,5 +100,5 @@ ecutsigx3   8.0      # Dimension of the G sum in Sigma_x.
 #%%  SiC in zinc-blende structure
 #%%  Calculation of the GW corrections with GWR code.
 #%%  Test symmetrization with time-reversal and umklapp g0 vectors
-#%%  Similar to t05.abi but here Sigma is computed with convolutions in k-space.
+#%%  as well as parallelization over k/g/tau.
 #%%<END TEST_INFO>
