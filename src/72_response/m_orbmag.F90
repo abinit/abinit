@@ -378,7 +378,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
 
  call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
-    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps,ucvol)
+    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
  icg = 0
  ikg = 0
@@ -2207,12 +2207,11 @@ end subroutine dterm_aij
 !! SOURCE
 
 subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
-    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps,ucvol)
+    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: mcprj
-  real(dp),intent(in) :: ucvol
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -2253,9 +2252,8 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
  
  call dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
- dterm%vxc1 = zero 
- call dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,gprimd,psps%dimekb,mcprj,mpi_enreg,occ,&
-   & paw_an,pawang,pawrad,pawtab,ucvol)
+ call dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,mcprj,mpi_enreg,&
+   & occ,paw_an,pawang,pawrad,pawtab)
 
  call dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 
@@ -2400,19 +2398,18 @@ end subroutine pack_pawrhoij
 !!
 !! SOURCE
 
-subroutine make_pawrhoij1(atindx,cprj,dimlmn,dtset,gprimd,lmn2_max,&
-    & mcprj,mpi_enreg,nband_k,occ,pawrhoij1,pawtab,ucvol)
+subroutine make_pawrhoij1(atindx,cprj,dimlmn,dtset,mcprj,mpi_enreg,&
+    & nband_k,occ,pawrhoij1,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcprj,lmn2_max,nband_k
-  real(dp),intent(in) :: ucvol
+  integer,intent(in) :: mcprj,nband_k
   type(MPI_type), intent(inout) :: mpi_enreg
   type(dataset_type),intent(in) :: dtset
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp), intent(in) :: gprimd(3,3),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
   type(pawrhoij_type),intent(inout) :: pawrhoij1(dtset%natom,3)
   type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
@@ -2427,7 +2424,7 @@ subroutine make_pawrhoij1(atindx,cprj,dimlmn,dtset,gprimd,lmn2_max,&
   character(len=500) :: msg
  
   !arrays
-  real(dp) :: dij(2),dij_red(2,3),dij_cart(2,3)
+  real(dp) :: dij(2),dij_red(2,3)
   real(dp),allocatable :: buffer1(:),buffer2(:)
   type(pawcprj_type),allocatable :: cprj_k(:,:)
 !--------------------------------------------------------------------
@@ -2692,13 +2689,12 @@ end subroutine paw_sph_den_alloc
 !!
 !! SOURCE
 
-subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,gprimd,lmn2_max,&
-    & mcprj,mpi_enreg,occ,paw_an,pawang,pawrad,pawtab,ucvol)
+subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,mcprj,mpi_enreg,occ,&
+    & paw_an,pawang,pawrad,pawtab)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcprj,lmn2_max
-  real(dp),intent(in) :: ucvol
+  integer,intent(in) :: mcprj
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -2706,7 +2702,7 @@ subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,gprimd,lmn2_max,&
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp), intent(in) :: gprimd(3,3),occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
@@ -2714,11 +2710,11 @@ subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,gprimd,lmn2_max,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,iat,iatom,ilm,imesh,ipt,itypat,jlm,klmn,kln
+  integer :: adir,iat,iatom,itypat
   integer :: mesh_size,nkxc,nk3xc
   integer :: nzlmopt,opt_compch,opt_dens,opt_l,opt_print
   integer :: usecore,usexcnhat,xc_option
-  real(dp) :: compch_sph,dij,eexc1,eexct1,eexcdc,hyb_mixing,xcint
+  real(dp) :: compch_sph,eexc1,eexct1,eexcdc,hyb_mixing
   logical :: non_magnetic_xc
   type(paw_sph_den_type) :: pawsphden
  
@@ -2727,6 +2723,8 @@ subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,gprimd,lmn2_max,&
   real(dp),allocatable :: kxc(:,:,:),k3xc(:,:,:)
   real(dp),allocatable :: vxc(:,:,:),tvxc(:,:,:)
 !--------------------------------------------------------------------
+
+  dterm%vxc1 = zero
 
   !=== options for pawdensities
   nzlmopt = -1
@@ -2747,11 +2745,11 @@ subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,gprimd,lmn2_max,&
   !=== make first order pawrhoij for all atoms 
   ABI_MALLOC(pawrhoij,(dtset%natom,3))
   do adir=1,3
-    call pawrhoij_alloc(pawrhoij(:,adir),dtset%pawcpxocc,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%typat,&
+    call pawrhoij_alloc(pawrhoij(:,adir),dtset%pawcpxocc,dtset%nspden,dtset%nspinor,&
+      & dtset%nsppol,dtset%typat,&
       & use_rhoijp=1,use_rhoij_=1,pawtab=pawtab)
   end do
-  call make_pawrhoij1(atindx,cprj,dimlmn,dtset,gprimd,lmn2_max,mcprj,mpi_enreg,&
-    & dtset%mband,occ,pawrhoij,pawtab,ucvol)
+  call make_pawrhoij1(atindx,cprj,dimlmn,dtset,mcprj,mpi_enreg,dtset%mband,occ,pawrhoij,pawtab)
   do adir=1,3
     call pack_pawrhoij(dtset,pawrhoij(:,adir))
   end do
