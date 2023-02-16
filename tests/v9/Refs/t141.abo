@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 14 Feb 2023.
-- ( at 15h09 )
+.Starting date : Thu 16 Feb 2023.
+- ( at 15h04 )
   
 - input  file    -> /media/jzwanzig/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t141/t141.abi
 - output file    -> t141.abo
@@ -858,7 +858,7 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
  
  Orbital magnetic moment, Cartesian directions :
- -8.70999417E-05 -1.55509475E-09 -1.08486906E-09
+ -8.70997608E-05 -1.85284025E-09 -1.38265171E-09
  
  
  Chern vector, Cartesian directions :
@@ -872,6 +872,7 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   1.79311671E-04  4.26954657E-10  6.23226989E-10
    <L_R> terms :  -3.66851133E-06 -4.62413400E-11 -1.19844189E-11
  <A0.An> terms :  -2.43193902E-06 -4.41246492E-14 -4.55253109E-14
+    vxc1 terms :   1.80937452E-10 -2.97745505E-10 -2.97782652E-10
     Lamb terms :  -7.66760000E-04  0.00000000E+00  0.00000000E+00
  Chern vector, term-by-term breakdown :
   Ch CC :   4.39320890E-06 -7.96602617E-11 -6.38354362E-11
@@ -890,7 +891,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   1.40558685E-05  1.04598723E-10 -2.91883949E-10
    <L_R> terms :  -5.79409268E-08  1.52767423E-13 -1.57517374E-13
  <A0.An> terms :  -1.52235609E-07 -1.15758191E-14 -1.21505367E-14
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :   1.14599769E-09  1.89277749E-14  7.42502599E-14
@@ -907,7 +907,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   1.40562041E-05  8.02029977E-11  1.13914476E-10
    <L_R> terms :  -5.79396823E-08  3.21113036E-13 -9.15975280E-13
  <A0.An> terms :  -1.52235609E-07 -1.16155572E-14 -1.21200174E-14
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :   1.14598101E-09  2.08645804E-14  7.47136244E-14
@@ -924,7 +923,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   4.15903648E-05 -4.57137022E-11  3.29665653E-11
    <L_R> terms :   9.16381104E-07 -2.27812607E-11  7.71827472E-12
  <A0.An> terms :  -3.37543646E-07 -3.23273901E-15 -3.13219541E-15
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :  -5.17593633E-07 -2.20958984E-12  1.16851292E-12
@@ -941,7 +939,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   4.15904538E-05 -6.35983811E-11  1.25014410E-10
    <L_R> terms :   9.16375807E-07  1.66221166E-11  1.94233775E-12
  <A0.An> terms :  -3.37543648E-07 -3.22164556E-15 -3.41460968E-15
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :  -5.17593577E-07 -2.27098746E-12  1.12151721E-12
@@ -958,7 +955,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   1.38098966E-02  1.95801171E-09  2.18081865E-09
    <L_R> terms :  -2.43751823E-03 -2.73722760E-10 -3.42526731E-10
  <A0.An> terms :  -3.46686245E-07 -4.47575721E-12 -4.84977906E-12
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :  -4.15408277E-03 -5.98673738E-10 -6.60776477E-10
@@ -975,7 +971,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   1.38098972E-02  1.88294999E-09  2.12453941E-09
    <L_R> terms :  -2.43751827E-03 -4.00168545E-10 -3.36632995E-10
  <A0.An> terms :  -3.46686247E-07 -4.47600487E-12 -4.84992547E-12
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :  -4.15408277E-03 -5.98706824E-10 -6.60667794E-10
@@ -992,7 +987,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :  -1.37758875E-02 -1.61898633E-09 -1.94185688E-09
    <L_R> terms :   2.43482557E-03  3.42459953E-10  2.63927809E-10
  <A0.An> terms :  -3.79504005E-07  4.46870627E-12  4.84246104E-12
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :   4.15688246E-03  5.61050792E-10  6.27003213E-10
@@ -1009,7 +1003,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :  -1.37758875E-02 -1.87051035E-09 -1.72028570E-09
    <L_R> terms :   2.43482554E-03  2.90875275E-10  3.94660378E-10
  <A0.An> terms :  -3.79504006E-07  4.46857692E-12  4.84253554E-12
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
  
  
  Chern vector :   4.15688246E-03  5.61169420E-10  6.26936983E-10
@@ -1244,10 +1237,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         24.1  wall=         24.4
+- Proc.   0 individual time (sec): cpu=         25.1  wall=         25.3
  
 ================================================================================
  
  Calculation completed.
-.Delivered  11 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.1  wall=         24.4
+.Delivered  23 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=         25.1  wall=         25.3
