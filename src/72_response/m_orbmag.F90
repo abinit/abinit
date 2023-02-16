@@ -377,8 +377,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ! note: in make_d, terms will be filled as iatom using atindx
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
 
- call make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
-    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
+ call make_d(atindx,cprj,dimlmn,dterm,dtset,gprimd,mcprj,mpi_enreg,occ,&
+   & paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
  icg = 0
  ikg = 0
@@ -2206,7 +2206,7 @@ end subroutine dterm_aij
 !!
 !! SOURCE
 
-subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
+subroutine make_d(atindx,cprj,dimlmn,dterm,dtset,gprimd,&
     & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
@@ -2219,7 +2219,7 @@ subroutine make_d(atindx,atindx1,cprj,dimlmn,dterm,dtset,gprimd,&
   type(pseudopotential_type), intent(inout) :: psps
 
   !arrays
-  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom)
+  integer,intent(in) :: atindx(dtset%natom)
   integer,intent(in) :: dimlmn(dtset%natom)
   real(dp),intent(in) :: gprimd(3,3)
   real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
