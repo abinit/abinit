@@ -2349,7 +2349,6 @@ subroutine chi0_bbp_mask(ikmq_ibz, ik_ibz, spin, spin_fact, use_tr, &
 
 !Local variables-------------------------------
 !scalars
-
  integer :: ib1, ib2
  real(dp) :: deltaeGW_b1kmq_b2k,deltaf_b1kmq_b2k,e_b1_kmq,f_b1_kmq
 !arrays
@@ -2417,7 +2416,6 @@ subroutine chi0_bbp_mask(ikmq_ibz, ik_ibz, spin, spin_fact, use_tr, &
        if (qp_occ(ib2,ik_ibz,spin) < GW_TOL_DOCC .and. (ABS(deltaf_b1kmq_b2k) < GW_TOL_DOCC .or. ib1<ib2)) then
          bbp_mask(ib1,ib2)=.FALSE.
        end if
-
      end do
    end do
 

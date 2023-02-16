@@ -988,12 +988,10 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! This piece of code is taken from m_sigmaph.
  ! In principle one should use the same algorithm in setup_sigma (legacy GW code).
  if (dtset%nkptgw /= 0) then
-
    ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
    call sigtk_kcalc_from_nkptgw(dtset, mband, gwr%nkcalc, gwr%kcalc, gwr%bstart_ks, gwr%nbcalc_ks)
 
  else
-
    if (any(abs(dtset%sigma_erange) > zero)) then
      ! Use sigma_erange and (optionally) sigma_ngkpt
      call sigtk_kcalc_from_erange(dtset, cryst, ks_ebands, gwr%ks_gaps, &
@@ -1037,7 +1035,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ierr = 0
  do ikcalc=1,gwr%nkcalc
-
    ! Note symrel and use_symrel.
    ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
    kk = gwr%kcalc(:, ikcalc)
@@ -1098,7 +1095,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ABI_CHECK(ierr == 0, "kptgw wavevectors must be in the IBZ read from the WFK file.")
 
- ! Build degtab tables.
+ ! Build degtab tables to average self-energy matrix element if symsigma /= 0
  if (abs(gwr%dtset%symsigma) == 1) then
    ABI_MALLOC(gwr%degtab, (gwr%nkcalc, gwr%nsppol))
    do ikcalc=1,gwr%nkcalc
@@ -1356,8 +1353,7 @@ block
 end block
 #endif
 
- !call gwr%kpt_comm%print_names()
- !call gwr%g_comm%print_names()
+ !call gwr%kpt_comm%print_names(); call gwr%g_comm%print_names()
 
  ! Define batch sizes for FFT transforms taking into account k-point parallelism, OpenMP threads and GPUs.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
@@ -1408,8 +1404,8 @@ end block
  call xmpi_split_block(gwr%nsppol, gwr%spin_comm%value, gwr%my_nspins, gwr%my_spins)
  ABI_CHECK(gwr%my_nspins > 0, "my_nspins == 0, decrease number of MPI procs for spin level")
 
- ! Distribute k-points in full BZ and build redirection tables.
- ! Finally, find the number of IBZ k-points stored by this MPI rank.
+ ! Distribute k-points in the full BZ and build redirection tables.
+ ! Finally, find the number of IBZ k-points treated by this MPI rank.
  call xmpi_split_block(gwr%nkbz, gwr%kpt_comm%value, gwr%my_nkbz, gwr%my_kbz_inds)
  ABI_CHECK(gwr%my_nkbz > 0, "my_nkbz == 0, decrease number of MPI procs for k-point level")
 
@@ -1450,7 +1446,7 @@ end block
  ABI_FREE(iwork)
 
  ! Distribute q-points in full BZ, transfer symmetry tables.
- ! Finally find the number of IBZ q-points that should be stored in memory.
+ ! Finally find the number of my IBZ q-points that should be stored in memory.
  call xmpi_split_block(gwr%nqbz, gwr%kpt_comm%value, gwr%my_nqbz, gwr%my_qbz_inds)
 
  ! Compute np_qibz
@@ -1526,7 +1522,6 @@ end block
  ! ==================================
  ! Allocate arrays of PBLAS matrices
  ! ==================================
-
  ABI_MALLOC(gwr%gt_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%tchi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
@@ -2092,7 +2087,6 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  call timab(1921, 1, tsec)
 
  dtset => gwr%dtset
-
  wfk_ebands = wfk_read_ebands(wfk_path, gwr%comm%value, out_hdr=wfk_hdr)
  call wfk_hdr%vs_dtset(dtset)
 
@@ -2180,11 +2174,10 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    do my_is=1,gwr%my_nspins
      spin = gwr%my_spins(my_is)
      do my_iki=1,gwr%my_nkibz
-       call cwtime(cpu_green, wall_green, gflops_green, "start")
-       ik_ibz = gwr%my_kibz_inds(my_iki)
-       kk_ibz = gwr%kibz(:, ik_ibz)
-       npw_k = wfk_hdr%npwarr(ik_ibz)
-       istwf_k = wfk_hdr%istwfk(ik_ibz)
+       print_time = gwr%comm%me == 0 .and. (my_iki <= LOG_MODK .or. mod(my_iki, LOG_MODK) == 0)
+       if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
+       ik_ibz = gwr%my_kibz_inds(my_iki); kk_ibz = gwr%kibz(:, ik_ibz)
+       npw_k = wfk_hdr%npwarr(ik_ibz); istwf_k = wfk_hdr%istwfk(ik_ibz)
        ! TODO
        ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
        npwsp = npw_k * gwr%nspinor
@@ -2208,7 +2201,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
        ABI_CHECK(all(kg_k(:,1:npw_k) == desc_k%gvec), "kg_k != desc_k%gvec")
 
-       if (my_iki <= LOG_MODK .or. mod(my_iki, LOG_MODK) == 0) then
+       if (print_time) then
          write(msg,'(4x,3(a,i0),a)')"Read ugb_k: my_iki [", my_iki, "/", gwr%my_nkibz, "] (tot: ", gwr%nkibz, ")"
          call cwtime_report(msg, cpu_green, wall_green, gflops_green); if (my_iki == LOG_MODK) call wrtout(std_out, " ...")
        end if
@@ -2921,8 +2914,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  class(gwr_t),intent(in) :: gwr
  integer,intent(in) :: ik_bz, itau, spin
  type(__slkmat_t),intent(inout) :: gk_rpr_pm(2)
- integer,optional,intent(in) :: g0(3)
- integer,optional,intent(in) :: ipm_list(:)
+ integer,optional,intent(in) :: g0(3), ipm_list(:)
 
 !Local variables-------------------------------
 !scalars
@@ -3291,8 +3283,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
  ABI_MALLOC(ceiqr, (gwr%g_nfft * gwr%nspinor))
 
  do my_iqf=1,gwr%my_nqbz
-   iq_bz = gwr%my_qbz_inds(my_iqf)
-   qq_bz = gwr%qbz(:, iq_bz)
+   iq_bz = gwr%my_qbz_inds(my_iqf); qq_bz = gwr%qbz(:, iq_bz)
    q_is_gamma = normv(qq_bz, gwr%cryst%gmet, "G") < GW_TOLQ0
    if (.not. q_is_gamma) call calc_ceikr(qq_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, ceiqr)
 
@@ -4008,17 +3999,15 @@ subroutine gwr_build_tchi(gwr)
  type(__slkmat_t) :: chi_rgp
  type(c_ptr) :: void_ptr
 !arrays
- integer :: sc_ngfft(18), gg(3), g0_kq(3)
+ integer :: sc_ngfft(18), gg(3), g0_kq(3), mask_qibz(gwr%nqibz), need_kibz(gwr%nkibz), got_kibz(gwr%nkibz)
  integer,allocatable :: green_scgvec(:,:), chi_scgvec(:,:)
- integer :: mask_qibz(gwr%nqibz), need_kibz(gwr%nkibz), got_kibz(gwr%nkibz)
  real(dp) :: kk_bz(3), kpq_bz(3), qq_ibz(3), tsec(2)
  complex(gwpc) ABI_ASYNC, contiguous, pointer :: gt_scbox(:,:,:)
- complex(gwpc),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:) ! gt_scbox(:,:,:),
+ complex(gwpc),allocatable :: low_wing_q(:), up_wing_q(:), cemiqr(:)
  type(__slkmat_t) :: gkq_rpr_pm(2), gk_rpr_pm(2)
  type(__slkmat_t),allocatable :: gt_gpr(:,:), chiq_gpr(:), chiq_rpr(:)
  type(desc_t),target,allocatable :: desc_mykbz(:)
  type(littlegroup_t),allocatable :: ltg_qibz(:)
- !type(desc_t),target :: desc_mykbz(gwr%my_nkbz)
  type(fftbox_plan3_t) :: green_plan
  type(uplan_t) :: uplan_q
 
@@ -4119,6 +4108,8 @@ subroutine gwr_build_tchi(gwr)
          ndat = blocked_loop(my_ir, my_nr, gwr%sc_batch_size)
          print_time = (gwr%comm%me == 0 .and. (my_ir <= 6 * gwr%sc_batch_size .or. mod(my_ir, LOG_MODR) == 0))
          if (print_time) call cwtime(cpu_ir, wall_ir, gflops_ir, "start")
+
+         ! TODO: GPU version
 
 if (.not. use_shmem_for_k) then
 
@@ -4549,7 +4540,8 @@ subroutine gwr_redistrib_gt_kibz(gwr, itau, spin, need_kibz, got_kibz, action)
      kk_ibz = gwr%kibz(:, ik_ibz)
      if (allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) sender_kibz(ik_ibz) = gwr%kpt_comm%me
      if (need_kibz(ik_ibz) /= 0 .and. .not. allocated(gwr%green_desc_kibz(ik_ibz)%gvec)) then
-       ! NB: Use same args as those used to init the descriptors in gwr_init.
+       ! NB: Use same args as those used to init the descriptors in gwr_init
+       ! so that gvec ordering is consistent across MPI procs.
        got_kibz(ik_ibz) = 1
        call gwr%green_desc_kibz(ik_ibz)%init(kk_ibz, istwfk1, gwr%dtset%ecut, gwr)
      end if
@@ -4658,7 +4650,8 @@ subroutine gwr_redistrib_mats_qibz(gwr, what, itau, spin, need_qibz, got_qibz, a
      qq_ibz = gwr%qibz(:, iq_ibz)
      if (allocated(gwr%tchi_desc_qibz(iq_ibz)%gvec)) sender_qibz(iq_ibz) = gwr%kpt_comm%me
      if (need_qibz(iq_ibz) /= 0 .and. .not. allocated(gwr%tchi_desc_qibz(iq_ibz)%gvec)) then
-       ! NB: Use same args as those used to init the descriptors in gwr_init.
+       ! NB: Use same args as those used to init the descriptors in gwr_init
+       ! so that gvec ordering is consistent across MPI procs.
        got_qibz(iq_ibz) = 1
        call gwr%tchi_desc_qibz(iq_ibz)%init(qq_ibz, istwfk1, gwr%dtset%ecuteps, gwr, kin_sorted=.True.)
      end if
@@ -4844,7 +4837,7 @@ subroutine gwr_build_wc(gwr)
  integer :: my_iqi, my_it, my_is, iq_ibz, spin, itau, iw, ierr
  integer :: il_g1, il_g2, ig1, ig2, iglob1, iglob2, ig0
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
- logical :: q_is_gamma, free_tchi
+ logical :: q_is_gamma, free_tchi, print_time
  character(len=5000) :: msg
  complex(dpc) :: vcs_g1, vcs_g2
  type(__slkmat_t) :: em1
@@ -4857,7 +4850,7 @@ subroutine gwr_build_wc(gwr)
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1924, 1, tsec)
- call wrtout([std_out, ab_out], " Building correlated screening Wc", pre_newlines=2)
+ call wrtout([std_out, ab_out], " Building correlated screening Wc ...", pre_newlines=2)
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space: ", gwr%tchi_space, " != iomega"))
 
  if (allocated(gwr%wc_qibz)) then
@@ -4884,9 +4877,9 @@ subroutine gwr_build_wc(gwr)
  !call slkproc_4diag%init(gwr%g_comm%value)
 
  do my_iqi=1,gwr%my_nqibz
-   call cwtime(cpu_q, wall_q, gflops_q, "start")
-   iq_ibz = gwr%my_qibz_inds(my_iqi)
-   qq_ibz = gwr%qibz(:, iq_ibz)
+   print_time = gwr%comm%me == 0 .and. (my_iqi <= LOG_MODK .or. mod(my_iqi, LOG_MODK) == 0)
+   if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
+   iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
    q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
 
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
@@ -4976,8 +4969,10 @@ subroutine gwr_build_wc(gwr)
    end do ! my_is
    end associate
 
-   write(msg,'(4x,2(a,i0),a)')"My iqi [", my_iqi, "/", gwr%my_nqibz, "]"
-   call cwtime_report(msg, cpu_q, wall_q, gflops_q)
+   if (print_time) then
+     write(msg,'(4x,2(a,i0),a)')"My iqi [", my_iqi, "/", gwr%my_nqibz, "]"
+     call cwtime_report(msg, cpu_q, wall_q, gflops_q)
+   end if
  end do ! my_iqi
 
  !call slkproc_4diag%free()
@@ -5522,8 +5517,7 @@ else
  !sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2
 
  call wc_rpr%free()
- call slk_array_free(sigc_rpr)
- call slk_array_free(gk_rpr_pm)
+ call slk_array_free(sigc_rpr); call slk_array_free(gk_rpr_pm)
  do ikcalc=1,gwr%nkcalc
    call ltg_kcalc(ikcalc)%free()
  end do
