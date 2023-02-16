@@ -2441,29 +2441,8 @@ if(need_compute_symmetric)then
   ABI_FREE(list_combination_tmp)
 
   !COUNT SYMMETRIC COMBINATIONS TO IRREDUCIBLE COMBINATIONS ON EACH PROCESSOR
-   if (my_nirred /= 0 ) then
-       my_ncombi = my_nirred*(nsym**(power_disps(2)))
-   end if
 
-  !Copy irreducible combinations from list_combination tmp into my_list_combination on rank i
-  !Make my_list_combination large enough for all symmetric combinations
-
-  !ABI_MALLOC(my_list_combination,(power_disps(2),my_ncombi))
-  !my_list_combination = 0
-
-
-
-  !ABI_MALLOC(my_index_irredcomb,(my_ncombi_end-my_ncombi_start+1))
-!  if(my_ncombi /= 0)then
-!    do i=1,my_nirred
-!       my_list_combination(:,1+(i-1)*(nsym**(power_disps(2)))) = my_list_combination_tmp(:,i)
-!       my_index_irredcomb(i) = 1+(i-1)*(nsym**(power_disps(2)))
-!    end do
-!  endif
-
-  !FOREGET ABOUT MY_LIST_COMBINATION_TMP
   !COMPUTE SYMMETRIC COMBINATIONS
-  if(my_ncombi /= 0)then
     do i=1,my_nirred
       associate(comb => my_list_combination_tmp(:, i))
         !ABI_MALLOC(dummylist,(0))
@@ -2481,13 +2460,12 @@ if(need_compute_symmetric)then
        iterm = my_index_irredcomb(i)-1
        call computeSymmetricCombinations(my_array_combination,list_symcoeff,list_symstr,ndisp,nsym,&
 &                                        comb(:ndisp+nstrain),power_disps(2),&
-&                                        my_ncombi,ncoeff_symsym,nstr_sym,nstrain, &
+&                                        ncoeff_symsym,nstr_sym,nstrain, &
 &                                        compatibleCoeffs,compute_sym,comm, &
 &                                        only_even=need_only_even_power, max_nbody=max_nbody)
 
      end associate
     enddo
-  endif
 
   ABI_FREE(my_list_combination_tmp)
 
@@ -2562,17 +2540,6 @@ if(iam_master)then
    end block
  endif
 
-
- !    do i=2,ncombination
- !       if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
- !         !irreducible = check_irreducibility(list_combination_tmp(:,i),list_combination_tmp(:,:i-1),list_symcoeff,&
- ! &       !                                   list_symstr,ncoeff_symsym,nsym,i-1,power_disps(2),index_irred)
- !         !if(.not. irreducible) list_combination_tmp(:,i) = 0
- !       endif
- !    enddo
- !    call reduce_zero_combinations(list_combination_tmp)
- !    ncombination = size(list_combination_tmp,2)
- ! ABI_FREE(index_irred)
 end if !iam_master
 if(need_verbose)then
   write(message,'(1x,I0,1a)') ncombination,' irreducible combinations generated '
@@ -3355,9 +3322,9 @@ end subroutine computeCombinationFromList
 subroutine symlist_init(self, nsym, power)
   class(symlist_t), intent(inout) :: self
   integer, intent(in) :: nsym, power
-  !integer(dp) :: nsym_dp, power_dp
-  !nsym_dp=nsym
-  !power_dp=power
+  if(power>7)  then
+     ABI_ERROR("The nbody or power of terms being generate is too large.")
+   end if
   if (power>0) then
     self%nsym = nsym
     self%power = power
@@ -3407,10 +3374,10 @@ end subroutine symlist_free
 
 subroutine computeSymmetricCombinations(array_combination, &
   & list_symcoeff, list_symstr, ndisp, nsym, index_coeff_in,  &
-  & ndisp_max, ncombinations, ncoeff, nsym_str, nstrain, &
+  & ndisp_max,  ncoeff, nsym_str, nstrain, &
   &  compatibleCoeffs,  compute, comm, only_even, max_nbody  )
 
-  integer,intent(in)    :: ndisp,nsym,ndisp_max,ncombinations,ncoeff,nstrain,nsym_str
+  integer,intent(in)    :: ndisp,nsym,ndisp_max, ncoeff,nstrain,nsym_str
   integer,intent(in)    :: comm
   logical,intent(in)    :: compute
   logical,optional,intent(in) :: only_even
@@ -3439,7 +3406,6 @@ subroutine computeSymmetricCombinations(array_combination, &
   type(polyform_t) :: polyform
   !Source
 
-  ABI_UNUSED(ncombinations)
   ABI_UNUSED(compute)
   ABI_UNUSED(comm)
 
