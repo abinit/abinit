@@ -23310,7 +23310,7 @@ This variable defines the number of imaginary-time points
 
 !!! important
 
-    To avoid load imbalance the the total number of MPI processes should be a divisor/multiple of [[gwr_ntau]] * [[nsppol]]
+    To avoid load imbalance the total number of MPI processes should be a divisor/multiple of [[gwr_ntau]] * [[nsppol]]
 """,
 ),
 
