@@ -2775,6 +2775,8 @@ subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,mcprj,mpi_enreg,occ,&
       !=== for current atom, compute vxc from n1(1) and \tilde{n}1(1)
       ABI_MALLOC(vxc,(mesh_size,pawang%angl_size,dtset%nspden))
       ABI_MALLOC(tvxc,(mesh_size,pawang%angl_size,dtset%nspden))
+      ABI_MALLOC(kxc,(mesh_size,pawang%angl_size,nkxc))
+      ABI_MALLOC(k3xc,(mesh_size,pawang%angl_size,nk3xc))
 
       call pawxc(pawtab(itypat)%coredens,eexc1,eexcdc,hyb_mixing,dtset%ixc,kxc,k3xc,&
         & pawsphden%lm_size,pawsphden%lmselectout,pawsphden%nhat1,&
@@ -2792,6 +2794,8 @@ subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,mcprj,mpi_enreg,occ,&
 
       ABI_FREE(vxc) 
       ABI_FREE(tvxc) 
+      ABI_FREE(kxc)
+      ABI_FREE(k3xc)
       call paw_sph_den_free(pawsphden)
 
     end do ! iat
