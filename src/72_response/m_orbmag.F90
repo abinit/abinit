@@ -55,20 +55,13 @@ module m_orbmag
   use m_mpinfo,           only : proc_distrb_cycle
   use m_nonlop,           only : nonlop
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
-  use m_paw_dmft,         only : paw_dmft_type
   use m_pawfgr,           only : pawfgr_type
   use m_pawfgrtab,        only : pawfgrtab_type
-  use m_paw_an,           only : paw_an_type
   use m_pawang,           only : pawang_type
   use m_paw_ij,           only : paw_ij_type
-  use m_paw_denpot,       only : pawdensities
-  use m_pawdij,           only : pawdijhat,pawdijnd,pawdijxc
-  use m_paw_occupancies,  only : pawmkrhoij
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen,poisson
-  use m_pawrhoij,         only : pawrhoij_alloc, pawrhoij_free, pawrhoij_type
   use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt
   use m_pawtab,           only : pawtab_type
-  use m_pawxc,            only : pawxc
   use m_spacepar,         only : make_vectornd
   use m_time,             only : timab
 
@@ -93,9 +86,9 @@ module m_orbmag
 
   ! these parameters name the various output terms                                             
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3,imcc=4,imvv1=5,imvv2=6
-  integer,parameter :: imnl=7,imlr=8,imbm=9,imvxc1=10
-  integer,parameter :: iomlmb=11
-  integer,parameter :: nterms=11
+  integer,parameter :: imnl=7,imlr=8,imbm=9
+  integer,parameter :: iomlmb=10
+  integer,parameter :: nterms=10
 
   ! these parameters are constants used repeatedly
   
@@ -113,7 +106,6 @@ module m_orbmag
     integer :: ndij
     integer :: has_aij=0
     integer :: has_qij=0
-    integer :: has_vxc1=0
     integer :: has_LR=0
     integer :: has_BM=0
 
@@ -124,10 +116,6 @@ module m_orbmag
     ! <phi|phi> - <tphi|tphi>
     ! qij(natom,lmn2max,ndij)
     complex(dpc),allocatable :: qij(:,:,:)
-    
-    ! vxc1(natom,ndij,3)
-    ! this is given as an energy directly by pawxc
-    complex(dpc),allocatable :: vxc1(:,:,:)
     
     ! onsite L_R/2
     ! <phi|L_R/2|phi> - <tphi|L_R/2|tphi>
@@ -140,25 +128,6 @@ module m_orbmag
     complex(dpc),allocatable :: BM(:,:,:,:)
 
   end type dterm_type
-
-  ! local datatype for pawdensities
-  type,private :: paw_sph_den_type
-    ! integer scalars
-    integer :: lm_size
-    integer :: mesh_size
-    integer :: cplex_density
-    integer :: nspden
-
-    ! logical arrays
-    logical,allocatable :: lmselectin(:)
-    logical,allocatable :: lmselectout(:)
-
-    ! real arrays
-    real(dp),allocatable :: rho1(:,:,:)
-    real(dp),allocatable :: trho1(:,:,:)
-    real(dp),allocatable :: nhat1(:,:,:)
-
-  end type paw_sph_den_type
 
   ! Bound methods:
 
@@ -173,7 +142,6 @@ module m_orbmag
   private :: dterm_qij
   private :: dterm_LR
   private :: dterm_BM
-  private :: dterm_vxc1
   private :: tt_me
   private :: txt_me
 
@@ -182,10 +150,6 @@ module m_orbmag
   private :: orbmag_output
   private :: dterm_alloc
   private :: dterm_free
-  private :: pack_pawrhoij
-  private :: make_pawrhoij1
-  private :: paw_sph_den_alloc
-  private :: paw_sph_den_free
   
 CONTAINS  !========================================================================================
 !!***
@@ -224,7 +188,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,paw_an,pawang,paw_ij,pawfgr,pawrad,&
+    & nfftf,ngfftf,npwarr,occ,pawang,paw_ij,pawfgr,pawrad,&
     & pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -247,7 +211,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
- type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
@@ -258,7 +221,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm,with_vectornd
- real(dp) :: arg,ecut_eff,evxc1,ucvol
+ real(dp) :: arg,ecut_eff,ucvol
  logical :: has_nucdip
  type(dterm_type) :: dterm
  type(gs_hamiltonian_type) :: gs_hamk
@@ -377,8 +340,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ! note: in make_d, terms will be filled as iatom using atindx
  call dterm_alloc(dterm,psps%lmnmax,lmn2max,dtset%natom,paw_ij(1)%ndij)
 
- call make_d(atindx,cprj,dimlmn,dterm,dtset,gprimd,mcprj,mpi_enreg,occ,&
-   & paw_an,pawang,paw_ij,pawrad,pawtab,psps)
+ call make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
  icg = 0
  ikg = 0
@@ -622,15 +584,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 call lamb_core(atindx,dtset,omlamb)
 orbmag_trace(:,:,iomlmb) = omlamb
 
-do adir = 1, 3
-  evxc1=zero
-  do iat = 1, dtset%natom
-    evxc1 = evxc1 + REAL(dterm%vxc1(iat,1,adir))
-  end do
-  orbmag_trace(1,adir,imvxc1) = evxc1
-end do
-orbmag_trace(1,1:3,imvxc1) = ucvol*MATMUL(gprimd,orbmag_trace(1,1:3,imvxc1))
- 
 call orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
 !---------------------------------------------------
@@ -1893,8 +1846,6 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(1,adir,imbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') '    vxc1 terms : ',(orbmag_trace(1,adir,imvxc1),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
@@ -2005,11 +1956,6 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_qij=0
 
-  if(allocated(dterm%vxc1)) then
-    ABI_FREE(dterm%vxc1)
-  end if
-  dterm%has_vxc1=0
-
   if(allocated(dterm%LR)) then
     ABI_FREE(dterm%LR)
   end if
@@ -2085,12 +2031,6 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
   end if
   ABI_MALLOC(dterm%qij,(natom,lmn2max,ndij))
   dterm%has_qij=1
-
-  if(allocated(dterm%vxc1)) then
-    ABI_FREE(dterm%vxc1)
-  end if
-  ABI_MALLOC(dterm%vxc1,(natom,ndij,3))
-  dterm%has_vxc1=1
 
   if(allocated(dterm%LR)) then
     ABI_FREE(dterm%LR)
@@ -2206,25 +2146,17 @@ end subroutine dterm_aij
 !!
 !! SOURCE
 
-subroutine make_d(atindx,cprj,dimlmn,dterm,dtset,gprimd,&
-    & mcprj,mpi_enreg,occ,paw_an,pawang,paw_ij,pawrad,pawtab,psps)
+subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcprj
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
-  type(MPI_type), intent(inout) :: mpi_enreg
-  type(pawang_type),intent(in) :: pawang
   type(pseudopotential_type), intent(inout) :: psps
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
-  integer,intent(in) :: dimlmn(dtset%natom)
   real(dp),intent(in) :: gprimd(3,3)
-  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
-  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
-  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
@@ -2252,563 +2184,12 @@ subroutine make_d(atindx,cprj,dimlmn,dterm,dtset,gprimd,&
  
  call dterm_BM(atindx,dterm,dtset,gntselect,gprimd,my_lmax,pawrad,pawtab,realgnt)
 
- call dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,mcprj,mpi_enreg,&
-   & occ,paw_an,pawang,pawrad,pawtab)
-
  call dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
  
 end subroutine make_d
-!!***
-
-!!****f* ABINIT/pack_pawrhoij
-!! NAME
-!! pack_pawrhoij
-!!
-!! FUNCTION
-!! for a pawhoij data structure, add packed data from unpacked
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine pack_pawrhoij(dtset,pawrhoij)
-
-  !Arguments ------------------------------------
-  !scalars
-  type(dataset_type),intent(in) :: dtset
-  type(pawrhoij_type),intent(inout) :: pawrhoij(dtset%natom)
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
-  integer :: iatom,isel,klmn
-  real(dp) :: ri,rr
-  logical :: cprho
-  character(len=500) :: msg
- 
-  !arrays
-!--------------------------------------------------------------------
-
-  do iatom = 1, dtset%natom
-    if (pawrhoij(iatom)%use_rhoij_ .EQ. 0) then
-      msg='Unpacked rhoij elements not available.'
-      ABI_BUG(msg)
-    end if
-
-    ! count number of nonzero pawrhoij elements
-    isel = 0
-    cprho = (pawrhoij(iatom)%cplex_rhoij .EQ. 2)
-    do klmn = 1, pawrhoij(iatom)%lmn2_size
-      if (cprho) then
-        rr = pawrhoij(iatom)%rhoij_(2*klmn-1,1)
-        ri = pawrhoij(iatom)%rhoij_(2*klmn,1)
-      else
-        rr = pawrhoij(iatom)%rhoij_(klmn,1)
-        ri = zero
-      end if
-      if ( (ABS(rr) .GT. tol16) .OR. (ABS(ri) .GT. tol16) ) then
-        isel = isel + 1
-      end if
-    end do ! end loop over klmn
-    pawrhoij(iatom)%nrhoijsel = isel
-
-    pawrhoij(iatom)%rhoijp = zero
-    pawrhoij(iatom)%rhoijselect = 0
-
-    isel = 0 
-    do klmn = 1, pawrhoij(iatom)%lmn2_size
-      if (cprho) then
-        rr = pawrhoij(iatom)%rhoij_(2*klmn-1,1)
-        ri = pawrhoij(iatom)%rhoij_(2*klmn,1)
-      else
-        rr = pawrhoij(iatom)%rhoij_(klmn,1)
-        ri = zero
-      end if
-      if ( (ABS(rr) .GT. tol16) .OR. (ABS(ri) .GT. tol16) ) then
-        isel = isel + 1
-        pawrhoij(iatom)%rhoijselect(isel) = klmn
-        if (cprho) then
-          pawrhoij(iatom)%rhoijp(2*isel-1,1) = rr
-          pawrhoij(iatom)%rhoijp(2*isel,1) = ri
-        else
-          pawrhoij(iatom)%rhoijp(isel,1) = rr
-        end if ! if cprho
-      end if ! if rhoij nonzero
-    end do ! end loop over klmn
-
-    pawrhoij(iatom)%use_rhoijp=1
-
-  end do ! end loop over iatom
- 
-end subroutine pack_pawrhoij
-!!***
-
-!!****f* ABINIT/make_pawrhoij1
-!! NAME
-!! make_pawrhoij1
-!!
-!! FUNCTION
-!! make pawrhoij1 for direction adir
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine make_pawrhoij1(atindx,cprj,dimlmn,dtset,mcprj,mpi_enreg,&
-    & nband_k,occ,pawrhoij1,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: mcprj,nband_k
-  type(MPI_type), intent(inout) :: mpi_enreg
-  type(dataset_type),intent(in) :: dtset
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
-  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
-  type(pawrhoij_type),intent(inout) :: pawrhoij1(dtset%natom,3)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,bdir,buff_size,gdir
-  integer :: iat,iatom,icprj,ierr,ilmn,ikpt,isp,isppol,itypat,jlmn,klmn
-  integer :: mcprjk,me,ncpgr,nn,nnisp,nproc,spaceComm
-  real(dp) :: epsabg
-  complex(dpc) :: cpi,cpj,cterm,prefac
-  character(len=500) :: msg
- 
-  !arrays
-  real(dp) :: dij(2),dij_red(2,3)
-  real(dp),allocatable :: buffer1(:),buffer2(:)
-  type(pawcprj_type),allocatable :: cprj_k(:,:)
-!--------------------------------------------------------------------
-
-  isppol = 1
-  spaceComm=mpi_enreg%comm_cell
-  nproc=xmpi_comm_size(spaceComm)
-  me = mpi_enreg%me_kpt
-
-  mcprjk = nband_k*dtset%nspinor
-  ncpgr = cprj(1,1)%ncpgr
-  if(ncpgr .NE. 3) then
-    msg = 'Must have cprj gradients in make_pawrhoij1'
-    ABI_BUG(msg)
-  end if
-  ABI_MALLOC(cprj_k,(dtset%natom,mcprjk))
-  call pawcprj_alloc(cprj_k,ncpgr,dimlmn)
-
-  do iat = 1, dtset%natom
-    iatom = atindx(iat)
-    itypat = dtset%typat(iat)
-    do klmn = 1, pawtab(itypat)%lmn2_size
-      ilmn = pawtab(itypat)%indklmn(7,klmn)
-      jlmn = pawtab(itypat)%indklmn(8,klmn)
-
-      do adir = 1, 3
-        dij = zero
-        icprj = 0
-        do ikpt = 1, dtset%nkpt
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
-          call pawcprj_get(atindx,cprj_k,cprj,dtset%natom,1,icprj,ikpt,0,isppol,dtset%mband,&
-            & dtset%mkmem,dtset%natom,nband_k,nband_k,dtset%nspinor,dtset%nsppol,0)
-          do nn = 1, nband_k
-            do isp = 1, dtset%nspinor
-              nnisp = dtset%nspinor*(nn-1)+isp
-              do bdir = 1, 3
-                do gdir = 1, 3
-                  epsabg = eijk(adir,bdir,gdir)
-                  if (ABS(epsabg) .LT. half) cycle
-                  prefac = epsabg*com*c2 ! do I need c2 here?
-
-                  cpi = CMPLX(cprj_k(iatom,nnisp)%dcp(1,bdir,ilmn),cprj_k(iatom,nnisp)%dcp(2,bdir,ilmn))
-                  cpj = CMPLX(cprj_k(iatom,nnisp)%dcp(1,gdir,jlmn),cprj_k(iatom,nnisp)%dcp(2,gdir,jlmn))
-                  cterm = prefac*occ((ikpt-1)*nband_k+nn)*dtset%wtk(ikpt)*CONJG(cpi)*cpj
-
-                  dij(1) = dij(1) +  REAL(cterm)
-                  dij(2) = dij(2) + AIMAG(cterm)
-
-                end do !gdir
-              end do ! bdir
-            end do ! isp
-          end do ! nn
-          icprj = icprj + mcprjk
-        end do ! ikpt
-        if (nproc > 1) then
-          buff_size=size(dij)
-          ABI_MALLOC(buffer1,(buff_size))
-          ABI_MALLOC(buffer2,(buff_size))
-          buffer1=zero;buffer2=zero
-          buffer1(1:buff_size) = reshape(dij,(/2/))
-          call xmpi_sum(buffer1,buffer2,buff_size,spaceComm,ierr)
-          dij(1:2) = reshape(buffer2,(/2/))
-          ABI_FREE(buffer1)
-          ABI_FREE(buffer2)
-        end if
-
-        dij_red(1,adir) = dij(1); dij_red(2,adir) = dij(2)
-
-      end do ! adir
-      !dij_cart(1,1:3) = ucvol*MATMUL(gprimd,dij_red(1,1:3))
-      !dij_cart(2,1:3) = ucvol*MATMUL(gprimd,dij_red(2,1:3))
-     
-      do adir = 1, 3 
-        pawrhoij1(iatom,adir)%rhoij_(2*klmn-1,1) = dij_red(1,adir)
-        pawrhoij1(iatom,adir)%rhoij_(2*klmn,  1) = dij_red(2,adir)
-      end do ! adir
-
-    end do ! klmn
-  end do ! iat
-
-  call pawcprj_free(cprj_k)
-  ABI_FREE(cprj_k)
-
-end subroutine make_pawrhoij1
-!!***
-
-!!****f* ABINIT/paw_sph_den_free
-!! NAME
-!! paw_sph_den_free
-!!
-!! FUNCTION
-!! free paw_sph_den_type
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine paw_sph_den_free(paw_sph_den)
-
-  !Arguments ------------------------------------
-  !scalars
-  type(paw_sph_den_type),intent(inout) :: paw_sph_den
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
- 
-  !arrays
-!--------------------------------------------------------------------
-
-  if(allocated(paw_sph_den%lmselectin)) then
-    ABI_FREE(paw_sph_den%lmselectin)
-  end if
-  
-  if(allocated(paw_sph_den%lmselectout)) then
-    ABI_FREE(paw_sph_den%lmselectout)
-  end if
-  
-  if(allocated(paw_sph_den%rho1)) then
-    ABI_FREE(paw_sph_den%rho1)
-  end if
-
-  if(allocated(paw_sph_den%trho1)) then
-    ABI_FREE(paw_sph_den%trho1)
-  end if
-
-  if(allocated(paw_sph_den%nhat1)) then
-    ABI_FREE(paw_sph_den%nhat1)
-  end if
- 
-end subroutine paw_sph_den_free
-!!***
-
-!!****f* ABINIT/paw_sph_den_alloc
-!! NAME
-!! paw_sph_den_alloc
-!!
-!! FUNCTION
-!! allocate paw_sph_den_type
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine paw_sph_den_alloc(cplex,lm_size,mesh_size,nspden,paw_sph_den)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: cplex,lm_size,mesh_size,nspden
-  type(paw_sph_den_type),intent(inout) :: paw_sph_den
-
-  !arrays
-
-  !Local variables -------------------------
-  !scalars
- 
-  !arrays
-!--------------------------------------------------------------------
-
-  paw_sph_den%lm_size = lm_size
-  paw_sph_den%mesh_size = mesh_size
-  paw_sph_den%cplex_density = cplex
-  paw_sph_den%nspden = nspden
-
-  if(allocated(paw_sph_den%lmselectin)) then
-    ABI_FREE(paw_sph_den%lmselectin)
-  end if
-  ABI_MALLOC(paw_sph_den%lmselectin,(lm_size))
-  
-  if(allocated(paw_sph_den%lmselectout)) then
-    ABI_FREE(paw_sph_den%lmselectout)
-  end if
-  ABI_MALLOC(paw_sph_den%lmselectout,(lm_size))
-  
-  if(allocated(paw_sph_den%rho1)) then
-    ABI_FREE(paw_sph_den%rho1)
-  end if
-  ABI_MALLOC(paw_sph_den%rho1,(cplex*mesh_size,lm_size,nspden))
-
-  if(allocated(paw_sph_den%trho1)) then
-    ABI_FREE(paw_sph_den%trho1)
-  end if
-  ABI_MALLOC(paw_sph_den%trho1,(cplex*mesh_size,lm_size,nspden))
-
-  if(allocated(paw_sph_den%nhat1)) then
-    ABI_FREE(paw_sph_den%nhat1)
-  end if
-  ABI_MALLOC(paw_sph_den%nhat1,(cplex*mesh_size,lm_size,nspden))
- 
-end subroutine paw_sph_den_alloc
-!!***
-
-!!****f* ABINIT/dterm_vxc1
-!! NAME
-!! dterm_vxc1
-!!
-!! FUNCTION
-!! make dterm_vxc1
-!!
-!! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!
-!! TODO
-!!
-!! NOTES
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine dterm_vxc1(atindx,cprj,dimlmn,dterm,dtset,mcprj,mpi_enreg,occ,&
-    & paw_an,pawang,pawrad,pawtab)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: mcprj
-  type(dterm_type),intent(inout) :: dterm
-  type(dataset_type),intent(in) :: dtset
-  type(MPI_type), intent(inout) :: mpi_enreg
-  type(pawang_type),intent(in) :: pawang
-
-  !arrays
-  integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
-  type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
-  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
-  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
-
-  !Local variables -------------------------
-  !scalars
-  integer :: adir,iat,iatom,itypat
-  integer :: mesh_size,nkxc,nk3xc
-  integer :: nzlmopt,opt_compch,opt_dens,opt_l,opt_print
-  integer :: usecore,usexcnhat,xc_option
-  real(dp) :: compch_sph,eexc1,eexct1,eexcdc,hyb_mixing
-  logical :: non_magnetic_xc
-  type(paw_sph_den_type) :: pawsphden
- 
-  !arrays
-  type(pawrhoij_type),allocatable :: pawrhoij(:,:)
-  real(dp),allocatable :: kxc(:,:,:),k3xc(:,:,:)
-  real(dp),allocatable :: vxc(:,:,:),tvxc(:,:,:)
-!--------------------------------------------------------------------
-
-  dterm%vxc1 = zero
-
-  !=== options for pawdensities
-  nzlmopt = -1
-  opt_compch = 0
-  opt_dens = 1 ! n1 and \tilde{n}1 only
-  opt_l = -1
-  opt_print = 0
- 
-  !=== options for pawxc 
-  hyb_mixing = zero
-  nkxc = 0
-  nk3xc = 0
-  non_magnetic_xc = .FALSE.
-  xc_option = 0 ! energies and potentials
-  usecore = 0 ! no first order contribution from core xc
-  usexcnhat = 0
- 
-  !=== make first order pawrhoij for all atoms 
-  ABI_MALLOC(pawrhoij,(dtset%natom,3))
-  do adir=1,3
-    call pawrhoij_alloc(pawrhoij(:,adir),dtset%pawcpxocc,dtset%nspden,dtset%nspinor,&
-      & dtset%nsppol,dtset%typat,&
-      & use_rhoijp=1,use_rhoij_=1,pawtab=pawtab)
-  end do
-  call make_pawrhoij1(atindx,cprj,dimlmn,dtset,mcprj,mpi_enreg,dtset%mband,occ,pawrhoij,pawtab)
-  do adir=1,3
-    call pack_pawrhoij(dtset,pawrhoij(:,adir))
-  end do
-  
-  dterm%vxc1 = czero
-  do adir = 1, 3
-
-    !=== loop over atoms
-    do iat = 1, dtset%natom
-      iatom = atindx(iat)
-      itypat = dtset%typat(iat)
-      mesh_size = pawtab(itypat)%mesh_size
-
-      !=== for current atom, compute onsite densities with first-order pawrhoij
-      call paw_sph_den_alloc(pawrhoij(iatom,adir)%qphase,paw_an(iatom)%lm_size,mesh_size,&
-        & dtset%nspden,pawsphden)
-      pawsphden%lmselectin = .TRUE. 
-      call pawdensities(compch_sph,pawsphden%cplex_density,iatom,pawsphden%lmselectin,&
-        & pawsphden%lmselectout,pawsphden%lm_size,pawsphden%nhat1,dtset%nspden,nzlmopt,&
-        & opt_compch,opt_dens,opt_l,opt_print,pawang,dtset%pawprtvol,pawrad(itypat),&
-        & pawrhoij(iatom,adir),pawtab(itypat),pawsphden%rho1,pawsphden%trho1)
-      
-      !=== for current atom, compute vxc from n1(1) and \tilde{n}1(1)
-      ABI_MALLOC(vxc,(mesh_size,pawang%angl_size,dtset%nspden))
-      ABI_MALLOC(tvxc,(mesh_size,pawang%angl_size,dtset%nspden))
-      ABI_MALLOC(kxc,(mesh_size,pawang%angl_size,nkxc))
-      ABI_MALLOC(k3xc,(mesh_size,pawang%angl_size,nk3xc))
-
-      call pawxc(pawtab(itypat)%coredens,eexc1,eexcdc,hyb_mixing,dtset%ixc,kxc,k3xc,&
-        & pawsphden%lm_size,pawsphden%lmselectout,pawsphden%nhat1,&
-        & nkxc,nk3xc,non_magnetic_xc,mesh_size,pawsphden%nspden,&
-        & xc_option,pawang,pawrad(itypat),pawsphden%rho1,usecore,usexcnhat,&
-        & vxc,dtset%xclevel,dtset%xc_denpos)
-            
-      call pawxc(pawtab(itypat)%tcoredens(:,1),eexct1,eexcdc,hyb_mixing,dtset%ixc,kxc,k3xc,&
-        & pawsphden%lm_size,pawsphden%lmselectout,pawsphden%nhat1,&
-        & nkxc,nk3xc,non_magnetic_xc,mesh_size,pawsphden%nspden,&
-        & xc_option,pawang,pawrad(itypat),pawsphden%trho1,usecore,usexcnhat,&
-        & tvxc,dtset%xclevel,dtset%xc_denpos)
-
-      dterm%vxc1(iatom,1,adir) = CMPLX(eexc1-eexct1,0.0D0)
-
-      ABI_FREE(vxc) 
-      ABI_FREE(tvxc) 
-      ABI_FREE(kxc)
-      ABI_FREE(k3xc)
-      call paw_sph_den_free(pawsphden)
-
-    end do ! iat
-  end do ! adir
-
-  dterm%has_vxc1 = 2
-    
-  do adir = 1, 3
-    call pawrhoij_free(pawrhoij(:,adir))
-  end do ! adir
-  ABI_FREE(pawrhoij)
-
-end subroutine dterm_vxc1
 !!***
 
 end module m_orbmag

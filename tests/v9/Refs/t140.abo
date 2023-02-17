@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 16 Feb 2023.
-- ( at 15h04 )
+.Starting date : Fri 17 Feb 2023.
+- ( at 14h48 )
   
 - input  file    -> /media/jzwanzig/jzwanzig/abinit/abinit/tmp-build/intel/fast/tests/Test_suite/v9_t140/t140.abi
 - output file    -> t140.abo
@@ -747,7 +747,7 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
  
  Orbital magnetic moment, Cartesian directions :
- -8.71085974E-05 -2.58748184E-09  1.54249627E-09
+ -8.71087782E-05 -2.28980814E-09  1.84017015E-09
  
  
  Chern vector, Cartesian directions :
@@ -761,7 +761,6 @@ tolerances: {tolwfr: 1.00E-20, }
      rho(0) NL :   1.79312975E-04 -2.63187785E-10  5.16345569E-11
    <L_R> terms :  -3.66826389E-06 -1.58207485E-10 -8.51535505E-11
  <A0.An> terms :  -2.43193898E-06 -1.48284714E-16  3.01692448E-16
-    vxc1 terms :   1.80824911E-10 -2.97673704E-10 -2.97673882E-10
     Lamb terms :  -7.66760000E-04  0.00000000E+00  0.00000000E+00
  Chern vector, term-by-term breakdown :
   Ch CC :   4.39307821E-06 -7.32735758E-11  7.32568080E-11
@@ -1059,10 +1058,10 @@ P          mk1mem          32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.7
+- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.8
  
 ================================================================================
  
  Calculation completed.
-.Delivered  31 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.4  wall=         17.7
+.Delivered  19 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.5  wall=         16.8
