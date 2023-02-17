@@ -47,6 +47,7 @@ module m_invars2
  use m_ipi,       only : ipi_check_initial_consistency
  use m_crystal,   only : crystal_t
  use m_bz_mesh,   only : kmesh_t, find_qmesh
+ use m_drivexc,   only : has_kxc
 
  implicit none
 
@@ -252,6 +253,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
+ type(libxc_functional_type) :: xcfunc_tmp(2)
 
 ! *************************************************************************
 
@@ -1768,21 +1770,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdwfkfine',tread,'INT')
  if(tread==1) dtset%irdwfkfine=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
- if(tread==1) then
-   dtset%iscf=intarr(1)
-   if (dtset%usewvl==1) then
-     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
-     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
-     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
-   end if
- else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
-   dtset%iscf=dtset%iscf-10
- else if (dtset%optdriver==RUNL_GWLS) then
-   dtset%iscf=-2
- end if
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'isecur',tread,'INT')
  if(tread==1) dtset%isecur=intarr(1)
 
@@ -1846,10 +1833,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
      dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
    else if (ixc_current<0) then
-     call libxc_functionals_init(ixc_current,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+     call libxc_functionals_init(ixc_current,dtset%nspden,xc_functionals=xcfunc_tmp)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
-       hyb_range=dtset%hyb_range_dft)
-     call libxc_functionals_end()
+       hyb_range=dtset%hyb_range_dft,xc_functionals=xcfunc_tmp)
+     call libxc_functionals_end(xc_functionals=xcfunc_tmp)
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
 
@@ -1902,6 +1889,38 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
    if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft
 
+ end if
+
+!Note iscf has to be read after ixc, usewvl, optdriver, optforces, densfor_pred
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
+ if(tread==1) then
+   dtset%iscf=intarr(1)
+   if (dtset%usewvl==1) then
+     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
+     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
+     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
+   end if
+ else if (dtset%optdriver==RUNL_GWLS) then
+   !For GWLS, iscf=-2 is mandatory
+   dtset%iscf=-2
+ else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
+   !Only potential mixing available for response function
+   dtset%iscf=dtset%iscf-10
+ else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and. &
+&         dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) then
+   !In case of density mixing (iscf>=10) and correction of forces (densfor_pred/=0 and 5)
+   !  we need Kxc. If it is not available, we switch to potential mixing (iscf<10)
+   if (dtset%ixc<0) call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_functionals=xcfunc_tmp)
+   if (.not.has_kxc(dtset%ixc,xcfunc_tmp)) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
+     if (dtset%optforces/=0.or.intarr(1)/=0) then
+       dtset%iscf=dtset%iscf-10
+       msg='Automatically switching to potential mixing (iscf<10), because XC functional doesnt provide Kxc!'
+       ABI_COMMENT(msg)
+     end if
+   end if
+   if (dtset%ixc<0) call libxc_functionals_end(xc_functionals=xcfunc_tmp)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
