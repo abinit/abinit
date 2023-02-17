@@ -455,6 +455,9 @@ module m_gwr
    ! (ntau, ntau)
    ! weights for sine transform (i tau --> i omega)
 
+   real(dp) :: te_min = -one, te_max = one
+   ! min and Max transition energy in Ha.
+
    real(dp) :: ft_max_error(3) = -one
    ! Max error due to inhomogenous FT.
 
@@ -824,7 +827,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj !, it, iw
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
- real(dp) :: cpu, wall, gflops, te_min, te_max, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
+ real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
  real(dp) :: prev_efficiency, prev_speedup
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
@@ -1129,17 +1132,16 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Setup tau/omega mesh and weights
  ! ================================
  ! Compute min/max transition energy taking into account nsppol if any.
- te_min = minval(gwr%ks_gaps%cb_min - gwr%ks_gaps%vb_max)
- te_max = maxval(ks_ebands%eig(nbsum,:,:) - ks_ebands%eig(1,:,:))
- if (te_min <= tol6) then
-   te_min = tol6
-   ABI_WARNING("System is metallic or with a very small fundamental gap!")
+ gwr%te_min = minval(gwr%ks_gaps%cb_min - gwr%ks_gaps%vb_max)
+ gwr%te_max = maxval(ks_ebands%eig(nbsum,:,:) - ks_ebands%eig(1,:,:))
+ if (gwr%te_min <= tol6) then
+   gwr%te_min = tol6
+   ABI_ERROR("System is metallic or with a very small fundamental gap!")
  end if
-
  gwr%ntau = dtset%gwr_ntau
 
 #ifdef __HAVE_GREENX
- call gx_minimax_grid(gwr%ntau, te_min, te_max, &  ! in
+ call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
                       gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
                       gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
                       gwr%ft_max_error, gwr%cosft_duality_error, ierr)
@@ -1152,8 +1154,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! FIXME: Here we need to rescale the weights because greenx convention is not what we expect!
  gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
 
- call wrtout(std_out, sjoin(" Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_error)))
- call wrtout(std_out, sjoin(" ft_max_error", ltoa(gwr%ft_max_error)))
+ !call wrtout(std_out, sjoin(" Minimax eratio:", ftoa(gwr%te_max / te_min)))
+ !call wrtout(std_out, sjoin(" Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_error)))
+ !call wrtout(std_out, sjoin(" ft_max_error", ltoa(gwr%ft_max_error)))
 #else
  ABI_ERROR("GWR code requires Green-X library!")
 #endif
@@ -1162,7 +1165,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    write(std_out, "(3a)")ch10, " Computing F(delta) = \int_0^{\infty} dw / (w^2 + delta^2) = pi/2/delta ", ch10
    write(std_out, "(*(a12,2x))")"delta", "numeric", "exact", "abs_rerr (%)"
    do ii=1,10
-     delta = (ii * te_min)
+     delta = (ii * gwr%te_min)
      eval_int = sum(gwr%iw_wgs(:) / (gwr%iw_mesh(:)**2 + delta**2))
      exact_int = pi / (two * delta)
      abs_rerr = 100 * abs(eval_int - exact_int) / exact_int
@@ -1179,7 +1182,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    end do
    write(std_out, "(a)")
  end if
- !call xmpi_abort()
 
  ! =========================================
  ! Find FFT mesh and max number of g-vectors
@@ -3890,6 +3892,9 @@ subroutine gwr_print(gwr, units, header)
  call ydoc%add_int1d("P np_kibz", gwr%np_kibz)
  call ydoc%add_int1d("P np_qibz", gwr%np_qibz)
  ! Print Max error due to inhomogeneous FT.
+ call ydoc%add_real("min_transition_energy_eV", gwr%te_min)
+ call ydoc%add_real("max_transition_energy_eV", gwr%te_max)
+ call ydoc%add_real("eratio", gwr%te_max / gwr%te_min)
  call ydoc%add_real("ft_max_err_t2w_cos", gwr%ft_max_error(1))
  call ydoc%add_real("ft_max_err_w2t_cos", gwr%ft_max_error(2))
  call ydoc%add_real("ft_max_err_t2w_sin", gwr%ft_max_error(3))

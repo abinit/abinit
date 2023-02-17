@@ -399,7 +399,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(402,1,tsec) ! Init1
 
  if (nprocs > Sigp%nbnds) then
-   write(msg,"(2(a,i0))")"The number of MPI procs:", nprocs, " is greater than nband:", sigp%nbnds
+   write(msg,"(2(a,i0))")"The number of MPI procs: ", nprocs, " is greater than nband: ", sigp%nbnds
    ABI_ERROR(msg)
  end if
 
