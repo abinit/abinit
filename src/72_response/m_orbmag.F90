@@ -57,7 +57,6 @@ module m_orbmag
   use m_pawcprj,          only : pawcprj_type, pawcprj_alloc, pawcprj_free,pawcprj_getdim, pawcprj_get, pawcprj_put
   use m_pawfgr,           only : pawfgr_type
   use m_pawfgrtab,        only : pawfgrtab_type
-  use m_pawang,           only : pawang_type
   use m_paw_ij,           only : paw_ij_type
   use m_pawrad,           only : nderiv_gen,pawrad_type,pawrad_deducer0,simp_gen,poisson
   use m_paw_sphharm,      only : setsym_ylm,slxyzs,realgaunt
@@ -188,7 +187,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
-    & nfftf,ngfftf,npwarr,occ,pawang,paw_ij,pawfgr,pawrad,&
+    & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,&
     & pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -197,7 +196,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),intent(in) :: gsqcut
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
- type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(inout) :: psps
 
