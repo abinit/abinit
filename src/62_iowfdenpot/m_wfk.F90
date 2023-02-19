@@ -1919,6 +1919,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
    call MPI_TYPE_COMMIT(recnpw_type, mpierr)
    ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
+   ! NB: This is a collection operation so all proch in wfk%comm must call the routine.
    call MPI_FILE_SET_VIEW(Wfk%fh, my_offset, MPI_BYTE, recnpw_type, 'native', xmpio_info, mpierr)
    ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
@@ -1953,7 +1954,6 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      !----------------------------------------------------------------------------
      ! record 3 eigk occk
      if (present(eig_k) .and. present(occ_k)) then
-
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG)
 
        ! bsize_rec(1) = 2 * nband_disk * xmpi_bsize_dp
@@ -1986,6 +1986,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        !call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,nb_block,bsize_frecords,mpierr)
        !ABI_CHECK(mpierr==0,"mpierr!=0")
        !ABI_FREE(bsize_frecords)
+       !print *, "Writing cg"
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG)
        sizes    = [npw_disk*nspinor_disk, nband_disk]
