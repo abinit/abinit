@@ -3012,66 +3012,66 @@ end subroutine gwr_get_gkbz_rpr_pm
 
 !----------------------------------------------------------------------
 
-!!****f* m_gwr/gwr_ggp_to_rpr
-!! NAME
-!!  gwr_ggp_to_rpr
+!!  !!****f* m_gwr/gwr_ggp_to_rpr
+!!  !! NAME
+!!  !!  gwr_ggp_to_rpr
+!!  !!
+!!  !! FUNCTION
+!!  !!  Helper function to FFT transform a two-point function: F_{g,g'} --> F_{r',r}
+!!  !!
+!!  !! INPUTS
+!!  !!
+!!  !! OUTPUT
+!!  !!
+!!  !! SOURCE
 !!
-!! FUNCTION
-!!  Helper function to FFT transform a two-point function: F_{g,g'} --> F_{r',r}
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-!subroutine gwr_ggp_to_rpr(gwr, desc, g_gp, rp_r)
-!
-!!Arguments ------------------------------------
-! class(gwr_t),intent(in) :: gwr
-! type(desc_t),intent(in) :: desc
-! type(__slkmat_t),intent(in) :: g_gp
-! type(__slkmat_t),intent(inout) :: rp_r
-!
-!!Local variables-------------------------------
-! integer :: ig2, npwsp, nrsp, col_bsize, ir1, ndat
-! type(__slkmat_t) :: rgp, gpr
-! character(len=500) :: msg
-! type(uplan_t) :: uplan_k
-!
-!! *************************************************************************
-!
-! ABI_ERROR("Not Implemented Error")
-!
-! ! Allocate intermediate rgp PBLAS matrix to store F(r,g')
-! npwsp = desc%npw * gwr%nspinor
-! nrsp = gwr%g_nfft * gwr%nspinor
-! ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
-! call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
-!
-! call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
-!                   desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
-!
-! ! F(g,g') --> F(r,g') and store results in rgp.
-! do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
-!   ndat = blocked_loop(ig2, g_gp%sizeb_local(2), gwr%uc_batch_size)
-!   call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
-! end do
-!
-! ! F(r,g') --> F(g',r)
-! call rgp%ptrans("N", gpr, free=.True.)
-!
-! ! F(g',r) --> F(r',r) and store results in rp_r.
-! do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
-!   ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
-!   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), rp_r%buffer_cplx(:,ir1), isign=-1, iscale=0)
-! end do
-!
-! call uplan_k%free()
-! call gpr%free()
-!
-!end subroutine gwr_ggp_to_rpr
-!!!***
+!!  !subroutine gwr_ggp_to_rpr(gwr, desc, g_gp, rp_r)
+!!  !
+!!  !!Arguments ------------------------------------
+!!  ! class(gwr_t),intent(in) :: gwr
+!!  ! type(desc_t),intent(in) :: desc
+!!  ! type(__slkmat_t),intent(in) :: g_gp
+!!  ! type(__slkmat_t),intent(inout) :: rp_r
+!!  !
+!!  !!Local variables-------------------------------
+!!  ! integer :: ig2, npwsp, nrsp, col_bsize, ir1, ndat
+!!  ! type(__slkmat_t) :: rgp, gpr
+!!  ! character(len=500) :: msg
+!!  ! type(uplan_t) :: uplan_k
+!!  !
+!!  !! *************************************************************************
+!!  !
+!!  ! ABI_ERROR("Not Implemented Error")
+!!  !
+!!  ! ! Allocate intermediate rgp PBLAS matrix to store F(r,g')
+!!  ! npwsp = desc%npw * gwr%nspinor
+!!  ! nrsp = gwr%g_nfft * gwr%nspinor
+!!  ! ABI_CHECK(block_dist_1d(npwsp, gwr%g_comm%nproc, col_bsize, msg), msg)
+!!  ! call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
+!!  !
+!!  ! call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
+!!  !                   desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+!!  !
+!!  ! ! F(g,g') --> F(r,g') and store results in rgp.
+!!  ! do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
+!!  !   ndat = blocked_loop(ig2, g_gp%sizeb_local(2), gwr%uc_batch_size)
+!!  !   call uplan_k%execute_gr(ndat, g_gp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
+!!  ! end do
+!!  !
+!!  ! ! F(r,g') --> F(g',r)
+!!  ! call rgp%ptrans("N", gpr, free=.True.)
+!!  !
+!!  ! ! F(g',r) --> F(r',r) and store results in rp_r.
+!!  ! do ir1=1, gpr%sizeb_local(2), gwr%uc_batch_size
+!!  !   ndat = blocked_loop(ir1, gpr%sizeb_local(2), gwr%uc_batch_size)
+!!  !   call uplan_k%execute_gr(ndat, gpr%buffer_cplx(:,ir1), rp_r%buffer_cplx(:,ir1), isign=-1, iscale=0)
+!!  ! end do
+!!  !
+!!  ! call uplan_k%free()
+!!  ! call gpr%free()
+!!  !
+!!  !end subroutine gwr_ggp_to_rpr
+!!  !!!***
 
 !----------------------------------------------------------------------
 

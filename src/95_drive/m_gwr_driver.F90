@@ -152,7 +152,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
- integer :: ierr, spin, ik_ibz, nband_k, iomode__
+ integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
@@ -609,7 +609,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    diago_info = zero
 
    if (write_wfk) then
-     ! Master writes header and Fortran record markers if needed.
+     ! ===============================================
+     ! Master writes header and Fortran record markers
+     ! ===============================================
      out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
      iomode__ = iomode_from_fname(out_path)
      call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
@@ -621,8 +623,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      call xmpi_barrier(comm)
 
      ! Reopen file inside diago_pool%comm.
-     call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
-                          write_hdr=.False., write_frm=.False.)
+     !call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
+     !                     write_hdr=.False., write_frm=.False.)
    end if
 
    do spin=1,dtset%nsppol
@@ -643,17 +645,32 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        if (write_wfk) then
         ! occupancies are set to zero.
         ! Client code is responsible for recomputing occ and fermie when reading this WFK.
-        ABI_CALLOC(occ_k, (owfk%mband))
-        sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
+        !ABI_CALLOC(occ_k, (owfk%mband))
+        ABI_CALLOC(occ_k, (nband_k))
+        !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
+        !print *, "About to write with ugb%my_nband", ugb%my_nband, "has_idle_procs:", ugb%has_idle_procs
+        !call xmpi_barrier(comm)
+
+        color = merge(1, 0, ugb%my_nband > 0)
+        call xmpi_comm_split(diago_pool%comm%value, color, diago_pool%comm%me, io_comm, ierr)
+
         if (ugb%my_nband > 0) then
           ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
           call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
+          ! Reopen file inside io_comm.
+          call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, &
+                               write_hdr=.False., write_frm=.False.)
+
+          sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
+          sc_mode = xmpio_collective
           call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
                                       eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+          call owfk%close()
         end if
+        call xmpi_comm_free(io_comm)
         ABI_FREE(occ_k)
        end if
 
@@ -705,7 +722,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call owfk_hdr%free()
    call ebands_free(owfk_ebands)
    call diago_pool%free()
-   call owfk%close()
+   !call owfk%close()
 
  !else if (dtset%gwr_task == "CC4CS") then
    ! Diagonalize Hamiltonian at k = Gamma
