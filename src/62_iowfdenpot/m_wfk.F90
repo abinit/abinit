@@ -1161,13 +1161,12 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
  end if
 
  nb_block     = (band_block(2) - band_block(1) + 1)
- ABI_CHECK(nb_block>0,"nband <=0")
+ ABI_CHECK(nb_block >0, "nband <=0")
  npw_tot_disk = npw_disk * nspinor_disk * nb_block
 
  if (present(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
  end if
-
  if (present(cg_k)) then
    ABI_CHECK(SIZE(cg_k, DIM=2) >= npw_tot_disk,"cg_k too small")
  end if
@@ -1200,7 +1199,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
    if (any( [npw_read, nspinor_read, nband_read] /= [npw_disk, nspinor_disk, nband_disk])) then
      write(msg,"(a,6(i0,2x))")"Mismatch between (npw, nspinor, nband) read from WFK and those found in HDR ",&
-&      npw_read, nspinor_read, nband_read, npw_disk, nspinor_disk, nband_disk
+       npw_read, nspinor_read, nband_read, npw_disk, nspinor_disk, nband_disk
      ABI_ERROR(msg)
    end if
 
@@ -1216,7 +1215,6 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
      ! The third record: eigenvalues and occupation factors.
      ! write(unitwf) (eigen(iband),iband=1,nband_disk),(occ(iband),iband=1,nband_disk)
      if (present(eig_k) .or. present(occ_k)) then
-
        ABI_MALLOC(tmp_eigk, (nband_disk))
        ABI_MALLOC(tmp_occk, (nband_disk))
 
@@ -1767,7 +1765,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  real(dp) :: cpu, wall, gflops
 !arrays
  real(dp),ABI_CONTIGUOUS pointer :: tmp_eigk(:)
- real(dp), allocatable :: eig_buffer(:), cg_buffer(:,:)
+ !real(dp), allocatable :: eig_buffer(:), cg_buffer(:,:)
 #ifdef HAVE_MPI_IO
  integer :: mpierr,bufsz,recnpw_type,gkk_type,cgblock_type
  integer(XMPI_OFFSET_KIND) :: my_offset,my_offpad
@@ -1779,7 +1777,6 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 !************************************************************************
 
  DBG_ENTER("COLL")
-
  ABI_CHECK_IEQ(Wfk%rw_mode,  WFK_WRITEMODE, "Wfk must be in WRITEMODE")
 
  call cwtime(cpu, wall, gflops, "start")
@@ -1791,8 +1788,10 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
  nb_block     = (band_block(2) - band_block(1) + 1)
  npw_tot      = npw_disk * nspinor_disk * nb_block
 
- ABI_MALLOC (eig_buffer, (2*nband_disk))
- ABI_MALLOC (cg_buffer, (2,npw_disk*nspinor_disk))
+ ! MG: We don't need to allocate memory if we want to skip records.
+ ! Plain read without variable will do the job.
+ !ABI_MALLOC (eig_buffer, (2*nband_disk))
+ !ABI_MALLOC (cg_buffer, (2,npw_disk*nspinor_disk))
 
  if (PRESENT(kg_k)) then
    ABI_CHECK_IGEQ(SIZE(kg_k, DIM=2), npw_disk, "kg_k too small")
@@ -1850,15 +1849,15 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      ! The wave-functions.
      if (present(cg_k)) then
        npwso = npw_disk*nspinor_disk
-! fast forward the bands which are not mine
-! could do in a single read, but need to check if cg_k is big enough as a buffer
-! e.g. for band_block(1)=100 and band_block(2)=105
+       ! fast forward the bands which are not mine
+       ! could do in a single read, but need to check if cg_k is big enough as a buffer
+       ! e.g. for band_block(1)=100 and band_block(2)=105
        do band=1,band_block(1)-1
-         read(Wfk%fh, err=10, iomsg=errmsg) cg_buffer(1:2,1:npwso)
+         read(Wfk%fh, err=10, iomsg=errmsg) ! cg_buffer(1:2,1:npwso)
        end do
 
+       ! MJV 2021/02: I think my coding is correct - the previous one would only accept band_block(:) = 1,nband_disk
        my_bcount = 0
-! MJV 2021/02: I think my coding is correct - the previous one would only accept band_block(:) = 1,nband_disk
        do band=band_block(1), band_block(2)
          ipw = my_bcount * npwso
          my_bcount = my_bcount + 1
@@ -1877,20 +1876,20 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      ! And the wave-functions.
      npwso = npw_disk*nspinor_disk
 
-! fast forward the bands which are not mine
-! could do in a single read, but need to check if cg_k is big enough as a buffer
-! e.g. for band_block(1)=100 and band_block(2)=105
+     ! fast forward the bands which are not mine
+     ! could do in a single read, but need to check if cg_k is big enough as a buffer
+     ! e.g. for band_block(1)=100 and band_block(2)=105
      do band=1, band_block(1)-1
-       read(Wfk%fh, err=10, iomsg=errmsg) eig_buffer(1:2*nband_disk)
-       read(Wfk%fh, err=10, iomsg=errmsg) cg_buffer(1:2,1:npwso)
+       read(Wfk%fh, err=10, iomsg=errmsg) ! eig_buffer(1:2*nband_disk)
+       read(Wfk%fh, err=10, iomsg=errmsg) ! cg_buffer(1:2,1:npwso)
      end do
 
      my_bcount = 0
      do band=band_block(1),band_block(2)
        base = 2*(band-1)*nband_disk
-!NB: interleaves the arrays eig_k and cg_k in the RF case with formeig 1
+       !NB: interleaves the arrays eig_k and cg_k in the RF case with formeig 1
        write(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*nband_disk)
-! MJV 2021/02: I think my coding is correct - the previous one would only accept band_block(:) = 1,nband_disk
+       ! MJV 2021/02: I think my coding is correct - the previous one would only accept band_block(:) = 1,nband_disk
        ipw = my_bcount * npwso
        my_bcount = my_bcount + 1
        write(Wfk%fh, err=10, iomsg=errmsg) cg_k(1:2,ipw+1:ipw+npwso)
@@ -1905,67 +1904,62 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 
 #ifdef HAVE_MPI_IO
  case (IO_MODE_MPI)
-!----------------------------------------------------------------------------
-! record 1 npw, nspinor, nband of length 3
+   ! record 1 npw, nspinor, nband of length 3
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW)
 
-!   bsize_rec(1) = 3 * xmpi_bsize_int
-!   call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
-!   ABI_CHECK(mpierr==0,"mpierr!=0")
+   ! bsize_rec(1) = 3 * xmpi_bsize_int
+   ! call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
+   ! ABI_CHECK(mpierr==0,"mpierr!=0")
 
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW) + xmpio_bsize_frm
 
    call MPI_TYPE_CONTIGUOUS(3, MPI_INTEGER, recnpw_type, mpierr)
    ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
-   call MPI_TYPE_COMMIT(recnpw_type,mpierr)
+   call MPI_TYPE_COMMIT(recnpw_type, mpierr)
    ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
-   call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,recnpw_type,'native',xmpio_info,mpierr)
+   call MPI_FILE_SET_VIEW(Wfk%fh, my_offset, MPI_BYTE, recnpw_type, 'native', xmpio_info, mpierr)
    ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
-   call MPI_TYPE_FREE(recnpw_type,mpierr)
+   call MPI_TYPE_FREE(recnpw_type, mpierr)
    ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
    dims = [npw_disk, nspinor_disk, nband_disk]
 
-   if (sc_mode==xmpio_collective) then
-     call MPI_FILE_WRITE_ALL(Wfk%fh,dims,SIZE(dims),MPI_INTEGER,MPI_STATUS_IGNORE,mpierr)
-   else if (sc_mode==xmpio_single) then
-     call MPI_FILE_WRITE(Wfk%fh,dims,SIZE(dims),MPI_INTEGER,MPI_STATUS_IGNORE,mpierr)
+   if (sc_mode == xmpio_collective) then
+     call MPI_FILE_WRITE_ALL(Wfk%fh, dims, SIZE(dims), MPI_INTEGER, MPI_STATUS_IGNORE, mpierr)
+   else if (sc_mode == xmpio_single) then
+     call MPI_FILE_WRITE(Wfk%fh, dims, SIZE(dims), MPI_INTEGER, MPI_STATUS_IGNORE, mpierr)
    else
      ABI_ERROR("Wrong sc_mode")
    end if
    ABI_CHECK_MPI(mpierr, "writing REC_NPW")
 
-!----------------------------------------------------------------------------
-! record 2 kg
+   !----------------------------------------------------------------------------
+   ! record 2 kg
    if (present(kg_k)) then
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG)
 
-!     bsize_rec(1) = 3 * npw_disk * xmpi_bsize_int
-!     call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
-
+     ! bsize_rec(1) = 3 * npw_disk * xmpi_bsize_int
+     ! call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG) + xmpio_bsize_frm
 
-     call mpio_write_kg_k(Wfk%fh,my_offset,npw_disk,sc_mode,kg_k,mpierr)
+     call mpio_write_kg_k(Wfk%fh, my_offset, npw_disk, sc_mode, kg_k, mpierr)
      ABI_CHECK_MPI(mpierr, "mpio_write_kg_k")
    end if
 
-!----------------------------------------------------------------------------
    if (Wfk%formeig==0) then
-!----------------------------------------------------------------------------
-
-!----------------------------------------------------------------------------
-! record 3 eigk occk
+     !----------------------------------------------------------------------------
+     ! record 3 eigk occk
      if (present(eig_k) .and. present(occ_k)) then
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG)
 
-!       bsize_rec(1) = 2 * nband_disk * xmpi_bsize_dp
-!       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
+       ! bsize_rec(1) = 2 * nband_disk * xmpi_bsize_dp
+       ! call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,mpierr)
 
-!TODO: check if we need 2*bsize_frm here
+       !TODO: check if we need 2*bsize_frm here
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + xmpio_bsize_frm
        !
        ! Write both eig and occ in tmp_eigk
@@ -1975,14 +1969,14 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        tmp_eigk(1:nband_disk)  = eig_k(1:nband_disk)
        tmp_eigk(nband_disk+1:) = occ_k(1:nband_disk)
 
-       call mpio_write_eigocc_k(Wfk%fh,my_offset,nband_disk,Wfk%formeig,sc_mode,tmp_eigk,mpierr)
+       call mpio_write_eigocc_k(Wfk%fh, my_offset, nband_disk, Wfk%formeig, sc_mode, tmp_eigk, mpierr)
        ABI_CHECK_MPI(mpierr, "mpio_write_eigocc_k")
 
        ABI_FREE(tmp_eigk)
      end if
 
-!----------------------------------------------------------------------------
-! record 4 cg
+     !----------------------------------------------------------------------------
+     ! record 4 cg
      if (present(cg_k)) then
        !TODO: in principle these markers are written when the file is opened, no need here.
        !ABI_MALLOC(bsize_frecords, (nb_block))
@@ -2005,11 +1999,11 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
 
    else if (Wfk%formeig == 1) then
 
-!----------------------------------------------------------------------------
-! record 3 eigk occk
+     !----------------------------------------------------------------------------
+     ! record 3 eigk occk
      if (present(eig_k)) then
-       types = [MPI_DOUBLE_COMPLEX,MPI_DOUBLE_COMPLEX]
-       sizes = [nband_disk,npw_disk*nspinor_disk]
+       types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
+       sizes = [nband_disk, npw_disk*nspinor_disk]
 
        call xmpio_create_fstripes(nband_disk,sizes,types,gkk_type,my_offpad,mpierr)
        ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
@@ -2022,12 +2016,12 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        call MPI_TYPE_FREE(gkk_type,mpierr)
        ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
-! NB: bufsz is not 2*nband**2 because we use COMPLEX below
-       bufsz = (nband_disk**2)
+       ! NB: bufsz is not 2*nband**2 because we use COMPLEX below
+       bufsz = nband_disk**2
 
-       if (sc_mode==xmpio_collective) then
+       if (sc_mode == xmpio_collective) then
          call MPI_FILE_WRITE_ALL(Wfk%fh,eig_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
-       else if (sc_mode==xmpio_single) then
+       else if (sc_mode == xmpio_single) then
          call MPI_FILE_WRITE(Wfk%fh,eig_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else
          ABI_ERROR("Wrong sc_mode")
@@ -2036,10 +2030,10 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        ABI_CHECK_MPI(mpierr, "FILE_WRITE")
      end if
 
-!----------------------------------------------------------------------------
-! record 4 cg
+     !----------------------------------------------------------------------------
+     ! record 4 cg
      if (present(cg_k)) then
-!       ABI_CHECK(band_block(1)==1,"band_block(1) !=1 not coded")
+       !ABI_CHECK(band_block(1)==1,"band_block(1) !=1 not coded")
 
        types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
        !sizes = [npw_disk*nspinor_disk, band_block(2)-band_block(1)]
@@ -2048,9 +2042,9 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        call xmpio_create_fstripes(nb_block,sizes,types,cgblock_type,my_offpad,mpierr)
        ABI_CHECK_MPI(mpierr, "xmpio_create_fstripes")
 
-! TODO: check that the following offset is correct
-!       check that the 4 * xmpio_bsize_frm is correct: 1 record marker for eigen and 1 for cg in principle!
-!         even if the cg is followed by 2 frm, and eig 1, then it should be 3, not 4
+       ! TODO: check that the following offset is correct
+       !       check that the 4 * xmpio_bsize_frm is correct: 1 record marker for eigen and 1 for cg in principle!
+       !       even if the cg is followed by 2 frm, and eig 1, then it should be 3, not 4
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + my_offpad &
           + (band_block(1)-1) * (2 * nband_disk * xmpi_bsize_dp &
                                + 2 * npw_disk * nspinor_disk * xmpi_bsize_dp &
@@ -2063,9 +2057,9 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        ABI_CHECK_MPI(mpierr, "TYPE_FREE")
 
        bufsz = npw_disk * nspinor_disk * nb_block
-       if (sc_mode==xmpio_collective) then
+       if (sc_mode == xmpio_collective) then
          call MPI_FILE_WRITE_ALL(Wfk%fh,cg_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
-       else if (sc_mode==xmpio_single) then
+       else if (sc_mode == xmpio_single) then
          call MPI_FILE_WRITE    (Wfk%fh,cg_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else
          ABI_ERROR("Wrong sc_mode")
@@ -2145,11 +2139,10 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
    ABI_ERROR(sjoin('Wrong value of iomode:', itoa(Wfk%iomode)))
  end select
 
- ABI_FREE(eig_buffer)
- ABI_FREE(cg_buffer)
+ !ABI_FREE(eig_buffer)
+ !ABI_FREE(cg_buffer)
 
  call cwtime_report(" wfk_write_band_block", cpu, wall, gflops)
-
  DBG_EXIT("COLL")
 
  return

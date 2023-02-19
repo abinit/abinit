@@ -1,5 +1,5 @@
 
-.Version 9.9.0 of ABINIT 
+.Version 9.9.2 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 14 Feb 2023.
-- ( at 20h55 )
+.Starting date : Sun 19 Feb 2023.
+- ( at 18h11 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t04/t04.abi
 - output file    -> t04.abo
@@ -533,14 +533,6 @@ meta: {optdriver: 6, }
  Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-- FFT uc_batch_size: 1
-- FFT sc_batch_size: 1
-
 - Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
 - Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
 - np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
@@ -557,6 +549,14 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1.8
 - chi_q(r,g): 0.9
+
+ ==== FFT mesh for Green's function ====
+  FFT mesh divisions ........................     8    8    8
+  Augmented FFT divisions ...................     8    8    8
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -579,6 +579,9 @@ g_ngfft: [8, 8, 8, 8, 8, 8, ]
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
+min_transition_energy_eV:   8.34720019E-02
+max_transition_energy_eV:   1.85898004E+00
+eratio:   2.22707016E+01
 ft_max_err_t2w_cos:   3.38096265E-03
 ft_max_err_w2t_cos:   1.13989232E-04
 ft_max_err_t2w_sin:   5.99630147E-02
@@ -660,7 +663,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
 
 
- Building correlated screening Wc
+ Building correlated screening Wc ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
@@ -1047,14 +1050,6 @@ meta: {optdriver: 6, }
  Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-- FFT uc_batch_size: 1
-- FFT sc_batch_size: 1
-
 - Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
 - Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
 - np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
@@ -1071,6 +1066,14 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1.8
 - chi_q(r,g): 0.9
+
+ ==== FFT mesh for Green's function ====
+  FFT mesh divisions ........................     8    8    8
+  Augmented FFT divisions ...................     8    8    8
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -1093,6 +1096,9 @@ g_ngfft: [8, 8, 8, 8, 8, 8, ]
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
+min_transition_energy_eV:   8.34720019E-02
+max_transition_energy_eV:   1.85898004E+00
+eratio:   2.22707016E+01
 ft_max_err_t2w_cos:   3.38096265E-03
 ft_max_err_w2t_cos:   1.13989232E-04
 ft_max_err_t2w_sin:   5.99630147E-02
@@ -1174,7 +1180,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
 
 
- Building correlated screening Wc
+ Building correlated screening Wc ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
@@ -1330,7 +1336,7 @@ data: !Tabular |
 
 
 
- Building correlated screening Wc
+ Building correlated screening Wc ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
@@ -1486,7 +1492,7 @@ data: !Tabular |
 
 
 
- Building correlated screening Wc
+ Building correlated screening Wc ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
@@ -1642,7 +1648,7 @@ data: !Tabular |
 
 
 
- Building correlated screening Wc
+ Building correlated screening Wc ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 4, }
@@ -1789,14 +1795,6 @@ meta: {optdriver: 6, }
  Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-- FFT uc_batch_size: 1
-- FFT sc_batch_size: 1
-
 - Optimizing MPI grid with mem_per_cpu_mb: 2.048000E+03 [Mb]
 - Use `abinit run.abi --mem-per-cpu=4G` to set mem_per_cpu_mb in the submission script
 - np_k  np_g  np_t  np_s  memb_per_cpu    efficiency       speedup
@@ -1813,6 +1811,14 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1.8
 - chi_q(r,g): 0.9
+
+ ==== FFT mesh for Green's function ====
+  FFT mesh divisions ........................     8    8    8
+  Augmented FFT divisions ...................     8    8    8
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
+- FFT uc_batch_size: 1
+- FFT sc_batch_size: 1
  ==== Info on the GWR object ====
 
 --- !GWR_params
@@ -1835,6 +1841,9 @@ g_ngfft: [8, 8, 8, 8, 8, 8, ]
 P gwr_np_kgts: [1, 1, 1, 1, ]
 P np_kibz: [1, ]
 P np_qibz: [1, ]
+min_transition_energy_eV:   8.34720019E-02
+max_transition_energy_eV:   1.85898004E+00
+eratio:   2.22707016E+01
 ft_max_err_t2w_cos:   3.38096265E-03
 ft_max_err_w2t_cos:   1.13989232E-04
 ft_max_err_t2w_sin:   5.99630147E-02

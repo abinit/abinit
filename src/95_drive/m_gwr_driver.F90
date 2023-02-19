@@ -567,6 +567,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
  if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
 
+   ! FIXME: Deadlock if gamma-only!
+
    ! ==========================================
    ! Direct diagonalization of the Hamiltonian
    ! ==========================================
@@ -715,7 +717,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ! === This is the real GWR stuff once all is ready ===
    ! ====================================================
    read_wfk = .True.
-
    if (read_wfk) then
      if (my_rank == master) then
        if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
