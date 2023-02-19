@@ -2230,7 +2230,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
      if (io_in_kcomm .and. .not. any(gwr%my_spins == spin)) cycle
 
      do ik_ibz=1,gwr%nkibz
-       print_time = gwr%comm%me == 0 .and. (ik_ibz < LOG_MODK .or. mod(my_iki, LOG_MODK) == 0)
+       print_time = gwr%comm%me == 0 .and. (ik_ibz < LOG_MODK .or. mod(ik_ibz, LOG_MODK) == 0)
        if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
        kk_ibz = gwr%kibz(:, ik_ibz)
        npw_k = wfk_hdr%npwarr(ik_ibz); istwf_k = wfk_hdr%istwfk(ik_ibz)
@@ -5972,11 +5972,12 @@ subroutine gwr_rpa_energy(gwr)
  integer,parameter :: master = 0
  integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz, ii, ierr, ig, ncut, icut, mat_size
  integer :: il_g1, il_g2, ig1, ig2, npw_q, ig0
- logical :: q_is_gamma
+ logical :: q_is_gamma, print_time
  real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp, tsec(2)
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
  complex(dpc) :: vcs_g1, vcs_g2
  type(desc_t),pointer :: desc_q
- !character(len=500) :: msg
+ character(len=500) :: msg
 !arrays
  type(__slkmat_t) :: chi_tmp, dummy_vec, chi_4diag
  type(processor_scalapack) :: proc_4diag
@@ -5989,12 +5990,14 @@ subroutine gwr_rpa_energy(gwr)
  call gwr%build_green(free_ugb=.True.)
  call gwr%build_tchi()
 
- ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
- call timab(1928, 1, tsec)
-
  ! See also calc_rpa_functional in m_screening_driver
  ! Compute RPA energy for ncut cutoff energies in order to extrapolate for ecuteps --> oo
  ncut = 5; estep = -gwr%dtset%ecuteps * 0.05_dp
+
+ call wrtout(std_out, sjoin(" Begin computation of RPA energy with ncut:", itoa(ncut), " ..."))
+ ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call timab(1928, 1, tsec)
 
  ABI_CALLOC(ec_rpa, (ncut))
  ABI_CALLOC(ec_mp2, (ncut))
@@ -6009,8 +6012,9 @@ subroutine gwr_rpa_energy(gwr)
 
    do my_iqi=1,gwr%my_nqibz
      if (gwr%spin_comm%skip(my_iqi)) cycle
-     iq_ibz = gwr%my_qibz_inds(my_iqi)
-     qq_ibz = gwr%qibz(:, iq_ibz)
+     print_time = gwr%comm%me == 0 .and. (my_iqi < LOG_MODK .or. mod(my_iqi, LOG_MODK) == 0)
+     if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
+     iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
      q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
      !if (q_is_gamma) then
      !  call wrtout([std_out, ab_out], "RPA: Ignoring q==0"); cycle
@@ -6111,6 +6115,10 @@ subroutine gwr_rpa_energy(gwr)
      end do ! my_it
 
      ABI_FREE(kin_qg)
+     if (print_time) then
+       write(msg,'(4x,2(a,i0),a)')"My iqi [", my_iqi, "/", gwr%my_nqibz, "]"
+       call cwtime_report(msg, cpu_q, wall_q, gflops_q)
+     end if
    end do ! my_iqi
  end do ! my_is
 
@@ -6135,6 +6143,8 @@ subroutine gwr_rpa_energy(gwr)
  ABI_FREE(ec_rpa)
  ABI_FREE(ec_mp2)
  ABI_FREE(ecut_chi)
+
+ call cwtime_report(" gwr_rpa_energy:", cpu_all, wall_all, gflops_all)
  call timab(1928, 2, tsec)
 
 end subroutine gwr_rpa_energy

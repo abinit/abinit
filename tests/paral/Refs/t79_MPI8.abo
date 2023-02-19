@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 16 Feb 2023.
-- ( at 01h32 )
+.Starting date : Sun 19 Feb 2023.
+- ( at 18h18 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t79_MPI8/t79.abi
 - output file    -> t79_MPI8.abo
@@ -654,6 +654,9 @@ g_ngfft: [10, 10, 10, 10, 10, 10, ]
 P gwr_np_kgts: [2, 2, 2, 1, ]
 P np_kibz: [1, 1, 1, 1, 2, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, 2, 1, 1, 1, ]
+min_transition_energy_eV:   3.35507171E-02
+max_transition_energy_eV:   3.00485835E+00
+eratio:   8.95616730E+01
 ft_max_err_t2w_cos:   2.00733501E-02
 ft_max_err_w2t_cos:   1.18358450E-03
 ft_max_err_t2w_sin:   4.40444592E-01
@@ -818,7 +821,7 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
 
 
 
- Building correlated screening Wc
+ Building correlated screening Wc ...
 
 --- !EMACRO_WITHOUT_LOCAL_FIELDS
 iteration_state: {dtset: 3, }
