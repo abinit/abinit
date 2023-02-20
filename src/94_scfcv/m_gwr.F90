@@ -2040,6 +2040,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  end associate
 
  call cwtime_report(" gwr_load_kcalc_from_wfk:", cpu, wall, gflops)
+ call gwr%pstat%print([std_out], reload=.True.)
 
 end subroutine gwr_load_kcalc_wfd
 !!***
@@ -2245,6 +2246,8 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        ! TODO: Optimize this part
        ! Find band_step that gives good compromise between memory and efficiency.
        band_step = memb_limited_step(1, nbsum, 2*npwsp, xmpi_bsize_dp, 1024.0_dp)
+       band_step = 200
+       !band_step = 100
        do bstart=1, nbsum, band_step
          bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
 
@@ -5974,7 +5977,7 @@ subroutine gwr_rpa_energy(gwr)
  integer :: il_g1, il_g2, ig1, ig2, npw_q, ig0
  logical :: q_is_gamma, print_time
  real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp, tsec(2)
- real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, cpu_cut, wall_cut, gflops_cut
  complex(dpc) :: vcs_g1, vcs_g2
  type(desc_t),pointer :: desc_q
  character(len=500) :: msg
@@ -5992,9 +5995,10 @@ subroutine gwr_rpa_energy(gwr)
 
  ! See also calc_rpa_functional in m_screening_driver
  ! Compute RPA energy for ncut cutoff energies in order to extrapolate for ecuteps --> oo
+ !ncut = max(1, gwr%dtset%gwr_rpa_ncut)
  ncut = 5; estep = -gwr%dtset%ecuteps * 0.05_dp
 
- call wrtout(std_out, sjoin(" Begin computation of RPA energy with ncut:", itoa(ncut), " ..."))
+ call wrtout(std_out, sjoin(" Begin computation of RPA energy with gwr_rpa_ncut:", itoa(ncut), " ..."))
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1928, 1, tsec)
@@ -6014,6 +6018,7 @@ subroutine gwr_rpa_energy(gwr)
      if (gwr%spin_comm%skip(my_iqi)) cycle
      print_time = gwr%comm%me == 0 .and. (my_iqi < LOG_MODK .or. mod(my_iqi, LOG_MODK) == 0)
      if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
+
      iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
      q_is_gamma = normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0
      !if (q_is_gamma) then
@@ -6035,7 +6040,6 @@ subroutine gwr_rpa_energy(gwr)
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
        associate (tchi => gwr%tchi_qibz(iq_ibz, itau, spin))
-
        if (my_it == 1) then
          ! Allocate workspace. NB: npw_q is the total number of PWs for this q.
          call tchi%copy(chi_tmp)
@@ -6044,6 +6048,7 @@ subroutine gwr_rpa_energy(gwr)
        end if
 
        do icut=1,ncut
+         call cwtime(cpu_cut, wall_cut, gflops_cut, "start")
 
          ! Damp Coulomb kernel in order to have smooth E(V).
          ! See also https://www.vasp.at/wiki/index.php/ENCUTGWSOFT
@@ -6103,6 +6108,9 @@ subroutine gwr_rpa_energy(gwr)
              !end if
            end do
          end if
+
+         write(msg,'(4x,2(a,i0),a)')"icut [", icut, "/", ncut, "]"
+         call cwtime_report(msg, cpu_cut, wall_cut, gflops_cut)
        end do ! icut
 
        if (my_it == gwr%my_ntau) then

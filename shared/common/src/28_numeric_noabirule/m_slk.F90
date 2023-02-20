@@ -2814,6 +2814,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
      IFAIL,ICLUSTR,GAP,INFO)
   endif
 
+  ! MG: TODO: Recheck the computation of the workspace as I got INFO 2 with a 5x5x5 si supercell.
   if (INFO/=0) then
     write(msg,'(A,I0)') "Problem to compute eigenvalues and eigenvectors with ScaLAPACK, INFO=",INFO
     ABI_ERROR(msg)

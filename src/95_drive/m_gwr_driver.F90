@@ -566,9 +566,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
  if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
-
-   ! FIXME: Deadlock if gamma-only!
-
    ! ==========================================
    ! Direct diagonalization of the Hamiltonian
    ! ==========================================
@@ -663,7 +660,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
           call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, &
                                write_hdr=.False., write_frm=.False.)
 
-          sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
+          !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
           sc_mode = xmpio_collective
           call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
@@ -789,12 +786,15 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
 
    ! Compute gwr%ks_me matrix elements.
-   call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
-                     ks_vtrial, ks_vhartr, ks_vxc, psps, pawtab, ks_paw_an, pawang, pawfgrtab, ks_paw_ij, dijexc_core, &
-                     ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+   if (.not. string_in(dtset%gwr_task, "RPA_ENERGY")) then
+     ! FIXME: This routine allocates (nband, nband) matrices and should be rewritten!
+     call calc_vhxc_me(gwr%kcalc_wfd, ks_mflags, gwr%ks_me, cryst, dtset, nfftf, ngfftf, &
+                       ks_vtrial, ks_vhartr, ks_vxc, psps, pawtab, ks_paw_an, pawang, pawfgrtab, ks_paw_ij, dijexc_core, &
+                       ks_rhor, usexcnhat, ks_nhat, ks_nhatgr, nhatgrdim, tmp_kstab, taur=ks_taur)
+     if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
+   end if
 
    ABI_FREE(tmp_kstab)
-   if (my_rank == master) call gwr%ks_me%print(header="KS matrix elements", unit=std_out)
 
    if (read_wfk) then
      ! Build Green's function in imaginary-time from WFK file
