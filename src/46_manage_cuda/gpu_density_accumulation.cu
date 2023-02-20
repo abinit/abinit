@@ -82,8 +82,8 @@ __global__ void kernel_accumulate_density(double *fofr,
 /**********                                      *******************/
 /*******************************************************************/
 
-extern "C" void gpu_density_accumulation_(double *fofr,double* denpot, double* weight_r,
-                   double* weight_i,int* nfft_tot,int *ndat,cudaStream_t *compute_stream)
+extern "C" void gpu_density_accumulation_(double *fofr, double* denpot, double* weight_r,
+                                          double* weight_i, int* nfft_tot, int *ndat, cudaStream_t *compute_stream)
 {
 
   //Arguments ------------------------------------
