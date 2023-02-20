@@ -57,6 +57,7 @@
 #include "abi_common.h"
 #include "stdio.h"
 #include "abi_gpu_header.h"
+#include "abi_gpu_header_common.h"
 #include "cuda_api_error_check.h"
 
 /******************************************************************/
@@ -93,11 +94,12 @@ void kernel_sphere_in(double *cfft,
                       const int istwfk)
 {
 
-  int thread_id  = threadIdx.x + blockIdx.x*blockDim.x;
+  int thread_id = threadIdx.x + blockIdx.x*blockDim.x;
   int idat = blockIdx.y;
 
   for (int ipw=thread_id; ipw<npw; ipw+=blockDim.x*gridDim.x)
     {
+
       int i1=kg_k[ipw*3];//kg_k(1,ipw)
       int i2=kg_k[ipw*3 + 1];//kg_k(2,ipw)
       int i3=kg_k[ipw*3 + 2];//kg_k(3,ipw)
@@ -144,19 +146,24 @@ void kernel_sphere_out(const double *cfft,
 
   for (int ig=thread_id; ig<npw; ig+=blockDim.x*gridDim.x)
     {
+
       int i1 = kg_k[ig*3    ];//kg_k(1,ipw)
       int i2 = kg_k[ig*3 + 1];//kg_k(2,ipw)
       int i3 = kg_k[ig*3 + 2];//kg_k(3,ipw)
+
       if(i1<0)
         i1+=n1;
+
       if(i2<0)
         i2+=n2;
+
       if(i3<0)
         i3+=n3;
 
       //We write cg(ig)
       cg[    2*(ig + npw*idat)] = norm * cfft[   2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] ;
       cg[1 + 2*(ig + npw*idat)] = norm * cfft[1+ 2*(i1 + n1*(i2 + n2*(i3+n3*idat)))] ;
+
     } // end for ig
 
 } // kernel_sphere_out
@@ -233,6 +240,9 @@ extern "C" void gpu_sphere_in_(const double *cg,
   grid.x = min((*npw  + bloc.x - 1 )/bloc.x,MAX_GRID_SIZE);
   grid.y = *ndat;
   //Call kernel to put cg into cfft
+
+  //check_gpu_mem_("before kernel_sphere_in");
+
   kernel_sphere_in<<<grid,bloc,0,*compute_stream>>>(cfft,cg,kg_k,*npw,*ndat,*n1,*n2,*n3,shift_inv1,shift_inv2,shift_inv3,*istwfk);
   CUDA_KERNEL_CHECK("kernel_sphere_in");
 
@@ -312,6 +322,7 @@ extern "C" void gpu_sphere_out_(double *cg,
   bloc.x = BLOCK_SIZE;
   grid.x = min((*npw  + bloc.x - 1 )/bloc.x ,MAX_GRID_SIZE);
   grid.y = *ndat;
+
   //Extract wave functions and appy fft normalisation factor before storing
   kernel_sphere_out<<<grid,bloc,0,*compute_stream>>>(cfft,cg,kg_k,*npw,*ndat,*n1,*n2,*n3,norme);
   CUDA_KERNEL_CHECK("kernel_sphere_out");
