@@ -5635,19 +5635,19 @@ end if
    ! using the correction evaluated at bstop_ks/bstart_ks to accelerate self-consistent calculations.
    do spin=1,gwr%nsppol
      do ikcalc=1,gwr%nkcalc
-        ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
-        band = gwr%bstop_ks(ikcalc, spin)
-        if (band + 1 <= size(gwr%qp_ebands%eig, dim=1)) then
-          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
-          call wrtout(std_out, sjoin(" Correcting bands >= ", itoa(band+1), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
-          gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) = gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) + eshift
-        end if
-        band = gwr%bstart_ks(ikcalc, spin)
-        if (band > 1) then ! unlikely
-          eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
-          call wrtout(std_out, sjoin(" Correcting bands < ", itoa(band), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
-          gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) = gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) + eshift
-        end if
+       ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+       band = gwr%bstop_ks(ikcalc, spin)
+       if (band + 1 <= size(gwr%qp_ebands%eig, dim=1)) then
+         eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
+         call wrtout(std_out, sjoin(" Correcting bands >= ", itoa(band+1), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
+         gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) = gwr%qp_ebands%eig(band + 1:, ik_ibz, spin) + eshift
+       end if
+       band = gwr%bstart_ks(ikcalc, spin)
+       if (band > 1) then ! unlikely
+         eshift = gwr%qp_ebands%eig(band, ik_ibz, spin) - gwr%qp_ebands_prev%eig(band, ik_ibz, spin)
+         call wrtout(std_out, sjoin(" Correcting bands < ", itoa(band), "with eshift:", ftoa(eshift * Ha_meV), "(meV)"))
+         gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) = gwr%qp_ebands%eig(:band - 1, ik_ibz, spin) + eshift
+       end if
      end do
    end do
 
@@ -5933,6 +5933,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
    !ABI_CHECK_IEQ(nfftsp, rp_r%sizeb_local(1), "First dimension should be local to each MPI proc!")
    ABI_MALLOC(loc_cwork, (rp_r%sizeb_local(2)))
    loc_cwork(:) = matmul(transpose(rp_r%buffer_cplx), ur_glob)
+   ! TODO
    !call xgemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc )
    ! Integrate over r. Note complex conjugate.
    do il_r1=1,rp_r%sizeb_local(2)

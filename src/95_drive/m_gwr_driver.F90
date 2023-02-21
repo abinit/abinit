@@ -156,7 +156,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk, write_wfk, cc4s_task
+ logical :: read_wfk, write_wfk, cc4s_task, rectangular
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -602,7 +602,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    ! Build pools to distribute (kpt, spin)
    ! Try to have rectangular grids in each pool to improve efficiency in scalapack diago.
-   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=.True.)
+   rectangular = .True.
+   if (dtset%nkpt == 1) rectangular = .False.
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
    if (write_wfk) then
@@ -618,10 +620,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        call owfk%close()
      end if
      call xmpi_barrier(comm)
-
-     ! Reopen file inside diago_pool%comm.
-     !call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), diago_pool%comm%value, &
-     !                     write_hdr=.False., write_frm=.False.)
    end if
 
    do spin=1,dtset%nsppol
@@ -719,7 +717,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    call owfk_hdr%free()
    call ebands_free(owfk_ebands)
    call diago_pool%free()
-   !call owfk%close()
 
  !else if (dtset%gwr_task == "CC4CS") then
    ! Diagonalize Hamiltonian at k = Gamma
