@@ -993,27 +993,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,&
 &     eta=eta_mq,omega=omega_mq) !optional arguments for finite-w calculation
 
-!   write(*,*) "ITERATION -:", istep,ek0_mq,edocc_mq,eeig0_mq,eloc0_mq,enl0_mq,enl1_mq
-
-     !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
-!     do ifft=1,nfftf
-!       rhor1(2*ifft-1,1) = half*(rhor1_pq(2*ifft-1,1)+rhor1_mq(2*ifft-1,1))
-!       rhor1(2*ifft  ,1) = half*(rhor1_pq(2*ifft  ,1)-rhor1_mq(2*ifft  ,1))
-!     end do
-!     if (nspden >= 2) then
-!       do ifft=1,nfftf
-!         rhor1(2*ifft-1,2) = half*(rhor1_pq(2*ifft-1,2)+rhor1_mq(2*ifft-1,2))
-!         rhor1(2*ifft  ,2) = half*(rhor1_pq(2*ifft  ,2)-rhor1_mq(2*ifft  ,2))
-!       end do
-!     end if
-!     if (nspden > 2) then
-!       do ifft=1,nfftf
-!         rhor1(2*ifft-1,3) = half*(rhor1_pq(2*ifft-1,3)+rhor1_mq(2*ifft  ,4))
-!         rhor1(2*ifft  ,3) = half*(rhor1_pq(2*ifft  ,3)-rhor1_mq(2*ifft-1,4))
-!         rhor1(2*ifft  ,4) = half*(rhor1_pq(2*ifft  ,4)+rhor1_mq(2*ifft-1,3))
-!         rhor1(2*ifft-1,4) = half*(rhor1_pq(2*ifft-1,4)-rhor1_mq(2*ifft  ,3))
-!       end do
-!     end if
      do ifft=1,nfftf
        rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
        rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
@@ -4619,9 +4598,9 @@ subroutine dfpt_vtrial1_mq(cplex,nfftf,nspden,nvresid1,nvresid1_mq,vtrial1,vtria
      vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
      vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
      nvresid1_mq(2*ifft-1,3)= nvresid1(2*ifft  ,4) !Re[V^12]
-     nvresid1_mq(2*ifft  ,3)= nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+     nvresid1_mq(2*ifft  ,3)=-nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
      nvresid1_mq(2*ifft  ,4)= nvresid1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-     nvresid1_mq(2*ifft-1,4)= nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+     nvresid1_mq(2*ifft-1,4)=-nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
    end do
  end if
 
