@@ -521,6 +521,12 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      bdtot_index=bdtot_index+nband_k
 
    end do ! end loop over kpts
+   
+   ABI_FREE(vlocal)
+   ABI_FREE(vectornd)
+   if(has_nucdip) then
+     ABI_FREE(vectornd_pac)
+   end if
 
  end do ! end loop over isppol
 
@@ -595,11 +601,6 @@ call orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
 
  call gs_hamk%free()
 
- ABI_FREE(vlocal)
- ABI_FREE(vectornd)
- if(has_nucdip) then
-   ABI_FREE(vectornd_pac)
- end if
  ABI_FREE(kg_k)
  ABI_FREE(kinpw)
  ABI_FREE(ph1d)
