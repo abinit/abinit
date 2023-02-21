@@ -80,18 +80,18 @@ contains
 !!
 !! SOURCE
 
-subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
+subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nucdipmom,&
      & rprimd,vectornd,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,natom,nfft
+ integer,intent(in) :: cplex,izero,natom,nfft,nspden
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
- real(dp),intent(out) :: vectornd(nfft,3)
+ real(dp),intent(out) :: vectornd(nfft,nspden,3)
 
 !Local variables-------------------------------
  !scalars
@@ -262,21 +262,27 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 
  end if
 
+ !note nspden effect--the nuclear vector potential conains no electron spin flip operator,
+ ! so vectornd(:,2,:) = vectornd(:,1,:) and vectornd(:,3:4,:) = zero
+ vectornd = zero
  ! Fourier Transform
  ABI_MALLOC(ndvecr,(cplex*nfft))
  ndvecr=zero
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,1)=ndvecr(:)
+ vectornd(:,1,1)=ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,1) = ndvecr(:)
  ABI_FREE(work1)
 
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,2) = ndvecr(:)
+ vectornd(:,1,2) = ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,2) = ndvecr(:)
  ABI_FREE(work2)
 
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,3) = ndvecr(:)
+ vectornd(:,1,3) = ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,3) = ndvecr(:)
  ABI_FREE(work3)
  ABI_FREE(ndvecr)
 
