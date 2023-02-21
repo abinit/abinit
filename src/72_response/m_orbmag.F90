@@ -319,7 +319,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  vectornd = zero
  if(has_nucdip) then
    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
-     & dtset%nucdipmom,rprimd,vectornd,xred)
+     & dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
    ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,3))
    ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
    do idir = 1, 3
