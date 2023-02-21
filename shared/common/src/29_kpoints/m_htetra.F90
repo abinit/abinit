@@ -105,7 +105,7 @@ type, public :: htetra_t
   ! volume of the tetrahedra
 
   real(dp) :: klatt(3, 3)
-  ! reciprocal of lattice vectors for full kpoint grid
+  ! reciprocal of equivalent supercell lattice vectors for full kpoint grid
 
   type(htetra_bucket),allocatable :: ibz(:)
   ! indexes of the tetrahedra for each k-point
