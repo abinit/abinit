@@ -1324,7 +1324,7 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
           dcpi = CMPLX(bcp(iatom,isp)%dcp(1,bdir,ilmn),bcp(iatom,isp)%dcp(2,bdir,ilmn))
           dcpj = CMPLX(kcp(iatom,isp)%dcp(1,gdir,jlmn),kcp(iatom,isp)%dcp(2,gdir,jlmn))
           txt = txt + CONJG(dcpi)*dcpj*dij
-          if (ndij > 1) then
+          if (ndij .GT. 2) then
             if (isp == 1) then
               dij = aij(iatom,klmn,3) ! up-down
               if (ilmn .GT. jlmn) dij = CONJG(dij)
