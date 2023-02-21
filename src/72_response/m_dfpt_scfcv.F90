@@ -1528,6 +1528,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
+ if (nspden==4.and.dtset%prtvol>0) then
+   prtopt=1
+   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+ & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+ & prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+   call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+ end if
+
  if(ipert==dtset%natom+5.or.ipert<=dtset%natom)then
    prtopt=1
    if(ipert==dtset%natom+5) then
@@ -4598,9 +4606,9 @@ subroutine dfpt_vtrial1_mq(cplex,nfftf,nspden,nvresid1,nvresid1_mq,vtrial1,vtria
      vtrial1_mq(2*ifft  ,4)= vtrial1(2*ifft-1,3) !Re[V^21]=Re[V^12]
      vtrial1_mq(2*ifft-1,4)= vtrial1(2*ifft  ,3) !Re[V^21]=Re[V^12]
      nvresid1_mq(2*ifft-1,3)= nvresid1(2*ifft  ,4) !Re[V^12]
-     nvresid1_mq(2*ifft  ,3)=-nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
+     nvresid1_mq(2*ifft  ,3)= nvresid1(2*ifft-1,4) !Im[V^12],see definition of v(:,4) cplex=2 case
      nvresid1_mq(2*ifft  ,4)= nvresid1(2*ifft-1,3) !Re[V^21]=Re[V^12]
-     nvresid1_mq(2*ifft-1,4)=-nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
+     nvresid1_mq(2*ifft-1,4)= nvresid1(2*ifft  ,3) !Re[V^21]=Re[V^12]
    end do
  end if
 
