@@ -520,6 +520,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(symq,(4,2,dtset%nsym))
  timrev=1
 
+!Deactivate time-reversal symmetry for finite-omega calculations
+ if (abs(dtset%rfomega)>tol10) timrev=0
+
 ! By default use symmetries.
  use_sym = 1
  if (dtset%prtgkk == 1)then
@@ -1097,8 +1100,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.','COLL')
  end if
 
-!Deactivate time-reversal symmetry for finite-omega calculations
- if (abs(dtset%rfomega)>tol10) timrev=0
 
  call timab(136,2,tsec)
 
