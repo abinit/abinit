@@ -8708,9 +8708,9 @@ This means having [[usekden]] = 1.
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
 
-==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)  
+==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)
   The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
-  Use of [[occopt]]=3 is recommended to have a physical meaning of the temperature.  
+  Use of [[occopt]]=3 is recommended to have a physical meaning of the temperature.
   As these functionals do not provide Kxc (2nd derivative of Exc), a SCF mixing
   of the potential is automatically selected ([[iscf]]<10).
 
@@ -19186,7 +19186,7 @@ has to specify an independent broadening [[tsmear]]. The combination of the
 two parameters [[tphysel]] and [[tsmear]] is described in [[cite:Verstraete2002]].
 Note that the signification of the entropy is modified with respect to the usual entropy.
 The choice has been made to use [[tsmear]] as a prefactor of the entropy, to
-define the entropy contribution to the free energy.  
+define the entropy contribution to the free energy.
 Note that [[tphysel]] might be used as parameter for Free Energy exchange-correlation functionals (see [[ixc]]).
 """,
 ),
@@ -23338,6 +23338,20 @@ Variable(
     dimensions=[1],
     defaultval=1,
     mnemonics="GWR CHI ALGOrithm.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+""",
+),
+
+Variable(
+    abivarname="gwr_rpa_ncut",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=5,
+    mnemonics="GWR RPA Number of CUToff",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""

@@ -283,6 +283,7 @@ type, public :: dataset_type
  integer :: gwr_ntau = 12
  integer :: gwr_chi_algo = 1
  integer :: gwr_sigma_algo = 1
+ integer :: gwr_rpa_ncut = 5
  real(dp) :: gwr_boxcutmin = one
  real(dp) :: gwr_max_hwtene = -one
  character(len=fnlen) :: gwr_task = "None"
@@ -1643,6 +1644,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwr_ntau = dtin%gwr_ntau
  dtout%gwr_chi_algo = dtin%gwr_chi_algo
  dtout%gwr_sigma_algo = dtin%gwr_sigma_algo
+ dtout%gwr_rpa_ncut = dtin%gwr_rpa_ncut
  dtout%gwr_boxcutmin = dtin%gwr_boxcutmin
  dtout%gwr_max_hwtene = dtin%gwr_max_hwtene
  dtout%gwr_task = dtin%gwr_task
@@ -3317,7 +3319,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' gwr_np_kgts gwr_ucsc_batch gwr_ntau gwr_boxcutmin gwr_max_hwtene gwr_task'
- list_vars=trim(list_vars)//" gwr_chi_algo gwr_sigma_algo"
+ list_vars=trim(list_vars)//" gwr_chi_algo gwr_sigma_algo gwr_rpa_ncut"
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'

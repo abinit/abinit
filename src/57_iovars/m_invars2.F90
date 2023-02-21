@@ -595,6 +595,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (tread == 1) dtset%gwr_chi_algo = intarr(1)
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_sigma_algo', tread,'INT')
  if (tread == 1) dtset%gwr_sigma_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_rpa_ncut', tread,'INT')
+ if (tread == 1) dtset%gwr_rpa_ncut = intarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_boxcutmin', tread, 'DPR')
  if (tread == 1) dtset%gwr_boxcutmin = dprarr(1)
@@ -3683,7 +3685,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')
    if (tread == 1) dtset%sigma_nshiftk = intarr(1)
    if (dtset%sigma_nshiftk < 1 .or. dtset%sigma_nshiftk > MAX_NSHIFTK ) then
-     write(msg,  '(a,i0,2a,i0,3a)' )&
+     write(msg, '(a,i0,2a,i0,3a)' ) &
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
      'while it is found to be ',dtset%sigma_nshiftk,'.',ch10,&
      'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
@@ -3744,8 +3746,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call find_qmesh(Qmesh, Cryst, Kmesh)
 #ifdef HAVE_NETCDF
    if (my_rank == master) then
-      ncerr = nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt)
-      NCF_CHECK(ncerr)
+     ncerr = nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt)
+     NCF_CHECK(ncerr)
    end if
 #endif
    call xmpi_barrier(comm)
