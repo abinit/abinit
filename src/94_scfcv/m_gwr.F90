@@ -1153,10 +1153,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  ! FIXME: Here we need to rescale the weights because greenx convention is not what we expect!
  gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
-
- !call wrtout(std_out, sjoin(" Minimax eratio:", ftoa(gwr%te_max / te_min)))
- !call wrtout(std_out, sjoin(" Max_{ij} |CT CT^{-1} - I|", ftoa(gwr%cosft_duality_error)))
- !call wrtout(std_out, sjoin(" ft_max_error", ltoa(gwr%ft_max_error)))
 #else
  ABI_ERROR("GWR code requires Green-X library!")
 #endif
@@ -2474,7 +2470,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
 ! *************************************************************************
 
  !call cwtime(cpu, wall, gflops, "start")
- call timab(1929, 1, tsec)
+ !call timab(1929, 1, tsec)
 
  ! Take the union of (k,g') for k in the BZ.
  ! Note gwr%ngkpt instead of gwr%ngqpt.
@@ -2542,7 +2538,7 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
  end if
 
  !call cwtime_report(" gwr_gk_to_scbox:", cpu, wall, gflops)
- call timab(1929, 2, tsec)
+ !call timab(1929, 2, tsec)
 
 end subroutine gwr_gk_to_scbox
 !!***
@@ -2581,7 +2577,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
 
 ! *************************************************************************
 
- call timab(1930, 1, tsec)
+ !call timab(1930, 1, tsec)
 
  ! Take the union of (q,g') for q in the BZ. Note gwr%ngqpt instead of gwr%ngkpt.
 
@@ -2638,7 +2634,7 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
    end do ! iepoch
  end if
 
- call timab(1930, 2, tsec)
+ !call timab(1930, 2, tsec)
 
 end subroutine gwr_wcq_to_scbox
 !!***
@@ -3777,7 +3773,7 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
 
 ! *************************************************************************
 
- call timab(1931, 1, tsec)
+ !call timab(1931, 1, tsec)
 
  n1 = sc_ngfft(1); n2 = sc_ngfft(2); n3 = sc_ngfft(3)
  n4 = sc_ngfft(4); n5 = sc_ngfft(5); n6 = sc_ngfft(6)
@@ -3811,7 +3807,7 @@ integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
    end do
  end do
 
- call timab(1931, 2, tsec)
+ !call timab(1931, 2, tsec)
 
 end subroutine desc_to_scbox
 !!***
@@ -5995,8 +5991,8 @@ subroutine gwr_rpa_energy(gwr)
 
  ! See also calc_rpa_functional in m_screening_driver
  ! Compute RPA energy for ncut cutoff energies in order to extrapolate for ecuteps --> oo
- !ncut = max(1, gwr%dtset%gwr_rpa_ncut)
- ncut = 5; estep = -gwr%dtset%ecuteps * 0.05_dp
+ ncut = max(1, gwr%dtset%gwr_rpa_ncut)  ! Usually 5
+ estep = -gwr%dtset%ecuteps * 0.05_dp
 
  call wrtout(std_out, sjoin(" Begin computation of RPA energy with gwr_rpa_ncut:", itoa(ncut), " ..."))
  ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
@@ -6562,7 +6558,7 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 
 ! *************************************************************************
 
- call timab(1931, 1, tsec)
+ !call timab(1931, 1, tsec)
 
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
@@ -6584,7 +6580,7 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
    end do
  end do
 
- call timab(1931, 2, tsec)
+ !call timab(1931, 2, tsec)
 
 end subroutine gsph2box
 !!***
@@ -6838,7 +6834,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  call wrtout(std_out, sjoin(" Using: ", itoa(band1_max), "/", itoa(gwr%ugb_nband), "bands for chi0 head and wings."))
 
  ! Loop on spin to calculate $\chi_{\up,\up} + \chi_{\down,\down}$
- ! TODO: Spinor
+ ! TODO: nspinor 2
  nI = 1; nJ = 1; nomega = gwr%ntau
  omega(:) = j_dpc * gwr%iw_mesh(:)
  ABI_CALLOC(chi0_lwing, (npwe*nI, nomega, 3))

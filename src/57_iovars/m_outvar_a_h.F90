@@ -1193,6 +1193,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_chi_algo', 'INT', 0)
  intarr(1,:) = dtsets(:)%gwr_sigma_algo
  call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_sigma_algo', 'INT', 0)
+ intarr(1,:) = dtsets(:)%gwr_rpa_ncut
+ call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_rpa_ncut', 'INT', 0)
 
  ! TODO
  !call prttagm(dprarr, intarr, iout, jdtset_, 2, marr, 1, narrm, ncid, ndtset_alloc, 'gwr_task', 'INT', 0)
