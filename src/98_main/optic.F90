@@ -575,7 +575,15 @@ program optic
        nctkarr_t('shg_intra2w', "dp", "two, nomega, shg_ncomp, ntemp"), &
        nctkarr_t('shg_intra1w', "dp", "two, nomega, shg_ncomp, ntemp"), &
        nctkarr_t('shg_intra1wS', "dp", "two, nomega, shg_ncomp, ntemp"), &
-       nctkarr_t('shg_chi2tot', "dp", "two, nomega, shg_ncomp, ntemp") &
+       nctkarr_t('shg_chi2tot', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       ! Addition VT AR
+       nctkarr_t('shg_inter2w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_inter1w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra2w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1w_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_intra1wS_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_chi2tot_AR', "dp", "two, nomega, shg_ncomp, ntemp"), &
+       nctkarr_t('shg_chi2full', "dp", "two, nomega, shg_ncomp, ntemp") &
      ])
      NCF_CHECK(ncerr)
    end if

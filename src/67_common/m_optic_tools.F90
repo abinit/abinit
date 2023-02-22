@@ -643,6 +643,38 @@ real(dp) :: s(3,3),sym(3,3,3)
 complex(dpc), allocatable :: px(:,:,:,:,:), py(:,:,:,:,:), pz(:,:,:,:,:)
 complex(dpc), allocatable :: delta(:,:,:), inter2w(:), inter1w(:)
 complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
+! Addition VT antiresonant (AR)
+! Products of momentum matrix elem for the AR terms
+real(dp)     :: t2
+complex(dpc) :: mat2wa,mat1w1a,mat1w2a,mat2wa_tra,mat1w3a_tra
+complex(dpc) :: a111,a112,a113,a11                      ! AR inter2w term
+complex(dpc), allocatable :: inter2wa(:)
+complex(dpc) :: a121,a131,a122,a132,a123,a133,a12_13    ! AR inter1w term
+complex(dpc), allocatable :: inter1wa(:)
+complex(dpc) :: a241,a242,a243,a231,a24                 ! AR intra2w term
+complex(dpc), allocatable :: intra2wa(:)
+complex(dpc) :: a211,a221,a212,a222,a213,a223,a21_22    ! AR intra1w term
+complex(dpc), allocatable :: intra1wa(:)
+complex(dpc) :: a311,a312,a313,a331,a31_32              ! AR intra1wS term
+complex(dpc), allocatable :: intra1wSa(:)
+complex(dpc), allocatable :: chi2tota(:)                ! AR total sum
+complex(dpc), allocatable :: chi2full(:)               ! AR+R total sum
+! Addition VT bands decomposition
+!character(len=fnlen) :: fnam8
+!character(len=fnlen) :: fnam9
+!character(len=fnlen) :: fnam10
+!character(len=fnlen) :: fnam11
+!character(len=fnlen) :: fnam12
+!integer :: fout8
+!integer :: fout9
+!integer :: fout10
+!integer :: fout11
+!integer :: fout12
+!complex(dpc), allocatable :: inter2w_bands(:,:,:), inter2w_bands_ik(:,:,:) 
+!complex(dpc), allocatable :: inter1w_bands(:,:,:), inter1w_bands_ik(:,:,:)
+!complex(dpc), allocatable :: intra2w_bands(:,:,:), intra2w_bands_ik(:,:,:) 
+!complex(dpc), allocatable :: intra1w_bands(:,:,:), intra1w_bands_ik(:,:,:)
+!complex(dpc), allocatable :: intra1wS_bands(:,:,:), intra1wS_bands_ik(:,:,:)
 
 ! *********************************************************************
 
@@ -675,6 +707,12 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
  fnam5=trim(fnam)//'-ChiAbs.out'
  fnam6=trim(fnam)//'-ChiImDec.out'
  fnam7=trim(fnam)//'-ChiReDec.out'
+ ! Addition VT bands decomposition
+! fnam8=trim(fnam)//'-ChiInter2wBands.out' 
+! fnam9=trim(fnam)//'-ChiInter1wBands.out' 
+! fnam10=trim(fnam)//'-ChiIntra2wBands.out' 
+! fnam11=trim(fnam)//'-ChiIntra1wBands.out' 
+! fnam12=trim(fnam)//'-ChiIntra1wSBands.out' 
 
  if(my_rank == master) then
    ! If there exists inversion symmetry exit with a message.
@@ -741,13 +779,30 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
  !allocate local arrays
  ABI_MALLOC(px, (mband, mband, 3, 3, 3))
  ABI_MALLOC(py, (mband, mband, 3, 3, 3))
- ABI_MALLOC(pz,(mband,mband, 3, 3, 3))
+ ABI_MALLOC(pz, (mband, mband, 3, 3, 3))
  ABI_MALLOC(inter2w, (nmesh))
  ABI_MALLOC(inter1w, (nmesh))
  ABI_MALLOC(intra2w, (nmesh))
  ABI_MALLOC(intra1w, (nmesh))
  ABI_MALLOC(intra1wS, (nmesh))
  ABI_MALLOC(delta, (mband, mband, 3))
+ ! Addition VT antiresonant (AR)
+ ABI_MALLOC(inter2wa, (nmesh)) 
+ ABI_MALLOC(inter1wa, (nmesh)) 
+ ABI_MALLOC(intra2wa, (nmesh))
+ ABI_MALLOC(intra1wa, (nmesh))
+ ABI_MALLOC(intra1wSa, (nmesh))
+ ! Addition VT bands decomposition
+! ABI_MALLOC(inter2w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(inter2w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(inter1w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(inter1w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(intra2w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(intra2w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(intra1w_bands,      (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(intra1w_bands_ik,   (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(intra1wS_bands,     (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
+! ABI_MALLOC(intra1wS_bands_ik,  (nband_sum,nband_sum,nband_sum)) ! (l,m,n,w)
 
  !generate the symmetrizing tensor
  sym = zero
@@ -775,6 +830,23 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
  intra1w(:)=zero
  intra1wS(:)=zero
  delta(:,:,:)=zero
+ ! Addition VT antiresonant (AR)
+ inter2wa(:)=zero
+ inter1wa(:)=zero
+ intra2wa(:)=zero
+ intra1wa(:)=zero
+ intra1wSa(:)=zero
+ ! Addition VT bands decomposition
+! inter2w_bands(:,:,:)           = zero
+! inter2w_bands_ik(:,:,:)        = zero
+! inter1w_bands(:,:,:)           = zero
+! inter1w_bands_ik(:,:,:)        = zero
+! intra2w_bands(:,:,:)           = zero
+! intra2w_bands_ik(:,:,:)        = zero
+! intra1w_bands(:,:,:)           = zero
+! intra1w_bands_ik(:,:,:)        = zero
+! intra1wS_bands(:,:,:)          = zero
+! intra1wS_bands_ik(:,:,:)       = zero
 
  my_emin=HUGE(zero)
  my_emax=-HUGE(zero)
@@ -786,28 +858,30 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
    do isp=1,ks_ebands%nsppol
      !  loop over states
      do ist1=1,nband_sum
-       e1 = ks_ebands%eig(ist1,ik,isp)
-       if (e1.lt.ks_ebands%fermie) then   ! ist1 is a valence state
-         do ist2=1,nband_sum
-           e2 = ks_ebands%eig(ist2,ik,isp)
-           if (e2.gt.ks_ebands%fermie) then ! ist2 is a conduction state
+       ! Addition VT antiresonant (AR) commented
+       !e1 = ks_ebands%eig(ist1,ik,isp)
+       !if (e1.lt.ks_ebands%fermie) then   ! ist1 is a valence state
+       do ist2=1,nband_sum
+           ! Addition VT antiresonant (AR) commented
+           !e2 = ks_ebands%eig(ist2,ik,isp)
+           !if (e2.gt.ks_ebands%fermie) then ! ist2 is a conduction state
              ! symmetrize the momentum matrix elements
-             do lx=1,3
-               do ly=1,3
-                 do lz=1,3
-                   f1=sym(lx,ly,lz)+sym(lx,lz,ly)
-                   f2=sym(ly,lx,lz)+sym(ly,lz,lx)
-                   f3=sym(lz,lx,ly)+sym(lz,ly,lx)
-                   px(ist1,ist2,lx,ly,lz)=f1*pmat(ist1,ist2,ik,lx,isp)
-                   py(ist2,ist1,lx,ly,lz)=f2*pmat(ist2,ist1,ik,lx,isp)
-                   pz(ist2,ist1,lx,ly,lz)=f3*pmat(ist2,ist1,ik,lx,isp)
-                 end do
-               end do
-             end do ! end loop over states
-           end if
-         end do
-       end if
-     end do
+         do lx=1,3
+           do ly=1,3
+             do lz=1,3
+               f1=sym(lx,ly,lz)+sym(lx,lz,ly)
+               f2=sym(ly,lx,lz)+sym(ly,lz,lx)
+               f3=sym(lz,lx,ly)+sym(lz,ly,lx)
+               px(ist1,ist2,lx,ly,lz)=f1*pmat(ist1,ist2,ik,lx,isp)
+               py(ist2,ist1,lx,ly,lz)=f2*pmat(ist2,ist1,ik,lx,isp)
+               pz(ist2,ist1,lx,ly,lz)=f3*pmat(ist2,ist1,ik,lx,isp)
+             end do !lz
+           end do !ly
+         end do ! lx end loop over states
+       !end if ! e2.gt.fermie
+       end do ! ist2
+       !end if ! e1.lt.fermie
+     end do ! ist1
 
      ! calculate the energy window and \Delta_nm
      do ist1=1,nband_sum
@@ -842,6 +916,31 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
      b312=zero
      b313=zero
      b331=zero
+     ! Addition VT AR
+     ! factors are named as above but b->a for AR
+     a111=zero
+     a112=zero
+     a113=zero
+     a121=zero
+     a131=zero
+     a122=zero
+     a132=zero
+     a123=zero
+     a133=zero
+     a241=zero
+     a242=zero
+     a243=zero
+     a231=zero
+     a211=zero
+     a221=zero
+     a212=zero
+     a222=zero
+     a213=zero
+     a223=zero
+     a311=zero
+     a312=zero
+     a313=zero
+     a331=zero
      ! start the calculation
      do istn=1,nband_sum
        en=ks_ebands%eig(istn,ik,isp)
@@ -855,6 +954,9 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
              ! calculate the matrix elements for two band intraband term
              mat2w_tra=zero
              mat1w3_tra=zero
+             ! Addition VT AR
+             mat2wa_tra  = zero
+             mat1w3a_tra = zero
              do lx=1,3
                do ly=1,3
                  do lz=1,3
@@ -867,18 +969,34 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                    ! NOTE:: lx to ly m to n in pmat matrices respectively
                    ! Changes are made so that this (b3) term is according to paper
                    ! [[cite:Sipe1993]] (Ref. 4) rather than [[cite:Hughes1996]] (Ref 2) in which this term is incorrect
+                   
+                   ! Addition VT AR
+                   mat2wa_tra=mat2wa_tra+px(istm,istn,lx,ly,lz)*pmat(istn,istm,ik,lz,isp)    &
+                   *delta(istn,istm,ly)
+
+                   mat1w3a_tra=mat1w3a_tra+px(istm,istn,lx,ly,lz)*pmat(istn,istm,ik,ly,isp)  &
+                   *delta(istn,istm,lz)
+
                  end do
                end do
              end do
              b331=mat1w3_tra/wnm
              b231=8._dp*mat2w_tra/wmn
+             ! Addition VT AR
+             a331=mat1w3a_tra/wmn
+             a231=8._dp*mat2wa_tra/wnm
 
              b11=zero
              b12_13=zero
              b24=zero
              b31_32=zero
              b21_22=zero
-
+             ! Addition VT AR
+             a11    = zero
+             a12_13 = zero
+             a24    = zero
+             a21_22 = zero
+             a31_32 = zero
              ! istl < istn
              do istl=1,istn-1  ! istl is a valence state below istn
                el=ks_ebands%eig(istl,ik,isp)
@@ -890,6 +1008,10 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
+               ! Addition VT AR
+               mat2wa  = zero
+               mat1w1a = zero
+               mat1w2a = zero
                do lx=1,3
                  do ly=1,3
                    do lz=1,3
@@ -902,6 +1024,17 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
 
                      mat1w2=mat1w2+(pz(istm,istn,lx,ly,lz)*pmat(istl,istm,ik,lz,isp) &
                      *pmat(istn,istl,ik,ly,isp))
+
+                     ! Addition VT AR
+                     mat2wa=mat2wa+(px(istm,istn,lx,ly,lz)*pmat(istn,istl,ik,ly,isp)   &
+                     *pmat(istl,istm,ik,lz,isp))
+
+                     mat1w1a=mat1w1a+(py(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
+                     *pmat(istm,istl,ik,ly,isp))
+
+                     mat1w2a=mat1w2a+(pz(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
+                     *pmat(istm,istl,ik,ly,isp))
+                     
                    end do
                  end do
                end do
@@ -912,7 +1045,14 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                b211=mat1w1/wml
                b241=-mat2w/wml
                b311=mat1w2/wlm
-
+               ! Addition VT AR
+               a111=mat2wa*(1._dp/(wln+wlm))*(1._dp/wml)
+               a121=mat1w1a*(1._dp/wml) !*(1._dp/(wmn+wln))
+               a131=mat1w2a*(1._dp/(wlm-wmn))*(1._dp/wml)
+               a241=-mat2wa/wlm
+               a221=mat1w2a/wlm
+               a211=zero
+               a311=mat1w1a/wlm
                if (abs(wln).gt.tol) then
                  b111=b111/wln
                  b121=b121/wln
@@ -920,23 +1060,51 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                  b221=mat1w2/wln
                  b241=b241+(mat2w/wln)
                  b311=b311+(mat1w1/wln)
+                 ! Addition VT AR
+                 a111=a111/wnl
+                 a121=a121/wnl
+                 a131=a131/wnl
+                 a241=a241+(mat2wa/wnl)
+                 a211=mat1w1a/wnl
+                 a311=a311+(mat1w2a/wln)
                else
                  b111=zero
                  b121=zero
                  b131=zero
                  b221=zero
+                 ! Addition VT AR
+                 a111=zero
+                 a121=zero
+                 a131=zero
+                 a211=zero
                end if
                t1=wln-wnm
                if (abs(t1).gt.tol) then
                  b131=b131/t1
+               ! Addition VT AR
+                 a121=a121/t1
                else
                  b131=zero
+               ! Addition VT AR
+                 a121=zero
                end if
                b11=b11-2._dp*b111
                b12_13=b12_13+b121+b131
                b21_22=b21_22-b211+b221
                b24=b24+2._dp*b241
                b31_32=b31_32+b311
+               ! Addition VT AR
+               a11    = a11+2._dp*a111
+               a12_13 = a12_13-a121-a131
+               a24    = a24+2._dp*a241
+               a21_22 = a21_22+a211-a221
+               a31_32 = a31_32-a311
+               ! Addition VT bands decomposition
+!               inter2w_bands_ik(istl, istm, istn)  = -2._dp*b111
+!               inter1w_bands_ik(istl, istm, istn)  = b121+b131
+!               intra2w_bands_ik(istl, istm, istn)  = 2._dp*b241
+!               intra1w_bands_ik(istl, istm, istn)  = -b211+b221
+!               intra1wS_bands_ik(istl, istm, istn) = b311
              end do ! istl
 
              ! istn < istl < istm
@@ -946,6 +1114,10 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
+               ! Addition VT AR
+               mat2wa  = zero
+               mat1w1a = zero
+               mat1w2a = zero
                do lx=1,3
                  do ly=1,3
                    do lz=1,3
@@ -958,6 +1130,17 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
 
                      mat1w2=mat1w2+(pz(istm,istn,lx,ly,lz)*pmat(istl,istm,ik,lz,isp) &
                      *pmat(istn,istl,ik,ly,isp))
+                
+                     ! Addition VT AR
+                     mat2wa=mat2wa+(px(istm,istn,lx,ly,lz)*pmat(istn,istl,ik,ly,isp)   &
+                     *pmat(istl,istm,ik,lz,isp))
+
+                     mat1w1a=mat1w1a+(py(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
+                     *pmat(istm,istl,ik,ly,isp))
+
+                     mat1w2a=mat1w2a+(pz(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
+                     *pmat(istm,istl,ik,ly,isp))
+                      
                    end do
                  end do
                end do
@@ -981,6 +1164,14 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                b222=zero
                b212=zero
                b312=zero
+               ! Addition VT AR
+               a112=zero
+               a122=mat1w1a*(1._dp/(wmn+wln))
+               a132=mat1w2a*(1._dp/(wmn+wml))
+               a242=zero
+               a212=zero
+               a222=zero
+               a312=zero
                if (abs(wnl).gt.tol) then
                  b112=mat2w/wln
                  b122=b122/wnl
@@ -988,9 +1179,19 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                  b242=mat2w/wln
                  b222=mat1w2/wln
                  b312=mat1w1/wln
+                 ! Addition VT AR
+                 a112=mat2wa/wnl
+                 a122=a122/wln
+                 a132=a132/wln
+                 a242=mat2wa/wnl
+                 a212=mat1w1a/wnl
+                 a312=mat1w2a/wln
                else
                  b122=zero
                  b132=zero
+                 ! Addition VT AR
+                 a122=zero
+                 a132=zero
                end if
                if (abs(wlm).gt.tol) then
                  b112=b112/wml
@@ -999,23 +1200,51 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                  b242=b242-(mat2w/wml)
                  b212=mat1w1/wml
                  b312=b312+(mat1w2/wlm)
+                 ! Addition VT AR
+                 a112=a112/wlm
+                 a122=a122/wml
+                 a132=a132/wml
+                 a242=a242-(mat2wa/wlm)
+                 a222=mat1w2a/wlm
+                 a312=a312+(mat1w1a/wlm)
                else
                  b112=zero
                  b122=zero
                  b132=zero
                  b212=zero
+                 ! Addition VT AR
+                 a112=zero
+                 a122=zero
+                 a132=zero
+                 a222=zero
                end if
                t1=wlm-wnl
                if (abs(t1).gt.tol) then
                  b112=b112/t1
+                 ! Addition VT AR
+                 a112=a112/t1
                else
                  b112=zero
+                 ! Addition VT AR
+                 a112=zero
                end if
                b11=b11+2._dp*b112
                b12_13=b12_13-b122+b132
                b24=b24+2._dp*b242
                b21_22=b21_22-b212+b222
                b31_32=b31_32+b312
+               ! Addition VT AR
+               a11    = a11-2._dp*a112
+               a12_13 = a12_13+a122-a132
+               a24    = a24+2._dp*a242
+               a21_22 = a21_22+a212-a222
+               a31_32 = a31_32-a312
+               ! Addition VT bands decomposition
+!               inter2w_bands_ik(istl, istm, istn)  = 2._dp*b112 
+!               inter1w_bands_ik(istl, istm, istn)  = -b122+b132
+!               intra2w_bands_ik(istl, istm, istn)  = 2._dp*b242
+!               intra1w_bands_ik(istl, istm, istn)  = -b212+b222
+!               intra1wS_bands_ik(istl, istm, istn) = b312
              end do ! istl
 
              ! istl > istm    !
@@ -1029,9 +1258,14 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                mat2w=zero
                mat1w1=zero
                mat1w2=zero
+               ! Addition VT AR
+               mat2wa  = zero
+               mat1w1a = zero
+               mat1w2a = zero
                do lx=1,3
                  do ly=1,3
                    do lz=1,3
+
                      mat2w=mat2w+px(istn,istm,lx,ly,lz)*pmat(istm,istl,ik,ly,isp) &
                      *pmat(istl,istn,ik,lz,isp)
 
@@ -1040,6 +1274,17 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
 
                      mat1w2=mat1w2+(pz(istm,istn,lx,ly,lz)*pmat(istl,istm,ik,lz,isp) &
                      *pmat(istn,istl,ik,ly,isp))
+
+                     ! Addition VT AR
+                     mat2wa=mat2wa+px(istm,istn,lx,ly,lz)*pmat(istn,istl,ik,ly,isp) &
+                     *pmat(istl,istm,ik,lz,isp)
+
+                     mat1w1a=mat1w1a+(py(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
+                     *pmat(istm,istl,ik,ly,isp))
+
+                     mat1w2a=mat1w2a+(pz(istn,istm,lx,ly,lz)*pmat(istl,istn,ik,lz,isp) &
+                     *pmat(istm,istl,ik,ly,isp))
+
                    end do
                  end do
                end do
@@ -1051,6 +1296,14 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                b223=mat1w2/wln
                b213=zero
                b313=-1._dp*mat1w1/wnl
+               ! Addition VT AR
+               a113=mat2wa*(1._dp/(wnl+wml))*(1._dp/wln)
+               a123=mat1w1a*(1._dp/(wmn-wnl))*(1._dp/wln)
+               a133=mat1w2a*(1._dp/wln)!*(1._dp/(wml+wmn))
+               a243=mat2wa/wnl
+               a223=zero
+               a213=mat1w1a/wnl
+               a313=mat1w2a/wln
                if (abs(wml).gt.tol) then
                  b113=b113/wml
                  b123=b123/wml
@@ -1058,10 +1311,21 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                  b243=b243-(mat2w/wml)
                  b213=mat1w1/wml
                  b313=b313+(mat1w2/wlm)
+                 ! Addition VT AR
+                 a113=a113/wlm
+                 a123=a123/wlm
+                 a133=a133/wlm
+                 a243=a243-(mat2wa/wlm)
+                 a223=mat1w2a/wlm
+                 a313=a313-(mat1w1a/wml)
                else
                  b113=zero
                  b123=zero
                  b133=zero
+                 ! Addition VT AR
+                 a113=zero
+                 a123=zero
+                 a133=zero
                end if
                t1=wnm-wml
                if (abs(t1).gt.tol) then
@@ -1069,30 +1333,75 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                else
                  b123=zero
                end if
+               t2=(wml+wmn)
+               if (abs(t2).gt.tol) then
+                 a133=a133/t2
+               else
+                 a133=zero
+               end if
                b11=b11+2._dp*b113
                b12_13=b12_13+b123-b133
                b21_22=b21_22-b213+b223
                b24=b24+2._dp*b243
                b31_32=b31_32+b313
+               ! Addition VT AR
+               a11    = a11-2._dp*a113
+               a12_13 = a12_13-a123+a133
+               a24    = a24+2._dp*a243
+               a21_22 = a21_22+a213-a223
+               a31_32 = a31_32-a313
+               ! Addition VT bands decomposition
+!               inter2w_bands_ik(istl, istm, istn)  = 2._dp*b113
+!               inter1w_bands_ik(istl, istm, istn)  = b123-b133
+!               intra2w_bands_ik(istl, istm, istn)  = 2._dp*b243
+!               intra1w_bands_ik(istl, istm, istn)  = -b213+b223
+!               intra1wS_bands_ik(istl, istm, istn) = b313
              end do ! istl
 
-             b11=b11*zi*(1._dp/wnm)*const_esu
-             b12_13=b12_13*zi*(1._dp/wnm)*const_esu
-             b24=(b24+b231)*zi*(1._dp/(wnm**3))*const_esu
-             b21_22=(b21_22)*zi*(1._dp/(wnm**3))*const_esu
-             b31_32=(b31_32-b331)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp
+             b11    = b11*zi*(1._dp/wnm)*const_esu
+             b12_13 = b12_13*zi*(1._dp/wnm)*const_esu
+             b24    = (b24+b231)*zi*(1._dp/(wnm**3))*const_esu
+             b21_22 = (b21_22)*zi*(1._dp/(wnm**3))*const_esu
+             b31_32 = (b31_32-b331)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp
+             ! Addition VT AR
+             a11    = a11*zi*(1._dp/wmn)*const_esu
+             a12_13 = a12_13*zi*(1._dp/wmn)*const_esu
+             a24    = (a24-a231)*zi*(1._dp/(wmn**3))*const_esu
+             a21_22 = (a21_22)*zi*(1._dp/(wmn**3))*const_esu
+             a31_32 = (a31_32+a331)*zi*(1._dp/(wnm**3))*const_esu*0.5_dp
+             ! Addition VT bands decomposition
+!             inter2w_bands_ik(:, istm, istn)  = inter2w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
+!             inter1w_bands_ik(:, istm, istn)  = inter1w_bands_ik(:, istm, istn)*zi*(1._dp/wnm)*const_esu
+!             intra2w_bands_ik(:, istm, istn)  = intra2w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
+!             intra1w_bands_ik(:, istm, istn)  = intra1w_bands_ik(:, istm, istn)*zi*(1._dp/(wnm**3))*const_esu 
+!             intra1wS_bands_ik(:, istm, istn) = intra1wS_bands_ik(:, istm, istn)*zi*(1._dp/(wmn**3))*const_esu*0.5_dp 
+
              ! calculate over the desired energy mesh and sum over k-points
              do iw=1,nmesh
                w=(iw-1)*de+idel
-               inter2w(iw)=inter2w(iw)+(ks_ebands%wtk(ik)*(b11/(wmn-2._dp*w))) ! Inter(2w) from chi
-               inter1w(iw)=inter1w(iw)+(ks_ebands%wtk(ik)*(b12_13/(wmn-w))) ! Inter(1w) from chi
-               intra2w(iw)=intra2w(iw)+(ks_ebands%wtk(ik)*(b24/(wmn-2._dp*w))) ! Intra(2w) from eta
-               intra1w(iw)=intra1w(iw)+(ks_ebands%wtk(ik)*((b21_22)/(wmn-w))) ! Intra(1w) from eta
+               inter2w(iw)=inter2w(iw)+(ks_ebands%wtk(ik)*(b11/(wmn-2._dp*w)))  ! Inter(2w) from chi
+               inter1w(iw)=inter1w(iw)+(ks_ebands%wtk(ik)*(b12_13/(wmn-w)))     ! Inter(1w) from chi
+               intra2w(iw)=intra2w(iw)+(ks_ebands%wtk(ik)*(b24/(wmn-2._dp*w)))  ! Intra(2w) from eta
+               intra1w(iw)=intra1w(iw)+(ks_ebands%wtk(ik)*((b21_22)/(wmn-w)))   ! Intra(1w) from eta
                intra1wS(iw)=intra1wS(iw)+(ks_ebands%wtk(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
-             end do
-           end if
+               ! Addition VT AR
+               inter2wa(iw)=inter2wa(iw)+(ks_ebands%wtk(ik)*(a11/(wnm-2._dp*dble(w))))  ! Inter(2w) from chi AR
+               inter1wa(iw)=inter1wa(iw)+(ks_ebands%wtk(ik)*(a12_13/(wnm-dble(w))))     ! Inter(1w) from chi AR
+               intra2wa(iw)=intra2wa(iw)+(ks_ebands%wtk(ik)*(a24/(wnm-2._dp*dble(w))))  ! Intra(2w) from eta AR
+               intra1wa(iw)=intra1wa(iw)+(ks_ebands%wtk(ik)*((a21_22)/(wnm-dble(w))))   ! Intra(1w) from eta AR
+               intra1wSa(iw)=intra1wSa(iw)+(ks_ebands%wtk(ik)*((a31_32)/(wnm-dble(w)))) ! Intra(1w) from sigma AR
+               ! Addition VT bands decomposition
+!               if (iw==279) then ! need to restrict to one frequency due to memory issues
+!                 inter2w_bands(:, istm, istn)  = inter2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(inter2w_bands_ik(:, istm, istn)/(wmn-2._dp*w)))
+!                 inter1w_bands(:, istm, istn)  = inter1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(inter1w_bands_ik(:, istm, istn)/(wmn-w)))
+!                 intra2w_bands(:, istm, istn)  = intra2w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*(intra2w_bands_ik(:, istm, istn)/(wmn-2._dp*w))) 
+!                 intra1w_bands(:, istm, istn)  = intra1w_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1w_bands_ik(:, istm, istn))/(wmn-w)))
+!                 intra1wS_bands(:, istm, istn) = intra1wS_bands(:,istm,istn)+(ks_ebands%wtk(ik)*((intra1wS_bands_ik(:, istm, istn))/(wmn-w)))
+!               end if ! Chosen frequency for bands decomposition
+             end do ! iw
+           end if ! istm is CB
          end do ! istm
-       end if
+       end if ! istn is VB
      end do ! istn
    end do  ! spins
  end do ! k-points
@@ -1104,6 +1413,18 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
  call xmpi_sum(intra1wS,comm,ierr)
  call xmpi_min(my_emin,emin,comm,ierr)
  call xmpi_max(my_emax,emax,comm,ierr)
+ ! Addition VT AR
+ call xmpi_sum(inter2wa,comm,ierr)
+ call xmpi_sum(inter1wa,comm,ierr)
+ call xmpi_sum(intra2wa,comm,ierr)
+ call xmpi_sum(intra1wa,comm,ierr)
+ call xmpi_sum(intra1wSa,comm,ierr)
+ ! Addition VT bands decomposition
+! call xmpi_sum(inter2w_bands,comm,ierr)
+! call xmpi_sum(inter1w_bands,comm,ierr)
+! call xmpi_sum(intra2w_bands,comm,ierr)
+! call xmpi_sum(intra1w_bands,comm,ierr)
+! call xmpi_sum(intra1wS_bands,comm,ierr)
 
  if (my_rank == master) then
    ! write output in SI units and esu (esu to SI(m/v)=(value_esu)*(4xpi)/30000)
@@ -1113,15 +1434,31 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
      count4 = [2, nmesh, 1, 1]
      ABI_MALLOC(chi2tot, (nmesh))
      chi2tot = inter2w + inter1w + intra2w + intra1w + intra1wS
+     ! Addition VT AR
+     ABI_MALLOC(chi2tota, (nmesh))
+     ABI_MALLOC(chi2full, (nmesh))
+     chi2tota  = inter2wa + inter1wa + intra2wa + intra1wa + intra1wSa
+     chi2full = chi2tot + chi2tota
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"), c2r(inter2w), start=start4, count=count4))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"), c2r(inter1w), start=start4, count=count4))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"), c2r(intra2w), start=start4, count=count4))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w"), c2r(intra1w), start=start4, count=count4))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS"), c2r(intra1wS), start=start4, count=count4))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot"), c2r(chi2tot), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w"),     c2r(inter2w),   start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w"),     c2r(inter1w),   start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w"),     c2r(intra2w),   start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w"),     c2r(intra1w),   start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS"),    c2r(intra1wS),  start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot"),     c2r(chi2tot),   start=start4, count=count4))
+     ! Addition VT AR
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter2w_AR"),  c2r(inter2wa),  start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_inter1w_AR"),  c2r(inter1wa),  start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra2w_AR"),  c2r(intra2wa),  start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1w_AR"),  c2r(intra1wa),  start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_intra1wS_AR"), c2r(intra1wSa), start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2tot_AR"),  c2r(chi2tota),  start=start4, count=count4))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "shg_chi2full"),   c2r(chi2full), start=start4, count=count4))
 #endif
      ABI_FREE(chi2tot)
+     ! Addition VT AR
+     ABI_FREE(chi2tota)
+     ABI_FREE(chi2full)
    end if
 
    if (open_file(fnam1,msg,newunit=fout1,action='WRITE',form='FORMATTED') /= 0) then
@@ -1145,6 +1482,23 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
    if (open_file(fnam7,msg,newunit=fout7,action='WRITE',form='FORMATTED') /= 0) then
      ABI_ERROR(msg)
    end if
+   ! Addition VT bands decomposition
+!   if (open_file(fnam8,msg,newunit=fout8,action='WRITE',form='FORMATTED') /= 0) then
+!     ABI_ERROR(msg)
+!   end if
+!   if (open_file(fnam9,msg,newunit=fout9,action='WRITE',form='FORMATTED') /= 0) then
+!     ABI_ERROR(msg)
+!   end if
+!   if (open_file(fnam10,msg,newunit=fout10,action='WRITE',form='FORMATTED') /= 0) then
+!     ABI_ERROR(msg)
+!   end if
+!   if (open_file(fnam11,msg,newunit=fout11,action='WRITE',form='FORMATTED') /= 0) then
+!     ABI_ERROR(msg)
+!   end if
+!   if (open_file(fnam12,msg,newunit=fout12,action='WRITE',form='FORMATTED') /= 0) then
+!     ABI_ERROR(msg)
+!   end if
+
    ! write headers
    write(fout1, '(a,3i3)' ) ' #calculated the component:',v1,v2,v3
    write(fout1, '(a,es16.6)' ) ' #tolerance:',tol
@@ -1208,14 +1562,59 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
    write(fout7, '(a)')' # Energy(eV) Chi(w) Eta(w) Sigma(w)'
    write(fout7, '(a)')' # in esu'
    write(fout7, '(a)')' # '
+   ! Addition VT bands decomposition
+!   write(fout8, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+!   write(fout8, '(a,es16.6)') ' #tolerance:',tol
+!   write(fout8, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+!   write(fout8, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+!   write(fout8, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+!   write(fout8, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter2w             Im Inter2w'
+!   write(fout8, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+!   write(fout8, '(a)')' # '
 
-   totim=zero
-   totre=zero
-   totabs=zero
-   do iw=2,nmesh
-     ene=(iw-1)*de
-     ene=ene*ha2ev
+!   write(fout9, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+!   write(fout9, '(a,es16.6)') ' #tolerance:',tol
+!   write(fout9, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+!   write(fout9, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+!   write(fout9, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+!   write(fout9, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Inter1w             Im Inter1w'
+!   write(fout9, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+!   write(fout9, '(a)')' # '
 
+!   write(fout10, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+!   write(fout10, '(a,es16.6)') ' #tolerance:',tol
+!   write(fout10, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+!   write(fout10, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+!   write(fout10, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+!   write(fout10, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra2w             Im Intra2w'
+!   write(fout10, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+!   write(fout10, '(a)')' # '
+
+!   write(fout11, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+!   write(fout11, '(a,es16.6)') ' #tolerance:',tol
+!   write(fout11, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+!   write(fout11, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+!   write(fout11, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+!   write(fout11, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1w             Im Intra1w'
+!   write(fout11, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+!   write(fout11, '(a)')' # '
+
+!   write(fout12, '(a,3i3)') ' #calculated the component:',v1,v2,v3
+!   write(fout12, '(a,es16.6)') ' #tolerance:',tol
+!   write(fout12, '(a,es16.6,a)') ' #broadening:',brod,'Ha'
+!   write(fout12, '(a,es16.6,a)') ' #scissors shift:',sc,'Ha'
+!   write(fout12, '(a,es16.6,a,es16.6,a)') ' #energy window:',(emax-emin)*ha2ev,'eV',(emax-emin),'Ha'
+!   write(fout12, '(a)')' # Energy(eV)  n valence   m conduction   l both   Re Intra1wS            Im Intra1wS'
+!   write(fout12, '(a)')' # eV                                              *10^-12 m/V SI units   *10^-12 m/V SI units '
+!   write(fout12, '(a)')' # '
+
+   totim=zero              
+   totre=zero              
+   totabs=zero             
+   do iw=2,nmesh           
+     ene=(iw-1)*de         
+     ene=ene*ha2ev         
+                           
      totim=aimag(inter2w(iw)+inter1w(iw)+intra2w(iw)+intra1w(iw)+intra1wS(iw))/1.d-7
      write(fout1,'(f15.6,2es15.6)') ene,totim,totim*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-5)
      totim=zero
@@ -1240,6 +1639,42 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
      write(fout7,'(f15.6,4es15.6)') ene,dble(inter2w(iw)+inter1w(iw))/1.d-7,       &
      dble(intra2w(iw)+intra1w(iw))/1.d-7,dble(intra1wS(iw))/1.d-7
    end do
+   ! Addition VT bands decomposition
+   do iw=2,nmesh
+     if (iw==279) then
+       ene=(iw-1)*de         
+       ene=ene*ha2ev         
+       
+       do istn=1,nband_sum
+         do istm=1,nband_sum
+           do istl=1,nband_sum
+
+!             write(fout8,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+!             dble(inter2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
+!             aimag(inter2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+
+!             write(fout9,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+!             dble(inter1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
+!             aimag(inter1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+
+!             write(fout10,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+!             dble(intra2w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
+!             aimag(intra2w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+
+!             write(fout11,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+!             dble(intra1w_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),     &
+!             aimag(intra1w_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+
+!             write(fout12,'(f15.6,3i15,2es16.6)') ene,istn,istm,istl,                            &
+!             dble(intra1wS_bands(istl,istm,istn)) *4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12),    &
+!             aimag(intra1wS_bands(istl,istm,istn))*4._dp*pi*(1._dp/30000._dp)*(1._dp/1.d-12)
+
+           end do ! istl
+         end do ! istm  
+       end do ! istn
+     end if ! iw==2
+   end do ! iw   
+
 
    close(fout1)
    close(fout2)
@@ -1248,6 +1683,13 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
    close(fout5)
    close(fout6)
    close(fout7)
+   ! Addition VT bands decomposition
+!   close(fout8)
+!   close(fout9)
+!   close(fout10)
+!   close(fout11)
+!   close(fout12)
+
    ! print information
    write(std_out,*) ' '
    write(std_out,*) 'information about calculation just performed:'
@@ -1279,6 +1721,23 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
  ABI_FREE(intra1w)
  ABI_FREE(intra1wS)
  ABI_FREE(delta)
+ ! Addition VT AR
+ ABI_FREE(inter2wa)
+ ABI_FREE(inter1wa)
+ ABI_FREE(intra2wa)
+ ABI_FREE(intra1wa)
+ ABI_FREE(intra1wSa)
+ ! Addition VT bands decomposition
+! ABI_FREE(inter2w_bands)
+! ABI_FREE(inter2w_bands_ik)
+! ABI_FREE(inter1w_bands)
+! ABI_FREE(inter1w_bands_ik)
+! ABI_FREE(intra2w_bands)
+! ABI_FREE(intra2w_bands_ik)
+! ABI_FREE(intra1w_bands)
+! ABI_FREE(intra1w_bands_ik)
+! ABI_FREE(intra1wS_bands)
+! ABI_FREE(intra1wS_bands_ik)
 
 end subroutine nlinopt
 !!***
