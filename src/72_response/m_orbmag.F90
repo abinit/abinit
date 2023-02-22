@@ -1866,40 +1866,46 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
  end if
 
- if(abs(dtset%orbmag) .EQ. 2) then
+ if(dtset%orbmag .EQ. 2) then
    write(message,'(a)')ch10
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Term-by-term breakdowns for each band : '
    call wrtout(ab_out,message,'COLL')
    do iband = 1, nband_k
-     write(message,'(a)')ch10
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,i2,a,i2)') ' band ',iband,' of ',nband_k
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_terms(1,iband,1,adir,imcc),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_terms(1,iband,1,adir,imvv1),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_terms(1,iband,1,adir,imvv2),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_terms(1,iband,1,adir,imnl),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '   <L_R> terms : ',(orbmag_terms(1,iband,1,adir,imlr),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(1,iband,1,adir,imbm),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a)')ch10
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(1,iband,adir),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') '  Ch CC : ',(orbmag_terms(1,iband,1,adir,ibcc),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' Ch VV1 : ',(orbmag_terms(1,iband,1,adir,ibvv1),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,3es16.8)') ' Ch VV2 : ',(orbmag_terms(1,iband,1,adir,ibvv2),adir=1,3)
-     call wrtout(ab_out,message,'COLL')
+     do isppol = 1, dtset%nsppol
+       write(message,'(a)')ch10
+       call wrtout(ab_out,message,'COLL')
+       if (dtset%nsppol .EQ. 2) then
+         write(message,'(a,i3,a,i3,a,i2,a,i2)') ' band ',iband,' of ',nband_k,'; spin polarization ',isppol,' of ',dtset%nsppol
+       else
+         write(message,'(a,i3,a,i3)') ' band ',iband,' of ',nband_k
+       end if
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') ' Orbital magnetic moment : ',(orbmag_bb(1,iband,adir),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') '     rho(1) CC : ',(orbmag_terms(1,iband,isppol,adir,imcc),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_terms(1,iband,isppol,adir,imvv1),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_terms(1,iband,isppol,adir,imvv2),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_terms(1,iband,isppol,adir,imnl),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') '   <L_R> terms : ',(orbmag_terms(1,iband,isppol,adir,imlr),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(1,iband,isppol,adir,imbm),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a)')ch10
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(1,iband,adir),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') '  Ch CC : ',(orbmag_terms(1,iband,isppol,adir,ibcc),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') ' Ch VV1 : ',(orbmag_terms(1,iband,isppol,adir,ibvv1),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3es16.8)') ' Ch VV2 : ',(orbmag_terms(1,iband,isppol,adir,ibvv2),adir=1,3)
+       call wrtout(ab_out,message,'COLL')
+     end do !isppol
    end do ! iband
  end if
 
