@@ -2123,8 +2123,12 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
     itypat=dtset%typat(iat)
     do klmn=1,pawtab(itypat)%lmn2_size
       do idij = 1, dterm%ndij
-        dterm%aij(iatom,klmn,idij) = &
-          & CMPLX(paw_ij(iatom)%dij(2*klmn-1,idij),paw_ij(iatom)%dij(2*klmn,idij))
+        if (paw_ij(iatom)%cplex_dij .EQ. 2) then
+          dterm%aij(iatom,klmn,idij) = &
+            & CMPLX(paw_ij(iatom)%dij(2*klmn-1,idij),paw_ij(iatom)%dij(2*klmn,idij))
+        else
+          dterm%aij(iatom,klmn,idij) = CMPLX(paw_ij(iatom)%dij(klmn,idij),zero)
+        end if
       end do ! idij
     end do ! klmn
   end do ! iat
