@@ -430,7 +430,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      ! compute P_c|cg1>
      ABI_MALLOC(pcg1_k,(2,mcgk,3))
      call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mpi_enreg,nband_k,npw_k,pcg1_k)
+       & mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
      
      ! compute <p|Pc cg1> cprjs
      ABI_MALLOC(cprj1_k,(dtset%natom,mcprjk,3))
@@ -684,8 +684,9 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk
  
  do adir = 1, 3
    do nn = 1, nband_k
-
      trnrm = occ_k(nn)*dtset%wtk(ikpt)/ucvol
+     if(abs(trnrm).LT.tol8) cycle
+
      call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
        & dtset%mkmem,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
      
@@ -770,6 +771,7 @@ subroutine orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
  do adir = 1, 3
    do nn = 1, nband_k
      trnrm = occ_k(nn)*dtset%wtk(ikpt)/ucvol
+     if(abs(trnrm).LT.tol8) cycle
      call pawcprj_get(atindx,cwaveprj,cprj_k,dtset%natom,nn,0,ikpt,0,isppol,dtset%mband,&
        & dtset%mkmem,dtset%natom,1,nband_k,dtset%nspinor,dtset%nsppol,0)
 
@@ -877,10 +879,11 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppo
 
  do adir = 1, 3
    do nn = 1, nband_k
+     trnrm = occ_k(nn)*dtset%wtk(ikpt)/ucvol
+     if (abs(trnrm).LT.tol8) cycle
 
      m1 = czero
      b1 = czero
-     trnrm = occ_k(nn)*dtset%wtk(ikpt)/ucvol
 
      do bdir = 1, 3
        do gdir = 1, 3
@@ -1011,6 +1014,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
      m1 = czero; mv2b = czero
      b1 = czero; bv2b = czero
      trnrm = occ_k(nn)*dtset%wtk(ikpt)/ucvol
+     if(abs(trnrm).LT.tol8) cycle
 
      do bdir = 1, 3
        do gdir = 1, 3
@@ -1050,6 +1054,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
          m1 = m1 + prefac_m*CMPLX(dotr,-doti)*eig_k(nn)
          
          do np = 1, nband_k
+           if(abs(occ_k(np)).LT.tol8) cycle
 
            bra(1:2,1:npwsp) = cg_k(1:2,(np-1)*npwsp+1:np*npwsp)
        
@@ -1115,7 +1120,7 @@ end subroutine orbmag_vv_k
 !! SOURCE
 
 subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
-    & ikpt,isppol,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,pcg1_k)
+    & ikpt,isppol,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
 
   !Arguments ------------------------------------
   !scalars
@@ -1126,7 +1131,7 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
-  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3)
+  real(dp),intent(in) :: cg_k(2,mcgk),cg1_k(2,mcgk,3),occ_k(nband_k)
   real(dp),intent(out) :: pcg1_k(2,mcgk,3)
   type(pawcprj_type),intent(in) ::  cprj_k(dtset%natom,mcprjk)
 
@@ -1176,6 +1181,7 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
       !! form vcg1 = -1/2 \sum |u_j^0><u_j^0|S^1|u_i^0>, the valence band part of cg1
       vcg1 = zero
       do jband = 1, nband_k
+        if(abs(occ_k(jband)).LT.tol8) cycle
         cwavef(1:2,1:npwsp)=cg_k(1:2,(jband-1)*npwsp+1:jband*npwsp)
         dotr = DOT_PRODUCT(cwavef(1,:),svectout(1,:))+DOT_PRODUCT(cwavef(2,:),svectout(2,:))
         doti = DOT_PRODUCT(cwavef(1,:),svectout(2,:))-DOT_PRODUCT(cwavef(2,:),svectout(1,:))
