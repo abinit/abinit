@@ -590,7 +590,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  end do ! isppol
 
 ! get the Lamb term
-call lamb_core(atindx,dtset,omlamb)
+call lamb_core(atindx,dtset,omlamb,pawtab)
 orbmag_trace(:,:,iomlmb) = omlamb
 
 call orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
@@ -1232,7 +1232,7 @@ end subroutine make_pcg1
 !!
 !! SOURCE
 
-subroutine lamb_core(atindx,dtset,omlamb)
+subroutine lamb_core(atindx,dtset,omlamb,pawtab)
 
   !Arguments ------------------------------------
   !scalars
@@ -1241,21 +1241,28 @@ subroutine lamb_core(atindx,dtset,omlamb)
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   real(dp),intent(out) :: omlamb(2,3)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
   integer :: adir,iat,iatom,itypat
+  real(dp) :: lambsig
 
 !--------------------------------------------------------------------
 
   omlamb = zero 
-  do adir = 1, 3
-    do iat=1,dtset%natom
-      iatom = atindx(iat)
-      itypat = dtset%typat(iat)
-      omlamb(1,adir) = omlamb(1,adir) - dtset%lambsig(itypat)*dtset%nucdipmom(adir,iat)
-    end do ! end loop over atoms
-  end do ! end loop over adir
+  do iat=1,dtset%natom
+    iatom = atindx(iat)
+    itypat = dtset%typat(iat)
+    if (abs(dtset%lambsig(itypat)).GT.tol8) then
+      lambsig=dtset%lambsig(itypat)
+    else
+      lambsig=pawtab(itypat)%lamb_shielding
+    end if
+    do adir = 1, 3
+      omlamb(1,adir) = omlamb(1,adir) - lambsig*dtset%nucdipmom(adir,iat)
+    end do ! end loop over adir
+  end do ! end loop over iat
  
 end subroutine lamb_core
 !!***
