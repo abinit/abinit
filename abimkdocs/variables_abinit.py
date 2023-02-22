@@ -22964,7 +22964,7 @@ unoccupied bands in the buffer with [[extfpmd_nbdbuf]] input variable.
 
   * **useextfpmd** = 1 *(Recommended)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
-contributions will be computed with integrals over the band number.
+contributions will be computed using the density of states of the Fermi gas.
 
   * **useextfpmd** = 2, the energy shift will be evaluated by making
 the average between the eigenvalues and the Fermi gas energy over the last
@@ -22975,6 +22975,10 @@ over the band number.
 average between the eigenvalues and the kinetic energies over the last
 [[extfpmd_nbcut]] bands, and the contributions will be computed using the
 density of states of the Fermi gas.
+
+  * **useextfpmd** = 4, the energy shift will be evaluated
+by making an integration of the trial potential over the real space and the
+contributions will be computed with integrals over the band number.
 """,
 ),
 
@@ -23013,9 +23017,6 @@ electronic contributions starting from [[nband]] - [[extfpmd_nbdbuf]].
 In some cases, setting this input variable to a positive number can solve
 convergency problems due to high variations of electron density within the SCF
 cycle.
-
-Moreover, setting [[extfpmd_nbdbuf]] = [[nband]] should theoretically give
-access to Fermi gas orbital free calculations (not tested yet).
 
 **extfpmd_nbdbuf** must be less than or equal to [[nband]].
 """,

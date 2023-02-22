@@ -281,8 +281,8 @@ contains
       this%shiftfactor=this%shiftfactor/this%nbcut
     end if
 
-    ! Get extended FPMD band energy cutoff for version 10, 3 and 4.
-    if(this%version==10.or.this%version==3.or.this%version==4) then
+    ! Get extended FPMD band energy cutoff for version 1, 3 and 10.
+    if(this%version==1.or.this%version==3.or.this%version==10) then
       this%e_bcut=0
       band_index=0
       do isppol=1,nsppol
@@ -335,7 +335,7 @@ contains
     ! Computes extfpmd contribution to nelect integrating
     ! over accessible states from bcut to infinity with
     ! order 1/2 incomplete Fermi-Dirac integral.
-    if(this%version==1.or.this%version==2) then
+    if(this%version==4.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
@@ -344,7 +344,7 @@ contains
     ! Computes extfpmd contribution to nelect integrating
     ! over energy from e_bcut to infinity with order 1/2
     ! incomplete Fermi-Dirac integral.
-    if(this%version==3.or.this%version==4) then
+    if(this%version==1.or.this%version==3) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
@@ -412,7 +412,7 @@ contains
     ! Computes extfpmd contribution to kinetic energy integrating
     ! over accessible states from bcut to infinity with
     ! order 3/2 incomplete Fermi-Dirac integral.
-    if(this%version==1.or.this%version==2) then
+    if(this%version==4.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
@@ -421,7 +421,7 @@ contains
     ! Computes extfpmd contribution to kinetic energy integrating
     ! over energy from e_bcut to infinity with order 3/2
     ! incomplete Fermi-Dirac integral.
-    if(this%version==3.or.this%version==4) then
+    if(this%version==1.or.this%version==3) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
@@ -497,7 +497,7 @@ contains
     ! Computes extfpmd contribution to the entropy integrating
     ! over accessible states with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
-    if(this%version==1.or.this%version==2.or.this%version==10) then
+    if(this%version==2.or.this%version==4.or.this%version==10) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
@@ -526,7 +526,7 @@ contains
     ! Computes extfpmd contribution to the entropy integrating
     ! over energy with Fermi-Dirac complete integrals and
     ! substracting 0 to bcut contribution with numeric integration.
-    if(this%version==3.or.this%version==4) then
+    if(this%version==1.or.this%version==3) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
       gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
