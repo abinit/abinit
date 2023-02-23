@@ -642,8 +642,7 @@ type, public :: dataset_type
  integer :: vdw_df_tweaks
  integer :: vdw_xc
 !W
- !integer :: wfinit = 0
- integer :: wfinit = 1
+ integer :: wfinit = 0
  integer :: wfoptalg
  integer :: wfk_task
  integer :: wvl_bigdft_comp
