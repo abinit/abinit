@@ -227,6 +227,72 @@ extern "C" void gpu_xgemm_omp_(int* cplx, char *transA, char *transB, int *N, in
                 (cuDoubleComplex *)(C_ptr), *ldc));
 }
 
+
+extern "C" void gpu_xgemm_strided_batched_omp_(int* cplx, char *transA, char *transB,
+                           int *N, int *M, int *K,
+                           cuDoubleComplex *alpha,
+                           void *A_ptr, int *lda, int *strideA,
+                           void* B_ptr, int *ldb, int *strideB,
+                           cuDoubleComplex *beta,
+                           void* C_ptr, int *ldc, int *strideC, int *batchCount)
+{
+
+  cublasOperation_t opA = select_cublas_op(transA);
+  cublasOperation_t opB = select_cublas_op(transB);
+
+  (*cplx==1)?
+    CUDA_API_CHECK( cublasDgemmStridedBatched(cublas_handle, opA, opB,
+                *N, *M, *K, &((*alpha).x),
+                (double *)(A_ptr), *lda, *strideA,
+                (double *)(B_ptr), *ldb, *strideB,
+                &((*beta).x),
+                (double *)(C_ptr), *ldc, *strideC, *batchCount)) :
+    CUDA_API_CHECK( cublasZgemmStridedBatched(cublas_handle, opA, opB,
+                *N, *M, *K, alpha,
+                (cuDoubleComplex *)(A_ptr), *lda, *strideA,
+                (cuDoubleComplex *)(B_ptr), *ldb, *strideB,
+                beta,
+                (cuDoubleComplex *)(C_ptr), *ldc, *strideC, *batchCount));
+}
+
+extern "C" void gpu_xsymm_omp_(int* cplx, char *side, char *uplo, int *N, int *M,
+                           cuDoubleComplex *alpha,
+                           void *A_ptr, int *lda, void* B_ptr, int *ldb,
+                           cuDoubleComplex *beta, void* C_ptr, int *ldc)
+{
+
+  cublasSideMode_t sideMode = select_cublas_side(side);
+  cublasFillMode_t fillMode = select_cublas_fill_mode(uplo);
+
+  (*cplx==1)?
+    CUDA_API_CHECK( cublasDsymm(cublas_handle, sideMode, fillMode, *N, *M, &((*alpha).x),
+                (double *)(A_ptr), *lda,
+                (double *)(B_ptr), *ldb,
+                &((*beta).x),
+                (double *)(C_ptr), *ldc)) :
+    CUDA_API_CHECK( cublasZsymm(cublas_handle, sideMode, fillMode, *N, *M, alpha,
+                (cuDoubleComplex *)(A_ptr), *lda,
+                (cuDoubleComplex *)(B_ptr), *ldb,
+                beta,
+                (cuDoubleComplex *)(C_ptr), *ldc));
+}
+
+extern "C" void gpu_zhemm_omp_(char *side, char *uplo, int *N, int *M,
+                           cuDoubleComplex *alpha,
+                           void *A_ptr, int *lda, void* B_ptr, int *ldb,
+                           cuDoubleComplex *beta, void* C_ptr, int *ldc)
+{
+
+  cublasSideMode_t sideMode = select_cublas_side(side);
+  cublasFillMode_t fillMode = select_cublas_fill_mode(uplo);
+
+  CUDA_API_CHECK( cublasZhemm(cublas_handle, sideMode, fillMode, *N, *M, alpha,
+              (cuDoubleComplex *)(A_ptr), *lda,
+              (cuDoubleComplex *)(B_ptr), *ldb,
+              beta,
+              (cuDoubleComplex *)(C_ptr), *ldc));
+}
+
 /*=========================================================================*/
 // NAME
 //  gpu_xtrsm
