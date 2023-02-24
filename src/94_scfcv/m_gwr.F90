@@ -565,6 +565,7 @@ module m_gwr
    ! Sequential mpi_type needed to invoke ABINIT routines requiring it.
 
    type(processor_scalapack) :: g_slkproc
+   ! 1D PBLAS grid to block-distribute matrices along columns inside gcomm.
 
    type(__slkmat_t),allocatable :: gt_kibz(:,:,:,:)
    ! (2, nkibz, ntau, nsppol)
