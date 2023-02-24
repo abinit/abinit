@@ -25,9 +25,9 @@ module m_gpu_toolbox
  use m_initcuda
  use m_gpu_detect
 
-#ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding
-#endif
+!#ifdef HAVE_FC_ISO_C_BINDING
+! use, intrinsic :: iso_c_binding
+!#endif
 
  implicit none
 

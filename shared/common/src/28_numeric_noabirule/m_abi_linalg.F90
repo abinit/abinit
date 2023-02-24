@@ -37,7 +37,7 @@ module m_abi_linalg
 #endif
 
 #if defined HAVE_GPU_CUDA
- !use m_gpu_toolbox
+ use m_gpu_toolbox
 
  ! MG: I had to comment this import to avoid the following error on buda2_gnu_8.5_cuda
  !
