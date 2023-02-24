@@ -27,7 +27,7 @@ MODULE m_fft_mesh
  use m_errors
  use m_abicore
  use m_hide_blas
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use defs_fftdata,     only : size_goed_fft
  use m_fstrings,       only : sjoin, itoa, ltoa

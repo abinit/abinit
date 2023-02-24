@@ -137,7 +137,7 @@ module m_gwr
  use m_dtfil
  use m_yaml
  use m_sigtk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_hide_blas
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t

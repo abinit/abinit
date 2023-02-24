@@ -32,7 +32,7 @@ MODULE m_nctk
  use m_abicore
  use m_build_info
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_xmpi
 #ifdef HAVE_NETCDF
  use netcdf

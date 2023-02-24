@@ -27,7 +27,7 @@ MODULE m_crystal
  use m_atomdata
  use m_xmpi
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_NETCDF
  use netcdf
 #endif

@@ -53,7 +53,7 @@ MODULE m_fft
  ! MG: Had to comment this line to avoid "Ambiguous reference to c_ptr on buda2 with CUDA
  !use m_manage_cuda
 #endif
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  implicit none
 
@@ -167,22 +167,22 @@ MODULE m_fft
 #if defined HAVE_GPU_CUDA
  interface
    subroutine gpu_planpp_free(plan_pp) bind(C)
-     use iso_c_binding
+     use, intrinsic :: iso_c_binding
      type(c_ptr),intent(inout) :: plan_pp
    end subroutine gpu_planpp_free
    subroutine devpp_free(dev_pp) bind(C)
-     use iso_c_binding
+     use, intrinsic :: iso_c_binding
      type(c_ptr),intent(inout) :: dev_pp
    end subroutine devpp_free
    subroutine xgpu_fftbox_c2c_ip(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, plan_pp, d_ff) bind(C)
-     use iso_c_binding
+     use, intrinsic :: iso_c_binding
      integer(c_int),intent(in) :: f_dims(3), f_embed(3)
      integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
      type(c_ptr),intent(in) :: h_ff
      type(c_ptr),intent(inout) :: plan_pp, d_ff
    end subroutine xgpu_fftbox_c2c_ip
    subroutine xgpu_fftbox_c2c_op(f_dims, f_embed, ndat, isign, kind, iscale, h_ff, h_gg, plan_pp, d_ff, d_gg) bind(C)
-     use iso_c_binding
+     use, intrinsic :: iso_c_binding
      integer(c_int),intent(in) :: f_dims(3), f_embed(3)
      integer(c_int),value, intent(in) :: ndat, isign, kind, iscale
      type(c_ptr),intent(in) :: h_ff, h_gg

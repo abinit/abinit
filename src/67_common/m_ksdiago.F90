@@ -28,7 +28,7 @@ module m_ksdiago
  use m_xomp
  use m_hamiltonian
  use m_distribfft
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use libxc_functionals
 
  use defs_datatypes,      only : pseudopotential_type

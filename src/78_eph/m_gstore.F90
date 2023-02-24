@@ -109,7 +109,7 @@ module m_gstore
  use m_htetra
  use libtetrabz
  use m_ebands
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use netcdf
  use m_nctk
  use m_wfk

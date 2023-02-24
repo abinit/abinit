@@ -26,7 +26,7 @@ module m_gpu_toolbox
  use m_gpu_detect
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #endif
 
  implicit none
@@ -36,7 +36,7 @@ module m_gpu_toolbox
 #if defined HAVE_GPU_CUDA
 !interface
 !  integer(C_INT) function cuda_func() bind(C)
-!    use iso_c_binding, only : C_INT,C_PTR
+!    use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
 !    type(C_PTR) :: ptr
 !  end function cuda_func
 #endif

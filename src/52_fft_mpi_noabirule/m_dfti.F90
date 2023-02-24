@@ -49,7 +49,7 @@ MODULE m_dfti
  use m_cgtools
  use m_cplxtools
  use m_fftcore
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_DFTI
  use MKL_DFTI
 #endif

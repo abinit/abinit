@@ -32,7 +32,7 @@ MODULE m_io_screening
  use m_nctk
  use m_errors
  use m_dtset
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use netcdf
  use m_hdr
  use m_sort
