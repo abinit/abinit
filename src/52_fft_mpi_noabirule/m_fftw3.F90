@@ -47,7 +47,7 @@ MODULE m_fftw3
  use m_cplxtools
  use m_distribfft
  use m_fftcore
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use m_time,           only : timab
  use m_numeric_tools,  only : imax_loc

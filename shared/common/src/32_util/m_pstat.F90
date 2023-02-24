@@ -24,7 +24,7 @@ module m_pstat
  use defs_basis
  use m_abicore
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_yaml
 
  use m_fstrings, only : find_and_select

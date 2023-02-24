@@ -258,7 +258,7 @@ module m_xgScalapack
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: eigenvalues
@@ -331,7 +331,7 @@ module m_xgScalapack
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: matrixB

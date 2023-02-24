@@ -28,7 +28,7 @@ block
    ! 2) transform is out-of-place here
    ! 3) Cannot use [ZC]copy: this is a template used both for single and double precision.
 
-   ! MG: Well, now one can use iso_c_binding for dp version but there's no point in optimizing 
+   ! MG: Well, now one can use, intrinsic :: iso_c_binding for dp version but there's no point in optimizing 
    !     this part as fftw3/dfti are much faster.
 
    ABI_MALLOC(arr,   (2, ldx, ldy, ldz))

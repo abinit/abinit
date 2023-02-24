@@ -27,7 +27,7 @@ MODULE m_sigma
  use m_xmpi
  use m_abicore
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
  use m_yaml
  use m_melemts

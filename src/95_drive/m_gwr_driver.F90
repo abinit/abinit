@@ -36,7 +36,7 @@ module m_gwr_driver
  use m_wfk
  use m_distribfft
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type

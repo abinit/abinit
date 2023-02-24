@@ -30,7 +30,7 @@ MODULE m_bse_io
 #endif
  use netcdf
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_hdr
 
  use m_time,           only : cwtime

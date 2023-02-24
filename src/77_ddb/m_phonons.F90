@@ -33,7 +33,7 @@ module m_phonons
  use m_cgtools
  use m_crystal
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_atprj
  use m_sortph
  use m_ddb

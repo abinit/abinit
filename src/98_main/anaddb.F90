@@ -41,7 +41,7 @@ program anaddb
  use m_phonons
  use m_gruneisen
  use m_supercell
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf

@@ -22,7 +22,7 @@
 module m_sigmaph
 
  use defs_basis
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_abicore
 #ifdef HAVE_MPI2
  use mpi
@@ -5004,7 +5004,7 @@ subroutine sigmaph_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 
  ! Write self-energy matrix elements for this (kpt, spin)
  ! NB: Only master writes
- ! (use iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
+ ! (use, intrinsic :: iso_c_binding to associate a real pointer to complex data because netcdf does not support complex types).
  ! Well, cannot use c_loc with gcc <= 4.8 due to internal compiler error so use c2r and stack memory.
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"), c2r(self%vals_e0ks), start=[1,1,1,ikcalc,spin]))
  NCF_CHECK(nf90_put_var(self%ncid, nctk_idname(self%ncid, "dvals_de0ks"), c2r(self%dvals_de0ks), start=[1,1,1,ikcalc,spin]))

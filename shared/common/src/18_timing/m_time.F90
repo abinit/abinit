@@ -24,7 +24,7 @@ module m_time
  use defs_basis
  use m_abicore
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #if defined HAVE_MPI2
  use mpi
 #endif

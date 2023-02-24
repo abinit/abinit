@@ -24,7 +24,7 @@ MODULE m_exc_spectra
  use defs_basis
  use m_bs_defs
  use m_abicore
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_xmpi
  use m_errors
  use m_nctk

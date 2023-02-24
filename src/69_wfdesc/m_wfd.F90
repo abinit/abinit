@@ -32,7 +32,7 @@ module m_wfd
  use m_wfk
  use m_hdr
  use m_distribfft
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_cgtools
 
  use defs_datatypes,   only : pseudopotential_type, ebands_t
