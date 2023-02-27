@@ -535,7 +535,7 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
  ! Possibility to increase nwr in case of interpolation in cumulant to add extra points
  ! TODO: not working yet
  self%nwr_ce = self%nwr!*4 -1 ! Odd
-
+ 
  self%ieta = j_dpc * sigmaph%ieta
  self%ebands = tmp_ebands
  self%mu_e = sigmaph%mu_e
@@ -943,7 +943,9 @@ subroutine cumulant_compute(self)
          if (self%debug == 1) self%time_mesh(:,itemp,ib,my_ik,spin) = time_mesh_temp(:)! * 0.24188845385 *10E-4 ! picoseconds ( I think )
 
          if (time_mesh_temp(nwr) < time_max) ABI_WARNING(sjoin("KBT",itoa(my_ik),itoa(ib),itoa(itemp)))
-         if (time_mesh_temp(nwr) < time_max) ABI_WARNING(sjoin("Time mesh smaller than needed to reach tolerance value. Actual value of", ftoa(time_mesh_temp(nwr)), ", desirable ",ftoa(time_max),". Increase nfreqsp."))
+         if (time_mesh_temp(nwr) < time_max) ABI_WARNING(sjoin(&
+                 "Time mesh smaller than needed to reach tolerance value. Actual value of",& 
+                 ftoa(time_mesh_temp(nwr)), ", desirable ",ftoa(time_max),". Increase nfreqsp."))
          beta(:) = abs( aimag( self%vals_wr(:, itemp, ib, my_ik, spin ) ) ) / pi
 
          ! Calculation of the different terms of the cumulant ( c1, c2 and c3 ),
@@ -964,801 +966,805 @@ subroutine cumulant_compute(self)
            c1 = c1 * wr_step * nwr
            c1(2::2) = -1.0 * c1(2::2)
          else
-           ABI_COMMENT("FFT not available, using DFT instead. Slower but reliable. Parallelism over frequency for integration of C(t)")
-           do it=1, nwr
-!            if (mod(it, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over time
-             time = time_mesh_temp(it)
-               
-             ! Discrete Fourier Transform of C1 ( cumulant function without the +iwt and -1 parts
-             c_temp(:) = betaoverw2(:) *  exp( - j_dpc * time * wrmesh_shifted(:) )
-             c1(it) = simpson_cplx( nwr, wr_step, c_temp)
-           enddo
-             
-         endif
+           ABI_COMMENT(sjoin("FFT not available, using DFT instead.",&
+                          " Slower but reliable.",&
+                          " Parallelism over frequency for integration of C(t)"))
+                   do it=1, nwr
+        !            if (mod(it, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over time
+                     time = time_mesh_temp(it)
+                       
+                     ! Discrete Fourier Transform of C1 ( cumulant function without the +iwt and -1 parts
+                     c_temp(:) = betaoverw2(:) *  exp( - j_dpc * time * wrmesh_shifted(:) )
+                     c1(it) = simpson_cplx( nwr, wr_step, c_temp)
+                   enddo
+                     
+                 endif
 
 
-         ! The cumulant function as sum of the different components
-         ct_temp(:) = c1 + c2 + c3
-         ! Fitting the cumulant function
-         res_re = linfit(nwr,time_mesh_temp(:), real(ct_temp(:)), m_fit_re, b_fit_re)
-         res_im = linfit(nwr,time_mesh_temp(:), aimag(ct_temp(:)), m_fit_im, b_fit_im)
-!         call xmpi_sum(ct, self%wt_comm%value, ierr)
-         if (self%debug == 1) then ! .and. self%wt_comm%nproc > 1) then
-                self%ct_vals(:, itemp, ib, my_ik, spin) = ct(:)
-                self%c1(:, itemp, ib, my_ik, spin) = c1(:)
-                self%c2(:, itemp, ib, my_ik, spin) = c2(:)
-                self%c3(:, itemp, ib, my_ik, spin) = c3(:)
-         endif
-        
-         ! Adding extra interpolated points to the cumulant function
-         !!ct(:nwr/2) = ct_temp(:nwr/2)
-         !!ct(nwr/2:) = time_mesh(nwr/2:) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(nwr/2:) * m_fit_im + b_fit_im )
+                 ! The cumulant function as sum of the different components
+                 ct_temp(:) = c1 + c2 + c3
+                 ! Fitting the cumulant function
+                 res_re = linfit(nwr,time_mesh_temp(:), real(ct_temp(:)), m_fit_re, b_fit_re)
+                 res_im = linfit(nwr,time_mesh_temp(:), aimag(ct_temp(:)), m_fit_im, b_fit_im)
+        !         call xmpi_sum(ct, self%wt_comm%value, ierr)
+                 if (self%debug == 1) then ! .and. self%wt_comm%nproc > 1) then
+                        self%ct_vals(:, itemp, ib, my_ik, spin) = ct(:)
+                        self%c1(:, itemp, ib, my_ik, spin) = c1(:)
+                        self%c2(:, itemp, ib, my_ik, spin) = c2(:)
+                        self%c3(:, itemp, ib, my_ik, spin) = c3(:)
+                 endif
+                
+                 ! Adding extra interpolated points to the cumulant function
+                 !!ct(:nwr/2) = ct_temp(:nwr/2)
+                 !!ct(nwr/2:) = time_mesh(nwr/2:) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(nwr/2:) * m_fit_im + b_fit_im )
 
-         !!do iw=1, nwr/2
-         !!    temp_reflex(nwr/2-iw) = - ct(iw) + time_mesh(iw) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(iw) * m_fit_im + b_fit_im )
-         !!enddo
-         !!ct(nwr_ce - nwr/2:) =  ct(nwr_ce - nwr/2:) + temp_reflex(:)
-         ct(:) = ct_temp(:)
-         ! Retarded Green's function in time domain
-         gt = - j_dpc * exp( ct )
+                 !!do iw=1, nwr/2
+                 !!    temp_reflex(nwr/2-iw) = - ct(iw) + time_mesh(iw) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(iw) * m_fit_im + b_fit_im )
+                 !!enddo
+                 !!ct(nwr_ce - nwr/2:) =  ct(nwr_ce - nwr/2:) + temp_reflex(:)
+                 ct(:) = ct_temp(:)
+                 ! Retarded Green's function in time domain
+                 gt = - j_dpc * exp( ct )
 
-         ! Collect data if wt parallelism.
-!         call xmpi_sum(gt, self%wt_comm%value, ierr)
+                 ! Collect data if wt parallelism.
+        !         call xmpi_sum(gt, self%wt_comm%value, ierr)
 
-         if (self%debug == 1) then ! .and. self%wt_comm%nproc > 1) then
-           self%gt_vals(:, itemp, ib, my_ik, spin) = gt(:)
+                 if (self%debug == 1) then ! .and. self%wt_comm%nproc > 1) then
+                   self%gt_vals(:, itemp, ib, my_ik, spin) = gt(:)
+                 end if
+
+                 use_fft = .True.
+                 if (use_fft) then
+                   
+                   ! Fast Fourier Transform to obtain the Green's function in frequency
+                   ! domain
+                   temp_g_ce(1,:,1) = real(gt(:))
+                   temp_g_ce(2,:,1) = aimag(gt(:))
+                   call fourdp(2, temp_g_ce, temp_r_cplx, 1, self%ce_mpi_enreg, nwr_ce, 1, self%ce_ngfft_g , 0 )
+                   gw(:) = temp_r_cplx(1::2,1) + j_dpc* temp_r_cplx(2::2,1)
+
+                   
+                   ! TODO use ig2gfft from 52_fft_mpi_noabirule/m_fftcore.F90 instead of the two following lines
+                   if ( mod(nwr_ce,2) == 0 ) then
+                           self%gw_vals(1:int(nwr_ce/2.0), itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0):nwr_ce)
+                           self%gw_vals(int(nwr_ce/2.0)+1:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0)-1)
+                   else
+                           self%gw_vals(1:int(nwr_ce/2.0)+1, itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0)+1:nwr_ce)
+                           self%gw_vals(int(nwr_ce/2.0)+2:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0))
+                   endif
+
+         
+                   self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin) * time_step
+
+                   ! FFT is different from integration methods and the two extreme points
+                   ! need to be compensated
+                   self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin)  & 
+                         - 0.5* gt(1)*time_step - 0.5 * gt(nwr_ce)*exp(j_dpc*wrmesh_shifted_ce(:)*time_mesh(nwr_ce)) * time_step
+
+
+                 else
+                   ABI_COMMENT(sjoin("FFT not available, using DFT instead.",&
+                          " Slower but reliable.",&
+                          " Parallelism over time for integration of G(t)"))
+
+                   do iw=1, nwr_ce
+        !             if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
+                     omega = wrmesh_shifted_ce(iw)
+                 
+                     ! Discrete Fourier Transform of the Green's function
+                     g1(:) = exp( j_dpc * omega * time_mesh(:) ) * gt(:)
+                 
+                     ! Retarded Green's function in frequency domain
+                     self%gw_vals(iw, itemp, ib, my_ik, spin) = simpson_cplx(nwr_ce, time_step, g1)
+                 
+                     !if (my_rank == 0) write(ab_out, *)"gw_vals",  self%gw_vals(iw, itemp, ib, my_ik, spin)
+              
+
+                   end do ! iw
+                 end if
+                 
+                 
+
+                 ! Collect data if wt parallelism.
+        !         call xmpi_sum(self%gw_vals(:, itemp, ib, my_ik, spin) , self%wt_comm%value, ierr)
+
+               end do  ! itemp
+             end do ! ib
+
+             write(msg,'(4(a,i0),a,f8.2)') " k-point [", ikcalc, "/", self%nkcalc, "]"
+             call cwtime_report(msg, cpu, wall, gflops)
+           end do ! my_ik
+         end do ! my_spin
+
+         
+         ABI_SFREE(c1)
+         ABI_SFREE(c2)
+         ABI_SFREE(c3)
+         ABI_SFREE(ct)
+         ABI_SFREE(gt)
+         ABI_SFREE(g1)
+         ABI_SFREE(gw)
+         ABI_SFREE(beta)
+         ABI_SFREE(temp_g)
+         ABI_SFREE(temp_g_ce)
+         ABI_SFREE(temp_r)
+         ABI_SFREE(temp_r_cplx)
+         ABI_SFREE(time_mesh)
+         ABI_SFREE(wrmesh_shifted)
+         ABI_SFREE(wrmesh_shifted_ce)
+         !ABI_SFREE(inv_wrmesh_shifted_sq)
+         ABI_SFREE(betaoverw2)
+
+         call cwtime_report(" cumulant_compute", cpu_kloop, wall_kloop, gflops_kloop)
+
+        ! contains
+
+        ! real function lreg(x,y, n, nsteps) result(m,b)
+        ! !
+        ! ! Determines a linear regression from x and y values
+        ! ! What are the best m and b values to produce y= m*x + b ?
+        ! !
+        ! !
+        ! ! Cost function ( Root Mean Squared Error ): J = 1/n sum_i^n (pred_i - y_i)^2
+        ! ! where pred is the predicted value and y the true value
+        ! ! 
+        ! ! Goal: minimize J
+        ! ! How? Using Gradient Descent
+        ! ! - Learning rate is the step that the new value will be ( too small, takes longer; too large, it can be instable )
+        ! ! - Initial m or b are chosen randomly
+        ! ! - n is the number of points
+        ! !
+        ! ! new b = old b - 2*(learning rate)/n sum_i^n (pred(x_i) - y) * x_i
+        ! ! new m = old m  - 2*(learning rate)/n sum_i^n (pred(x_i) - y) 
+        ! !
+        !
+        ! integer, intent(in) :: n, nsteps
+        ! real(dp), intent(in) :: x(n), y(n)
+        ! !real(dp) :: m,b
+        ! integer :: istep, i
+        ! real(dp) :: lrate, cost, acc
+        ! real(dp) :: pred(n)
+        !
+        ! m = 0 ! Initial guesses
+        ! b = 0
+        ! do istep=1,nsteps
+        !   
+        !  pred(:) = m * x(:) + b ! Prediction with the new coefficients m, b
+        !
+        !  ! Check accuracy comparing the linear regression and the data
+        !  do i=1, n
+        !    if (abs(y(i) ) < 1e-4 ) cycle
+        !    acc = acc + sum( abs(pred(i) - y(i))/y(i) )
+        !  end do i
+        !  acc = 1 - acc
+        !  print *, "Accuracy: ",istep, acc
+        !
+        !  cost = 1.0/n * sum(pred(:) - y(:))**2
+        !
+        !  print *, "Cost: ", istep, cost
+        !
+        !  ! Update coefficients
+        !
+        !  m = m - 2.0*lrate/n * sum(pred(:) - y(:))
+        !  b = b - 2.0*lrate/n * sum((pred(:) - y(:))*x(:))
+        ! enddo ! istep
+        !
+        ! end function lreg
+
+        !  complex function trapz(f_size, f_step, f)
+        !
+        !   integer,intent(in) :: f_size
+        !   real(dp),intent(in) :: f_step
+        !   complex(dpc),intent(in) :: f(f_size)
+        !
+        !   trapz = ( sum(f) - 0.5* f(1) - 0.5* f(f_size) )* f_step
+        !
+        !  end function trapz
+
+        end subroutine cumulant_compute
+        !!***
+
+        !----------------------------------------------------------------------
+
+        !!****f* m_cumulant/cumulant_kubo_transport
+        !! NAME
+        !! cumulant_kubo_transport
+        !!
+        !! FUNCTION
+        !!  Compute conductivity/mobility
+        !!
+        !! INPUTS
+        !!
+        !! PARENTS
+        !!
+        !! CHILDREN
+        !!
+        !! SOURCE
+
+        subroutine cumulant_kubo_transport(self, dtset, cryst)
+
+        !Arguments ------------------------------------
+         class(cumulant_t),intent(inout) :: self
+         type(dataset_type),intent(in) :: dtset
+         type(crystal_t),intent(in) :: cryst
+        ! type(ebands_t),intent(in) :: ebands
+
+        !Local variables ------------------------------
+         integer,parameter :: master = 0
+         integer :: cnt
+         integer :: nbands, ib, ikcalc, iw, spin, itemp, comm, ik_ibz
+         integer :: ieh, ib_eph
+         integer :: ii, jj, time_opt, isym_k, trev_k
+         integer :: my_rank, nprocs, my_spin, my_ik
+         real(dp) :: omega!, time_step!, time_max
+         real(dp) :: cpu, wall, gflops, cpu_kloop, wall_kloop, gflops_kloop
+         real(dp) :: eig_nk, sp_func, wr_step
+         real(dp) :: integration, mu_e, max_occ, fact0, fact
+         character(len=500) :: msg
+        !arrays
+         real(dp),allocatable :: kernel(:), dfdw_acc(:),Aw(:),Aw_l0(:),dfdw_l0(:)!test_Aw(:), test_dfdw(:)
+         real(dp) :: int_Aw, int_dfdw, dfdw
+         real(dp) :: vr(3), vv_tens(3,3), S(3,3), wtk!, spfunc
+        ! real(dp), allocatable :: onsager_coeff(:,:)
+         real(dp) :: work_33(3,3),l0inv_33nw(3,3,2)
+         real(dp) :: Tkelv
+
+
+        !************************************************************************
+
+         comm = self%comm
+         my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
+         
+         call wrtout(std_out, " Computing conductivity using Kubo-Greenwood method.")
+         call cwtime(cpu_kloop, wall_kloop, gflops_kloop, "start")
+
+
+         ABI_MALLOC(kernel, (self%nwr))
+        ! ABI_MALLOC(test_Aw, (self%ntemp))
+        ! ABI_MALLOC(test_dfdw, (self%ntemp))
+         ABI_MALLOC(Aw, (self%nwr))
+         ABI_MALLOC(dfdw_acc, (self%nwr))
+         ABI_MALLOC(Aw_l0, (self%ntemp))
+         ABI_MALLOC(dfdw_l0, (self%ntemp))
+
+         ABI_CALLOC(self%l0, (3, 3, 2, self%nsppol, self%ntemp))
+         ABI_CALLOC(self%l1, (3, 3, 2, self%nsppol, self%ntemp))
+         ABI_CALLOC(self%l2, (3, 3, 2, self%nsppol, self%ntemp))
+         ABI_CALLOC(self%seebeck, (3, 3, 2, self%nsppol, self%ntemp))
+         ABI_CALLOC(self%kappa, (3, 3, 2, self%nsppol, self%ntemp))
+
+
+
+         ABI_CALLOC(self%mobility_mu, (3, 3, 2, self%nsppol, self%ntemp))
+         ABI_CALLOC(self%conductivity_mu, (3, 3, 2, self%nsppol, self%ntemp))
+         ABI_CALLOC(self%print_dfdw, (self%nwr, self%ntemp))
+
+         ABI_MALLOC(self%transport_mu_e, (self%ntemp))
+
+         ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
+         self%transport_fermie = dtset%eph_fermie
+         self%transport_extrael = dtset%eph_extrael
+         self%transport_mu_e = self%mu_e
+         if (self%transport_fermie /= zero) self%transport_mu_e = self%transport_fermie
+
+         if (self%transport_fermie == zero .and. self%transport_extrael /= self%eph_extrael) then
+
+           if (self%transport_extrael /= self%eph_extrael) then
+             write(msg,'(2(a,e18.8),3a)') &
+               ' extrael from SIGEPH: ',self%transport_extrael, ' and input file: ',self%eph_extrael, "differ", ch10, &
+               ' Will recompute the chemical potential'
+             call wrtout(std_out, msg)
+           end if
+
+           ! Compute Fermi level for different T values.
+           call ebands_get_muT_with_fd(self%ebands, self%ntemp, self%kTmesh, dtset%spinmagntarget, dtset%prtvol, self%transport_mu_e, comm)
          end if
 
-         use_fft = .True.
-         if (use_fft) then
-           
-           ! Fast Fourier Transform to obtain the Green's function in frequency
-           ! domain
-           temp_g_ce(1,:,1) = real(gt(:))
-           temp_g_ce(2,:,1) = aimag(gt(:))
-           call fourdp(2, temp_g_ce, temp_r_cplx, 1, self%ce_mpi_enreg, nwr_ce, 1, self%ce_ngfft_g , 0 )
-           gw(:) = temp_r_cplx(1::2,1) + j_dpc* temp_r_cplx(2::2,1)
+         call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
 
-           
-           ! TODO use ig2gfft from 52_fft_mpi_noabirule/m_fftcore.F90 instead of the two following lines
-           if ( mod(nwr_ce,2) == 0 ) then
-                   self%gw_vals(1:int(nwr_ce/2.0), itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0):nwr_ce)
-                   self%gw_vals(int(nwr_ce/2.0)+1:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0)-1)
-           else
-                   self%gw_vals(1:int(nwr_ce/2.0)+1, itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0)+1:nwr_ce)
-                   self%gw_vals(int(nwr_ce/2.0)+2:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0))
+
+         time_opt =0
+         cnt = 0
+         do my_spin=1,self%my_nspins
+           spin = self%my_spins(my_spin)
+           do my_ik=1,self%my_nkcalc
+             ikcalc= self%my_ikcalc(my_ik)
+             !if (ikcalc > 1) cycle
+             ik_ibz = self%kcalc2ibz(ikcalc, 1) 
+             isym_k = self%kcalc2ibz(ikcalc, 2)
+             trev_k = self%kcalc2ibz(ikcalc, 6)
+
+             wtk = self%ebands%wtk(ik_ibz)
+             S = transpose(cryst%symrel_cart(:,:,isym_k))
+
+             nbands = self%nbcalc_ks(ikcalc, spin)
+             call cwtime(cpu, wall, gflops, "start")
+
+             do ib=self%bmin,self%bmax
+               !if (ib > self%bmin) cycle ! MG HACK To be able to run tests quickly.
+               ib_eph = ib - self%bmin + 1
+               eig_nk = self%ebands%eig(ib, ik_ibz, spin)
+               wr_step = self%wrmesh_b(2,ib_eph,my_ik,spin) - self%wrmesh_b(1,ib_eph,my_ik,spin)
+               vr(:) = self%vbks(:, ib, ik_ibz, spin)
+               ! Store outer product (v_bks x v_bks) in vv_tens. This part does not depend on T and irta.
+               do ii=1,3
+                 do jj=1,3
+                   vv_tens(ii, jj) = vr(ii) * vr(jj)
+                 end do
+               end do
+               ! Calculation of the velocity tensor
+               vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
+                 do itemp=1,self%ntemp
+             !if (itemp > 1) cycle
+                 
+                 Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
+                   do iw=1, self%nwr
+        !             if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
+
+                        !  Preparing all elements needed for conductivity
+                        omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
+                        sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
+        !                test_Aw(itemp) = test_Aw(itemp) + sp_func
+                        dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
+                        self%print_dfdw(iw,itemp) = dfdw
+        !                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
+                        kernel(iw) = - dfdw * sp_func**2 
+                        Aw(iw) = sp_func**2
+                        dfdw_acc(iw) = dfdw
+
+                   end do !iw
+                 mu_e = self%transport_mu_e(itemp)
+                 ieh = 2; if (eig_nk >= mu_e) ieh = 1
+                 integration = simpson( wr_step, kernel)
+                 int_Aw = simpson(wr_step,Aw)
+                 int_dfdw = simpson(wr_step,dfdw_acc)
+                 ! Calculation of the conductivity
+                 self%l0( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
+                 Aw_l0(itemp) = Aw_l0(itemp) + int_Aw*wtk*vv_tens(1,1) 
+                 dfdw_l0(itemp) = dfdw_l0(itemp) + int_dfdw*wtk*vv_tens(1,1)
+                 call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
+
+                 l0inv_33nw(:,:,ieh) = work_33
+                 self%l1( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp)) 
+                 self%l2( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp)) 
+
+                 self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
+
+                 work_33 = self%l1(:, :, ieh, spin, itemp)
+                 work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
+                 self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
+                 !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
+        !         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
+                 end do ! itemp
+
+             end do !ib
+
+           end do ! my_ik
+           ! Collect data if k-points parallelism.
+           !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
+         end do !my_spin
+         max_occ = two / (self%nspinor * self%nsppol)
+         fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
+         self%conductivity_mu = fact0 * self%l0  ! siemens cm^-1
+         self%seebeck = - volt_SI  * max_occ * self%seebeck
+         self%kappa = + volt_SI**2 * fact0 * self%kappa
+         do itemp=1, self%ntemp
+                 Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
+         end do
+
+         ! Scale by the carrier concentration
+         fact = 100**3 / e_Cb
+         do my_spin=1,self%my_nspins
+           spin = self%my_spins(my_spin)
+             do itemp=1,self%ntemp
+               do ieh=1,2 ! e/h
+                 call safe_div(fact * self%conductivity_mu(:,:,ieh,spin,itemp), &
+                               self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, &
+                               self%mobility_mu(:,:,ieh,spin,itemp))
+               end do
+             end do
+           end do
+
+
+         call cwtime_report(" cumulant_kubo_transport", cpu_kloop, wall_kloop, gflops_kloop)
+
+         ABI_SFREE(kernel)
+        ! ABI_SFREE(test_Aw)
+        ! ABI_SFREE(test_dfdw)
+         ABI_SFREE(Aw)
+         ABI_SFREE(dfdw_acc)
+         ABI_SFREE(Aw_l0)
+         ABI_SFREE(dfdw_l0)
+
+        end subroutine cumulant_kubo_transport
+
+        !!***
+
+        !----------------------------------------------------------------------
+
+        !!****f* m_cumulant/cumulant_sigmaph_ncread
+        !! NAME
+        !! cumulant_sigmaph_ncread
+        !!
+        !! FUNCTION
+        !!   read out_SIGPH.nc file
+        !!
+        !! INPUTS
+        !! cryst<crystal_t>=Crystalline structure
+        !! dtset<dataset_type>=All input variables for this dataset.
+        !! ncid=Netcdf file handle.
+        !!
+        !! PARENTS
+        !!      m_cumulant
+        !!
+        !! CHILDREN
+        !!
+        !! SOURCE
+
+        subroutine cumulant_sigmaph_ncread(self, path, ncid, comm)
+
+        !Arguments --------------------------------------
+         class(cumulant_t),intent(inout) :: self
+         character(len=fnlen),intent(in) :: path
+         integer,intent(in) :: comm
+         integer,intent(out) :: ncid
+
+        !Local variables --------------------------------
+         integer :: ierr
+         real(dp) :: cpu, wall, gflops
+         character(len=1000) :: msg
+         !real(dp), allocatable :: vals_wr(:,:,:,:,:,:),vals_e0ks(:,:,:,:,:)
+
+        !************************************************************************
+
+         call cwtime(cpu, wall, gflops, "start")
+
+         ! Open netcdf file
+         msg = "Netcdf not activated at configure time!"
+         ierr = 1
+        #ifdef HAVE_NETCDF
+         ierr = 0
+
+         if (.not. file_exists(path)) then
+           msg = sjoin("Cannot find file", path)
+           ierr = 1; return
+         end if
+
+         call cwtime(cpu, wall, gflops, "start")
+         NCF_CHECK(nctk_open_read(ncid, path, comm))
+
+         NCF_CHECK(nctk_get_dim(ncid, "nkcalc", self%nkcalc))
+         NCF_CHECK(nctk_get_dim(ncid, "max_nbcalc", self%max_nbcalc))
+         NCF_CHECK(nctk_get_dim(ncid, "nsppol", self%nsppol))
+         NCF_CHECK(nctk_get_dim(ncid, "number_of_spinor_components", self%nspinor))
+         NCF_CHECK(nctk_get_dim(ncid, "ntemp", self%ntemp))
+         NCF_CHECK(nctk_get_dim(ncid, "nwr", self%nwr))
+         NCF_CHECK(nctk_get_dim(ncid, "nqbz", self%nqbz))
+         NCF_CHECK(nctk_get_dim(ncid, "nqibz", self%nqibz))
+         NCF_CHECK(nctk_get_dim(ncid, "natom3", self%natom3))
+
+         ABI_MALLOC(self%kcalc, (3, self%nkcalc))
+         ABI_MALLOC(self%nbcalc_ks, (self%nkcalc, self%nsppol))
+         ABI_MALLOC(self%bstart_ks, (self%nkcalc, self%nsppol))
+         ABI_MALLOC(self%kcalc2ibz, (self%nkcalc, 6))
+         ABI_MALLOC(self%kTmesh, (self%ntemp))
+         !ABI_MALLOC(self%wrmesh_b, (self%nwr, self%max_nbcalc, self%nkcalc, self%nsppol))
+         !ABI_MALLOC(self%vals_wr, ( self%nwr, self%ntemp, self%max_nbcalc, self%nkcalc, self%nsppol))
+         !ABI_MALLOC(self%vals_e0ks, ( self%ntemp, self%max_nbcalc, self%nkcalc, self%nsppol))
+         !ABI_MALLOC(self%e0vals, (self%max_nbcalc, self%nkcalc, self%nsppol))
+         NCF_CHECK(nf90_get_var(ncid, vid("ngqpt"), self%ngqpt))
+         NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), self%kcalc))
+         NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), self%kTmesh))
+         NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), self%nbcalc_ks))
+         NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), self%bstart_ks))
+         NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), self%kcalc2ibz))
+
+         call cwtime_report(" sigmaph_ncread", cpu, wall, gflops)
+        #endif
+
+        contains
+         integer function vid(vname)
+           character(len=*),intent(in) :: vname
+           vid = nctk_idname(ncid, vname)
+        end function vid
+
+        end subroutine cumulant_sigmaph_ncread
+        !!***
+
+        !----------------------------------------------------------------------
+
+        !!****f* m_cumulant/cumulant_ncwrite
+        !! NAME
+        !! cumulant_ncwrite
+        !!
+        !! FUNCTION
+        !!
+        !! INPUTS
+        !! path=Filenae of output netcdf file.
+        !! cryst<crystal_t>=Crystalline structure
+        !! dtset<dataset_type>=All input variables for this dataset.
+        !! ncid=Netcdf file handle.
+        !!
+        !! PARENTS
+        !!      m_cumulant
+        !!
+        !! CHILDREN
+        !!
+        !! SOURCE
+
+        !subroutine cumulant_ncwrite(self, path, cryst, ebands, dtset)
+        subroutine cumulant_ncwrite(self, path, cryst, dtset)
+
+        !Arguments --------------------------------------
+         class(cumulant_t),intent(in) :: self
+         type(crystal_t),intent(in) :: cryst
+        ! type(ebands_t),intent(in) :: ebands
+         type(dataset_type),intent(in) :: dtset
+         character(len=*),intent(in) :: path
+
+        !Local variables --------------------------------
+         integer,parameter :: master = 0
+         integer :: ncerr, ncid, ikcalc, spin, my_ik, ib, itemp, ntemp
+         integer :: ii, ieh
+         real(dp) :: cpu, wall, gflops
+
+        !************************************************************************
+
+         !comm = self%comm my_rank =
+         call wrtout([std_out, ab_out], ch10//sjoin("- Writing cumulant results to:", path))
+         call cwtime(cpu, wall, gflops, "start")
+
+        #ifdef HAVE_NETCDF
+         ! Only one proc create the file, write structure and define basic dimensions.
+         ! Then we reopen the file in MPI-IO mode.
+
+         if (xmpi_comm_rank(self%comm) == master) then
+
+           NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
+
+           ! Write to netcdf file
+           NCF_CHECK(cryst%ncwrite(ncid))
+           ! FIXME: Cannot write ebands because it crashes in
+           !   k_dependent = "no"; if (any(ebands%nband(1) /= ebands%nband)) k_dependent = "yes"
+           ! Should understand why!
+           !NCF_CHECK(ebands_ncwrite(ebands, ncid))
+
+           ! Add cumulant dimensions.
+           ncerr = nctk_def_dims(ncid, [ &
+             nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("max_nbcalc", self%max_nbcalc), &
+             nctkdim_t("nsppol", self%nsppol), nctkdim_t("ntemp", self%ntemp), &
+             nctkdim_t("nqbz", self%nsppol), nctkdim_t("nqibz", self%ntemp), &
+             nctkdim_t("nwr", self%nwr)], &
+             defmode=.True.)
+           NCF_CHECK(ncerr)
+           ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
+             "eph_task",  "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
+             "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
+             "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep"])
+           NCF_CHECK(ncerr)
+           ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
+             "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"])
+           NCF_CHECK(ncerr)
+
+
+           ! Define arrays. Note nkcalc instead of my_nkcalc
+           ncerr = nctk_def_arrays(ncid, [ &
+             nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
+             nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
+             nctkarr_t("ngqpt", "dp", "three"), &
+             nctkarr_t("kcalc", "dp", "three, nkcalc"), &
+             nctkarr_t("kcalc2ibz", "dp", " nkcalc, six"), &
+             nctkarr_t("kTmesh", "dp", "ntemp"), &
+             !nctkarr_t("mu_e", "dp", "ntemp"), &
+             nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
+             !nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("gw_vals", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("ks_enes", "dp", "max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t('dfdw',"dp", "nwr, ntemp"), &
+             nctkarr_t('conductivity_mu',"dp", "three, three, two, nsppol, ntemp"), &
+             nctkarr_t('mobility_mu', "dp", "three, three, two, nsppol, ntemp"), &
+             nctkarr_t('seebeck',"dp", "three, three, two, nsppol, ntemp"), &
+             nctkarr_t('kappa',"dp", "three, three, two, nsppol, ntemp") &
+           ])
+           NCF_CHECK(ncerr)
+
+           if (self%debug == 1) then
+             ncerr = nctk_def_arrays(ncid, [ &
+             nctkarr_t("time_mesh", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("ct_vals", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("c1", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("c2", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("c3", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
+             nctkarr_t("gt_vals", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol") ] )
+             NCF_CHECK(ncerr)
            endif
 
- 
-           self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin) * time_step
-
-           ! FFT is different from integration methods and the two extreme points
-           ! need to be compensated
-           self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin)  & 
-                 - 0.5* gt(1)*time_step - 0.5 * gt(nwr_ce)*exp(j_dpc*wrmesh_shifted_ce(:)*time_mesh(nwr_ce)) * time_step
-
-
-         else
-           ABI_COMMENT("FFT not available, using DFT instead. Slower but reliable. Parallelism over time for integration of G(t)")
-
-           do iw=1, nwr_ce
-!             if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
-             omega = wrmesh_shifted_ce(iw)
-         
-             ! Discrete Fourier Transform of the Green's function
-             g1(:) = exp( j_dpc * omega * time_mesh(:) ) * gt(:)
-         
-             ! Retarded Green's function in frequency domain
-             self%gw_vals(iw, itemp, ib, my_ik, spin) = simpson_cplx(nwr_ce, time_step, g1)
-         
-             !if (my_rank == 0) write(ab_out, *)"gw_vals",  self%gw_vals(iw, itemp, ib, my_ik, spin)
-      
-
-           end do ! iw
-         end if
-         
-         
-
-         ! Collect data if wt parallelism.
-!         call xmpi_sum(self%gw_vals(:, itemp, ib, my_ik, spin) , self%wt_comm%value, ierr)
-
-       end do  ! itemp
-     end do ! ib
-
-     write(msg,'(4(a,i0),a,f8.2)') " k-point [", ikcalc, "/", self%nkcalc, "]"
-     call cwtime_report(msg, cpu, wall, gflops)
-   end do ! my_ik
- end do ! my_spin
-
- 
- ABI_SFREE(c1)
- ABI_SFREE(c2)
- ABI_SFREE(c3)
- ABI_SFREE(ct)
- ABI_SFREE(gt)
- ABI_SFREE(g1)
- ABI_SFREE(gw)
- ABI_SFREE(beta)
- ABI_SFREE(temp_g)
- ABI_SFREE(temp_g_ce)
- ABI_SFREE(temp_r)
- ABI_SFREE(temp_r_cplx)
- ABI_SFREE(time_mesh)
- ABI_SFREE(wrmesh_shifted)
- ABI_SFREE(wrmesh_shifted_ce)
- !ABI_SFREE(inv_wrmesh_shifted_sq)
- ABI_SFREE(betaoverw2)
-
- call cwtime_report(" cumulant_compute", cpu_kloop, wall_kloop, gflops_kloop)
-
-! contains
-
-! real function lreg(x,y, n, nsteps) result(m,b)
-! !
-! ! Determines a linear regression from x and y values
-! ! What are the best m and b values to produce y= m*x + b ?
-! !
-! !
-! ! Cost function ( Root Mean Squared Error ): J = 1/n sum_i^n (pred_i - y_i)^2
-! ! where pred is the predicted value and y the true value
-! ! 
-! ! Goal: minimize J
-! ! How? Using Gradient Descent
-! ! - Learning rate is the step that the new value will be ( too small, takes longer; too large, it can be instable )
-! ! - Initial m or b are chosen randomly
-! ! - n is the number of points
-! !
-! ! new b = old b - 2*(learning rate)/n sum_i^n (pred(x_i) - y) * x_i
-! ! new m = old m  - 2*(learning rate)/n sum_i^n (pred(x_i) - y) 
-! !
-!
-! integer, intent(in) :: n, nsteps
-! real(dp), intent(in) :: x(n), y(n)
-! !real(dp) :: m,b
-! integer :: istep, i
-! real(dp) :: lrate, cost, acc
-! real(dp) :: pred(n)
-!
-! m = 0 ! Initial guesses
-! b = 0
-! do istep=1,nsteps
-!   
-!  pred(:) = m * x(:) + b ! Prediction with the new coefficients m, b
-!
-!  ! Check accuracy comparing the linear regression and the data
-!  do i=1, n
-!    if (abs(y(i) ) < 1e-4 ) cycle
-!    acc = acc + sum( abs(pred(i) - y(i))/y(i) )
-!  end do i
-!  acc = 1 - acc
-!  print *, "Accuracy: ",istep, acc
-!
-!  cost = 1.0/n * sum(pred(:) - y(:))**2
-!
-!  print *, "Cost: ", istep, cost
-!
-!  ! Update coefficients
-!
-!  m = m - 2.0*lrate/n * sum(pred(:) - y(:))
-!  b = b - 2.0*lrate/n * sum((pred(:) - y(:))*x(:))
-! enddo ! istep
-!
-! end function lreg
-
-!  complex function trapz(f_size, f_step, f)
-!
-!   integer,intent(in) :: f_size
-!   real(dp),intent(in) :: f_step
-!   complex(dpc),intent(in) :: f(f_size)
-!
-!   trapz = ( sum(f) - 0.5* f(1) - 0.5* f(f_size) )* f_step
-!
-!  end function trapz
-
-end subroutine cumulant_compute
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_cumulant/cumulant_kubo_transport
-!! NAME
-!! cumulant_kubo_transport
-!!
-!! FUNCTION
-!!  Compute conductivity/mobility
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cumulant_kubo_transport(self, dtset, cryst)
-
-!Arguments ------------------------------------
- class(cumulant_t),intent(inout) :: self
- type(dataset_type),intent(in) :: dtset
- type(crystal_t),intent(in) :: cryst
-! type(ebands_t),intent(in) :: ebands
-
-!Local variables ------------------------------
- integer,parameter :: master = 0
- integer :: cnt
- integer :: nbands, ib, ikcalc, iw, spin, itemp, comm, ik_ibz
- integer :: ieh, ib_eph
- integer :: ii, jj, time_opt, isym_k, trev_k
- integer :: my_rank, nprocs, my_spin, my_ik
- real(dp) :: omega!, time_step!, time_max
- real(dp) :: cpu, wall, gflops, cpu_kloop, wall_kloop, gflops_kloop
- real(dp) :: eig_nk, sp_func, wr_step
- real(dp) :: integration, mu_e, max_occ, fact0, fact
- character(len=500) :: msg
-!arrays
- real(dp),allocatable :: kernel(:), dfdw_acc(:),Aw(:),Aw_l0(:),dfdw_l0(:)!test_Aw(:), test_dfdw(:)
- real(dp) :: int_Aw, int_dfdw, dfdw
- real(dp) :: vr(3), vv_tens(3,3), S(3,3), wtk!, spfunc
-! real(dp), allocatable :: onsager_coeff(:,:)
- real(dp) :: work_33(3,3),l0inv_33nw(3,3,2)
- real(dp) :: Tkelv
-
-
-!************************************************************************
-
- comm = self%comm
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- 
- call wrtout(std_out, " Computing conductivity using Kubo-Greenwood method.")
- call cwtime(cpu_kloop, wall_kloop, gflops_kloop, "start")
-
-
- ABI_MALLOC(kernel, (self%nwr))
-! ABI_MALLOC(test_Aw, (self%ntemp))
-! ABI_MALLOC(test_dfdw, (self%ntemp))
- ABI_MALLOC(Aw, (self%nwr))
- ABI_MALLOC(dfdw_acc, (self%nwr))
- ABI_MALLOC(Aw_l0, (self%ntemp))
- ABI_MALLOC(dfdw_l0, (self%ntemp))
-
- ABI_CALLOC(self%l0, (3, 3, 2, self%nsppol, self%ntemp))
- ABI_CALLOC(self%l1, (3, 3, 2, self%nsppol, self%ntemp))
- ABI_CALLOC(self%l2, (3, 3, 2, self%nsppol, self%ntemp))
- ABI_CALLOC(self%seebeck, (3, 3, 2, self%nsppol, self%ntemp))
- ABI_CALLOC(self%kappa, (3, 3, 2, self%nsppol, self%ntemp))
-
-
-
- ABI_CALLOC(self%mobility_mu, (3, 3, 2, self%nsppol, self%ntemp))
- ABI_CALLOC(self%conductivity_mu, (3, 3, 2, self%nsppol, self%ntemp))
- ABI_CALLOC(self%print_dfdw, (self%nwr, self%ntemp))
-
- ABI_MALLOC(self%transport_mu_e, (self%ntemp))
-
- ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
- self%transport_fermie = dtset%eph_fermie
- self%transport_extrael = dtset%eph_extrael
- self%transport_mu_e = self%mu_e
- if (self%transport_fermie /= zero) self%transport_mu_e = self%transport_fermie
-
- if (self%transport_fermie == zero .and. self%transport_extrael /= self%eph_extrael) then
-
-   if (self%transport_extrael /= self%eph_extrael) then
-     write(msg,'(2(a,e18.8),3a)') &
-       ' extrael from SIGEPH: ',self%transport_extrael, ' and input file: ',self%eph_extrael, "differ", ch10, &
-       ' Will recompute the chemical potential'
-     call wrtout(std_out, msg)
-   end if
-
-   ! Compute Fermi level for different T values.
-   call ebands_get_muT_with_fd(self%ebands, self%ntemp, self%kTmesh, dtset%spinmagntarget, dtset%prtvol, self%transport_mu_e, comm)
- end if
-
- call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
-
-
- time_opt =0
- cnt = 0
- do my_spin=1,self%my_nspins
-   spin = self%my_spins(my_spin)
-   do my_ik=1,self%my_nkcalc
-     ikcalc= self%my_ikcalc(my_ik)
-     !if (ikcalc > 1) cycle
-     ik_ibz = self%kcalc2ibz(ikcalc, 1) 
-     isym_k = self%kcalc2ibz(ikcalc, 2)
-     trev_k = self%kcalc2ibz(ikcalc, 6)
-
-     wtk = self%ebands%wtk(ik_ibz)
-     S = transpose(cryst%symrel_cart(:,:,isym_k))
-
-     nbands = self%nbcalc_ks(ikcalc, spin)
-     call cwtime(cpu, wall, gflops, "start")
-
-     do ib=self%bmin,self%bmax
-       !if (ib > self%bmin) cycle ! MG HACK To be able to run tests quickly.
-       ib_eph = ib - self%bmin + 1
-       eig_nk = self%ebands%eig(ib, ik_ibz, spin)
-       wr_step = self%wrmesh_b(2,ib_eph,my_ik,spin) - self%wrmesh_b(1,ib_eph,my_ik,spin)
-       vr(:) = self%vbks(:, ib, ik_ibz, spin)
-       ! Store outer product (v_bks x v_bks) in vv_tens. This part does not depend on T and irta.
-       do ii=1,3
-         do jj=1,3
-           vv_tens(ii, jj) = vr(ii) * vr(jj)
-         end do
-       end do
-       ! Calculation of the velocity tensor
-       vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
-         do itemp=1,self%ntemp
-     !if (itemp > 1) cycle
-         
-         Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
-           do iw=1, self%nwr
-!             if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
-
-                !  Preparing all elements needed for conductivity
-                omega = self%wrmesh_b(iw,ib_eph,my_ik,my_spin)
-                sp_func = -aimag (self%gw_vals(iw, itemp, ib_eph, my_ik, my_spin) ) / pi
-!                test_Aw(itemp) = test_Aw(itemp) + sp_func
-                dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
-                self%print_dfdw(iw,itemp) = dfdw
-!                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
-                kernel(iw) = - dfdw * sp_func**2 
-                Aw(iw) = sp_func**2
-                dfdw_acc(iw) = dfdw
-
-           end do !iw
-         mu_e = self%transport_mu_e(itemp)
-         ieh = 2; if (eig_nk >= mu_e) ieh = 1
-         integration = simpson( wr_step, kernel)
-         int_Aw = simpson(wr_step,Aw)
-         int_dfdw = simpson(wr_step,dfdw_acc)
-         ! Calculation of the conductivity
-         self%l0( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
-         Aw_l0(itemp) = Aw_l0(itemp) + int_Aw*wtk*vv_tens(1,1) 
-         dfdw_l0(itemp) = dfdw_l0(itemp) + int_dfdw*wtk*vv_tens(1,1)
-         call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
-
-         l0inv_33nw(:,:,ieh) = work_33
-         self%l1( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp)) 
-         self%l2( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp)) 
-
-         self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
-
-         work_33 = self%l1(:, :, ieh, spin, itemp)
-         work_33 = self%l2(:, :, ieh, spin, itemp) - matmul(work_33, matmul(l0inv_33nw(:, :, ieh), work_33))
-         self%kappa(:,:,ieh,spin,itemp) = work_33 / Tkelv
-         !self%conductivity_mu( :, :, ieh, spin, itemp ) = self%conductivity_mu( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
-!         call xmpi_sum(self%conductivity_mu(:, :, ieh, spin, itemp) , self%wt_comm%value, ierr)
-         end do ! itemp
-
-     end do !ib
-
-   end do ! my_ik
-   ! Collect data if k-points parallelism.
-   !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
- end do !my_spin
- max_occ = two / (self%nspinor * self%nsppol)
- fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
- self%conductivity_mu = fact0 * self%l0  ! siemens cm^-1
- self%seebeck = - volt_SI  * max_occ * self%seebeck
- self%kappa = + volt_SI**2 * fact0 * self%kappa
- do itemp=1, self%ntemp
-         Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
- end do
-
- ! Scale by the carrier concentration
- fact = 100**3 / e_Cb
- do my_spin=1,self%my_nspins
-   spin = self%my_spins(my_spin)
-     do itemp=1,self%ntemp
-       do ieh=1,2 ! e/h
-         call safe_div(fact * self%conductivity_mu(:,:,ieh,spin,itemp), &
-                       self%n_ehst(ieh, spin, itemp) / cryst%ucvol / Bohr_meter**3, zero, &
-                       self%mobility_mu(:,:,ieh,spin,itemp))
-       end do
-     end do
-   end do
-
-
- call cwtime_report(" cumulant_kubo_transport", cpu_kloop, wall_kloop, gflops_kloop)
-
- ABI_SFREE(kernel)
-! ABI_SFREE(test_Aw)
-! ABI_SFREE(test_dfdw)
- ABI_SFREE(Aw)
- ABI_SFREE(dfdw_acc)
- ABI_SFREE(Aw_l0)
- ABI_SFREE(dfdw_l0)
-
-end subroutine cumulant_kubo_transport
-
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_cumulant/cumulant_sigmaph_ncread
-!! NAME
-!! cumulant_sigmaph_ncread
-!!
-!! FUNCTION
-!!   read out_SIGPH.nc file
-!!
-!! INPUTS
-!! cryst<crystal_t>=Crystalline structure
-!! dtset<dataset_type>=All input variables for this dataset.
-!! ncid=Netcdf file handle.
-!!
-!! PARENTS
-!!      m_cumulant
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine cumulant_sigmaph_ncread(self, path, ncid, comm)
-
-!Arguments --------------------------------------
- class(cumulant_t),intent(inout) :: self
- character(len=fnlen),intent(in) :: path
- integer,intent(in) :: comm
- integer,intent(out) :: ncid
-
-!Local variables --------------------------------
- integer :: ierr
- real(dp) :: cpu, wall, gflops
- character(len=1000) :: msg
- !real(dp), allocatable :: vals_wr(:,:,:,:,:,:),vals_e0ks(:,:,:,:,:)
-
-!************************************************************************
-
- call cwtime(cpu, wall, gflops, "start")
-
- ! Open netcdf file
- msg = "Netcdf not activated at configure time!"
- ierr = 1
-#ifdef HAVE_NETCDF
- ierr = 0
-
- if (.not. file_exists(path)) then
-   msg = sjoin("Cannot find file", path)
-   ierr = 1; return
- end if
-
- call cwtime(cpu, wall, gflops, "start")
- NCF_CHECK(nctk_open_read(ncid, path, comm))
-
- NCF_CHECK(nctk_get_dim(ncid, "nkcalc", self%nkcalc))
- NCF_CHECK(nctk_get_dim(ncid, "max_nbcalc", self%max_nbcalc))
- NCF_CHECK(nctk_get_dim(ncid, "nsppol", self%nsppol))
- NCF_CHECK(nctk_get_dim(ncid, "number_of_spinor_components", self%nspinor))
- NCF_CHECK(nctk_get_dim(ncid, "ntemp", self%ntemp))
- NCF_CHECK(nctk_get_dim(ncid, "nwr", self%nwr))
- NCF_CHECK(nctk_get_dim(ncid, "nqbz", self%nqbz))
- NCF_CHECK(nctk_get_dim(ncid, "nqibz", self%nqibz))
- NCF_CHECK(nctk_get_dim(ncid, "natom3", self%natom3))
-
- ABI_MALLOC(self%kcalc, (3, self%nkcalc))
- ABI_MALLOC(self%nbcalc_ks, (self%nkcalc, self%nsppol))
- ABI_MALLOC(self%bstart_ks, (self%nkcalc, self%nsppol))
- ABI_MALLOC(self%kcalc2ibz, (self%nkcalc, 6))
- ABI_MALLOC(self%kTmesh, (self%ntemp))
- !ABI_MALLOC(self%wrmesh_b, (self%nwr, self%max_nbcalc, self%nkcalc, self%nsppol))
- !ABI_MALLOC(self%vals_wr, ( self%nwr, self%ntemp, self%max_nbcalc, self%nkcalc, self%nsppol))
- !ABI_MALLOC(self%vals_e0ks, ( self%ntemp, self%max_nbcalc, self%nkcalc, self%nsppol))
- !ABI_MALLOC(self%e0vals, (self%max_nbcalc, self%nkcalc, self%nsppol))
- NCF_CHECK(nf90_get_var(ncid, vid("ngqpt"), self%ngqpt))
- NCF_CHECK(nf90_get_var(ncid, vid("kcalc"), self%kcalc))
- NCF_CHECK(nf90_get_var(ncid, vid("kTmesh"), self%kTmesh))
- NCF_CHECK(nf90_get_var(ncid, vid("nbcalc_ks"), self%nbcalc_ks))
- NCF_CHECK(nf90_get_var(ncid, vid("bstart_ks"), self%bstart_ks))
- NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), self%kcalc2ibz))
-
- call cwtime_report(" sigmaph_ncread", cpu, wall, gflops)
-#endif
-
-contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
-end function vid
-
-end subroutine cumulant_sigmaph_ncread
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_cumulant/cumulant_ncwrite
-!! NAME
-!! cumulant_ncwrite
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!! path=Filenae of output netcdf file.
-!! cryst<crystal_t>=Crystalline structure
-!! dtset<dataset_type>=All input variables for this dataset.
-!! ncid=Netcdf file handle.
-!!
-!! PARENTS
-!!      m_cumulant
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-!subroutine cumulant_ncwrite(self, path, cryst, ebands, dtset)
-subroutine cumulant_ncwrite(self, path, cryst, dtset)
-
-!Arguments --------------------------------------
- class(cumulant_t),intent(in) :: self
- type(crystal_t),intent(in) :: cryst
-! type(ebands_t),intent(in) :: ebands
- type(dataset_type),intent(in) :: dtset
- character(len=*),intent(in) :: path
-
-!Local variables --------------------------------
- integer,parameter :: master = 0
- integer :: ncerr, ncid, ikcalc, spin, my_ik, ib, itemp, ntemp
- integer :: ii, jj, ieh
- real(dp) :: cpu, wall, gflops
-
-!************************************************************************
-
- !comm = self%comm my_rank =
- call wrtout([std_out, ab_out], ch10//sjoin("- Writing cumulant results to:", path))
- call cwtime(cpu, wall, gflops, "start")
-
-#ifdef HAVE_NETCDF
- ! Only one proc create the file, write structure and define basic dimensions.
- ! Then we reopen the file in MPI-IO mode.
-
- if (xmpi_comm_rank(self%comm) == master) then
-
-   NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
-
-   ! Write to netcdf file
-   NCF_CHECK(cryst%ncwrite(ncid))
-   ! FIXME: Cannot write ebands because it crashes in
-   !   k_dependent = "no"; if (any(ebands%nband(1) /= ebands%nband)) k_dependent = "yes"
-   ! Should understand why!
-   !NCF_CHECK(ebands_ncwrite(ebands, ncid))
-
-   ! Add cumulant dimensions.
-   ncerr = nctk_def_dims(ncid, [ &
-     nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("max_nbcalc", self%max_nbcalc), &
-     nctkdim_t("nsppol", self%nsppol), nctkdim_t("ntemp", self%ntemp), &
-     nctkdim_t("nqbz", self%nsppol), nctkdim_t("nqibz", self%ntemp), &
-     nctkdim_t("nwr", self%nwr)], &
-     defmode=.True.)
-   NCF_CHECK(ncerr)
-   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "eph_task",  "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
-     "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
-     "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep"])
-   NCF_CHECK(ncerr)
-   ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"])
-   NCF_CHECK(ncerr)
-
-
-   ! Define arrays. Note nkcalc instead of my_nkcalc
-   ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
-     nctkarr_t("nbcalc_ks", "int", "nkcalc, nsppol"), &
-     nctkarr_t("ngqpt", "dp", "three"), &
-     nctkarr_t("kcalc", "dp", "three, nkcalc"), &
-     nctkarr_t("kcalc2ibz", "dp", " nkcalc, six"), &
-     nctkarr_t("kTmesh", "dp", "ntemp"), &
-     !nctkarr_t("mu_e", "dp", "ntemp"), &
-     nctkarr_t("wrmesh_b", "dp", "nwr, max_nbcalc, nkcalc, nsppol"), &
-     !nctkarr_t("vals_wr", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("gw_vals", "dp", "two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("ks_enes", "dp", "max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("dw_vals", "dp", "ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t('dfdw',"dp", "nwr, ntemp"), &
-     nctkarr_t('conductivity_mu',"dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('mobility_mu', "dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('seebeck',"dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('kappa',"dp", "three, three, two, nsppol, ntemp") &
-   ])
-   NCF_CHECK(ncerr)
-
-   if (self%debug == 1) then
-     ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t("time_mesh", "dp", "nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("ct_vals", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("c1", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("c2", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("c3", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol"), &
-     nctkarr_t("gt_vals", "dp","two, nwr, ntemp, max_nbcalc, nkcalc, nsppol") ] )
-     NCF_CHECK(ncerr)
-   endif
-
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), self%ieta))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbsum"), self%nbsum))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), self%ngqpt))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), self%kcalc))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), self%nbcalc_ks))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), self%bstart_ks))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "dfdw"), self%print_dfdw))
-   ! FIXME This part is wrong since these arrays are MPI distributed
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kappa"), self%kappa))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wrmesh_b"), self%wrmesh_b))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vals_wr"), c2r(self%vals_wr)))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ks_enes"), self%e0vals))
-
-   NCF_CHECK(nf90_close(ncid))
- end if ! master
-
- ! Barrier to avoid race conditions.
- !call wrtout(std_out, "before barrier")
- call xmpi_barrier(self%comm)
-
- ! Only the procs in the ncwrite_comm communicator write to disk.
- if (self%ncwrite_comm%value == xmpi_comm_null) goto 100
-
- ! open file for parallel-IO mode inside comm. All procs in ncwrite_comm enter this part.
- call wrtout(std_out, sjoin(" Performing parallel IO with:", itoa(self%ncwrite_comm%nproc), "procs"))
- NCF_CHECK(nctk_open_modify(ncid, path, self%ncwrite_comm%value))
-
- NCF_CHECK(nctk_set_datamode(ncid))
-
- ! Activate collectve IO.
- ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "gw_vals"), nf90_collective)
- NCF_CHECK(ncerr)
-
- ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "wrmesh_b"), nf90_collective)
- NCF_CHECK(ncerr)
-
- ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "ks_enes"), nf90_collective)
- NCF_CHECK(ncerr)
-
- ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dw_vals"), nf90_collective)
- NCF_CHECK(ncerr)
-
-if (any(abs(dtset%sigma_erange) > zero)) then
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dfdw"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "conductivity_mu"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "mobility_mu"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "seebeck"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "kappa"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-
-end if
-
- if (self%debug == 1) then
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "time_mesh"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "ct_vals"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "c1"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "c2"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "c3"), nf90_collective)
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "gt_vals"), nf90_collective)
-   NCF_CHECK(ncerr)
- endif
- spin = self%my_spins(1)
- ikcalc = self%my_ikcalc(1) ! index of the first kcalc treated by this rank.
-
- ! Start to write my **contiguous block** of kpoints from this **global** location
- ! Each MPI proc writes my_nkcalc entries.
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gw_vals"), c2r(self%gw_vals), &
-                      start=[1,1,1,1,ikcalc,spin], &
-                      count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
- NCF_CHECK(ncerr)
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "wrmesh_b"), self%wrmesh_b, &
-                      start=[1,1,ikcalc,spin], &
-                      count=[self%nwr, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
- NCF_CHECK(ncerr)
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "ks_enes"), self%e0vals, &
-                      start=[1,ikcalc,spin], &
-                      count=[self%max_nbcalc, self%my_nkcalc, self%my_nspins])
- NCF_CHECK(ncerr)
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "dw_vals"), self%dw_vals, &
-                      start=[1,1,ikcalc,spin], &
-                      count=[self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
- NCF_CHECK(ncerr)
-
-
-if (any(abs(dtset%sigma_erange) > zero)) then
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck, &
-                      start=[1,1,1,spin,1], &
-                      count=[3, 3, 2, self%my_nspins , self%ntemp])
- NCF_CHECK(ncerr)
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "kappa"), self%kappa, &
-                      start=[1,1,1,spin,1], &
-                      count=[3, 3, 2, self%my_nspins , self%ntemp])
- NCF_CHECK(ncerr)
-
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu, &
-                      start=[1,1,1,spin,1], &
-                      count=[3, 3, 2, self%my_nspins , self%ntemp])
- NCF_CHECK(ncerr)
-
- ncerr = nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu, &
-                      start=[1,1,1,spin,1], &
-                      count=[3, 3, 2, self%my_nspins , self%ntemp])
- NCF_CHECK(ncerr)
-
-end if
-
-
- if (self%debug == 1) then
-
-   ncerr = nf90_put_var(ncid, nctk_idname(ncid, "time_mesh"), self%time_mesh, &
-                        start=[1,1,1,ikcalc,spin], &
-                        count=[self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_put_var(ncid, nctk_idname(ncid, "ct_vals"), c2r(self%ct_vals), &
-                        start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c1"), c2r(self%c1), &
-                        start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c2"), c2r(self%c2), &
-                        start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c3"), c2r(self%c3), &
-                        start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
-   NCF_CHECK(ncerr)
-
-   ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gt_vals"), c2r(self%gt_vals), &
-                        start=[1,1,1,1,ikcalc,spin], &
-                        count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
-   NCF_CHECK(ncerr)
- endif
-
- NCF_CHECK(nf90_close(ncid))
-
- ! Write to ab_out for automatic testing.
- if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out)) then
-   write(ab_out, "(/,a)")" Print first 10 frequencies in gw_vals array (re-im) for testing purposes:"
-   write(ab_out, "(2(a, i0))")" spin: ", spin, ", ikcalc: ", ikcalc
-   my_ik = 1
-   do ib=1,self%nbcalc_ks(ikcalc, spin)
-     do itemp=1,self%ntemp
-       write(ab_out, "(2(a,i0))")" gw_vals for itemp:", itemp, "ib: ", ib
-       write(ab_out, "(*(es13.5))")dble(self%gw_vals(1:min(10, self%nwr), itemp, ib, my_ik, spin))
-       write(ab_out, "(*(es13.5))")aimag(self%gw_vals(1:min(10, self%nwr), itemp, ib, my_ik, spin))
-     end do
-  end do
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eta"), self%ieta))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbsum"), self%nbsum))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), self%ngqpt))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc"), self%kcalc))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nbcalc_ks"), self%nbcalc_ks))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "bstart_ks"), self%bstart_ks))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
+           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "dfdw"), self%print_dfdw))
+           ! FIXME This part is wrong since these arrays are MPI distributed
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu))
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu))
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck))
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kappa"), self%kappa))
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wrmesh_b"), self%wrmesh_b))
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vals_wr"), c2r(self%vals_wr)))
+           !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ks_enes"), self%e0vals))
+
+           NCF_CHECK(nf90_close(ncid))
+         end if ! master
+
+         ! Barrier to avoid race conditions.
+         !call wrtout(std_out, "before barrier")
+         call xmpi_barrier(self%comm)
+
+         ! Only the procs in the ncwrite_comm communicator write to disk.
+         if (self%ncwrite_comm%value == xmpi_comm_null) goto 100
+
+         ! open file for parallel-IO mode inside comm. All procs in ncwrite_comm enter this part.
+         call wrtout(std_out, sjoin(" Performing parallel IO with:", itoa(self%ncwrite_comm%nproc), "procs"))
+         NCF_CHECK(nctk_open_modify(ncid, path, self%ncwrite_comm%value))
+
+         NCF_CHECK(nctk_set_datamode(ncid))
+
+         ! Activate collectve IO.
+         ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "gw_vals"), nf90_collective)
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "wrmesh_b"), nf90_collective)
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "ks_enes"), nf90_collective)
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dw_vals"), nf90_collective)
+         NCF_CHECK(ncerr)
+
+        if (any(abs(dtset%sigma_erange) > zero)) then
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "dfdw"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "conductivity_mu"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "mobility_mu"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "seebeck"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "kappa"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+
+        end if
+
+         if (self%debug == 1) then
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "time_mesh"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "ct_vals"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "c1"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "c2"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "c3"), nf90_collective)
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_var_par_access(ncid, nctk_idname(ncid, "gt_vals"), nf90_collective)
+           NCF_CHECK(ncerr)
+         endif
+         spin = self%my_spins(1)
+         ikcalc = self%my_ikcalc(1) ! index of the first kcalc treated by this rank.
+
+         ! Start to write my **contiguous block** of kpoints from this **global** location
+         ! Each MPI proc writes my_nkcalc entries.
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gw_vals"), c2r(self%gw_vals), &
+                              start=[1,1,1,1,ikcalc,spin], &
+                              count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "wrmesh_b"), self%wrmesh_b, &
+                              start=[1,1,ikcalc,spin], &
+                              count=[self%nwr, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "ks_enes"), self%e0vals, &
+                              start=[1,ikcalc,spin], &
+                              count=[self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "dw_vals"), self%dw_vals, &
+                              start=[1,1,ikcalc,spin], &
+                              count=[self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+         NCF_CHECK(ncerr)
+
+
+        if (any(abs(dtset%sigma_erange) > zero)) then
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "seebeck"), self%seebeck, &
+                              start=[1,1,1,spin,1], &
+                              count=[3, 3, 2, self%my_nspins , self%ntemp])
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "kappa"), self%kappa, &
+                              start=[1,1,1,spin,1], &
+                              count=[3, 3, 2, self%my_nspins , self%ntemp])
+         NCF_CHECK(ncerr)
+
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "mobility_mu"), self%mobility_mu, &
+                              start=[1,1,1,spin,1], &
+                              count=[3, 3, 2, self%my_nspins , self%ntemp])
+         NCF_CHECK(ncerr)
+
+         ncerr = nf90_put_var(ncid, nctk_idname(ncid, "conductivity_mu"), self%conductivity_mu, &
+                              start=[1,1,1,spin,1], &
+                              count=[3, 3, 2, self%my_nspins , self%ntemp])
+         NCF_CHECK(ncerr)
+
+        end if
+
+
+         if (self%debug == 1) then
+
+           ncerr = nf90_put_var(ncid, nctk_idname(ncid, "time_mesh"), self%time_mesh, &
+                                start=[1,1,1,ikcalc,spin], &
+                                count=[self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_put_var(ncid, nctk_idname(ncid, "ct_vals"), c2r(self%ct_vals), &
+                                start=[1,1,1,1,ikcalc,spin], &
+                                count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c1"), c2r(self%c1), &
+                                start=[1,1,1,1,ikcalc,spin], &
+                                count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c2"), c2r(self%c2), &
+                                start=[1,1,1,1,ikcalc,spin], &
+                                count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_put_var(ncid, nctk_idname(ncid, "c3"), c2r(self%c3), &
+                                start=[1,1,1,1,ikcalc,spin], &
+                                count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+           NCF_CHECK(ncerr)
+
+           ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gt_vals"), c2r(self%gt_vals), &
+                                start=[1,1,1,1,ikcalc,spin], &
+                                count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
+           NCF_CHECK(ncerr)
+         endif
+
+         NCF_CHECK(nf90_close(ncid))
+
+         ! Write to ab_out for automatic testing.
+         if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out)) then
+           write(ab_out, "(/,a)")" Print first 10 frequencies in gw_vals array (re-im) for testing purposes:"
+           write(ab_out, "(2(a, i0))")" spin: ", spin, ", ikcalc: ", ikcalc
+           my_ik = 1
+           do ib=1,self%nbcalc_ks(ikcalc, spin)
+             do itemp=1,self%ntemp
+               write(ab_out, "(2(a,i0))")" gw_vals for itemp:", itemp, "ib: ", ib
+               write(ab_out, "(*(es13.5))")dble(self%gw_vals(1:min(10, self%nwr), itemp, ib, my_ik, spin))
+               write(ab_out, "(*(es13.5))")aimag(self%gw_vals(1:min(10, self%nwr), itemp, ib, my_ik, spin))
+             end do
+          end do
  end if
 if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out) .and. any(abs(dtset%sigma_erange) > zero)) then
    write(ab_out, "(/,a)")" Print first 5 temperatures of diagonal mobility_mu > 1e-6 (with ieh as electrons or holes) for testing purposes:"
@@ -1782,7 +1788,7 @@ end if
 
 
  100 call cwtime_report(" cumulant_ncwrite", cpu, wall, gflops)
-#endif
+ #endif
 
 end subroutine cumulant_ncwrite
 !!***
