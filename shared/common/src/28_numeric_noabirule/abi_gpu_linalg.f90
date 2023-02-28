@@ -39,7 +39,7 @@
 
 subroutine check_gpu_mem(str)
 
-!Arguments ------------------------------------
+  !Arguments ------------------------------------
   character (KIND=c_char), intent(in)  :: str(*)
 
   !ABI_UNUSED(str)
@@ -305,11 +305,14 @@ end subroutine gpu_allocated_impl
 !!
 !! SOURCE
 
-subroutine gpu_managed_ptr_status(gpu_ptr)
+subroutine gpu_managed_ptr_status(gpu_ptr, str)
 
   !Arguments ------------------------------------
-  type(c_ptr)                       :: gpu_ptr
+  type(c_ptr)                          :: gpu_ptr
+  character (KIND=c_char), intent(in)  :: str(*)
+
   ABI_UNUSED(gpu_ptr)
+  !ABI_UNUSED(str)
 
 end subroutine gpu_managed_ptr_status
 !!***
