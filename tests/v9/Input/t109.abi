@@ -5,7 +5,7 @@
 ##  Fe BCC | ferromagnetic | PAW                       LMac 2022 ##
 ###################################################################
 
-# These are the command line options that will passed to lruj code.
+# These are the command line options passed to lruj program.
 
 t107o_DS1_LRUJ.nc t107o_DS2_LRUJ.nc t107o_DS3_LRUJ.nc t107o_DS4_LRUJ.nc
 
