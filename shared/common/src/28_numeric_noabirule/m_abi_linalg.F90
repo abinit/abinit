@@ -277,10 +277,11 @@ module m_abi_linalg
       logical(kind=c_bool),           intent(out) :: is_allocated
     end subroutine gpu_allocated_impl
 
-    subroutine gpu_managed_ptr_status(gpu_ptr) bind(c, name="gpu_managed_ptr_status_")
+    subroutine gpu_managed_ptr_status(gpu_ptr, str) bind(c, name="gpu_managed_ptr_status_")
       use, intrinsic :: iso_c_binding
       implicit none
       type(c_ptr),                    intent(in)  :: gpu_ptr
+      character (KIND=c_char),        intent(in)  :: str(*)
     end subroutine gpu_managed_ptr_status
 
   end interface
