@@ -302,7 +302,8 @@ extern "C" void check_gpu_mem_(const char* str)
 {
   size_t free,total;
   cudaMemGetInfo(&free,&total);
-  printf("[%s] *** GPU memory : Free =>  %4.2fMo   | Total =>  %4.2fMo ***\n", str, free*1e-6, total*1e-6);
+  printf("[%s] *** GPU memory : Occupied => %4.2fMo   | Free =>  %4.2fMo   | Total =>  %4.2fMo ***\n",
+         str, (total-free)*1e-6, free*1e-6, total*1e-6);
   fflush(stdout);
 }
 
@@ -401,7 +402,8 @@ extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, const 
 {
   if (cudaMemcpy(*dest_gpu_ptr, *src_gpu_ptr, *size, cudaMemcpyDeviceToDevice) != cudaSuccess)
   {
-    fprintf(stderr, "ERROR: copy_gpu_to_gpu failed (size=%ld): %s\n",*size, cudaGetErrorString(cudaGetLastError()));
+    fprintf(stderr, "ERROR: copy_gpu_to_gpu failed (dest=%p, src=%p, size=%ld): %s\n",
+            *dest_gpu_ptr, *src_gpu_ptr, *size, cudaGetErrorString(cudaGetLastError()));
     fflush(stderr);
     abi_cabort();
   }
@@ -471,7 +473,7 @@ extern "C" void gpu_allocated_impl_(void **gpu_ptr, bool* is_allocated)
 /*  None.                                                                     */
 /*============================================================================*/
 
-extern "C" void gpu_managed_ptr_status_(void **gpu_ptr)
+extern "C" void gpu_managed_ptr_status_(void **gpu_ptr, const char* str)
 {
 
   cudaPointerAttributes attributes;
@@ -480,12 +482,15 @@ extern "C" void gpu_managed_ptr_status_(void **gpu_ptr)
 
   if(attributes.type == cudaMemoryTypeManaged)
   {
-    printf("ptr %p is memory managed, host addr=%p, device addr=%p\n", *gpu_ptr,
+    printf("[%s] ptr %p is memory managed, host addr=%p, device addr=%p\n", str, *gpu_ptr,
            attributes.hostPointer,
            attributes.devicePointer);
     fflush(stdout);
+  } else if(attributes.type == cudaMemoryTypeDevice) {
+    printf("[%s] ptr %p is a device ptr.\n", str, *gpu_ptr);
+    fflush(stdout);
   } else {
-    printf("ptr %p is not memory managed.\n", *gpu_ptr);
+    printf("[%s] ptr %p is neither a memory managed pointer nor a device pointer.\n", str, *gpu_ptr);
     fflush(stdout);
   }
 
