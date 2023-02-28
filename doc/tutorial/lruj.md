@@ -297,7 +297,7 @@ files.
 
 This more expensive calculation should take under five minutes to run. Open up the output file.
 
-{% dialog tests/tutorial/Input/tlruj_2.abo %}
+{% dialog tests/tutorial/Refs/tlruj_2.abo %}
 
 You will find all information related to the calculation of the U parameter between the 
 <code>calculate U, (J)</code> flags. The first information printed out is as follows:
@@ -370,7 +370,7 @@ directory as the abinit executable) with the following command.
 It should take less than a second to run. If the lruj utility runs successfully, the resulting
 output file, <code>tlruj_lruj.out</code>, should look like this:
 
-{% dialog tests/tutorial/Refs/tlruj_lruj.out %}
+{% dialog tests/tutorial/Refs/tlruj_3.stdout %}
 
 This specific calculation looks at the Hubbard U parameter ([[macro_uj]] 1) using results from five
 (5) perturbations, the strengths of which are listed in the first table alongside the corresponding
@@ -431,12 +431,12 @@ To assess which one is best, you’ll want to use the RMS errors in column seven
 can import the perturbation/occupation table into Excel (or any other choice of graphical
 utility) to visualize the fits. The following graph visualizes our data in Mathematica.
 
-![lrujPolyU](udet_assets/LRUJ_U_polynomials.png)
+![lrujPolyU](lruj_assets/LRUJ_U_polynomials.png)
 
 Based on this information, one could argue the quadratic fit is sufficient. Thus, we get a
 first-principles Hubbard U value of 9.30 ± 0.07 eV for the Ni *3d* subspace in a four-atom cell
 of AF2 NiO. This is much larger than values for NiO reported in the literature values, which can be
-attributed to the poor [[ecut]] and [[ngkpnt]] sampling needed to speed up this tutorial. Furthermore,
+attributed to the poor [[ecut]] and [[ngkpt]] sampling needed to speed up this tutorial. Furthermore,
 this indicates that these parameters must be converged with respect to supercell size in order to 
 isolate the perturbed subspace from its periodic images.
 
@@ -445,7 +445,7 @@ subspaces. We do this now but more precisely, doubling the value of [[ecut]] and
 etc. When we plot the linear response data, it becomes more obvious why more scruitnous run parameters
 are necessary and why polynomials of higher order are needed to perform an accurate regression:
 
-![lrujPolyJ](udet_assets/LRUJ_J_polynomials.png)
+![lrujPolyJ](lruj_assets/LRUJ_J_polynomials.png)
 
 Here, we see that the quadratic fit, at minimum, sufficiently fits the data, yielding a Hund’s J value 
 of 0.499 ± 0.032 eV for the Ni 3d subspace in a four-atom cell NiO. Keep in mind, however, that these 

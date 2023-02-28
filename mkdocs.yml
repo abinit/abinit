@@ -180,8 +180,9 @@ nav:
         - PAW3: tutorial/paw3.md
     - DFT_PLUS_U:
         - tutorial/dftu.md
-        - tutorial/udet.md
+        #- tutorial/udet.md
         - tutorial/ucalc_crpa.md
+        - LRUJ: tutorial/lruj.md
     - DFPT:
         - RF1: tutorial/rf1.md
         - RF2: tutorial/rf2.md
