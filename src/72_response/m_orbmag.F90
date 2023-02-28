@@ -85,11 +85,10 @@ module m_orbmag
 
   ! these parameters name the various output terms                                             
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
-  integer,parameter :: imcc=4,imccmu=5
-  integer,parameter :: imvv1=6,imvv1mu=7,imvv2=8,imvv2mu=9
-  integer,parameter :: imnl=10,imlr=11,imbm=12
-  integer,parameter :: iomlmb=13
-  integer,parameter :: nterms=13
+  integer,parameter :: imcc=4,imvv1=5,imvv2=6
+  integer,parameter :: imnl=7,imlr=8,imbm=9
+  integer,parameter :: iomlmb=10
+  integer,parameter :: nterms=10
 
   ! these parameters are constants used repeatedly
   
@@ -479,19 +478,23 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
     
      call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
        & m1_k,m1_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+    
      orbmag_terms(:,:,isppol,:,ibcc) = orbmag_terms(:,:,isppol,:,ibcc) + b1_k(:,:,:)
+   
      orbmag_terms(:,:,isppol,:,imcc) = orbmag_terms(:,:,isppol,:,imcc) + m1_k(:,:,:)
-     orbmag_terms(:,:,isppol,:,imccmu) = orbmag_terms(:,:,isppol,:,imccmu) + m1_mu_k(:,:,:)
+     orbmag_terms(:,:,isppol,:,imcc) = orbmag_terms(:,:,isppol,:,imcc) + m1_mu_k(:,:,:)
      
      call orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
       & ikpt,isppol,m1_k,m1_mu_k,m2_k,m2_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,&
       & npw_k,occ_k,pcg1_k,ucvol)
      orbmag_terms(:,:,isppol,:,ibvv1) = orbmag_terms(:,:,isppol,:,ibvv1) + b1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,ibvv2) = orbmag_terms(:,:,isppol,:,ibvv2) + b2_k(:,:,:)
+  
      orbmag_terms(:,:,isppol,:,imvv1) = orbmag_terms(:,:,isppol,:,imvv1) + m1_k(:,:,:)
-     orbmag_terms(:,:,isppol,:,imvv1mu) = orbmag_terms(:,:,isppol,:,imvv1mu) + m1_mu_k(:,:,:)
+     orbmag_terms(:,:,isppol,:,imvv1) = orbmag_terms(:,:,isppol,:,imvv1) + m1_mu_k(:,:,:)
+ 
      orbmag_terms(:,:,isppol,:,imvv2) = orbmag_terms(:,:,isppol,:,imvv2) + m2_k(:,:,:)
-     orbmag_terms(:,:,isppol,:,imvv2mu) = orbmag_terms(:,:,isppol,:,imvv2mu) + m2_mu_k(:,:,:)
+     orbmag_terms(:,:,isppol,:,imvv2) = orbmag_terms(:,:,isppol,:,imvv2) + m2_mu_k(:,:,:)
      
      call orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
        & m1_k,mcprjk,nband_k,occ_k,pawtab,ucvol)
@@ -1890,12 +1893,6 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    write(message,'(a,3es16.8)') '    rho(1) VV1 : ',(orbmag_trace(1,adir,imvv1),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_trace(1,adir,imvv2),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' rho(1) CC mu  : ',(orbmag_trace(1,adir,imccmu),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') 'rho(1) VV1 mu  : ',(orbmag_trace(1,adir,imvv1mu),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') 'rho(1) VV2 mu  : ',(orbmag_trace(1,adir,imvv2mu),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_trace(1,adir,imnl),adir=1,3)
    call wrtout(ab_out,message,'COLL')
