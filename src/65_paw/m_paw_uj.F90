@@ -281,7 +281,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,dtset,dtfil,ures,comm)
 !scalars
  integer,parameter           :: natmax=2,nwfchr=6
  integer                     :: ii,jj,nat_org,jdtset,nspden,macro_uj,marr
- integer                     :: im1,ndtuj,idtset, nsh_org, nsh_sc,nat_sc,maxnat
+ integer                     :: im1,ndtuj,nsh_org, nsh_sc,nat_sc,maxnat
  integer                     :: pawujat,pawprtvol,pawujoption
  integer                     :: dmatpuopt,invopt,ipert
  integer                     :: my_rank, ncid, ncerr
@@ -289,7 +289,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,dtset,dtfil,ures,comm)
  real(dp)                    :: diem,signum,scalarHP !LMac quantities
 
  character(len=500)          :: message
- character(len=2)            :: hstr
+ !character(len=2)            :: hstr
  character(len=5)            :: pertname
  character(len=1)            :: parname
  character(len=14)           :: occmag
@@ -641,8 +641,9 @@ call wrtout(std_out,message,'COLL')
 
  ii=1
  write(message, fmt='(8a)') ' URES ','     ii','    nat','       r_max','    U(J)[eV]','   U_ASA[eV]','   U_inf[eV]',ch10
- write(message, fmt='(a,2i7,4f12.5)') trim(message)//' URES ',ii,nat_org,maxval(abs(distv_org)),signum*ures,signum*ures*exp(log(intg)*eyp),&
-& signum*ures*exp(log(ph0phiint)*eyp)
+ write(message, fmt='(a,2i7,4f12.5)') &
+     trim(message)//' URES ',ii,nat_org,maxval(abs(distv_org)),signum*ures,signum*ures*exp(log(intg)*eyp),&
+     signum*ures*exp(log(ph0phiint)*eyp)
  call wrtout(units,message)
 
  if (pawprtvol>1) then
@@ -839,6 +840,8 @@ subroutine pawuj_red(istep, pert_state, dtfil, &
  logical,allocatable         :: dmusk(:,:),atvshmusk(:,:,:) !atvshmusk(natvshift,2,natom)
 
 ! *********************************************************************
+
+ ABI_UNUSED((/dtfil%ireadwf, istep, pert_state, comm/))
 
 !Initializations
  nspden=1;nsppol=1
@@ -1157,7 +1160,7 @@ subroutine linvmat(inmat,oumat,nat,nam,option,gam,prtvol)
 !Local variables -------------------------
  character(len=500)             :: message
  character(len=500)             :: bastrin,gastrin
- integer                        :: info,nnat,optionn,ii,jj
+ integer                        :: info,nnat,optionn !,ii,jj
  integer,allocatable            :: ipvt(:)
  real(dp),allocatable           :: hma(:,:),work(:)
 

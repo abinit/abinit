@@ -67,8 +67,8 @@ program lruj
  integer                            :: ncid,nnat,prtvol,nargs,nfiles,ndtpawuj,degarg
  integer                            :: ndata,nspden,macro_uj,pawujat,dmatpuopt
  integer                            :: degree,mdegree,ii,ipert
- real(dp)                           :: diem,diemix,diemixmag,ph0phiint,signum,Ha2eV
- type(crystal_t)                    :: cryst
+ real(dp)                           :: diem,ph0phiint,signum,Ha2eV !diemix, diemixmag,
+ !type(crystal_t)                    :: cryst
 
 !arrays
  integer, allocatable               :: iperm(:),pawujat_file(:),macrouj_file(:),dmatpuopt_file(:)
@@ -81,12 +81,11 @@ program lruj
 
 !characters
  character(len=1)                   :: parname
- character(len=5)                   :: pertname,degreename
- character(len=12)                  :: regname
+ character(len=5)                   :: degreename
  character(len=14)                  :: occmag
  character(len=24)                  :: codename
  character(len=30)                  :: diem_token
- character(len=500)                 :: message,command,arg,msg
+ character(len=500)                 :: message,arg,msg,pertname,regname
  character(len=fnlen),allocatable   :: file_paths(:)
 
 
@@ -578,7 +577,7 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
  real(dp),allocatable        :: work(:)
  real(dp),allocatable        :: A(:,:),AT(:,:),ATA(:,:)
 !characters
- character(len=500)          :: message
+ !character(len=500)          :: message
 
 !####################################################################
 !#####################  Get Polynomial Fit  #########################
