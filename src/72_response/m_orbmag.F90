@@ -84,10 +84,12 @@ module m_orbmag
   integer,parameter :: pack1a(3) = (/4,2,3/)
 
   ! these parameters name the various output terms                                             
-  integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3,imcc=4,imvv1=5,imvv2=6
-  integer,parameter :: imnl=7,imlr=8,imbm=9
-  integer,parameter :: iomlmb=10
-  integer,parameter :: nterms=10
+  integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
+  integer,parameter :: imcc=4,imccmu=5
+  integer,parameter :: imvv1=6,imvv1mu=7,imvv2=8,imvv2mu=9
+  integer,parameter :: imnl=10,imlr=11,imbm=12
+  integer,parameter :: iomlmb=13
+  integer,parameter :: nterms=13
 
   ! these parameters are constants used repeatedly
   
@@ -143,6 +145,7 @@ module m_orbmag
   private :: dterm_BM
   private :: tt_me
   private :: txt_me
+  private :: local_fermie
 
   private :: lamb_core
   private :: make_pcg1
@@ -220,7 +223,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ngfft1,ngfft2,ngfft3,ngfft4
  integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm,with_vectornd
- real(dp) :: arg,ecut_eff,ucvol
+ real(dp) :: arg,ecut_eff,fermie,ucvol
  logical :: has_nucdip
  type(dterm_type) :: dterm
  type(gs_hamiltonian_type) :: gs_hamk
@@ -231,7 +234,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: b1_k(:,:,:),b2_k(:,:,:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cgrvtrial(:,:),cwavef(:,:)
- real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:),m1_k(:,:,:),m2_k(:,:,:)
+ real(dp),allocatable :: eig_k(:),ffnl_k(:,:,:,:),kinpw(:),kpg_k(:,:)
+ real(dp),allocatable :: m1_k(:,:,:),m1_mu_k(:,:,:),m2_k(:,:,:),m2_mu_k(:,:,:)
  real(dp),allocatable :: occ_k(:),orbmag_terms(:,:,:,:,:),orbmag_trace(:,:,:)
  real(dp),allocatable :: pcg1_k(:,:,:),ph1d(:,:),ph3d(:,:,:),phkxred(:,:),realgnt(:)
  real(dp),allocatable :: vectornd(:,:,:),vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
@@ -250,6 +254,11 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
  ngfft4=dtset%ngfft(4) ; ngfft5=dtset%ngfft(5) ; ngfft6=dtset%ngfft(6)
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0; ikg1 = 0
+
+ ! Fermi energy
+ call local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
+ ! fermie = dtset%userra
+ write(std_out,'(a,es16.8)')'JWZ debug using fermi e = ',fermie
 
  !Definition of atindx array
  !Generate an index table of atoms, in order for them to be used type after type.
@@ -464,19 +473,25 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      ABI_MALLOC(b1_k,(2,nband_k,3))
      ABI_MALLOC(b2_k,(2,nband_k,3))
      ABI_MALLOC(m1_k,(2,nband_k,3))
+     ABI_MALLOC(m1_mu_k,(2,nband_k,3))
      ABI_MALLOC(m2_k,(2,nband_k,3))
+     ABI_MALLOC(m2_mu_k,(2,nband_k,3))
     
-     call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
-      & mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+     call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
+       & m1_k,m1_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
      orbmag_terms(:,:,isppol,:,ibcc) = orbmag_terms(:,:,isppol,:,ibcc) + b1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,imcc) = orbmag_terms(:,:,isppol,:,imcc) + m1_k(:,:,:)
+     orbmag_terms(:,:,isppol,:,imccmu) = orbmag_terms(:,:,isppol,:,imccmu) + m1_mu_k(:,:,:)
      
-     call orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
-      & ikpt,isppol,m1_k,m2_k,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+     call orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
+      & ikpt,isppol,m1_k,m1_mu_k,m2_k,m2_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,&
+      & npw_k,occ_k,pcg1_k,ucvol)
      orbmag_terms(:,:,isppol,:,ibvv1) = orbmag_terms(:,:,isppol,:,ibvv1) + b1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,ibvv2) = orbmag_terms(:,:,isppol,:,ibvv2) + b2_k(:,:,:)
      orbmag_terms(:,:,isppol,:,imvv1) = orbmag_terms(:,:,isppol,:,imvv1) + m1_k(:,:,:)
+     orbmag_terms(:,:,isppol,:,imvv1mu) = orbmag_terms(:,:,isppol,:,imvv1mu) + m1_mu_k(:,:,:)
      orbmag_terms(:,:,isppol,:,imvv2) = orbmag_terms(:,:,isppol,:,imvv2) + m2_k(:,:,:)
+     orbmag_terms(:,:,isppol,:,imvv2mu) = orbmag_terms(:,:,isppol,:,imvv2mu) + m2_mu_k(:,:,:)
      
      call orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
        & m1_k,mcprjk,nband_k,occ_k,pawtab,ucvol)
@@ -494,7 +509,9 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      ABI_FREE(b1_k)
      ABI_FREE(b2_k)
      ABI_FREE(m1_k)
+     ABI_FREE(m1_mu_k)
      ABI_FREE(m2_k)
+     ABI_FREE(m2_mu_k)
 
      icg = icg + mcgk
      icprj = icprj + mcprjk
@@ -831,13 +848,13 @@ end subroutine orbmag_nl_k
 !!
 !! SOURCE
 
-subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppol,m1_k,&
-    & mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
+    & m1_k,m1_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,nband_k,npw_k
-  real(dp),intent(in) :: ucvol
+  real(dp),intent(in) :: fermie,ucvol
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -845,14 +862,14 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppo
   !arrays
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: eig_k(nband_k),occ_k(nband_k),pcg1_k(2,mcgk,3)
-  real(dp),intent(out) :: b1_k(2,nband_k,3),m1_k(2,nband_k,3)
+  real(dp),intent(out) :: b1_k(2,nband_k,3),m1_k(2,nband_k,3),m1_mu_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj1_k(dtset%natom,mcprjk,3)
 
   !Local variables -------------------------
   !scalars
   integer :: adir,bdir,cpopt,gdir,ndat,nn,npwsp,sij_opt,tim_getghc,type_calc
   real(dp) :: doti,dotr,epsabg,lams,trnrm
-  complex(dpc) :: b1,m1,prefac_b,prefac_m
+  complex(dpc) :: b1,m1,m1_mu,prefac_b,prefac_m
   !arrays
   real(dp),allocatable :: bra(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:),ket(:,:)
   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
@@ -861,6 +878,7 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppo
 
  b1_k = zero
  m1_k = zero
+ m1_mu_k = zero
  npwsp = npw_k*dtset%nspinor
  
  ABI_MALLOC(bra,(2,npwsp))
@@ -883,6 +901,7 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppo
      if (abs(trnrm).LT.tol8) cycle
 
      m1 = czero
+     m1_mu = czero
      b1 = czero
 
      do bdir = 1, 3
@@ -909,12 +928,14 @@ subroutine orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,gs_hamk,ikpt,isppo
          doti = DOT_PRODUCT(bra(1,:),gsc(2,:))-DOT_PRODUCT(bra(2,:),gsc(1,:))
          b1 = b1 -two*prefac_b*CMPLX(dotr,doti)
          m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
+         m1_mu = m1_mu - two*prefac_m*CMPLX(dotr,doti)*fermie
          
        end do !gdir
      end do !bdir
 
      b1_k(1,nn,adir) = trnrm*real(b1); b1_k(2,nn,adir) = trnrm*aimag(b1)
      m1_k(1,nn,adir) = trnrm*real(m1); m1_k(2,nn,adir) = trnrm*aimag(m1)
+     m1_mu_k(1,nn,adir) = trnrm*real(m1_mu); m1_mu_k(2,nn,adir) = trnrm*aimag(m1_mu)
 
    end do !nn
  end do !adir
@@ -956,13 +977,14 @@ end subroutine orbmag_cc_k
 !!
 !! SOURCE
 
-subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
-    & ikpt,isppol,m1_k,m2_k,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
+subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
+    & ikpt,isppol,m1_k,m1_mu_k,m2_k,m2_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,&
+    & occ_k,pcg1_k,ucvol)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: ikpt,isppol,mcgk,mcprjk,nband_k,npw_k
-  real(dp),intent(in) :: ucvol
+  real(dp),intent(in) :: fermie,ucvol
   type(dataset_type),intent(in) :: dtset
   type(gs_hamiltonian_type),intent(inout) :: gs_hamk
   type(MPI_type), intent(inout) :: mpi_enreg
@@ -971,7 +993,8 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
   integer,intent(in) :: atindx(dtset%natom),dimlmn(dtset%natom)
   real(dp),intent(in) :: cg_k(2,mcgk),eig_k(nband_k),occ_k(nband_k),pcg1_k(2,mcgk,3)
   real(dp),intent(out) :: b1_k(2,nband_k,3),b2_k(2,nband_k,3)
-  real(dp),intent(out) :: m1_k(2,nband_k,3),m2_k(2,nband_k,3)
+  real(dp),intent(out) :: m1_k(2,nband_k,3),m1_mu_k(2,nband_k,3)
+  real(dp),intent(out) :: m2_k(2,nband_k,3),m2_mu_k(2,nband_k,3)
   type(pawcprj_type),intent(in) :: cprj_k(dtset%natom,mcprjk)
 
   !Local variables -------------------------
@@ -979,7 +1002,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
   integer :: adir,bdir,choice,cpopt,gdir,ndat,nn,nnlout,np,npwsp
   integer :: paw_opt,signs,tim_getghc
   real(dp) :: doti,dotr,epsabg,trnrm
-  complex(dpc) :: b1,bv2b,m1,mb,mg,mv2b,prefac_b,prefac_m
+  complex(dpc) :: b1,bv2b,m1,m1_mu,mb,mg,mv2b,mv2b_mu,prefac_b,prefac_m
   !arrays
   real(dp) :: enlout(1),lamv(1)
   real(dp),allocatable :: bra(:,:),ket(:,:),svectoutb(:,:),svectoutg(:,:),vectout(:,:)
@@ -988,6 +1011,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
 !--------------------------------------------------------------------
 
  m1_k = zero; m2_k = zero
+ m1_mu_k = zero; m2_mu_k = zero
  b1_k = zero; b2_k = zero
  npwsp = npw_k*dtset%nspinor
  
@@ -1012,6 +1036,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
    do nn = 1, nband_k
 
      m1 = czero; mv2b = czero
+     m1_mu = czero; mv2b_mu = czero
      b1 = czero; bv2b = czero
      trnrm = occ_k(nn)*dtset%wtk(ikpt)/ucvol
      if(abs(trnrm).LT.tol8) cycle
@@ -1043,6 +1068,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
          ! add <Pc du/dk_b|dS/dk_g|u_nk>*E_nk
          b1 = b1 - prefac_b*CMPLX(dotr,doti)
          m1 = m1 + prefac_m*CMPLX(dotr,doti)*eig_k(nn)
+         m1_mu = m1_mu - prefac_m*CMPLX(dotr,doti)*fermie
 
          ! extract |Pc du/dk_g>         
          bra(1:2,1:npwsp) = pcg1_k(1:2,(nn-1)*npwsp+1:nn*npwsp,gdir)
@@ -1052,6 +1078,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
          ! add CONJG(<Pc du/dk_b|dS/dk_g|u_nk>)*E_nk
          b1 = b1 - prefac_b*CMPLX(dotr,-doti)
          m1 = m1 + prefac_m*CMPLX(dotr,-doti)*eig_k(nn)
+         m1_mu = m1_mu - prefac_m*CMPLX(dotr,-doti)*fermie
          
          do np = 1, nband_k
            if(abs(occ_k(np)).LT.tol8) cycle
@@ -1068,6 +1095,7 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
 
            bv2b = bv2b + prefac_b*CONJG(mb)*mg
            mv2b = mv2b - prefac_m*CONJG(mb)*mg*eig_k(nn)
+           mv2b_mu = mv2b_mu + prefac_m*CONJG(mb)*mg*fermie
          end do ! np
  
        end do !gdir
@@ -1076,7 +1104,9 @@ subroutine orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,gs_hamk,&
      b1_k(1,nn,adir) = trnrm*real(b1); b1_k(2,nn,adir) = trnrm*aimag(b1)
      b2_k(1,nn,adir) = trnrm*real(bv2b); b2_k(2,nn,adir) = trnrm*aimag(bv2b)
      m1_k(1,nn,adir) = trnrm*real(m1); m1_k(2,nn,adir) = trnrm*aimag(m1)
+     m1_mu_k(1,nn,adir) = trnrm*real(m1_mu); m1_mu_k(2,nn,adir) = trnrm*aimag(m1_mu)
      m2_k(1,nn,adir) = trnrm*real(mv2b); m2_k(2,nn,adir) = trnrm*aimag(mv2b)
+     m2_mu_k(1,nn,adir) = trnrm*real(mv2b_mu); m2_mu_k(2,nn,adir) = trnrm*aimag(mv2b_mu)
 
    end do !nn
  end do !adir
@@ -1861,6 +1891,12 @@ subroutine orbmag_output(dtset,nband_k,nterms,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '    rho(1) VV2 : ',(orbmag_trace(1,adir,imvv2),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') ' rho(1) CC mu  : ',(orbmag_trace(1,adir,imccmu),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') 'rho(1) VV1 mu  : ',(orbmag_trace(1,adir,imvv1mu),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,3es16.8)') 'rho(1) VV2 mu  : ',(orbmag_trace(1,adir,imvv2mu),adir=1,3)
+   call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '     rho(0) NL : ',(orbmag_trace(1,adir,imnl),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') '   <L_R> terms : ',(orbmag_trace(1,adir,imlr),adir=1,3)
@@ -2222,5 +2258,103 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
  
 end subroutine make_d
 !!***
+
+!!****f* ABINIT/local_fermie
+!! NAME
+!! local_fermie
+!!
+!! FUNCTION
+!! estimate Fermi energy as max value of all occupied bands/kpts
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
+
+  !Arguments ------------------------------------
+  !scalars
+  real(dp),intent(out) :: fermie
+  type(dataset_type),intent(in) :: dtset
+  type(MPI_type), intent(inout) :: mpi_enreg
+
+  !arrays
+  real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
+  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: bdtot_index,ierr,ikpt,isppol,me
+  integer :: nband_k,nband_me,nn,nproc,spaceComm
+  real(dp) :: fermie_k
+ 
+  !arrays
+  real(dp),allocatable :: eig_k(:),occ_k(:)
+
+!--------------------------------------------------------------------
+  
+  spaceComm=mpi_enreg%comm_cell
+  nproc=xmpi_comm_size(spaceComm)
+  me = mpi_enreg%me_kpt
+
+  bdtot_index=0
+  fermie_k = -1.0D99
+  do isppol = 1, dtset%nsppol
+    do ikpt = 1, dtset%nkpt
+     
+      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+      nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
+
+      ! if the current kpt is not on the current processor, cycle
+      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
+        bdtot_index=bdtot_index+nband_k
+        cycle
+      end if
+
+      ABI_MALLOC(occ_k,(nband_k))
+      occ_k(:)=occ(1+bdtot_index:nband_k+bdtot_index)
+
+      ABI_MALLOC(eig_k,(nband_k))
+      eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
+
+      do nn = 1, nband_k
+        if ( (abs(occ_k(nn)).GT.tol8) .AND. (eig_k(nn).GT.fermie_k) ) then
+          fermie_k = eig_k(nn)
+        end if
+      end do ! nn
+
+      ABI_FREE(occ_k)
+      ABI_FREE(eig_k)
+      
+      bdtot_index=bdtot_index+nband_k
+
+    end do ! end loop over kpts
+  end do ! end loop over isppol
+
+  call xmpi_max(fermie_k,fermie,spaceComm,ierr)
+
+end subroutine local_fermie
+!!***
+
 
 end module m_orbmag
