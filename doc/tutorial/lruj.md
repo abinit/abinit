@@ -92,7 +92,7 @@ Abinit suite as both an intrinsic DFT protocol and post-processing utility
 extension. Abinit Version 9.6.2 saw the introduction of an additional [[macro_uj]] 
 variable for calculating the Hund's J with ujdet.
 
-In 2022, users alerted Abinit to the existence of a bug in ujdet which led to the decomission of
+In 2022, users alerted Abinit to the existence of a bug in ujdet which led to the decommission of
 its post-processing utility and the renovation of its internal Abinit functionality. As of Version 
 9.6.2, the Abinit DFT suite is equipped with the lruj post-processing tool, which is built off of the
 same core, but debugged, ujdet programming. Although older versions of Abinit preserve the ujdet 
