@@ -412,7 +412,7 @@ program lruj
 
  write(message, fmt='(10a)')'  Perturbations         ',occmag,ch10,&
 ' --------------- -----------------------------',ch10,&
-'    ',pertname,' [eV]     Unscreened      Screened',ch10,&
+'    ',trim(pertname),' [eV]     Unscreened      Screened',ch10,&
 ' --------------- -----------------------------'
  call wrtout(std_out,message)
  do ipert=0,nfiles
