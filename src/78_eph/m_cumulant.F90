@@ -943,9 +943,10 @@ subroutine cumulant_compute(self)
          if (self%debug == 1) self%time_mesh(:,itemp,ib,my_ik,spin) = time_mesh_temp(:)! * 0.24188845385 *10E-4 ! picoseconds ( I think )
 
          if (time_mesh_temp(nwr) < time_max) ABI_WARNING(sjoin("KBT",itoa(my_ik),itoa(ib),itoa(itemp)))
-         if (time_mesh_temp(nwr) < time_max) ABI_WARNING(sjoin( &
-                 "Time mesh smaller than needed to reach tolerance value. Actual value of", & 
-                 ftoa(time_mesh_temp(nwr)), ", desirable ",ftoa(time_max),". Increase nfreqsp."))
+         msg = sjoin( &
+                 "Time mesh smaller than needed to reach tolerance value. Actual value of", &
+                 ftoa(time_mesh_temp(nwr)), ", desirable ",ftoa(time_max),". Increase nfreqsp.")
+         if (time_mesh_temp(nwr) < time_max) ABI_WARNING(msg)
          beta(:) = abs( aimag( self%vals_wr(:, itemp, ib, my_ik, spin ) ) ) / pi
 
          ! Calculation of the different terms of the cumulant ( c1, c2 and c3 ),
@@ -966,9 +967,10 @@ subroutine cumulant_compute(self)
            c1 = c1 * wr_step * nwr
            c1(2::2) = -1.0 * c1(2::2)
          else
-           ABI_COMMENT(sjoin("FFT not available, using DFT instead.",  &
+           msg = sjoin("FFT not available, using DFT instead.",  &
                           " Slower but reliable.",  &
-                          " Parallelism over frequency for integration of C(t)"))
+                          " Parallelism over frequency for integration of C(t)")
+           ABI_COMMENT(msg)
            do it=1, nwr
              ! if (mod(it, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over time
              time = time_mesh_temp(it)
@@ -1043,9 +1045,10 @@ subroutine cumulant_compute(self)
 
 
          else
-           ABI_COMMENT(sjoin("FFT not available, using DFT instead.",  &
+           msg = sjoin("FFT not available, using DFT instead.",  &
                           " Slower but reliable.",  &
-                          " Parallelism over time for integration of G(t)"))
+                          " Parallelism over time for integration of G(t)")
+           ABI_COMMENT(msg)
 
            do iw=1, nwr_ce
              ! if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
