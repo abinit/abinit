@@ -39,7 +39,9 @@ module m_drivexc
 
  public :: drivexc         ! Driver of XC functionals. Optionally, deliver the XC kernel, or even the derivative
  public :: echo_xc_name    ! Write to log and output the xc functional which will be used for this dataset
- public :: check_kxc       ! Given a XC functional (defined by ixc), check if Kxc (dVxc/drho) is avalaible.
+ public :: has_kxc         ! Given a XC functional (defined by ixc), return TRUE if Kxc (dVxc/drho) is avalaible.
+ public :: has_k3xc        ! Given a XC functional (defined by ixc), return TRUE if K3xc (d2Vxc/drho2) is avalaible.
+ public :: check_kxc       ! Given a XC functional (defined by ixc), check if Kxc and/or K3xc is avalaible.
  public :: size_dvxc       ! Give the size of the array dvxc(npts,ndvxc) and the second dimension of the d2vxc(npts,nd2vxc)
  public :: xcmult          ! (GGA) Multiply the different gradient of spin-density by the derivative of the XC functional
                            ! with respect to the norm of the gradient, then divide it by the norm of the gradient
@@ -212,12 +214,98 @@ subroutine echo_xc_name (ixc)
 end subroutine echo_xc_name
 !!***
 
+!!****f* m_drivexc/has_kxc
+!! NAME
+!! has_kxc
+!!
+!! FUNCTION
+!!  Given a XC functional (defined by ixc), return TRUE if Kxc (dVxc/drho) is avalaible.
+!!
+!! INPUTS
+!!  ixc = internal code for xc functional
+!!  [xc_funcs(2)]= <type(libxc_functional_type)> = optional - libXC set of functionals
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+logical function has_kxc(ixc,xc_funcs)
+
+!Arguments -------------------------------
+ integer, intent(in) :: ixc
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
+
+!Local variables -------------------------
+
+! *********************************************************************
+
+ has_kxc=.false.
+
+ if (ixc>=0) then
+   has_kxc=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27)
+ else if (ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456)then
+   has_kxc=.true.
+ else ! ixc<0 and not one of the allowed hybrids
+   if (present(xc_funcs)) then
+     has_kxc=libxc_functionals_has_kxc(xc_funcs)
+   else
+     has_kxc=libxc_functionals_has_kxc()
+   end if
+ end if
+
+end function has_kxc
+!!***
+
+!!****f* m_drivexc/has_k3xc
+!! NAME
+!! has_k3xc
+!!
+!! FUNCTION
+!!  Given a XC functional (defined by ixc), return TRUE if K3xc (d2Vxc/drho2) is avalaible.
+!!
+!! INPUTS
+!!  ixc = internal code for xc functional
+!!  [xc_funcs(2)]= <type(libxc_functional_type)> = optional - libXC set of functionals
+!!
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+logical function has_k3xc(ixc,xc_funcs)
+
+!Arguments -------------------------------
+ integer, intent(in) :: ixc
+ type(libxc_functional_type),intent(in),optional :: xc_funcs(2)
+
+!Local variables -------------------------
+
+! *********************************************************************
+
+ has_k3xc=.false.
+
+ if (ixc>=0) then
+   has_k3xc=(ixc==0.or.ixc==3.or.(ixc>=7.and.ixc<=15).or. &
+&    ixc==23.or.ixc==24.or.ixc==41.or.ixc==42.or.ixc==1402000)
+ else if (ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456)then
+   has_k3xc=.false.
+ else ! ixc<0 and not one of the allowed hybrids
+   if (present(xc_funcs)) then
+     has_k3xc=libxc_functionals_has_k3xc(xc_funcs)
+   else
+     has_k3xc=libxc_functionals_has_k3xc()
+   end if
+ end if
+
+end function has_k3xc
+!!***
+
 !!****f* m_drivexc/check_kxc
 !! NAME
 !! check_kxc
 !!
 !! FUNCTION
-!!  Given a XC functional (defined by ixc), check if Kxc (dVxc/drho) is avalaible.
+!!  Given a XC functional (defined by ixc), check if Kxc and/or K3xc is avalaible.
 !!
 !! INPUTS
 !!  ixc = internal code for xc functional
@@ -241,12 +329,11 @@ subroutine check_kxc(ixc,optdriver,check_k3xc)
 ! *********************************************************************
 
  check_k3xc_=.false. ; if (present(check_k3xc)) check_k3xc_=check_k3xc
- kxc_available=.false.  ; k3xc_available=.false.
+
+ kxc_available=has_kxc(ixc)
+ k3xc_available=has_k3xc(ixc)
 
  if (ixc>=0) then
-   kxc_available=(ixc/=16.and.ixc/=17.and.ixc/=26.and.ixc/=27)
-   k3xc_available=(ixc==0.or.ixc==3.or.(ixc>=7.and.ixc<=15).or. &
-&    ixc==23.or.ixc==24.or.ixc==41.or.ixc==42.or.ixc==1402000)
    if (.not.kxc_available) then
      write(msg,'(a,i0,3a)') &
 &     'The selected XC functional (ixc=',ixc,')',ch10,&
@@ -257,12 +344,7 @@ subroutine check_kxc(ixc,optdriver,check_k3xc)
 &     'The selected XC functional (ixc=',ixc,')',ch10,&
 &     'does not provide K3xc (d^2Vxc/drho^2) !'
    end if
- else if (ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456)then
-   kxc_available=.true.
-   k3xc_available=.false.
- else ! ixc<0 and not one of the allowed hybrids
-   kxc_available=libxc_functionals_has_kxc()
-   k3xc_available=libxc_functionals_has_k3xc()
+ else ! ixc<0
    if (.not.kxc_available) then
      write(msg,'(a,i0,7a)') &
 &     'The selected XC functional (ixc=',ixc,'):',ch10,&
