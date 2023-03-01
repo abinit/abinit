@@ -256,8 +256,8 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
 
  ! Fermi energy
  call local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
- ! fermie = dtset%userra
- write(std_out,'(a,es16.8)')'JWZ debug using fermi e = ',fermie
+ !fermie = dtset%userra
+ !write(std_out,'(a,es16.8)')'JWZ debug using fermi e = ',fermie
 
  !Definition of atindx array
  !Generate an index table of atoms, in order for them to be used type after type.
@@ -2303,7 +2303,7 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
   !scalars
   integer :: bdtot_index,ierr,ikpt,isppol,me
   integer :: nband_k,nband_me,nn,nproc,spaceComm
-  real(dp) :: fermie_k
+  real(dp) :: fermie_proc
  
   !arrays
   real(dp),allocatable :: eig_k(:),occ_k(:)
@@ -2315,7 +2315,7 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
   me = mpi_enreg%me_kpt
 
   bdtot_index=0
-  fermie_k = -1.0D99
+  fermie_proc = -1.0D99
   do isppol = 1, dtset%nsppol
     do ikpt = 1, dtset%nkpt
      
@@ -2335,8 +2335,8 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
       eig_k(:)=eigen0(1+bdtot_index:nband_k+bdtot_index)
 
       do nn = 1, nband_k
-        if ( (abs(occ_k(nn)).GT.tol8) .AND. (eig_k(nn).GT.fermie_k) ) then
-          fermie_k = eig_k(nn)
+        if ( (abs(occ_k(nn)).GT.tol8) .AND. (eig_k(nn).GT.fermie_proc) ) then
+          fermie_proc = eig_k(nn)
         end if
       end do ! nn
 
@@ -2348,7 +2348,7 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
     end do ! end loop over kpts
   end do ! end loop over isppol
 
-  call xmpi_max(fermie_k,fermie,spaceComm,ierr)
+  call xmpi_max(fermie_proc,fermie,spaceComm,ierr)
 
 end subroutine local_fermie
 !!***
