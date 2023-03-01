@@ -291,7 +291,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_USE], [
     if test "${sd_hdf5_mpi_ok}" = "yes"; then
       AC_MSG_CHECKING([whether the NetCDF Fortran interface has parallel I/O])
       AC_LANG_PUSH([Fortran])
-      AC_RUN_IFELSE([AC_LANG_PROGRAM([],
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
         [[
           use mpi
           use netcdf

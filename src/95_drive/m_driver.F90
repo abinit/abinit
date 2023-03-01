@@ -165,7 +165,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer :: idtset,ierr,iexit,iget_cell,iget_occ,iget_vel,iget_xcart,iget_xred
  integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk,linalg_max_size
  integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol, omp_nthreads
- real(dp) :: etotal
+ real(dp) :: el_temp,etotal
  character(len=500) :: msg, dilatmx_errmsg
  logical :: converged,results_gathered,test_img,use_results_all
  type(dataset_type) :: dtset
@@ -681,7 +681,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
-     call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+     el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+     call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
 
 #if defined DEV_YP_VDWXC
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
