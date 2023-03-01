@@ -1689,6 +1689,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(1)
 #endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+ call openblas_set_num_threads(1)
+#endif
 #ifdef HAVE_FFTW3_THREADS
  fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
  call fftw3_use_lib_threads(.false.)
@@ -1750,6 +1753,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 !Restire libs behavior (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(nthreads)
+#endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+ call openblas_set_num_threads(nthreads)
 #endif
 #ifdef HAVE_FFTW3_THREADS
  call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
