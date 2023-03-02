@@ -1,6 +1,10 @@
+******************************************************************************************
+                                Welcome to MULTIBINIT,                         
+ a software platform designed for the construction and use of second-principles models
+                   for lattice, spin and electron degrees of freedom.
 
-.Version 9.3.3 of MULTIBINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.8.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +18,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 16 Dec 2020.
-- ( at 13h23 )
+ MULTIBINIT is a software project of the University of Liege
+ (PHYTHEMA & NANOMAT groups), in collaboration with other partners.
+
+*****************************************************************************************
+
+
+.Starting date : Wed 14 Dec 2022.
+- ( at 15h21 )
   
 -  nproc =    1
 
@@ -166,10 +176,10 @@ Lattice dynamic steps:
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
-+Total cpu time      1.234  and wall time      1.237 sec
++Total cpu time      1.121  and wall time      1.124 sec
 
  multibinit : the run completed succesfully.

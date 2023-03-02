@@ -350,7 +350,7 @@ end subroutine atomdata_from_znucl
 !!
 !! SOURCE
 
-subroutine atomdata_from_symbol(atom,symbol)
+subroutine atomdata_from_symbol(atom, symbol)
 
 !Arguments ------------------------------------
 !scalars

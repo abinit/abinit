@@ -2586,7 +2586,7 @@ instead of the legacy mode based on the files file. Example:
 
     outdata_prefix = "t01_o"
 
-    See also [[outdata_prefix@abinit]]
+See also [[outdata_prefix@abinit]]
 """,
     ),
 

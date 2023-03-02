@@ -384,7 +384,6 @@ AC_DEFUN([ABI_PROG_CC],[
       fi
     fi
   fi
-  # AC_PROG_CC([ cc CC gcc icc xlc mpicc mpiicc ])
   AC_PROG_CC([ mpiicc mpicc icc xlc CC cc gcc ])
 
   # Fail if no C compiler is available

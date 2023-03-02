@@ -46,7 +46,7 @@ Variable(
     topics=['LatticeModel_expert'],
     dimensions=[3],
     defaultval=0,
-    mnemonics="Dipole-Dipole interaction",
+    mnemonics="Dipole-Dipole range",
     added_in_version="before_v9",
     text=r"""
 Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
@@ -163,7 +163,7 @@ Variable(
     topics=['LWFModel_basic'],
     dimensions="scalar",
     defaultval=100,
-    mnemonics="LWF Delta Time",
+    mnemonics="Lattice Wannier Function Delta Time",
     added_in_version="9.8",
     text=r"""
 Time step for lwf dynamics. Default value is 100.
@@ -211,7 +211,7 @@ Variable(
     topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval="",
-    mnemonics="LWF POTential File NAME",
+    mnemonics="Lattice Wannier function POTential File NAME",
     added_in_version="9.8",
     text=r"""
 Specify the LWF potential file name in the multibinit lwf dynamics calculation, which is a netcdf file. The string must be enclosed between quotation marks:
@@ -229,7 +229,7 @@ Variable(
     topics=['LWFModel_basic'],
     dimensions="scalar",
     defaultval=1000,
-    mnemonics="LWF dynamics relaxation time TAUT",
+    mnemonics="Lattice Wannier function dynamics relaxation time TAUT",
     added_in_version="9.8",
     text=r"""
     Parameter used in Berendsen lattice dynamics [[multibinit:lwf_dynamics]] = 3, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of lwf_taut. 
@@ -248,7 +248,7 @@ Variable(
     topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval=0.0,
-    mnemonics="LWF TEMPERATURE START",
+    mnemonics="Lattice Wannier function TEMPERATURE START",
     added_in_version="9.8",
     text=r"""
 Start point of variable temperature LWF dynamcis calculation (see [[multibinit:lwf_var_temperature]]) in lwf dynamics calculation.
@@ -262,7 +262,7 @@ Variable(
     topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval=0.0,
-    mnemonics="LWF TEMPERATURE END",
+    mnemonics="Lattice Wannier function TEMPERATURE END",
     added_in_version="9.8",
     text=r"""
 End point of variable temperature LWF dynamics calculation (see [[multibinit:LWF_var_temperature]]) in LWF dynamics calculation.
@@ -276,7 +276,7 @@ Variable(
     topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="LWF TEMPERATURE Number of STEPs",
+    mnemonics="Lattice Wannier function TEMPERATURE Number of STEPs",
     added_in_version="9.8",
     text=r"""
 Number of steps in the variable temperature LWF dynamics calculation (see [[multibinit:lwf_var_temperature]]) in lwf dynamics calculation.
@@ -290,7 +290,7 @@ Variable(
     topics=["LWFModel_basic"],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="LWF  VARiable TEMPERATURE",
+    mnemonics="Lattice Wannier function VARiable TEMPERATURE",
     added_in_version="9.8",
     text=r"""
 Switch for variable temperature calculation in LWF dynamics. 0: off. 1: on.
@@ -376,7 +376,7 @@ Variable(
     topics=['LatticeModel_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Effective potential XML output",
+    mnemonics="Print the Goal-Function values in a CSV file",
     added_in_version="v9",
     text=r"""
 * 0 --> do nothing (Default)
@@ -393,7 +393,7 @@ Variable(
     topics=['LatticeModel_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Effective potential XML output",
+    mnemonics="PRinT the MODEL",
     added_in_version="before_v9",
     text=r"""
 * 0  -->  do nothing (Default).
@@ -474,7 +474,7 @@ Variable(
     topics=['FitProcess_basic'],
     dimensions=[3],
     defaultval=[1,1,1],
-    mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses",
+    mnemonics="FIT FACTORS for Goal Function of Energy, Forces, and Stresses",
     added_in_version="v9",
     text=r"""
 Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
@@ -505,10 +505,10 @@ Variable(
     topics=['FitProcess_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="FIT Number of COEFFicients",
+    mnemonics="FIT Number of COEFFicients per Irreducible ATOM",
     added_in_version="before_v9",
     text=r"""
-Give the number of anharmonic coefficients per symmetric irreducible atoms to add during fit process.
+Give the number of anharmonic coefficients per symmetric irreducible atom to add during fit process.
 [[multibinit:fit_ncoeff]]/(nirred_atoms*fit_ncoeff_per_iatom) gives the number of fitting loops performed during the fit process, where in each loop fit_ncoeff_per_iatom coefficients for each irreducible atom will be added to the anharmonic potential.
 """,
 ),
@@ -765,7 +765,7 @@ Variable(
     mnemonics="FIT Number of IMPOSEd COEFFicients",
     added_in_version="before_v9",
     text=r"""
-Indices of the imposed coefficients with fixed coefficient value during the fit process for the model:
+Indices of the imposed coefficients with fixed coefficient value during the fit process for the model.
 """,
 ),
 
@@ -827,8 +827,8 @@ Variable(
     mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during bounding process",
     added_in_version="v9",
     text=r"""
-Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
-bounding process allowing to change the relative weight of the three quantities.
+Specify three factors for Energy, Forces and Stresses in the calculation of the Goal Function which is to be minimized during the
+bounding process, allowing to change the relative weights of the three quantities.
 
 Default value is 1 1 1, equally balancing energy, forces and stresses.
 """,
@@ -2098,11 +2098,11 @@ Variable(
 Random seed to be used in Multibinit spin/LWF dynamics. 
 It should be 0, or a large positive integer.
 The default value 0 means it will use the current clock time.
-DO NOT set this number unless it is to repeat the previous result. If a series
+DO NOT set this number unless you want to repeat the previous result. If a series
 of dynamics is done with the same seed, the results could be wrong due to the
-artificial periodicity of the random number. Even it is set, it is not guranteed
-that the previous result can be recoverd, as it is also affected by the number of 
-processors, type of type of CPU, compiler,  and versions of MULTIBINIT. 
+artificial periodicity of the random number that is generated. Even [[randomseed@multibinit]] is set, it is not guranteed
+that the previous result can be recovered, as the generation of numbers is also affected by the number of 
+processors, type of type of CPU, compiler,  and version of MULTIBINIT. 
 """,
 ),
 
@@ -2148,6 +2148,35 @@ Specify the spin-lattice-coupling potential file name in the coupled spin-lattic
 """
 
 ),
+
+Variable(
+    abivarname="outdata_prefix@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="OUTput DATA PREFIX",
+    added_in_version="9.8.0",
+    text=r"""
+Prefix for output files. Replaces the analogous entry in the obsolete *files_file* .
+This variable is used when MULTIBINIT is executed with the new syntax:
+
+    multibinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the filename ends with an extension, e.g. `.ext`. (`.abi` is recommended)
+If the input filename does not have a file extension, a default is provided.
+
+Example:
+
+    outdata_prefix = "t01_o"
+
+See also [[outdata_prefix@abinit]] and [[outdata_prefix@anaddb]]
+
+"""
+),
+
 
 
 

@@ -98,9 +98,19 @@ inp_files = [
 "tspin_5.abi",
 "tspin_6.abi",
 "ttddft_1.abi",
+<<<<<<< HEAD
 "tlruj_1.abi",
 "tlruj_2.abi",
 "tlruj_3.abi",
+||||||| merged common ancestors
+"tudet_1.abi",
+"tudet_2.abi",
+"tudet_3.abi",
+=======
+"tucalc_lr_1.abi",
+"tucalc_lr_2.abi",
+"tucalc_lr_3.abi",
+>>>>>>> 452e21a1b4750156528c94c7da454c93a846fac0
 "tfold2bloch_1.abi",
 "tfold2bloch_2.abi",
 ]

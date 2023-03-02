@@ -58,7 +58,7 @@ inp_files = [
     "t41.abi",
     "t42.abi",
     "t43.abi",
-    "t44.abi",  # test orbital magnetism with DDK wavefunctions
+    "t44.abi",  # test orbital magnetism with DDK wavefunctions on Ne atom
     "t46.abi",  # longwave GGA
     "t47.abi",  # metallic iron GGA-PBE PAW nsppol=2
     "t48.abi",  # optic
@@ -109,6 +109,10 @@ inp_files = [
     "t86.abi",  # Spin lattice coupling, Only Oiju term activated.
     "t87.abi",  # Spin lattice coupling, Oiju and Tijuv.
 
+    # test usepawu options with nspinor=2,nspden=4 and different pawxcdev
+    "t88.abi", # LDA
+    "t89.abi", # GGA
+
     # GS Coulomb cut-off
     "t90.abi",  # checkG Coulomb cut-off, large tolerance a.t.m.
     "t91.abi",  # occopt 9 tests on Si
@@ -141,7 +145,12 @@ inp_files = [
     "t110.abi",
     # projWF method for lattice wannier function in anaddb (disentangle option 2)
     "t111.abi",
-
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
+    # UPF2 format for norm-conserving pseudopotentials
+    "t130.abi",  # UPF2
+    "t131.abi",  # UPF2 with SOC
+    # more DFPT
+    "t140.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
+    "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
 ]
