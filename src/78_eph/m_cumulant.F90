@@ -1513,6 +1513,7 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
  integer :: ncerr, ncid, ikcalc, spin, my_ik, ib, itemp, ntemp
  integer :: ii, ieh
  real(dp) :: cpu, wall, gflops
+ character(len=1000) :: msg
 
 !************************************************************************
 
@@ -1773,7 +1774,9 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
   end do
  end if
  if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out) .and. any(abs(dtset%sigma_erange) > zero)) then
-   write(ab_out, "(/,a)")" Print first 5 temperatures of diagonal mobility_mu > 1e-6 (with ieh as electrons or holes) for testing purposes:"
+         msg = sjoin(" Print first 5 temperatures of diagonal mobility_mu", &
+                 " > 1e-6 (with ieh as electrons or holes) for testing purposes:")
+   write(ab_out, "(/,a)") msg
    write(ab_out, "(2(a, i0))")" spin: ", spin
    if (self%ntemp > 5) then
      ntemp = 5
