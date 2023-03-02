@@ -342,7 +342,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 
 /* F2008 support  */
 #ifdef HAVE_FC_CONTIGUOUS
-#define ABI_CONTIGUOUS contiguous,
+#define ABI_CONTIGUOUS
 #else
 #define ABI_CONTIGUOUS
 #endif
