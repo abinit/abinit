@@ -442,7 +442,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  tolsym8=tol8
  call symatm(cryst%indsym, natom, Cryst%nsym, Cryst%symrec, Cryst%tnons, tolsym8, Cryst%typat, Cryst%xred)
 
- ! Find list of irreducible atoms by using the indsym
+! Find list of irreducible atoms by using the indsym
  cryst%nirredat = 0
  irredat_tmp = .TRUE.
  do iat = 1,natom
@@ -450,9 +450,9 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
       cryst%nirredat = cryst%nirredat + 1
       do isym = 1,nsym
          if (cryst%indsym(4,isym,iat) /= iat)then
-            if (all(cryst%indsym(:3,isym,iat) == (/0,0,0/)))then
+            !if (all(cryst%indsym(:3,isym,iat) == (/0,0,0/)))then  !Subhadeep!
                irredat_tmp(cryst%indsym(4,isym,iat)) = .FALSE.
-            endif
+            !endif   !Subhadeep
          endif
       enddo
    endif

@@ -1823,7 +1823,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
 
     if (minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
     if (minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
- end if
+ end if ! me == 0
 
  ABI_FREE(pseudo_paths)
 

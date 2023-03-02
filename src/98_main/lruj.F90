@@ -436,7 +436,7 @@ program lruj
      write(degreename,'(i2)') degree
      regname=' Degree'//degreename//': '
    end if
-   write(message,fmt='(a,3f14.7,a,3f13.7)') regname,chi0(degree),chi(degree),hubpar(degree),&
+   write(message,fmt='(a,3f14.7,a,3f13.7)') trim(regname),chi0(degree),chi(degree),hubpar(degree),&
      '  |',chi0err(degree),chierr(degree),hubparerr(degree)
    call wrtout(std_out,message)
  end do
@@ -593,7 +593,11 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
   !Prepare the matrix A
   do icoeff=0,ncoeffs-1
     do ipoint=1,size(xvals)
-       A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
+       if (icoeff==0.and.xvals(ipoint)==0.0) then
+          A(ipoint,icoeff+1) = 1.0
+       else
+          A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
+       end if
     end do
   end do
 
@@ -616,7 +620,11 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
   do ipoint=1,npoints
     fitval=0.0d0
     do icoeff=1,ncoeffs
-      fitval=fitval+coeffs(icoeff)*xvals(ipoint)**(icoeff-1)
+      if (icoeff==0.and.xvals(ipoint)==0.0) then
+        fitval=fitval+coeffs(icoeff)
+      else
+        fitval=fitval+coeffs(icoeff)*xvals(ipoint)**(icoeff-1)
+      end if
     end do
     residual=residual+(fitval-yvals(ipoint))**2
   end do
