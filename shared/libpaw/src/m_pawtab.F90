@@ -346,7 +346,7 @@ MODULE m_pawtab
    ! jpawu
    ! Value of J parameter for paw+u for a given type.
   
-   real(dp) :: lamb_shielding
+   real(dp) :: lamb_shielding=0.0D0
    ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
 
   real(dp) :: rpaw
