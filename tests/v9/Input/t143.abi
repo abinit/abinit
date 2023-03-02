@@ -1,3 +1,10 @@
+# Added by runtests.py
+output_file = "t143.abo"
+indata_prefix = "t143i"
+outdata_prefix = "t143o"
+tmpdata_prefix = "t143t"
+# end runtests.py section
+
 # test DDK and orbital magnetism response with nuclear dipole moment 
 # metallic Na
 # also tests reading of Lamb shielding from PAW data set file
@@ -84,7 +91,7 @@ pseudos="Na.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t143.abo, tolnlines= 0, tolabs=  0.0, tolrel= 0.0
+#%%   t143.abo, tolnlines= 80, tolabs=  5.0E-06, tolrel= 1.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
