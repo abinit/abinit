@@ -38,7 +38,7 @@ module m_barevcoul
 
 ! Cut-off methods modules 
  use m_cutoff_sphere,   only : cutoff_sphere
- use m_cutoff_surface,  only : cutoff_surface
+ use m_cutoff_slab,     only : cutoff_slab
  use m_cutoff_cylinder, only : cutoff_cylinder, K0cos
 
  implicit none
@@ -63,7 +63,7 @@ module m_barevcoul
    ! Number of G-vectors
 
   real(dp) :: alpha(3)
-   ! Lenght of the finite surface
+   ! Lenght of the finite slab
 
   real(dp) :: rcut
    ! Cutoff radius
@@ -78,7 +78,7 @@ module m_barevcoul
     ! Volume of the unit cell
 
   character(len=50) :: mode
-   ! String defining the cutoff mode, possible values are: sphere,cylinder,surface,crystal
+   ! String defining the cutoff mode, possible values are: sphere,cylinder,slab,crystal
 
   integer :: pdir(3)
    ! 1 if the system is periodic along this direction
@@ -169,7 +169,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  integer              :: i1,i2,i23,i3,id1,id2,id3,icutcoul_local
  integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer              :: ii,ing,n1,n2,n3,npar,npt
- integer              :: opt_cylinder,opt_surface,test
+ integer              :: opt_cylinder,opt_slab,test
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: check,step
  real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
@@ -210,7 +210,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 
  if (icutcoul_local==0) vcut%mode='SPHERE'
  if (icutcoul_local==1) vcut%mode='CYLINDER'
- if (icutcoul_local==2) vcut%mode='SURFACE'
+ if (icutcoul_local==2) vcut%mode='SLAB'
  if (icutcoul_local==4) vcut%mode='ERF'
  if (icutcoul_local==5) vcut%mode='ERFC'
 !
@@ -375,7 +375,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      vcut%i_sz=barev(1)
    end if
 
- CASE('SURFACE')
+ CASE('SLAB')
 
    test=COUNT(vcut%vcutgeo/=zero)
    ABI_CHECK(test==2,"Wrong vcutgeo")
@@ -383,29 +383,29 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    ! Two methods available
    !
    ! === Default is Beigi"s method ===
-   opt_surface=1; vcut%alpha(:)=zero
-   if (ANY(vcut%vcutgeo<zero)) opt_surface=2
+   opt_slab=1; vcut%alpha(:)=zero
+   if (ANY(vcut%vcutgeo<zero)) opt_slab=2
    vcut%pdir(:)=zero
    do ii=1,3
      check=vcut%vcutgeo(ii)
-     if (ABS(check)>zero) then ! Use Rozzi"s method with a finite surface along x-y
+     if (ABS(check)>zero) then ! Use Rozzi"s method with a finite slab along x-y
        vcut%pdir(ii)=1
        if (check<zero) vcut%alpha(ii)=normv(check*Cryst%rprimd(:,ii),rmet,'R')
      end if
    end do
 
-   ! Beigi"s method: the surface must be along x-y and R must be L_Z/2.
-   if (opt_surface==1) then
+   ! Beigi"s method: the slab must be along x-y and R must be L_Z/2.
+   if (opt_slab==1) then
      ABI_CHECK(ALL(vcut%pdir == (/1,1,0/)),"Surface must be in the x-y plane")
      vcut%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
-   call cutoff_surface(nfft,gq,ng,Gsph%gvec,gprimd,vcut%rcut,&
-&    vcut%boxcenter,vcut%pdir,vcut%alpha,barev,opt_surface)
+   call cutoff_slab(nfft,gq,ng,Gsph%gvec,gprimd,vcut%rcut,&
+&    vcut%boxcenter,vcut%pdir,vcut%alpha,barev,opt_slab)
 
    !
    ! === If Beigi, treat the limit q--> 0 ===
-   if (opt_surface==1) then
+   if (opt_slab==1) then
      ! Integrate numerically in the plane close to 0
      npt=100 ! Number of points in 1D
      gamma_pt=RESHAPE((/0,0,0/),(/3,1/)) ! Gamma point
@@ -433,8 +433,8 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
        qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii))/(2*pi)
      end do
 
-     call cutoff_surface(npt,qfit,1,gamma_pt,gprimd,vcut%rcut,&
-&       vcut%boxcenter,vcut%pdir,vcut%alpha,vcfit,opt_surface)
+     call cutoff_slab(npt,qfit,1,gamma_pt,gprimd,vcut%rcut,&
+&       vcut%boxcenter,vcut%pdir,vcut%alpha,vcfit,opt_slab)
 
      ABI_MALLOC(xx,(npt))
      ABI_MALLOC(yy,(npt))

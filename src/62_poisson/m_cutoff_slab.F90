@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_vcoul/m_cutoff_surface
+!!****m* ABINIT/m_vcoul/m_cutoff_slab
 !! NAME
-!!  m_cutoff_surface
+!!  m_cutoff_slab
 !!
 !! FUNCTION
 !!
@@ -12,7 +12,7 @@
 
 #include "abi_common.h"
 
-module m_cutoff_surface
+module m_cutoff_slab
 
  use defs_basis
  use m_abicore
@@ -23,16 +23,16 @@ module m_cutoff_surface
  private
 !!***
 
- public :: cutoff_surface
+ public :: cutoff_slab
 
 CONTAINS  !========================================================================================
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_vcoul/cutoff_surface
+!!****f* m_vcoul/cutoff_slab
 !! NAME
-!! cutoff_surface
+!! cutoff_slab
 !!
 !! FUNCTION
 !!  Calculate the Fourier components of an effective Coulomb interaction
@@ -70,7 +70,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut,method)
+subroutine cutoff_slab(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut,method)
 
 !Arguments ------------------------------------
 !scalars
@@ -117,12 +117,12 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
      write(std_out,*)qcart(:,:)
      write(msg,'(5a)')&
 &      'Found q-points with non-zero component along non-periodic direction ',ch10,&
-&      'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
+&      'This is not allowed, see Notes in cutoff_slab.F90 ',ch10,&
 &      'ACTION : Modify the q-point sampling '
      ABI_ERROR(msg)
    end if
    !
-   ! === Calculate truncated Coulomb interaction for a infinite surface ===
+   ! === Calculate truncated Coulomb interaction for a infinite slab ===
    ! * Here I suppose that all the input q-points are different from zero
    do iq=1,nq
      qc(:)=qcart(:,iq)
@@ -132,7 +132,7 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
        qpg(:)=qc(:)+gcart(:)
        qpg2  =DOT_PRODUCT(qpg(:),qpg(:))
        qpg_para=SQRT(qpg(1)**2+qpg(2)**2) ; qpg_perp=qpg(3)
-       ! if (abs(qpg_perp)<SMALL.and.qpg_para<SMALL) stop 'SMALL in cutoff_surface
+       ! if (abs(qpg_perp)<SMALL.and.qpg_para<SMALL) stop 'SMALL in cutoff_slab
        vc_cut(ig,iq)=four_pi/qpg2*(one-EXP(-qpg_para*rcut)*COS(qpg_perp*rcut))
      end do
    end do
@@ -153,7 +153,7 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
        else
          if (ABS(qpg_perp)>SMALL) then
            vc_cut(ig,iq)=four_pi/qpg_perp**2*(one-COS(qpg_perp*rcut)-qpg_perp*rcut*SIN(qpg_perp*rcut)) !&
-!&          + 8*rcut*SIN(qpg_perp*rcut)/qpg_perp*LOG((alpha+ap1sqrt)*(one+ap1sqrt)/alpha) ! contribution due to finite surface
+!&          + 8*rcut*SIN(qpg_perp*rcut)/qpg_perp*LOG((alpha+ap1sqrt)*(one+ap1sqrt)/alpha) ! contribution due to finite slab
          else
            vc_cut(ig,iq)=-two_pi*rcut**2
          end if
@@ -168,8 +168,8 @@ subroutine cutoff_surface(nq,qpt,ng,gvec,gprimd,rcut,boxcenter,pdir,alpha,vc_cut
 
  ABI_FREE(qcart)
 
-end subroutine cutoff_surface
+end subroutine cutoff_slab
 !!***
 
-end module m_cutoff_surface
+end module m_cutoff_slab
 !!***
