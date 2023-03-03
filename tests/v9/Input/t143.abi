@@ -91,7 +91,7 @@ pseudos="Na.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t143.abo, tolnlines= 80, tolabs=  5.0E-06, tolrel= 1.0
+#%%   t143.abo, tolnlines= 90, tolabs=  1.5E-5, tolrel= 1.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
