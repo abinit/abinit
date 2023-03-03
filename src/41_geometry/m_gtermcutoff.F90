@@ -94,7 +94,7 @@ contains
 !!
 !! FUNCTION
 !!   Apply a cut-off term to the 1/G**2-like terms that appears throughout
-!!   the code at the ground-state level as follows: Ewald, NC-PSP, Hartee.
+!!   the code at the ground-state level as follows: Ewald, NC-PSP, Hartree.
 !!
 !! INPUTS
 !!   gsqcut     = cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential) (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
@@ -134,7 +134,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing
  integer            :: c1,c2,opt_cylinder
  integer            :: n1,n2,n3,nfft
- integer            :: test,opt_surface !opt_cylinder
+ integer            :: test,opt_slab !opt_cylinder
  real(dp)           :: alpha_fac, ap1sqrt, log_alpha
  real(dp)           :: cutoff,rcut_loc,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
@@ -188,7 +188,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  if (icutcoul==0) mode='SPHERE'
  if (icutcoul==1) mode='CYLINDER'
- if (icutcoul==2) mode='SURFACE'
+ if (icutcoul==2) mode='SLAB'
  if (icutcoul==3) mode='CRYSTAL'
  if (icutcoul==4) mode='ERF'
  if (icutcoul==5) mode='ERFC'
@@ -331,7 +331,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 &         (ANY(ABS(rprimd(1:3:2,2))>tol6)).or.&
 &         (ANY(ABS(rprimd(1:2,  3))>tol6))    &
 &       ) then
-       msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
+       msg = ' Bravais lattice should be orthorhombic and parallel to the cartesian verctors '
        ABI_ERROR(msg)
      end if
 
@@ -483,7 +483,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
       ABI_BUG(sjoin('Wrong value for cylinder method:',itoa(opt_cylinder)))
      END SELECT
 
-   CASE('SURFACE')
+   CASE('SLAB')
 
      test=COUNT(vcutgeo/=zero)
      ABI_CHECK(test==2,"Wrong vcutgeo")
@@ -493,22 +493,22 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      a2=rprimd(:,2); b2=two_pi*gprimd(:,2)
      a3=rprimd(:,3); b3=two_pi*gprimd(:,3)
 
-     !SURFACE Default - Beigi
-     opt_surface=1; alpha(:)=zero
-     ! Otherwsise use Rozzi's method
-     if (ANY(vcutgeo<zero)) opt_surface=2
+     !SLAB Default - Beigi
+     opt_slab=1; alpha(:)=zero
+     ! Otherwise use Rozzi's method
+     if (ANY(vcutgeo<zero)) opt_slab=2
      pdir(:)=zero
      do ii=1,3
        check=vcutgeo(ii)
-       if (ABS(check)>zero) then ! Use Rozzi"s method with a finite surface along x-y
+       if (ABS(check)>zero) then ! Use Rozzi"s method with a finite slab along x-y
          pdir(ii)=1
          if (check<zero) alpha(ii)=normv(check*rprimd(:,ii),rmet,'R')
        end if
      end do
 
-     SELECT CASE (opt_surface)
+     SELECT CASE (opt_slab)
 
-       !CASE SURFACE 1 - Beigi
+       !CASE SLAB 1 - Beigi
        CASE(1)
 
        ! Calculate rcut for each method !
@@ -535,7 +535,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
         end do !i2
        end do !i3
 
-       !CASE SURFACE 2 - Rozzi
+       !CASE SLAB 2 - Rozzi
        CASE(2)
 
        !Set the cut-off radius
@@ -575,7 +575,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        end do !i3
 
        CASE DEFAULT
-         write(msg,'(a,i3)')' Wrong value of surface method: ',opt_surface
+         write(msg,'(a,i3)')' Wrong value of slab method: ',opt_slab
          ABI_BUG(msg)
        END SELECT
 

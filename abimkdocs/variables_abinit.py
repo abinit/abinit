@@ -7341,7 +7341,7 @@ case, a cut-off Coulomb interaction might prove useful.
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
 in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
 and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
-.
+ 
 The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 5.
 For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
@@ -20168,7 +20168,7 @@ from images in neighbouring cells
 typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). For each
 geometry, two different definitions of the cutoff region are available (see
 [[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
-of the methods)
+of the methods).
 
 In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
 Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
