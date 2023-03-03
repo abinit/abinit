@@ -2573,7 +2573,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !dtset%freqspmin
  new%nwr = dtset%nfreqsp; new%wr_step = zero
  if (new%nwr > 0) then
-   do while (mod(new%nwr, 2) == 0 .and. (mod(new%nwr,3) /= 0 .or. mod(new%nwr,5) /= 0 ) )
+   do while (mod(new%nwr,3) /= 0 .or. mod(new%nwr,5) /= 0 ) 
      new%nwr = new%nwr + 1
    end do
      new%wr_step = two * eV_Ha / (new%nwr - 1)
