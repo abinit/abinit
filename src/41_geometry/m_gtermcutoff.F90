@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_gtermcutoff
+!!****zeroi* ABINIT/m_gtermcutoff
 !! NAME
 !!  m_gtermcutoff
 !!
@@ -57,7 +57,7 @@ module m_gtermcutoff
 !!!  real(dp) :: ucvol
 !!!  ! Volume of the unit cell
 
-!!!   ! integer :: pdir(3)
+!!!   ! integer :: periodic_dir(3)
 !!!   ! 1 if the system is periodic along this direction
 
 !!!   ! real(dp) :: boxcenter(3)
@@ -148,9 +148,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 ! type(gcut_t)       :: gcut  !
 
 !arrays
+ integer              :: periodic_dir(3)
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
- real(dp)             :: pdir(3),alpha(3)
+ real(dp)             :: alpha(3)
  real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
  real(dp),allocatable,intent(inout) :: gcutoff(:)
 
@@ -272,11 +273,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      ! === Beigi method is the default one, i.e infinite cylinder of radius rcut ===
      ! * Negative values to use Rozzi method with finite cylinder of extent hcyl.
-     opt_cylinder=1; hcyl=zero; pdir(:)=0
+     opt_cylinder=1; hcyl=zero; periodic_dir(:)=0
      do ii=1,3
        check=vcutgeo(ii)
        if (ABS(check)>tol6) then
-         pdir(ii)=1
+         periodic_dir(ii)=1
          if (check<zero) then  ! use Rozzi's method.
            hcyl=ABS(check)*SQRT(SUM(rprimd(:,ii)**2))
            opt_cylinder=2
@@ -296,7 +297,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      endif
 
      if (opt_cylinder==1) then
-       ABI_CHECK(ALL(pdir == (/0,0,1/)),"The cylinder must be along the z-axis")
+       ABI_CHECK(ALL(periodic_dir == (/0,0,1/)),"The cylinder must be along the z-axis")
      end if
 
      rcut_= rcut_loc
@@ -496,12 +497,13 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      !SLAB Default - Beigi
      opt_slab=1; alpha(:)=zero
      ! Otherwise use Rozzi's method
-     if (ANY(vcutgeo<zero)) opt_slab=2
-     pdir(:)=zero
+     if (ANY(vcutgeo<zero) .or. rcut>tol8) opt_slab=2
+     periodic_dir(:)=0
      do ii=1,3
        check=vcutgeo(ii)
-       if (ABS(check)>zero) then ! Use Rozzi"s method with a finite slab along x-y
-         pdir(ii)=1
+       if (ABS(check)>zero) then 
+         periodic_dir(ii)=1
+         !For Rozzi"s method
          if (check<zero) alpha(ii)=normv(check*rprimd(:,ii),rmet,'R')
        end if
      end do
@@ -512,11 +514,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        CASE(1)
 
        ! Calculate rcut for each method !
-       if(rcut>tol4) then
-          rcut_loc = rcut
-       else
-          rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
-       endif
+       rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
 
        do i3=1,n3
         do i2=1,n2
