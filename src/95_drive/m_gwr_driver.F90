@@ -930,15 +930,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
  call setmesh(cryst%gmet, gvec_max, u_ngfft, npwvec, m_npw, npw_k, u_nfft, method, mG0, cryst, enforce_sym, unit=std_out)
  u_mgfft = maxval(u_ngfft(1:3))
 
- !nqibz_ = 1; nqbz = 1; qbz_ = zero
+ !nqibz_ = 1; nqbz_ = 1; qbz_ = zero
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  !call vcgen%init(cryst, ks_ebands%kptrlatt, nkbz, nqibz_, nqbz_, qbz_, &
  !                dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, ugb%comm)
 
  ! NB: npweps = m_npw
- ABI_MALLOC(vc_qg, (m_npw))
+ ABI_CALLOC(vc_qg, (m_npw))
  qpt = zero
- vc_qg = one
  !call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, dtset%gw_qlwl(:,1), cryst, vc_qg, ugb%comm)
  vc_qg = vc_qg**2
  call vcgen%free()
@@ -959,29 +958,28 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-
-     WRITE(unt,'(A)')    'version: 100'
-     WRITE(unt,'(A)')    'type: Tensor'
-     WRITE(unt,'(A)')    'scalarType: Real64'
-     WRITE(unt,'(A)')    'dimensions:'
-     WRITE(unt,'(A)')    '  - length: 3'
-     WRITE(unt,'(A)')    '    type: Vector'
+     write(unt,'(A)')    'version: 100'
+     write(unt,'(A)')    'type: Tensor'
+     write(unt,'(A)')    'scalarType: Real64'
+     write(unt,'(A)')    'dimensions:'
+     write(unt,'(A)')    '  - length: 3'
+     write(unt,'(A)')    '    type: Vector'
      !#ifdef gammareal
-     !     WRITE(7,'(A,I6)') '  - length: ',NGVECTOR*2-1     ! TODO: TR symmetry>
+     !     write(7,'(A,I6)') '  - length: ',NGVECTOR*2-1     ! TODO: TR symmetry>
      !#else
-     WRITE(unt,'(A,I0)') '  - length: ',m_npw
+     write(unt,'(A,I0)') '  - length: ',m_npw
      !#endif
-     WRITE(unt,'(A)')    '    type: Momentum'
-     WRITE(unt,'(A)')    'elements:'
-     WRITE(unt,'(A)')    '  type: TextFile'
-     !WRITE(unt,'(A)')    'unit: 0.529177249       # =(Bohr^-1/Angstrom^-1)'
-     WRITE(unt,'(A)')    'unit: 1.0'
-     WRITE(unt,'(A)')    'metaData:'
-     WRITE(unt,'("  Gi: [",E22.15,",",E22.15,",",E22.15,"]")')  &
+     write(unt,'(A)')    '    type: Momentum'
+     write(unt,'(A)')    'elements:'
+     write(unt,'(A)')    '  type: TextFile'
+     !write(unt,'(A)')    'unit: 0.529177249       # =(Bohr^-1/Angstrom^-1)'
+     write(unt,'(A)')    'unit: 1.0'
+     write(unt,'(A)')    'metaData:'
+     write(unt,'("  Gi: [",E22.15,",",E22.15,",",E22.15,"]")')  &
         two_pi*cryst%gprimd(1, 1),two_pi*cryst%gprimd(2,1),two_pi*cryst%gprimd(3, 1)
-     WRITE(unt,'("  Gj: [",E22.15,",",E22.15,",",E22.15,"]")')  &
+     write(unt,'("  Gj: [",E22.15,",",E22.15,",",E22.15,"]")')  &
         two_pi*cryst%gprimd(1, 2),two_pi*cryst%gprimd(2,2),two_pi*cryst%gprimd(3, 2)
-     WRITE(unt,'("  Gk: [",E22.15,",",E22.15,",",E22.15,"]")')  &
+     write(unt,'("  Gk: [",E22.15,",",E22.15,",",E22.15,"]")')  &
        two_pi*cryst%gprimd(1, 3),two_pi*cryst%gprimd(2,3),two_pi*cryst%gprimd(3, 3)
      close(unt)
 
@@ -994,7 +992,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      do ig=1,m_npw
        gcart = two_pi * matmul(cryst%gprimd, m_gvec(:,ig))
        do ii=1,3
-         !WRITE(unt,*) two_pi*GVEC_FULL(ii,ig,KQ)
+         !write(unt,*) two_pi*GVEC_FULL(ii,ig,KQ)
          write(unt, *) gcart(ii)
        end do
      end do
@@ -1006,101 +1004,103 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-     WRITE(unt,'(A)')    'version: 100'
-     WRITE(unt,'(A)')    'type: Tensor'
-     WRITE(unt,'(A)')    'scalarType: Real64'
-     WRITE(unt,'(A)')    'dimensions:'
-     !WRITE(unt,'(A,I9)') '- length: ',((NBANDSDUMP)*WDES%ISPIN)
-     WRITE(unt,'(A,I0)') '- length: ',dtset%mband * dtset%nsppol
-     WRITE(unt,'(A)')    '  type: State'
-     WRITE(unt,'(A)')    'elements:'
-     WRITE(unt,'(A)')    '  type: TextFile'
-     !WRITE(unt,'(A)')    'unit: 0.03674932217563878       # = (Eh/eV)'
-     WRITE(unt,'(A)')    'unit: 1.0'
-     WRITE(unt,'(A)')    'metaData:'
-     WRITE(unt,'(A,E22.15)')    '  fermiEnergy: ',zero !#EFERMI
-     WRITE(unt,'(A)')    '  energies:'
-
+     write(unt,'(A)')    'version: 100'
+     write(unt,'(A)')    'type: Tensor'
+     write(unt,'(A)')    'scalarType: Real64'
+     write(unt,'(A)')    'dimensions:'
+     !write(unt,'(A,I9)') '- length: ',((NBANDSDUMP)*WDES%ISPIN)
+     write(unt,'(A,I0)') '- length: ',dtset%mband * dtset%nsppol
+     write(unt,'(A)')    '  type: State'
+     write(unt,'(A)')    'elements:'
+     write(unt,'(A)')    '  type: TextFile'
+     !write(unt,'(A)')    'unit: 0.03674932217563878       # = (Eh/eV)'
+     write(unt,'(A)')    'unit: 1.0'
+     write(unt,'(A)')    'metaData:'
+     write(unt,'(A,E22.15)')    '  fermiEnergy: ',zero !#EFERMI
+     write(unt,'(A)')    '  energies:'
      !DO SI=1,WDES%ISPIN*(NBANDSDUMP+NFREEZE)
      !  SPA=SP_ORD(SI)
      !  I=N_ORD(SI)
      !  IF (I <= NFREEZE) CYCLE
-     !  IF (ME==0) WRITE(unt,*) '  - ',REAL(W%CELTOT(I,1,SPA),kind=8)
+     !  write(unt,*) '  - ',REAL(W%CELTOT(I,1,SPA),kind=8)
      !ENDDO
-     CLOSE(unt)
+     close(unt)
 
      filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.element'
+     write(ab_out, "(3a)")ch10," Writing Eigenenergies to file: ", trim(filepath)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
      !DO SI=1,WDES%ISPIN*(NBANDSDUMP+NFREEZE)
-     !   SPA=SP_ORD(SI)
-     !   I=N_ORD(SI)
-     !   IF (I <= NFREEZE) CYCLE
-     !    WRITE(unt,*) REAL(W%CELTOT(I,1,SPA),kind=8)
+     !  SPA=SP_ORD(SI)
+     !  I=N_ORD(SI)
+     !  IF (I <= NFREEZE) CYCLE
+     !  write(unt,*) REAL(W%CELTOT(I,1,SPA),kind=8)
      !ENDDO
-     CLOSE(unt)
+     close(unt)
 
-     !OPEN(unit = unt,file = "CoulombVertexSingularVectors.yaml",FORM='FORMATTED',access='stream',STATUS='REPLACE')
-     filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertexSingularVectors.yaml'
-     write(ab_out, "(3a)")ch10,' Writing CoulombVertexSingularVectors to file: ', trim(filepath)
-     if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
-       ABI_ERROR(msg)
-     end if
-
-     WRITE(unt,'(A)')    'version: 100'
-     WRITE(unt,'(A)')    'type: Tensor'
-     WRITE(unt,'(A)')    'scalarType: Complex64'
-     WRITE(unt,'(A)')    'dimensions:'
-     !#ifdef gammareal
-     !WRITE(unt,'(A,I6)') '  - length: ',NGVECTOR*2-1
-     !#else
-     !WRITE(unt,'(A,I6)') '  - length: ',NGVECTOR
-     !#endif
-     WRITE(unt,'(A)')    '    type: Momentum'
-     !WRITE(unt,'(A,I6)') '  - length: ',NOPTAUX
-     WRITE(unt,'(A)')    '    type: AuxiliaryField'
-     WRITE(unt,'(A)')    'elements:'
-     WRITE(unt,'(A)')    '  type: IeeeBinaryFile'
-     WRITE(unt,'(A)')    'unit: 1.0       #'
-     CLOSE(unt)
-     !IF (ME==0) OPEN(unit = 7,file = "CoulombVertexSingularVectors.elements",FORM='UNFORMATTED',access='stream',STATUS='REPLACE')
-     !CLOSE(unt)
+     !!filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertexSingularVectors.yaml'
+     !!write(ab_out, "(3a)")ch10,' Writing CoulombVertexSingularVectors to file: ', trim(filepath)
+     !!if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
+     !!  ABI_ERROR(msg)
+     !!end if
+     !!write(unt,'(A)')    'version: 100'
+     !!write(unt,'(A)')    'type: Tensor'
+     !!write(unt,'(A)')    'scalarType: Complex64'
+     !!write(unt,'(A)')    'dimensions:'
+     !!!#ifdef gammareal
+     !!!write(unt,'(A,I6)') '  - length: ',NGVECTOR*2-1
+     !!!#else
+     !!!write(unt,'(A,I6)') '  - length: ',NGVECTOR
+     !!!#endif
+     !!write(unt,'(A)')    '    type: Momentum'
+     !!!write(unt,'(A,I6)') '  - length: ',NOPTAUX
+     !!write(unt,'(A)')    '    type: AuxiliaryField'
+     !!write(unt,'(A)')    'elements:'
+     !!write(unt,'(A)')    '  type: IeeeBinaryFile'
+     !!write(unt,'(A)')    'unit: 1.0       #'
+     !!close(unt)
+     !!!IF (ME==0) OPEN(unit = 7,file = "CoulombVertexSingularVectors.elements",FORM='UNFORMATTED',access='stream',STATUS='REPLACE')
+     !!!close(unt)
    end if ! (ik_ibz == 1 .and. spin == 1) then
 
+   ! https://manuals.cc4s.org/user-manual/objects/CoulombVertex.html
    filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.yaml'
    write(ab_out, "(3a)")ch10, ' Writing CoulombVertex to file: ', trim(filepath)
    if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
      ABI_ERROR(msg)
    end if
-   WRITE(unt,'(A)')    'version: 100'
-   WRITE(unt,'(A)')    'type: Tensor'
-   WRITE(unt,'(A)')    'scalarType: Complex64'
-   WRITE(unt,'(A)')    'dimensions:'
-   !WRITE(unt,'(A,I0)') '- length: ',NOPTAUX
-   WRITE(unt,'(A)')    '  type: AuxiliaryField'
-   !WRITE(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
-   WRITE(unt,'(A)')    '  type: State'
-   !WRITE(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
-   WRITE(unt,'(A)')    '  type: State'
-   WRITE(unt,'(A)')    'elements:'
-   WRITE(unt,'(A)')    '  type: IeeeBinaryFile'
-   WRITE(unt,'(A)')    'unit: 0.1917011272153577       # = sqrt(Eh/eV)'
-   WRITE(unt,'(A)')    'metaData:'
-!#ifdef gammareal
-!  WRITE(unt,'(A)')    '  halfGrid: 1'
-!#else
-   WRITE(unt,'(A)')    '  halfGrid: 0'
-!#endif
-   CLOSE(unt)
+   write(unt,'(A)')    'version: 100'
+   write(unt,'(A)')    'type: Tensor'
+   write(unt,'(A)')    'scalarType: Complex64'
+   write(unt,'(A)')    'dimensions:'
+   !write(unt,'(A,I0)') '- length: ',NOPTAUX
+   write(unt,'(A)')    '  type: AuxiliaryField'
+   !write(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+   write(unt,'(A)')    '  type: State'
+   !write(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+   !write(unt,'(A)')    '  type: State'
+   write(unt,'(A)')    'elements:'
+   write(unt,'(A)')    '  type: IeeeBinaryFile'
+   write(unt,'(A)')    'unit: 0.1917011272153577       # = sqrt(Eh/eV)'
+   write(unt,'(A)')    'metaData:'
+   !#ifdef gammareal
+   !write(unt,'(A)')    '  halfGrid: 1'
+   !#else
+   write(unt,'(A)')    '  halfGrid: 0'
+   !#endif
+   close(unt)
 
    !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
    !ALLOCATE(CVERTEX_TMP(NOPTAUX,(NBANDSDUMP),WDES%ISPIN))
-   !IF (ME==0) OPEN(unit = 7,file = "CoulombVertex.elements",FORM='UNFORMATTED',access='stream',STATUS='REPLACE')
+   filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
+   if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
+     ABI_ERROR(msg)
+   end if
    !COMPLEX(q), ALLOCATABLE :: CVERTEX_TMP(:,:,:), CVERTEX_TMP_SINGLE(:)
    !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
-   !WRITE(7) CVERTEX_TMP_SINGLE(:)
-   !IF (ME==0) CLOSE(7)
+   !write(unt) CVERTEX_TMP_SINGLE(:)
+   close(unt)
  end if ! my_rank == master
 
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
@@ -1183,9 +1183,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
    ! TODO: Write ug12_batch.
    !  - Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
    !  - Format for nspinor == 2?
-   if (my_rank == master) then
-   end if
-
+   !if (my_rank == master) then
+   !end if
  end do ! band1_start
 
  call uplan_1%free()
