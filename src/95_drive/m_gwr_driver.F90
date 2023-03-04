@@ -966,11 +966,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      WRITE(unt,'(A)')    'dimensions:'
      WRITE(unt,'(A)')    '  - length: 3'
      WRITE(unt,'(A)')    '    type: Vector'
-!#ifdef gammareal
-!     WRITE(7,'(A,I6)') '  - length: ',NGVECTOR*2-1     ! TODO: TR symmetry>
-!#else
+     !#ifdef gammareal
+     !     WRITE(7,'(A,I6)') '  - length: ',NGVECTOR*2-1     ! TODO: TR symmetry>
+     !#else
      WRITE(unt,'(A,I0)') '  - length: ',m_npw
-!#endif
+     !#endif
      WRITE(unt,'(A)')    '    type: Momentum'
      WRITE(unt,'(A)')    'elements:'
      WRITE(unt,'(A)')    '  type: TextFile'
@@ -991,13 +991,13 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      end if
 
      !TODO: k-points to be implemented.
-     DO ig=1,m_npw
+     do ig=1,m_npw
        gcart = two_pi * matmul(cryst%gprimd, m_gvec(:,ig))
-       DO ii=1,3
+       do ii=1,3
          !WRITE(unt,*) two_pi*GVEC_FULL(ii,ig,KQ)
          write(unt, *) gcart(ii)
-       ENDDO
-     ENDDO
+       end do
+     end do
      close(unt)
 
      ! Write eigenenergies. See https://manuals.cc4s.org/user-manual/objects/EigenEnergies.html
@@ -1053,9 +1053,9 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      WRITE(unt,'(A)')    'scalarType: Complex64'
      WRITE(unt,'(A)')    'dimensions:'
      !#ifdef gammareal
-     !     WRITE(unt,'(A,I6)') '  - length: ',NGVECTOR*2-1
+     !WRITE(unt,'(A,I6)') '  - length: ',NGVECTOR*2-1
      !#else
-     !     WRITE(unt,'(A,I6)') '  - length: ',NGVECTOR
+     !WRITE(unt,'(A,I6)') '  - length: ',NGVECTOR
      !#endif
      WRITE(unt,'(A)')    '    type: Momentum'
      !WRITE(unt,'(A,I6)') '  - length: ',NOPTAUX
@@ -1067,7 +1067,41 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      !IF (ME==0) OPEN(unit = 7,file = "CoulombVertexSingularVectors.elements",FORM='UNFORMATTED',access='stream',STATUS='REPLACE')
      !CLOSE(unt)
    end if ! (ik_ibz == 1 .and. spin == 1) then
- end if
+
+   filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.yaml'
+   write(ab_out, "(3a)")ch10, ' Writing CoulombVertex to file: ', trim(filepath)
+   if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
+     ABI_ERROR(msg)
+   end if
+   WRITE(unt,'(A)')    'version: 100'
+   WRITE(unt,'(A)')    'type: Tensor'
+   WRITE(unt,'(A)')    'scalarType: Complex64'
+   WRITE(unt,'(A)')    'dimensions:'
+   !WRITE(unt,'(A,I0)') '- length: ',NOPTAUX
+   WRITE(unt,'(A)')    '  type: AuxiliaryField'
+   !WRITE(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+   WRITE(unt,'(A)')    '  type: State'
+   !WRITE(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+   WRITE(unt,'(A)')    '  type: State'
+   WRITE(unt,'(A)')    'elements:'
+   WRITE(unt,'(A)')    '  type: IeeeBinaryFile'
+   WRITE(unt,'(A)')    'unit: 0.1917011272153577       # = sqrt(Eh/eV)'
+   WRITE(unt,'(A)')    'metaData:'
+!#ifdef gammareal
+!  WRITE(unt,'(A)')    '  halfGrid: 1'
+!#else
+   WRITE(unt,'(A)')    '  halfGrid: 0'
+!#endif
+   CLOSE(unt)
+
+   !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
+   !ALLOCATE(CVERTEX_TMP(NOPTAUX,(NBANDSDUMP),WDES%ISPIN))
+   !IF (ME==0) OPEN(unit = 7,file = "CoulombVertex.elements",FORM='UNFORMATTED',access='stream',STATUS='REPLACE')
+   !COMPLEX(q), ALLOCATABLE :: CVERTEX_TMP(:,:,:), CVERTEX_TMP_SINGLE(:)
+   !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
+   !WRITE(7) CVERTEX_TMP_SINGLE(:)
+   !IF (ME==0) CLOSE(7)
+ end if ! my_rank == master
 
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
  call sphereboundary(gbound_k, ugb%istwf_k, ugb%kg_k, u_mgfft, npw_k)

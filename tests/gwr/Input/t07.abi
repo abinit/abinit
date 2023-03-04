@@ -54,7 +54,7 @@ pseudos "Li.psp8, F.upf"
 #%%   t07.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;
 #%%   t07o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%%   t07o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t07o_DS2_CoulombVertexSingularVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]

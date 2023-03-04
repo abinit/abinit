@@ -1,0 +1,12 @@
+version: 100
+type: Tensor
+scalarType: Real64
+dimensions:
+- length: 40
+  type: State
+elements:
+  type: TextFile
+unit: 1.0
+metaData:
+  fermiEnergy:  0.000000000000000E+00
+  energies:
