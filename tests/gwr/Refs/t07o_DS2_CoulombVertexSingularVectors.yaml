@@ -1,0 +1,9 @@
+version: 100
+type: Tensor
+scalarType: Complex64
+dimensions:
+    type: Momentum
+    type: AuxiliaryField
+elements:
+  type: IeeeBinaryFile
+unit: 1.0       #
