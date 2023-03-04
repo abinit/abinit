@@ -1844,6 +1844,7 @@ end subroutine vcgen_init
 !! vcgen_get_vc_sqrt
 !!
 !! FUNCTION
+!!  Compute sqrt(vc(q, g))
 !!
 !! SOURCE
 

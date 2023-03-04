@@ -25,6 +25,15 @@ module m_gpu_toolbox
  use m_initcuda
  use m_gpu_detect
 
+! MG: I had to comment this import to avoid the following error on buda2_gnu_8.5_cuda
+!
+!    type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu,sqgram_gpu
+!            1
+!    Error: Type name 'c_ptr' at (1) is ambiguous
+!    abi_gpu_linalg.f90:374:47:
+!
+! I believe this is due to a misconfiguration issue in the Fortran compilers used by the bot.
+
 !#ifdef HAVE_FC_ISO_C_BINDING
 ! use, intrinsic :: iso_c_binding
 !#endif
