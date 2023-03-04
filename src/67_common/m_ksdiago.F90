@@ -74,8 +74,10 @@ module m_ksdiago
  type, public :: ugb_t
 
    integer :: istwf_k = -1
+   ! WF Storage mode.
 
    integer :: nspinor = -1
+   ! Number of spinors
 
    integer :: npw_k = -1
    ! Number of planewaves.

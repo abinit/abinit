@@ -1,0 +1,11 @@
+version: 100
+type: Tensor
+scalarType: Complex64
+dimensions:
+  type: AuxiliaryField
+  type: State
+elements:
+  type: IeeeBinaryFile
+unit: 0.1917011272153577       # = sqrt(Eh/eV)
+metaData:
+  halfGrid: 0
