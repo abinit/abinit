@@ -38,15 +38,6 @@ module m_abi_linalg
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
-
- ! MG: I had to comment this import to avoid the following error on buda2_gnu_8.5_cuda
- !
- !    type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu,sqgram_gpu
- !            1
- !    Error: Type name 'c_ptr' at (1) is ambiguous
- !    abi_gpu_linalg.f90:374:47:
- !
- ! I believe this is due to a misconfiguration issue in the Fortran compilers used by the bot.
 #endif
 
 #if defined HAVE_MPI1

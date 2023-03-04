@@ -1,10 +1,10 @@
-# Crystalline silicon. 
+# Crystalline silicon.
 # Calculation of the GW corrections with GWR code and energy-only self-consistency
 
 ndtset      5
 
 # This to compute QP without symmetries for debugging purposes
-#nsym 1 
+#nsym 1
 #kptopt 3
 #kptopt 2
 #
@@ -22,7 +22,7 @@ gwr_task2 "HDIAGO_FULL"   # Direct Diagonalization with nband == npw
 getden2       1
 
 #########################################
-# GWR variables common to dataset 3 and 4 
+# GWR variables common to dataset 3 and 4
 #########################################
 gwr_ntau   6        # Number of imaginary-time points
 gwr_sigma_algo 1    # Use supercell for Sigma
@@ -35,8 +35,8 @@ ecutsigx    4.0     # Dimension of the G sum in Sigma_x.
                      # ecutsigx = ecut is usually a wise choice
                      # (the dimension in Sigma_c is controlled by ecuteps)
 gw_qprange +8
-gwr_nstep  4        # Max number of iteration (default 50, so one might omit it)   
-gwr_tolqpe 0.02 eV  # Will stop if all abs differences between QP energies computed at two 
+gwr_nstep  4        # Max number of iteration (default 50, so one might omit it)
+gwr_tolqpe 0.02 eV  # Will stop if all abs differences between QP energies computed at two
                     # consecutive iteration steps are smaller than this value.
                     #
 #gw_icutcoul   16    # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
@@ -74,7 +74,7 @@ prtvol4 1            # Write additional stuff to abo file for testing purposes.
 # Dataset 4: HF with the GWR code
 ################################
 optdriver5  6        # Activate GWR code
-gwr_task5 "G0V"      # HF with KS states 
+gwr_task5 "G0V"      # HF with KS states
 
 getden5 1
 getwfk5 2            # WFK file with empty states

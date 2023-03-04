@@ -822,7 +822,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !Local variables-------------------------------
 !scalars
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
- integer :: my_it, my_ikf, my_iqf, ii, ebands_timrev, my_iki, my_iqi, itau, spin
+ integer :: my_it, my_ikf, ii, ebands_timrev, my_iki, my_iqi, itau, spin, my_iqf
  integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig, ikq_ibz
  integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt
  integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj !, it, iw
@@ -2465,8 +2465,8 @@ subroutine gwr_gk_to_scbox(gwr, sc_ngfft, desc_mykbz, green_scgvec, my_ir, ndat,
  integer,optional,intent(inout) :: gt_scbox_win
 
 !Local variables-------------------------------
- integer :: my_ikf, ik_bz, ipm, ig, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc)
- real(dp) :: tsec(2) !, cpu, wall, gflops
+ integer :: my_ikf, ik_bz, ipm, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc) ! ig,
+ !real(dp) :: tsec(2) !, cpu, wall, gflops
 
 ! *************************************************************************
 
@@ -2573,8 +2573,8 @@ subroutine gwr_wcq_to_scbox(gwr, sc_ngfft, desc_myqbz, wc_scgvec, my_ir, ndat, &
  integer,optional,intent(inout) :: wct_scbox_win
 
 !Local variables-------------------------------
- integer :: my_iqf, iq_bz, ig, gg(3), idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc)
- real(dp) :: tsec(2) !, cpu, wall, gflops
+ integer :: my_iqf, iq_bz, idat, iepoch, ii, idat_list(gwr%kpt_comm%nproc) ! gg(3), ig,
+ !real(dp) :: tsec(2) !, cpu, wall, gflops
 
 ! *************************************************************************
 
@@ -3769,7 +3769,7 @@ subroutine desc_to_scbox(desc, kk, ngkpt, sc_ngfft, ndat, cg, cfft)
 !Local variables-------------------------------
 integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw, kg(3), gg(3), ifft
  logical :: compute_mapping
- real(dp) :: tsec(2) !, cpu, wall, gflops
+ !real(dp) :: tsec(2) !, cpu, wall, gflops
  !character(len=500) :: msg
 
 ! *************************************************************************
@@ -3990,17 +3990,17 @@ subroutine gwr_build_tchi(gwr)
 !Local variables-------------------------------
 !scalars
  integer :: my_is, my_it, my_ikf, ig, my_ir, my_nr, nrsp, npwsp, ncol_glob, col_bsize, my_iqi, gt_scbox_win
- integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2, ii
- integer :: ik_ibz, isym_k, trev_k, g0_k(3), tsign_k, use_umklp
+ integer :: idat, ndat, max_ndat, sc_nfft, sc_nfftsp, spin, ik_bz, iq_ibz, ikq_ibz, ikq_bz, ierr, ipm, itau, ig2 !, ii
+ integer :: use_umklp ! ik_ibz, isym_k, trev_k, tsign_k, ! g0_k(3),
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all, cpu_ir, wall_ir, gflops_ir
  real(dp) :: cpu_ikf, wall_ikf, gflops_ikf
  real(dp) :: tchi_rfact, mem_mb, local_max, max_abs_imag_chit, wtqp, wtqm
  complex(gwpc) :: head_q
  complex(dp) :: chq(3), wng(3)
- logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, print_time
+ logical :: q_is_gamma, use_shmem_for_k, use_mpi_for_k, print_time ! isirr_k,
  character(len=5000) :: msg
- type(desc_t),pointer :: desc_k, desc_q
+ type(desc_t),pointer :: desc_q ! desc_k,
  type(__slkmat_t) :: chi_rgp
  type(c_ptr) :: void_ptr
 !arrays
@@ -5049,20 +5049,20 @@ subroutine gwr_build_sigmac(gwr)
  integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii
  integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
- integer :: my_ikf, ipm, ik_bz, ig, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir
+ integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir, ig,
  integer :: isym_k, trev_k, g0_k(3), tsign_k
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
- integer :: gt_scbox_win, wct_scbox_win, use_umklp, isym, ideg, nstates
+ integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
  real(dp) :: mem_mb, cpu_ir, wall_ir, gflops_ir, cpu_ikf, wall_ikf, gflops_ikf
  real(dp) :: max_abs_imag_wct, max_abs_re_wct, sck_ucvol, scq_ucvol, wtqm, wtqp
  logical :: k_is_gamma, use_shmem_for_k, use_mpi_for_k, isirr_k, compute_this_kbz, print_time
  character(len=500) :: msg
- type(desc_t), pointer :: desc_q, desc_k
+ !type(desc_t), pointer :: desc_q !, desc_k
  type(yamldoc_t) :: ydoc
  type(c_ptr) :: void_ptr
 !arrays
- integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(3), gg(3), g0_q(3)
+ integer :: sc_ngfft(18), need_qibz(gwr%nqibz), got_qibz(gwr%nqibz), units(3), g0_q(3) ! gg(3),
  integer,allocatable :: green_scgvec(:,:), wc_scgvec(:,:)
  real(dp) :: kk_bz(3), kcalc_bz(3), qq_bz(3), tsec(2)  !, qq_ibz(3)
  complex(gwpc) :: cpsi_r, sigc_pm(2)
@@ -5920,7 +5920,7 @@ subroutine sig_braket_ur(sig_rpr, nfftsp, ur_glob, sigm_pm)
  complex(gwpc),intent(out) :: sigm_pm(2)
 
 !Local variables-------------------------------
- integer :: ipm, ir1, il_r1, ierr
+ integer :: ipm, ir1, il_r1 !, ierr
  complex(gwpc),allocatable :: loc_cwork(:)
 
 ! *************************************************************************
@@ -6555,7 +6555,7 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 !Local variables-------------------------------
  integer :: n1, n2, n3, n4, n5, n6, i1, i2, i3, idat, ipw
  complex(gwpc),contiguous,pointer :: cfft_ptr(:,:,:,:)
- real(dp) :: tsec(2) !, cpu, wall, gflops
+ !real(dp) :: tsec(2) !, cpu, wall, gflops
  !character(len=500) :: msg
 
 ! *************************************************************************
@@ -7167,7 +7167,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 !scalars
  integer :: nsppol, nspinor, ierr, my_ikf, band_sum, ii, jj, kb, il_b, iab !ig_start, ig,
  integer :: my_is, ikcalc, ikcalc_ibz, bmin, bmax, band, istwf_k, npw_k
- integer :: spin, isym, jb, is_idx, use_umklp
+ integer :: spin, jb, is_idx, use_umklp
  integer :: spad, wtqm, wtqp, irow, spadx1, spadx2
  integer :: npwx, u_nfft, u_mgfft, u_mpw, nsig_ab
  integer :: ik_bz, ik_ibz, isym_k, trev_k, g0_k(3)

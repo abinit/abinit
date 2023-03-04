@@ -3357,12 +3357,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
-#ifdef HAVE_NETCDF
    if (my_rank == 0) then
      ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
      NCF_CHECK(ncerr)
    end if
-#endif
    call xmpi_barrier(comm)
    ABI_ERROR_NODUMP("kpts.nc file written. Aborting now")
  end if
@@ -3742,12 +3740,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    Kmesh%nshift        =Dtset%nshiftk
    ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
    Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
-   !call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0, "COLL")
+   !call Kmesh%print("K-mesh for the wavefunctions",ab_out, dtset%prtvol)
    call find_qmesh(Qmesh, Cryst, Kmesh)
 #ifdef HAVE_NETCDF
    if (my_rank == master) then
-     ncerr = nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt)
-     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt))
    end if
 #endif
    call xmpi_barrier(comm)

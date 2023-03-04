@@ -1899,7 +1899,7 @@ integer function next_token(string, start, ostr) result(ierr)
  integer :: ii,beg
 
 ! *************************************************************************
- !print *, "string:", trim(string(start:))
+ !print *, "string:", trim(string(start:)), ", start:", start
 
  ierr = 1; beg = 0
  ! Find first non-empty char.
@@ -1921,6 +1921,7 @@ integer function next_token(string, start, ostr) result(ierr)
  if (start == 0) start = len_trim(string) + 1
 
  ierr = 0
+ !print *, "string(beg:):", trim(string(beg:))
  ostr = string(beg:start-1)
 
 end function next_token
