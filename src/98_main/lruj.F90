@@ -621,7 +621,7 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
   do ipoint=1,npoints
     fitval=0.0d0
     do icoeff=1,ncoeffs
-      if (icoeff==0.and.xvals(ipoint)==0.0) then
+      if (icoeff==1.and.xvals(ipoint)==0.0) then
         fitval=fitval+coeffs(icoeff)
       else
         fitval=fitval+coeffs(icoeff)*xvals(ipoint)**(icoeff-1)
