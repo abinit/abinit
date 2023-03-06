@@ -15,17 +15,19 @@ block
  case (ABI_FFTW_BACKWARD) ! G --> R
    !
    ! The prototype of sfftw_plan_many_dft is:
-   ! sfftw_plan_many_dft(rank, n, howmany, 
-   !   fin,  iembed, istride, idist, 
+   ! sfftw_plan_many_dft(rank, n, howmany,
+   !   fin,  iembed, istride, idist,
    !   fout, oembed, ostride, odist, isign, my_flags)
    !
    ! 1) Transform along x.
+   !$omp critical
    bw_plan1 = fftw3_plan_many_dft(1, (/nx/), 1, &
        ff, (/ldx, ldy, ldz/), 1, ldx,     &
        ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx) 
-   do cnt=0,(zpad%nlinex*ndat)-1 
+!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
+   do cnt=0,(zpad%nlinex*ndat)-1
      dat  = 1 + cnt / zpad%nlinex
      line = 1 + MOD(cnt, zpad%nlinex)
      jj   = zpad%linex2ifft_yz(1,line)
@@ -34,15 +36,20 @@ block
      call fftw3_execute_dft(bw_plan1, ff(sidx:), ff(sidx:) ) ! Pass the base address.
    end do
 
+   !$omp critical
    call fftw3_destroy_plan(bw_plan1)
+   !$omp end critical
+
    !
    ! 2) Transform along y.
+   !$omp critical
    bw_plan2 = fftw3_plan_many_dft(1, (/ny/), nx,&
        ff, (/ldx, ldy, ldz/), ldx, 1,          &
        ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx) 
-   do cnt=0,(zpad%n_zplanes*ndat)-1 
+!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
+   do cnt=0,(zpad%n_zplanes*ndat)-1
      dat    = 1 + cnt / zpad%n_zplanes
      zplane = 1 + MOD(cnt, zpad%n_zplanes)
      kk     = zpad%zplane(1,zplane)
@@ -50,33 +57,45 @@ block
      call fftw3_execute_dft(bw_plan2, ff(sidx:), ff(sidx:))
    end do
 
+   !$omp critical
    call fftw3_destroy_plan(bw_plan2)
+   !$omp end critical
+
    !
    ! 3) Transform along z.
    if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
+      !$omp critical
      bw_plan3 = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads) 
+     !$omp end critical
 
      do dat=1,ndat
        sidx = 1 + dst*(dat-1) * ldx*ldy*ldz
        call fftw3_execute_dft(bw_plan3, ff(sidx:), ff(sidx:))
      end do
 
+     !$omp critical
      call fftw3_destroy_plan(bw_plan3)
-   else 
+     !$omp end critical
+
+   else
      ! Split ndat transforms among the threads.
+     !$omp critical
      bw_plan3  = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! ldx*ldy 1D transforms of f(x,y,Gz) along Gz.
            ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            & ! Note that we have to visit the entire augmented x-y plane!
            ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(sidx) 
+!$OMP PARALLEL DO PRIVATE(sidx)
      do dat=1,ndat
        sidx = 1 + dst*(dat-1)*ldx*ldy*ldz
        call fftw3_execute_dft(bw_plan3, ff(sidx:), ff(sidx:))
      end do
 
+     !$omp critical
      call fftw3_destroy_plan(bw_plan3)
+     !$omp end critical
    end if
 
    if (iscale__ /= 0) then
@@ -87,44 +106,55 @@ block
  case (ABI_FFTW_FORWARD) ! R --> G
    !
    ! The prototype for sfftw_plan_many_dft is:
-   ! sfftw_plan_many_dft(n, howmany, 
-   !   fin,  iembed, istride, idist, 
+   ! sfftw_plan_many_dft(n, howmany,
+   !   fin,  iembed, istride, idist,
    !   fout, oembed, ostride, odist, isign, my_flags)
    !
    ! 1) Transform along z.
    if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
+     !$omp critical
      fw_plan3 = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1,             &
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+     !$omp end critical
 
      do dat=1,ndat
        sidx = 1 + dst*(dat-1) *ldx*ldy*ldz
        call fftw3_execute_dft(fw_plan3, ff(sidx:), ff(sidx:))
      end do
 
+     !$omp critical
      call fftw3_destroy_plan(fw_plan3)
+     !$omp end critical
+
    else
      ! Split ndat transforms among the threads.
+     !$omp critical
      fw_plan3 = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
          ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(sidx) 
+!$OMP PARALLEL DO PRIVATE(sidx)
      do dat=1,ndat
        sidx = 1 + dst*(dat-1) *ldx*ldy*ldz
        call fftw3_execute_dft(fw_plan3, ff(sidx:), ff(sidx:))
      end do
 
+     !$omp critical
      call fftw3_destroy_plan(fw_plan3)
+     !$omp end critical
    end if
    !
    ! 2) Transform along y.
+   !$omp critical
    fw_plan2 = fftw3_plan_many_dft(1, (/ny/), nx, &
        ff, (/ldx, ldy, ldz/), ldx, 1,           &
        ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx) 
-   do cnt=0,(zpad%n_zplanes*ndat)-1 
+!$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
+   do cnt=0,(zpad%n_zplanes*ndat)-1
      dat    = 1 + cnt / zpad%n_zplanes
      zplane = 1 + MOD(cnt, zpad%n_zplanes)
      kk     = zpad%zplane(1,zplane)
@@ -132,15 +162,20 @@ block
      call fftw3_execute_dft(fw_plan2, ff(sidx:), ff(sidx:))
    end do
 
+   !$omp critical
    call fftw3_destroy_plan(fw_plan2)
+   !$omp end critical
 
-   ! 3) Transform along x. 
+   !
+   ! 3) Transform along x.
+   !$omp critical
    fw_plan1 = fftw3_plan_many_dft(1, (/nx/), 1, &
        ff, (/ldx, ldy, ldz/), 1, ldx,           &
        ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
-!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx) 
-   do cnt=0,(zpad%nlinex*ndat)-1 
+!$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
+   do cnt=0,(zpad%nlinex*ndat)-1
      dat  = 1 + cnt / zpad%nlinex
      line = 1 + MOD(cnt, zpad%nlinex)
      jj   = zpad%linex2ifft_yz(1,line)
@@ -149,7 +184,9 @@ block
      call fftw3_execute_dft(fw_plan1, ff(sidx:), ff(sidx:))
    end do
 
+   !$omp critical
    call fftw3_destroy_plan(fw_plan1)
+   !$omp end critical
 
    ! 4) Normalize the transform.
    if (iscale__ /= 0) then

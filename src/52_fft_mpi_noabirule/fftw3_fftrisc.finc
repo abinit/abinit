@@ -131,9 +131,11 @@ if (istwf_k==1) then
 
 #else
    ! 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz.
+   !$omp critical
    bw_plan  = fftw3_plan_many_dft(1, (/nz/), 1, &
     cuboid, (/mgb, nz/), mgb, 1,               &
     cuboid, (/mgb, nz/), mgb, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
 !!$OMP PARALLEL DO SCHEDULE(STATIC, lotin)
 !$OMP PARALLEL DO
@@ -142,8 +144,11 @@ if (istwf_k==1) then
    end do
 #endif
 
+  !$omp critical
   call fftw3_destroy_plan(bw_plan)
-   ! Now we have cuboid(Gx,Gy,z) in the cuboid enclosing the G-sphere
+  !$omp end critical
+
+  ! Now we have cuboid(Gx,Gy,z) in the cuboid enclosing the G-sphere
  end if
  !
  ! ================================
@@ -167,12 +172,15 @@ if (istwf_k==1) then
 #endif
 
  ng2_pos = g2max_in + 1
+ !$omp critical
  bw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos, &  ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx
 &  slice_a, (/ldx, ldy/), 1, ldx,                         &  ! for Gy >= 0
 &  slice_b, (/ldx, ldy/), 1, ldx, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+ !$omp end critical
 
  ng2_neg = -g2min_in
 
+ !$omp critical
  bw_plan_xg2neg = fftw3_plan_many_dft(1, (/nx/), ng2_neg, &   ! ng2_neg 1D transforms of f(Gx,Gy,z) along Gx
 &  slice_a, (/ldx, ldy/), 1, ldx,                         &   ! for Gy < 0
 &  slice_b, (/ldx, ldy/), 1, ldx, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
@@ -180,24 +188,31 @@ if (istwf_k==1) then
  bw_plan_y = fftw3_plan_many_dft(1, (/ny/), nx, &  ! nx 1D transforms of f(x,Gy,z) along Gy.
 &  slice_b, (/ldx, ldy/), ldx, 1,               &
 &  slice_a, (/ldx, ldy/), ldx, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+ !$omp end critical
 
  if (option==2 .or. option==3)then
 
+   !$omp critical
    fw_plan_y = fftw3_plan_many_dft(1, (/ny/), nx, &  ! nx 1D transforms of f(x,y,Gz) along y.
 &    slice_a, (/ldx, ldy/), ldx, 1,               &
 &    slice_b, (/ldx, ldy/), ldx, 1, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
    ng2_pos = g2max_out + 1
 
+   !$omp critical
    fw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos, &  ! ng2_pos 1D transforms of f(x,y,Gz) along x.
 &    slice_b, (/ldx, ldy/), 1, ldx,                         &
 &    slice_a, (/ldx, ldy/), 1, ldx, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
    ng2_neg = -g2min_out
 
+   !$omp critical
    fw_plan_xg2neg = fftw3_plan_many_dft(1, (/nx/), ng2_neg, &  ! ng2_neg 1D transforms of f(x,y,Gz) along x.
 &    slice_b, (/ldx, ldy/), 1, ldx,                         &
 &    slice_a, (/ldx, ldy/), 1, ldx, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
  end if
 
 #ifdef DEV_USE_ABIMALLOC
@@ -370,14 +385,18 @@ end if
 !$OMP END PARALLEL
 
 ! Free plans
+ !$omp critical
  call fftw3_destroy_plan(bw_plan_xg2pos)
  call fftw3_destroy_plan(bw_plan_xg2neg)
  call fftw3_destroy_plan(bw_plan_y)
+ !$omp end critical
 
  if (option==2 .or. option==3)then
+   !$omp critical
    call fftw3_destroy_plan(fw_plan_y)
    call fftw3_destroy_plan(fw_plan_xg2pos)
    call fftw3_destroy_plan(fw_plan_xg2neg)
+   !$omp end critical
  end if
 
  if (option==2 .or. option==3) then
@@ -390,9 +409,11 @@ end if
    call fftw3_execute_dft(fw_plan, cuboid, cuboid)
 
 #else
+   !$omp critical
    fw_plan = fftw3_plan_many_dft(1, (/nz/), 1,&
 &    cuboid, (/mgb, nz, 1/), mgb, 1,          &
 &    cuboid, (/mgb, nz, 1/), mgb, 1, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
 ! TODO Use chunks, see lot
 !!$OMP PARALLEL DO SCHEDULE(STATIC, lotout)
@@ -402,7 +423,9 @@ end if
    end do
 #endif
 
+  !$omp critical
   call fftw3_destroy_plan(fw_plan)
+  !$omp end critical
 
    ! Transfer the data in the output array, after normalization
    norm=one/DBLE(nfft)
@@ -562,9 +585,11 @@ else
 
      call fftw3_execute_dft(bw_plan, cuboid, cuboid)
 #else
+     !$omp critical
      bw_plan = fftw3_plan_many_dft(1, (/nz/), 1, &
 &      cuboid, (/mgb, nz/), mgb, 1,                  &
 &      cuboid, (/mgb, nz/), mgb, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
 !!$OMP PARALLEL DO SCHEDULE(STATIC, lotin)
 !$OMP PARALLEL DO
@@ -573,7 +598,9 @@ else
      end do
 #endif
 
+     !$omp critical
      call fftw3_destroy_plan(bw_plan)
+     !$omp end critical
 
      ! Change the phase if $k_z \neq 0$
      if (istwf_k==4 .or. istwf_k==5 .or. istwf_k==8 .or. istwf_k==9) then
@@ -601,6 +628,7 @@ else
    g2max_in= gboundin(4,1)
    ng2_pos = g2max_in + 1
 
+   !$omp critical
    bw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos,  &  ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx
 &    slice_a, (/ldx, ldy/), 1, ldx,                          &  ! for Gy >= 0
 &    slice_b, (/ldx, ldy/), 1, ldx, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
@@ -611,14 +639,17 @@ else
    bw_plan_y = fftw3_plan_many_dft(1, (/ny/), nxhalf1, &  ! nx 1D transforms of f(x,Gy,z) along Gy.
 &    slice_a, (/ldx, ldy/), ldx, 1,                    &
 &    slice_b, (/ldx, ldy/), ldx, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
    if (option==2 .or. option==3)then
+     !$omp critical
      ! TODO clarify this point. why nxhalfm?
      !fw_plan_y = dplan_many_dft(1, (/ny/), nxhalfm, &  ! nx 1D transforms of f(x,y,Gz) along y.
      !fw_plan_y = dplan_many_dft(1, (/ny/), nx, &    ! nx 1D transforms of f(x,y,Gz) along y.
      fw_plan_y = fftw3_plan_many_dft(1, (/ny/), nxhalf1, &  ! nx 1D transforms of f(x,y,Gz) along y.
 &      slice_a, (/ldx, ldy/), ldx, 1,                    &
 &      slice_b, (/ldx, ldy/), ldx, 1, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
 #ifdef DEV_USE_ABIMALLOC
      ABI_MALLOC(slice_c,(2*nxhalfm*ldy))
@@ -632,9 +663,11 @@ else
      ! TODO clarify this point. why nxhalfm?
      ng2_pos = g2max_in + 1
      !fw_plan_xg2pos = dplan_many_dft(1, (/2*nxhalfm/), ng2_pos, &  ! ng2_pos 1D transforms of f(x,y,Gz) along x.
+     !$omp critical
      fw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos, &  ! ng2_pos 1D transforms of f(x,y,Gz) along x.
 &      slice_c, (/  nxhalfm, ldy/), 1, 2*nxhalfm,        &
 &      slice_d, (/2*nxhalfm, ldy/), 1, 2*nxhalfm, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
 #ifdef DEV_USE_ABIMALLOC
      ABI_FREE(slice_c)
@@ -961,13 +994,17 @@ else
 #endif
 !$OMP END PARALLEL
 
+   !$omp critical
    call fftw3_destroy_plan(bw_plan_xg2pos)
    call fftw3_destroy_plan(bw_plan_y)
+   !$omp end critical
 
    if (option==2 .or. option==3) then
 
+     !$omp critical
      call fftw3_destroy_plan(fw_plan_y)
      call fftw3_destroy_plan(fw_plan_xg2pos)
+     !$omp end critical
 
      ! Change the phase if $k_z \neq 0$
      if (istwf_k==4 .or. istwf_k==5 .or. istwf_k==8 .or. istwf_k==9) then
@@ -1002,7 +1039,9 @@ else
      end do
 #endif
 
+     !$omp critical
      call fftw3_destroy_plan(fw_plan)
+     !$omp end critical
 
      ! Transfer the data in the output array, after normalization
      norm=one/DBLE(nfft)

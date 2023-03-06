@@ -102,6 +102,9 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
 #endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+    integer :: openblas_get_num_threads
+#endif
     integer :: nthread
 #ifdef HAVE_LINALG_SCALAPACK
     integer :: maxProc
@@ -126,6 +129,8 @@ module m_xgScalapack
     nthread = 1
 #ifdef HAVE_LINALG_MKL_THREADS
     nthread =  mkl_get_max_threads()
+#elif HAVE_LINALG_OPENBLAS_THREADS
+    nthread =  openblas_get_num_threads()
 #else
     nthread = xomp_get_num_threads(open_parallel=.true.)
     if ( nthread == 0 ) nthread = 1
