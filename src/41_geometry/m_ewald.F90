@@ -144,7 +144,7 @@ if(icutcoul.eq.1) then
  !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
-if (icutcoul.eq.3) then
+!if (icutcoul.eq.3) then
 !Sum over G space, done shell after shell until all
 !contributions are too small.
  ng=0
@@ -246,7 +246,7 @@ if (icutcoul.eq.3) then
    if (newg==0) exit
 
  end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
-endif
+!endif
 
  sumg=gsum/(two_pi*ucvol)
 
