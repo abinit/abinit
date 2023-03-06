@@ -11,8 +11,8 @@
 #Run Parameters
 nstep 30                          #Higher than normal because of magnetic state
 tolvrs 10d-12
-ecut 15
-pawecutdg 30
+ecut 10
+pawecutdg 20
 chkprim 0                         #Will complain otherwise with AFII magnetic state
 occopt 0
 nband 26                          #24 occupied + 2 unoccupied
@@ -45,7 +45,7 @@ spinat 0 0 3                      #Set high to enforce convergence to high magne
 #Kpoint Grid
 kptopt 1                          #Monkhorst-Pack Mesh
 chksymbreak 0                     #Don't check for symmetry breaking
-ngkpt 6 6 6
+ngkpt 4 4 4
 
 # DFT+U
 usepawu 1                         #Alert Abinit to use of DFT+U
@@ -56,7 +56,6 @@ dmatpuopt 3
 
 #Printing Info
 outdata_prefix = "tlruj_1.o"
-prtvol 3                          #More information on DFT+U
 prtwf 1                           #Default: make sure WFK are printed
 
 #Pseudos
@@ -72,13 +71,13 @@ pseudos "Ni.xml,Ni.xml,O.xml"     #Use same pseudopotential for both Ni atoms
 #%% test_chain = tlruj_1.abi, tlruj_2.abi, tlruj_3.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tlruj_1.abo, tolnlines = 10, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
+#%%   tlruj_1.abo, tolnlines = 15, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options =  -medium
 #%% output_file = "tlruj_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 20
 #%% [extra_info]
 #%% authors = L. MacEnulty
-#%% keywords = PAW, DFTU,LRUJ,UJDET,linear,response,Hubbard U,Hunds J
+#%% keywords = PAW,DFTU,LRUJ,UJDET,linear,response,Hubbard U,Hunds J
 #%% description = 
 #%%   AFII NiO 4-atom cell | LRUJ utility | LMac 2022
 #%%   Linear Response Hubbard U and Hund's J (LRUJ)

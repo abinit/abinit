@@ -82,10 +82,11 @@ program lruj
 !characters
  character(len=1)                   :: parname
  character(len=5)                   :: degreename
+ character(len=12)                  :: regname
  character(len=14)                  :: occmag
  character(len=24)                  :: codename
  character(len=30)                  :: diem_token
- character(len=500)                 :: message,arg,msg,pertname,regname
+ character(len=500)                 :: message,arg,msg,pertname
  character(len=fnlen),allocatable   :: file_paths(:)
 
 
@@ -436,7 +437,7 @@ program lruj
      write(degreename,'(i2)') degree
      regname=' Degree'//degreename//': '
    end if
-   write(message,fmt='(a,3f14.7,a,3f13.7)') trim(regname),chi0(degree),chi(degree),hubpar(degree),&
+   write(message,fmt='(a,3f14.7,a,3f13.7)') regname,chi0(degree),chi(degree),hubpar(degree),&
      '  |',chi0err(degree),chierr(degree),hubparerr(degree)
    call wrtout(std_out,message)
  end do
