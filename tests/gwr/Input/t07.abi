@@ -1,4 +1,4 @@
-# Crystalline LiF
+# LiF. Interface with CC4S code
 
 # Number of datasets: 4-step calculation
 ndtset 2
@@ -61,6 +61,5 @@ pseudos "Li.psp8, F.upf"
 #%% authors = M. Giantomassi
 #%% keywords = GWR
 #%% description =
-#%%   LiF.
-#%% topics = CC4S
+#%%   LiF. Interface with CC4S code
 #%%<END TEST_INFO>

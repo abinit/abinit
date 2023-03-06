@@ -889,9 +889,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
  integer,parameter :: istwfk1 = 1, mG0(3) = 0, master = 0
  integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig
  integer :: band1_start, band1_stop, batch1_size, n1dat, idat1
- integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt
- !integer :: nqibz_, nqbz_
- real(dp) :: cpu, wall, gflops, qpt(3), qbz(3,1), gcart(3)
+ integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_
+ real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3)
  character(len=500) :: msg
  character(len=fnlen) :: filepath
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
@@ -920,7 +919,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
  if (dtset%fftgw==10 .or. dtset%fftgw==11) method=1
  if (dtset%fftgw==20 .or. dtset%fftgw==21) method=2
  if (dtset%fftgw==30 .or. dtset%fftgw==31) method=3
- enforce_sym = MOD(dtset%fftgw, 10)
+ enforce_sym = mod(dtset%fftgw, 10)
  enforce_sym = 0 ! Gamma only --> we don't need to rotate wavefunctions in the BZ
 
  npwvec = npw_k; gvec_max => ugb%kg_k
@@ -930,7 +929,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
  call setmesh(cryst%gmet, gvec_max, u_ngfft, npwvec, m_npw, npw_k, u_nfft, method, mG0, cryst, enforce_sym, unit=std_out)
  u_mgfft = maxval(u_ngfft(1:3))
 
- !nqibz_ = 1; nqbz_ = 1; qbz_ = zero
+ ! Get full BZ associated to ebands
+ !call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
+ !  nkibz, kibz, wtk, nkbz, kbz, bz2ibz=bz2ibz)
+
+ nqibz_ = 1; nqbz_ = 1; qbz_ = zero
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  !call vcgen%init(cryst, ks_ebands%kptrlatt, nkbz, nqibz_, nqbz_, qbz_, &
  !                dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, ugb%comm)
@@ -948,6 +951,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
    do ii=1,size(units)
      call print_ngfft(u_ngfft, header='FFT mesh for the wavefunctions', unit=units(ii))
    end do
+
    ! =====================
    ! Write files for CC4S
    ! =====================
@@ -1079,7 +1083,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
    !write(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
    write(unt,'(A)')    '  type: State'
    !write(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
-   !write(unt,'(A)')    '  type: State'
+   write(unt,'(A)')    '  type: State'
    write(unt,'(A)')    'elements:'
    write(unt,'(A)')    '  type: IeeeBinaryFile'
    write(unt,'(A)')    'unit: 0.1917011272153577       # = sqrt(Eh/eV)'

@@ -875,7 +875,7 @@ subroutine remove_non_ascii(in_str)
 
  character(len=*),intent(inout) :: in_str
 
- character(len=len_trim(in_str)) :: tmp_str
+ character(len=len(in_str)) :: tmp_str
  integer :: ii, cnt
 
  ! in UTF8 character value c2 a0 (194 160) is defined as NO-BREAK SPACE.
@@ -884,7 +884,7 @@ subroutine remove_non_ascii(in_str)
  tmp_str = ""
  do ii=1,len(in_str)
    if ((iachar(in_str(ii:ii)) >= 127)) cycle
-   cnt = cnt + 1 !; print *, "copying`", in_str(ii:ii), "` with iachar:", iachar(in_str(ii:ii))
+   cnt = cnt + 1 !; write(std_out, *) "copying`", in_str(ii:ii), "` with iachar:", iachar(in_str(ii:ii))
    tmp_str(cnt:cnt) = in_str(ii:ii)
  end do
 
