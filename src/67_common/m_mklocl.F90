@@ -294,8 +294,8 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
  integer :: jj,me_fft,me_g0,n1,n2,n3,nproc_fft,shift1
  integer :: shift2,shift3
  real(dp),parameter :: tolfix=1.0000001_dp
- real(dp) :: aa,bb,beta,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
- real(dp) :: dqm1,ee,ff,gmag,gsquar,gcart_para,gcart_perp
+ real(dp) :: aa,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
+ real(dp) :: dqm1,ee,ff,gmag,gsquar!beta,gcart_para,gcart_perp
  real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
  real(dp) :: ph3i,ph3r,phimag_igia,phre_igia,rcut_loc,sfi,sfr
  real(dp) :: svion,svioni,svionr,term,vion1,vion2,xnorm
