@@ -435,7 +435,7 @@ program lruj
      regname=' Cubic:     '
    else
      write(degreename,'(i2)') degree
-     regname=' Degree'//degreename//': '
+     regname=' Degree'//trim(degreename)//' : '
    end if
    write(message,fmt='(a,3f14.7,a,3f13.7)') regname,chi0(degree),chi(degree),hubpar(degree),&
      '  |',chi0err(degree),chierr(degree),hubparerr(degree)
