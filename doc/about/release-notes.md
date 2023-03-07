@@ -1,21 +1,19 @@
 ## v9.8
 
-Version 9.8, released on December 9, 2022.
+Version 9.8, released on December 23, 2022.
 List of changes with respect to version 9.6.
 <!-- Release notes updated on December 3, 2022. -->
 
 Many thanks to the contributors to the ABINIT project between
-October 2021 and October 2022 ! These release notes
+October 2021 and August 2022, and some late contributions up to December 2022 ! These release notes
 are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
-<!-- Merge requests up to and including MR874. Also, MR881, 882, and 885 are taken into account. -->
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, and 894 are taken into account. -->
 
 The list of contributors includes:
-B. Amadon, G. Antonius, L. Baguet, L. Bastogne, J.-M. Beuken, 
-J. Bieder, A. Blanchet, 
+B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet, 
 F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote, 
-C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, 
-B. Guster, P. Kesterner, R. Outerovich, Ch. Paillard,
-M. Royo, B. Sataric, M. Schmitt, F. Soubiran, 
+C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner, 
+R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran, 
 M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
@@ -53,7 +51,6 @@ By X. Gonze (MR852)
 The [[tutorial:lattice_wannier]] has been written to teach how to construct such lattice Wannier functions. 
 They are used in localized bases for atomic distortions. 
 One typical use case is to build an effective Hamiltonian of collective, localized, atomic displacements (see the next achievement). 
-In many phenomena, only a few distortion modes are important.
 
 A script (compare_phbands.py) to compare phonon/LWF band structures is added to the scripts/post_processing directory.
 
@@ -71,6 +68,8 @@ Related input variables :
 
 Related topic [[topic:LWFModel]].
 See tests [[test:lwf_1]], [[test:v9_110]], and [[test:v9_111]].
+
+This feature is still under heavy development. The current version should be regarded as a "technology preview". 
 
 By He Xu (MR844)
 
@@ -95,6 +94,8 @@ lwf_temperature@multibinit,
 [[lwf_var_temperature@multibinit]].
 
 See the tutorial [[tutorial:lwf_model]] and related tests.
+
+This feature is still under heavy development. The current version should be regarded as a "technology preview". 
 
 By He Xu (MR851)
 
@@ -125,7 +126,7 @@ specify the indices of the imposed coefficients with fixed coefficient value dur
 
 See the tests in which these input variables are used. 
 
-By He Xu, L. Bastogne, M. Schmitt and P. Ghosez (MR812, 851, 868)
+By He Xu, M. Schmitt, A. Sasani, L. Bastogne, S. Bandyopadhyay, and P. Ghosez (MR812, 851, 868, 894)
 
 
 **B.4** The TDEP formalism implemented in ABINIT (aTDEP), allowing to compute temperature-dependent phonon band structures,
@@ -316,7 +317,11 @@ From E. Bousquet (MR881)
 
 From P. Kestener (MR843 and 869)
 
-**D.26** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.26** Restructuring of the tutorial index page, doci/tutorial/index.md ..
+
+From X. Gonze
+
+**D.27** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
 By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
@@ -880,7 +885,7 @@ New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp
 
 Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
 Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
-[[tutorial:eph]] and [[tutorial:tdepes]].
+[[tutorial:eph_legacy]] and [[tutorial:eph_tdep_legacy]].
 For further details about the implementation and usage, please consult [[cite:Brunin2020b]].
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
@@ -1327,11 +1332,13 @@ Test tolerance in the new integration weights, tests [[test:v8_52]], [[test:v8_5
 By H. Miranda and M. Giantomassi
 
 **D.7** Test calculation of velocity matrix elements (DDK) with
- optdriver 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]].
+ [[optdriver]] 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]]. By the way, the 
+ other capabilities linked to [[wfk_task]] ("wfk_fullbz", "wfk_einterp", "wfk_optics_fullbz", "wfk_kpts_erange") seem
+ not to have been properly advertised.
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
@@ -2063,7 +2070,7 @@ By H. Miranda and M. Giantomassi
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
@@ -2535,8 +2542,8 @@ See the new tests v7#67-72 libxc#44, 45, 72, 73, 74,
 and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
 By X. Gonze and F. Jollet, with help by M. Torrent.
 
-D.3 The [[tutorial:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
-    See all tests in `tutorespfn/tdepes*`.
+D.3 The [[tutorial:eph_tdep_legacy|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
+    See all tests in `tutorespfn/teph_tdep_legacy*`.
     By X. Gonze and M. Giantomassi
 
 D.4 Output of interpolated density in the MPI-IO case is now tested, [[test:mpiio_26]] and [[test:mpiio_27]].

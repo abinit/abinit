@@ -38,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.9.1],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.9.2],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1056,6 +1056,11 @@ if test ! -z "${status}" -o ! -z "${mandatory}"; then
 fi
 
 # Always generate a build script for required fallbacks
+#AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README])
+# AC_CONFIG_FILES([fallbacks/build-abinit-fallbacks.sh])
+#AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
+#AC_OUTPUT
+# Old formulation: AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
 AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
 
 # Check that we have all required fallbacks
@@ -1220,6 +1225,10 @@ fi
 if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
   ABI_MSG_NOTICE([gpu-without-magma],
     [Suboptimal GPU configuration])
+fi
+if test "${sd_libxc_kxc_ok}" = "no"; then
+  ABI_MSG_NOTICE([libxc-kxc],
+    [Suboptimal libxc configuration])
 fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END

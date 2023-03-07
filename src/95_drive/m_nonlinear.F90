@@ -71,6 +71,7 @@ module m_nonlinear
  use m_pspini,      only : pspini
  use m_atm2fft,     only : atm2fft
  use m_rhotoxc,     only : rhotoxc
+ use m_drivexc,     only : check_kxc
  use m_mpinfo,      only : proc_distrb_cycle
  use m_mklocl,      only : mklocl
  use m_common,      only : setup1
@@ -684,7 +685,7 @@ end if
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,ntypat,pawang,dtset%pawprtvol,pawrad,&
+&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)
@@ -875,6 +876,7 @@ end if
  if(dtset%xclevel==2.and.dtset%nspden==1) nkxc=7  ! non-polarized GGA
  if(dtset%xclevel==2.and.dtset%nspden==2) nkxc=19 ! polarized GGA
  nk3xc=3*dtset%nspden-2
+ call check_kxc(dtset%ixc,dtset%optdriver,check_k3xc=.true.)
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(k3xc,(nfftf,nk3xc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
