@@ -218,6 +218,9 @@ contains
  intarr(1,:)=dtsets(:)%optcell
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optcell','INT',0)
 
+ intarr(1,:)=dtsets(:)%optdcmagpawu
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdcmagpawu','INT',0)
+
  intarr(1,:)=dtsets(:)%optdriver
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdriver','INT',0)
 

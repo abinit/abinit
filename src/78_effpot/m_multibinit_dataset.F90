@@ -28,7 +28,7 @@ module m_multibinit_dataset
  use m_xmpi
  use m_parser, only : intagm, instrng
  use m_fstrings,   only : replace, inupper
- use m_dtset,      only : chkvars 
+ use m_dtset,      only : chkvars
  use m_ddb,    only : DDB_QTOL
  use m_scup_dataset
 
@@ -58,7 +58,7 @@ module m_multibinit_dataset
 !! SOURCE
 
  type multibinit_dtset_type
-    
+
 ! Integer
   integer :: asr
   integer :: analyze_anh_pot
@@ -91,13 +91,13 @@ module m_multibinit_dataset
   integer :: fit_nfixcoeff
   integer :: fit_nimposecoeff
   integer :: fit_EFS(3)
-  integer :: sel_EFS(3) 
-  integer :: opt_EFS(3) 
-  integer :: bound_EFS(3) 
-  integer :: opt_effpot 
-  integer :: opt_ncoeff 
+  integer :: sel_EFS(3)
+  integer :: opt_EFS(3)
+  integer :: bound_EFS(3)
+  integer :: opt_effpot
+  integer :: opt_ncoeff
   integer :: ts_option
-  integer :: hmctt 
+  integer :: hmctt
   integer :: hmcsst
   integer :: ifcana
   integer :: ifcflag
@@ -127,8 +127,8 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: restartxf
   integer :: symdynmat
-  integer :: test_effpot 
-  integer :: test_prt_ph 
+  integer :: test_effpot
+  integer :: test_prt_ph
   integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
@@ -213,10 +213,10 @@ module m_multibinit_dataset
   real(dp) :: conf_cutoff_strain(6)
   real(dp) :: rprim(3,3)
 
-  ! lattice (new) related 
+  ! lattice (new) related
   real(dp) :: latt_friction ! langevin dynamics friction
   real(dp) :: latt_taut     ! Berendsen taut
-  !real(dp) :: latt_taup     ! 
+  !real(dp) :: latt_taup     !
   !real(dp) :: latt_compressibility
   !integer :: latt_mask(3)
   real(dp) :: latt_temperature_start
@@ -246,7 +246,7 @@ module m_multibinit_dataset
   real(dp) :: spin_projection_qpoint(3) ! qpoint to check if spin configuration is random
   real(dp) :: spin_sia_k1dir(3)
   real(dp) :: spin_init_qpoint(3) ! qpoint to specify initial spin configuration
-  real(dp) :: spin_init_rotate_axis(3) ! rotation axis to specify initial spin configuration  
+  real(dp) :: spin_init_rotate_axis(3) ! rotation axis to specify initial spin configuration
   real(dp) :: spin_init_orientation(3) ! spin orientation in primitive cell which is then rotated
 
 ! Integer arrays
@@ -260,7 +260,7 @@ module m_multibinit_dataset
   integer, allocatable :: fit_bancoeff(:)
   ! fit_bancoeffs(fit_nbancoeff)
 
-  integer, allocatable :: iatfix(:,:) 
+  integer, allocatable :: iatfix(:,:)
   ! iatfix(3,natom) atom fix contraints for Broyden
 
   integer, allocatable :: opt_coeff(:)
@@ -268,15 +268,15 @@ module m_multibinit_dataset
 
   !integer, allocatable :: spin_sublattice(:) ! TODO hexu: difficult to use, better in xml?
 
-! Logical array 
+! Logical array
   logical :: fit_on(3)
-  ! fit_on(1) == TRUE, fit on energy, fit_on(2,3)=TRUE fit on forces stresses, fit_on(1,2,3)=TRUE fit on EFS 
+  ! fit_on(1) == TRUE, fit on energy, fit_on(2,3)=TRUE fit on forces stresses, fit_on(1,2,3)=TRUE fit on EFS
 
   logical :: sel_on(3)
-  ! sel_on(1) == TRUE, select on energy, sel_on(2,3)=TRUE select on forces stresses, sel_on(1,2,3)=TRUE select on EFS 
-  
+  ! sel_on(1) == TRUE, select on energy, sel_on(2,3)=TRUE select on forces stresses, sel_on(1,2,3)=TRUE select on EFS
+
   logical :: opt_on(3)
-  ! opt_on(1) == TRUE, optimize on energy, sel_on(2,3)=TRUE optimize on forces stresses, opt_on(1,2,3)=TRUE optimize on EFS 
+  ! opt_on(1) == TRUE, optimize on energy, sel_on(2,3)=TRUE optimize on forces stresses, opt_on(1,2,3)=TRUE optimize on EFS
 
   real(dp), allocatable :: qmass(:)
   ! qmass(nnos)
@@ -289,7 +289,7 @@ module m_multibinit_dataset
 
   real(dp), allocatable :: conf_cutoff_disp(:)
   ! conf_cuttoff(natom)
-  
+
   real(dp),allocatable  :: q1shft(:,:)
   !q1shft(3,nqshft)  SHIFT for Q point
 
@@ -304,12 +304,12 @@ module m_multibinit_dataset
 
   real(dp), allocatable :: qph2l(:,:)
   ! qph2l(3,nph2l)
- 
-  !MS all variables for scale-up are put into their one type 
+
+  !MS all variables for scale-up are put into their one type
   type(scup_dtset_type) :: scup_dtset
 
   ! spin part
-  !real(dp), allocatable :: gilbert_damping ! if not provided in xml or override is needed. 
+  !real(dp), allocatable :: gilbert_damping ! if not provided in xml or override is needed.
   !real(dp), allocatable :: gyro_ratio(:) ! if not provided in xml
 
   !real(dp), allocatable :: qspin1l(:,:)
@@ -377,7 +377,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
 !Scalars
 !=====================================================================
  multibinit_dtset%asr=2
- multibinit_dtset%analyze_anh_pot=0 
+ multibinit_dtset%analyze_anh_pot=0
  multibinit_dtset%brav=1
  multibinit_dtset%bmass=0
  multibinit_dtset%chneut=0
@@ -400,7 +400,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%bound_model=0
  multibinit_dtset%bound_penalty=1.001d+0
  multibinit_dtset%bound_anhaStrain=0
- multibinit_dtset%bound_cutoff=0 
+ multibinit_dtset%bound_cutoff=0
  multibinit_dtset%bound_maxCoeff=4
  multibinit_dtset%bound_temp=325
  multibinit_dtset%bound_step=1000
@@ -423,7 +423,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_dispterms=1
  multibinit_dtset%fit_SPC_maxS=1
  multibinit_dtset%fit_generateCoeff=1
- multibinit_dtset%fit_initializeData=1
+ multibinit_dtset%fit_initializeData=0
  multibinit_dtset%fit_tolMSDE=zero
  multibinit_dtset%fit_tolMSDS=zero
  multibinit_dtset%fit_tolMSDF=zero
@@ -459,7 +459,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
  multibinit_dtset%prt_GF_csv = .FALSE.
- multibinit_dtset%randomseed = 0 
+ multibinit_dtset%randomseed = 0
  multibinit_dtset%strcpling = -1
  multibinit_dtset%qrefine=1
  multibinit_dtset%restartxf=0
@@ -469,8 +469,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%strprecon=1.0d0
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
- multibinit_dtset%test_effpot=0 
- multibinit_dtset%test_prt_ph=0 
+ multibinit_dtset%test_effpot=0
+ multibinit_dtset%test_prt_ph=0
  multibinit_dtset%tolmxf=2.0d-5
  multibinit_dtset%latt_temperature_start=0.0
  multibinit_dtset%latt_temperature_end=0.0
@@ -506,11 +506,11 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%lwf_temperature_start=0.0
  multibinit_dtset%lwf_temperature_end= 0.0
  multibinit_dtset%lwf_temperature_nstep= 0
- multibinit_dtset%lwf_var_temperature=0 
+ multibinit_dtset%lwf_var_temperature=0
 
  multibinit_dtset%spin_init_hist_fname=""
  multibinit_dtset%spin_pot_fname=""
- 
+
  !multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
  !multibinit_dtset%spin_calc_correlation_obs=0
@@ -535,10 +535,10 @@ multibinit_dtset%spin_temperature_start=0.0
 multibinit_dtset%spin_temperature_end= 0.0
 multibinit_dtset%spin_temperature_nstep= 0
 !multibinit_dtset%spin_tolavg=1d-2 ! TODO hexu: to be decided. should it be a function of temperature?
-!multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above. 
+!multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above.
 
-multibinit_dtset%spin_var_temperature=0 
-multibinit_dtset%spin_write_traj=1 
+multibinit_dtset%spin_var_temperature=0
+multibinit_dtset%spin_write_traj=1
 
 multibinit_dtset%slc_pot_fname=""
 multibinit_dtset%slc_coupling=0
@@ -569,7 +569,7 @@ multibinit_dtset%outdata_prefix=""
  multibinit_dtset%spin_init_rotate_axis(:)=(/1.0, 0.0, 0.0/)
  multibinit_dtset%spin_init_orientation(:)=(/0.0, 0.0, 1.0/)
 
- 
+
  multibinit_dtset%spin_sia_k1dir(:)=(/0.0,0.0,1.0/)
 
 
@@ -649,7 +649,7 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  if(allocated(multibinit_dtset%q1shft))then
    ABI_FREE(multibinit_dtset%q1shft)
  end if
- if(allocated(multibinit_dtset%iatfix))then 
+ if(allocated(multibinit_dtset%iatfix))then
    ABI_FREE(multibinit_dtset%iatfix)
  end if
 
@@ -690,7 +690,7 @@ end subroutine multibinit_dtset_free
 subroutine invars_multibinit_filenames( string, lenstr, outdata_prefix, sys_fname )
   character(len=fnlen), optional, intent(inout) :: outdata_prefix, sys_fname
   character(len=*), intent(inout) :: string
-  integer, intent(in) :: lenstr 
+  integer, intent(in) :: lenstr
   integer :: jdtset,marr,tread
   !arrays
   integer,allocatable :: intarr(:)
@@ -1062,7 +1062,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct fit_nfixcoeff in your input file.'
    ABI_ERROR(message)
  end if
- 
+
  multibinit_dtset%fit_nimposecoeff=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_nimposecoeff',tread,'INT')
  if(tread==1) multibinit_dtset%fit_nimposecoeff=intarr(1)
@@ -1087,7 +1087,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct fit_EFS in your input file.'
    ABI_ERROR(message)
  end if
- 
+
  multibinit_dtset%fit_factors=(/1,1,1/)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_factors',tread,'DPR')
  if(tread==1) multibinit_dtset%fit_factors(1:3)=dprarr(1:3)
@@ -1218,7 +1218,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
       &   multibinit_dtset%dynamics/=2.and.&
       &   multibinit_dtset%dynamics/=22.and.&
       &   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25 .and. &
-      &   multibinit_dtset%dynamics/=101.and.multibinit_dtset%dynamics/=102 .and. & 
+      &   multibinit_dtset%dynamics/=101.and.multibinit_dtset%dynamics/=102 .and. &
       &   multibinit_dtset%dynamics/=103.and.multibinit_dtset%dynamics/=120    &
     ) then
    write(message, '(a,i8,a,a,a,a,a)' )&
@@ -1781,7 +1781,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 &   'opt_EFS is',multibinit_dtset%opt_EFS,', but the only allowed values are 0 and 1',ch10,&
 &   'Action: correct opt_EFS in your input file.'
    ABI_ERROR(message)
- endif 
+ endif
 
  multibinit_dtset%opt_factors=(/1,1,1/)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'opt_factors',tread,'DPR')
@@ -1799,7 +1799,7 @@ multibinit_dtset%lwf_temperature_start=0.0
  if(tread==1) multibinit_dtset%prt_model=intarr(1)
  if(multibinit_dtset%prt_model<0.or.multibinit_dtset%prt_model>4)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_model is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'prt_model is',multibinit_dtset%prt_model,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct prt_model in your input file.'
    ABI_ERROR(message)
@@ -1811,39 +1811,39 @@ multibinit_dtset%lwf_temperature_start=0.0
  if(tread==1) multibinit_dtset%prt_phfrq=intarr(1)
  if(multibinit_dtset%prt_phfrq<0.or.multibinit_dtset%prt_phfrq>2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_phfrq is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'prt_phfrq is',multibinit_dtset%prt_phfrq,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct prt_phfrq in your input file.'
    ABI_ERROR(message)
  end if
 
- multibinit_dtset%fit_initializeData=1
+ multibinit_dtset%fit_initializeData=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_initializeData',tread,'INT')
  if(tread==1) multibinit_dtset%fit_initializeData=intarr(1)
  if(multibinit_dtset%fit_initializeData<0.or.multibinit_dtset%fit_initializeData>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_initializeData is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'fit_initializeData is',multibinit_dtset%fit_initializeData,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct fit_initializeData in your input file.'
    ABI_ERROR(message)
  end if
 
- 
+
  multibinit_dtset%fit_generateCoeff=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_generateCoeff',tread,'INT')
  if(tread==1) multibinit_dtset%fit_generateCoeff=intarr(1)
  if(multibinit_dtset%fit_generateCoeff<0.or.multibinit_dtset%fit_generateCoeff>1)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'fit_generateCoeff is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'fit_generateCoeff is',multibinit_dtset%fit_generateCoeff,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct fit_generateCoeff in your input file.'
    ABI_ERROR(message)
  end if
 
-!Default is no output of GF values per processor to csv file 
+!Default is no output of GF values per processor to csv file
  multibinit_dtset%prt_GF_csv = .FALSE.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_GF_csv',tread,'INT')
- if(tread==1)then 
+ if(tread==1)then
     if(intarr(1) == 1) multibinit_dtset%prt_GF_csv = .TRUE.
     if(intarr(1) == 0) multibinit_dtset%prt_GF_csv = .FALSE.
     if(intarr(1) < 0 .or. intarr(1) > 1) then
@@ -1853,7 +1853,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 &     'Action: correct prt_GF_csv in your input file.'
       ABI_ERROR(message)
     end if
- endif 
+ endif
 !Default is no output of the real space IFC to file
  multibinit_dtset%prt_ifc = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_ifc',tread,'INT')
@@ -1879,7 +1879,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 &    "the number of cpu cores is consistent."
     ABI_WARNING(message)
  end if
-    
+
 
 
 
@@ -2011,7 +2011,7 @@ multibinit_dtset%lwf_temperature_start=0.0
     ABI_ERROR(message)
  end if
 
- 
+
  multibinit_dtset%spin_dynamics=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_dynamics',tread,'INT')
  if(tread==1) multibinit_dtset%spin_dynamics=intarr(1)
@@ -2030,7 +2030,7 @@ multibinit_dtset%lwf_temperature_start=0.0
  end if
 
 
- 
+
  multibinit_dtset%spin_init_state=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_init_state',tread,'INT')
  if(tread==1) multibinit_dtset%spin_init_state=intarr(1)
@@ -2042,7 +2042,7 @@ multibinit_dtset%lwf_temperature_start=0.0
          &   'Action: correct spin_init_state in your input file.'
     ABI_ERROR(message)
  end if
- 
+
 
 
  multibinit_dtset%spin_mag_field= zero
@@ -2065,7 +2065,7 @@ multibinit_dtset%lwf_temperature_start=0.0
          &   'Action: correct spin_nctime in your input file.'
     ABI_ERROR(message)
  end if
- 
+
  multibinit_dtset%spin_ntime_pre=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_ntime_pre',tread,'INT')
  if(tread==1) multibinit_dtset%spin_ntime_pre=intarr(1)
@@ -2108,7 +2108,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 !         &   'Action: correct spin_n2l in your input file.'
 !    ABI_ERROR(message)
 ! end if
- 
+
  multibinit_dtset%spin_init_orientation= [0.0, 0.0, 1.0]
  if(3>marr)then
     marr=3
@@ -2247,7 +2247,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 !         &   'Action: correct spin_tolvar in your input file.'
 !    ABI_ERROR(message)
 ! end if
- 
+
  multibinit_dtset%spin_var_temperature=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_var_temperature',tread,'INT')
  if(tread==1) multibinit_dtset%spin_var_temperature=intarr(1)
@@ -2273,7 +2273,7 @@ multibinit_dtset%lwf_temperature_start=0.0
  multibinit_dtset%slc_coupling=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'slc_coupling',tread,'INT')
  if(tread==1) multibinit_dtset%slc_coupling=intarr(1)
- if(multibinit_dtset%slc_coupling.ne. 1111 .and. & 
+ if(multibinit_dtset%slc_coupling.ne. 1111 .and. &
       &   multibinit_dtset%slc_coupling.ne. 1110 .and. &
       &   multibinit_dtset%slc_coupling.ne. 1101 .and. &
       &   multibinit_dtset%slc_coupling.ne. 1011 .and. &
@@ -2319,7 +2319,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 &   'Action: correct strfact in your input file.'
    ABI_ERROR(message)
  end if
- 
+
  multibinit_dtset%strprecon=1.0d0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'strprecon',tread,'DPR')
  if(tread==1) multibinit_dtset%strprecon=dprarr(1)
@@ -2354,7 +2354,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 &   'Action: correct test_effpot in your input file.'
    ABI_ERROR(message)
  end if
- 
+
  multibinit_dtset%test_prt_ph=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_prt_ph',tread,'DPR')
  if(tread==1) multibinit_dtset%test_prt_ph=dprarr(1)
@@ -2607,7 +2607,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 &   'Action: correct bound_SPCoupling in your input file.'
    ABI_ERROR(message)
  end if
- 
+
  multibinit_dtset%fit_dispterms=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_dispterms',tread,'INT')
  if(tread==1) multibinit_dtset%fit_dispterms=intarr(1)
@@ -2878,7 +2878,7 @@ multibinit_dtset%lwf_temperature_start=0.0
      end do
    end if
  end if
- 
+
  ABI_MALLOC(multibinit_dtset%fit_imposecoeff,(multibinit_dtset%fit_nimposecoeff))
  if (multibinit_dtset%fit_nimposecoeff >0)then
    if(multibinit_dtset%fit_nimposecoeff>marr)then
@@ -3075,14 +3075,14 @@ multibinit_dtset%lwf_temperature_start=0.0
 
 !  Use natfix also for natfixx,natfixy,natfixz
    natfix=0
-   if(tread==1)then 
-      natfix=intarr(1)        
+   if(tread==1)then
+      natfix=intarr(1)
       ABI_FREE(intarr)
       ABI_FREE(dprarr)
       ABI_MALLOC(intarr,(natfix))
       ABI_MALLOC(dprarr,(natfix))
       marr = natfix
-   endif 
+   endif
 
 !  Checks the validity of natfix
    if (natfix<0 .or. natfix>natom_sc) then
@@ -3144,7 +3144,7 @@ multibinit_dtset%lwf_temperature_start=0.0
  end do
 
 !=======================================================================
-! Read SCALE UP variables 
+! Read SCALE UP variables
 !=======================================================================
 
 call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
@@ -3220,7 +3220,7 @@ call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
    end do
  end do
 
- 
+
  do ii=1,multibinit_dtset%opt_ncoeff
    do jj=ii+1,multibinit_dtset%opt_ncoeff
      if (multibinit_dtset%opt_coeff(ii) == multibinit_dtset%opt_coeff(jj))then
@@ -3323,7 +3323,7 @@ end subroutine invars10
 !! outvars_multibinit
 !!
 !! FUNCTION
-!! Takes as an input the input dtset for multibinit and echoes it to 
+!! Takes as an input the input dtset for multibinit and echoes it to
 !! the output
 !!
 !! INPUTS
@@ -3389,15 +3389,15 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(3x,15F12.10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
    end if
 
-   if(any(multibinit_dtset%iatfix /= 0))then 
+   if(any(multibinit_dtset%iatfix /= 0))then
       natfix = 0
       do ii=1,size(multibinit_dtset%iatfix,2)
-          if(any(multibinit_dtset%iatfix(:,ii) /= 0))then 
-             natfix = natfix + 1 
-          endif 
-      enddo       
+          if(any(multibinit_dtset%iatfix(:,ii) /= 0))then
+             natfix = natfix + 1
+          endif
+      enddo
       write(nunit,'(3x,a9,3I10)')'   natfix', natfix
-   endif 
+   endif
 
    if(multibinit_dtset%dynamics==101)then
    end if
@@ -3415,7 +3415,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 !      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
 !      write(nunit,'(a15,ES15.5)')'compressibility',multibinit_dtset%latt_compressibility
    end if
-   
+
    if(multibinit_dtset%dynamics==105)then
       write(nunit,'(a15,ES15.5)')'     latt_taut',multibinit_dtset%latt_taut
 !      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
@@ -3441,9 +3441,9 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 
     if(multibinit_dtset%lwf_dynamics==1) then
     write(nunit,'(20x,a8,ES15.5, a8)')  'lwf_taut',multibinit_dtset%lwf_dt*Time_Sec , ' second' !TODO: use a.u.
-    else if(multibinit_dtset%lwf_dynamics==3) then 
+    else if(multibinit_dtset%lwf_dynamics==3) then
        write(nunit,'(10x, a18, 5x, F10.5)')'lwf_mc_avg_amp',multibinit_dtset%lwf_mc_avg_amp
-    end if  
+    end if
  end if
 
  if(multibinit_dtset%spin_dynamics/=0) then
@@ -3516,8 +3516,8 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    end if
    write(nunit,'(1x,a17,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
    write(nunit,'(1x,a17,I3.1)')'      fit_option',multibinit_dtset%fit_option
-   write(nunit,'(1x,a17,2x,I0)')'      fit_iatom',multibinit_dtset%fit_iatom  
-   write(nunit,'(1x,a17,2x,I0)')'      fit_ncoeff',multibinit_dtset%fit_ncoeff   
+   write(nunit,'(1x,a17,2x,I0)')'      fit_iatom',multibinit_dtset%fit_iatom
+   write(nunit,'(1x,a17,2x,I0)')'      fit_ncoeff',multibinit_dtset%fit_ncoeff
    write(nunit,'(1x,a17,3i3)') '        fit_grid',multibinit_dtset%fit_grid
    write(nunit,'(1x,a17,I3.1)')'   ts_option',multibinit_dtset%ts_option
    write(nunit,'(1x,a17,2i3)') '  fit_rangePower',multibinit_dtset%fit_rangePower
@@ -3530,32 +3530,32 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(1x,a17)',advance='no')'   fit_bancoeff'
      write(nunit,'(4x,9i7)') (multibinit_dtset%fit_bancoeff(ii),ii=1,multibinit_dtset%fit_nbancoeff)
    end if
-   if(multibinit_dtset%fit_nfixcoeff /= 0) then    
+   if(multibinit_dtset%fit_nfixcoeff /= 0) then
      write(nunit,'(1x,a17,I3)')  '   fit_nfixcoeff',multibinit_dtset%fit_nfixcoeff
      write(nunit,'(1x,a17)',advance='no')'   fit_fixcoeff'
      write(nunit,'(4x,9i7)') (multibinit_dtset%fit_fixcoeff(ii),ii=1,multibinit_dtset%fit_nfixcoeff)
    end if
-   if(multibinit_dtset%fit_nimposecoeff /= 0) then    
+   if(multibinit_dtset%fit_nimposecoeff /= 0) then
      write(nunit,'(1x,a17,I3)')  '   fit_nimposecoeff',multibinit_dtset%fit_nimposecoeff
      write(nunit,'(1x,a17)',advance='no')'   fit_imposecoeff'
      write(nunit,'(4x,9i7)') (multibinit_dtset%fit_imposecoeff(ii),ii=1,multibinit_dtset%fit_nimposecoeff)
    end if
  end if
 
- if(multibinit_dtset%opt_effpot/=0)then  
+ if(multibinit_dtset%opt_effpot/=0)then
    write(nunit,'(a)')'Optimize Effective Potential :'
-   if(multibinit_dtset%opt_ncoeff /= 0) then    
-     write(nunit,'(1x,a17,I3)')  '   opt_ncoeff',multibinit_dtset%opt_ncoeff 
+   if(multibinit_dtset%opt_ncoeff /= 0) then
+     write(nunit,'(1x,a17,I3)')  '   opt_ncoeff',multibinit_dtset%opt_ncoeff
      write(nunit,'(1x,a17)',advance='no')'   opt_coeff'
      write(nunit,'(4x,9i7)') (multibinit_dtset%opt_coeff(ii),ii=1,multibinit_dtset%opt_ncoeff)
    end if
- end if 
+ end if
 
  if(multibinit_dtset%bound_model /=0)then
    write(nunit,'(a)')' Bound the coefficients :'
    write(nunit,'(1x,a16,I3.1)') '     bound_model',multibinit_dtset%bound_model
    write(nunit,'(1x,a16,es12.4)') '   bound_penalty',multibinit_dtset%bound_penalty
-   write(nunit,'(1x,a16,I3)')    'bound_anhaStrain',multibinit_dtset%bound_anhaStrain   
+   write(nunit,'(1x,a16,I3)')    'bound_anhaStrain',multibinit_dtset%bound_anhaStrain
    write(nunit,'(1x,a16,I3)')    'bound_SPCoupling',multibinit_dtset%bound_SPCoupling
    write(nunit,'(1x,a16,es16.8)')'    bound_cutoff',multibinit_dtset%bound_cutoff
    write(nunit,'(1x,a16,1x,3I3)')   '      bound_cell',multibinit_dtset%bound_cell
@@ -3565,10 +3565,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,2I3.1)')'bound_rangePower',multibinit_dtset%bound_rangePower
  end if
 
-!MS Variables for SCALE-UP 
+!MS Variables for SCALE-UP
 !Replace by function from m_scup_dataset.F90
- if(multibinit_dtset%scup_dtset%scup_elec_model)then  
-   call outvars_scup(multibinit_dtset%scup_dtset,nunit)  
+ if(multibinit_dtset%scup_dtset%scup_elec_model)then
+   call outvars_scup(multibinit_dtset%scup_dtset,nunit)
  end if
 
 !Write the general information

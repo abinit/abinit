@@ -18,7 +18,7 @@ ecutsm  0.5
 dilatmx 1.02
 ntime   2
 
-# SCF cycle 
+# SCF cycle
 nstep    50
 tolvrs   1.0d-9
 
@@ -56,14 +56,14 @@ znucl   28
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, psp8
-#%% description =  
+#%% description =
 #%%   Nickel ferromagnetic fcc structure with an ONCVPSP pseudo containing valence density.
 #%%   We test several improvements that are available when the NC file contains the PS valence charge.
 #%%   More specifically, we test the initialization of the density from atomic quantities (initro.F90),
-#%%   the correction to the forces due to the residuals and the extrapolation of the density 
+#%%   the correction to the forces due to the residuals and the extrapolation of the density
 #%%   for structural relaxations (well, xred is fixed by symmetry).
-#%%   We also test the treatment of the core charge in G-space in the case of GS calculations 
-#%%   By default, abinit handles XCCC in real space, here we use nc_xccc_gspace==1 to treat it 
+#%%   We also test the treatment of the core charge in G-space in the case of GS calculations
+#%%   By default, abinit handles XCCC in real space, here we use nc_xccc_gspace==1 to treat it
 #%%   in G-space using the same approach as the one used in PAW.
 #%% topics = GeoOpt
 #%%<END TEST_INFO>
