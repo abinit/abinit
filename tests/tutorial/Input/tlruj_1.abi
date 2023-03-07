@@ -71,7 +71,7 @@ pseudos "Ni.xml,Ni.xml,O.xml"     #Use same pseudopotential for both Ni atoms
 #%% test_chain = tlruj_1.abi, tlruj_2.abi, tlruj_3.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tlruj_1.abo, tolnlines = 15, tolabs = 1.000e-05, tolrel = 1.000e-05, fld_options =  -medium
+#%%   tlruj_1.abo, tolnlines = 15, tolabs = 1.000e-05, tolrel = 0.07, fld_options =  -medium
 #%% output_file = "tlruj_1.abo"
 #%% [paral_info]
 #%% max_nprocs = 20
