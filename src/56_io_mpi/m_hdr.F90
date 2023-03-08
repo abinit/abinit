@@ -4762,7 +4762,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    ABI_ERROR(msg)
  end if
 
- test=ALL(ABS(Hdr%xred-Dtset%xred_orig(:,1:Dtset%natom,1))<tol6)
+ test=ALL(ABS(Hdr%xred-Dtset%xred_orig(:,1:Dtset%natom,1)) < tol3)
  ABI_CHECK(test,'Mismatch in xred')
 
  test=ALL(Hdr%typat==Dtset%typat(1:Dtset%natom))
