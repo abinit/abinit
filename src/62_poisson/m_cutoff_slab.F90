@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_vcoul/m_cutoff_surface
+!!****m* ABINIT/m_vcoul/m_cutoff_slab
 !! NAME
-!!  m_cutoff_surface
+!!  m_cutoff_slab
 !!
 !! FUNCTION
 !!
@@ -12,7 +12,7 @@
 
 #include "abi_common.h"
 
-module m_cutoff_surface
+module m_cutoff_slab
 
  use defs_basis
  use m_abicore
@@ -25,7 +25,7 @@ module m_cutoff_surface
  private
 !!***
 
- public :: cutoff_surface
+ public :: cutoff_slab
 
  !integer,public,parameter :: SURFACE_BEIGI = 1
  !integer,public,parameter :: SURFACE_ROZZI = 2
@@ -35,9 +35,9 @@ CONTAINS  !=====================================================================
 
 !----------------------------------------------------------------------
 
-!!****f* m_vcoul/cutoff_surface
+!!****f* m_vcoul/cutoff_slab
 !! NAME
-!! cutoff_surface
+!! cutoff_slab
 !!
 !! FUNCTION
 !!  Calculate the Fourier components of an effective Coulomb interaction
@@ -72,7 +72,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine cutoff_surface(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, vc_cut, method)
+subroutine cutoff_slab(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, vc_cut, method)
 
 !Arguments ------------------------------------
 !scalars
@@ -117,8 +117,8 @@ subroutine cutoff_surface(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, v
      write(std_out,*)qc
      write(msg,'(5a)')&
       'Found q-points with non-zero component along non-periodic direction ',ch10,&
-      'This is not allowed, see Notes in cutoff_surface.F90 ',ch10,&
-      'ACTION: Modify the q-point sampling'
+      'This is not allowed, see Notes in cutoff_slab.F90 ',ch10,&
+      'ACTION: Modify the q-point sampling '
      ABI_ERROR(msg)
    end if
 
@@ -148,7 +148,7 @@ subroutine cutoff_surface(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, v
      else
        if (ABS(qpg_perp)>SMALL) then
          vc_cut(ig)=four_pi/qpg_perp**2*(one-COS(qpg_perp*rcut)-qpg_perp*rcut*SIN(qpg_perp*rcut)) ! &
-         ! contribution due to finite surface
+         ! contribution due to finite slab
          ! + 8*rcut*SIN(qpg_perp*rcut)/qpg_perp*LOG((alpha+ap1sqrt)*(one+ap1sqrt)/alpha)
        else
          vc_cut(ig)=-two_pi*rcut**2
@@ -160,8 +160,8 @@ subroutine cutoff_surface(qpt, ng, gvec, gprimd, rcut, boxcenter, pdir, alpha, v
    ABI_BUG(sjoin('Wrong value for method:', itoa(method)))
  end select
 
-end subroutine cutoff_surface
+end subroutine cutoff_slab
 !!***
 
-end module m_cutoff_surface
+end module m_cutoff_slab
 !!***

@@ -49,7 +49,7 @@ module m_vcoul
 
  ! Cut-off methods modules
  use m_cutoff_sphere,   only : cutoff_sphere
- use m_cutoff_surface,  only : cutoff_surface
+ use m_cutoff_slab,     only : cutoff_slab
  use m_cutoff_cylinder, only : cutoff_cylinder
 
  implicit none
@@ -83,7 +83,7 @@ type,public :: vcoul_t
    ! Number of small q-points around Gamma
 
   real(dp) :: alpha(3) = -one
-   ! Lenght of the finite surface.
+   ! Length of the finite slab
 
   real(dp) :: rcut = -one
    ! Cutoff radius.
@@ -103,7 +103,7 @@ type,public :: vcoul_t
     ! Volume of the unit cell
 
   character(len=50) :: mode
-   ! String defining the cutoff mode
+   ! String defining the cutoff mode, possible values are: sphere,cylinder,slab,crystal
 
   integer :: pdir(3)
    ! 1 if the system is periodic along this direction
@@ -201,7 +201,7 @@ type, public :: vcgen_t
 
   integer :: opt_cylinder
 
-  integer :: opt_surface
+  integer :: opt_slab
 
   real(dp) :: alpha(3) = -one
    ! Lenght of the finite surface.
@@ -267,7 +267,7 @@ subroutine gw_icutcoul_to_mode(gw_icutcoul, mode)
  mode = 'NONE'
  if (gw_icutcoul == 0) mode = 'SPHERE'
  if (gw_icutcoul == 1) mode = 'CYLINDER'
- if (gw_icutcoul == 2) mode = 'SURFACE'
+ if (gw_icutcoul == 2) mode = 'SLAB'
  if (gw_icutcoul == 3) mode = 'CRYSTAL'
  if (gw_icutcoul == 4) mode = 'ERF'
  if (gw_icutcoul == 5) mode = 'ERFC'
@@ -322,7 +322,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 !scalars
  integer,parameter :: master=0
  integer :: nqibz, nqbz, nkbz, iqlwl, iq_ibz
- integer :: opt_cylinder,opt_surface,my_rank,nprocs
+ integer :: opt_cylinder,my_rank,nprocs, opt_slab
  real(dp) :: bz_geometry_factor,q0_vol, rcut2
  character(len=500) :: msg
  type(mc_t) :: mc
@@ -439,24 +439,24 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    call vcp%print(unit=ab_out)
 
- case ('SURFACE')
-   call surface_setup(cryst, vcp%vcutgeo, vcp%alpha, vcp%rcut, vcp%pdir, opt_surface)
+ case ('SLAB')
+   call surface_setup(cryst, vcp%vcutgeo, vcp%alpha, vcp%rcut, vcp%pdir, opt_slab)
 
    do iq_ibz=1,nqibz
-     call cutoff_surface(qibz(:,iq_ibz), ng, gvec, cryst%gprimd, vcp%rcut, &
-                         vcp%boxcenter, vcp%pdir, vcp%alpha, vcoul(:,iq_ibz), opt_surface)
+     call cutoff_slab(qibz(:,iq_ibz), ng, gvec, cryst%gprimd, vcp%rcut, &
+                      vcp%boxcenter, vcp%pdir, vcp%alpha, vcoul(:,iq_ibz), opt_slab)
    end do
 
    ! q-points for optical limit.
    do iqlwl=1,nqlwl
-     call cutoff_surface(qlwl(:,iq_ibz), ng, gvec, cryst%gprimd, vcp%rcut, &
-                         vcp%boxcenter, vcp%pdir, vcp%alpha, vcoul_lwl(:,iqlwl), opt_surface)
+     call cutoff_slab(qlwl(:,iq_ibz), ng, gvec, cryst%gprimd, vcp%rcut, &
+                      vcp%boxcenter, vcp%pdir, vcp%alpha, vcoul_lwl(:,iqlwl), opt_slab)
    end do
 
    ! If Beigi, treat the limit q --> 0.
-   if (opt_surface == 1) then
+   if (opt_slab == 1) then
      ! Integrate numerically in the plane close to 0
-     call beigi_surface_limit(opt_surface, cryst, nqibz, nkbz, vcp%rcut, vcp%alpha, &
+     call beigi_surface_limit(opt_slab, cryst, nqibz, nkbz, vcp%rcut, vcp%alpha, &
                               vcp%boxcenter, vcp%pdir, vcp%i_sz)
    else
      ! In Rozzi's method the lim q+G --> 0 is finite.
@@ -640,13 +640,13 @@ end subroutine cylinder_setup
 !!
 !! SOURCE
 
-subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_surface)
+subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_slab)
 
  type(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: vcutgeo(3)
  real(dp),intent(out) :: alpha(3)
  real(dp),intent(inout) :: rcut
- integer,intent(out) :: pdir(3), opt_surface
+ integer,intent(out) :: pdir(3), opt_slab
 
 !Local variables-------------------------------
  integer :: ii
@@ -658,7 +658,7 @@ subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_surface)
  ABI_CHECK(count(vcutgeo /= zero) == 2, "Wrong vcutgeo")
 
  ! Default is Beigi's method.
- opt_surface = 1; if (any(vcutgeo < zero)) opt_surface = 2
+ opt_slab = 1; if (any(vcutgeo < zero)) opt_slab = 2
  pdir(:) = zero; alpha(:)=zero
  do ii=1,3
    check = vcutgeo(ii)
@@ -670,7 +670,7 @@ subroutine surface_setup(cryst, vcutgeo, alpha, rcut, pdir, opt_surface)
  end do
 
  ! In Beigi's method, the surface must be along x-y and R must be L_Z/2.
- if (opt_surface == 1) then
+ if (opt_slab == 1) then
    msg = "2D Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo and/or your geometry."
    ABI_CHECK(all(pdir == [1, 1, 0]), msg)
    rcut = half*SQRT(DOT_PRODUCT(cryst%rprimd(:,3), cryst%rprimd(:,3)))
@@ -1111,7 +1111,7 @@ subroutine vcoul_print(Vcp, unit, prtvol, mode_paral)
    if (Vcp%hcyl/=zero) write(msg,'(a,f8.5,2a)')'  Finite length of ....... ',Vcp%hcyl,' [Bohr] ',ch10
    call wrtout(my_unt,msg,my_mode)
 
- case ('SURFACE')
+ CASE ('SLAB')
    write(msg,'(5a,f10.4,3a,3f10.2,2a)')ch10,&
      ' === Surface cutoff === ',ch10,ch10,&
      '  Cutoff radius .................... ',Vcp%rcut,' [Bohr] ',ch10,&
@@ -1546,10 +1546,10 @@ end subroutine beigi_cylinder_limit
 !!
 !! SOURCE
 
-subroutine beigi_surface_limit(opt_surface, cryst, nqibz, nkbz, rcut, alpha, boxcenter, pdir, i_sz)
+subroutine beigi_surface_limit(opt_slab, cryst, nqibz, nkbz, rcut, alpha, boxcenter, pdir, i_sz)
 
 !Arguments ------------------------------------
- integer,intent(in) :: opt_surface, nqibz, nkbz, pdir(3)
+ integer,intent(in) :: opt_slab, nqibz, nkbz, pdir(3)
  type(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: rcut, alpha(3), boxcenter(3)
  real(dp),intent(out) :: i_sz
@@ -1587,8 +1587,8 @@ subroutine beigi_surface_limit(opt_surface, cryst, nqibz, nkbz, rcut, alpha, box
 
  do ii=1,npt
    qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
-   call cutoff_surface(qfit(:,ii), 1, gamma_pt, cryst%gprimd, rcut, &
-                       boxcenter, pdir, alpha, vcfit(:,ii), opt_surface)
+   call cutoff_slab(qfit(:,ii), 1, gamma_pt, cryst%gprimd, rcut, &
+                    boxcenter, pdir, alpha, vcfit(:,ii), opt_slab)
  end do
 
  ABI_MALLOC(xx, (npt))
@@ -1779,18 +1779,18 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
      vcgen%i_sz = vcoul0(1)
    end if
 
- case ('SURFACE')
-   call surface_setup(cryst, vcgen%vcutgeo, vcgen%alpha, vcgen%rcut, vcgen%pdir, vcgen%opt_surface)
+ case ('SLAB')
+   call surface_setup(cryst, vcgen%vcutgeo, vcgen%alpha, vcgen%rcut, vcgen%pdir, vcgen%opt_slab)
 
    ! If Beigi, treat the limit q --> 0.
-   if (vcgen%opt_surface == 1) then
+   if (vcgen%opt_slab == 1) then
      ! Integrate numerically in the plane close to 0
-     call beigi_surface_limit(vcgen%opt_surface, cryst, nqibz, nkbz, vcgen%rcut, vcgen%alpha, &
+     call beigi_surface_limit(vcgen%opt_slab, cryst, nqibz, nkbz, vcgen%rcut, vcgen%alpha, &
                               vcgen%boxcenter, vcgen%pdir, vcgen%i_sz)
    else
      ! In Rozzi's method the lim q+G --> 0 is finite.
-     call cutoff_surface(q_gamma, 1, gvec0, cryst%gprimd, vcgen%rcut, &
-                         vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul0, vcgen%opt_surface)
+     call cutoff_slab(q_gamma, 1, gvec0, cryst%gprimd, vcgen%rcut, &
+                      vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul0, vcgen%opt_slab)
      vcgen%i_sz = vcoul0(1)
    end if
 
@@ -1890,9 +1890,9 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
    call cutoff_cylinder(qpt, npw, gvec, vcgen%rcut, vcgen%hcyl, vcgen%pdir, &
                         vcgen%boxcenter, cryst%rprimd, vcoul, vcgen%opt_cylinder, comm)
 
- case ('SURFACE')
-   call cutoff_surface(qpt, npw, gvec, cryst%gprimd, vcgen%rcut, &
-                       vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul, vcgen%opt_surface)
+ case ('SLAB')
+   call cutoff_slab(qpt, npw, gvec, cryst%gprimd, vcgen%rcut, &
+                    vcgen%boxcenter, vcgen%pdir, vcgen%alpha, vcoul, vcgen%opt_slab)
 
  case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB", "ERF", "ERFC")
    ! Compute |q+G| with special treatment of (q=0, g=0).
