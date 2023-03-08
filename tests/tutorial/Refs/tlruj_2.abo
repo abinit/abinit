@@ -778,8 +778,8 @@ See the LRUJ protocol for more information.
 ================================================================================
  
  ----iterations are completed or convergence reached----
- 
- Mean square residual over all n,k,spin=   10.677E-14; max=  19.016E-12
+
+ Mean square residual over all n,k,spin=   10.672E-14; max=  19.016E-12
  reduced coordinates (array xred) for    4 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1515,9 +1515,9 @@ force_length_stats: {min:   3.03043720E-20, max:   2.25569896E-04, mean:   1.127
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     12.719705992658259
- Compensation charge over fine fft grid    =     12.719993068937956
- 
+ Compensation charge over spherical meshes =     12.719705992686990
+ Compensation charge over fine fft grid    =     12.719993068937887
+
  ==== Results concerning PAW augmentation regions ====
  
  Total pseudopotential strength Dij (hartree):
@@ -2040,9 +2040,9 @@ force_length_stats: {min:   0.00000000E+00, max:   2.29516271E-04, mean:   1.147
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     12.717893954402474
- Compensation charge over fine fft grid    =     12.718180257557782
- 
+ Compensation charge over spherical meshes =     12.717893954735395
+ Compensation charge over fine fft grid    =     12.718180258284498
+
  ==== Results concerning PAW augmentation regions ====
  
  Total pseudopotential strength Dij (hartree):
@@ -2329,8 +2329,8 @@ force_length_stats: {min:   0.00000000E+00, max:   2.29516271E-04, mean:   1.147
                     Scalar response functions:
                     Chi0 [eV^-1]:     -0.83408
                     Chi [eV^-1]:      -0.09602
- 
- The scalar U from the two-point regression scheme is   9.21610 eV.
+
+ The scalar U from the two-point regression scheme is   9.21611 eV.
 *********************************************************************
 *********************************************************************
 Note: For more reliable linear regressions of the response
@@ -2565,9 +2565,9 @@ force_length_stats: {min:   6.63935525E-20, max:   4.60337529E-04, mean:   2.301
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     12.716914199091299
- Compensation charge over fine fft grid    =     12.717201808614501
- 
+ Compensation charge over spherical meshes =     12.716914199074830
+ Compensation charge over fine fft grid    =     12.717201808613732
+
  ==== Results concerning PAW augmentation regions ====
  
  Total pseudopotential strength Dij (hartree):
