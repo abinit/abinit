@@ -7306,11 +7306,14 @@ case, a cut-off Coulomb interaction might prove useful.
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
 in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
 and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
-.
+ 
 The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 5.
-For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
-This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+For 1-dimensional and 2-dimensional systems, the geometry of the system (along which directions the cell is to be periodically repeated, 
+along which ones the system is finite) 
+has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length might be provided, depending
+on the methodology, thanks to [[rcut]].
 
   * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
   * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
@@ -16893,6 +16896,20 @@ Variable(
     text=r"""
 Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
 is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
+See complementary information in [[vcutgeo]].
+
+In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
+Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
+thus automatically defined by the unit cell and there is no need to specify
+the value of [[rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
+at half the replication length perpendicular to the (truly) periodic plane.
+
+Thus, when the Beigi methods in 1D or 2D are expected, [[rcut]] must be 0.0.
+Using another value of [[rcut]] will prevent the Beigi method to be used.
+See complementary information in [[vcutgeo]].
+
+On the other hand, when the Rozzi methods in 1D or 2D are expected, which is the case when one component of [[vcutgeo]] is negative,
+[[rcut]] mut be defined.
 
 If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the primitive cell.
@@ -20154,15 +20171,19 @@ to be used. It has a meaning either for a periodic one-dimensional system, typic
 a nanowire, nanotube or polymer surrounded by vacuum separating the system
 from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
-typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). For each
+typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). 
+
+When a non-zero component of this three-dimensional vector is non-zero, this indicate that the system is
+periodic along this dimension. Note that the components of this vector are real numbers, which is
+useful in the current implementation of the Rozzi methods [[cite:Rozzi2006]]. Of course, just specifying 0 or 1 is allowed,
+but will be read as 0.0 or 1.0.
+
+For each
 geometry, two different definitions of the cutoff region are available (see
 [[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
-of the methods)
-
-In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
-Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
-thus automatically defined by the unit cell and there is no need to specify
-the value of [[rcut]].
+of the methods).
+The Beigi method is used by default. The Rozzi method is used if [[rcut]] is not at its default value (0.0), or if
+one component of [[vcutgeo]] is negative.
 
 To define a cylinder along the z-axis use the following lines:
 ```
@@ -20195,8 +20216,8 @@ For two-dimensional systems ([[icutcoul]] = 2), [[vcutgeo]] is used to define th
 two periodic directions. Also in this case two different
 techniques are available. In the method of Ismail-Beigi, the (positive) non-zero
 components of vcutgeo define the periodic directions of the infinite surface.
-The interaction is truncated within a slab of width L where L is the length of
-the primitive vector of the lattice along the non-periodic dimension. For
+The interaction is truncated within a slab of width L where L is the projection of
+the primitive vector of the lattice along the direction perpendicular to the periodic plane. For
 example:
 ```
 icutcoul 2
