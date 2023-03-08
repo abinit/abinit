@@ -50,6 +50,7 @@ program lruj
 
  use m_fstrings,    only : itoa, sjoin, ltoa
  use m_specialmsg,  only : specialmsg_getcount, herald
+ use m_numeric_tools, only : polynomial_regression
  use m_sort,        only : sort_dp
  use m_common,      only : crystal_from_file
  use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
@@ -485,19 +486,7 @@ program lruj
 
 contains
 
-!!****f* lruj/lruj_show_help
-!! NAME
-!! lruj_show_help
-!!
-!! FUNCTION
-!!  Show command line help
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
+!  Show command line help
 subroutine lruj_show_help()
 
   write(std_out,"(a)")" "
@@ -516,133 +505,12 @@ subroutine lruj_show_help()
   write(std_out,"(a)")"                           case) or more so as to avoid overfitting."
 
 end subroutine lruj_show_help
-!!***
 
-
- !Function to simplify reading in of variables from netcdf files.
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
-
-
-
-!----------------------------------------------------------------------
-!!****f* polynomial_regression
-!! NAME
-!!  polynomial_regression
-!!
-!! FUNCTION
-!!  Perform a polynomial regression on incoming data points, the
-!!  x-values of which are stored in array xvals and the y-values
-!!  stored in array yvals. Returns a one dimensional array with
-!!  fit coefficients (coeffs) and the unbiased RMS error of the
-!!  fit as a scalar (RMSerr).
-!!
-!! INPUTS
-!!  npoints = number of data points
-!!  xvals(npoints) = x-values of those data points
-!!  yvals(npoints) = y-values of those data points
-!!  degree = order of the polynomial
-!!
-!! OUTPUT
-!!  coeffs(degree+1) = coefficients of the polynomial regression
-!!  RMSerr = unbiased RMS error on the fit
-!!            RMSerr=\sqrt{\frac{1}{npoints-1}*
-!!                      \sum_i^npoints{(fitval-yvals(i))**2}}
-!!
-!! SOURCE
-!!  Polynomial regression algorithm from Rosetta Code under Creative Commons
-!!  and GNU Free Documentation License.
-!!  Link: https://rosettacode.org/wiki/Polynomial_regression#Fortranf
-!!  Some variables changed to simplify.
-
-subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
-
-!Arguments ------------------------------------
-
-!scalars
- integer                     :: npoints,degree
- real(dp),intent(out)        :: RMSerr
-!arrays
- real(dp),intent(in)         :: xvals(1:npoints),yvals(1:npoints)
- real(dp),intent(out)        :: coeffs(degree+1)
-
-!Local variables-------------------------------
-
-!scalars
- integer                     :: ncoeffs,icoeff,ipoint,info
- real(dp)                    :: residual,fitval
-!arrays
- integer,allocatable         :: ipiv(:)
- real(dp),allocatable        :: work(:)
- real(dp),allocatable        :: A(:,:),AT(:,:),ATA(:,:)
-!characters
- !character(len=500)          :: message
-
-!####################################################################
-!#####################  Get Polynomial Fit  #########################
-
-  ncoeffs=degree+1
-
-  ABI_MALLOC(ipiv,(ncoeffs))
-  ABI_MALLOC(work,(ncoeffs))
-  ABI_MALLOC(A,(size(xvals),ncoeffs))
-  ABI_MALLOC(AT,(ncoeffs,size(xvals)))
-  ABI_MALLOC(ATA,(ncoeffs,ncoeffs))
-
-  !Prepare the matrix A
-  do icoeff=0,ncoeffs-1
-    do ipoint=1,size(xvals)
-       if (icoeff==0.and.xvals(ipoint)==0.0) then
-          A(ipoint,icoeff+1) = 1.0
-       else
-          A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
-       end if
-    end do
-  end do
-
-  AT  = transpose(A)
-  ATA = matmul(AT,A)
-
-  !Call LAPACK subroutines DGETRF and DGETRI
-  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,ipiv,info)
-  ABI_CHECK(info == 0, sjoin('LAPACK DGETRF in polynomial regression returned:', itoa(info)))
-
-  call DGETRI(ncoeffs,ATA,ncoeffs,ipiv,work,ncoeffs,info)
-  ABI_CHECK(info == 0, sjoin('LAPACK DGETRI in polynomial regression returned:', itoa(info)))
-
-  coeffs = matmul(matmul(ATA,AT),yvals)
-
-!####################################################################
-!##############  RMS error on the polynomial fit  ###################
-
-  residual=0.0d0
-  do ipoint=1,npoints
-    fitval=0.0d0
-    do icoeff=1,ncoeffs
-      if (icoeff==1.and.xvals(ipoint)==0.0) then
-        fitval=fitval+coeffs(icoeff)
-      else
-        fitval=fitval+coeffs(icoeff)*xvals(ipoint)**(icoeff-1)
-      end if
-    end do
-    residual=residual+(fitval-yvals(ipoint))**2
-  end do
-  RMSerr=sqrt(residual/(real(npoints-1,8)))
-
-
-!####################################################################
-!########################  Deallocations  ###########################
-
-  ABI_FREE(ipiv)
-  ABI_FREE(work)
-  ABI_FREE(A)
-  ABI_FREE(AT)
-  ABI_FREE(ATA)
-
-end subroutine polynomial_regression
-!!***
+! Function to simplify reading in of variables from netcdf files.
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
+end function vid
 
 end program lruj
 !!***
