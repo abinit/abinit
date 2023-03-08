@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed  8 Mar 2023.
-- ( at 11h51 )
+- ( at 16h02 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
 - output file    -> t60.abo
@@ -395,7 +395,7 @@ P           mkmem           8
             nband11        20
             nband12        20
            ndtset          12
-          nfreqsp         125
+          nfreqsp         135
             ngfft          16      16      16
              nkpt           8
              nsym          48
@@ -3093,7 +3093,7 @@ P           mkmem           8
             nband11        20
             nband12        20
            ndtset          12
-          nfreqsp         125
+          nfreqsp         135
             ngfft          16      16      16
              nkpt           8
              nsym          48
@@ -3453,10 +3453,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.3  wall=         11.9
+- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  23 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.3  wall=         11.9
++Overall time at end (sec) : cpu=          9.2  wall=          9.8
