@@ -1,6 +1,6 @@
 
 .Version 9.9.0 of MRGDDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Feb 2023.
-- ( at 16h53 )
+.Starting date : Wed  8 Mar 2023.
+- ( at 11h41 )
   
   Give name for output derivative database : 
  t58_out_DDB
@@ -29,45 +29,45 @@
  t57o_DS5_DDB
   Give name for derivative database number           3  : 
  t57o_DS6_DDB
-
+ 
   merge_ddb: Reading all headers.
  Opening DDB file: t57o_DS4_DDB
  Opening DDB file: t57o_DS5_DDB
  Opening DDB file: t57o_DS6_DDB
  Opening DDB file: t57o_DS4_DDB
-
+ 
  read the input derivative database number     1
  Opening DDB file: t57o_DS4_DDB
  compare the current and input DDB information
  Opening DDB file: t57o_DS4_DDB
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
-
+ 
+ 
  rdddb9: read 1 blocks from the input DDB
  Now the whole DDB is in central memory
  add block #    1 from file t57o_DS4_DDB
-
+ 
  read the input derivative database number     2
  Opening DDB file: t57o_DS5_DDB
  compare the current and input DDB information
  Opening DDB file: t57o_DS5_DDB
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
-
+ 
+ 
  rdddb9: read 1 blocks from the input DDB
  Now the whole DDB is in central memory
  add block #    1 from file t57o_DS5_DDB
-
+ 
  read the input derivative database number     3
  Opening DDB file: t57o_DS6_DDB
  compare the current and input DDB information
  Opening DDB file: t57o_DS6_DDB
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
-
+ 
+ 
  rdddb9: read 1 blocks from the input DDB
  Now the whole DDB is in central memory
  add block #    1 from file t57o_DS6_DDB

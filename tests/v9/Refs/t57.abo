@@ -1,6 +1,6 @@
 
 .Version 9.9.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Feb 2023.
-- ( at 16h50 )
+.Starting date : Wed  8 Mar 2023.
+- ( at 11h39 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/build/test/Test_suite/v9_t57-t58-t59-t60-t61/t57.abi
+- input  file    -> /home/alpsulg/jabreu/Software/joao_cumulant2/build/tests/Test_suite/v9_t57-t58-t59-t60-t61/t57.abi
 - output file    -> t57.abo
 - root for input  files -> t57i
 - root for output files -> t57o
-
-
+ 
+ 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       8.351 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.383 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,8 +55,8 @@ P This job should need less than                       8.474 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.868 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -73,8 +73,8 @@ P This job should need less than                      40.575 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4 (RF).
@@ -91,8 +91,8 @@ P This job should need less than                      40.725 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    5 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5 (RF).
@@ -109,8 +109,8 @@ P This job should need less than                      41.776 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    6 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6 (RF).
@@ -127,8 +127,8 @@ P This job should need less than                      41.776 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     11.311 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    7 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  7.
@@ -144,13 +144,13 @@ P This job should need less than                       8.351 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.383 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -174,7 +174,7 @@ _ WF disk file :      1.383 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
                        0.00000000E+00
           einterp7     1.00000000E+00  5.00000000E+00  0.00000000E+00
                        0.00000000E+00
--          fftalg         312
+-          fftalg         512
            getddk1          0
            getddk2          0
            getddk3          0
@@ -679,27 +679,27 @@ P          mk1mem7          8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   1.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   3.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   5.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   7.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -713,20 +713,20 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  27  27  27
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -739,9 +739,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+ 
+- pspini: atom type   2  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -754,12 +754,12 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
-
+ 
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
-
+ 
 _setup2: Arith. and geom. avg. npw (full set) are    1129.016    1128.983
-
+ 
 ================================================================================
 
 --- !BeginCycle
@@ -767,41 +767,41 @@ iteration_state: {dtset: 1, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-20, }
 ...
-
+ 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -24.365379285075    -2.437E+01 2.764E-02 1.585E+03
- ETOT  2  -24.486490684702    -1.211E-01 9.008E-05 1.445E+03
- ETOT  3  -25.192339339345    -7.058E-01 2.504E-02 1.954E+01
- ETOT  4  -25.202173215099    -9.834E-03 1.840E-04 1.288E+00
- ETOT  5  -25.202602011486    -4.288E-04 1.878E-05 5.013E-02
- ETOT  6  -25.202628368288    -2.636E-05 8.848E-07 7.717E-04
- ETOT  7  -25.202628663823    -2.955E-07 1.161E-08 3.086E-05
- ETOT  8  -25.202628678275    -1.445E-08 9.129E-10 4.431E-07
- ETOT  9  -25.202628678401    -1.258E-10 5.029E-12 3.443E-08
- ETOT 10  -25.202628678418    -1.685E-11 8.573E-13 5.076E-11
- ETOT 11  -25.202628678418    -4.263E-13 1.498E-14 1.381E-12
- ETOT 12  -25.202628678418     3.837E-13 1.300E-13 1.233E-17
- ETOT 13  -25.202628678419    -1.336E-12 5.427E-14 2.271E-19
- ETOT 14  -25.202628678419     2.878E-13 5.189E-14 9.642E-21
- ETOT 15  -25.202628678419     1.812E-13 5.570E-15 5.976E-22
- ETOT 16  -25.202628678419     1.137E-13 3.278E-15 7.491E-24
- ETOT 17  -25.202628678419     1.421E-14 3.051E-16 4.531E-26
- ETOT 18  -25.202628678419    -2.487E-14 1.743E-16 5.145E-27
- ETOT 19  -25.202628678419    -3.553E-15 1.603E-17 3.418E-27
- ETOT 20  -25.202628678419     1.421E-14 9.180E-18 2.839E-27
- ETOT 21  -25.202628678419    -7.105E-15 8.399E-19 3.752E-27
- ETOT 22  -25.202628678419     7.105E-15 4.822E-19 1.801E-27
- ETOT 23  -25.202628678419    -1.066E-14 4.395E-20 3.888E-27
- ETOT 24  -25.202628678419    -3.553E-15 2.528E-20 1.100E-26
- ETOT 25  -25.202628678419    -1.066E-14 9.695E-21 1.374E-26
-
+ ETOT  1  -24.365379285077    -2.437E+01 2.764E-02 1.585E+03
+ ETOT  2  -24.486490684704    -1.211E-01 9.008E-05 1.445E+03
+ ETOT  3  -25.192339339347    -7.058E-01 2.504E-02 1.954E+01
+ ETOT  4  -25.202173215101    -9.834E-03 1.840E-04 1.288E+00
+ ETOT  5  -25.202602011487    -4.288E-04 1.878E-05 5.013E-02
+ ETOT  6  -25.202628368290    -2.636E-05 8.848E-07 7.717E-04
+ ETOT  7  -25.202628663824    -2.955E-07 1.161E-08 3.086E-05
+ ETOT  8  -25.202628678276    -1.445E-08 9.129E-10 4.431E-07
+ ETOT  9  -25.202628678402    -1.262E-10 5.029E-12 3.443E-08
+ ETOT 10  -25.202628678420    -1.735E-11 8.573E-13 5.076E-11
+ ETOT 11  -25.202628678420    -1.741E-13 1.499E-14 1.381E-12
+ ETOT 12  -25.202628678420     9.237E-14 1.300E-13 1.233E-17
+ ETOT 13  -25.202628678420    -2.807E-13 5.425E-14 2.271E-19
+ ETOT 14  -25.202628678420     1.954E-13 5.188E-14 9.640E-21
+ ETOT 15  -25.202628678420     1.315E-13 5.570E-15 5.924E-22
+ ETOT 16  -25.202628678420     1.066E-14 3.278E-15 7.490E-24
+ ETOT 17  -25.202628678420    -3.908E-14 3.051E-16 8.531E-26
+ ETOT 18  -25.202628678420    -1.421E-14 1.743E-16 3.347E-27
+ ETOT 19  -25.202628678420     0.000E+00 1.603E-17 1.950E-27
+ ETOT 20  -25.202628678420     0.000E+00 9.179E-18 2.183E-27
+ ETOT 21  -25.202628678420     7.105E-15 8.398E-19 1.561E-27
+ ETOT 22  -25.202628678420     3.553E-15 4.820E-19 4.351E-27
+ ETOT 23  -25.202628678420    -1.066E-14 4.395E-20 5.994E-27
+ ETOT 24  -25.202628678420     0.000E+00 2.528E-20 1.134E-26
+ ETOT 25  -25.202628678420     7.105E-15 9.695E-21 7.747E-27
+ 
  At SCF step   25   max residual=  9.70E-21 < tolwfr=  1.00E-20 =>converged.
-
+ 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.81619451E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.81619451E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.81619451E-04  sigma(2 1)=  0.00000000E+00
-
+ 
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -813,7 +813,7 @@ lattice_vectors:
 lattice_lengths: [   5.44685,    5.44685,    5.44685, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1426706E+02
-convergence: {deltae: -1.066E-14, res2:  1.374E-26, residm:  9.695E-21, diffor: null, }
+convergence: {deltae:  7.105E-15, res2:  7.747E-27, residm:  9.695E-21, diffor: null, }
 etotal    :  -2.52026287E+01
 entropy   :   0.00000000E+00
 fermie    :  -7.09476690E-03
@@ -826,8 +826,8 @@ xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Li]
 - [  5.0000E-01,   5.0000E-01,   5.0000E-01,  F]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
@@ -837,29 +837,29 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
     1        2.00000          0.32309123
     2        2.00000          7.03516123
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   38.545E-22; max=  96.952E-22
+ 
+ Mean square residual over all n,k,spin=   38.545E-22; max=  96.951E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
-
+ 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      2.03812811310319     2.03812811310319     2.03812811310319
-
+ 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
+ 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    1      0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000     0.00000000000000     0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
@@ -870,38 +870,38 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   -0.72526   -0.00709   -0.00709   -0.00709    0.30658    0.84023    0.84023    0.84023
    0.86228    0.86228
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
+ 
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.69382404212939E+01
-hartree             :  8.33193609042008E+00
-xc                  : -5.78120118019885E+00
+hartree             :  8.33193609042005E+00
+xc                  : -5.78120118019884E+00
 Ewald energy        : -1.58703825045696E+01
-psp_core            :  2.16381254418033E-03
-local_psp           : -3.17174028955684E+01
-non_local_psp       :  2.89401757766001E+00
-total_energy        : -2.52026286784187E+01
-total_energy_eV     : -6.85798403249496E+02
-band_energy         : -1.70876900892378E+00
+psp_core            :  2.16381254267430E-03
+local_psp           : -3.17174028955679E+01
+non_local_psp       :  2.89401757766002E+00
+total_energy        : -2.52026286784197E+01
+total_energy_eV     : -6.85798403249523E+02
+band_energy         : -1.70876900892376E+00
 ...
 
-
+ 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  3.81619451E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.81619451E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.81619451E-04  sigma(2 1)=  0.00000000E+00
-
+ 
 -Cartesian components of stress tensor (GPa)         [Pressure= -1.1228E+01 GPa]
 - sigma(1 1)=  1.12276300E+01  sigma(3 2)=  0.00000000E+00
 - sigma(2 2)=  1.12276300E+01  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)=  1.12276300E+01  sigma(2 1)=  0.00000000E+00
-
+ 
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -912,30 +912,30 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  27  27  27
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 --------------------------------------------------------------------------------
-
-
+ 
+ 
 ================================================================================
  prteigrs : about to open file t57o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.74E-17  1.81E-17  3.00E-17  3.78E-17  8.11E-17  9.79E-17  4.91E-17  5.44E-17
   3.33E-17  4.28E-17  9.53E-17  5.80E-17  6.99E-17  6.08E-18  4.56E-17  5.93E-17
-  7.22E-17  8.28E-17  6.99E-17  5.40E-17  2.74E-16  4.04E-17  5.68E-12  9.36E-12
+  7.23E-17  8.29E-17  6.99E-17  5.41E-17  2.74E-16  4.04E-17  5.68E-12  9.36E-12
   1.12E-11  2.88E-11  6.55E-11  4.96E-17
  -7.2526E-01 -7.0948E-03 -7.0948E-03 -7.0948E-03  3.0658E-01  8.4023E-01
   8.4023E-01  8.4023E-01  8.6228E-01  8.6228E-01  8.6228E-01  9.6573E-01
@@ -943,8 +943,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   2.2287E+00  2.3119E+00  2.3119E+00  2.3119E+00  2.4503E+00  2.4503E+00
   2.4838E+00  2.4838E+00  2.4838E+00  2.6082E+00
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
 
 --- !ResultsGS
 iteration_state: {dtset: 2, }
@@ -975,14 +975,14 @@ force_length_stats: {min: null, max: null, mean: null, }
     1        2.00000          0.32309123
     2        2.00000          7.03516123
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   30.695E-18; max=  99.165E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
-
+ 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      2.03812811310319     2.03812811310319     2.03812811310319
@@ -996,12 +996,12 @@ force_length_stats: {min: null, max: null, mean: null, }
    1.63214    1.63214    2.22874    2.31193    2.31193    2.31193    2.45032    2.45032
    2.48383    2.48383    2.48383    2.60823
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -1012,12 +1012,12 @@ meta: {optdriver: 1, rfelfd: 2, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1025,31 +1025,31 @@ meta: {optdriver: 1, rfelfd: 2, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  27  27  27
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  ==>  initialize data related to q vector <== 
-
+ 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
     2)    idir= 2    ipert=   3
     3)    idir= 3    ipert=   3
-
+ 
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   1
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1058,33 +1058,33 @@ iteration_state: {dtset: 3, }
 solver: {iscf: -3, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-16, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -15.939555583945     -1.594E+01 2.413E+00 0.000E+00
- ETOT  2  -15.941232507019     -1.677E-03 1.206E-02 0.000E+00
- ETOT  3  -15.941232875441     -3.684E-07 8.942E-03 0.000E+00
- ETOT  4  -15.941232875588     -1.467E-10 4.292E-04 0.000E+00
- ETOT  5  -15.941232875588     -1.155E-13 1.144E-04 0.000E+00
- ETOT  6  -15.941232875588     -3.553E-15 7.149E-06 0.000E+00
- ETOT  7  -15.941232875588      3.553E-15 1.189E-06 0.000E+00
- ETOT  8  -15.941232875588     -1.776E-15 1.372E-07 0.000E+00
- ETOT  9  -15.941232875588      1.776E-15 1.703E-08 0.000E+00
- ETOT 10  -15.941232875588     -1.776E-15 2.651E-09 0.000E+00
- ETOT 11  -15.941232875588      3.553E-15 3.691E-10 0.000E+00
- ETOT 12  -15.941232875588      1.776E-15 5.733E-11 0.000E+00
- ETOT 13  -15.941232875588      3.553E-15 8.510E-12 0.000E+00
- ETOT 14  -15.941232875588     -5.329E-15 1.325E-12 0.000E+00
- ETOT 15  -15.941232875588     -1.776E-15 1.978E-13 0.000E+00
- ETOT 16  -15.941232875588      7.105E-15 3.093E-14 0.000E+00
- ETOT 17  -15.941232875588      0.000E+00 4.610E-15 0.000E+00
- ETOT 18  -15.941232875588      0.000E+00 7.235E-16 0.000E+00
- ETOT 19  -15.941232875588      0.000E+00 9.823E-17 0.000E+00
-
+-ETOT  1  -15.939555583488     -1.594E+01 2.413E+00 0.000E+00
+ ETOT  2  -15.941232507027     -1.677E-03 1.206E-02 0.000E+00
+ ETOT  3  -15.941232875450     -3.684E-07 8.941E-03 0.000E+00
+ ETOT  4  -15.941232875596     -1.468E-10 4.292E-04 0.000E+00
+ ETOT  5  -15.941232875596     -5.684E-14 1.144E-04 0.000E+00
+ ETOT  6  -15.941232875596      7.105E-15 7.150E-06 0.000E+00
+ ETOT  7  -15.941232875596      0.000E+00 1.189E-06 0.000E+00
+ ETOT  8  -15.941232875596     -1.776E-15 1.372E-07 0.000E+00
+ ETOT  9  -15.941232875596      1.776E-15 1.703E-08 0.000E+00
+ ETOT 10  -15.941232875596      0.000E+00 2.651E-09 0.000E+00
+ ETOT 11  -15.941232875596     -1.776E-15 3.691E-10 0.000E+00
+ ETOT 12  -15.941232875596      1.776E-15 5.733E-11 0.000E+00
+ ETOT 13  -15.941232875596     -1.776E-15 8.510E-12 0.000E+00
+ ETOT 14  -15.941232875596      0.000E+00 1.325E-12 0.000E+00
+ ETOT 15  -15.941232875596     -3.553E-15 1.978E-13 0.000E+00
+ ETOT 16  -15.941232875596      5.329E-15 3.093E-14 0.000E+00
+ ETOT 17  -15.941232875596      0.000E+00 4.611E-15 0.000E+00
+ ETOT 18  -15.941232875596      0.000E+00 7.236E-16 0.000E+00
+ ETOT 19  -15.941232875596     -3.553E-15 9.823E-17 0.000E+00
+ 
  At SCF step   19   max residual=  9.82E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   41.771E-18; max=  98.229E-18
  dfpt_looppert : ek2=    3.1935982812E+01
           f-sum rule ratio=    9.9947855721E-01
@@ -1092,11 +1092,11 @@ tolerances: {tolwfr: 1.00E-16, }
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000    0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000
+   0.00000   -0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.52204456E+01 eigvalue=   3.84449082E-01  local=  -6.38669760E+00
@@ -1107,19 +1107,19 @@ tolerances: {tolwfr: 1.00E-16, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.59412329E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1594123288E+02 Ha. Also 2DEtotal=   -0.433783006979E+03 eV
+ 2DEtotal=   -0.1594123288E+02 Ha. Also 2DEtotal=   -0.433783006980E+03 eV
     (  non-var. 2DEtotal :   -1.5941232877E+01 Ha)
-
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1128,35 +1128,35 @@ iteration_state: {dtset: 3, }
 solver: {iscf: -3, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-16, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -15.939517877183     -1.594E+01 7.615E-02 0.000E+00
- ETOT  2  -15.941232355246     -1.714E-03 1.277E-02 0.000E+00
- ETOT  3  -15.941232748259     -3.930E-07 3.242E-06 0.000E+00
- ETOT  4  -15.941232748420     -1.607E-10 2.935E-07 0.000E+00
- ETOT  5  -15.941232748420     -1.030E-13 1.057E-10 0.000E+00
- ETOT  6  -15.941232748420      5.329E-15 1.814E-11 0.000E+00
- ETOT  7  -15.941232748420      0.000E+00 7.861E-15 0.000E+00
- ETOT  8  -15.941232748420      0.000E+00 1.302E-15 0.000E+00
- ETOT  9  -15.941232748420      0.000E+00 9.823E-17 0.000E+00
-
+-ETOT  1  -15.939517878202     -1.594E+01 7.615E-02 0.000E+00
+ ETOT  2  -15.941232355256     -1.714E-03 1.279E-02 0.000E+00
+ ETOT  3  -15.941232748268     -3.930E-07 3.247E-06 0.000E+00
+ ETOT  4  -15.941232748429     -1.607E-10 2.944E-07 0.000E+00
+ ETOT  5  -15.941232748429     -6.928E-14 1.060E-10 0.000E+00
+ ETOT  6  -15.941232748429      5.329E-15 1.820E-11 0.000E+00
+ ETOT  7  -15.941232748429     -1.066E-14 7.893E-15 0.000E+00
+ ETOT  8  -15.941232748429      0.000E+00 1.308E-15 0.000E+00
+ ETOT  9  -15.941232748429      3.553E-15 9.823E-17 0.000E+00
+ 
  At SCF step    9   max residual=  9.82E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   41.516E-18; max=  98.229E-18
+ 
+ Mean square residual over all n,k,spin=   41.517E-18; max=  98.229E-18
  dfpt_looppert : ek2=    3.1935982812E+01
           f-sum rule ratio=    9.9947854932E-01
  prteigrs : about to open file t57t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
+  -0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000   -0.00000
   -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.52906931E+01 eigvalue=   3.85942024E-01  local=  -6.41119853E+00
@@ -1169,17 +1169,17 @@ tolerances: {tolwfr: 1.00E-16, }
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.1594123275E+02 Ha. Also 2DEtotal=   -0.433783003519E+03 eV
     (  non-var. 2DEtotal :   -1.5941232750E+01 Ha)
-
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1188,35 +1188,35 @@ iteration_state: {dtset: 3, }
 solver: {iscf: -3, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolwfr: 1.00E-16, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -15.939544836690     -1.594E+01 1.051E+00 0.000E+00
- ETOT  2  -15.941232455085     -1.688E-03 2.325E-02 0.000E+00
- ETOT  3  -15.941232832537     -3.775E-07 1.358E-02 0.000E+00
- ETOT  4  -15.941232832687     -1.505E-10 5.621E-04 0.000E+00
- ETOT  5  -15.941232832687     -1.119E-13 3.786E-04 0.000E+00
- ETOT  6  -15.941232832687     -3.553E-15 1.782E-05 0.000E+00
- ETOT  7  -15.941232832687      1.776E-15 1.031E-05 0.000E+00
- ETOT  8  -15.941232832687      0.000E+00 5.108E-07 0.000E+00
- ETOT  9  -15.941232832687     -5.329E-15 2.767E-07 0.000E+00
- ETOT 10  -15.941232832687      1.776E-15 1.387E-08 0.000E+00
- ETOT 11  -15.941232832687      0.000E+00 7.301E-09 0.000E+00
- ETOT 12  -15.941232832687     -5.329E-15 3.605E-10 0.000E+00
- ETOT 13  -15.941232832687      5.329E-15 1.901E-10 0.000E+00
- ETOT 14  -15.941232832687      1.776E-15 9.148E-12 0.000E+00
- ETOT 15  -15.941232832687      0.000E+00 4.905E-12 0.000E+00
- ETOT 16  -15.941232832687      0.000E+00 2.299E-13 0.000E+00
- ETOT 17  -15.941232832687     -3.553E-15 1.257E-13 0.000E+00
- ETOT 18  -15.941232832687      0.000E+00 5.763E-15 0.000E+00
- ETOT 19  -15.941232832687     -3.553E-15 3.202E-15 0.000E+00
- ETOT 20  -15.941232832687      0.000E+00 1.444E-16 0.000E+00
- ETOT 21  -15.941232832687      3.553E-15 9.823E-17 0.000E+00
-
+-ETOT  1  -15.939544836461     -1.594E+01 1.051E+00 0.000E+00
+ ETOT  2  -15.941232455093     -1.688E-03 2.325E-02 0.000E+00
+ ETOT  3  -15.941232832545     -3.775E-07 1.358E-02 0.000E+00
+ ETOT  4  -15.941232832696     -1.506E-10 5.621E-04 0.000E+00
+ ETOT  5  -15.941232832696     -5.862E-14 3.786E-04 0.000E+00
+ ETOT  6  -15.941232832696     -1.776E-15 1.782E-05 0.000E+00
+ ETOT  7  -15.941232832696      0.000E+00 1.031E-05 0.000E+00
+ ETOT  8  -15.941232832696      0.000E+00 5.108E-07 0.000E+00
+ ETOT  9  -15.941232832696      3.553E-15 2.767E-07 0.000E+00
+ ETOT 10  -15.941232832696      0.000E+00 1.387E-08 0.000E+00
+ ETOT 11  -15.941232832696      0.000E+00 7.302E-09 0.000E+00
+ ETOT 12  -15.941232832696      0.000E+00 3.605E-10 0.000E+00
+ ETOT 13  -15.941232832696      0.000E+00 1.901E-10 0.000E+00
+ ETOT 14  -15.941232832696      0.000E+00 9.150E-12 0.000E+00
+ ETOT 15  -15.941232832696      0.000E+00 4.906E-12 0.000E+00
+ ETOT 16  -15.941232832696      0.000E+00 2.300E-13 0.000E+00
+ ETOT 17  -15.941232832696      0.000E+00 1.257E-13 0.000E+00
+ ETOT 18  -15.941232832696      0.000E+00 5.764E-15 0.000E+00
+ ETOT 19  -15.941232832696      0.000E+00 3.203E-15 0.000E+00
+ ETOT 20  -15.941232832696     -3.553E-15 1.444E-16 0.000E+00
+ ETOT 21  -15.941232832696      0.000E+00 9.823E-17 0.000E+00
+ 
  At SCF step   21   max residual=  9.82E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   42.112E-18; max=  98.229E-18
  dfpt_looppert : ek2=    3.1935982812E+01
           f-sum rule ratio=    9.9947855460E-01
@@ -1225,10 +1225,10 @@ tolerances: {tolwfr: 1.00E-16, }
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
-   0.00000    0.00000
+  -0.00000   -0.00000
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.52158169E+01 eigvalue=   3.84422846E-01  local=  -6.38525757E+00
@@ -1242,10 +1242,10 @@ tolerances: {tolwfr: 1.00E-16, }
  2DEtotal=   -0.1594123283E+02 Ha. Also 2DEtotal=   -0.433783005812E+03 eV
     (  non-var. 2DEtotal :   -1.5941232834E+01 Ha)
 ================================================================================
-
+ 
  ---- first-order wavefunction calculations are completed ----
-
-
+ 
+ 
  Total localisation tensor (bohr^2) in cartesian coordinates
   WARNING : still subject to testing - especially symmetries.
       direction              matrix element
@@ -1259,13 +1259,13 @@ tolerances: {tolwfr: 1.00E-16, }
      3        1       0.3351852668    0.0000000000
      3        2       0.3351852715    0.0000000000
      3        3       0.6703705383    0.0000000000
-
+ 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
-
+ 
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -1276,14 +1276,14 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  mkfilename : getddk/=0, take file _1WF from output of DATASET   3.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1291,62 +1291,62 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  27  27  27
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  ==>  initialize data related to q vector <== 
-
+ 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
     2)    idir= 1    ipert=   2
     3)    idir= 1    ipert=   4
-
+ 
 ================================================================================
-
+ 
  The perturbation idir=   2  ipert=   1 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   3  ipert=   1 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   2  ipert=   2 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   3  ipert=   2 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   2  ipert=   4 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   3  ipert=   4 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   1   along direction   1
  Found     4 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
  is reduced to    26 .
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1355,28 +1355,28 @@ iteration_state: {dtset: 4, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.80947585831059     -2.216E+00 4.139E+00 1.984E+01
- ETOT  2  0.80233945251213     -7.136E-03 2.328E-02 2.799E-01
- ETOT  3  0.80208078271766     -2.587E-04 3.672E-02 3.606E-02
- ETOT  4  0.80206171135410     -1.907E-05 3.593E-04 3.736E-04
- ETOT  5  0.80206161306915     -9.828E-08 4.854E-04 1.753E-06
- ETOT  6  0.80206161239400     -6.752E-10 3.785E-06 7.000E-08
- ETOT  7  0.80206161238537     -8.623E-12 5.091E-06 4.650E-08
- ETOT  8  0.80206161234034     -4.504E-11 3.786E-08 1.670E-11
- ETOT  9  0.80206161234033     -7.994E-15 5.114E-08 9.271E-15
-
+-ETOT  1  0.80947585831519     -2.216E+00 4.139E+00 1.984E+01
+ ETOT  2  0.80233945251263     -7.136E-03 2.329E-02 2.799E-01
+ ETOT  3  0.80208078272109     -2.587E-04 3.672E-02 3.606E-02
+ ETOT  4  0.80206171135765     -1.907E-05 3.593E-04 3.736E-04
+ ETOT  5  0.80206161307270     -9.828E-08 4.855E-04 1.753E-06
+ ETOT  6  0.80206161239754     -6.752E-10 3.786E-06 7.000E-08
+ ETOT  7  0.80206161238892     -8.620E-12 5.092E-06 4.650E-08
+ ETOT  8  0.80206161234388     -4.504E-11 3.788E-08 1.670E-11
+ ETOT  9  0.80206161234388     -4.885E-15 5.116E-08 9.271E-15
+ 
  At SCF step    9       vres2   =  9.27E-15 < tolvrs=  1.00E-12 =>converged.
 -open ddk wf file :t57o_DS3_1WF7
 -open ddk wf file :t57o_DS3_1WF8
 -open ddk wf file :t57o_DS3_1WF9
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   32.779E-11; max=  51.135E-09
-
+ 
+ Mean square residual over all n,k,spin=   32.793E-11; max=  51.158E-09
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.80157426E+00 eigvalue=   7.42948643E-02  local=  -6.04820895E-01
@@ -1392,22 +1392,22 @@ tolerances: {tolvrs: 1.00E-12, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -9.86156347E-02  frxc 2 =  -1.21271166E-01
  Resulting in :
- 2DEtotal=    0.8020616123E+00 Ha. Also 2DEtotal=    0.218252064128E+02 eV
-    (2DErelax=   -2.2233144087E+00 Ha. 2DEnonrelax=    3.0253760210E+00 Ha)
-    (  non-var. 2DEtotal :    8.0206161224E-01 Ha)
-
-
+ 2DEtotal=    0.8020616123E+00 Ha. Also 2DEtotal=    0.218252064129E+02 eV
+    (2DErelax=   -2.2233144087E+00 Ha. 2DEnonrelax=    3.0253760211E+00 Ha)
+    (  non-var. 2DEtotal :    8.0206161225E-01 Ha)
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   2   along direction   1
  Found     4 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
  is reduced to    26 .
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1416,29 +1416,29 @@ iteration_state: {dtset: 4, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   288.02357419758     -2.246E+03 5.099E+01 4.847E+05
- ETOT  2   16.725845187286     -2.713E+02 1.583E+00 1.180E+04
- ETOT  3   1.0422714868456     -1.568E+01 1.539E-01 5.190E+02
- ETOT  4  0.77393246555408     -2.683E-01 6.547E-02 2.035E+00
- ETOT  5  0.77325395251052     -6.785E-04 1.044E-02 1.416E-02
- ETOT  6  0.77325238564532     -1.567E-06 2.599E-03 1.148E-04
- ETOT  7  0.77325237251449     -1.313E-08 5.348E-04 2.620E-07
- ETOT  8  0.77325237253314      1.864E-11 1.251E-04 1.248E-07
- ETOT  9  0.77325237241763     -1.155E-10 2.595E-05 1.056E-09
- ETOT 10  0.77325237243446      1.683E-11 5.537E-06 9.611E-14
-
+-ETOT  1   288.02357391944     -2.246E+03 5.098E+01 4.847E+05
+ ETOT  2   16.725845085839     -2.713E+02 1.583E+00 1.180E+04
+ ETOT  3   1.0422714005804     -1.568E+01 1.539E-01 5.190E+02
+ ETOT  4  0.77393237899241     -2.683E-01 6.547E-02 2.035E+00
+ ETOT  5  0.77325386598886     -6.785E-04 1.045E-02 1.416E-02
+ ETOT  6  0.77325229904454     -1.567E-06 2.599E-03 1.148E-04
+ ETOT  7  0.77325228595691     -1.309E-08 5.349E-04 2.620E-07
+ ETOT  8  0.77325228599511      3.820E-11 1.251E-04 1.248E-07
+ ETOT  9  0.77325228587188     -1.232E-10 2.595E-05 1.056E-09
+ ETOT 10  0.77325228586733     -4.547E-12 5.536E-06 9.611E-14
+ 
  At SCF step   10       vres2   =  9.61E-14 < tolvrs=  1.00E-12 =>converged.
 -open ddk wf file :t57o_DS3_1WF7
 -open ddk wf file :t57o_DS3_1WF8
 -open ddk wf file :t57o_DS3_1WF9
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   35.491E-09; max=  55.366E-07
-
+ 
+ Mean square residual over all n,k,spin=   35.488E-09; max=  55.361E-07
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   3.54368473E+03 eigvalue=   2.60312341E+01  local=  -1.98119893E+03
@@ -1452,23 +1452,23 @@ tolerances: {tolvrs: 1.00E-12, }
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   1.59731759E+03 fr.nonlo=   9.41545354E+02  Ewald=   7.61300826E+00
  13,14 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829772E+01
+ frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829771E+01
  Resulting in :
- 2DEtotal=    0.7732523724E+00 Ha. Also 2DEtotal=    0.210412671270E+02 eV
-    (2DErelax=   -2.5328420476E+03 Ha. 2DEnonrelax=    2.5336153000E+03 Ha)
-    (  non-var. 2DEtotal :    7.7325218177E-01 Ha)
-
-
+ 2DEtotal=    0.7732522859E+00 Ha. Also 2DEtotal=    0.210412647713E+02 eV
+    (2DErelax=   -2.5328420476E+03 Ha. 2DEnonrelax=    2.5336152999E+03 Ha)
+    (  non-var. 2DEtotal :    7.7325209521E-01 Ha)
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : homogeneous electric field along direction   1
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 - dfpt_looppert: read the DDK wavefunctions from file: t57o_DS3_1WF7
@@ -1478,28 +1478,28 @@ iteration_state: {dtset: 4, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -18.882057257441     -1.888E+01 6.329E+02 6.800E+02
- ETOT  2  -19.132580166707     -2.505E-01 1.021E-01 3.853E+00
- ETOT  3  -19.134941315359     -2.361E-03 1.809E-02 5.040E-01
- ETOT  4  -19.135186515482     -2.452E-04 3.138E-05 1.094E-02
- ETOT  5  -19.135191813320     -5.298E-06 3.172E-05 3.034E-05
- ETOT  6  -19.135191825025     -1.171E-08 1.948E-07 3.637E-07
- ETOT  7  -19.135191825126     -1.006E-10 1.250E-07 1.026E-09
- ETOT  8  -19.135191825126     -2.771E-13 1.107E-09 1.237E-11
- ETOT  9  -19.135191825126      6.750E-14 6.660E-10 3.537E-13
-
+-ETOT  1  -18.882057257071     -1.888E+01 6.329E+02 6.800E+02
+ ETOT  2  -19.132580166736     -2.505E-01 1.021E-01 3.853E+00
+ ETOT  3  -19.134941315370     -2.361E-03 1.809E-02 5.040E-01
+ ETOT  4  -19.135186515492     -2.452E-04 3.138E-05 1.094E-02
+ ETOT  5  -19.135191813329     -5.298E-06 3.172E-05 3.034E-05
+ ETOT  6  -19.135191825035     -1.171E-08 1.948E-07 3.637E-07
+ ETOT  7  -19.135191825136     -1.005E-10 1.250E-07 1.026E-09
+ ETOT  8  -19.135191825136     -2.238E-13 1.107E-09 1.237E-11
+ ETOT  9  -19.135191825136     -1.421E-14 6.660E-10 3.537E-13
+ 
  At SCF step    9       vres2   =  3.54E-13 < tolvrs=  1.00E-12 =>converged.
 -open ddk wf file :t57o_DS3_1WF7
 -open ddk wf file :t57o_DS3_1WF8
 -open ddk wf file :t57o_DS3_1WF9
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   17.344E-13; max=  66.600E-11
-
+ 
+ Mean square residual over all n,k,spin=   17.343E-13; max=  66.598E-11
+ 
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.84655043E+00 eigvalue=   5.55236660E-02  local=  -5.51150825E-01
@@ -1510,13 +1510,13 @@ tolerances: {tolvrs: 1.00E-12, }
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.91351918E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.1913519183E+02 Ha. Also 2DEtotal=   -0.520695049988E+03 eV
+ 2DEtotal=   -0.1913519183E+02 Ha. Also 2DEtotal=   -0.520695049989E+03 eV
     (  non-var. 2DEtotal :   -1.9135191825E+01 Ha)
 ================================================================================
-
+ 
  ---- first-order wavefunction calculations are completed ----
-
-
+ 
+ 
  ==> Compute Derivative Database <==
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
@@ -1532,7 +1532,7 @@ tolerances: {tolvrs: 1.00E-12, }
    1    1   3    2        -0.4010286818         0.0000000000
    1    1   1    4         0.2697943919         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
-   1    1   3    4         0.0000000000         0.0000000000
+   1    1   3    4        -0.0000000000         0.0000000000
   
    2    1   1    1         0.4010308061         0.0000000000
    2    1   2    1         0.8020616122         0.0000000000
@@ -1542,7 +1542,7 @@ tolerances: {tolvrs: 1.00E-12, }
    2    1   3    2        -0.4010286818         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   2    4         0.2697943919         0.0000000000
-   2    1   3    4        -0.0000000000         0.0000000000
+   2    1   3    4         0.0000000000         0.0000000000
   
    3    1   1    1         0.4010308061         0.0000000000
    3    1   2    1         0.4010308061         0.0000000000
@@ -1557,62 +1557,62 @@ tolerances: {tolvrs: 1.00E-12, }
    1    2   1    1        -0.8020573281         0.0000000000
    1    2   2    1        -0.4010286641         0.0000000000
    1    2   3    1        -0.4010286641         0.0000000000
-   1    2   1    2         0.7732521818         0.0000000000
-   1    2   2    2         0.3866260909         0.0000000000
-   1    2   3    2         0.3866260909         0.0000000000
-   1    2   1    4       -50.5092486364         0.0000000000
-   1    2   2    4        -0.0000000000         0.0000000000
+   1    2   1    2         0.7732520952         0.0000000000
+   1    2   2    2         0.3866260476         0.0000000000
+   1    2   3    2         0.3866260476         0.0000000000
+   1    2   1    4       -50.5092486365         0.0000000000
+   1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.4010286641         0.0000000000
    2    2   2    1        -0.8020573281         0.0000000000
    2    2   3    1        -0.4010286641         0.0000000000
-   2    2   1    2         0.3866260909         0.0000000000
-   2    2   2    2         0.7732521818         0.0000000000
-   2    2   3    2         0.3866260909         0.0000000000
+   2    2   1    2         0.3866260476         0.0000000000
+   2    2   2    2         0.7732520952         0.0000000000
+   2    2   3    2         0.3866260476         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
-   2    2   2    4       -50.5092486364         0.0000000000
-   2    2   3    4        -0.0000000000         0.0000000000
+   2    2   2    4       -50.5092486365         0.0000000000
+   2    2   3    4         0.0000000000         0.0000000000
   
    3    2   1    1        -0.4010286641         0.0000000000
    3    2   2    1        -0.4010286641         0.0000000000
    3    2   3    1        -0.8020573281         0.0000000000
-   3    2   1    2         0.3866260909         0.0000000000
-   3    2   2    2         0.3866260909         0.0000000000
-   3    2   3    2         0.7732521818         0.0000000000
+   3    2   1    2         0.3866260476         0.0000000000
+   3    2   2    2         0.3866260476         0.0000000000
+   3    2   3    2         0.7732520952         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
-   3    2   2    4         0.0000000000         0.0000000000
-   3    2   3    4       -50.5092486364         0.0000000000
+   3    2   2    4        -0.0000000000         0.0000000000
+   3    2   3    4       -50.5092486365         0.0000000000
   
    1    4   1    1         0.2697943989         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
-   1    4   3    1        -0.0000000000         0.0000000000
+   1    4   3    1         0.0000000000         0.0000000000
    1    4   1    2       -50.5092484522         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
    1    4   3    2         0.0000000000         0.0000000000
-   1    4   1    4       -19.1351918252         0.0000000000
+   1    4   1    4       -19.1351918253         0.0000000000
    1    4   2    4         6.3783972751         0.0000000000
    1    4   3    4         6.3783972751         0.0000000000
   
-   2    4   1    1        -0.0000000000         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
    2    4   2    1         0.2697943989         0.0000000000
-   2    4   3    1         0.0000000000         0.0000000000
-   2    4   1    2        -0.0000000000         0.0000000000
+   2    4   3    1        -0.0000000000         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
    2    4   2    2       -50.5092484522         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
    2    4   1    4         6.3783972751         0.0000000000
-   2    4   2    4       -19.1351918252         0.0000000000
+   2    4   2    4       -19.1351918253         0.0000000000
    2    4   3    4         6.3783972751         0.0000000000
   
-   3    4   1    1         0.0000000000         0.0000000000
-   3    4   2    1         0.0000000000         0.0000000000
+   3    4   1    1        -0.0000000000         0.0000000000
+   3    4   2    1        -0.0000000000         0.0000000000
    3    4   3    1         0.2697943989         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
    3    4   3    2       -50.5092484522         0.0000000000
    3    4   1    4         6.3783972751         0.0000000000
    3    4   2    4         6.3783972751         0.0000000000
-   3    4   3    4       -19.1351918252         0.0000000000
+   3    4   3    4       -19.1351918253         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -1621,13 +1621,13 @@ tolerances: {tolvrs: 1.00E-12, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.0270344189         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.0270342757         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
-   1    1   3    2         0.0000000000         0.0000000000
+   1    1   3    2        -0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.0270344189         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
@@ -1644,39 +1644,39 @@ tolerances: {tolvrs: 1.00E-12, }
    1    2   1    1        -0.0270342745         0.0000000000
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.0260633635         0.0000000000
+   1    2   1    2         0.0260633606         0.0000000000
    1    2   2    2        -0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1         0.0000000000         0.0000000000
    2    2   2    1        -0.0270342745         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.0260633635         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   1    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.0260633606         0.0000000000
+   2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.0270342745         0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.0260633635         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   2    2        -0.0000000000         0.0000000000
+   3    2   3    2         0.0260633606         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    4         2.0542930414        -0.0000000000
-   1    4   2    4         0.0000000000        -0.0000000000
-   1    4   3    4         0.0000000000        -0.0000000000
+   1    4   1    4         2.0542930414         0.0000000000
+   1    4   2    4         0.0000000000         0.0000000000
+   1    4   3    4         0.0000000000         0.0000000000
   
-   2    4   1    4         0.0000000000        -0.0000000000
-   2    4   2    4         2.0542930414        -0.0000000000
-   2    4   3    4         0.0000000000        -0.0000000000
+   2    4   1    4         0.0000000000         0.0000000000
+   2    4   2    4         2.0542930414         0.0000000000
+   2    4   3    4         0.0000000000         0.0000000000
   
-   3    4   1    4         0.0000000000        -0.0000000000
-   3    4   2    4         0.0000000000        -0.0000000000
-   3    4   3    4         2.0542930414        -0.0000000000
+   3    4   1    4         0.0000000000         0.0000000000
+   3    4   2    4         0.0000000000         0.0000000000
+   3    4   3    4         2.0542930414         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
@@ -1687,23 +1687,23 @@ tolerances: {tolvrs: 1.00E-12, }
    1    1   1    4         1.0429391111         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
-   1    2   1    4        -1.0387965923         0.0000000000
-   2    2   1    4        -0.0000000000         0.0000000000
-   3    2   1    4         0.0000000000         0.0000000000
+   1    2   1    4        -1.0387965924         0.0000000000
+   2    2   1    4         0.0000000000         0.0000000000
+   3    2   1    4        -0.0000000000         0.0000000000
   
-   1    1   2    4         0.0000000000         0.0000000000
+   1    1   2    4        -0.0000000000         0.0000000000
    2    1   2    4         1.0429391111         0.0000000000
-   3    1   2    4        -0.0000000000         0.0000000000
-   1    2   2    4        -0.0000000000         0.0000000000
-   2    2   2    4        -1.0387965923         0.0000000000
-   3    2   2    4         0.0000000000         0.0000000000
+   3    1   2    4         0.0000000000         0.0000000000
+   1    2   2    4         0.0000000000         0.0000000000
+   2    2   2    4        -1.0387965924         0.0000000000
+   3    2   2    4        -0.0000000000         0.0000000000
   
-   1    1   3    4         0.0000000000         0.0000000000
+   1    1   3    4        -0.0000000000         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
    3    1   3    4         1.0429391111         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-   3    2   3    4        -1.0387965923         0.0000000000
+   3    2   3    4        -1.0387965924         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
@@ -1712,71 +1712,71 @@ tolerances: {tolvrs: 1.00E-12, }
   dir pert dir pert     real part    imaginary part
   
    1    4   1    1         1.0429391122         0.0000000000
-   2    4   1    1         0.0000000000         0.0000000000
+   2    4   1    1        -0.0000000000         0.0000000000
    3    4   1    1        -0.0000000000         0.0000000000
   
-   1    4   2    1         0.0000000000         0.0000000000
+   1    4   2    1        -0.0000000000         0.0000000000
    2    4   2    1         1.0429391122         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
-   1    4   3    1        -0.0000000000         0.0000000000
+   1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
    3    4   3    1         1.0429391122         0.0000000000
   
    1    4   1    2        -1.0387965630         0.0000000000
-   2    4   1    2        -0.0000000000         0.0000000000
+   2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
    1    4   2    2        -0.0000000000         0.0000000000
    2    4   2    2        -1.0387965630         0.0000000000
-   3    4   2    2         0.0000000000         0.0000000000
+   3    4   2    2        -0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
-   2    4   3    2         0.0000000000         0.0000000000
+   2    4   3    2        -0.0000000000         0.0000000000
    3    4   3    2        -1.0387965630         0.0000000000
   
   
   
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.434674E-04 -1.434674E-04 -1.434674E-04  1.705820E-03  1.705820E-03
+  -1.434677E-04 -1.434677E-04 -1.434677E-04  1.705820E-03  1.705820E-03
    1.705820E-03
  Phonon frequencies in cm-1    :
-- -3.148746E+01 -3.148746E+01 -3.148746E+01  3.743842E+02  3.743842E+02
+- -3.148751E+01 -3.148751E+01 -3.148751E+01  3.743842E+02  3.743842E+02
 -  3.743842E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.434674E-04 -1.434674E-04 -1.434247E-04  1.705820E-03  1.705820E-03
+  -1.434677E-04 -1.434677E-04 -1.434250E-04  1.705820E-03  1.705820E-03
    3.029856E-03
  Phonon frequencies in cm-1    :
-- -3.148746E+01 -3.148746E+01 -3.147809E+01  3.743842E+02  3.743842E+02
+- -3.148751E+01 -3.148751E+01 -3.147814E+01  3.743842E+02  3.743842E+02
 -  6.649766E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-  -1.434674E-04 -1.434674E-04 -1.434247E-04  1.705820E-03  1.705820E-03
+  -1.434677E-04 -1.434677E-04 -1.434250E-04  1.705820E-03  1.705820E-03
    3.029856E-03
  Phonon frequencies in cm-1    :
-- -3.148746E+01 -3.148746E+01 -3.147809E+01  3.743842E+02  3.743842E+02
+- -3.148751E+01 -3.148751E+01 -3.147814E+01  3.743842E+02  3.743842E+02
 -  6.649766E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-  -1.434674E-04 -1.434674E-04 -1.434247E-04  1.705820E-03  1.705820E-03
+  -1.434677E-04 -1.434677E-04 -1.434250E-04  1.705820E-03  1.705820E-03
    3.029856E-03
  Phonon frequencies in cm-1    :
-- -3.148746E+01 -3.148746E+01 -3.147809E+01  3.743842E+02  3.743842E+02
+- -3.148751E+01 -3.148751E+01 -3.147814E+01  3.743842E+02  3.743842E+02
 -  6.649766E+02
-
+ 
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
@@ -1787,12 +1787,12 @@ meta: {optdriver: 1, rfphon: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1800,13 +1800,13 @@ meta: {optdriver: 1, rfphon: 1, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
-
+ 
  getcut: wavevector=  0.5000  0.0000  0.0000  ngfft=  27  27  27
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.72413
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1819,9 +1819,9 @@ meta: {optdriver: 1, rfphon: 1, }
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+ 
+- pspini: atom type   2  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1834,41 +1834,41 @@ meta: {optdriver: 1, rfphon: 1, }
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
-
+ 
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  ==>  initialize data related to q vector <== 
-
+ 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
     2)    idir= 2    ipert=   1
     3)    idir= 1    ipert=   2
     4)    idir= 2    ipert=   2
-
+ 
 ================================================================================
-
+ 
  The perturbation idir=   3  ipert=   1 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   3  ipert=   2 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.000000  0.000000
  Perturbation : displacement of atom   1   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
  is reduced to    40 .
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1877,28 +1877,28 @@ iteration_state: {dtset: 5, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   2.6615075309429     -2.389E+00 5.148E-02 1.669E+03
- ETOT  2   2.6197485970687     -4.176E-02 5.658E-04 3.130E+02
- ETOT  3   2.3299614717053     -2.898E-01 3.989E-04 2.116E+02
- ETOT  4   2.2865687499866     -4.339E-02 3.950E-05 9.079E-01
- ETOT  5   2.2862930176221     -2.757E-04 5.524E-07 5.733E-03
- ETOT  6   2.2862916305595     -1.387E-06 4.957E-09 2.858E-05
- ETOT  7   2.2862916198906     -1.067E-08 2.259E-11 3.136E-07
- ETOT  8   2.2862916198592     -3.139E-11 2.194E-13 5.043E-08
- ETOT  9   2.2862916198412     -1.801E-11 4.931E-14 1.830E-08
- ETOT 10   2.2862916198290     -1.215E-11 7.614E-15 5.485E-11
- ETOT 11   2.2862916198290     -2.043E-14 2.759E-17 1.791E-12
- ETOT 12   2.2862916198290      1.332E-14 6.849E-19 1.884E-14
-
+-ETOT  1   2.6615075348051     -2.389E+00 5.148E-02 1.669E+03
+ ETOT  2   2.6197486030558     -4.176E-02 5.658E-04 3.130E+02
+ ETOT  3   2.3299614713729     -2.898E-01 3.989E-04 2.116E+02
+ ETOT  4   2.2865687499550     -4.339E-02 3.950E-05 9.079E-01
+ ETOT  5   2.2862930176259     -2.757E-04 5.524E-07 5.733E-03
+ ETOT  6   2.2862916305631     -1.387E-06 4.957E-09 2.858E-05
+ ETOT  7   2.2862916198942     -1.067E-08 2.259E-11 3.136E-07
+ ETOT  8   2.2862916198628     -3.140E-11 2.194E-13 5.043E-08
+ ETOT  9   2.2862916198448     -1.800E-11 4.931E-14 1.830E-08
+ ETOT 10   2.2862916198326     -1.216E-11 7.614E-15 5.485E-11
+ ETOT 11   2.2862916198326     -1.421E-14 2.759E-17 1.791E-12
+ ETOT 12   2.2862916198326      0.000E+00 6.849E-19 1.884E-14
+ 
  At SCF step   12       vres2   =  1.88E-14 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   20.888E-20; max=  68.492E-20
-
+ 
+ Mean square residual over all n,k,spin=   20.889E-20; max=  68.492E-20
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.95610339E+00 eigvalue=   8.58030390E-02  local=  -6.86741979E-01
@@ -1914,21 +1914,21 @@ tolerances: {tolvrs: 1.00E-12, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -9.92235823E-02  frxc 2 =  -1.21271166E-01
  Resulting in :
- 2DEtotal=    0.2286291620E+01 Ha. Also 2DEtotal=    0.622131588831E+02 eV
+ 2DEtotal=    0.2286291620E+01 Ha. Also 2DEtotal=    0.622131588832E+02 eV
     (2DErelax=   -2.7646816862E+00 Ha. 2DEnonrelax=    5.0509733061E+00 Ha)
     (  non-var. 2DEtotal :    2.2862916204E+00 Ha)
-
-
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.000000  0.000000
  Perturbation : displacement of atom   1   along direction   2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1937,26 +1937,26 @@ iteration_state: {dtset: 5, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.91983626085438     -2.254E+00 1.385E-01 8.803E+00
- ETOT  2  0.91831870334766     -1.518E-03 4.281E-05 2.976E-01
- ETOT  3  0.91828634630220     -3.236E-05 3.502E-07 1.057E-02
- ETOT  4  0.91828528563623     -1.061E-06 9.033E-09 5.766E-05
- ETOT  5  0.91828528031717     -5.319E-09 6.693E-11 1.454E-05
- ETOT  6  0.91828527137032     -8.947E-09 1.232E-11 1.550E-06
- ETOT  7  0.91828527032789     -1.042E-09 5.942E-13 5.805E-10
- ETOT  8  0.91828527032776     -1.275E-13 7.890E-16 4.353E-12
- ETOT  9  0.91828527032776      3.109E-15 3.325E-18 1.148E-12
- ETOT 10  0.91828527032776     -2.220E-15 3.564E-19 2.916E-13
-
+-ETOT  1  0.91983626078874     -2.254E+00 1.385E-01 8.803E+00
+ ETOT  2  0.91831870335248     -1.518E-03 4.280E-05 2.976E-01
+ ETOT  3  0.91828634630712     -3.236E-05 3.502E-07 1.057E-02
+ ETOT  4  0.91828528564358     -1.061E-06 9.033E-09 5.766E-05
+ ETOT  5  0.91828528032701     -5.317E-09 6.694E-11 1.455E-05
+ ETOT  6  0.91828527137355     -8.953E-09 1.233E-11 1.550E-06
+ ETOT  7  0.91828527033149     -1.042E-09 5.939E-13 5.805E-10
+ ETOT  8  0.91828527033136     -1.283E-13 7.890E-16 4.352E-12
+ ETOT  9  0.91828527033136      0.000E+00 3.325E-18 1.147E-12
+ ETOT 10  0.91828527033136      3.109E-15 3.565E-19 2.915E-13
+ 
  At SCF step   10       vres2   =  2.92E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   77.792E-21; max=  35.645E-20
-
+ 
+ Mean square residual over all n,k,spin=   77.807E-21; max=  35.655E-20
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.82425974E+00 eigvalue=   7.91177652E-02  local=  -6.20076455E-01
@@ -1972,22 +1972,22 @@ tolerances: {tolvrs: 1.00E-12, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -9.87876606E-02  frxc 2 =  -1.21271166E-01
  Resulting in :
- 2DEtotal=    0.9182852703E+00 Ha. Also 2DEtotal=    0.249878129839E+02 eV
+ 2DEtotal=    0.9182852703E+00 Ha. Also 2DEtotal=    0.249878129840E+02 eV
     (2DErelax=   -2.2558587084E+00 Ha. 2DEnonrelax=    3.1741439787E+00 Ha)
-    (  non-var. 2DEtotal :    9.1828527031E-01 Ha)
-
-
+    (  non-var. 2DEtotal :    9.1828527032E-01 Ha)
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.000000  0.000000
  Perturbation : displacement of atom   2   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
  is reduced to    40 .
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1996,29 +1996,29 @@ iteration_state: {dtset: 5, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   607.82606695170     -2.025E+03 1.557E+01 2.948E+06
- ETOT  2   37.623696360465     -5.702E+02 1.393E+00 1.660E+05
- ETOT  3   7.0872007480380     -3.054E+01 5.207E-02 3.278E+04
- ETOT  4   2.4527445812560     -4.634E+00 6.303E-03 3.216E+02
- ETOT  5   2.3856536655680     -6.709E-02 8.749E-05 4.262E-01
- ETOT  6   2.3855752693285     -7.840E-05 2.539E-07 1.582E-02
- ETOT  7   2.3855716927605     -3.577E-06 1.613E-08 2.983E-03
- ETOT  8   2.3855702842952     -1.408E-06 3.243E-09 9.323E-04
- ETOT  9   2.3855696390556     -6.452E-07 4.401E-10 3.064E-06
- ETOT 10   2.3855696381584     -8.972E-10 2.337E-12 2.982E-08
- ETOT 11   2.3855696382393      8.095E-11 2.512E-14 5.302E-10
- ETOT 12   2.3855696381734     -6.594E-11 7.153E-16 9.555E-12
- ETOT 13   2.3855696381574     -1.592E-11 5.683E-18 1.817E-13
-
+-ETOT  1   607.82606722678     -2.025E+03 1.557E+01 2.948E+06
+ ETOT  2   37.623696267153     -5.702E+02 1.393E+00 1.660E+05
+ ETOT  3   7.0872006637233     -3.054E+01 5.207E-02 3.278E+04
+ ETOT  4   2.4527444944874     -4.634E+00 6.303E-03 3.216E+02
+ ETOT  5   2.3856535790883     -6.709E-02 8.749E-05 4.262E-01
+ ETOT  6   2.3855751829351     -7.840E-05 2.539E-07 1.582E-02
+ ETOT  7   2.3855716063017     -3.577E-06 1.613E-08 2.983E-03
+ ETOT  8   2.3855701977564     -1.409E-06 3.244E-09 9.323E-04
+ ETOT  9   2.3855695525731     -6.452E-07 4.401E-10 3.064E-06
+ ETOT 10   2.3855695516531     -9.200E-10 2.337E-12 2.982E-08
+ ETOT 11   2.3855695516540      9.095E-13 2.512E-14 5.302E-10
+ ETOT 12   2.3855695516509     -3.183E-12 7.152E-16 9.556E-12
+ ETOT 13   2.3855695516504     -4.547E-13 5.683E-18 1.817E-13
+ 
  At SCF step   13       vres2   =  1.82E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   27.353E-19; max=  56.827E-19
-
+ 
+ Mean square residual over all n,k,spin=   27.354E-19; max=  56.828E-19
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   3.53538529E+03 eigvalue=   2.55634748E+01  local=  -1.97920990E+03
@@ -2032,23 +2032,23 @@ tolerances: {tolvrs: 1.00E-12, }
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   1.59731759E+03 fr.nonlo=   9.41545354E+02  Ewald=   1.06897065E+02
  13,14 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829772E+01
+ frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829771E+01
  Resulting in :
- 2DEtotal=    0.2385569638E+01 Ha. Also 2DEtotal=    0.649146511486E+02 eV
-    (2DErelax=   -2.6305137868E+03 Ha. 2DEnonrelax=    2.6328993564E+03 Ha)
-    (  non-var. 2DEtotal :    2.3855698608E+00 Ha)
-
-
+ 2DEtotal=    0.2385569552E+01 Ha. Also 2DEtotal=    0.649146487947E+02 eV
+    (2DErelax=   -2.6305137868E+03 Ha. 2DEnonrelax=    2.6328993563E+03 Ha)
+    (  non-var. 2DEtotal :    2.3855697743E+00 Ha)
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.000000  0.000000
  Perturbation : displacement of atom   2   along direction   2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2057,27 +2057,27 @@ iteration_state: {dtset: 5, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   298.43704460429     -2.242E+03 1.144E+01 5.336E+05
- ETOT  2   16.976693012179     -2.815E+02 1.049E+00 1.158E+04
- ETOT  3   1.4592936474458     -1.552E+01 3.647E-02 7.241E+02
- ETOT  4   1.1287688295673     -3.305E-01 8.811E-04 3.492E+00
- ETOT  5   1.1274638459912     -1.305E-03 5.597E-06 1.272E-02
- ETOT  6   1.1274621524957     -1.693E-06 1.766E-08 7.585E-05
- ETOT  7   1.1274621423680     -1.013E-08 1.270E-10 2.960E-07
- ETOT  8   1.1274621422161     -1.519E-10 5.844E-13 1.281E-08
- ETOT  9   1.1274621421652     -5.093E-11 2.808E-14 9.827E-11
- ETOT 10   1.1274621421874      2.228E-11 9.778E-17 3.274E-12
- ETOT 11   1.1274621422065      1.910E-11 3.881E-19 2.876E-13
-
+-ETOT  1   298.43704483683     -2.242E+03 1.144E+01 5.336E+05
+ ETOT  2   16.976692959968     -2.815E+02 1.049E+00 1.158E+04
+ ETOT  3   1.4592935611804     -1.552E+01 3.647E-02 7.241E+02
+ ETOT  4   1.1287687430872     -3.305E-01 8.811E-04 3.492E+00
+ ETOT  5   1.1274637595056     -1.305E-03 5.597E-06 1.272E-02
+ ETOT  6   1.1274620660024     -1.694E-06 1.766E-08 7.585E-05
+ ETOT  7   1.1274620558356     -1.017E-08 1.270E-10 2.960E-07
+ ETOT  8   1.1274620556806     -1.551E-10 5.844E-13 1.281E-08
+ ETOT  9   1.1274620556719     -8.640E-12 2.808E-14 9.827E-11
+ ETOT 10   1.1274620556719      0.000E+00 9.778E-17 3.274E-12
+ ETOT 11   1.1274620556705     -1.364E-12 3.881E-19 2.876E-13
+ 
  At SCF step   11       vres2   =  2.88E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   18.021E-20; max=  38.807E-20
-
+ 
+ Mean square residual over all n,k,spin=   18.021E-20; max=  38.806E-20
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   3.54308438E+03 eigvalue=   2.60154696E+01  local=  -1.98177699E+03
@@ -2091,17 +2091,17 @@ tolerances: {tolvrs: 1.00E-12, }
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   1.59731759E+03 fr.nonlo=   9.41545354E+02  Ewald=   1.49110675E+01
  13,14 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829772E+01
+ frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829771E+01
  Resulting in :
- 2DEtotal=    0.1127462142E+01 Ha. Also 2DEtotal=    0.306798051392E+02 eV
-    (2DErelax=   -2.5397858971E+03 Ha. 2DEnonrelax=    2.5409133592E+03 Ha)
-    (  non-var. 2DEtotal :    1.1274621719E+00 Ha)
-
+ 2DEtotal=    0.1127462056E+01 Ha. Also 2DEtotal=    0.306798027844E+02 eV
+    (2DErelax=   -2.5397858971E+03 Ha. 2DEnonrelax=    2.5409133591E+03 Ha)
+    (  non-var. 2DEtotal :    1.1274620854E+00 Ha)
+ 
 ================================================================================
-
+ 
  ---- first-order wavefunction calculations are completed ----
-
-
+ 
+ 
  ==> Compute Derivative Database <==
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
@@ -2114,42 +2114,42 @@ tolerances: {tolvrs: 1.00E-12, }
    1    1   3    1         0.4591427624         0.0000000000
    1    1   1    2         0.0000000000         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
-   1    1   3    2        -0.0000000000         0.0000000000
+   1    1   3    2         0.0000000000         0.0000000000
   
    2    1   1    1         0.4591427624         0.0000000000
    2    1   2    1         0.9182855248         0.0000000000
    2    1   3    1         0.4591427624         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
-   2    1   2    2         0.0000000000         0.0000000000
+   2    1   2    2        -0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
   
    3    1   1    1         0.4591427624         0.0000000000
    3    1   2    1         0.4591427624         0.0000000000
    3    1   3    1         0.9182855248         0.0000000000
-   3    1   1    2        -0.0000000000         0.0000000000
+   3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
-   3    1   3    2        -0.0000000000         0.0000000000
+   3    1   3    2         0.0000000000         0.0000000000
   
    1    2   1    1         0.0000000000        -0.0000000000
    1    2   2    1         0.0000000000        -0.0000000000
-   1    2   3    1        -0.0000000000        -0.0000000000
-   1    2   1    2         2.3813643328        -0.0000001164
-   1    2   2    2         0.5617806693         0.0000000000
-   1    2   3    2         0.5617806693         0.0000000000
+   1    2   3    1         0.0000000000        -0.0000000000
+   1    2   1    2         2.3813642463        -0.0000001164
+   1    2   2    2         0.5617806261         0.0000000000
+   1    2   3    2         0.5617806261         0.0000000000
   
    2    2   1    1         0.0000000000        -0.0000000000
-   2    2   2    1         0.0000000000        -0.0000000000
+   2    2   2    1        -0.0000000000        -0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
-   2    2   1    2         0.5617806693         0.0000000000
-   2    2   2    2         1.1235613387         0.0000000000
-   2    2   3    2         0.5617806693         0.0000000000
+   2    2   1    2         0.5617806261         0.0000000000
+   2    2   2    2         1.1235612522         0.0000000000
+   2    2   3    2         0.5617806261         0.0000000000
   
-   3    2   1    1        -0.0000000000        -0.0000000000
+   3    2   1    1         0.0000000000        -0.0000000000
    3    2   2    1         0.0000000000        -0.0000000000
-   3    2   3    1        -0.0000000000        -0.0000000000
-   3    2   1    2         0.5617806693         0.0000000000
-   3    2   2    2         0.5617806693         0.0000000000
-   3    2   3    2         1.1235613387         0.0000000000
+   3    2   3    1         0.0000000000        -0.0000000000
+   3    2   1    2         0.5617806261         0.0000000000
+   3    2   2    2         0.5617806261         0.0000000000
+   3    2   3    2         1.1235612522         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -2160,45 +2160,45 @@ tolerances: {tolvrs: 1.00E-12, }
    1    1   1    1         0.0540070000        -0.0000000000
    1    1   2    1        -0.0230551191         0.0000000000
    1    1   3    1        -0.0230551191         0.0000000000
-   1    1   1    2         0.0000000000         0.0000000000
-   1    1   2    2        -0.0000000000        -0.0000000000
-   1    1   3    2        -0.0000000000        -0.0000000000
+   1    1   1    2        -0.0000000000         0.0000000000
+   1    1   2    2         0.0000000000         0.0000000000
+   1    1   3    2        -0.0000000000         0.0000000000
   
    2    1   1    1        -0.0230551191         0.0000000000
    2    1   2    1         0.0540070000        -0.0000000000
    2    1   3    1         0.0230551191        -0.0000000000
-   2    1   1    2        -0.0000000000        -0.0000000000
-   2    1   2    2        -0.0000000000         0.0000000000
-   2    1   3    2         0.0000000000         0.0000000000
+   2    1   1    2         0.0000000000         0.0000000000
+   2    1   2    2         0.0000000000         0.0000000000
+   2    1   3    2         0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0230551191         0.0000000000
    3    1   2    1         0.0230551191        -0.0000000000
    3    1   3    1         0.0540070000        -0.0000000000
-   3    1   1    2        -0.0000000000        -0.0000000000
-   3    1   2    2         0.0000000000         0.0000000000
+   3    1   1    2        -0.0000000000         0.0000000000
+   3    1   2    2         0.0000000000        -0.0000000000
    3    1   3    2         0.0000000000         0.0000000000
   
-   1    2   1    1         0.0000000000        -0.0000000000
-   1    2   2    1        -0.0000000000         0.0000000000
-   1    2   3    1        -0.0000000000         0.0000000000
-   1    2   1    2         0.0590687967        -0.0000000020
+   1    2   1    1        -0.0000000000        -0.0000000000
+   1    2   2    1         0.0000000000        -0.0000000000
+   1    2   3    1        -0.0000000000        -0.0000000000
+   1    2   1    2         0.0590687938        -0.0000000020
    1    2   2    2        -0.0211978559         0.0000000020
    1    2   3    2        -0.0211978559         0.0000000020
   
-   2    2   1    1        -0.0000000000         0.0000000000
-   2    2   2    1        -0.0000000000        -0.0000000000
-   2    2   3    1         0.0000000000        -0.0000000000
+   2    2   1    1         0.0000000000        -0.0000000000
+   2    2   2    1         0.0000000000        -0.0000000000
+   2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        -0.0211978559         0.0000000020
-   2    2   2    2         0.0590687967        -0.0000000020
+   2    2   2    2         0.0590687938        -0.0000000020
    2    2   3    2         0.0211978559        -0.0000000020
   
-   3    2   1    1        -0.0000000000         0.0000000000
-   3    2   2    1         0.0000000000        -0.0000000000
+   3    2   1    1        -0.0000000000        -0.0000000000
+   3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000        -0.0000000000
    3    2   1    2        -0.0211978559         0.0000000020
    3    2   2    2         0.0211978559        -0.0000000020
-   3    2   3    2         0.0590687967        -0.0000000020
-
+   3    2   3    2         0.0590687938        -0.0000000020
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    1.045718E-03  1.045718E-03  1.564057E-03  1.564057E-03  1.711664E-03
@@ -2206,11 +2206,11 @@ tolerances: {tolvrs: 1.00E-12, }
  Phonon frequencies in cm-1    :
 -  2.295085E+02  2.295085E+02  3.432707E+02  3.432707E+02  3.756668E+02
 -  6.173731E+02
-
+ 
 ================================================================================
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 6, }
@@ -2221,12 +2221,12 @@ meta: {optdriver: 1, rfphon: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -2234,13 +2234,13 @@ meta: {optdriver: 1, rfphon: 1, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  setup1 : take into account q-point for computing boxcut.
-
+ 
  getcut: wavevector=  0.5000  0.5000  0.0000  ngfft=  27  27  27
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.72482
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2253,9 +2253,9 @@ meta: {optdriver: 1, rfphon: 1, }
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+ 
+- pspini: atom type   2  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2268,49 +2268,49 @@ meta: {optdriver: 1, rfphon: 1, }
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
-
+ 
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  ==>  initialize data related to q vector <== 
-
+ 
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
     2)    idir= 1    ipert=   2
-
+ 
 ================================================================================
-
+ 
  The perturbation idir=   2  ipert=   1 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   3  ipert=   1 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   2  ipert=   2 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
  The perturbation idir=   3  ipert=   2 is
  symmetric of a previously calculated perturbation.
  So, its SCF calculation is not needed.
-
-
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.500000  0.000000
  Perturbation : displacement of atom   1   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
  is reduced to    40 .
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2319,26 +2319,26 @@ iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.7221165206082     -2.672E+00 2.595E-02 1.553E+03
- ETOT  2   1.4679799521272     -2.541E-01 3.539E-04 9.902E+01
- ETOT  3   1.4544619448494     -1.352E-02 1.177E-05 6.928E+00
- ETOT  4   1.4533027274614     -1.159E-03 4.319E-06 5.423E-02
- ETOT  5   1.4532760215674     -2.671E-05 5.222E-08 2.797E-04
- ETOT  6   1.4532759539194     -6.765E-08 1.549E-10 7.211E-06
- ETOT  7   1.4532759526266     -1.293E-09 3.342E-12 6.386E-08
- ETOT  8   1.4532759525964     -3.015E-11 9.781E-14 4.778E-09
- ETOT  9   1.4532759525942     -2.176E-12 5.314E-15 1.965E-11
- ETOT 10   1.4532759525943      2.442E-14 1.741E-17 1.252E-13
-
+-ETOT  1   1.7221165201391     -2.672E+00 2.595E-02 1.553E+03
+ ETOT  2   1.4679799521619     -2.541E-01 3.539E-04 9.902E+01
+ ETOT  3   1.4544619448524     -1.352E-02 1.177E-05 6.928E+00
+ ETOT  4   1.4533027274648     -1.159E-03 4.319E-06 5.423E-02
+ ETOT  5   1.4532760215708     -2.671E-05 5.222E-08 2.797E-04
+ ETOT  6   1.4532759539228     -6.765E-08 1.549E-10 7.211E-06
+ ETOT  7   1.4532759526300     -1.293E-09 3.342E-12 6.386E-08
+ ETOT  8   1.4532759525998     -3.016E-11 9.781E-14 4.778E-09
+ ETOT  9   1.4532759525977     -2.160E-12 5.314E-15 1.965E-11
+ ETOT 10   1.4532759525977      0.000E+00 1.741E-17 1.252E-13
+ 
  At SCF step   10       vres2   =  1.25E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   32.939E-19; max=  17.405E-18
-
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   2.05327632E+00 eigvalue=   8.90196762E-02  local=  -7.24611423E-01
@@ -2354,22 +2354,22 @@ tolerances: {tolvrs: 1.00E-12, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -9.92112046E-02  frxc 2 =  -1.21271166E-01
  Resulting in :
- 2DEtotal=    0.1453275953E+01 Ha. Also 2DEtotal=    0.395456498005E+02 eV
+ 2DEtotal=    0.1453275953E+01 Ha. Also 2DEtotal=    0.395456498006E+02 eV
     (2DErelax=   -2.9403870650E+00 Ha. 2DEnonrelax=    4.3936630176E+00 Ha)
     (  non-var. 2DEtotal :    1.4532759563E+00 Ha)
-
-
+ 
+ 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.500000  0.500000  0.000000
  Perturbation : displacement of atom   2   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : the number of k-points, thanks to the symmetries,
  is reduced to    40 .
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 --------------------------------------------------------------------------------
-
+ 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2378,27 +2378,27 @@ iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
 tolerances: {tolvrs: 1.00E-12, }
 ...
-
+ 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   452.21182062149     -2.148E+03 1.520E+01 1.537E+06
- ETOT  2   24.307280987161     -4.279E+02 1.297E+00 5.102E+04
- ETOT  3   4.2129159906906     -2.009E+01 5.009E-02 1.070E+04
- ETOT  4   2.1868811829552     -2.026E+00 3.230E-03 1.169E+02
- ETOT  5   2.1572015857053     -2.968E-02 4.435E-05 5.850E-01
- ETOT  6   2.1571077294873     -9.386E-05 2.789E-07 1.729E-02
- ETOT  7   2.1571040414617     -3.688E-06 9.980E-09 2.479E-04
- ETOT  8   2.1571038145828     -2.269E-07 4.871E-10 3.168E-06
- ETOT  9   2.1571038138216     -7.612E-10 2.267E-12 1.570E-08
- ETOT 10   2.1571038138266      5.002E-12 1.338E-14 1.255E-10
- ETOT 11   2.1571038138289      2.274E-12 5.267E-17 6.564E-13
-
+-ETOT  1   452.21182024195     -2.148E+03 1.520E+01 1.537E+06
+ ETOT  2   24.307281041718     -4.279E+02 1.297E+00 5.102E+04
+ ETOT  3   4.2129159033357     -2.009E+01 5.009E-02 1.070E+04
+ ETOT  4   2.1868810967203     -2.026E+00 3.230E-03 1.169E+02
+ ETOT  5   2.1572014992194     -2.968E-02 4.435E-05 5.850E-01
+ ETOT  6   2.1571076429682     -9.386E-05 2.789E-07 1.729E-02
+ ETOT  7   2.1571039549690     -3.688E-06 9.980E-09 2.479E-04
+ ETOT  8   2.1571037280569     -2.269E-07 4.871E-10 3.168E-06
+ ETOT  9   2.1571037273220     -7.349E-10 2.267E-12 1.570E-08
+ ETOT 10   2.1571037273206     -1.364E-12 1.338E-14 1.255E-10
+ ETOT 11   2.1571037273125     -8.185E-12 5.267E-17 6.564E-13
+ 
  At SCF step   11       vres2   =  6.56E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   17.600E-18; max=  52.670E-18
-
+ 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   3.53673745E+03 eigvalue=   2.56687733E+01  local=  -1.97989748E+03
@@ -2412,17 +2412,17 @@ tolerances: {tolvrs: 1.00E-12, }
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
  fr.local=   1.59731759E+03 fr.nonlo=   9.41545354E+02  Ewald=   7.46882540E+01
  13,14 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829772E+01
+ frxc 1  =  -1.03243627E+02  frxc 2 =   9.03829771E+01
  Resulting in :
- 2DEtotal=    0.2157103814E+01 Ha. Also 2DEtotal=    0.586977799040E+02 eV
-    (2DErelax=   -2.5985334419E+03 Ha. 2DEnonrelax=    2.6006905458E+03 Ha)
-    (  non-var. 2DEtotal :    2.1571041689E+00 Ha)
-
+ 2DEtotal=    0.2157103727E+01 Ha. Also 2DEtotal=    0.586977775497E+02 eV
+    (2DErelax=   -2.5985334419E+03 Ha. 2DEnonrelax=    2.6006905457E+03 Ha)
+    (  non-var. 2DEtotal :    2.1571040824E+00 Ha)
+ 
 ================================================================================
-
+ 
  ---- first-order wavefunction calculations are completed ----
-
-
+ 
+ 
  ==> Compute Derivative Database <==
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
@@ -2453,24 +2453,24 @@ tolerances: {tolvrs: 1.00E-12, }
   
    1    2   1    1         0.2401632101         0.0000000087
    1    2   2    1        -0.0588652519         0.0000000253
-   1    2   3    1         0.2990284621        -0.0000000166
-   1    2   1    2         2.1520795756         0.0000000000
-   1    2   2    2         1.3811688428         0.0000000000
-   1    2   3    2         0.7709107328         0.0000000000
+   1    2   3    1         0.2990284620        -0.0000000166
+   1    2   1    2         2.1520794891         0.0000000000
+   1    2   2    2         1.3811687995         0.0000000000
+   1    2   3    2         0.7709106896         0.0000000000
   
    2    2   1    1        -0.0588652519         0.0000000253
    2    2   2    1         0.2401632101         0.0000000087
-   2    2   3    1         0.2990284621        -0.0000000166
-   2    2   1    2         1.3811688428         0.0000000000
-   2    2   2    2         2.1520795756         0.0000000000
-   2    2   3    2         0.7709107328         0.0000000000
+   2    2   3    1         0.2990284620        -0.0000000166
+   2    2   1    2         1.3811687995         0.0000000000
+   2    2   2    2         2.1520794891         0.0000000000
+   2    2   3    2         0.7709106896         0.0000000000
   
-   3    2   1    1         0.2990284621        -0.0000000166
-   3    2   2    1         0.2990284621        -0.0000000166
+   3    2   1    1         0.2990284620        -0.0000000166
+   3    2   2    1         0.2990284620        -0.0000000166
    3    2   3    1         0.5980569241        -0.0000000332
-   3    2   1    2         0.7709107328         0.0000000000
-   3    2   2    2         0.7709107328         0.0000000000
-   3    2   3    2         1.5418214657         0.0000000000
+   3    2   1    2         0.7709106896         0.0000000000
+   3    2   2    2         0.7709106896         0.0000000000
+   3    2   3    2         1.5418213792         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -2480,7 +2480,7 @@ tolerances: {tolvrs: 1.00E-12, }
   
    1    1   1    1         0.0374289193         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
-   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2         0.0201717414         0.0000000011
    1    1   2    2         0.0000000000        -0.0000000000
    1    1   3    2        -0.0000000000         0.0000000000
@@ -2492,34 +2492,34 @@ tolerances: {tolvrs: 1.00E-12, }
    2    1   2    2         0.0201717414         0.0000000011
    2    1   3    2        -0.0000000000         0.0000000000
   
-   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.0605397822         0.0000000000
-   3    1   1    2        -0.0000000000        -0.0000000000
+   3    1   1    2        -0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.0039614746        -0.0000000017
   
    1    2   1    1         0.0201582037        -0.0000000011
    1    2   2    1         0.0000000000         0.0000000000
-   1    2   3    1        -0.0000000000        -0.0000000000
-   1    2   1    2         0.0519688845         0.0000000000
+   1    2   3    1        -0.0000000000         0.0000000000
+   1    2   1    2         0.0519688816         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1         0.0000000000        -0.0000000000
    2    2   2    1         0.0201582037        -0.0000000011
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.0519688845         0.0000000000
+   2    2   1    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.0519688816         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.0039682435         0.0000000017
-   3    2   1    2         0.0000000000         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.0931078023         0.0000000000
-
+   3    2   3    2         0.0931077994         0.0000000000
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
    1.010672E-03  1.010672E-03  1.634477E-03  1.854004E-03  1.854004E-03
@@ -2527,11 +2527,11 @@ tolerances: {tolvrs: 1.00E-12, }
  Phonon frequencies in cm-1    :
 -  2.218169E+02  2.218169E+02  3.587263E+02  4.069068E+02  4.069068E+02
 -  4.809310E+02
-
+ 
 ================================================================================
 == DATASET  7 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 7, }
@@ -2542,17 +2542,17 @@ meta: {optdriver: 8, wfk_task: 8, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t57o_DS1_WFK
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2565,9 +2565,9 @@ meta: {optdriver: 8, wfk_task: 8, }
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+ 
+- pspini: atom type   2  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2580,10 +2580,10 @@ meta: {optdriver: 8, wfk_task: 8, }
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
-
+ 
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  ============================================================================================
  Using SKW interpolation to interpolate KS energies onto dense k-mesh.
  defined by sigma_ngkpt: [8, 8, 8]
@@ -2592,24 +2592,24 @@ meta: {optdriver: 8, wfk_task: 8, }
  Using sigma_erange:  0.200  0.200  (eV)
  SKW parameters (einterp): [   1.0000E+00,    5.0000E+00,    0.0000E+00,    0.0000E+00]
 ============================================================================================ 
-
-
+ 
+ 
  === Gaps from input WFK ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
    VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
-
+ 
+ 
  === Gaps from SKW interpolated eigenvalues ===
  Indirect band gap semiconductor
  Fundamental gap:     8.521 (eV)
    VBM:    -0.179 (eV) at k: [ 1.2500E-01,  0.0000E+00,  0.0000E+00]
    CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
-
+ 
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -2635,11 +2635,11 @@ meta: {optdriver: 8, wfk_task: 8, }
            etotal1    -2.5202628678E+01
            etotal3    -1.5941232833E+01
            etotal4    -1.9135191825E+01
-           etotal5     1.1274621422E+00
-           etotal6     2.1571038138E+00
+           etotal5     1.1274620557E+00
+           etotal6     2.1571037273E+00
            etotal7     0.0000000000E+00
-            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2648,7 +2648,7 @@ meta: {optdriver: 8, wfk_task: 8, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart7     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddk1          0
            getddk2          0
            getddk3          0
@@ -3056,7 +3056,7 @@ P          mk1mem7          8
       sigma_ngkpt6       0    0    0
       sigma_ngkpt7       8    8    8
           spgroup         225
-           strten1     3.8161945055E-04  3.8161945055E-04  3.8161945055E-04
+           strten1     3.8161945056E-04  3.8161945056E-04  3.8161945056E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3163,353 +3163,368 @@ P          mk1mem7          8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
-
+ 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    6.0916E-07 sec,    Wall time =    6.0972E-07 sec
+- CPU time =    1.8103E-06 sec,    Wall time =    1.8168E-06 sec
 
-- Total cpu        time (s,m,h):        185.0        3.08      0.051
-- Total wall clock time (s,m,h):        185.6        3.09      0.052
+- Total cpu        time (s,m,h):        121.8        2.03      0.034
+- Total wall clock time (s,m,h):        123.1        2.05      0.034
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =          185.0, wall_time =          185.6
+- cpu_time =          121.8, wall_time =          123.1
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- fourwf%(pot)                    124.218  67.1       124.576  67.1         267674      -1.00        1.00       1.00
-- fourwf%(G->r)                    15.406   8.3        15.453   8.3          63592      -1.00        1.00       1.00
-- projbd                           13.009   7.0        13.048   7.0         442756      -1.00        1.00       1.00
-- nonlop(apply)                     6.112   3.3         6.151   3.3         225134      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)              4.429   2.4         4.426   2.4             -1      -1.00        1.00       1.00
-- nonlop(forces)                    2.202   1.2         2.215   1.2          61020      -1.00        0.99       0.99
-- getghc-other                      1.986   1.1         1.902   1.0             -1      -1.00        1.04       1.04
-- dfpt_vtorho-kpt loop              1.398   0.8         1.402   0.8            144      -1.00        1.00       1.00
-- getgh1c_setup                     1.299   0.7         1.301   0.7           7390      -1.00        1.00       1.00
-- pspini                            1.021   0.6         1.022   0.6              7      -1.00        1.00       1.00
-- mkffnl                            0.527   0.3         0.530   0.3          12284      -1.00        1.00       1.00
-- fourwf%(den)                      0.474   0.3         0.475   0.3           1824      -1.00        1.00       1.00
-- dfpt_dyxc1                        0.423   0.2         0.423   0.2              3      -1.00        1.00       1.00
-- invars2                           0.421   0.2         0.421   0.2              7      -1.00        1.00       1.00
-- mkrho/=                           0.297   0.2         0.297   0.2              8      -1.00        1.00       1.00
-- fourdp                            0.292   0.2         0.293   0.2            695      -1.00        1.00       1.00
-- vtowfk(ssdiag)                    0.193   0.1         0.194   0.1             -1      -1.00        1.00       1.00
-- ctgk_rotate                       0.149   0.1         0.149   0.1           1044      -1.00        1.00       1.00
-- timing timab                      0.119   0.1         0.119   0.1             14      -1.00        1.00       1.00
-- abinit(2)                         0.089   0.0         0.089   0.0              1      -1.00        1.00       1.00
-- kpgsph                            0.072   0.0         0.073   0.0           5280      -1.00        0.99       0.99
-- symrhg(no FFT)                    0.056   0.0         0.056   0.0             94      -1.00        1.00       1.00
-- mkcore                            0.055   0.0         0.055   0.0             11      -1.00        1.00       1.00
-- xc:pot/=fourdp                    0.039   0.0         0.039   0.0            403      -1.00        1.00       1.00
-- dfpt_vtorho (1)                   0.037   0.0         0.037   0.0            144      -1.00        1.00       1.00
-- ewald                             0.027   0.0         0.027   0.0              2      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )             0.019   0.0         0.019   0.0             -1      -1.00        1.00       1.00
-- dfpt_vtowfk (1)                   0.017   0.0         0.016   0.0           7390      -1.00        1.02       1.02
-- stress                            0.016   0.0         0.016   0.0              1      -1.00        1.00       1.00
-- setsym                            0.014   0.0         0.014   0.0             18      -1.00        1.00       1.00
+- fourwf%(pot)                     61.175  50.2        61.508  50.0         267674      -1.00        0.99       0.99
+- nonlop(apply)                     8.363   6.9         8.419   6.8         225134      -1.00        0.99       0.99
+- fourwf%(G->r)                     8.292   6.8         8.338   6.8          63592      -1.00        0.99       0.99
+- projbd                            7.219   5.9         7.247   5.9         442756      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                  4.157   3.4         4.154   3.4             -1      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)              3.231   2.7         3.234   2.6             -1      -1.00        1.00       1.00
+- nonlop(forces)                    2.606   2.1         2.623   2.1          61020      -1.00        0.99       0.99
+- getghc-other                      2.354   1.9         2.294   1.9             -1      -1.00        1.03       1.03
+- dfpt_vtorho-kpt loop              1.861   1.5         1.870   1.5            144      -1.00        1.00       1.00
+- getgh1c_setup                     1.680   1.4         1.688   1.4           7390      -1.00        1.00       1.00
+- mkffnl                            0.771   0.6         0.775   0.6          12284      -1.00        0.99       0.99
+- dfpt_dyxc1                        0.549   0.5         0.551   0.4              3      -1.00        1.00       1.00
+- invars2                           0.531   0.4         0.533   0.4              7      -1.00        1.00       1.00
+- pspini                            0.475   0.4         0.476   0.4              7      -1.00        1.00       1.00
+- vtowfk(ssdiag)                    0.246   0.2         0.247   0.2             -1      -1.00        1.00       1.00
+- fourwf%(den)                      0.242   0.2         0.243   0.2           1824      -1.00        0.99       0.99
+- fourdp                            0.181   0.1         0.452   0.4            695      -1.00        0.40       0.40
+- ctgk_rotate                       0.180   0.1         0.180   0.1           1044      -1.00        1.00       1.00
+- mkrho/=                           0.151   0.1         0.151   0.1              8      -1.00        1.00       1.00
+- abinit(2)                         0.118   0.1         0.120   0.1              1      -1.00        0.99       0.99
+- timing timab                      0.104   0.1         0.105   0.1             11      -1.00        1.00       1.00
+- symrhg(no FFT)                    0.087   0.1         0.088   0.1             94      -1.00        0.99       0.99
+- mkcore                            0.085   0.1         0.086   0.1             11      -1.00        1.00       1.00
+- kpgsph                            0.069   0.1         0.070   0.1           5280      -1.00        0.99       0.99
+- dfpt_vtowfk (1)                   0.061   0.1         0.061   0.0           7390      -1.00        1.01       1.01
+- xc:pot/=fourdp                    0.058   0.0         0.058   0.0            403      -1.00        1.00       1.00
+- dfpt_vtowfk (3)                   0.028   0.0         0.028   0.0           7390      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )             0.027   0.0         0.027   0.0             -1      -1.00        1.00       1.00
+- setsym                            0.020   0.0         0.020   0.0             18      -1.00        1.00       1.00
+- ewald                             0.020   0.0         0.020   0.0              2      -1.00        1.00       1.00
+- stress                            0.019   0.0         0.019   0.0              1      -1.00        1.00       1.00
+- dfpt_vtorho (1)                   0.017   0.0         0.018   0.0            144      -1.00        0.99       0.99
+- forces                            0.010   0.0         0.010   0.0              1      -1.00        1.00       1.00
+- dfpt_vtorho:MPI                   0.010   0.0         0.010   0.0            144      -1.00        0.99       0.99
+- vtowfk(contrib)                   0.010   0.0         0.010   0.0            208      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                0.008   0.0         0.008   0.0              1      -1.00        1.00       1.00
-- dfpt_vtowfk (3)                   0.008   0.0         0.008   0.0           7390      -1.00        1.01       1.01
-- vtowfk(contrib)                   0.007   0.0         0.007   0.0            208      -1.00        1.01       1.01
-- forces                            0.006   0.0         0.006   0.0              1      -1.00        1.00       1.00
 - listkk                            0.005   0.0         0.005   0.0             22      -1.00        1.00       1.00
-- dfpt_vtorho:MPI                   0.004   0.0         0.004   0.0            144      -1.00        1.00       1.00
-- nonlop(forstr)                    0.001   0.0         0.001   0.0             32      -1.00        1.00       1.00
-- dfpt_scfcv  (1)                   0.001   0.0         0.001   0.0             12      -1.00        1.01       1.01
-- scfcv-scprqt                      0.001   0.0         0.001   0.0             25      -1.00        1.00       1.00
-- vtowfk  (1)                       0.000   0.0         0.000   0.0            208      -1.00        1.05       1.05
-- others (99)                     -15.338  -8.3       -15.417  -8.3             -1      -1.00        0.99       0.99
+- nonlop(forstr)                    0.002   0.0         0.002   0.0             32      -1.00        1.00       1.00
+- vtowfk  (1)                       0.001   0.0         0.001   0.0            208      -1.00        1.00       1.00
+- dfpt_scfcv  (1)                   0.001   0.0         0.001   0.0             12      -1.00        0.99       0.99
+- scfcv-scprqt                      0.001   0.0         0.001   0.0             25      -1.00        0.99       0.99
+- others (98)                       0.000   0.0         0.000   0.0             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                        159.119  86.0       159.462  85.9                                  1.00       1.00
+- subtotal                        105.027  86.2       105.752  85.9                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =         185.0, wall_time =         185.6
+- cpu_time =         121.8, wall_time =         123.1
 -
 - routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                        (-1=no count)
-- fourwf%(pot)                    124.218  67.1       124.576  67.1         267674      -1.00        1.00       1.00
-- fourwf%(G->r)                    15.406   8.3        15.453   8.3          63592      -1.00        1.00       1.00
-- projbd                           13.009   7.0        13.048   7.0         442756      -1.00        1.00       1.00
-- nonlop(apply)                     6.112   3.3         6.151   3.3         225134      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)              4.429   2.4         4.426   2.4             -1      -1.00        1.00       1.00
-- nonlop(forces)                    2.202   1.2         2.215   1.2          61020      -1.00        0.99       0.99
-- getghc-other                      1.986   1.1         1.902   1.0             -1      -1.00        1.04       1.04
-- dfpt_vtorho-kpt loop              1.398   0.8         1.402   0.8            144      -1.00        1.00       1.00
-- getgh1c_setup                     1.299   0.7         1.301   0.7           7390      -1.00        1.00       1.00
-- pspini                            1.021   0.6         1.022   0.6              7      -1.00        1.00       1.00
-- mkffnl                            0.527   0.3         0.530   0.3          12284      -1.00        1.00       1.00
-- fourwf%(den)                      0.474   0.3         0.475   0.3           1824      -1.00        1.00       1.00
-- dfpt_dyxc1                        0.423   0.2         0.423   0.2              3      -1.00        1.00       1.00
-- invars2                           0.421   0.2         0.421   0.2              7      -1.00        1.00       1.00
-- mkrho/=                           0.297   0.2         0.297   0.2              8      -1.00        1.00       1.00
-- fourdp                            0.292   0.2         0.293   0.2            695      -1.00        1.00       1.00
-- vtowfk(ssdiag)                    0.193   0.1         0.194   0.1             -1      -1.00        1.00       1.00
-- ctgk_rotate                       0.149   0.1         0.149   0.1           1044      -1.00        1.00       1.00
-- timing timab                      0.119   0.1         0.119   0.1             14      -1.00        1.00       1.00
-- abinit(2)                         0.089   0.0         0.089   0.0              1      -1.00        1.00       1.00
-- kpgsph                            0.072   0.0         0.073   0.0           5280      -1.00        0.99       0.99
-- symrhg(no FFT)                    0.056   0.0         0.056   0.0             94      -1.00        1.00       1.00
-- mkcore                            0.055   0.0         0.055   0.0             11      -1.00        1.00       1.00
-- xc:pot/=fourdp                    0.039   0.0         0.039   0.0            403      -1.00        1.00       1.00
-- dfpt_vtorho (1)                   0.037   0.0         0.037   0.0            144      -1.00        1.00       1.00
-- ewald                             0.027   0.0         0.027   0.0              2      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )             0.019   0.0         0.019   0.0             -1      -1.00        1.00       1.00
-- dfpt_vtowfk (1)                   0.017   0.0         0.016   0.0           7390      -1.00        1.02       1.02
-- stress                            0.016   0.0         0.016   0.0              1      -1.00        1.00       1.00
-- setsym                            0.014   0.0         0.014   0.0             18      -1.00        1.00       1.00
+- fourwf%(pot)                     61.175  50.2        61.508  50.0         267674      -1.00        0.99       0.99
+- nonlop(apply)                     8.363   6.9         8.419   6.8         225134      -1.00        0.99       0.99
+- fourwf%(G->r)                     8.292   6.8         8.338   6.8          63592      -1.00        0.99       0.99
+- projbd                            7.219   5.9         7.247   5.9         442756      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                  4.157   3.4         4.154   3.4             -1      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)              3.231   2.7         3.234   2.6             -1      -1.00        1.00       1.00
+- nonlop(forces)                    2.606   2.1         2.623   2.1          61020      -1.00        0.99       0.99
+- getghc-other                      2.354   1.9         2.294   1.9             -1      -1.00        1.03       1.03
+- dfpt_vtorho-kpt loop              1.861   1.5         1.870   1.5            144      -1.00        1.00       1.00
+- getgh1c_setup                     1.680   1.4         1.688   1.4           7390      -1.00        1.00       1.00
+- mkffnl                            0.771   0.6         0.775   0.6          12284      -1.00        0.99       0.99
+- dfpt_dyxc1                        0.549   0.5         0.551   0.4              3      -1.00        1.00       1.00
+- invars2                           0.531   0.4         0.533   0.4              7      -1.00        1.00       1.00
+- pspini                            0.475   0.4         0.476   0.4              7      -1.00        1.00       1.00
+- vtowfk(ssdiag)                    0.246   0.2         0.247   0.2             -1      -1.00        1.00       1.00
+- fourwf%(den)                      0.242   0.2         0.243   0.2           1824      -1.00        0.99       0.99
+- fourdp                            0.181   0.1         0.452   0.4            695      -1.00        0.40       0.40
+- ctgk_rotate                       0.180   0.1         0.180   0.1           1044      -1.00        1.00       1.00
+- mkrho/=                           0.151   0.1         0.151   0.1              8      -1.00        1.00       1.00
+- abinit(2)                         0.118   0.1         0.120   0.1              1      -1.00        0.99       0.99
+- timing timab                      0.104   0.1         0.105   0.1             11      -1.00        1.00       1.00
+- symrhg(no FFT)                    0.087   0.1         0.088   0.1             94      -1.00        0.99       0.99
+- mkcore                            0.085   0.1         0.086   0.1             11      -1.00        1.00       1.00
+- kpgsph                            0.069   0.1         0.070   0.1           5280      -1.00        0.99       0.99
+- dfpt_vtowfk (1)                   0.061   0.1         0.061   0.0           7390      -1.00        1.01       1.01
+- xc:pot/=fourdp                    0.058   0.0         0.058   0.0            403      -1.00        1.00       1.00
+- dfpt_vtowfk (3)                   0.028   0.0         0.028   0.0           7390      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )             0.027   0.0         0.027   0.0             -1      -1.00        1.00       1.00
+- setsym                            0.020   0.0         0.020   0.0             18      -1.00        1.00       1.00
+- ewald                             0.020   0.0         0.020   0.0              2      -1.00        1.00       1.00
+- stress                            0.019   0.0         0.019   0.0              1      -1.00        1.00       1.00
+- dfpt_vtorho (1)                   0.017   0.0         0.018   0.0            144      -1.00        0.99       0.99
+- forces                            0.010   0.0         0.010   0.0              1      -1.00        1.00       1.00
+- dfpt_vtorho:MPI                   0.010   0.0         0.010   0.0            144      -1.00        0.99       0.99
+- vtowfk(contrib)                   0.010   0.0         0.010   0.0            208      -1.00        1.00       1.00
 - ewald2 (+vdw_dftd)                0.008   0.0         0.008   0.0              1      -1.00        1.00       1.00
-- dfpt_vtowfk (3)                   0.008   0.0         0.008   0.0           7390      -1.00        1.01       1.01
-- vtowfk(contrib)                   0.007   0.0         0.007   0.0            208      -1.00        1.01       1.01
-- forces                            0.006   0.0         0.006   0.0              1      -1.00        1.00       1.00
 - listkk                            0.005   0.0         0.005   0.0             22      -1.00        1.00       1.00
-- dfpt_vtorho:MPI                   0.004   0.0         0.004   0.0            144      -1.00        1.00       1.00
-- nonlop(forstr)                    0.001   0.0         0.001   0.0             32      -1.00        1.00       1.00
-- dfpt_scfcv  (1)                   0.001   0.0         0.001   0.0             12      -1.00        1.01       1.01
-- scfcv-scprqt                      0.001   0.0         0.001   0.0             25      -1.00        1.00       1.00
-- vtowfk  (1)                       0.000   0.0         0.000   0.0            208      -1.00        1.05       1.05
-- others (99)                     -15.338  -8.3       -15.417  -8.3             -1      -1.00        0.99       0.99
+- nonlop(forstr)                    0.002   0.0         0.002   0.0             32      -1.00        1.00       1.00
+- vtowfk  (1)                       0.001   0.0         0.001   0.0            208      -1.00        1.00       1.00
+- dfpt_scfcv  (1)                   0.001   0.0         0.001   0.0             12      -1.00        0.99       0.99
+- scfcv-scprqt                      0.001   0.0         0.001   0.0             25      -1.00        0.99       0.99
+- others (98)                       0.000   0.0         0.000   0.0             -1      -1.00        0.98       0.98
 -<END_TIMER>
 
-- subtotal                        159.119  86.0       159.462  85.9                                  1.00       1.00
+- subtotal                        105.027  86.2       105.752  85.9                                  0.99       0.99
 
  Partitioning of abinit
-- abinit                          184.992 100.0       185.589 100.0              1                   1.00       1.00
+- abinit                          121.798 100.0       123.127 100.0              1                   0.99       0.99
  
-- abinit(2)                         0.089   0.0         0.089   0.0              1                   1.00       1.00
-- indefo+macroin+invars2m           0.422   0.2         0.422   0.2              1                   1.00       1.00
-- abinit(4)                         0.675   0.4         0.684   0.4              1                   0.99       0.99
-- abinit(5)                         0.043   0.0         0.043   0.0              1                   1.00       1.00
-- driver                          184.039  99.5       184.620  99.5              1                   1.00       1.00
-- abinit(6)                         0.112   0.1         0.118   0.1              1                   0.95       0.95
-- timing timab                      0.119   0.1         0.119   0.1             14                   1.00       1.00
+- abinit(1)                         0.030   0.0         0.038   0.0              1                   0.80       0.80
+- abinit(2)                         0.118   0.1         0.120   0.1              1                   0.99       0.99
+- indefo+macroin+invars2m           0.532   0.4         0.534   0.4              1                   1.00       1.00
+- abinit(4)                         0.859   0.7         0.881   0.7              1                   0.98       0.98
+- abinit(5)                         0.047   0.0         0.048   0.0              1                   1.00       1.00
+- driver                          120.617  99.0       121.893  99.0              1                   0.99       0.99
+- abinit(6)                         0.163   0.1         0.190   0.2              1                   0.86       0.86
+- timing timab                      0.104   0.1         0.105   0.1             11                   1.00       1.00
 
-- subtotal                        184.992 100.0       185.589 100.0                                  1.00       1.00
+- subtotal                        121.798 100.0       123.127 100.0                                  0.99       0.99
 
  Partitioning of driver
-- driver                          184.039  99.5       184.620  99.5              1                   1.00       1.00
+- driver                          120.617  99.0       121.893  99.0              1                   0.99       0.99
  
-- respfn                          175.870  95.1       176.386  95.0              4                   1.00       1.00
-- (other)                           8.166   4.4         8.231   4.4             -1                   0.99       0.99
+- respfn                          115.411  94.8       116.222  94.4              4                   0.99       0.99
+- (other)                           5.202   4.3         5.668   4.6             -1                   0.92       0.92
 
-- subtotal                        184.039  99.5       184.620  99.5                                  1.00       1.00
+- subtotal                        120.617  99.0       121.893  99.0                                  0.99       0.99
 
  Partitioning of gstateimg+gstate
-- gstateimg                         7.883   4.3         7.932   4.3              2                   0.99       0.99
+- gstateimg                         5.051   4.1         5.466   4.4              2                   0.92       0.92
  
-- gstate(pspini)                    0.256   0.1         0.256   0.1              2                   1.00       1.00
-- gstate(...scfcv)                  7.587   4.1         7.635   4.1              2                   0.99       0.99
+- gstate(1)                         0.031   0.0         0.031   0.0              4                   1.00       1.00
+- gstate(pspini)                    0.121   0.1         0.122   0.1              2                   1.00       1.00
+- gstate(init rhor rhog)            0.011   0.0         0.281   0.2              2                   0.04       0.04
+- gstate(...scfcv)                  4.876   4.0         4.996   4.1              2                   0.98       0.98
+- gstate(clnup1)                    0.006   0.0         0.029   0.0              2                   0.20       0.20
 
-- subtotal                          7.883   4.3         7.932   4.3                                  0.99       0.99
+- subtotal                          5.051   4.1         5.465   4.4                                  0.92       0.92
 
  Partitioning of scfcv_core
-- scfcv_core                        7.587   4.1         7.635   4.1              2                   0.99       0.99
+- scfcv_core                        4.875   4.0         4.996   4.1              2                   0.98       0.98
  
-- scfcv_core(iniloop, setv          0.042   0.0         0.042   0.0             26                   1.00       1.00
-- scfcv_core(vtorho(f))             7.385   4.0         7.400   4.0             26                   1.00       1.00
-- scfcv_core(rhotov)                0.038   0.0         0.038   0.0             25                   1.00       1.00
-- scfcv_core(mix pot)               0.040   0.0         0.040   0.0             24                   1.00       1.00
-- scfcv_core(outscfcv)              0.055   0.0         0.089   0.0              2                   0.62       0.62
+- scfcv_core(iniloop, setv          0.038   0.0         0.038   0.0             26                   1.00       1.00
+- scfcv_core(vtorho(f))             4.623   3.8         4.643   3.8             26                   1.00       1.00
+- scfcv_core(rhotov)                0.054   0.0         0.054   0.0             25                   0.99       0.99
+- scfcv_core(mix pot)               0.036   0.0         0.036   0.0             24                   1.00       1.00
+- scfcv_core(afterscfloop)          0.032   0.0         0.032   0.0              2                   1.00       1.00
+- scfcv_core(outscfcv)              0.090   0.1         0.190   0.2              2                   0.47       0.47
 
-- subtotal                          7.587   4.1         7.635   4.1                                  0.99       0.99
+- subtotal                          4.875   4.0         4.996   4.1                                  0.98       0.98
 
  Partitioning of rhotov
-- rhotov                            0.038   0.0         0.038   0.0             25                   1.00       1.00
+- rhotov                            0.053   0.0         0.054   0.0             25                   0.99       0.99
  
+- rhotov(rhotoxc)                   0.035   0.0         0.036   0.0             25                   0.99       0.99
 
-- subtotal                          0.038   0.0         0.038   0.0                                  1.00       1.00
+- subtotal                          0.053   0.0         0.054   0.0                                  0.99       0.99
 
  Partitioning of vtorho
-- vtorho                            7.385   4.0         7.400   4.0             26                   1.00       1.00
+- vtorho                            4.622   3.8         4.642   3.8             26                   1.00       1.00
  
-- vtowfk                            7.324   4.0         7.338   4.0            208                   1.00       1.00
-- vtorho(mkrho 2)                   0.039   0.0         0.039   0.0             51                   1.00       1.00
+- vtorho(bef. vtowfk)               0.025   0.0         0.026   0.0            208                   0.99       0.99
+- vtowfk                            4.549   3.7         4.569   3.7            208                   1.00       1.00
+- vtorho(mkrho 2)                   0.042   0.0         0.042   0.0             51                   0.99       0.99
 
-- subtotal                          7.385   4.0         7.400   4.0                                  1.00       1.00
+- subtotal                          4.622   3.8         4.642   3.8                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                            7.324   4.0         7.338   4.0            208                   1.00       1.00
+- vtowfk                            4.549   3.7         4.569   3.7            208                   1.00       1.00
  
-- cgwf                              6.932   3.7         6.945   3.7            273                   1.00       1.00
-- vtowfk(subdiago)                  0.038   0.0         0.039   0.0            273                   1.00       1.00
-- vtowfk(pw_orthon)                 0.145   0.1         0.146   0.1            273                   1.00       1.00
-- fourwf%vtowfk                     0.191   0.1         0.192   0.1            800                   1.00       1.00
+- cgwf                              4.185   3.4         4.203   3.4            273                   1.00       1.00
+- vtowfk(subdiago)                  0.046   0.0         0.046   0.0            273                   0.99       0.99
+- vtowfk(pw_orthon)                 0.185   0.2         0.186   0.2            273                   1.00       1.00
+- fourwf%vtowfk                     0.107   0.1         0.108   0.1            800                   0.99       0.99
 
-- subtotal                          7.324   4.0         7.338   4.0                                  1.00       1.00
+- subtotal                          4.549   3.7         4.569   3.7                                  1.00       1.00
 
  Partitioning of cgwf
-- cgwf                              6.932   3.7         6.945   3.7            273                   1.00       1.00
+- cgwf                              4.185   3.4         4.203   3.4            273                   1.00       1.00
  
-- getghc%cgwf                       5.756   3.1         5.767   3.1          12598                   1.00       1.00
-- cgwf-O(npw)                       0.448   0.2         0.448   0.2             -1                   1.00       1.00
-- projbd%cgwf                       0.728   0.4         0.730   0.4          17684                   1.00       1.00
+- getghc%cgwf                       3.268   2.7         3.282   2.7          12598                   1.00       1.00
+- cgwf-O(npw)                       0.378   0.3         0.379   0.3             -1                   1.00       1.00
+- projbd%cgwf                       0.539   0.4         0.542   0.4          17684                   0.99       0.99
 
-- subtotal                          6.932   3.7         6.945   3.7                                  1.00       1.00
+- subtotal                          4.185   3.4         4.203   3.4                                  1.00       1.00
 
  Partitioning of respfn
-- respfn                          175.870  95.1       176.386  95.0              4                   1.00       1.00
+- respfn                          115.411  94.8       116.222  94.4              4                   0.99       0.99
  
-- respfn(pspini)                    0.510   0.3         0.510   0.3              4                   1.00       1.00
-- respfn(inwffil)                   0.053   0.0         0.054   0.0              4                   1.00       1.00
-- respfn(frozen)                    0.452   0.2         0.453   0.2              4                   1.00       1.00
-- respfn(dfpt_dyxc1+bef.df          0.424   0.2         0.424   0.2              4                   1.00       1.00
-- respfn(after dfpt_loper)          0.043   0.0         0.094   0.1              4                   0.46       0.46
-- dfpt_loper                      174.383  94.3       174.847  94.2              4                   1.00       1.00
+- respfn(pspini)                    0.236   0.2         0.237   0.2              4                   1.00       1.00
+- respfn(inwffil)                   0.074   0.1         0.074   0.1              4                   1.00       1.00
+- respfn(frozen)                    0.338   0.3         0.339   0.3              4                   0.99       0.99
+- respfn(dfpt_dyxc1+bef.df          0.550   0.5         0.552   0.4              4                   1.00       1.00
+- respfn(after dfpt_loper)          0.050   0.0         0.127   0.1              4                   0.40       0.40
+- dfpt_loper                      114.158  93.7       114.887  93.3              4                   0.99       0.99
 
-- subtotal                        175.870  95.1       176.386  95.0                                  1.00       1.00
+- subtotal                        115.411  94.8       116.221  94.4                                  0.99       0.99
 
  Partitioning of dfpt_looppert
-- dfpt_loper                      174.383  94.3       174.847  94.2              4                   1.00       1.00
+- dfpt_loper                      114.158  93.7       114.887  93.3              4                   0.99       0.99
  
-- dfpt_loper(inwffil)               0.202   0.1         0.203   0.1             30                   1.00       1.00
-- dfpt_scfcv                      173.900  94.0       174.298  93.9             12                   1.00       1.00
-- dfpt_loper(outwf)                 0.184   0.1         0.249   0.1             12                   0.74       0.74
-- (other)                           0.062   0.0         0.062   0.0             -1                   1.00       1.00
+- dfpt_loper(inwffil)               0.300   0.2         0.301   0.2             30                   1.00       1.00
+- dfpt_scfcv                      113.468  93.2       114.072  92.6             12                   0.99       0.99
+- dfpt_loper(outwf)                 0.243   0.2         0.367   0.3             12                   0.66       0.66
+- (other)                           0.108   0.1         0.109   0.1             -1                   1.00       1.00
 
-- subtotal                        174.383  94.3       174.847  94.2                                  1.00       1.00
+- subtotal                        114.158  93.7       114.887  93.3                                  0.99       0.99
 
  Partitioning of dfpt_scfcv
-- dfpt_scfcv                      173.900  94.0       174.298  93.9             12                   1.00       1.00
+- dfpt_scfcv                      113.468  93.2       114.072  92.6             12                   0.99       0.99
  
-- dfpt_vtorho                     172.115  93.0       172.508  93.0            144                   1.00       1.00
-- dfpt_rhotov                       0.140   0.1         0.140   0.1            156                   1.00       1.00
-- dfpt_newvtr                       0.163   0.1         0.163   0.1             86                   1.00       1.00
-- dfpt_nselt/nstdy/nstpaw           1.462   0.8         1.464   0.8             12                   1.00       1.00
+- dfpt_vtorho                     111.454  91.5       111.942  90.9            144                   1.00       1.00
+- dfpt_rhotov                       0.109   0.1         0.110   0.1            156                   0.99       0.99
+- dfpt_newvtr                       0.120   0.1         0.121   0.1             86                   0.99       0.99
+- dfpt_scfcv (6)                    0.012   0.0         0.120   0.1             24                   0.10       0.10
+- dfpt_nselt/nstdy/nstpaw           1.756   1.4         1.762   1.4             12                   1.00       1.00
 
-- subtotal                        173.897  94.0       174.295  93.9                                  1.00       1.00
+- subtotal                        113.463  93.2       114.067  92.6                                  0.99       0.99
 
  Partitioning of dfpt_vtorho
-- dfpt_vtorho                     172.115  93.0       172.508  93.0            144                   1.00       1.00
+- dfpt_vtorho                     111.454  91.5       111.942  90.9            144                   1.00       1.00
  
-- dfpt_vtorho (1)                   0.037   0.0         0.037   0.0            144                   1.00       1.00
-- dfpt_vtowfk                     170.568  92.2       170.957  92.1           7390                   1.00       1.00
-- dfpt_vtorho-kpt loop              1.398   0.8         1.402   0.8            144                   1.00       1.00
-- dfpt_vtorho (4)                   0.107   0.1         0.108   0.1            144                   1.00       1.00
+- dfpt_vtowfk                     109.460  89.9       109.939  89.3           7390                   1.00       1.00
+- dfpt_vtorho-kpt loop              1.861   1.5         1.870   1.5            144                   1.00       1.00
+- dfpt_vtorho (4)                   0.105   0.1         0.105   0.1            144                   0.99       0.99
 
-- subtotal                        172.115  93.0       172.508  93.0                                  1.00       1.00
+- subtotal                        111.453  91.5       111.942  90.9                                  1.00       1.00
 
  Partitioning of dfpt_vtowfk
-- dfpt_vtowfk                     170.568  92.2       170.957  92.1           7390                   1.00       1.00
+- dfpt_vtowfk                     109.460  89.9       109.939  89.3           7390                   1.00       1.00
  
-- dfpt_cgwf                       149.928  81.0       150.266  81.0          73900                   1.00       1.00
-- fourwf%dfpt_accrho%dfpt_         15.406   8.3        15.453   8.3          63592                   1.00       1.00
-- corrmetalwf1%dfpt_vtowfk          0.782   0.4         0.787   0.4          73900                   0.99       0.99
-- dfpt_vtowfk(contrib)              4.429   2.4         4.426   2.4             -1                   1.00       1.00
+- dfpt_vtowfk (1)                   0.061   0.1         0.061   0.0           7390                   1.01       1.01
+- dfpt_cgwf                        97.035  79.7        97.458  79.2          73900                   1.00       1.00
+- fourwf%dfpt_accrho%dfpt_          8.292   6.8         8.338   6.8          63592                   0.99       0.99
+- corrmetalwf1%dfpt_vtowfk          0.812   0.7         0.820   0.7          73900                   0.99       0.99
+- dfpt_vtowfk(contrib)              3.231   2.7         3.234   2.6             -1                   1.00       1.00
+- dfpt_vtowfk (3)                   0.028   0.0         0.028   0.0           7390                   1.00       1.00
 
-- subtotal                        170.568  92.2       170.957  92.1                                  1.00       1.00
+- subtotal                        109.460  89.9       109.939  89.3                                  1.00       1.00
 
  Partitioning of dfpt_cgwf
-- dfpt_cgwf                       149.928  81.0       150.266  81.0          73900                   1.00       1.00
+- dfpt_cgwf                        97.035  79.7        97.458  79.2          73900                   1.00       1.00
  
-- getghc%dfpt_cgwf                106.835  57.8       107.072  57.7         212536                   1.00       1.00
-- getgh1c%dfpt_cgwf                23.369  12.6        23.431  12.6          73900                   1.00       1.00
-- projbd%dfpt_cgwf                 12.282   6.6        12.318   6.6         425072                   1.00       1.00
-- nonlop%dfpt_cgwf !2               1.358   0.7         1.368   0.7          36780                   0.99       0.99
-- nonlop%dfpt_cgwf !5               1.696   0.9         1.705   0.9          31360                   1.00       1.00
-- fourwf%dfpt_cgwf                 19.725  10.7        19.790  10.7          42540                   1.00       1.00
+- dfpt_cgwf-O(npw)                  4.157   3.4         4.154   3.4             -1                   1.00       1.00
+- getghc%dfpt_cgwf                 58.185  47.8        58.443  47.5         212536                   1.00       1.00
+- getgh1c%dfpt_cgwf                14.310  11.7        14.375  11.7          73900                   1.00       1.00
+- projbd%dfpt_cgwf                  6.680   5.5         6.705   5.4         425072                   1.00       1.00
+- nonlop%dfpt_cgwf !2               1.627   1.3         1.639   1.3          36780                   0.99       0.99
+- nonlop%dfpt_cgwf !5               1.637   1.3         1.646   1.3          31360                   0.99       0.99
+- fourwf%dfpt_cgwf                 10.440   8.6        10.496   8.5          42540                   0.99       0.99
 
-- subtotal                        149.928  81.0       150.266  81.0                                  1.00       1.00
+- subtotal                         97.035  79.7        97.458  79.2                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                          112.592  60.9       112.839  60.8         225134                   1.00       1.00
+- getghc                           61.453  50.5        61.725  50.1         225134                   1.00       1.00
  
-- fourwf%getghc                   104.493  56.5       104.786  56.5         225134                   1.00       1.00
-- nonlop%getghc                     6.112   3.3         6.151   3.3         225134                   0.99       0.99
-- getghc-other                      1.986   1.1         1.902   1.0             -1                   1.04       1.04
+- fourwf%getghc                    50.735  41.7        51.012  41.4         225134                   0.99       0.99
+- nonlop%getghc                     8.363   6.9         8.419   6.8         225134                   0.99       0.99
+- getghc-other                      2.354   1.9         2.294   1.9             -1                   1.03       1.03
 
-- subtotal                        112.592  60.9       112.839  60.8                                  1.00       1.00
+- subtotal                         61.453  50.5        61.725  50.1                                  1.00       1.00
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                          140.098  75.7       140.505  75.7         333090                   1.00       1.00
+- fourwf                           69.710  57.2        70.090  56.9         333090                   0.99       0.99
  
-- fourwf%getghc                   104.493  56.5       104.786  56.5         225134                   1.00       1.00
-- fourwf%vtowfk                     0.191   0.1         0.192   0.1            800                   1.00       1.00
-- fourwf%dfpt_cgwf                 19.725  10.7        19.790  10.7          42540                   1.00       1.00
-- fourwf%dfpt_accrho%dfpt_         15.406   8.3        15.453   8.3          63592                   1.00       1.00
-- fourwf%mkrho2                     0.283   0.2         0.283   0.2           1024                   1.00       1.00
+- fourwf%getghc                    50.735  41.7        51.012  41.4         225134                   0.99       0.99
+- fourwf%vtowfk                     0.107   0.1         0.108   0.1            800                   0.99       0.99
+- fourwf%dfpt_cgwf                 10.440   8.6        10.496   8.5          42540                   0.99       0.99
+- fourwf%dfpt_accrho%dfpt_          8.292   6.8         8.338   6.8          63592                   0.99       0.99
+- fourwf%mkrho2                     0.135   0.1         0.136   0.1           1024                   1.00       1.00
 
-- subtotal                        140.098  75.7       140.505  75.7                                  1.00       1.00
+- subtotal                         69.710  57.2        70.090  56.9                                  0.99       0.99
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                             0.314   0.2         0.314   0.2              4                   1.00       1.00
+- mkrho                             0.157   0.1         0.157   0.1              4                   1.00       1.00
  
-- mkrho%respfn                      0.314   0.2         0.314   0.2              4                   1.00       1.00
+- mkrho%respfn                      0.157   0.1         0.157   0.1              4                   1.00       1.00
 
-- subtotal                          0.314   0.2         0.314   0.2                                  1.00       1.00
+- subtotal                          0.157   0.1         0.157   0.1                                  1.00       1.00
 
  Partitioning of inwffil
-- inwffil                           0.019   0.0         0.019   0.0              2                   1.00       1.00
+- inwffil                           0.027   0.0         0.027   0.0              2                   1.00       1.00
  
+- inwffil(call newkpt)              0.027   0.0         0.027   0.0              2                   1.00       1.00
 
-- subtotal                          0.019   0.0         0.019   0.0                                  1.00       1.00
+- subtotal                          0.027   0.0         0.027   0.0                                  1.00       1.00
 
  Partitioning of newkpt
-- newkpt                            0.019   0.0         0.019   0.0              2                   1.00       1.00
+- newkpt                            0.027   0.0         0.027   0.0              2                   1.00       1.00
  
+- newkpt(call wfconv)               0.027   0.0         0.027   0.0             16                   1.00       1.00
 
-- subtotal                          0.019   0.0         0.019   0.0                                  1.00       1.00
+- subtotal                          0.027   0.0         0.027   0.0                                  1.00       1.00
 
  Partitioning of newvtr
-- newvtr                            0.040   0.0         0.040   0.0             24                   1.00       1.00
+- newvtr                            0.036   0.0         0.036   0.0             24                   1.00       1.00
  
 
-- subtotal                          0.040   0.0         0.040   0.0                                  1.00       1.00
+- subtotal                          0.036   0.0         0.036   0.0                                  1.00       1.00
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                            0.292   0.2         0.293   0.2            695                   1.00       1.00
+- fourdp                            0.181   0.1         0.452   0.4            695                   0.40       0.40
  
-- fourdp%(other)                    0.292   0.2         0.293   0.2            695                   1.00       1.00
+- fourdp%(other)                    0.181   0.1         0.452   0.4            695                   0.40       0.40
 
-- subtotal                          0.292   0.2         0.293   0.2                                  1.00       1.00
+- subtotal                          0.181   0.1         0.452   0.4                                  0.40       0.40
 
  Partitioning of afterscfloop
-- afterscfloop                      0.024   0.0         0.024   0.0              2                   1.00       1.00
+- afterscfloop                      0.032   0.0         0.032   0.0              2                   1.00       1.00
  
+- afterscfloop(forstr)              0.032   0.0         0.032   0.0              2                   1.00       1.00
 
-- subtotal                          0.024   0.0         0.024   0.0                                  1.00       1.00
+- subtotal                          0.032   0.0         0.032   0.0                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                            0.024   0.0         0.024   0.0              1                   1.00       1.00
+- forstr                            0.032   0.0         0.032   0.0              1                   1.00       1.00
  
 
-- subtotal                          0.024   0.0         0.024   0.0                                  1.00       1.00
+- subtotal                          0.032   0.0         0.032   0.0                                  1.00       1.00
 
  Partitioning of forstrnps
-- forstrnps                         0.002   0.0         0.002   0.0              1                   1.00       1.00
+- forstrnps                         0.003   0.0         0.003   0.0              1                   1.00       1.00
  
 
-- subtotal                          0.002   0.0         0.002   0.0                                  1.00       1.00
+- subtotal                          0.003   0.0         0.003   0.0                                  1.00       1.00
 
  Partitioning of outscfcv
-- outscfcv                          0.055   0.0         0.089   0.0              2                   0.62       0.62
+- outscfcv                          0.090   0.1         0.189   0.2              2                   0.47       0.47
  
-- outscfcv(output GSR)              0.053   0.0         0.087   0.0              2                   0.61       0.61
+- outscfcv(output GSR)              0.086   0.1         0.179   0.1              2                   0.48       0.48
 
-- subtotal                          0.055   0.0         0.089   0.0                                  0.62       0.62
+- subtotal                          0.090   0.1         0.189   0.2                                  0.47       0.47
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                      0.078   0.0         0.069   0.0         186354                   1.12       1.12
+- communic.MPI                      0.255   0.2         0.244   0.2         186354                   1.05       1.05
 -
-- forstrnps:synchr                  0.000   0.0         0.000   0.0              2                   1.86       1.86
-- mkrho :MPIrhor                    0.000   0.0         0.000   0.0              4                   0.20       0.20
-- subtotal                          0.000   0.0         0.000   0.0                                  0.50       0.50
+- forstrnps:synchr                  0.000   0.0         0.000   0.0              2                   1.00       1.00
+- mkrho :MPIrhor                    0.000   0.0         0.000   0.0              4                   0.61       0.61
+- subtotal                          0.000   0.0         0.000   0.0                                  0.69       0.69
 
  Additional information
-- timana(1)                         0.000   0.0         0.000   0.0              1                   1.33       1.33
-- total timab                       1.220   0.7         1.221   0.7        2002359                   1.00       1.00
-- fourwf                          140.098  75.7       140.505  75.7         333090                   1.00       1.00
+- timana(1)                         0.000   0.0         0.000   0.0              1                   1.02       1.02
+- total timab                       3.377   2.8         3.389   2.8        1865429                   1.00       1.00
+- fourwf                           69.710  57.2        70.090  56.9         333090                   0.99       0.99
 - mklocl(2)                         0.001   0.0         0.001   0.0              1                   1.00       1.00
-- nonlop(forstr)                    0.001   0.0         0.001   0.0             32                   1.00       1.00
-- nonlop(dyfrnl)                    0.064   0.0         0.064   0.0           1920                   1.00       1.00
-- nonlop(ddk)                       1.696   0.9         1.705   0.9          31360                   1.00       1.00
-- nonlop(total)                    10.076   5.4        10.136   5.5         319466                   0.99       0.99
-- fourwf%(G->r)                    15.406   8.3        15.453   8.3          63592                   1.00       1.00
+- nonlop(forstr)                    0.002   0.0         0.002   0.0             32                   1.00       1.00
+- nonlop(dyfrnl)                    0.079   0.1         0.079   0.1           1920                   1.00       1.00
+- nonlop(ddk)                       1.637   1.3         1.646   1.3          31360                   0.99       0.99
+- nonlop(total)                    12.687  10.4        12.769  10.4         319466                   0.99       0.99
+- fourwf%(G->r)                     8.292   6.8         8.338   6.8          63592                   0.99       0.99
 - read_rho                          0.001   0.0         0.001   0.0              1                   1.00       1.00
 
  timana : in multi dataset mode, the more detailed analysis is not done.
@@ -3592,10 +3607,10 @@ P          mk1mem7          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        185.0  wall=        185.6
-
+- Proc.   0 individual time (sec): cpu=        121.8  wall=        123.1
+ 
 ================================================================================
-
+ 
  Calculation completed.
-.Delivered 260 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        185.0  wall=        185.6
+.Delivered 259 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=        121.8  wall=        123.1
