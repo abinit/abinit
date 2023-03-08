@@ -1,6 +1,6 @@
 
 .Version 9.9.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Feb 2023.
-- ( at 16h53 )
+.Starting date : Wed  8 Mar 2023.
+- ( at 11h41 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/build/test/Test_suite/v9_t57-t58-t59-t60-t61/t61.abi
+- input  file    -> /home/alpsulg/jabreu/Software/joao_cumulant2/build/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.abi
 - output file    -> t61.abo
 - root for input  files -> t61i
 - root for output files -> t61o
-
-
+ 
+ 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       5.787 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.231 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,8 +55,8 @@ P This job should need less than                       8.351 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.383 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,13 +72,13 @@ P This job should need less than                      12.377 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      5.095 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -98,7 +98,7 @@ _ WF disk file :      5.095 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
          eph_task1          1
          eph_task2          5
          eph_task3         -4
--          fftalg         312
+-          fftalg         512
            getddb1          0
            getddb2         20
            getddb3         20
@@ -249,19 +249,19 @@ P           mkmem3         29
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   1.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   3.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -272,27 +272,27 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
+ 
  mkfilename : getden/=0, take file _DEN from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  27  27  27
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -305,9 +305,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+ 
+- pspini: atom type   2  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -320,11 +320,11 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
-
+ 
 --------------------------------------------------------------------------------
-
+ 
 -inwffil : will read wavefunctions from disk file t61o_DS20_WFK
-
+ 
 ================================================================================
  prteigrs : about to open file t61o_DS1_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
@@ -333,8 +333,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -7.2526E-01 -7.0948E-03 -7.0948E-03 -7.0948E-03  3.0658E-01  8.4023E-01
   8.4023E-01  8.4023E-01  8.6228E-01  8.6228E-01
  Non-SCF case, kpt    2 (  0.12500  0.00000  0.00000), residuals and eigenvalues=
-  3.79E-17  5.56E-17  4.16E-17  1.50E-17  2.23E-18  6.78E-17  4.92E-17  2.88E-17
-  8.68E-06  4.65E-17
+  3.79E-17  5.56E-17  4.16E-17  1.50E-17  2.23E-18  6.79E-17  4.93E-17  2.90E-17
+  8.69E-06  4.66E-17
  -7.2272E-01 -2.3165E-02 -8.2887E-03 -8.2887E-03  3.2252E-01  7.2324E-01
   7.8396E-01  7.8396E-01  9.0105E-01  9.0922E-01
  Non-SCF case, kpt    3 (  0.25000  0.00000  0.00000), residuals and eigenvalues=
@@ -343,13 +343,13 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  -7.1637E-01 -5.7092E-02 -1.1248E-02 -1.1248E-02  3.5229E-01  6.2728E-01
   7.1988E-01  7.1988E-01  9.4473E-01  9.7628E-01
  Non-SCF case, kpt    4 (  0.37500  0.00000  0.00000), residuals and eigenvalues=
-  7.10E-18  5.79E-17  4.61E-17  3.51E-17  5.32E-17  2.88E-17  1.93E-18  6.04E-17
+  7.10E-18  5.79E-17  4.61E-17  3.51E-17  5.32E-17  2.88E-17  1.93E-18  6.03E-17
   3.66E-18  1.62E-17
  -7.0969E-01 -8.7291E-02 -1.4094E-02 -1.4094E-02  3.6740E-01  5.8746E-01
   6.7584E-01  6.7584E-01  1.0003E+00  1.0557E+00
  Non-SCF case, kpt    5 (  0.12500  0.12500  0.00000), residuals and eigenvalues=
-  2.10E-17  3.95E-17  9.54E-17  9.01E-17  7.63E-17  1.28E-17  5.90E-17  6.19E-17
-  4.93E-17  1.47E-15
+  2.10E-17  3.95E-17  9.53E-17  9.01E-17  7.63E-17  1.27E-17  5.91E-17  6.18E-17
+  4.93E-17  1.48E-15
  -7.2181E-01 -2.2111E-02 -1.2617E-02 -1.2617E-02  3.2970E-01  7.6063E-01
   7.6437E-01  7.6437E-01  7.7163E-01  9.8854E-01
  Non-SCF case, kpt    6 ( -0.25000  0.12500  0.00000), residuals and eigenvalues=
@@ -362,7 +362,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.98E-15  1.89E-13
  -7.1884E-01 -3.9806E-02 -1.9174E-02 -7.6442E-03  3.4520E-01  6.6105E-01
   7.2626E-01  7.5202E-01  9.0361E-01  9.1668E-01
-
+ 
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -374,7 +374,7 @@ lattice_vectors:
 lattice_lengths: [   5.44685,    5.44685,    5.44685, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1426706E+02
-convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.794E-17, diffor:  0.000E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.793E-17, diffor:  0.000E+00, }
 etotal    :  -2.52026287E+01
 entropy   :   0.00000000E+00
 fermie    :  -7.09476690E-03
@@ -393,14 +393,14 @@ force_length_stats: {min: null, max: null, mean: null, }
     1        2.00000          0.32309123
     2        2.00000          7.03516123
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   41.678E-18; max=  97.943E-18
+ 
+ Mean square residual over all n,k,spin=   41.679E-18; max=  97.931E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
-
+ 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      2.03812811310319     2.03812811310319     2.03812811310319
@@ -429,11 +429,11 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   7, nband= 10, wtk=  0.02344, kpt= -0.1250  0.1250  0.0000 (reduced coord)
   -0.71884   -0.03981   -0.01917   -0.00764    0.34520    0.66105    0.72626    0.75202
    0.90361    0.91668
-
+ 
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -444,19 +444,19 @@ meta: {optdriver: 7, eph_task: 5, }
 ...
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t61o_DS20_DDB
 - Reading DVDB from file: t61o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -464,39 +464,39 @@ meta: {optdriver: 7, eph_task: 5, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t61o_DS20_DDB
@@ -511,22 +511,22 @@ meta: {optdriver: 7, eph_task: 5, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
+ 
  Interpolation of the electron-phonon coupling potential
-
+ 
  From coarse q-mesh: [2, 2, 2] to: [8, 8, 8]
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 26
 Interpolation of the electron-phonon coupling potential completed
-
-
+ 
+ 
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -537,22 +537,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t61o_DS1_WFK
 - Reading DDB from file: t61o_DS20_DDB
 - Reading DVDB from file: t61o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -560,39 +560,39 @@ meta: {optdriver: 7, eph_task: -4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t61o_DS20_DDB
@@ -607,11 +607,11 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -625,8 +625,8 @@ meta: {optdriver: 7, eph_task: -4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000     7.219     7.412     1.124
  300.0     0.026     7.219     7.412     1.124
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
@@ -702,8 +702,8 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
 ============================================================================================
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.226    0.001    287.9    0.000
-   4  -0.226    0.001    287.9    0.000
+   3  -0.226    0.001    288.7    0.000
+   4  -0.226    0.001    288.7    0.000
 ============================================================================================
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -746,18 +746,18 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    4  -0.208    0.017     19.0    0.000
 ============================================================================================
-
+ 
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t61o_DS3_SIGEPH.nc
 
-
-
+ 
+ 
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
    VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ 
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
  Linear tetrahedron method.
@@ -766,48 +766,48 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
  Number of k-points in the IBZ: 29
  edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
-
+ 
  Transport (RTA) calculation results:
 
  Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.31E+02        0.00E+00            0.00            0.00
-
-
-
+ 
+ 
+ 
 - Writing RTA transport results to: t61o_DS3_RTA.nc
-
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -832,7 +832,7 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T:  300.0 [K], mu_e:    7.219
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddb1          0
            getddb2         20
            getddb3         20
@@ -929,7 +929,7 @@ P           mkmem3         29
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
 
 
@@ -1019,10 +1019,10 @@ P           mkmem3         29
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.4
-
+- Proc.   0 individual time (sec): cpu=          8.4  wall=          9.2
+ 
 ================================================================================
-
+ 
  Calculation completed.
 .Delivered   4 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.0  wall=         10.4
++Overall time at end (sec) : cpu=          8.4  wall=          9.2

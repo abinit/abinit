@@ -1,6 +1,6 @@
 
 .Version 9.9.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Feb 2023.
-- ( at 16h53 )
+.Starting date : Wed  8 Mar 2023.
+- ( at 11h41 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/build/test/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
+- input  file    -> /home/alpsulg/jabreu/Software/joao_cumulant2/build/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
 - output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
-
-
+ 
+ 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,8 +55,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,8 +72,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,8 +89,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    5 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -106,8 +106,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    6 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,8 +123,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    7 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  7.
@@ -140,8 +140,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    8 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -157,8 +157,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    9 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  9.
@@ -174,8 +174,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET   10 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -191,8 +191,8 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET   11 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11.
@@ -208,8 +208,8 @@ P This job should need less than                       5.742 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET   12 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -225,13 +225,13 @@ P This job should need less than                       5.742 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -339,7 +339,7 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
   eph_tols_idelta10    1.00000000E-12  1.00000000E-12
   eph_tols_idelta11    1.00000000E-12  1.00000000E-12
   eph_tols_idelta12    1.00000000E-12  1.00000000E-12
--          fftalg         312
+-          fftalg         512
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
           getdvdb1          0
@@ -395,7 +395,7 @@ P           mkmem           8
             nband11        20
             nband12        20
            ndtset          12
-          nfreqsp         100
+          nfreqsp         125
             ngfft          16      16      16
              nkpt           8
              nsym          48
@@ -643,37 +643,37 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   1.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   3.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   5.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   7.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   8.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   9.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  10.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  11.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  12.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -684,20 +684,20 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -705,39 +705,39 @@ meta: {optdriver: 7, eph_task: 4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -752,12 +752,12 @@ meta: {optdriver: 7, eph_task: 4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -770,9 +770,9 @@ meta: {optdriver: 7, eph_task: 4, }
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+ 
+- pspini: atom type   2  psp file is /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/alpsulg/jabreu/Software/joao_cumulant2/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -785,11 +785,11 @@ meta: {optdriver: 7, eph_task: 4, }
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
-
+ 
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -803,8 +803,8 @@ meta: {optdriver: 7, eph_task: 4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000     3.561     3.754     4.782
  300.0     0.026     3.173     3.366     5.170
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
@@ -812,7 +812,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 125 , Step: 0.016 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -950,11 +950,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  QP_gap - KS_gap:    0.353 (OTMS:    0.378)
  
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -965,21 +965,21 @@ meta: {optdriver: 7, eph_task: 5, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename: getdvdb from: t60o_DS20_DVDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -987,39 +987,39 @@ meta: {optdriver: 7, eph_task: 5, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -1034,22 +1034,22 @@ meta: {optdriver: 7, eph_task: 5, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
+ 
  Interpolation of the electron-phonon coupling potential
-
+ 
  From coarse q-mesh: [2, 2, 2] to: [4, 4, 4]
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
-
-
+ 
+ 
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -1060,22 +1060,22 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1083,39 +1083,39 @@ meta: {optdriver: 7, eph_task: 4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -1130,11 +1130,11 @@ meta: {optdriver: 7, eph_task: 4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -1148,8 +1148,8 @@ meta: {optdriver: 7, eph_task: 4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000     3.561     3.754     4.782
  300.0     0.026     3.173     3.366     5.170
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 3
  From bsum_start: 2 to bsum_stop: 4
@@ -1157,7 +1157,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 125 , Step: 0.016 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -1295,11 +1295,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  QP_gap - KS_gap:    0.014 (OTMS:    0.024)
  
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -1310,22 +1310,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1333,39 +1333,39 @@ meta: {optdriver: 7, eph_task: -4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -1380,11 +1380,11 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -1398,8 +1398,8 @@ meta: {optdriver: 7, eph_task: -4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000     3.561     3.754     4.782
  300.0     0.026     3.173     3.366     5.170
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 9
  From bsum_start: 1 to bsum_stop: 9
@@ -1408,7 +1408,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Tolerance for integration weights <     1.000000E-12     1.000000E-12
  eph_phwinfact:  1.10
  Only the Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 125 , Step: 0.016 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -1493,7 +1493,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
 ============================================================================================
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.234    1.883      0.2    0.000
+   1 -19.234    1.882      0.2    0.000
    2  -2.697    0.097      3.4   16.537
    3  -0.415    0.187      1.8    2.282
    4  -0.415    0.187      1.8    0.000
@@ -1511,7 +1511,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:    0.0 [K], mu_e:    3.561
    2  -3.149    0.000   4359.5   15.833
    3  -1.171    0.117      2.8    1.978
    4  -1.171    0.117      2.8    0.000
-   5  13.987    0.005     67.9   15.158
+   5  13.987    0.005     67.8   15.158
    6  15.747    0.190      1.7    1.760
    7  16.382    0.102      3.2    0.635
    8  19.258    0.183      1.8    2.876
@@ -1526,7 +1526,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    2  -3.149    0.000   4130.8   15.833
    3  -1.171    0.147      2.2    1.978
    4  -1.171    0.147      2.2    0.000
-   5  13.987    0.007     47.5   15.158
+   5  13.987    0.007     47.4   15.158
    6  15.747    0.273      1.2    1.760
    7  16.382    0.146      2.3    0.635
    8  19.258    0.280      1.2    2.876
@@ -1535,11 +1535,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
@@ -1550,21 +1550,21 @@ meta: {optdriver: 7, eph_task: -5, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1572,39 +1572,39 @@ meta: {optdriver: 7, eph_task: -5, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -1619,22 +1619,22 @@ meta: {optdriver: 7, eph_task: -5, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
+ 
  Interpolation of the electron-phonon coupling potential
-
+ 
  Using list of q-points specified by ph_qpath with 5 qpoints
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 2
 Interpolation of the electron-phonon coupling potential completed
-
-
+ 
+ 
 ================================================================================
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 6, }
@@ -1645,22 +1645,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1668,39 +1668,39 @@ meta: {optdriver: 7, eph_task: -4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -1715,11 +1715,11 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -1733,8 +1733,8 @@ meta: {optdriver: 7, eph_task: -4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000     3.561     3.754     4.782
  300.0     0.026     3.173     3.366     5.170
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
@@ -1743,7 +1743,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Tolerance for integration weights <     1.000000E-06     1.000000E-06
  eph_phwinfact:  3.90
  Only the Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 125 , Step: 0.016 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -1814,18 +1814,18 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    3  -0.415    0.185      1.8    0.000
    4  -0.415    0.185      1.8    0.000
 ============================================================================================
-
+ 
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS6_SIGEPH.nc
 
-
-
+ 
+ 
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
    VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -1835,52 +1835,52 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Number of k-points in the IBZ: 3
  edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
-
+ 
  Transport (RTA) calculation results:
 
  Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
-
+ 
+ 
+ 
 - Writing RTA transport results to: t60o_DS6_RTA.nc
-
+ 
 ================================================================================
 == DATASET  7 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 7, }
@@ -1891,22 +1891,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1914,39 +1914,39 @@ meta: {optdriver: 7, eph_task: -4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -1961,11 +1961,11 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -1979,8 +1979,8 @@ meta: {optdriver: 7, eph_task: -4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000     3.561     3.754     4.782
  300.0     0.026     3.173     3.366     5.170
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
@@ -1989,7 +1989,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Tolerance for integration weights <     1.000000E-06     1.000000E-06
  eph_phwinfact:  1.10
  Only the Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 125 , Step: 0.016 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -2060,18 +2060,18 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
    3  -0.415    0.166      2.0    0.000
    4  -0.415    0.166      2.0    0.000
 ============================================================================================
-
+ 
  Entering transport RTA computation driver.
 - Reading carrier lifetimes from: t60o_DS7_SIGEPH.nc
 
-
-
+ 
+ 
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
    VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
    CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-
+ 
  Computing integrals with downsampled sigma_ngkpt: [2, 2, 2]
 
  === Computation of DOS, VV_DOS and VVTAU_DOS === 
@@ -2081,52 +2081,52 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  Number of k-points in the IBZ: 3
  edos%ief == 0 --> Cannot print quantities at the Fermi level.
 
-
+ 
  Transport (RTA) calculation results:
 
  Cartesian component of SERTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of SERTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of SERTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: xx
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: yy
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
+ 
+ 
  Cartesian component of MRTA mobility tensor: zz
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
-
-
+ 
+ 
+ 
 - Writing RTA transport results to: t60o_DS7_RTA.nc
-
+ 
 ================================================================================
 == DATASET  8 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 8, }
@@ -2137,22 +2137,22 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -2160,39 +2160,39 @@ meta: {optdriver: 7, eph_task: 4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -2207,11 +2207,11 @@ meta: {optdriver: 7, eph_task: 4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -2225,8 +2225,8 @@ meta: {optdriver: 7, eph_task: 4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    0.0     0.000     3.561     3.754     4.782
  300.0     0.026     3.173     3.366     5.170
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 3
  From bsum_start: 2 to bsum_stop: 4
@@ -2234,7 +2234,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 125 , Step: 0.016 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -2372,11 +2372,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.173
  QP_gap - KS_gap:    0.013 (OTMS:    0.024)
  
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET  9 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 9, }
@@ -2387,21 +2387,21 @@ meta: {optdriver: 7, eph_task: 15, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename: getdvdb from: t60o_DS20_DVDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -2409,39 +2409,39 @@ meta: {optdriver: 7, eph_task: 15, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -2456,22 +2456,22 @@ meta: {optdriver: 7, eph_task: 15, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
+ 
  Computing average over the unit cell of the periodic part of the DFPT potentials
 
 
  Using list of q-points specified by ph_qpath with 5 qpoints
-
+ 
  - Results stored in: t60o_DS9_V1QAVG.nc
  Use `abiopen.py out_V1QAVG.nc -e` to visualize results
-
+ 
 ================================================================================
 == DATASET 10 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 10, }
@@ -2482,21 +2482,21 @@ meta: {optdriver: 7, eph_task: -15, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename: getdvdb from: t60o_DS20_DVDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -2504,39 +2504,39 @@ meta: {optdriver: 7, eph_task: -15, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -2551,22 +2551,22 @@ meta: {optdriver: 7, eph_task: -15, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
+ 
  Computing average over the unit cell of the periodic part of the DFPT potentials
 
 
  Using list of q-points found in the DVDB file
-
+ 
  - Results stored in: t60o_DS10_V1QAVG.nc
  Use `abiopen.py out_V1QAVG.nc -e` to visualize results
-
+ 
 ================================================================================
 == DATASET 11 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 11, }
@@ -2577,24 +2577,24 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
-
+ 
  Adding eph_extrael: -1.693263E-03 to input nelect: 8.000000E+00
  Old fermi level:     1.659170E-01, with nelect:     8.000000E+00
  New fermi level:     5.528197E-02, with nelect:     7.998307E+00
@@ -2605,39 +2605,39 @@ meta: {optdriver: 7, eph_task: 4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -2652,11 +2652,11 @@ meta: {optdriver: 7, eph_task: 4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     8.536 (eV)
@@ -2669,8 +2669,8 @@ meta: {optdriver: 7, eph_task: 4, }
 
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
 3000.0     0.259     1.407     1.601     6.935
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
@@ -2678,7 +2678,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 125 , Step: 0.016 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 1 From: 3.000000E+03 to 3.000000E+03 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -2768,11 +2768,11 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T: 3000.0 [K], mu_e:    1.407
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    4  -0.977   -0.586    0.391    2.340   -1.365    0.167   -8.632   10.972    0.000    0.000
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET 12 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 12, }
@@ -2783,26 +2783,26 @@ meta: {optdriver: 7, eph_task: 9, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename: getsigeph from: t60o_DS11_SIGEPH.nc
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
-
+ 
  Adding eph_extrael: -1.693263E-03 to input nelect: 8.000000E+00
  Old fermi level:     1.659170E-01, with nelect:     8.000000E+00
  New fermi level:     5.528197E-02, with nelect:     7.998307E+00
@@ -2813,39 +2813,39 @@ meta: {optdriver: 7, eph_task: 9, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.004143        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
        2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
-         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
-         1         3    1.294974E-16    1.294974E-16    1.040868E+00
-         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
-         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
-         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00    1.292988E-19
+         1         2    0.000000E+00    1.040868E+00    1.292988E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00   -1.292988E-19
+         2         2    0.000000E+00   -1.040868E+00   -1.292988E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
 - Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
@@ -2860,11 +2860,11 @@ meta: {optdriver: 7, eph_task: 9, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  Entering cumulant expansion computation driver.
 - Reading Sigma results from: t60o_DS11_SIGEPH.nc
 
@@ -2873,37 +2873,37 @@ meta: {optdriver: 7, eph_task: 9, }
  Number of spinor components: 1
  Number of k-points computed: 8
  Maximum number of bands computed: 4
- Number of frequencies in Sigma(w): 101
- Number of frequencies in G(w): 101
+ Number of frequencies in Sigma(w): 125
+ Number of frequencies in G(w): 125
  Number of Temperatures: 1
 - Using: 1 MPI procs to distribute: 8 k-points.
-
+ 
 - Writing cumulant results to: t60o_DS12_EPH_CUMULANT.nc
 
  Print first 10 frequencies in gw_vals array (re-im) for testing purposes:
  spin: 1, ikcalc: 1
  gw_vals for itemp:1ib: 1
- -2.41015E+00 -2.03936E+00 -1.66072E+00 -1.27561E+00 -8.85411E-01 -4.91516E-01 -9.53517E-02  3.01644E-01  6.98025E-01  1.09234E+00
- -4.88448E+01 -4.89827E+01 -4.90977E+01 -4.91897E+01 -4.92580E+01 -4.93026E+01 -4.93231E+01 -4.93194E+01 -4.92915E+01 -4.92394E+01
+ -2.33710E+00 -2.04003E+00 -1.73784E+00 -1.43124E+00 -1.12096E+00 -8.07728E-01 -4.92272E-01 -1.75344E-01  1.42307E-01  4.59924E-01
+ -4.87807E+01 -4.88903E+01 -4.89851E+01 -4.90651E+01 -4.91298E+01 -4.91793E+01 -4.92134E+01 -4.92318E+01 -4.92347E+01 -4.92219E+01
  gw_vals for itemp:1ib: 2
- -2.41015E+00 -2.03936E+00 -1.66072E+00 -1.27561E+00 -8.85411E-01 -4.91516E-01 -9.53517E-02  3.01644E-01  6.98025E-01  1.09234E+00
- -4.88448E+01 -4.89827E+01 -4.90977E+01 -4.91897E+01 -4.92580E+01 -4.93026E+01 -4.93231E+01 -4.93194E+01 -4.92915E+01 -4.92394E+01
+ -2.33710E+00 -2.04003E+00 -1.73784E+00 -1.43124E+00 -1.12096E+00 -8.07728E-01 -4.92272E-01 -1.75344E-01  1.42307E-01  4.59924E-01
+ -4.87807E+01 -4.88903E+01 -4.89851E+01 -4.90651E+01 -4.91298E+01 -4.91793E+01 -4.92134E+01 -4.92318E+01 -4.92347E+01 -4.92219E+01
  gw_vals for itemp:1ib: 3
- -2.41015E+00 -2.03936E+00 -1.66072E+00 -1.27561E+00 -8.85411E-01 -4.91516E-01 -9.53517E-02  3.01644E-01  6.98025E-01  1.09234E+00
- -4.88448E+01 -4.89827E+01 -4.90977E+01 -4.91897E+01 -4.92580E+01 -4.93026E+01 -4.93231E+01 -4.93194E+01 -4.92915E+01 -4.92394E+01
+ -2.33710E+00 -2.04003E+00 -1.73784E+00 -1.43124E+00 -1.12096E+00 -8.07728E-01 -4.92272E-01 -1.75344E-01  1.42307E-01  4.59924E-01
+ -4.87807E+01 -4.88903E+01 -4.89851E+01 -4.90651E+01 -4.91298E+01 -4.91793E+01 -4.92134E+01 -4.92318E+01 -4.92347E+01 -4.92219E+01
  gw_vals for itemp:1ib: 4
-  3.93549E+01  3.69989E+01  3.47674E+01  3.26478E+01  3.06293E+01  2.87025E+01  2.68595E+01  2.50934E+01  2.33986E+01  2.17704E+01
- -8.23808E+00 -7.92259E+00 -7.65099E+00 -7.41876E+00 -7.22224E+00 -7.05862E+00 -6.92549E+00 -6.82111E+00 -6.74403E+00 -6.69327E+00
+  3.91400E+01  3.72367E+01  3.54154E+01  3.36694E+01  3.19925E+01  3.03794E+01  2.88255E+01  2.73263E+01  2.58783E+01  2.44782E+01
+ -8.17924E+00 -7.92331E+00 -7.69618E+00 -7.49543E+00 -7.31900E+00 -7.16512E+00 -7.03232E+00 -6.91938E+00 -6.82528E+00 -6.74922E+00
 
- Print first 5 temperatures of diagonal mobility_mu > 1e-6 (with ieh as electrons or holes) for testing purposes:
+ Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
  spin: 1
  mobility_mu for itemp:1 ieh: 2 xyz: 1
-  4.79955E-02
+  4.78844E-02
  mobility_mu for itemp:1 ieh: 2 xyz: 2
-  4.79955E-02
+  4.78844E-02
  mobility_mu for itemp:1 ieh: 2 xyz: 3
-  4.79955E-02
-
+  4.78844E-02
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -3046,7 +3046,7 @@ meta: {optdriver: 7, eph_task: 9, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart12    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
           getdvdb1          0
@@ -3093,7 +3093,7 @@ P           mkmem           8
             nband11        20
             nband12        20
            ndtset          12
-          nfreqsp         100
+          nfreqsp         125
             ngfft          16      16      16
              nkpt           8
              nsym          48
@@ -3363,7 +3363,7 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
 
 
@@ -3453,10 +3453,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.8
-
+- Proc.   0 individual time (sec): cpu=          9.2  wall=         10.7
+ 
 ================================================================================
-
+ 
  Calculation completed.
 .Delivered  14 WARNINGs and  23 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.1  wall=          9.8
++Overall time at end (sec) : cpu=          9.2  wall=         10.7
