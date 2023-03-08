@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  8 Mar 2023.
-- ( at 11h41 )
+.Starting date : Tue  7 Mar 2023.
+- ( at 18h58 )
   
-- input  file    -> /home/alpsulg/jabreu/Software/joao_cumulant2/build/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
 - output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -2883,6 +2883,7 @@ meta: {optdriver: 7, eph_task: 9, }
  Print first 10 frequencies in gw_vals array (re-im) for testing purposes:
  spin: 1, ikcalc: 1
  gw_vals for itemp:1ib: 1
+<<<<<<< HEAD
  -2.33710E+00 -2.04003E+00 -1.73784E+00 -1.43124E+00 -1.12096E+00 -8.07728E-01 -4.92272E-01 -1.75344E-01  1.42307E-01  4.59924E-01
  -4.87807E+01 -4.88903E+01 -4.89851E+01 -4.90651E+01 -4.91298E+01 -4.91793E+01 -4.92134E+01 -4.92318E+01 -4.92347E+01 -4.92219E+01
  gw_vals for itemp:1ib: 2
@@ -2894,6 +2895,19 @@ meta: {optdriver: 7, eph_task: 9, }
  gw_vals for itemp:1ib: 4
   3.91400E+01  3.72367E+01  3.54154E+01  3.36694E+01  3.19925E+01  3.03794E+01  2.88255E+01  2.73263E+01  2.58783E+01  2.44782E+01
  -8.17924E+00 -7.92331E+00 -7.69618E+00 -7.49543E+00 -7.31900E+00 -7.16512E+00 -7.03232E+00 -6.91938E+00 -6.82528E+00 -6.74922E+00
+=======
+ -2.33708E+00 -2.04000E+00 -1.73782E+00 -1.43122E+00 -1.12094E+00 -8.07704E-01 -4.92249E-01 -1.75320E-01  1.42331E-01  4.59947E-01
+ -4.87807E+01 -4.88903E+01 -4.89851E+01 -4.90651E+01 -4.91299E+01 -4.91793E+01 -4.92134E+01 -4.92318E+01 -4.92347E+01 -4.92219E+01
+ gw_vals for itemp:1ib: 2
+ -2.33708E+00 -2.04000E+00 -1.73782E+00 -1.43122E+00 -1.12094E+00 -8.07704E-01 -4.92249E-01 -1.75320E-01  1.42331E-01  4.59947E-01
+ -4.87807E+01 -4.88903E+01 -4.89851E+01 -4.90651E+01 -4.91299E+01 -4.91793E+01 -4.92134E+01 -4.92318E+01 -4.92347E+01 -4.92219E+01
+ gw_vals for itemp:1ib: 3
+ -2.33708E+00 -2.04000E+00 -1.73782E+00 -1.43122E+00 -1.12094E+00 -8.07704E-01 -4.92249E-01 -1.75320E-01  1.42331E-01  4.59947E-01
+ -4.87807E+01 -4.88903E+01 -4.89851E+01 -4.90651E+01 -4.91299E+01 -4.91793E+01 -4.92134E+01 -4.92318E+01 -4.92347E+01 -4.92219E+01
+ gw_vals for itemp:1ib: 4
+  3.91397E+01  3.72364E+01  3.54151E+01  3.36691E+01  3.19922E+01  3.03792E+01  2.88252E+01  2.73261E+01  2.58781E+01  2.44780E+01
+ -8.17922E+00 -7.92326E+00 -7.69615E+00 -7.49541E+00 -7.31898E+00 -7.16509E+00 -7.03229E+00 -6.91936E+00 -6.82526E+00 -6.74920E+00
+>>>>>>> b7dbbd430422e27616ce42e5f840af117a952f14
 
  Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
  spin: 1
@@ -2903,7 +2917,11 @@ meta: {optdriver: 7, eph_task: 9, }
   4.78844E-02
  mobility_mu for itemp:1 ieh: 2 xyz: 3
   4.78844E-02
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> b7dbbd430422e27616ce42e5f840af117a952f14
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -3453,10 +3471,19 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
+<<<<<<< HEAD
 - Proc.   0 individual time (sec): cpu=          9.2  wall=         10.7
  
+=======
+- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.9
+
+>>>>>>> b7dbbd430422e27616ce42e5f840af117a952f14
 ================================================================================
  
  Calculation completed.
 .Delivered  14 WARNINGs and  23 COMMENTs to log file.
+<<<<<<< HEAD
 +Overall time at end (sec) : cpu=          9.2  wall=         10.7
+=======
++Overall time at end (sec) : cpu=          9.2  wall=          9.9
+>>>>>>> b7dbbd430422e27616ce42e5f840af117a952f14
