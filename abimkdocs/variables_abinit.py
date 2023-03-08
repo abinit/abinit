@@ -6260,9 +6260,9 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.9.0",
     text=r"""
-Gives the maximum number of self-consistent iterations in
-which G and/or W will be updated until the quasi-particle energies are converged within [[gwr_tolqpe]].
-[[gwr_task]] defines the type of self-consistency.
+Maximum number of self-consistent iterations in which G and/or W will be updated
+until the quasi-particle energies are converged within [[gwr_tolqpe]].
+[[gwr_task]] defines the self-consistency type.
 """,
 ),
 
@@ -23322,7 +23322,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the number of imaginary-time points
+This variable defines the number of imaginary-time points in the minimax mesh.
 
 !!! important
 
@@ -23341,6 +23341,12 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
+This input variable selects the algorithm to be used to compute the polarizability in the GWR code.
+Possible values are
+
+* 0 --> Automatic selection.
+* 1 --> Use supercell.
+* 2 --> Use convolutions in the BZ.
 """,
 ),
 
@@ -23355,6 +23361,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
+Number of cutoff energies for extrapolating RPA correlation energy.
 """,
 ),
 
@@ -23369,6 +23376,12 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
+This input variable selects the algorithm to be used to compute the self-energy in the GWR code.
+Possible values are
+
+* 0 --> Automatic selection.
+* 1 --> Use supercell.
+* 2 --> Use convolutions in the BZ.
 """,
 ),
 
@@ -23398,7 +23411,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.8.0",
     text=r"""
-Energy window for the empty states used in the computation of the head/wings of the polarizability.
+Energy window in Hartree for the empty states used in the computation of the head/wings of the polarizability.
 """,
 ),
 

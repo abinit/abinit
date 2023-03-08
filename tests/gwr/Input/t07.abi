@@ -55,11 +55,12 @@ pseudos "Li.psp8, F.upf"
 #%%   t07o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%%   t07o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%%   t07o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = GWR
+#%% keywords = GWR, CC4S
 #%% description =
 #%%   LiF. Interface with CC4S code
 #%%<END TEST_INFO>

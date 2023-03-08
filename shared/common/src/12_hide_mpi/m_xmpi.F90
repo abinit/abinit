@@ -337,16 +337,6 @@ module m_xmpi
  public :: xmpio_create_fherm_packed
  public :: xmpio_create_coldistr_from_fpacked
  public :: xmpio_create_coldistr_from_fp3blocks
-
-!interface xmpio_read
-!  module procedure xmpio_read_int
-!  module procedure xmpio_read_dp
-!end interface xmpio_read
-!
-!interface xmpio_write
-!  module procedure xmpio_write_int
-!  module procedure xmpio_write_dp
-!end interface xmpio_write
 #endif
 
 !----------------------------------------------------------------------
@@ -3048,7 +3038,7 @@ end subroutine xmpi_largetype_free
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_type_struct(ncount,block_length,block_displ,block_type,new_type,mpierr)
+subroutine xmpio_type_struct(ncount, block_length, block_displ, block_type, new_type, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3105,7 +3095,7 @@ end subroutine xmpio_type_struct
 !!
 !! SOURCE
 
-subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
+subroutine xmpio_get_info_frm(bsize_frm, mpi_type_frm, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3273,7 +3263,7 @@ end subroutine xmpio_get_info_frm
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_read_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
+subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -3398,7 +3388,7 @@ end subroutine xmpio_read_frm
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_write_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
+subroutine xmpio_write_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -3531,7 +3521,7 @@ end subroutine xmpio_write_frm
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fstripes(ncount,sizes,types,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fstripes(ncount, sizes, types, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3620,7 +3610,7 @@ end subroutine xmpio_create_fstripes
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fsubarray_2D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fsubarray_2D(sizes, subsizes, array_of_starts, old_type, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3631,8 +3621,7 @@ subroutine xmpio_create_fsubarray_2D(sizes,subsizes,array_of_starts,old_type,new
  integer,intent(in) :: sizes(2),subsizes(2),array_of_starts(2)
 !Local variables-------------------------------
 !scalars
- integer :: bsize_frm,bsize_old,nx,ny
- integer :: column_type,ldx
+ integer :: bsize_frm,bsize_old,nx,ny,column_type,ldx
  integer(XMPI_OFFSET_KIND) :: st_x,st_y
  integer(MPI_ADDRESS_KIND) :: stride_x
  !character(len=500) :: msg
@@ -3704,7 +3693,7 @@ end subroutine xmpio_create_fsubarray_2D
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fsubarray_3D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fsubarray_3D(sizes, subsizes, array_of_starts, old_type, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3744,9 +3733,9 @@ subroutine xmpio_create_fsubarray_3D(sizes,subsizes,array_of_starts,old_type,new
 
  ! The view starts at the first element of the submatrix.
  my_offpad = (st_x-1)*bsize_old + &
-&            (st_y-1)*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
-&            (st_z-1)*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
-&             xmpio_bsize_frm
+             (st_y-1)*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
+             (st_z-1)*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
+              xmpio_bsize_frm
 
  ! Byte size of the Fortran record + the two markers.
  stride_x = ldx*bsize_old + 2*bsize_frm
@@ -3800,7 +3789,7 @@ end subroutine xmpio_create_fsubarray_3D
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fsubarray_4D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fsubarray_4D(sizes, subsizes, array_of_starts, old_type, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3843,10 +3832,10 @@ subroutine xmpio_create_fsubarray_4D(sizes,subsizes,array_of_starts,old_type,new
 
  ! The view starts at the first element of the submatrix.
  my_offpad = (st_x-1)*bsize_old + &
-&            (st_y-1)*        (ldx*bsize_old+2*xmpio_bsize_frm) + &
-&            (st_z-1)*ldy*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
-&            (st_a-1)*lda*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
-&             xmpio_bsize_frm
+             (st_y-1)*        (ldx*bsize_old+2*xmpio_bsize_frm) + &
+             (st_z-1)*ldy*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
+             (st_a-1)*lda*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
+             xmpio_bsize_frm
 
  ! Byte size of the Fortran record + the two markers.
  stride_x = ldx*bsize_old + 2*bsize_frm
@@ -3905,7 +3894,7 @@ end subroutine xmpio_create_fsubarray_4D
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
+subroutine xmpio_check_frmarkers(fh, offset, sc_mode, nfrec, bsize_frecord, ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3935,12 +3924,11 @@ subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
 
  ! Workaround for XLF
  myfh = fh
-
  ierr=0
 
  bsize_frm    = xmpio_bsize_frm     ! Byte size of the Fortran record marker.
  mpi_type_frm = xmpio_mpi_type_frm  ! MPI type of the record marker.
- !
+
  ! Define the view for the file.
  nb=2*nfrec
  ABI_MALLOC(block_length,(nb+2))
@@ -4086,7 +4074,7 @@ end subroutine xmpio_check_frmarkers
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_read_int(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
+subroutine xmpio_read_int(fh, offset, sc_mode, ncount, buf, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -4178,7 +4166,7 @@ end subroutine xmpio_read_int
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_read_dp(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
+subroutine xmpio_read_dp(fh, offset, sc_mode, ncount, buf, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -4291,7 +4279,7 @@ end function xmpio_max_address
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
+subroutine xmpio_write_frmarkers(fh, offset, sc_mode, nfrec, bsize_frecord, ierr)
 
 !Arguments ------------------------------------
 !scalars

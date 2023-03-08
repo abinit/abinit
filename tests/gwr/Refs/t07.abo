@@ -359,11 +359,13 @@ meta: {optdriver: 6, }
 
  Writing Gridvectors info to file: t07o_DS2_GridVectors.yaml
 
- Writing Eigenenergies info to file: t07o_DS2_EigenEnergies.yaml
+ Writing CoulombVertex info to file: t07o_DS2_CoulombVertex.yaml
 
- Writing Eigenenergies to file: t07o_DS2_EigenEnergies.element
+ Writing CoulombVertex data to file: t07o_DS2_CoulombVertex.elements
 
- Writing CoulombVertex to file: t07o_DS2_CoulombVertex.yaml
+ Writing CoulombPotential info to file: t07o_DS2_CoulombPotential.yaml
+
+ Writing CoulombPotential data to file: t07o_DS2_CoulombPotential.elements
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
@@ -372,6 +374,10 @@ meta: {optdriver: 6, }
    CBM:     8.101 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
  Direct gap:         6.335 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
+
+ Writing Eigenenergies info to file: t07o_DS2_EigenEnergies.yaml
+
+ Writing Eigenenergies to file: t07o_DS2_EigenEnergies.element
 
 == END DATASET(S) ==============================================================
 ================================================================================

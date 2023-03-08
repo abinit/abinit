@@ -947,8 +947,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (istwf_k == 2) then
-   !ABI_WARNING("istwfk == 2 is still under development")
    ABI_ERROR("istwfk == 2 is still under development")
+   !ABI_WARNING("istwfk == 2 is still under development")
  end if
 
  if (dtset%ixc < 0) then
@@ -976,8 +976,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! The coarse FFT mesh.
  n1 = ngfftc(1); n2 = ngfftc(2); n3 = ngfftc(3)
  n4 = ngfftc(4); n5 = ngfftc(5); n6 = ngfftc(6)
- nfftc = product(ngfftc(1:3))
- mgfftc = maxval(ngfftc(1:3))
+ nfftc = product(ngfftc(1:3)); mgfftc = maxval(ngfftc(1:3))
 
  ! Initialize the Hamiltonian datatype on the coarse FFT mesh.
  if (present(electronpositron)) then

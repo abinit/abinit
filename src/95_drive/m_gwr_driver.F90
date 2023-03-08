@@ -21,6 +21,9 @@
 
 module m_gwr_driver
 
+#ifdef HAVE_MPI2
+ use mpi
+#endif
  use defs_basis
  use defs_wvltypes
  use m_errors
@@ -86,6 +89,10 @@ module m_gwr_driver
 !!***
 
  public :: gwr_driver
+
+#ifdef HAVE_MPI1
+ include 'mpif.h'
+#endif
 !!***
 
 contains
@@ -708,7 +715,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    if (my_rank == master) then
      call ebands_print_gaps(owfk_ebands, ab_out, header="KS gaps after direct diagonalization")
      call ebands_print_gaps(owfk_ebands, std_out, header="KS gaps after direct diagonalization")
+     if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
    end if
+
 
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)
@@ -859,6 +868,73 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 end subroutine gwr_driver
 !!***
 
+!!****f* m_gwr_driver/cc4s_write_eigens
+!! NAME
+!!  cc4s_write_eigens
+!!
+!! FUNCTION
+!!  Write eigenvalues in CC4S format. Only master proc should call this routine.
+!!
+!! INPUTS
+
+subroutine cc4s_write_eigens(ebands, dtfil)
+
+!Arguments ------------------------------------
+ type(ebands_t),intent(in) :: ebands
+ type(datafiles_type),intent(in) :: dtfil
+
+!Local variables-------------------------------
+!scalars
+ integer :: unt, ik_ibz, spin, band
+ character(len=500) :: msg
+ character(len=fnlen) :: filepath
+! *************************************************************************
+
+ filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.yaml'
+ write(ab_out, "(3a)")ch10," Writing Eigenenergies info to file: ", trim(filepath)
+ if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
+   ABI_ERROR(msg)
+ end if
+ write(unt,'(A)')    'version: 100'
+ write(unt,'(A)')    'type: Tensor'
+ write(unt,'(A)')    'scalarType: Real64'
+ write(unt,'(A)')    'dimensions:'
+ !write(unt,'(A,I0)') '- length: ',((NBANDSDUMP)*WDES%ISPIN)
+ write(unt,'(A,I0)') '- length: ',ebands%mband * ebands%nkpt * ebands%nsppol
+ write(unt,'(A)')    '  type: State'
+ write(unt,'(A)')    'elements:'
+ write(unt,'(A)')    '  type: TextFile'
+ !write(unt,'(A)')    'unit: 0.03674932217563878       # = (Eh/eV)'
+ write(unt,'(A)')    'unit: 1.0'
+ write(unt,'(A)')    'metaData:'
+ write(unt,'(A,E22.15)')    '  fermiEnergy: ',ebands%fermie
+ write(unt,'(A)')    '  energies:'
+ do spin=1,ebands%nsppol
+   do ik_ibz=1,ebands%nkpt
+     do band=1,ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
+       write(unt,*) '  - ',ebands%eig(band,ik_ibz,spin)
+     end do
+   end do
+ end do
+ close(unt)
+
+ filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.element'
+ write(ab_out, "(3a)")ch10," Writing Eigenenergies to file: ", trim(filepath)
+ if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
+   ABI_ERROR(msg)
+ end if
+ do spin=1,ebands%nsppol
+   do ik_ibz=1,ebands%nkpt
+     do band=1,ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
+       write(unt,*) '  - ',ebands%eig(band,ik_ibz,spin)
+     end do
+   end do
+ end do
+ close(unt)
+
+end subroutine cc4s_write_eigens
+!!***
+
 !!****f* m_gwr_driver/cc4s_gamma
 !! NAME
 !!  cc4s_gamma
@@ -887,9 +963,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: istwfk1 = 1, mG0(3) = 0, master = 0
- integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig
+ integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, nfrec, ierr
  integer :: band1_start, band1_stop, batch1_size, n1dat, idat1
  integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_
+ integer(XMPI_OFFSET_KIND) :: offset, my_offset
  real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3)
  character(len=500) :: msg
  character(len=fnlen) :: filepath
@@ -901,12 +978,15 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
  integer,allocatable,target :: m_gvec(:,:)
  complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:)
  complex(gwpc),allocatable :: vc_qg(:)
+ integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
+ integer :: sizes(2),subsizes(2),array_of_starts(2), mg_type
 
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
 
- nproc = xmpi_comm_size(ugb%comm); my_rank = xmpi_comm_rank(ugb%comm)
+ comm = ugb%comm
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
 
  ! m_gvec is the g-sphere for the oscillators M.
@@ -935,13 +1015,13 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
 
  nqibz_ = 1; nqbz_ = 1; qbz_ = zero
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
- !call vcgen%init(cryst, ks_ebands%kptrlatt, nkbz, nqibz_, nqbz_, qbz_, &
- !                dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, ugb%comm)
+ !call vcgen%init(cryst, ebands%kptrlatt, nkbz, nqibz_, nqbz_, qbz_, &
+ !                dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
 
  ! NB: npweps = m_npw
  ABI_CALLOC(vc_qg, (m_npw))
  qpt = zero
- !call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, dtset%gw_qlwl(:,1), cryst, vc_qg, ugb%comm)
+ !call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, dtset%gw_qlwl(:,1), cryst, vc_qg, comm)
  vc_qg = vc_qg**2
  call vcgen%free()
 
@@ -969,7 +1049,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      write(unt,'(A)')    '  - length: 3'
      write(unt,'(A)')    '    type: Vector'
      !#ifdef gammareal
-     !     write(7,'(A,I6)') '  - length: ',NGVECTOR*2-1     ! TODO: TR symmetry>
+     !write(unt,'(A,I0)') '  - length: ',NGVECTOR*2-1     ! TODO: TR symmetry>
      !#else
      write(unt,'(A,I0)') '  - length: ',m_npw
      !#endif
@@ -1002,47 +1082,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      end do
      close(unt)
 
-     ! Write eigenenergies. See https://manuals.cc4s.org/user-manual/objects/EigenEnergies.html
-     filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.yaml'
-     write(ab_out, "(3a)")ch10," Writing Eigenenergies info to file: ", trim(filepath)
-     if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
-       ABI_ERROR(msg)
-     end if
-     write(unt,'(A)')    'version: 100'
-     write(unt,'(A)')    'type: Tensor'
-     write(unt,'(A)')    'scalarType: Real64'
-     write(unt,'(A)')    'dimensions:'
-     !write(unt,'(A,I9)') '- length: ',((NBANDSDUMP)*WDES%ISPIN)
-     write(unt,'(A,I0)') '- length: ',dtset%mband * dtset%nsppol
-     write(unt,'(A)')    '  type: State'
-     write(unt,'(A)')    'elements:'
-     write(unt,'(A)')    '  type: TextFile'
-     !write(unt,'(A)')    'unit: 0.03674932217563878       # = (Eh/eV)'
-     write(unt,'(A)')    'unit: 1.0'
-     write(unt,'(A)')    'metaData:'
-     write(unt,'(A,E22.15)')    '  fermiEnergy: ',zero !#EFERMI
-     write(unt,'(A)')    '  energies:'
-     !DO SI=1,WDES%ISPIN*(NBANDSDUMP+NFREEZE)
-     !  SPA=SP_ORD(SI)
-     !  I=N_ORD(SI)
-     !  IF (I <= NFREEZE) CYCLE
-     !  write(unt,*) '  - ',REAL(W%CELTOT(I,1,SPA),kind=8)
-     !ENDDO
-     close(unt)
-
-     filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.element'
-     write(ab_out, "(3a)")ch10," Writing Eigenenergies to file: ", trim(filepath)
-     if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
-       ABI_ERROR(msg)
-     end if
-     !DO SI=1,WDES%ISPIN*(NBANDSDUMP+NFREEZE)
-     !  SPA=SP_ORD(SI)
-     !  I=N_ORD(SI)
-     !  IF (I <= NFREEZE) CYCLE
-     !  write(unt,*) REAL(W%CELTOT(I,1,SPA),kind=8)
-     !ENDDO
-     close(unt)
-
      !!filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertexSingularVectors.yaml'
      !!write(ab_out, "(3a)")ch10,' Writing CoulombVertexSingularVectors to file: ', trim(filepath)
      !!if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
@@ -1066,11 +1105,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      !!close(unt)
      !!!IF (ME==0) OPEN(unit = 7,file = "CoulombVertexSingularVectors.elements",FORM='UNFORMATTED',access='stream',STATUS='REPLACE')
      !!!close(unt)
-   end if ! (ik_ibz == 1 .and. spin == 1) then
+
 
    ! https://manuals.cc4s.org/user-manual/objects/CoulombVertex.html
    filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.yaml'
-   write(ab_out, "(3a)")ch10, ' Writing CoulombVertex to file: ', trim(filepath)
+   write(ab_out, "(3a)")ch10, ' Writing CoulombVertex info to file: ', trim(filepath)
    if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
      ABI_ERROR(msg)
    end if
@@ -1098,6 +1137,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
    !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
    !ALLOCATE(CVERTEX_TMP(NOPTAUX,(NBANDSDUMP),WDES%ISPIN))
    filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
+   write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(filepath)
    if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
      ABI_ERROR(msg)
    end if
@@ -1105,6 +1145,47 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
    !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
    !write(unt) CVERTEX_TMP_SINGLE(:)
    close(unt)
+
+   ! https://manuals.cc4s.org/user-manual/objects/CoulombPotential.html
+   filepath = trim(dtfil%filnam_ds(4))//'_CoulombPotential.yaml'
+   write(ab_out, "(3a)")ch10, ' Writing CoulombPotential info to file: ', trim(filepath)
+   if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
+     ABI_ERROR(msg)
+   end if
+   write(unt,'(A)')    'version: 100'
+   write(unt,'(A)')    'type: Tensor'
+   write(unt,'(A)')    'scalarType: Real64'
+   write(unt,'(A)')    'dimensions:'
+   !#ifdef gammareal
+   !write(unt,'(A,I0)') '  - length: ',NGVECTOR*2-1
+   !#else
+   write(unt,'(A,I0)') '  - length: ',m_npw
+   !#endif
+   write(unt,'(A)')    '    type: Momentum'
+   write(unt,'(A)')    'elements:'
+   write(unt,'(A)')    '  type: TextFile'
+   write(unt,'(A)')    'unit: 1.0'
+   !rite(unt,'(A)')    'unit: 0.2479966649373453       # =(Eh/eV*Bohr^3/Angstrom^3)'
+   close(unt)
+
+   filepath = trim(dtfil%filnam_ds(4))//'_CoulombPotential.elements'
+   write(ab_out, "(3a)")ch10, ' Writing CoulombPotential data to file: ', trim(filepath)
+   if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
+     ABI_ERROR(msg)
+   end if
+   !OPEN(unit = ,file = "CoulombPotential.elements",FORM='FORMATTED',access='stream',STATUS='REPLACE')
+   !KQ=1 !k-points to be implemented
+   !DO NG=1,NGVECTOR
+   !  write(unt,*) REAL(POTFAK_FULL(NG,KQ)*CONJG(POTFAK_FULL(NG,KQ)),kind=q)
+   !ENDDO
+   !#ifdef gammareal
+   !DO NG=2,NGVECTOR
+   !  write(unt,*) REAL(POTFAK_FULL(NG,KQ)*CONJG(POTFAK_FULL(NG,KQ)),kind=q)
+   !ENDDO
+   !#else
+   !#endif
+   close(unt)
+   end if ! (ik_ibz == 1 .and. spin == 1) then
  end if ! my_rank == master
 
  ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
@@ -1121,7 +1202,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
  ABI_MALLOC(ur2_batch, (u_nfft * nspinor, batch2_size))
  ABI_MALLOC(ur12_batch, (u_nfft * nspinor**2, batch2_size))
  ABI_MALLOC(ug12_batch, (m_npw * nspinor**2, batch2_size))
- ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S")
+ ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S interface")
 
  ! TODO: take advantage of
  ! M_{12}(g) = <1|e^{-ig.r}|2> => M_{12}(g) = M_{21}(-g)^*
@@ -1131,8 +1212,25 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
  call uplan_2%init(npw_k, nspinor, batch2_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
  call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, istwfk1, m_gvec, dp, dtset%use_gpu_cuda)
 
- do band1_start=1, ugb%nband_k, batch1_size
+#ifdef HAVE_MPI_IO
+ filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
+ call MPI_FILE_OPEN(comm, filepath, MPI_MODE_WRONLY, xmpio_info, fh, mpierr)
+ ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
+ if (my_rank == master) then
+   write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(filepath)
+   offset = 0; nfrec = ugb%nband_k ** 2
+   ABI_MALLOC(bsize_frecords, (nfrec))
+   bsize_frecords = 2 * m_npw * xmpi_bsize_dp
+   call xmpio_write_frmarkers(fh, offset, xmpio_single, nfrec, bsize_frecords, ierr)
+   ABI_CHECK(ierr == 0, "xmpio_write_frmarkers returned ierr != 0")
+   ABI_FREE(bsize_frecords)
+ end if
+ call xmpi_barrier(comm)
+#else
+ ABI_ERROR("CC4S interface requires MPI-IO!")
+#endif
 
+ do band1_start=1, ugb%nband_k, batch1_size
    ! Collect n1dat bands starting from band1_start on each proc.
    n1dat = blocked_loop(band1_start, ugb%nband_k, batch1_size)
    band1_stop = band1_start + n1dat - 1
@@ -1154,7 +1252,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      my_ib2 = band2_start - ugb%my_bstart + 1
      band2_stop = band2_start + n2dat - 1
 
-     ! FFT: ugb%mat --> ur2_batch
+     ! FFT: ugb%mat --> ur2_batch for nd2dat states.
      !call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, &
      !            u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
      !            ugb%mat%buffer_cplx(:,my_ib2), &     ! in
@@ -1163,6 +1261,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
      call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
 
      do idat1=1,n1dat
+       ! Build n2dat products in real space, then r --> g.
        do idat2=1,n2dat
          ur12_batch(:, idat2) = ur1_batch(:, idat1) * ur2_batch(:, idat2)
        end do
@@ -1181,19 +1280,34 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ugb)
          ug12_batch(:,idat2) = ug12_batch(:,idat2) * vc_qg(:)
        end do
 
+       ! Write ug12_batch.
+#ifdef HAVE_MPI_IO
+       !sizes = []; subsizes = []; array_of_starts = [1, 1]
+       !call xmpio_create_fsubarray_2D(sizes, subsizes, array_of_starts, old_type, mg_type, my_offpad, mpierr)
+       !call xmpio_create_fstripes(ncount, sizes, types, new_type, my_offpad, mpierr)
+       !ABI_HANDLE_MPIERR(mpierr)
+       !my_offset = offset + my_offpad - xmpio_bsize_frm
+       !call MPI_FILE_SET_VIEW(fh, my_offset, MPI_BYTE, mg_type, 'native', xmpio_info, mpierr)
+       !ABI_HANDLE_MPIERR(mpierr)
+       !call MPI_TYPE_FREE(mg_type, mpierr)
+       !ABI_HANDLE_MPIERR(mpierr)
+       !call MPI_FILE_WRITE(fh, buffer, bufsz, MPI_DOUBLE_PRECISION, MPI_STATUS_IGNORE, mpierr)
+       !ABI_HANDLE_MPIERR(mpierr)
+#endif
      end do ! idat1
    end do ! my_ib2
 
    ! TODO: Write ug12_batch.
    !  - Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
    !  - Format for nspinor == 2?
-   !if (my_rank == master) then
-   !end if
  end do ! band1_start
 
- call uplan_1%free()
- call uplan_2%free()
- call uplan_m%free()
+#ifdef HAVE_MPI_IO
+ call MPI_FILE_CLOSE(fh, mpierr)
+ ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
+#endif
+
+ call uplan_1%free(); call uplan_2%free(); call uplan_m%free()
 
  ABI_FREE(gbound_k)
  ABI_FREE(m_gbound)

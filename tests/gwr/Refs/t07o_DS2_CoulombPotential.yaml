@@ -1,0 +1,9 @@
+version: 100
+type: Tensor
+scalarType: Real64
+dimensions:
+  - length: 59
+    type: Momentum
+elements:
+  type: TextFile
+unit: 0.2479966649373453       # =(Eh/eV*Bohr^3/Angstrom^3)
