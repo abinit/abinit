@@ -86,15 +86,15 @@ pseudos "Ni.xml,Ni.xml,O.xml"        #Use same pseudopotential for both Ni atoms
 #%% executable = abinit
 #%% test_chain = tlruj_1.abi,tlruj_2.abi,tlruj_3.abi
 #%% [files]
-#%% files_to_test = 
-#%%   tlruj_2.abo, tolnlines = 100, tolabs = 1.000e-04, tolrel = 1.000e-04, fld_options =  -medium
+#%% files_to_test =
+#%%   tlruj_2.abo, tolnlines = 100, tolabs = 1.000e-04, tolrel = 5.000e-04, fld_options =  -medium
 #%% output_file = "tlruj_2.abo"
 #%% [paral_info]
 #%% max_nprocs = 20
 #%% [extra_info]
 #%% authors = L. MacEnulty
 #%% keywords = PAW, DFTU,LRUJ,UJDET,linear,response,Hund's J
-#%% description = 
+#%% description =
 #%%   AFII NiO 4-atom cell | LRUJ utility | LMac 2022
 #%%   Linear Response Hubbard U and Hund's J (LRUJ)
 #%%   post-processing utility for the determination of

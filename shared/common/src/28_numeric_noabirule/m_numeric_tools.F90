@@ -95,6 +95,7 @@ MODULE m_numeric_tools
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
  public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
+ public :: polynomial_regression ! Perform a polynomial regression on incoming data points
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -6186,5 +6187,121 @@ subroutine bool2index(bool_list, out_index)
 end subroutine bool2index
 !!***
 
-END MODULE m_numeric_tools
+!----------------------------------------------------------------------
+!!****f* ABINIT/polynomial_regression
+!! NAME
+!!  polynomial_regression
+!!
+!! FUNCTION
+!!  Perform a polynomial regression on incoming data points, the
+!!  x-values of which are stored in array xvals and the y-values
+!!  stored in array yvals. Returns a one dimensional array with
+!!  fit coefficients (coeffs) and the unbiased RMS error of the
+!!  fit as a scalar (RMSerr).
+!!
+!! INPUTS
+!!  npoints = number of data points
+!!  xvals(npoints) = x-values of those data points
+!!  yvals(npoints) = y-values of those data points
+!!  degree = order of the polynomial
+!!
+!! OUTPUT
+!!  coeffs(degree+1) = coefficients of the polynomial regression
+!!  RMSerr = unbiased RMS error on the fit
+!!            RMSerr=\sqrt{\frac{1}{npoints-1}*
+!!                      \sum_i^npoints{(fitval-yvals(i))**2}}
+!!
+!! SOURCE
+!!  Polynomial regression algorithm from Rosetta Code under Creative Commons
+!!  and GNU Free Documentation License.
+!!  Link: https://rosettacode.org/wiki/Polynomial_regression#Fortranf
+!!  Some variables changed to simplify.
+
+subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
+
+!Arguments ------------------------------------
+
+!scalars
+ integer                     :: npoints,degree
+ real(dp),intent(out)        :: RMSerr
+!arrays
+ real(dp),intent(in)         :: xvals(1:npoints),yvals(1:npoints)
+ real(dp),intent(out)        :: coeffs(degree+1)
+
+!Local variables-------------------------------
+!scalars
+ integer                     :: ncoeffs,icoeff,ipoint,info
+ real(dp)                    :: residual,fitval
+!arrays
+ integer,allocatable         :: ipiv(:)
+ real(dp),allocatable        :: work(:)
+ real(dp),allocatable        :: A(:,:),AT(:,:),ATA(:,:)
+!characters
+ !character(len=500)          :: message
+
+!####################################################################
+!#####################  Get Polynomial Fit  #########################
+
+  ncoeffs=degree+1
+
+  ABI_MALLOC(ipiv,(ncoeffs))
+  ABI_MALLOC(work,(ncoeffs))
+  ABI_MALLOC(A,(size(xvals),ncoeffs))
+  ABI_MALLOC(AT,(ncoeffs,size(xvals)))
+  ABI_MALLOC(ATA,(ncoeffs,ncoeffs))
+
+  !Prepare the matrix A
+  do icoeff=0,ncoeffs-1
+    do ipoint=1,size(xvals)
+       if (icoeff==0.and.xvals(ipoint)==0.0) then
+          A(ipoint,icoeff+1) = 1.0
+       else
+          A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
+       end if
+    end do
+  end do
+
+  AT  = transpose(A)
+  ATA = matmul(AT,A)
+
+  !Call LAPACK subroutines DGETRF and DGETRI
+  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,ipiv,info)
+  ABI_CHECK(info == 0, sjoin('LAPACK DGETRF in polynomial regression returned:', itoa(info)))
+
+  call DGETRI(ncoeffs,ATA,ncoeffs,ipiv,work,ncoeffs,info)
+  ABI_CHECK(info == 0, sjoin('LAPACK DGETRI in polynomial regression returned:', itoa(info)))
+
+  coeffs = matmul(matmul(ATA,AT),yvals)
+
+!####################################################################
+!##############  RMS error on the polynomial fit  ###################
+
+  residual=0.0d0
+  do ipoint=1,npoints
+    fitval=0.0d0
+    do icoeff=1,ncoeffs
+      if (icoeff==1.and.xvals(ipoint)==0.0) then
+        fitval=fitval+coeffs(icoeff)
+      else
+        fitval=fitval+coeffs(icoeff)*xvals(ipoint)**(icoeff-1)
+      end if
+    end do
+    residual=residual+(fitval-yvals(ipoint))**2
+  end do
+  RMSerr=sqrt(residual/(real(npoints-1,8)))
+
+
+!####################################################################
+!########################  Deallocations  ###########################
+
+  ABI_FREE(ipiv)
+  ABI_FREE(work)
+  ABI_FREE(A)
+  ABI_FREE(AT)
+  ABI_FREE(ATA)
+
+end subroutine polynomial_regression
+!!***
+
+end module m_numeric_tools
 !!***
