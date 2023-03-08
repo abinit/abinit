@@ -40,7 +40,7 @@ Inside a theme, there are also subsets of tutorials indicated with a light conto
 They are logically related to each other, and usually to be done
 one after the other. Otherwise, advanced tutorials usually do not have mutual dependencies.
 There are however three exceptions: the [GW1](gw1) tutorial is a prerequisite for the [paral_MBPT](paral_mbt) tutorial,
-the [parallelism](basepar) tutorial is a prerequisite for the [U_calc_LR](ucalc_lr) tutorial,
+the [parallelism](basepar) tutorial is a prerequisite for the [LRUJ](lruj) tutorial,
 while the [lattice_wannier](lattice_wannier) tutorial is a prerequisite for the [lwf_model](lwf_model) tutorial.
 
 
@@ -156,7 +156,7 @@ there are also specific User Guides for several postprocessors..**
     shows how to determine the U value for DFT+U with the constrained Random Phase Approximation (cRPA)
     using projected Wannier orbitals. Prerequisite: [DFT+U](dftu). Require at least 8 cores.
 
-  * [The tutorial U_calc_LR](ucalc_lr) shows how to determine the U value for DFT+U
+  * [The tutorial LRUJ](lruj) shows how to determine the U value for DFT+U
     with the linear response method. Prerequisite: [DFT+U](dftu).
 
   * [The tutorial PAW2](paw2) presents the generation of atomic data for use with the PAW method.
