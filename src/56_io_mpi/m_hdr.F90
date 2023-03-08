@@ -1692,7 +1692,7 @@ end subroutine hdr_mpio_skip
 !!
 !! SOURCE
 
-subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
+subroutine hdr_bsize_frecords(Hdr, formeig, nfrec, bsize_frecords)
 
 !Arguments ------------------------------------
 !scalars

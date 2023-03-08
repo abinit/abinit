@@ -431,9 +431,11 @@ module m_gwr
 
    logical, allocatable :: itreat_ikibz(:)
    ! (nkibz)
+   ! True if this MPI rank treat ik_ibz
 
    logical, allocatable :: itreat_iqibz(:)
    ! (nqibz)
+   ! True if this MPI rank treats iq_ibz
 
    real(dp),allocatable :: tau_mesh(:), tau_wgs(:)
    ! (ntau)
@@ -1394,8 +1396,7 @@ end block
  ABI_MALLOC(gwr%tau_master, (gwr%ntau))
  gwr%tau_master = -1
  do my_it=1,gwr%my_ntau
-   itau = gwr%my_itaus(my_it)
-   gwr%tau_master(itau) = gwr%tau_comm%me
+   itau = gwr%my_itaus(my_it); gwr%tau_master(itau) = gwr%tau_comm%me
  end do
  call xmpi_max_ip(gwr%tau_master, gwr%tau_comm%value, ierr)
  ABI_CHECK(all(gwr%tau_master > -1), "tau_master!")
@@ -1411,8 +1412,7 @@ end block
  ! Compute np_kibz
  ABI_ICALLOC(gwr%np_kibz, (gwr%nkibz))
  do my_ikf=1,gwr%my_nkbz
-   ik_bz = gwr%my_kbz_inds(my_ikf)
-   ik_ibz = gwr%kbz2ibz(1, ik_bz)
+   ik_bz = gwr%my_kbz_inds(my_ikf); ik_ibz = gwr%kbz2ibz(1, ik_bz)
    gwr%np_kibz(ik_ibz) = 1
  end do
 
@@ -1451,8 +1451,7 @@ end block
  ! Compute np_qibz
  ABI_ICALLOC(gwr%np_qibz, (gwr%nqibz))
  do my_iqf=1,gwr%my_nqbz
-   iq_bz = gwr%my_qbz_inds(my_iqf)
-   iq_ibz = gwr%qbz2ibz(1, iq_bz)
+   iq_bz = gwr%my_qbz_inds(my_iqf); iq_ibz = gwr%qbz2ibz(1, iq_bz)
    gwr%np_qibz(iq_ibz) = 1
  end do
 
@@ -6676,7 +6675,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  !integer :: iq_bz, iq_ibz, isym_q, trev_q, g0_q(3)
  integer :: nkpt_summed, use_umklp, band1, band2, band1_start, band1_stop, band1_max
  integer :: ib, il_b1, il_b2, nb, block_size, ii, mband, block_counter
- integer :: istwf_ki, npw_ki, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
+ integer :: istwf_ki, npw_ki, istwf_kf, nI, nJ, nomega, io, iq, nq, dim_rtwg !ig,
  integer :: npwe, u_nfft, u_mgfft, u_mpw
  logical :: isirr_k, use_tr, is_metallic, print_time
  real(dp) :: spin_fact, weight, deltaf_b1b2, deltaeGW_b1b2, gwr_boxcutmin_c, zcut, qlen, eig_nk, e0
@@ -6707,7 +6706,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  real(dp), allocatable :: gh1c_block(:,:,:,:)
  type(vkbr_t),allocatable :: vkbr(:)
  type(gsphere_t) :: gsph
- !type(ddkop_t) :: ddkop
+ type(ddkop_t) :: ddkop
  !type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *************************************************************************
@@ -6850,15 +6849,17 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
  ABI_MALLOC(rhotwg, (npwe * dim_rtwg))
 
+! TODO:
+ ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
+
  do my_is=1,gwr%my_nspins
    spin = gwr%my_spins(my_is)
-
-   ! TODO:
-   !ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
 
    ! Loop over my k-points in the BZ.
    do my_ikf=1,gwr%my_nkbz
      ik_bz = gwr%my_kbz_inds(my_ikf); kk_bz = gwr%kbz(:, ik_bz)
+     istwf_kf = 1
+     !istwf_kf = gwt% ???
 
      if (dtset%symchi == 1 .and. ltg_q%ibzq(ik_bz) /= 1) CYCLE ! Only IBZ_q
      print_time = gwr%comm%me == 0 .and. (my_ikf <= LOG_MODK .or. mod(my_ikf, LOG_MODK) == 0)
@@ -6889,14 +6890,13 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        gradk_not_done(ik_ibz) = .FALSE.
      end if
 
-     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_ibz, istwf_ki, npw_ki, kg_ki)
+     !call ddkop%setup_spin_kpoint(gwr%dtset, gwr%cryst, gwr%psps, spin, kk_bz, istwf_kk, npw_ki, kg_ki)
 
      !call wfd%copy_cg(ib_v, ik, spin, cg_v)
      !call ddkop%apply(ebands%eig(ib_v, ik, spin), npw_k, wfd%nspinor, cg_v, cwaveprj)
 
      !call wfd%copy_cg(ib_c, ik, spin, cg_c)
      !vv = ddkop%get_braket(ebands%eig(ib_c, ik, spin), istwf_k, npw_k, nspinor, cg_c, mode=ds%mode)
-     !call ddkop%free()
 
      ! HM: 24/07/2018
      ! Transform dipoles to be consistent with results from DFPT
@@ -7048,10 +7048,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
        if (my_ikf == LOG_MODK) call wrtout(std_out, " ...")
      end if
    end do ! my_ikf
-
-   !call ddkop%free()
  end do ! my_is
 
+ call ddkop%free()
  ABI_FREE(bbp_mask)
  ABI_FREE(gvec_q0)
  ABI_FREE(gbound_q0)
