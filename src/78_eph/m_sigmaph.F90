@@ -2490,6 +2490,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  integer :: intp_kptrlatt(3,3), g0_k(3), unts(2), indkk_k(6,1), my_gmax(3), band_block(2), qptrlatt(3,3)
  integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1), kk(3), kq(3), intp_shiftk(3)
+! integer :: inwr, jnwr, min_nwr
+! integer :: array_nwr(12)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
@@ -2573,6 +2575,23 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !dtset%freqspmin
  new%nwr = dtset%nfreqsp; new%wr_step = zero
  if (new%nwr > 0) then
+!   ! For fft to work in some machines nwr must be a multiple of 3 or 5 only
+!   array_nwr(:) = 1
+!   min_nwr = new%nwr
+!   do inwr=1,12
+!     do jnwr=1,inwr
+!       array_nwr(jnwr) = 3
+!     end do
+!     if (ABS(product(array_nwr) - new%nwr) < min_nwr .and. product(array_nwr) - new%nwr > zero) min_nwr = product(array_nwr)- new%nwr
+!     if (product(array_nwr) > new%nwr) go to 1010
+!     do jnwr=1, inwr
+!       array_nwr(jnwr) = 5
+!       if (ABS(product(array_nwr) - new%nwr) < min_nwr .and. product(array_nwr) - new%nwr > zero) min_nwr = product(array_nwr)- new%nwr
+!     end do
+!
+!   end do
+
+!   1010 new%nwr = new%nwr + min_nwr
    if (mod(new%nwr, 2) == 0) new%nwr = new%nwr + 1
    new%wr_step = two * eV_Ha / (new%nwr - 1)
    if (dtset%freqspmax /= zero) new%wr_step = dtset%freqspmax / (new%nwr - 1)
@@ -3683,10 +3702,12 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"), eph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"), eph_transport))
 
- ABI_CHECK_IEQ(symdynmat, dtset%symdynmat, "netcdf symdynmat != input file")
- ABI_CHECK_IEQ(ph_intmeth, dtset%ph_intmeth, "netcdf ph_intmeth != input file")
- ABI_CHECK_IEQ(eph_intmeth, dtset%eph_intmeth, "netcdf eph_intmeth != input file")
- ABI_CHECK_IEQ(eph_transport, dtset%eph_transport, "netcdf eph_transport != input file")
+ if (dtset%eph_task==-4 .or. dtset%eph_task==4) then
+   ABI_CHECK_IEQ(symdynmat, dtset%symdynmat, "netcdf symdynmat != input file")
+   ABI_CHECK_IEQ(ph_intmeth, dtset%ph_intmeth, "netcdf ph_intmeth != input file")
+   ABI_CHECK_IEQ(eph_intmeth, dtset%eph_intmeth, "netcdf eph_intmeth != input file")
+   ABI_CHECK_IEQ(eph_transport, dtset%eph_transport, "netcdf eph_transport != input file")
+ endif
 
  !NCF_CHECK(nf90_get_var(ncid, vid("frohl_params"), frohl_params))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
