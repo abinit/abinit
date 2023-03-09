@@ -12,8 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -24,7 +22,6 @@
 
 module m_cumulant
 
-
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -34,12 +31,10 @@ module m_cumulant
  use m_sigmaph
  use m_dtset
  use m_dtfil
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_datatypes,   only : ebands_t
- use defs_abitypes,     only : MPI_type
+ use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, is_open
  use m_time,           only : cwtime, cwtime_report
  use m_crystal,        only : crystal_t
@@ -47,11 +42,10 @@ module m_cumulant
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa
  use m_distribfft,     only : init_distribfft_seq
  !use m_kpts,           only : kpts_timrev_from_kptopt
- use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_fft,             only : fourdp
- use m_fftcore,       only : ngfft_seq,fftalg_isavailable
+ use m_mpinfo,         only : destroy_mpi_enreg, initmpi_seq
+ use m_fft,            only : fourdp
+ use m_fftcore,        only : ngfft_seq,fftalg_isavailable
  use m_occ,            only : occ_fd, occ_dfde
- !use m_pawtab,         only : pawtab_type
 
  implicit none
 
@@ -98,7 +92,6 @@ module m_cumulant
   integer :: nqibz
    ! Number of q-points in the (dense) IBZ for sigma integration
 
-
   integer :: nbsum
    ! Total number of bands used in sum over states without taking into account MPI distribution.
 
@@ -117,12 +110,11 @@ module m_cumulant
    ! Odd number so that the mesh is centered on the KS energy.
    ! The spectral function is computed only if nwr > 0 (taken from dtset%nfreqsp)
 
-
   integer :: ntemp
    ! Number of temperatures.
 
   integer :: comm
-   !
+   ! MPI communicator
 
   !type(xcomm_t) :: all_comm
 
@@ -148,27 +140,21 @@ module m_cumulant
   integer :: ngqpt(3)
    ! Number of divisions in the Q mesh in the BZ.
 
-
   integer,allocatable :: kcalc2ebands(:,:)
    ! Mapping ikcalc --> ebands IBZ
    ! Note that this array is not necessarily equation to kcalc2ibz computed in sigmaph
    ! because we may have used sigma_nkpt to downsample the initial nkpt mesh.
    ! This array is computed in get_ebands and is equal to kcalc2ibz if sigma_nkpt == ngkpt
 
-
-
    real(dp),allocatable :: linewidths(:,:,:,:,:)
    ! (ntemp, bmin:bmax, nkpt, nsppol, nrta)
    ! Linewidth in the IBZ computed in the SERTA/MRTA.
    ! Non-zero only for the kcalc k-points.
 
-
    real(dp),allocatable :: vbks(:,:,:,:)
    ! (3, bmin:bmax, nkpt, nsppol))
    ! band velocity in Cartesian coordinates in the IBZ
    ! Non-zero only for the kcalc k-points.
-
-
 
    integer :: bmin, bmax, bsize
    ! Only bands between bmin and bmax are considered in the integrals
@@ -176,12 +162,10 @@ module m_cumulant
    ! bmin = minval(%bstart_ks); bmax = maxval(%bstop_ks)
    ! bisze = bmax - bmin + 1
 
-
    type(ebands_t) :: ebands
    ! bandstructure object used to compute the transport properties
    ! Allocate using only the relevant bands for transport
    ! including valence states to allow to compute different doping
-
 
   complex(dpc) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
@@ -235,12 +219,9 @@ module m_cumulant
    ! mu_e(ntemp)
    ! chemical potential of electrons for the different temperatures.
 
-
    real(dp),allocatable :: l0(:,:,:,:,:), l1(:,:,:,:,:), l2(:,:,:,:,:)
    ! (3, 3, 2, nsppol, ntemp)
    ! Onsager coeficients in Cartesian coordinates
-
-
 
   integer,allocatable :: kcalc2ibz(:,:)
    !kcalc2ibz(nkcalc, 6))
@@ -351,8 +332,6 @@ module m_cumulant
    integer         :: ce_ngfft_g(18)
    type(mpi_type) :: ce_mpi_enreg
 
-
-
  contains
 
     procedure :: init => cumulant_init
@@ -364,7 +343,6 @@ module m_cumulant
     procedure :: free => cumulant_free
 
  end type cumulant_t
-
 !!***
 
 !----------------------------------------------------------------------
@@ -388,11 +366,6 @@ contains  !=====================================================
 !! cryst<crystal_t>=Crystalline structure
 !! comm=Initial MPI communicator with all procs provided by user.
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
@@ -408,9 +381,7 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
 !Local variables ------------------------------
  integer,parameter :: master = 0
  integer :: my_rank!, ierr
-#ifdef HAVE_NETCDF
 ! integer :: ncid
-#endif
 ! character(len=1000) :: msg
  character(len=fnlen) :: path
  type(cumulant_t) :: cumulant
@@ -449,7 +420,7 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
  !end if
 
  ! Free memory
-!100 
+!100
 call cumulant%free()
 
 end subroutine cumulant_driver
@@ -469,11 +440,6 @@ end subroutine cumulant_driver
 !! dtfil<datafiles_type>=variables related to files.
 !! comm=Initial MPI communicator with all procs provided by user.
 !!
-!! PARENTS
-!!      m_cumulant
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
@@ -490,6 +456,7 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
 !Local variables --------------------------------
  integer, parameter :: master = 0
  integer :: ncerr, ncid, my_rank, nprocs, ierr, spin, ikcalc, ib,  color !my_spin, my_kcalc, cnt, nbands,
+ integer :: fftalg, fftalga, ii
  real(dp) :: cpu, wall, gflops, rsize
  logical :: is_prime
  character(len=500) :: msg
@@ -535,23 +502,35 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
  ! Possibility to increase nwr in case of interpolation in cumulant to add extra points
  ! TODO: not working yet
  self%nwr_ce = self%nwr!*4 -1 ! Odd
- 
+
  self%ieta = j_dpc * sigmaph%ieta
  self%ebands = tmp_ebands
  self%mu_e = sigmaph%mu_e
-  
- ! Setting variables to launch FFT calculations later on
+
+ ! Setting variables to launch 1d FFT calculations later on
  call ngfft_seq(self%ce_ngfft, [self%nwr, 1, 1])
  self%ce_ngfft(4:6) = self%ce_ngfft(1:3)
+
+ fftalg = self%ce_ngfft(7); fftalga = fftalg/100
+ if (fftalga == FFT_SG) then
+   self%ce_ngfft(7)= 102
+   ABI_WARNING("Setting fftalg to 102. Please link with FFTW3 or DFTI for better performance!")
+ end if
+ self%ce_ngfft(7)= 102
 
  call initmpi_seq(self%ce_mpi_enreg)
  call init_distribfft_seq(self%ce_mpi_enreg%distribfft, 'c', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
  call init_distribfft_seq(self%ce_mpi_enreg%distribfft, 'f', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
 
-
  call ngfft_seq(self%ce_ngfft_g, [self%nwr_ce, 1, 1])
  self%ce_ngfft_g(4:6) = self%ce_ngfft_g(1:3)
 
+ fftalg = self%ce_ngfft_g(7); fftalga = fftalg/100
+ if (fftalga == FFT_SG) then
+   self%ce_ngfft_g(7)= 102
+   ABI_WARNING("Setting fftalg to 102. Please link with FFTW3 or DFTI for better performance!")
+ end if
+ self%ce_ngfft_g(7)= 102
 
  ! Setting debugging ( higher verbosity )
  self%tolcum = dtset%tolcum
@@ -746,7 +725,6 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
  spin = self%my_spins(1)
  ikcalc = self%my_ikcalc(1)
 
-#ifdef HAVE_NETCDF
  ncerr = nf90_get_var(ncid, vid("vals_wr"), rtmp_vals_wr, start=[1,1,1,1,ikcalc,spin], &
                       count=[2, self%nwr, self%ntemp, self%max_nbcalc, self%my_nkcalc, self%my_nspins])
  NCF_CHECK(ncerr)
@@ -770,7 +748,6 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
  ! Close the file here but the Kubo equation needs to read v_nk from file.
  ! We will have to rationalize this part.
  NCF_CHECK(nf90_close(ncid))
-#endif
 
  ! Convert from real arrays to Fortran complex
  self%vals_wr =  (rtmp_vals_wr(1,:,:,:,:,:) + j_dpc * rtmp_vals_wr(2,:,:,:,:,:))!*Ha_eV
@@ -808,16 +785,13 @@ end subroutine cumulant_init
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cumulant_compute(self)
 
 !Arguments ------------------------------------
  class(cumulant_t),intent(inout) :: self
+
 !Local variables ------------------------------
  integer,parameter :: master = 0
  integer :: nbands, ib, ikcalc, it, iw, spin, itemp, comm
@@ -837,7 +811,7 @@ subroutine cumulant_compute(self)
  real(dp) :: m_fit_re, b_fit_re, m_fit_im, b_fit_im, res_re, res_im
  complex(dpc),allocatable :: c1(:), ct_temp(:), c_temp(:)
  complex(dpc),allocatable :: c2(:), ct(:), gt(:), gw(:), g1(:)
- integer :: fftalg
+ integer :: fftalg, fftalga
  logical :: use_fft
 
 !************************************************************************
@@ -887,6 +861,7 @@ subroutine cumulant_compute(self)
  !end do
 
  fftalg = self%ce_ngfft(7)
+ fftalga = fftalg/100
  ! Loops are MPI-parallelized over k-points and spin.
  do my_spin=1,self%my_nspins
    spin = self%my_spins(my_spin)
@@ -915,15 +890,15 @@ subroutine cumulant_compute(self)
 
          init_t = 0.0
          time_step_init = 1.0/(nwr - 1.0)
-         time_mesh_temp(:) = arth(init_t, time_step_init, nwr) 
+         time_mesh_temp(:) = arth(init_t, time_step_init, nwr)
          time_mesh_temp = time_mesh_temp * 2*PI/wr_step
          time_step = time_mesh_temp(2) - time_mesh_temp(1)
 
-         time_mesh(:) = time_mesh_temp(:) !! arth(init_t, time_step_init, nwr_ce) 
+         time_mesh(:) = time_mesh_temp(:) !! arth(init_t, time_step_init, nwr_ce)
          time_mesh = time_mesh * 2*PI/wr_step
 
          ! Defining frequency mesh for after interpolation
-         
+
          !! TODO: Fix problems from when adding more points to time mesh by
          !interpolation
 
@@ -934,7 +909,7 @@ subroutine cumulant_compute(self)
          !!init_w = 0.0
          !!end_w = 1.0
          !!wrmesh_shifted_ce(nwr_ce/2+1:) = linspace(init_w,end_w, nwr_ce/2+1)
- 
+
          !!wr_step_ce = wrmesh_shifted_ce(2) - wrmesh_shifted_ce(1)
          !!wrmesh_shifted_ce(:) = wrmesh_shifted_ce(:) * PI/time_step - 0.5 *wr_step_ce
          !!self%wrmesh_ce(:,ib,my_ik,spin) = wrmesh_shifted_ce(:) + self%e0vals(ib,my_ik,spin) + 0.5 *wr_step_ce
@@ -960,7 +935,11 @@ subroutine cumulant_compute(self)
 
          temp_r(:,1) = betaoverw2(:)
 
-         use_fft = .True.       
+         !@Joao: I got different results when I set use_fft to .False.
+         !Can you recheck this part, if use_fft = .False. still needed?
+
+         use_fft = .True.
+         !use_fft = .not. fftalga == FFT_SG
          if (use_fft) then
            call fourdp(1, temp_g, temp_r, -1, self%ce_mpi_enreg, nwr, 1, self%ce_ngfft , 0 )
            c1(:) = temp_g(1, :, 1) + j_dpc* temp_g(2, :, 1)
@@ -968,18 +947,18 @@ subroutine cumulant_compute(self)
            c1(2::2) = -1.0 * c1(2::2)
          else
            msg = sjoin("FFT not available, using DFT instead.",  &
-                          " Slower but reliable.",  &
-                          " Parallelism over frequency for integration of C(t)")
+                       " Slower but reliable.",  &
+                       " Parallelism over frequency for integration of C(t)")
            ABI_COMMENT(msg)
            do it=1, nwr
              ! if (mod(it, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over time
              time = time_mesh_temp(it)
-                         
+
              ! Discrete Fourier Transform of C1 ( cumulant function without the +iwt and -1 parts
              c_temp(:) = betaoverw2(:) *  exp( - j_dpc * time * wrmesh_shifted(:) )
              c1(it) = simpson_cplx( nwr, wr_step, c_temp)
            enddo
-                     
+
          endif
 
 
@@ -995,7 +974,7 @@ subroutine cumulant_compute(self)
            self%c2(:, itemp, ib, my_ik, spin) = c2(:)
            self%c3(:, itemp, ib, my_ik, spin) = c3(:)
          endif
-                
+
          ! Adding extra interpolated points to the cumulant function
          !!ct(:nwr/2) = ct_temp(:nwr/2)
          !!ct(nwr/2:) = time_mesh(nwr/2:) * m_fit_re + b_fit_re + j_dpc * ( time_mesh(nwr/2:) * m_fit_im + b_fit_im )
@@ -1016,8 +995,9 @@ subroutine cumulant_compute(self)
          end if
 
          use_fft = .True.
+         !use_fft = .not. fftalga == FFT_SG
          if (use_fft) then
-                   
+
            ! Fast Fourier Transform to obtain the Green's function in frequency
            ! domain
            temp_g_ce(1,:,1) = real(gt(:))
@@ -1025,7 +1005,7 @@ subroutine cumulant_compute(self)
            call fourdp(2, temp_g_ce, temp_r_cplx, 1, self%ce_mpi_enreg, nwr_ce, 1, self%ce_ngfft_g , 0 )
            gw(:) = temp_r_cplx(1::2,1) + j_dpc* temp_r_cplx(2::2,1)
 
-                   
+
            ! TODO use ig2gfft from 52_fft_mpi_noabirule/m_fftcore.F90 instead of the two following lines
            if ( mod(nwr_ce,2) == 0 ) then
              self%gw_vals(1:int(nwr_ce/2.0), itemp, ib, my_ik, spin) = gw(int(nwr_ce/2.0):nwr_ce)
@@ -1035,12 +1015,12 @@ subroutine cumulant_compute(self)
              self%gw_vals(int(nwr_ce/2.0)+2:nwr_ce, itemp, ib, my_ik, spin) = gw(1:int(nwr_ce/2.0))
            endif
 
-         
+
            self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin) * time_step
 
            ! FFT is different from integration methods and the two extreme points
            ! need to be compensated
-           self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin)  & 
+           self%gw_vals(:, itemp, ib, my_ik, spin) = self%gw_vals(:, itemp, ib, my_ik, spin)  &
              - 0.5* gt(1)*time_step - 0.5 * gt(nwr_ce)*exp(j_dpc*wrmesh_shifted_ce(:)*time_mesh(nwr_ce)) * time_step
 
 
@@ -1053,20 +1033,16 @@ subroutine cumulant_compute(self)
            do iw=1, nwr_ce
              ! if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
              omega = wrmesh_shifted_ce(iw)
-                 
+
              ! Discrete Fourier Transform of the Green's function
              g1(:) = exp( j_dpc * omega * time_mesh(:) ) * gt(:)
-                 
+
              ! Retarded Green's function in frequency domain
              self%gw_vals(iw, itemp, ib, my_ik, spin) = simpson_cplx(nwr_ce, time_step, g1)
-                 
-             !if (my_rank == 0) write(ab_out, *)"gw_vals",  self%gw_vals(iw, itemp, ib, my_ik, spin)
-              
 
+             !if (my_rank == 0) write(ab_out, *)"gw_vals",  self%gw_vals(iw, itemp, ib, my_ik, spin)
            end do ! iw
          end if
-                 
-                 
 
          ! Collect data if wt parallelism.
          ! call xmpi_sum(self%gw_vals(:, itemp, ib, my_ik, spin) , self%wt_comm%value, ierr)
@@ -1079,7 +1055,7 @@ subroutine cumulant_compute(self)
    end do ! my_ik
  end do ! my_spin
 
-         
+
  ABI_SFREE(c1)
  ABI_SFREE(c2)
  ABI_SFREE(c3)
@@ -1110,7 +1086,7 @@ subroutine cumulant_compute(self)
  ! !
  ! ! Cost function ( Root Mean Squared Error ): J = 1/n sum_i^n (pred_i - y_i)^2
  ! ! where pred is the predicted value and y the true value
- ! ! 
+ ! !
  ! ! Goal: minimize J
  ! ! How? Using Gradient Descent
  ! ! - Learning rate is the step that the new value will be ( too small, takes longer; too large, it can be instable )
@@ -1118,7 +1094,7 @@ subroutine cumulant_compute(self)
  ! ! - n is the number of points
  ! !
  ! ! new b = old b - 2*(learning rate)/n sum_i^n (pred(x_i) - y) * x_i
- ! ! new m = old m  - 2*(learning rate)/n sum_i^n (pred(x_i) - y) 
+ ! ! new m = old m  - 2*(learning rate)/n sum_i^n (pred(x_i) - y)
  ! !
  !
  ! integer, intent(in) :: n, nsteps
@@ -1131,7 +1107,7 @@ subroutine cumulant_compute(self)
  ! m = 0 ! Initial guesses
  ! b = 0
  ! do istep=1,nsteps
- !   
+ !
  !  pred(:) = m * x(:) + b ! Prediction with the new coefficients m, b
  !
  !  ! Check accuracy comparing the linear regression and the data
@@ -1178,10 +1154,6 @@ end subroutine cumulant_compute
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cumulant_kubo_transport(self, dtset, cryst)
@@ -1217,7 +1189,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
 
  comm = self%comm
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- 
+
  call wrtout(std_out, " Computing conductivity using Kubo-Greenwood method.")
  call cwtime(cpu_kloop, wall_kloop, gflops_kloop, "start")
 
@@ -1273,7 +1245,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
    do my_ik=1,self%my_nkcalc
      ikcalc= self%my_ikcalc(my_ik)
      !if (ikcalc > 1) cycle
-     ik_ibz = self%kcalc2ibz(ikcalc, 1) 
+     ik_ibz = self%kcalc2ibz(ikcalc, 1)
      isym_k = self%kcalc2ibz(ikcalc, 2)
      trev_k = self%kcalc2ibz(ikcalc, 6)
 
@@ -1299,7 +1271,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
          do itemp=1,self%ntemp
      !if (itemp > 1) cycle
-         
+
          Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
            do iw=1, self%nwr
 !             if (mod(iw, self%wt_comm%nproc) /= self%wt_comm%me) cycle  ! MPI parallelism over freqs
@@ -1311,7 +1283,7 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
                 dfdw = occ_dfde(omega, self%kTmesh(itemp), self%mu_e(itemp))
                 self%print_dfdw(iw,itemp) = dfdw
 !                test_dfdw(itemp) = test_dfdw(itemp) + dfdw
-                kernel(iw) = - dfdw * sp_func**2 
+                kernel(iw) = - dfdw * sp_func**2
                 Aw(iw) = sp_func**2
                 dfdw_acc(iw) = dfdw
 
@@ -1323,13 +1295,13 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
          int_dfdw = simpson(wr_step,dfdw_acc)
          ! Calculation of the conductivity
          self%l0( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp ) + integration*vv_tens(:,:)*wtk
-         Aw_l0(itemp) = Aw_l0(itemp) + int_Aw*wtk*vv_tens(1,1) 
+         Aw_l0(itemp) = Aw_l0(itemp) + int_Aw*wtk*vv_tens(1,1)
          dfdw_l0(itemp) = dfdw_l0(itemp) + int_dfdw*wtk*vv_tens(1,1)
          call inv33(self%l0(:, :, ieh, spin, itemp), work_33)
 
          l0inv_33nw(:,:,ieh) = work_33
-         self%l1( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp)) 
-         self%l2( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp)) 
+         self%l1( :, :, ieh, spin, itemp ) = self%l0( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
+         self%l2( :, :, ieh, spin, itemp ) = self%l1( :, :, ieh, spin, itemp )*(eig_nk - self%mu_e(itemp))
 
          self%seebeck(:,:,ieh,spin,itemp) = matmul(work_33, self%l1(:,:,ieh,spin,itemp)) / Tkelv
 
@@ -1346,13 +1318,15 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
    ! Collect data if k-points parallelism.
    !call xmpi_sum(self%conductivity_mu , self%kcalc_comm%value, ierr)
  end do !my_spin
+
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
  self%conductivity_mu = fact0 * self%l0  ! siemens cm^-1
  self%seebeck = - volt_SI  * max_occ * self%seebeck
  self%kappa = + volt_SI**2 * fact0 * self%kappa
+
  do itemp=1, self%ntemp
-         Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
+   Tkelv = self%kTmesh(itemp) / kb_HaK; if (Tkelv < one) Tkelv = one
  end do
 
  ! Scale by the carrier concentration
@@ -1397,11 +1371,6 @@ end subroutine cumulant_kubo_transport
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
 !!
-!! PARENTS
-!!      m_cumulant
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cumulant_sigmaph_ncread(self, path, ncid, comm)
@@ -1423,8 +1392,6 @@ subroutine cumulant_sigmaph_ncread(self, path, ncid, comm)
  call cwtime(cpu, wall, gflops, "start")
 
  ! Open netcdf file
-        
-#ifdef HAVE_NETCDF
  ierr = 0
 
  if (.not. file_exists(path)) then
@@ -1462,11 +1429,6 @@ subroutine cumulant_sigmaph_ncread(self, path, ncid, comm)
  NCF_CHECK(nf90_get_var(ncid, vid("kcalc2ibz"), self%kcalc2ibz))
 
  call cwtime_report(" sigmaph_ncread", cpu, wall, gflops)
-#else
- ierr = 1
- msg = "Netcdf not activated at configure time!"
-
-#endif
 
 contains
  integer function vid(vname)
@@ -1490,11 +1452,6 @@ end subroutine cumulant_sigmaph_ncread
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
-!!
-!! PARENTS
-!!      m_cumulant
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1521,7 +1478,6 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
  call wrtout([std_out, ab_out], ch10//sjoin("- Writing cumulant results to:", path))
  call cwtime(cpu, wall, gflops, "start")
 
-#ifdef HAVE_NETCDF
  ! Only one proc create the file, write structure and define basic dimensions.
  ! Then we reopen the file in MPI-IO mode.
 
@@ -1774,9 +1730,9 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
   end do
  end if
  if (xmpi_comm_rank(self%comm) == master .and. is_open(ab_out) .and. any(abs(dtset%sigma_erange) > zero)) then
-         msg = sjoin(" Print first 5 temperatures of diagonal mobility_mu", &
-                 " > 1e-6 (with ieh as electrons or holes) for testing purposes:")
-   write(ab_out, "(/,a)") msg
+   msg = sjoin(" Print first 5 temperatures of diagonal mobility_mu", &
+               " > 1e-6 (with ieh as electrons or holes) for testing purposes:")
+   write(ab_out, "(/,a)") trim(msg)
    write(ab_out, "(2(a, i0))")" spin: ", spin
    if (self%ntemp > 5) then
      ntemp = 5
@@ -1797,7 +1753,6 @@ subroutine cumulant_ncwrite(self, path, cryst, dtset)
 
 
  100 call cwtime_report(" cumulant_ncwrite", cpu, wall, gflops)
-#endif
 
 end subroutine cumulant_ncwrite
 !!***
@@ -1812,10 +1767,6 @@ end subroutine cumulant_ncwrite
 !!  Free dynamic memory.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
