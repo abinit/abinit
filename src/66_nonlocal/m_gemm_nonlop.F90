@@ -488,7 +488,9 @@ contains
     gemm_nonlop_kpt_gpu(ikpt)%nprojs = nprojs
 
 #ifdef DEBUG_VERBOSE_GPU
-    call check_gpu_mem("make_gemm_nonlop begin")
+    if(xmpi_comm_rank(xmpi_world) == 0) then
+      call check_gpu_mem("make_gemm_nonlop begin")
+    end if
 #endif
 
     if(istwf_k <= 1) then
@@ -501,7 +503,9 @@ contains
     end if
 
 #ifdef DEBUG_VERBOSE_GPU
-    call check_gpu_mem("make_gemm_nonlop end  ")
+    if(xmpi_comm_rank(xmpi_world) == 0) then
+      call check_gpu_mem("make_gemm_nonlop end  ")
+    end if
 #endif
 #endif
   end if
