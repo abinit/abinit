@@ -3028,6 +3028,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%tolmxf=tolmxf_
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolcum',tread,'DPR',ds_input)
+ if(tread==1) dtset%tolcum=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%focktoldfe=dprarr(1)
 
