@@ -609,6 +609,13 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  ! upload inverse overlap matrices (sij and s_approx) to GPU memory
  if (ham%use_gpu_cuda==1) then
    ! allocate memory for sij and s_approx on GPU
+   write(message,'(a,a,i12,a,a,i6,a,a,i6,a,a,es12.4,a)') &
+     & 'Allocate GPU memory for inverse overlap computations (sij and s_approx) : ',&
+     & 'nprojs=',invovl%nprojs,ch10,&
+     & 'nlmnax=',ham%lmnmax,ch10,&
+     & 'ntypat=',ham%ntypat,ch10,&
+     & 'gram_projs_gpu_size (GBytes)=',1e-9*cplx*invovl%nprojs*invovl%nprojs*dp,ch10
+   call wrtout(std_out,message,'COLL')
    call f_gpu_apply_invovl_matrix_alloc(cplx, invovl%nprojs, ham%lmnmax, ham%ntypat, 0)
 
    invovl_gpu = make_invovl_kpt_gpu(invovl)
