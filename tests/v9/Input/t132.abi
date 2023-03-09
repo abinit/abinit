@@ -26,15 +26,16 @@ ndtset    3
  shiftk       0 0 0
 
 !Convergence parameters
- ecut   50.0
- tolvrs 1.d-8
+ ecut   48.0
+ tolwfr 1.d-16
  nstep  50
 
 !XC used
  ixc         11
 
 !bands
- nband     4
+ nband     8
+ nbdbuf    2
  
 ! 2D Beigi CUT-OFF
   icutcoul     2
@@ -48,7 +49,7 @@ ndtset    3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t132.abo, tolnlines = 10, tolabs = 1.000e-06, tolrel = 1.000e-01
+#%%  t132.abo, tolnlines = 0, tolabs = 1.000e-06, tolrel = 1.000e-01
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
