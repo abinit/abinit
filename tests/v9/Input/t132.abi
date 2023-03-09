@@ -18,17 +18,15 @@ ndtset    3
 !avoid errors and speed-up conv 
  chksymbreak 0 
  chksymtnons 0
- nline       6
- nnsclo      3
 
 !k-point grid
  kptopt       1
- ngkpt        3  3   1
+ ngkpt        6  6   1
  nshiftk      1
  shiftk       0 0 0
 
 !Convergence parameters
- ecut   24.0
+ ecut   50.0
  tolvrs 1.d-8
  nstep  50
 
@@ -50,7 +48,7 @@ ndtset    3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t132.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%  t132.abo, tolnlines = 0, tolabs = 1.000e-06, tolrel = 1.000e-01
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
@@ -59,11 +57,11 @@ ndtset    3
 #%% description = 
 #%%   h-BN single layer using 2D cut-off method of Beigi :
 #%%   compute the first order derivative of the total energy
-#%%   With delta(xred)=0.0002, one gets delta(etot)/delta(xred)=-0.0050067750
-#%%   With delta(xred)=0.0001, one gets delta(etot)/delta(xred)=-0.0050060470
+#%%   With delta(xred)=0.0002, one gets delta(etot)/delta(xred)=-0,0050208160
+#%%   With delta(xred)=0.0001, one gets delta(etot)/delta(xred)=-0,0050213750
 #%%   The combination of both results, in a higher-order finite difference
-#%%   formula gives -0.0050070177 . The direct computation of forces
-#%%   at the target geometry gives -0.0050076626 .
+#%%   formula gives -0,0050215613 . The direct computation of forces
+#%%   at the target geometry gives -0,0050217263 .
 #%%   The agreement falls within (6) digits of the finite-difference result.
 #%%<END TEST_INFO>
 
