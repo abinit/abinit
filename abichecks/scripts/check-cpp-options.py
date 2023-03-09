@@ -28,6 +28,10 @@ cpp_explicit = [
   "DFTI_CHECK",
   "XC_MAJOR_VERSION",
   "XC_MINOR_VERSION",
+  "HAVE_KOKKOS",
+  "HAVE_YAKL",
+  "DEBUG_VERBOSE_GPU",
+  "FC_NVHPC",
   ]
 
 cpp_ignored = [
