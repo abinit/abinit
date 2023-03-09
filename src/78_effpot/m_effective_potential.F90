@@ -2629,7 +2629,9 @@ if(need_elec_eval)then
 #endif
 
 energy = energy + energy_part
-fcart = fcart + fcart_part
+do ia = 1, natom 
+fcart(:,ia) = fcart(:,ia) + fcart_part(:,ia) / (1 + strain_tmp(1:3))
+end do 
 endif
 
 
@@ -2642,6 +2644,9 @@ endif
 
 ! multiply forces by -1
   fcart = -1 * fcart
+
+
+
 
 !Calculatei
     strten_part(:) = zero
@@ -2662,8 +2667,13 @@ endif
 !---------------------------------
 
 ! divide stess tensor by ucvol
-  strten = strten / ucvol
-
+  do alpha=1,6
+     if (alpha < 4) then
+        strten(alpha) = strten(alpha) * (1 + strain_tmp(alpha))/ ucvol
+     else
+        strten(alpha) = strten(alpha) * (1 - strain_tmp(alpha)**2)/ ucvol
+     end if
+  end do
 ! write(*,*) "--- STRTEN after /ucvol  --- " 
 ! write(*,*) strten(:)
 ! Redistribute the residuale of the forces
