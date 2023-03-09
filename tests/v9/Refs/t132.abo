@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Thu  9 Mar 2023.
-- ( at 14h31 )
+- ( at 15h47 )
   
 - input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bguster_cutoff_lwv2/tests/TestBot_MPI1/v9_t132/t132.abi
 - output file    -> t132.abo
@@ -931,10 +931,10 @@ P           mkmem           7
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         58.9  wall=         59.2
+- Proc.   0 individual time (sec): cpu=         59.8  wall=         60.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  91 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         58.9  wall=         59.2
++Overall time at end (sec) : cpu=         59.8  wall=         60.0
