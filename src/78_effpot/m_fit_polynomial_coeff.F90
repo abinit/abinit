@@ -2373,7 +2373,6 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  fcart_out(:,:,:,:) = zero
  strten_out(:,:,:)  = zero
  energy_out(:,:)    = zero
-
  icell = 0; ib1=0; ia1=0
  do i1=1,sc_size(1)
    do i2=1,sc_size(2)
@@ -2546,8 +2545,8 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
 
                if(idisp1 > ndisp)then
 !                Accumule stress tensor
-                 strten_out(idir1,itime,icoeff_tmp) = strten_out(idir1,itime,icoeff_tmp) + &
-&                                                      weight * tmp3 / ucvol(itime)
+                    strten_out(idir1,itime,icoeff_tmp) = strten_out(idir1,itime,icoeff_tmp) + &
+&                                                      weight * tmp3
                else
 !                Accumule  forces
                  fcart_out(idir1,ia1,icoeff_tmp,itime)=fcart_out(idir1,ia1,icoeff_tmp,itime)+weight*tmp2
@@ -2566,7 +2565,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  end do!End do i1
 
 ! multiply by -1
- fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:)
+ fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:) 
 
 !ADD stress due to forces on atoms and variation of disp with strain
  do icoeff=1,ncoeff
@@ -2574,14 +2573,23 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
      do ia1=1,natom_sc
        do idir1=1,3
          do idir2=1,6
-           strten_out(idir2,itime,icoeff) = strten_out(idir2,itime,icoeff) + &
-&                     du_delta(idir2,idir1,ia1,itime)*fcart_out(idir1,ia1,icoeff,itime)/ucvol(itime)
+              strten_out(idir2,itime,icoeff) = strten_out(idir2,itime,icoeff) + &
+&                     du_delta(idir2,idir1,ia1,itime)*fcart_out(idir1,ia1,icoeff,itime)
          end do
        end do
      end do
    end do
  end do
-
+ 
+ do itime=1, ntime
+    do idir1=1,6
+       if (idir1 < 4) then
+          strten_out(idir1,itime,:) = strten_out(idir1,itime,:) * (1 + strain(idir1,itime))/ucvol(itime)
+       else
+          strten_out(idir1,itime,:) = strten_out(idir1,itime,:) * (1 - strain(idir1,itime)**2)/ucvol(itime)
+       end if
+    end do
+ end do 
 
 end subroutine fit_polynomial_coeff_getFS
 !!***
