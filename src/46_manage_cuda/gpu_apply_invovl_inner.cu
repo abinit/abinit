@@ -267,10 +267,6 @@ extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3],
     //int32_t nprojs = proj_dim[1];
     //int32_t ndat_nspinor = proj_dim[2];
 
-#ifdef DEBUG_VERBOSE_GPU
-    check_gpu_mem_("gpu_apply_invovl_inner_alloc begin");
-#endif
-
     size_t proj_size_in_bytes = proj_dim[0]*proj_dim[1]*proj_dim[2]*sizeof(double);
 
     printf("[gpu_apply_invovl_inner_alloc] allocating %f GB\n",1e-9*3*proj_size_in_bytes);
@@ -295,9 +291,6 @@ extern "C" void gpu_apply_invovl_inner_alloc(int32_t proj_dim[3],
 
     gpu_inner_allocated = 1;
 
-#ifdef DEBUG_VERBOSE_GPU
-    check_gpu_mem_("gpu_apply_invovl_inner_alloc end  ");
-#endif
   }
 
 } // gpu_apply_invovl_inner_alloc

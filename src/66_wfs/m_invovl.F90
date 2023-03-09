@@ -724,8 +724,20 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   !! note : this is actually done only once
   if (ham%use_gpu_cuda==1) then
 
+#ifdef DEBUG_VERBOSE_GPU
+    if(xmpi_comm_rank(xmpi_world) == 0) then
+      call check_gpu_mem("gpu_apply_invovl_inner_alloc begin")
+    end if
+#endif
+
     ! make sure to use sizes from apply_invovl
     call f_gpu_apply_invovl_inner_alloc(proj_dim, ham%ntypat, 0)
+
+#ifdef DEBUG_VERBOSE_GPU
+    if(xmpi_comm_rank(xmpi_world) == 0) then
+      call check_gpu_mem("gpu_apply_invovl_inner_alloc end")
+    end if
+#endif
 
     ! TODO find a better place to put that initialization
     call f_gpu_init_invovl_data(indlmn_dim, c_loc(ham%indlmn(1,1,1)))
