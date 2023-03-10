@@ -1,5 +1,6 @@
 
 ndtset    3
+densty    0.0 0.0
 
 !Unit cell
  natom  2
@@ -21,7 +22,7 @@ ndtset    3
 
 !k-point grid
  kptopt       1
- ngkpt        6  6   1
+ ngkpt        1  6   1
  nshiftk      1
  shiftk       0 0 0
 
@@ -31,11 +32,10 @@ ndtset    3
  nstep  50
 
 !XC used
- ixc         11
+ ixc       7
 
 !bands
- nband     8
- nbdbuf    2
+ nband     6
  
 ! 2D Beigi CUT-OFF
   icutcoul     2
@@ -49,7 +49,7 @@ ndtset    3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t132.abo, tolnlines = 10, tolabs = 1.000e-06, tolrel = 1.000e-01
+#%%  t132.abo, tolnlines = 0, tolabs = 1.000e-06, tolrel = 1.000e-01
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
