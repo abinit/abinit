@@ -1,6 +1,10 @@
+******************************************************************************************
+                                Welcome to MULTIBINIT,                         
+ a software platform designed for the construction and use of second-principles models
+                   for lattice, spin and electron degrees of freedom.
 
-.Version 9.7.5 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu11.2 computer) 
+.Version 9.8.1 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu11.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +18,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 17 Jun 2022.
-- ( at 08h58 )
+ MULTIBINIT is a software project of the University of Liege
+ (PHYTHEMA & NANOMAT groups), in collaboration with other partners.
+
+*****************************************************************************************
+
+
+.Starting date : Wed 14 Dec 2022.
+- ( at 21h25 )
   
 -  nproc =    1
 
@@ -290,16 +300,16 @@ Measurement run:
 
 
 # Temperature              Cv             chi        BinderU4             Mst
-      0.00000     0.00000E+00    -7.66054E-15     0.66667E+00     1.00000E+00
+      0.00000     0.00000E+00    -3.33067E-16     0.66667E+00     1.00000E+00
 ================================================================================
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
 
 ================================================================================
 
-+Total cpu time      0.813  and wall time      0.856 sec
++Total cpu time      0.744  and wall time      0.753 sec
 
  multibinit : the run completed succesfully.

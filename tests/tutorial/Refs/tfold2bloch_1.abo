@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.8.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h15 )
+.Starting date : Wed 21 Dec 2022.
+- ( at 21h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/tutorial_tfold2bloch_1-tfold2bloch_2/tfold2bloch_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorial_tfold2bloch_1-tfold2bloch_2/tfold2bloch_1.abi
 - output file    -> tfold2bloch_1.abo
 - root for input  files -> tfold2bloch_1i
 - root for output files -> tfold2bloch_1o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
 
  DATASET    1 : the unit cell is not primitive
 ================================================================================
@@ -282,9 +282,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/H.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  3 (lmn_size=  5), orbitals=   0   0   1
  Spheres core radius: rc_sph= 0.89889493
@@ -320,7 +320,7 @@ tolerances: {tolvrs: 1.00E-06, }
  ETOT  2  -3.0210969300359    -4.523E-03 1.629E-08 2.335E-02
  ETOT  3  -3.0211193400803    -2.241E-05 2.932E-10 1.232E-04
  ETOT  4  -3.0211195443786    -2.043E-07 5.158E-12 7.636E-06
- ETOT  5  -3.0211195746957    -3.032E-08 1.831E-13 9.339E-09
+ ETOT  5  -3.0211195746956    -3.032E-08 1.831E-13 9.339E-09
 
  At SCF step    5       nres2   =  9.34E-09 < tolvrs=  1.00E-06 =>converged.
 
@@ -379,8 +379,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.049690285800944
- Compensation charge over fine fft grid    =      0.049693008364842
+ Compensation charge over spherical meshes =      0.049690285800987
+ Compensation charge over fine fft grid    =      0.049693008364849
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -472,28 +472,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.82106323227909E+00
-hartree             :  9.56303663549342E-02
-xc                  : -1.83138018010469E+00
+kinetic             :  2.82106323227914E+00
+hartree             :  9.56303663548594E-02
+xc                  : -1.83138018010456E+00
 Ewald energy        : -2.83729747948063E+00
 psp_core            :  1.39562159979751E-02
 local_psp           : -1.27151555004677E+00
-spherical_terms     : -1.15918982821219E-02
-total_energy        : -3.02113529328221E+00
-total_energy_eV     : -8.22092721584959E+01
+spherical_terms     : -1.15918982820586E-02
+total_energy        : -3.02113529328204E+00
+total_energy_eV     : -8.22092721584912E+01
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -6.68173900779656E-01
+band_energy         : -6.68173900780045E-01
 Ewald energy        : -2.83729747948063E+00
 psp_core            :  1.39562159979751E-02
-xc_dc               :  4.62368084556992E-01
-spherical_terms     :  8.02750500957261E-03
-total_energy_dc     : -3.02111957469574E+00
-total_energy_dc_eV  : -8.22088444340058E+01
+xc_dc               :  4.62368084557176E-01
+spherical_terms     :  8.02750500991400E-03
+total_energy_dc     : -3.02111957469561E+00
+total_energy_dc_eV  : -8.22088444340021E+01
 ...
 
 
@@ -556,7 +556,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.70E-13  2.97E-14  2.00E-13  5.61E-14
  -3.7397E-01 -2.2199E-01 -1.4827E-01 -1.4827E-01
  Non-SCF case, kpt    5 (  0.00000 -0.30000  0.00000), residuals and eigenvalues=
-  6.33E-13  3.99E-13  6.32E-13  3.40E-14
+  6.33E-13  3.99E-13  6.31E-13  3.40E-14
  -3.9085E-01 -1.8944E-01 -1.6492E-01 -1.6492E-01
  Non-SCF case, kpt    6 (  0.00000 -0.25000  0.00000), residuals and eigenvalues=
   8.56E-13  1.21E-13  7.30E-14  8.32E-14
@@ -604,7 +604,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   1.96E-13  4.52E-14  1.74E-13  5.70E-13
  -3.3265E-01 -2.8166E-01 -1.0760E-01 -1.0760E-01
  Non-SCF case, kpt   21 (  0.00000  0.50000  0.00000), residuals and eigenvalues=
-  3.36E-14  8.13E-13  9.29E-15  2.64E-13
+  3.36E-14  8.13E-13  9.28E-15  2.64E-13
  -3.0834E-01 -3.0834E-01 -8.3709E-02 -8.3709E-02
  Non-SCF case, kpt   22 (  0.00000  0.00000 -0.50000), residuals and eigenvalues=
   1.74E-13  8.84E-13  8.54E-09  5.27E-13
@@ -710,7 +710,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
- Compensation charge over spherical meshes =      0.049694322366308
+ Compensation charge over spherical meshes =      0.049694322366316
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1123,10 +1123,10 @@ P           mkmem2         42
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.5
+- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          4.5
++Overall time at end (sec) : cpu=          3.8  wall=          3.9

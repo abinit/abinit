@@ -3193,6 +3193,7 @@ subroutine ccfft(ngfft,isign,n1,n2,n3,n4,n5,n6,ndat,option,work1,work2,comm_fft)
 
 !*************************************************************************
 
+ !print *, "in ccfft"
  nproc_fft=ngfft(10)
 
  fftcache=ngfft(8)
@@ -3277,7 +3278,6 @@ end subroutine ccfft
 
 subroutine fourdp_mpi(cplex,nfft,ngfft,ndat,isign,&
 &  fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
-
 
 !Arguments ------------------------------------
 !scalars
