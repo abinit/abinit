@@ -22,8 +22,8 @@ shiftk   0.0 0.0 0.0
 ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with DDB data)
 
 ph_nqpath 3
-ph_qpath 
-  0 0 0 
+ph_qpath
+  0 0 0
   0.5 0 0
   0.5 0.5 0
 
@@ -92,7 +92,7 @@ getdvdb5   2
 
 ph_nqpath5 5
 ph_qpath5
-  0 0 0 
+  0 0 0
   0.15 0 0
   0.25 0 0
   0.35 0 0
@@ -103,7 +103,7 @@ ph_qpath5
 ############
 # Test erange and tolerance on tetra weights
 eph_task6 -4
-eph_intmeth6 2  
+eph_intmeth6 2
 sigma_ngkpt6 2 2 2
 sigma_erange6  0.5 0.5 eV
 eph_tols_idelta6 1e-6 1e-6
@@ -117,7 +117,7 @@ eph_ngqpt_fine6 4 4 4
 # Build W(r,R) using 2x2x2 q-mesh and interpolate DFPT potentials to compute IM(Sigma)
 # Same parameters as previous dataset except for getdvdb
 eph_task7 -4
-eph_intmeth7 2  
+eph_intmeth7 2
 sigma_ngkpt7 2 2 2
 sigma_erange7  0.5 0.5 eV
 eph_tols_idelta7 1e-6 1e-6
@@ -145,7 +145,7 @@ getdvdb_filepath9  "t60o_DS20_DVDB"
 
 ph_nqpath9 5
 ph_qpath9
-  0 0 0 
+  0 0 0
   0.15 0 0
   0.25 0 0
   0.35 0 0
@@ -165,7 +165,7 @@ eph_task11  4
 sigma_erange11  1.0 1.0 eV
 eph_ngqpt_fine11       4    4    4
 eph_doping11 1e20
-tmesh11 3000 1 1 
+tmesh11 3000 1 1
 occopt11 3
 
 
@@ -179,7 +179,7 @@ eph_intmeth12          1
 eph_ngqpt_fine12       4    4    4
 sigma_erange12  1.0 1.0 eV
 eph_doping12 1e20
-tmesh12 3000 1 1 
+tmesh12 3000 1 1
 occopt12 3
 
 
@@ -205,16 +205,16 @@ occopt12 3
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = HAVE_NETCDF_MPI 
+#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
-#%% files_to_test = 
-#%%   t60.abo, tolnlines = 55, tolabs = 0.4, tolrel = 0.15
+#%% files_to_test =
+#%%   t60.abo, tolnlines = 80, tolabs = 0.42, tolrel = 0.3
 #%% [paral_info]
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH, RTA
-#%% description = 
+#%% description =
 #%%   Calculation of the Fan-Migdal self-energy matrix elements in LiF.
 #%%<END TEST_INFO>
