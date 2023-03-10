@@ -171,7 +171,6 @@ module m_cumulant
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
-
   real(dp) :: tolcum
 
   integer :: debug
@@ -227,11 +226,9 @@ module m_cumulant
    !kcalc2ibz(nkcalc, 6))
    ! Mapping ikcalc --> IBZ as reported by listkk.
 
-
   real(dp),allocatable :: dw_vals(:,:,:,:)
    !  dw_vals(ntemp, max_nbcalc, my_nkcalc, nsppol)
    !  Debye-Waller term (static).
-
 
   real(dp),allocatable :: e0vals(:,:,:)
    ! (max_nbcalc, my_nkcalc, nsppol)
@@ -269,7 +266,6 @@ module m_cumulant
    ! ct_vals(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Cumulant function (time, kT, band, ikcalc, spin).
 
-
      complex(dpc),allocatable :: gt_vals(:,:,:,:,:)
    ! vals_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Green's function in time domain (time, kT, band, ikcalc, spin).
@@ -282,12 +278,10 @@ module m_cumulant
    ! ce_spfunc_wr(nwr, ntemp, max_nbcalc, my_nkcalc, nsppol)
    ! Absorption spectrum (omega, kT, band, ikcalc, spin).
 
-
    real(dp),allocatable :: seebeck(:,:,:,:,:)
    real(dp),allocatable :: kappa(:,:,:,:,:)
    ! (3, 3, 2, nsppol, ntemp)
    ! Transport coefficients in Cartesian coordinates
-
 
    real(dp),allocatable :: conductivity_mu(:,:,:,:,:)
    ! (3, 3, 2, nsppol, ntemp)
@@ -301,19 +295,15 @@ module m_cumulant
    ! mobility for electrons and holes (third dimension) at transport_mu_e(ntemp)
    ! Third dimension is for electron/hole
 
-
    real(dp),allocatable :: transport_mu_e(:)
    ! (%ntemp)
    ! Chemical potential at this carrier concentration and temperature
 
-
    real(dp) :: transport_fermie
    ! Fermi level specified in the input file when computing the SIGEPH file.
 
-
    real(dp) :: transport_extrael
    ! Extra electrons per unit cell specified in the input file when computing the SIGEPH file.
-
 
    real(dp),allocatable :: n_ehst(:,:,:)
     ! (2, %nsppol, %ntemp)
@@ -321,15 +311,14 @@ module m_cumulant
     ! The first dimension is for electrons/holes.
     ! If nsppol == 2, the second dimension is the number of e/h for spin else the total number of e/h summed over spins.
 
-
    real(dp) :: eph_extrael
    ! Extra electrons per unit cell used to compute SERTA lifetimes in sigmaph.
 
    real(dp) :: eph_fermie
    ! Fermi level specified in the input file when computing the SIGEPH file.
 
-   integer         :: ce_ngfft(18)
-   integer         :: ce_ngfft_g(18)
+   integer :: ce_ngfft(18)
+   integer :: ce_ngfft_g(18)
    type(mpi_type) :: ce_mpi_enreg
 
  contains
@@ -380,15 +369,12 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: my_rank!, ierr
-! integer :: ncid
-! character(len=1000) :: msg
+ integer :: my_rank
  character(len=fnlen) :: path
  type(cumulant_t) :: cumulant
  type(sigmaph_t) :: sigmaph
 !arrays
- !real(dp) :: extrael_fermie(2), sigma_erange(2)
- integer :: unts(2) !, sigma_ngkpt(3)
+ integer :: unts(2)
 
 ! *************************************************************************
 
@@ -422,6 +408,7 @@ subroutine cumulant_driver(dtfil, dtset, ebands, cryst, comm)
  ! Free memory
 !100
 call cumulant%free()
+call sigmaph%free()
 
 end subroutine cumulant_driver
 !!***
@@ -463,7 +450,7 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
  character(len=fnlen) :: sigeph_filepath
  integer :: unts(2), facts(2)
  real(dp), allocatable :: rtmp_vals_wr(:,:,:,:,:,:), rtmp_vals_e0ks(:,:,:,:,:)
- type(ebands_t) :: tmp_ebands
+ !type(ebands_t) :: tmp_ebands
  real(dp) :: extrael_fermie(2),sigma_erange(2)
  integer :: sigma_ngkpt(3)
 #ifdef HAVE_MPI
@@ -491,10 +478,13 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
          extrael_fermie=extrael_fermie, sigma_ngkpt=sigma_ngkpt, sigma_erange=sigma_erange)
 
  self%bmin = minval(sigmaph%bstart_ks); self%bmax = maxval(sigmaph%bstop_ks)
- ABI_CALLOC(self%vbks, (3, self%bmin:self%bmax, ebands%nkpt, sigmaph%nsppol))
+ !ABI_CALLOC(self%vbks, (3, self%bmin:self%bmax, ebands%nkpt, sigmaph%nsppol))
 
-if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, ebands, [self%bmin, self%bmax], &
+ !if (any(abs(dtset%sigma_erange) > zero)) then
+ self%ebands = sigmaph%get_ebands(cryst, ebands, [self%bmin, self%bmax], &
                                    self%kcalc2ebands, self%linewidths, self%vbks, xmpi_comm_self)
+ !end if
+
  self%eph_extrael = extrael_fermie(1)
  self%eph_fermie = extrael_fermie(2)
 
@@ -504,7 +494,7 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
  self%nwr_ce = self%nwr!*4 -1 ! Odd
 
  self%ieta = j_dpc * sigmaph%ieta
- self%ebands = tmp_ebands
+ !self%ebands = tmp_ebands
  self%mu_e = sigmaph%mu_e
 
  ! Setting variables to launch 1d FFT calculations later on
@@ -803,8 +793,8 @@ subroutine cumulant_compute(self)
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: temp_g(:,:,:), temp_r(:,:), temp_r_cplx(:,:), temp_g_ce(:,:,:)
- real(dp),allocatable :: betaoverw2(:), dfft(:)
- complex(dpc),allocatable :: betaoverw2c(:), temp_reflex(:)
+ real(dp),allocatable :: betaoverw2(:) !, dfft(:)
+ !complex(dpc),allocatable :: temp_reflex(:) ! betaoverw2c(:),
  real(dp),allocatable :: wrmesh_shifted(:), wrmesh_shifted_ce(:), beta(:), c3(:)
  real(dp),allocatable :: time_mesh(:), time_mesh_temp(:)
  real(dp) :: output_c3!, output_test2r, output_test2i
@@ -828,12 +818,12 @@ subroutine cumulant_compute(self)
  nwr_ce = self%nwr_ce
  ABI_CALLOC(c1, (nwr))
  ABI_CALLOC(c_temp, (nwr_ce))
- ABI_CALLOC(temp_reflex, (nwr/2))
+ !ABI_CALLOC(temp_reflex, (nwr/2))
  ABI_CALLOC(c2, (nwr))
  ABI_CALLOC(c3, (nwr))
  ABI_CALLOC(g1, (nwr_ce))
  ABI_CALLOC(gw, (nwr_ce))
- ABI_CALLOC(dfft, (nwr_ce))
+ !ABI_CALLOC(dfft, (nwr_ce))
  ABI_CALLOC(time_mesh, (nwr_ce))
  ABI_CALLOC(time_mesh_temp, (nwr))
  ABI_CALLOC(ct, (nwr_ce))
@@ -849,7 +839,7 @@ subroutine cumulant_compute(self)
  ABI_CALLOC(wrmesh_shifted_ce, (nwr_ce))
  ABI_CALLOC(beta, (nwr))
  ABI_CALLOC(betaoverw2, (nwr))
- ABI_CALLOC(betaoverw2c, (nwr))
+ !ABI_CALLOC(betaoverw2c, (nwr))
  Ha_fs = 8.955433106
 
  ! Setting direct domain after fft
@@ -857,8 +847,9 @@ subroutine cumulant_compute(self)
  ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
 
  !do iw=1,nwr_ce
- !       dfft(iw) = ig2gfft(iw,nwr)
+ !  dfft(iw) = ig2gfft(iw,nwr)
  !end do
+ !ABI_FREE(dfft)
 
  fftalg = self%ce_ngfft(7)
  fftalga = fftalg/100
@@ -1055,8 +1046,9 @@ subroutine cumulant_compute(self)
    end do ! my_ik
  end do ! my_spin
 
-
  ABI_SFREE(c1)
+ ABI_FREE(ct_temp)
+ ABI_FREE(c_temp)
  ABI_SFREE(c2)
  ABI_SFREE(c3)
  ABI_SFREE(ct)
@@ -1073,6 +1065,7 @@ subroutine cumulant_compute(self)
  ABI_SFREE(wrmesh_shifted_ce)
  !ABI_SFREE(inv_wrmesh_shifted_sq)
  ABI_SFREE(betaoverw2)
+ ABI_FREE(time_mesh_temp)
 
  call cwtime_report(" cumulant_compute", cpu_kloop, wall_kloop, gflops_kloop)
 
@@ -1162,7 +1155,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  class(cumulant_t),intent(inout) :: self
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
-! type(ebands_t),intent(in) :: ebands
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
@@ -1236,7 +1228,6 @@ subroutine cumulant_kubo_transport(self, dtset, cryst)
  end if
 
  call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
-
 
  time_opt =0
  cnt = 0
@@ -1777,8 +1768,12 @@ subroutine cumulant_free(self)
 
 !************************************************************************
 
+ ABI_SFREE(self%kcalc2ebands)
+ ABI_SFREE(self%linewidths)
+ ABI_SFREE(self%vbks)
  ABI_SFREE(self%nbcalc_ks)
  ABI_SFREE(self%bstart_ks)
+ !ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%kcalc2ibz)
  ABI_SFREE(self%coords_kws)
  ABI_SFREE(self%my_spins)
@@ -1789,6 +1784,7 @@ subroutine cumulant_free(self)
  !ABI_SFREE(self%ce_spfunc_wr)
  ABI_SFREE(self%conductivity_mu)
  ABI_SFREE(self%mobility_mu)
+ ABI_SFREE(self%transport_mu_e)
  ABI_SFREE(self%print_dfdw)
  ABI_SFREE(self%seebeck)
  ABI_SFREE(self%kappa)
@@ -1802,15 +1798,19 @@ subroutine cumulant_free(self)
  ABI_SFREE(self%c3)
  ABI_SFREE(self%gt_vals)
  ABI_SFREE(self%wrmesh_b)
+ ABI_SFREE(self%wrmesh_ce)
  ABI_SFREE(self%vals_e0ks)
  ABI_SFREE(self%vals_wr)
  ABI_SFREE(self%kcalc)
  ABI_SFREE(self%kTmesh)
+ ABI_SFREE(self%mu_e)
+ ABI_SFREE(self%n_ehst)
  call destroy_mpi_enreg(self%ce_mpi_enreg)
+ call ebands_free(self%ebands)
 
- call self%kcalc_comm%free()
  call self%spin_comm%free()
-! call self%wt_comm%free()
+ call self%kcalc_comm%free()
+ call self%wt_comm%free()
  call self%ncwrite_comm%free()
 
 end subroutine cumulant_free
