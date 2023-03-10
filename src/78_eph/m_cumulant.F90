@@ -456,7 +456,7 @@ subroutine cumulant_init(self, dtset, dtfil, cryst, ebands, comm, sigmaph )
 !Local variables --------------------------------
  integer, parameter :: master = 0
  integer :: ncerr, ncid, my_rank, nprocs, ierr, spin, ikcalc, ib,  color !my_spin, my_kcalc, cnt, nbands,
- integer :: fftalg, fftalga, ii
+ integer :: fftalg, fftalga
  real(dp) :: cpu, wall, gflops, rsize
  logical :: is_prime
  character(len=500) :: msg
@@ -516,7 +516,7 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
    self%ce_ngfft(7)= 102
    ABI_WARNING("Setting fftalg to 102. Please link with FFTW3 or DFTI for better performance!")
  end if
- self%ce_ngfft(7)= 102
+ !self%ce_ngfft(7)= 102
 
  call initmpi_seq(self%ce_mpi_enreg)
  call init_distribfft_seq(self%ce_mpi_enreg%distribfft, 'c', self%ce_ngfft(2), self%ce_ngfft(3), 'all')
@@ -530,7 +530,7 @@ if (any(abs(dtset%sigma_erange) > zero)) tmp_ebands = sigmaph%get_ebands(cryst, 
    self%ce_ngfft_g(7)= 102
    ABI_WARNING("Setting fftalg to 102. Please link with FFTW3 or DFTI for better performance!")
  end if
- self%ce_ngfft_g(7)= 102
+ !self%ce_ngfft_g(7)= 102
 
  ! Setting debugging ( higher verbosity )
  self%tolcum = dtset%tolcum
