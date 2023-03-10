@@ -27,7 +27,7 @@ ndtset    3
 
 !Convergence parameters
  ecut   48.0
- tolwfr 1.d-16
+ tolwfr 1.d-10
  nstep  50
 
 !XC used
@@ -62,7 +62,7 @@ ndtset    3
 #%%   With delta(xred)=0.0001, one gets delta(etot)/delta(xred)=-0,0050213750
 #%%   The combination of both results, in a higher-order finite difference
 #%%   formula gives -0,0050215613 . The direct computation of forces
-#%%   at the target geometry gives -0,0050217263 .
+#%%   at the target geometry gives -0,0050217263 when converged values are used.
 #%%   The agreement falls within (6) digits of the finite-difference result.
 #%%<END TEST_INFO>
 
