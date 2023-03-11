@@ -157,10 +157,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
- type(ddb_type) :: ddb, ddb_lw
+ type(ddb_type) :: ddb, ddb_lw, berry_ddb
  type(ddb_hdr_type) :: ddb_hdr
  type(dvdb_t) :: dvdb
- type(ifc_type) :: ifc
+ type(ifc_type) :: ifc, berry_ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
@@ -381,8 +381,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Read the DDB file.
  if (use_wfk) then
-   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst_ddb, comm, &
-                      prtvol=dtset%prtvol)
+   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst_ddb, comm, prtvol=dtset%prtvol)
 
    ! DDB cryst comes from DFPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
@@ -477,8 +476,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dtset%dipquad = 0
    dtset%quadquad = 0
  end if
-
- call ddb_hdr%free()
 
  if (my_rank == master) then
    if (iblock_quadrupoles == 0) then
@@ -726,26 +723,51 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
    call gstore%free()
 
- !case (13, -13)
+ !case (13)
    ! Variational polaron equations
-   !call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
-   !call variational_polaron(gstore, dtset, dtfil)
-
- case (14)
-   ! Molecular Berry Curvature
    !if (dtfil%filgstorein /= ABI_NOFILE) then
-   !  call wrtout(units, sjoin(" Computing Berry curvature from GSTORE:", dtfil%filgstorein))
+   !  call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
    !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
    !else
    !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+   !  call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
    !  call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    !  call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
    !                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
    !end if
+   !call variational_polaron(gstore, dtset, dtfil)
+   !call gstore%free()
 
-   call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
-   call berry_curvature(gstore, dtset, dtfil, ddb)  ! berry_ddb
+ case (14)
+   ! Molecular Berry Curvature
+   if (dtfil%filgstorein /= ABI_NOFILE) then
+     call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
+     call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   else
+     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+     call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
+     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   end if
+
+   call berry_curvature(gstore, dtset, dtfil, ddb, ddb_hdr, berry_ddb)
    call gstore%free()
+
+   ! Build new berry_ifc from berry_ddb.
+   call ifc_init(berry_ifc, cryst, berry_ddb, &
+     dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
+     dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+     qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
+     dipquad=dtset%dipquad, quadquad=dtset%quadquad)
+
+   call berry_ifc%print(unit=std_out)
+   call berry_ddb%free()
+
+   ! Output phonon band structure (requires qpath)
+   ! TODO: Change prefix to encode berry curvature?
+   if (dtset%prtphbands /= 0) call ifc_mkphbs(berry_ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
+   call berry_ifc%free()
 
  case (15, -15)
    ! Write average of DFPT potentials to file.
@@ -785,6 +807,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call cryst%free()
  call dvdb%free()
  call ddb%free()
+ call ddb_hdr%free()
  call ifc%free()
  call wfk0_hdr%free()
  call ebands_free(ebands)
