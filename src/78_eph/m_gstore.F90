@@ -46,7 +46,7 @@
 !!
 !!      2) gstore_compute evaluates the e-ph matrix elements in parallel and dumps the results to GSTORE.nc
 !!
-!!      3) gstore_from_ncpath reconstructs the object from GSTORE.nc
+!!      3) gstore%from_ncpath reconstructs the object from GSTORE.nc
 !!
 !!  In a typical scenario, one uses eph_task 11 to generate GSTORE.nc i.e. steps 1) and 2).
 !!  Then one introduces a new value of eph_task in which we read the object from file and call
@@ -426,6 +426,8 @@ contains
   procedure :: get_mpw_gmax => gstore_get_mpw_gmax
 
   procedure :: spin2my_is => gstore_spin2my_is
+  !  Return the local spin index from the global spin index.
+  !  0 if this spin is not treated by this MPI proc.
 
   procedure :: free => gstore_free
   ! Free memory
@@ -459,10 +461,13 @@ contains
   procedure :: get_a2fw => gstore_get_a2fw
   ! Compute Eliashberg function a^2F(w).
 
-end type gstore_t
+  procedure :: from_ncpath => gstore_from_ncpath
+  ! Reconstruct object from netcdf file
 
-public :: gstore_new          ! Build object
-public :: gstore_from_ncpath  ! Reconstruct object from netcdf file
+  procedure :: init => gstore_init
+  ! Build object
+
+end type gstore_t
 !!***
 
 contains
@@ -470,9 +475,9 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_gstore/gstore_new
+!!****f* m_gstore/gstore_init
 !! NAME
-!! gstore_new
+!! gstore_init
 !!
 !! FUNCTION
 !!
@@ -482,10 +487,11 @@ contains
 !!
 !! SOURCE
 
-function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gstore)
+subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(gstore_t),target,intent(out) :: gstore
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
  type(dataset_type),intent(in) :: dtset
@@ -493,7 +499,6 @@ function gstore_new(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm) result (gst
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
- type(gstore_t), target :: gstore
 
 !Local variables-------------------------------
 !scalars
@@ -895,7 +900,7 @@ contains
    vid_spin = nctk_idname(SPIN_NCID, vname)
  end function vid_spin
 
-end function gstore_new
+end subroutine gstore_init
 !!***
 
 !----------------------------------------------------------------------
@@ -1144,7 +1149,6 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    keepdim = .False.; keepdim(3) = .True.; call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
    ! Create communicator for the (qpt, pert) 2D grid
    keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gqk%qpt_pert_comm%from_cart_sub(comm_cart, keepdim)
-
    call xmpi_comm_free(comm_cart)
 #endif
 
@@ -1810,7 +1814,7 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
 
      if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, map_kq, qpt=qpt) /= 0) then
-       ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt)))
+       ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
      end if
 
      do my_ik=1,gqk%my_nk
@@ -2324,7 +2328,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
    ! Find k + q in the IBZ for all my k-points.
    ABI_MALLOC(my_kqmap, (6, gqk%my_nk))
    if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gqk%my_nk, gqk%my_kpts, my_kqmap, qpt=qpt) /= 0) then
-     ABI_ERROR(sjoin("Cannot map k+q to IBZ with q:", ktoa(qpt)))
+     ABI_ERROR(sjoin("Cannot map k+q to IBZ with qpt:", ktoa(qpt)))
    end if
 
    ! Init default sigma
@@ -2423,7 +2427,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
    ! Find correspondence between libtetra mesh and the IBZ.
    if (kpts_map("symrec", ebands_timrev, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map) /= 0) then
-     ABI_ERROR("Cannot map libtetra mesh to IBZ:")
+     ABI_ERROR("Cannot map libtetra mesh to IBZ")
    end if
 
    do ik_bz=1,nkbz
@@ -2433,7 +2437,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
 
    ! Map libtetra BZ mesh + q to IBZ and fill eig_kq
    if (kpts_map("symrec", ebands_timrev, cryst, gstore%krank_ibz, nkbz, kmesh, kmesh_map, qpt=qpt) /= 0) then
-     ABI_ERROR(sjoin("Cannot map libtetra k+q to IBZ with q:", ktoa(qpt)))
+     ABI_ERROR(sjoin("Cannot map libtetra k+q to IBZ with qpt:", ktoa(qpt)))
    end if
 
    do ik_bz=1,nkbz
@@ -3313,10 +3317,10 @@ end subroutine gstore_compute
 !!
 !! SOURCE
 
-function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) result(gstore)
+subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, ifc, comm)
 
 !Arguments ------------------------------------
-!scalars
+ class(gstore_t),target,intent(out) :: gstore
  character(len=*),intent(in) :: path
  integer,intent(in) :: with_cplex
  type(dataset_type),intent(in) :: dtset
@@ -3324,7 +3328,6 @@ function gstore_from_ncpath(path, with_cplex, dtset, cryst, ebands, ifc, comm) r
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
- type(gstore_t),target :: gstore
 
 !Local variables-------------------------------
 !scalars
@@ -3692,7 +3695,7 @@ contains
    spin_vid = nctk_idname(spin_ncid, vname)
  end function spin_vid
 
-end function gstore_from_ncpath
+end subroutine gstore_from_ncpath
 !!***
 
 end module m_gstore

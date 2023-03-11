@@ -683,7 +683,7 @@ module m_gwr
    ! b1gw = minval(gwr%bstart_ks); b2gw = maxval(gwr%bstop_ks)
 
    type(pstat_t) :: pstat
-   ! Interface to the /proc/{pid}/status file
+   ! Interface to the /proc/{pid}/status file.
 
  contains
 
@@ -825,9 +825,9 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 !scalars
  integer,parameter :: qptopt1 = 1, qtimrev1 = 1, master = 0, ndims = 4
  integer :: my_it, my_ikf, ii, ebands_timrev, my_iki, my_iqi, itau, spin, my_iqf
- integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid !, ig, ikq_ibz
+ integer :: my_nshiftq, iq_bz, iq_ibz, npw_, ncid
  integer :: comm_cart, me_cart, ierr, all_nproc, my_rank, qprange_, gap_err, ncerr, omp_nt
- integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj !, it, iw
+ integer :: cnt, ikcalc, ndeg, mband, bstop, nbsum, jj
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
@@ -845,21 +845,15 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
 ! *************************************************************************
 
- all_nproc = xmpi_comm_size(input_comm); my_rank = xmpi_comm_rank(input_comm)
- units = [std_out, ab_out]
-
  call cwtime(cpu, wall, gflops, "start")
  call timab(1920, 1, tsec)
 
- ! Keep a reference to other objects to simplify the API.
- gwr%dtset => dtset
- gwr%dtfil => dtfil
- gwr%cryst => cryst
- gwr%psps => psps
- gwr%pawtab => pawtab
- gwr%ks_ebands => ks_ebands
- gwr%kibz => ks_ebands%kptns
- gwr%wtk => ks_ebands%wtk
+ all_nproc = xmpi_comm_size(input_comm); my_rank = xmpi_comm_rank(input_comm)
+ units = [std_out, ab_out]
+
+ ! Keep a reference to other objects to simplify the internal API.
+ gwr%dtset => dtset; gwr%dtfil => dtfil; gwr%cryst => cryst; gwr%psps => psps; gwr%pawtab => pawtab
+ gwr%ks_ebands => ks_ebands; gwr%kibz => ks_ebands%kptns; gwr%wtk => ks_ebands%wtk
  gwr%mpi_enreg => mpi_enreg
 
  ! Initialize qp_ebands with KS values.
@@ -2151,8 +2145,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
    spin = gwr%my_spins(my_is)
    do my_iki=1,gwr%my_nkibz
      ik_ibz = gwr%my_kibz_inds(my_iki)
-     npw_k = gwr%green_desc_kibz(ik_ibz)%npw
-     npwsp = npw_k * gwr%nspinor
+     npw_k = gwr%green_desc_kibz(ik_ibz)%npw; npwsp = npw_k * gwr%nspinor
      call gwr%ugb(ik_ibz, spin)%init(npwsp, gwr%ugb_nband, gwr%g_slkproc, istwfk1, size_blocs=[-1, 1])
    end do
  end do
@@ -2177,9 +2170,9 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
        ik_ibz = gwr%my_kibz_inds(my_iki); kk_ibz = gwr%kibz(:, ik_ibz)
        npw_k = wfk_hdr%npwarr(ik_ibz); istwf_k = wfk_hdr%istwfk(ik_ibz)
+       npwsp = npw_k * gwr%nspinor
        ! TODO
        ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
-       npwsp = npw_k * gwr%nspinor
 
        associate (ugb => gwr%ugb(ik_ibz, spin), desc_k => gwr%green_desc_kibz(ik_ibz))
        ABI_CHECK_IEQ(npw_k, desc_k%npw, "npw_k != desc_k%npw")
@@ -2188,8 +2181,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        ! TODO: Optimize wfk_read_bmask and/or read WFK with all procs and master broadcasting.
        bmask = .False.
        do il_b=1, ugb%sizeb_local(2)
-         band = ugb%loc2gcol(il_b)
-         bmask(band) = .True.
+         band = ugb%loc2gcol(il_b); bmask(band) = .True.
        end do
        ! FIXME: This is wrong if spc
        call c_f_pointer(c_loc(ugb%buffer_cplx), cg_k, shape=[2, npwsp * ugb%sizeb_local(2)])
@@ -2230,8 +2222,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
        print_time = gwr%comm%me == 0 .and. (ik_ibz < LOG_MODK .or. mod(ik_ibz, LOG_MODK) == 0)
        if (print_time) call cwtime(cpu_green, wall_green, gflops_green, "start")
        kk_ibz = gwr%kibz(:, ik_ibz)
-       npw_k = wfk_hdr%npwarr(ik_ibz); istwf_k = wfk_hdr%istwfk(ik_ibz)
-       npwsp = npw_k * gwr%nspinor
+       npw_k = wfk_hdr%npwarr(ik_ibz); istwf_k = wfk_hdr%istwfk(ik_ibz); npwsp = npw_k * gwr%nspinor
        ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
 
        ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
@@ -2374,7 +2365,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      ! Init output of pzgemm in g-communicator
      call green%init(npwsp, npwsp, gwr%g_slkproc, istwfk1) ! size_blocs=[-1, col_bsize])
 
-     ! Loop over my_ntau as pzgemm is parallelized inside g_comm.
+     ! Loop over my_ntau as pzgemm is MPI-parallelized inside g_comm.
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
        do ipm=1,2
@@ -3361,7 +3352,6 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  type(__slkmat_t) :: wc_ggp, rgp, gpr
  type(uplan_t) :: uplan_k
  complex(gwpc),allocatable :: ceig0r(:)
-
 ! *************************************************************************
 
  ! NB: Non-zero g0, requires the application of the phase.
@@ -3642,7 +3632,6 @@ subroutine desc_init(desc, kk, istwfk, ecut, gwr, kin_sorted)
 
  desc%kin_sorted = .False.; if (present(kin_sorted)) desc%kin_sorted = kin_sorted
  desc%istwfk = istwfk
-
  call get_kg(kk, desc%istwfk, ecut, gwr%cryst%gmet, desc%npw, desc%gvec, kin_sorted=desc%kin_sorted)
 
  ABI_MALLOC(desc%gbound, (2 * gwr%g_mgfft + 8, 2))
@@ -3974,7 +3963,7 @@ end subroutine gwr_print_mem
 
 !!****f* m_gwr/gwr_build_tchi
 !! NAME
-!!  gwr_build_cthi
+!!  gwr_build_tchi
 !!
 !! FUNCTION
 !!  Compute the irreducible polarizability.
@@ -4030,7 +4019,7 @@ subroutine gwr_build_tchi(gwr)
 
  max_abs_imag_chit = zero
 
- ! Set FFT mesh in the supercell
+ ! Setup FFT mesh in the supercell.
  sc_ngfft = gwr%g_ngfft
  sc_ngfft(1:3) = gwr%ngkpt * gwr%g_ngfft(1:3); sc_ngfft(4:6) = sc_ngfft(1:3)
  sc_nfft = product(sc_ngfft(1:3)); sc_nfftsp = sc_nfft * gwr%nspinor
@@ -4258,6 +4247,7 @@ end if
    else
      ABI_FREE(gt_scbox)
    end if
+
    ABI_FREE(green_scgvec)
    ABI_FREE(chi_scgvec)
    ABI_FREE(cemiqr)
@@ -4362,9 +4352,9 @@ end if
           ! The weight depends on q_ibz and the symmetries of the little group of qq_ibz.
           wtqp = one / gwr%nkbz; wtqm = zero
           if (gwr%dtset%symchi /= 0) then
-             wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
-             wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
-             ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
+            wtqp = (one * sum(ltg_qibz(iq_ibz)%wtksym(1,:,ik_bz))) / gwr%nkbz
+            wtqm = (one * sum(ltg_qibz(iq_ibz)%wtksym(2,:,ik_bz))) / gwr%nkbz
+            ABI_CHECK(wtqm == zero, sjoin("TR is not yet implemented:, wqtm:", ftoa(wtqm)))
           end if
 
           chiq_rpr(iq_ibz)%buffer_cplx = chiq_rpr(iq_ibz)%buffer_cplx + &
@@ -4733,9 +4723,8 @@ subroutine gwr_print_trace(gwr, what)
 
 ! *************************************************************************
 
- ! The same q/k point in the IBZ might be available on different procs in kpt_comm
+ ! NB: The same q/k point in the IBZ might be available on different procs in kpt_comm
  ! hence we have to rescale the trace before summing the results in gwr%comm.
-
  comment = "Invalid space!"; units = [std_out, ab_out]
 
  select case (what)
@@ -5047,8 +5036,8 @@ subroutine gwr_build_sigmac(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii
- integer :: my_iqf, iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
- integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir, ig,
+ integer :: iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
+ integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir, ig, my_iqf,
  integer :: isym_k, trev_k, g0_k(3), tsign_k
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates
@@ -5188,8 +5177,7 @@ if (gwr%use_supercell_for_sigma) then
    ABI_MALLOC(uc_ceikr, (gwr%g_nfft * gwr%nspinor))
 
    do ikcalc=1,gwr%nkcalc
-     kcalc_bz = gwr%kcalc(:, ikcalc)
-     ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! NB: Assuming wfs in the IBZ.
+     kcalc_bz = gwr%kcalc(:, ikcalc); ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! NB: Assuming wfs in the IBZ.
      ! Compute e^{ik.r} phases in the unit cell.
      call calc_ceikr(kcalc_bz, gwr%g_ngfft, gwr%g_nfft, gwr%nspinor, uc_ceikr)
 
@@ -5209,7 +5197,6 @@ if (gwr%use_supercell_for_sigma) then
    do my_it=1,gwr%my_ntau
      call cwtime(cpu_tau, wall_tau, gflops_tau, "start")
      itau = gwr%my_itaus(my_it)
-
      !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
      ! G_k(g,g') --> G_k(g',r) e^{ik.r} for each k in the BZ treated by me.
@@ -5217,7 +5204,6 @@ if (gwr%use_supercell_for_sigma) then
 
      ! Wc_q(g,g') --> Wc_q(g',r) e^{iq.r} for each q in the BZ treated by me.
      call gwr%get_myq_wc_gpr(itau, spin, desc_myqbz, wc_gpr)
-
      !if (my_it == 1 .and. gwr%comm%me == 0) call gwr%pstat%print([std_out], reload=.True.)
 
      my_nr = gt_gpr(1,1)%sizeb_local(2)
@@ -5383,8 +5369,7 @@ else
    ABI_MALLOC(ur, (nrsp))
 
    do ikcalc=1,gwr%nkcalc
-     kcalc_bz = gwr%kcalc(:, ikcalc)
-     ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! NB: Assuming wfs in IBZ
+     kcalc_bz = gwr%kcalc(:, ikcalc); ikcalc_ibz = gwr%kcalc2ibz(ikcalc, 1)  ! NB: Assuming wfs in IBZ
      do band=gwr%bstart_ks(ikcalc, spin), gwr%bstop_ks(ikcalc, spin)
        call gwr%kcalc_wfd%get_ur(band, ikcalc_ibz, spin, ur)
        uc_psir_bk(:, band, ikcalc) = ur
@@ -5520,8 +5505,7 @@ else
  !print *, "ucvol: ", gwr%cryst%ucvol; print *, "g_nfft: ", gwr%g_nfft; print *, "ucvol * g_nfft: ", gwr%cryst%ucvol / gwr%g_nfft
  !sigc_it_diag_kcalc = -sigc_it_diag_kcalc * (gwr%cryst%ucvol / gwr%g_nfft) ** 2
 
- call wc_rpr%free()
- call slk_array_free(sigc_rpr); call slk_array_free(gk_rpr_pm)
+ call wc_rpr%free(); call slk_array_free(sigc_rpr); call slk_array_free(gk_rpr_pm)
  do ikcalc=1,gwr%nkcalc
    call ltg_kcalc(ikcalc)%free()
  end do
@@ -5990,15 +5974,15 @@ subroutine gwr_rpa_energy(gwr)
  call gwr%build_green(free_ugb=.True.)
  call gwr%build_tchi()
 
- ! See also calc_rpa_functional in m_screening_driver
  ! Compute RPA energy for ncut cutoff energies in order to extrapolate for ecuteps --> oo
+ ! See also calc_rpa_functional in m_screening_driver
  ncut = max(1, gwr%dtset%gwr_rpa_ncut)  ! Usually 5
  estep = -gwr%dtset%ecuteps * 0.05_dp
 
- call wrtout(std_out, sjoin(" Begin computation of RPA energy with gwr_rpa_ncut:", itoa(ncut), " ..."))
- ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1928, 1, tsec)
+ call wrtout(std_out, sjoin(" Begin computation of RPA energy with gwr_rpa_ncut:", itoa(ncut), " ..."))
+ ABI_CHECK(gwr%tchi_space == "iomega", sjoin("tchi_space:", gwr%tchi_space, "!= iomega"))
 
  ABI_CALLOC(ec_rpa, (ncut))
  ABI_CALLOC(ec_mp2, (ncut))
@@ -6116,7 +6100,6 @@ subroutine gwr_rpa_energy(gwr)
          ABI_FREE(eig)
        end if
        end associate
-
      end do ! my_it
 
      ABI_FREE(kin_qg)
@@ -6560,7 +6543,6 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
 ! *************************************************************************
 
  !call timab(1931, 1, tsec)
-
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
  call c_f_pointer(c_loc(cfft), cfft_ptr, shape=[n4, n5, n6, ndat])
@@ -6576,11 +6558,9 @@ subroutine gsph2box(ngfft, npw, ndat, kg_k, cg, cfft)
      !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
      !  ABI_ERROR(msg)
      !end if
-
      cfft_ptr(i1,i2,i3,idat) = cg(ipw+npw*(idat-1))
    end do
  end do
-
  !call timab(1931, 2, tsec)
 
 end subroutine gsph2box
@@ -6637,12 +6617,10 @@ subroutine box2gsph(ngfft, npw, ndat, kg_k, cfft, cg)
      i1 = modulo(kg_k(1, ipw), n1) + 1
      i2 = modulo(kg_k(2, ipw), n2) + 1
      i3 = modulo(kg_k(3, ipw), n3) + 1
-
      !if (any(kg_k(:,ipw) > ngfft(1:3)/2) .or. any(kg_k(:,ipw) < -(ngfft(1:3)-1)/2) ) then
      !  write(msg,'(a,3(i0,1x),a)')" The G-vector: ",kg_k(:, ipw)," falls outside the FFT box. Increase boxcutmin (?)"
      !  ABI_ERROR(msg)
      !end if
-
      icg = ipw + (idat - 1) * npw
      cg(icg) = cfft_ptr(i1, i2, i3, idat)
    end do
@@ -6689,7 +6667,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  type(littlegroup_t) :: ltg_q
  type(desc_t),pointer :: desc_ki
 !arrays
- integer :: gmax(3), u_ngfft(18), work_ngfft(18) ! spinor_padx(2,4), g0(3),
+ integer :: gmax(3), u_ngfft(18), work_ngfft(18), units(2) ! spinor_padx(2,4), g0(3),
  integer,contiguous, pointer :: kg_ki(:,:)
  integer,allocatable :: gvec_q0(:,:), gbound_q0(:,:), u_gbound(:,:)
  real(dp) :: kk_ibz(3), kk_bz(3), tsec(2)
@@ -6713,19 +6691,19 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  call timab(1927, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
- call wrtout([std_out, ab_out], sjoin(" Computing chi0 head and wings with inclvkb:", itoa(gwr%dtset%inclvkb)), &
-             pre_newlines=1)
+ units = [std_out, ab_out]
+ call wrtout(units, sjoin(" Computing chi0 head and wings with inclvkb:", itoa(gwr%dtset%inclvkb)), pre_newlines=1)
 
  nspinor = gwr%nspinor; nsppol = gwr%nsppol; dtset => gwr%dtset; cryst => gwr%cryst
  use_tr = gwr%dtset%awtr == 1; zcut = gwr%dtset%zcut ! well, it's not used in g0w0 when omega is complex.
 
  ! Use KS or QP energies depending on the iteration state.
  if (gwr%scf_iteration == 1) then
-   call wrtout([std_out, ab_out], " Using KS orbitals and KS energies...", newlines=1, do_flush=.True.)
+   call wrtout(units, " Using KS orbitals and KS energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%ks_ebands%eig; qp_occ => gwr%ks_ebands%occ
    now_ebands => gwr%ks_ebands
  else
-   call wrtout([std_out, ab_out], " Using KS orbitals and QP energies...", newlines=1, do_flush=.True.)
+   call wrtout(units, " Using KS orbitals and QP energies...", newlines=1, do_flush=.True.)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
    now_ebands => gwr%qp_ebands
  end if
@@ -7091,7 +7069,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
    qlen = tol3
    call cryst%get_redcart_qdirs(nq, qdirs, qlen=qlen)
    ABI_MALLOC(head_qvals, (nq))
-   associate (units => [std_out, ab_out])
    call wrtout(units, " Head of the irreducible polarizability for q --> 0", pre_newlines=1)
    call wrtout(units, sjoin(" q0_len:", ftoa(qlen), "(Bohr^-1)"))
    write(msg, "(*(a14))") "iomega (eV)", "[100]", "[010]", "[001]", "x", "y", "z"
@@ -7108,7 +7085,6 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      call wrtout(std_out, msg)
    end do
    call wrtout(units, " ")
-   end associate
    ABI_FREE(qdirs)
    ABI_FREE(head_qvals)
  end if
@@ -7802,6 +7778,7 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
        end do
      end do
    end do
+
  else
    ! Need to multiply by e^{ik.L}
    do il3=1,sc_shape(3)
