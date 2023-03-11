@@ -95,7 +95,7 @@ module m_scfcv_core
  use m_outscfcv,         only : outscfcv
  use m_afterscfloop,     only : afterscfloop
  use m_extraprho,        only : extraprho
- use m_spacepar,         only : make_vectornd,make_vectornd2,setsym
+ use m_spacepar,         only : make_vectornd,setsym
  use m_newrho,           only : newrho
  use m_newvtr,           only : newvtr
  use m_vtorho,           only : vtorho
@@ -389,7 +389,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  real(dp),allocatable :: ph1d(:,:),ph1ddiel(:,:),ph1df(:,:)
  real(dp),allocatable :: phnonsdiel(:,:,:),rhowfg(:,:),rhowfr(:,:),shiftvector(:)
  real(dp),allocatable :: susmat(:,:,:,:,:),synlgr(:,:)
- real(dp),allocatable :: vectornd(:,:),vhartr(:),vpsp(:),vtrial(:,:)
+ real(dp),allocatable :: vectornd(:,:,:),vhartr(:),vpsp(:),vtrial(:,:)
  real(dp),allocatable :: vxc(:,:),vxc_hybcomp(:,:),vxctau(:,:,:),workr(:,:),xccc3d(:),xcctau3d(:),ylmdiel(:,:)
  real(dp),pointer :: elfr(:,:),grhor(:,:,:),lrhor(:,:)
  type(scf_history_type) :: scf_history_wf
@@ -1162,11 +1162,11 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if(allocated(vectornd)) then
         ABI_FREE(vectornd)
      end if
-     ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
+     ABI_MALLOC(vectornd,(with_vectornd*nfftf,dtset%nspden,3))
      vectornd=zero
      if(with_vectornd .EQ. 1) then
-        call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-             & rprimd,vectornd,xred)
+        call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
+          & dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
      endif
 
    end if ! moved_atm_inside==1 .or. istep==1

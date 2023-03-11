@@ -270,6 +270,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    pawtab(:)%usepawu   = 0
    pawtab(:)%useexexch = 0
    pawtab(:)%exchmix   =zero
+   pawtab(:)%lamb_shielding   =zero
 
    call setsym_ylm(cryst%gprimd,pawang%l_max-1,cryst%nsym,dtset%pawprtvol,cryst%rprimd,cryst%symrec,pawang%zarot)
 

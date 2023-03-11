@@ -207,7 +207,7 @@ contains
 !!  usecprj=1 if cprj datastructure is stored in memory
 !!  wffnew,unit numbers for wf disk files.
 !!  with_vectornd = 1 if vectornd allocated
-!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
+!!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
 !!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
 !!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
@@ -329,7 +329,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: phnonsdiel(2,nfftdiel**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),rmet(3,3),rprimd(3,3)
- real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
+ real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,dtset%nspden,3),vtrial(nfftf,dtset%nspden)
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp), intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -720,7 +720,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(has_vectornd) then
         do idir = 1, 3
           ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,:,idir))
           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
           ABI_FREE(cgrvtrial)
         end do

@@ -158,7 +158,7 @@ contains
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
 !!  ddk<wfk_t)=struct info DDK file
-!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
+!!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
 !!  with_vectornd = 1 if vectornd allocated
@@ -262,7 +262,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp), intent(out) :: nhat1(cplex*nfftf,dtset%nspden*psps%usepaw)
  real(dp),intent(out) :: resid(mband*nkpt_rbz*nsppol),rhog1(2,nfftf)
  real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),rhor1(cplex*nfftf,nspden)
- real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,dtset%nspden,3)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
@@ -487,7 +487,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      do nddir = 1, 3
        ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
        call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-         & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
+         & rhodum,rhodum,cgrvtrial,vectornd(:,:,nddir))
        call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
          & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
        ABI_FREE(cgrvtrial)
