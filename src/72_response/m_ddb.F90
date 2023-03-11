@@ -343,12 +343,12 @@ CONTAINS  !===========================================================
 !!   nblok=number of blocks
 !!   mpert=maximum number of perturbations
 !!         (atom displacements + electric field + ...)
-!!   msize=maximum size of one block of the ddb
-!!         (e.g. 3*mpert * 3*mpert)
+!!   msize=maximum size of one block of the ddb e.g. 3*mpert * 3*mpert.
 !!
 !! SOURCE
 
 subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(inout) :: ddb
  type(dataset_type),intent(in) :: dtset

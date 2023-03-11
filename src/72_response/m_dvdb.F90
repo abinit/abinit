@@ -4550,11 +4550,10 @@ integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 ! *************************************************************************
 
  my_qtol = tol6; if (present(qtol)) my_qtol = qtol
-
  iqpt = -1
  do iq=1,db%nqpt
    if (all(abs(db%qpts(:, iq) - qpt) < my_qtol)) then
-      iqpt = iq; exit
+     iqpt = iq; exit
    end if
  end do
 
