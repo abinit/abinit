@@ -377,6 +377,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    Pawtab(:)%usepawu   = 0
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
+   Pawtab(:)%lamb_shielding = zero
 
    ! Evaluate <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for the long wavelength limit.
    ! TODO solve problem with memory leak and clean this part as well as the associated flag

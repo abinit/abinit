@@ -3825,6 +3825,10 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
    pawtab%ex_cc=paw_setuploc%ex_cc
  end if
 
+!----------------------------------------
+! store Lamb shielding
+pawtab%lamb_shielding=paw_setuploc%lamb_shielding
+
 !==========================================================
 !Compute additional atomic data only depending on present DATASET
 

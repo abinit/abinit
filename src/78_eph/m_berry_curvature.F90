@@ -24,16 +24,16 @@ module m_berry_curvature
  use m_abicore
  use m_xmpi
  use m_errors
- use netcdf
- use m_nctk
+ !use netcdf
+ !use m_nctk
  use m_crystal
  use m_dtset
  use m_dtfil
 
- use m_time,            only : cwtime, cwtime_report, sec2str
+ use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ktoa
  use defs_datatypes,    only : ebands_t
- use m_kpts,            only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
+ use m_kpts,            only : kpts_timrev_from_kptopt, kpts_map
  use m_ddb_hdr,         only : ddb_hdr_type
  use m_ddb,             only : ddb_type
  use m_ifc,             only : ifc_type
@@ -173,7 +173,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ddb_hdr, berry_ddb)
            !if (abs(dene) < tol12) then ??
            inv_dene2 = one / (dene ** 2)
 
-           ! Loop overt perturbations and accumulate.
+           ! Loop over perturbations and accumulate.
            ! Need all perts on the same procs as we have to take the outer product (ipc1, ipc2)
            do my_ip1=1,gqk%my_npert
              ipc1 = gqk%my_iperts(my_ip1)
