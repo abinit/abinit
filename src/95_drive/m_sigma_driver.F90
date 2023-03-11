@@ -472,6 +472,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Initialize optional flags in Pawtab to zero
    ! Cannot be done in Pawinit since the routine is called only if some pars. are changed
    pawtab(:)%has_nabla = 0
+   Pawtab(:)%lamb_shielding = zero
 
    call setsym_ylm(gprimd, pawang%l_max-1, cryst%nsym, dtset%pawprtvol, cryst%rprimd, cryst%symrec, pawang%zarot)
 
