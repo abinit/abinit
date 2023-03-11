@@ -9685,9 +9685,10 @@ Chemical shielding at each nucleus due to the core electrons. This quantity is
 input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
-will be included. Because the PAW input files do not include the core orbitals,
-the user must compute this value separately, from the Lamb formula [[cite:Abragam1961]],
-and input it here.
+will be included. If a PAW dataset is used where this quantity is included, then a non-zero
+value in [[lambsig]] will override the PAW value. 
+The value to be used here can be obtained from the PAW core wavefunctions and the
+Lamb formula [[cite:Abragam1961]].
 """,
 ),
 
@@ -12703,15 +12704,16 @@ Variable(
     dimensions=[3, '[[natom]]'],
     defaultval=0.0,
     mnemonics="NUClear DIPole MOMents",
-    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] = 3",
+    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] = 0 or 3",
     added_in_version="before_v9",
     text=r"""
 Places an array of nuclear magnetic dipole moments on the atomic
 positions, useful for computing the magnetization in the presence of
-nuclear dipoles and thus the chemical shielding by the converse method
-[[cite:Thonhauser2009]]. The presence of these dipoles breaks time
+nuclear dipoles and thus the chemical shielding by the converse method (see [[orbmag]] and
+[[cite:Thonhauser2009]]). The presence of these dipoles breaks time
 reversal symmetry and lowers the overall spatial symmetry.  The dipole
-moment values are entered in atomic units. For reference, note that
+moment values are entered in atomic units, as vectors in the Cartesian (not crystallographic)
+coordinate frame. For reference, note that
 one Bohr magneton has value $1/2$ in atomic units, while one nuclear
 Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 """,
@@ -12730,7 +12732,7 @@ Variable(
     text=r"""
 If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
 Using this option requires [[quadmom]] to be set as well.
-Values will be written to main output file (search for Electric Field Gradient).
+Values will be written to the main output file (search for Electric Field Gradient).
 If nucefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
 If nucefg=2, the full electric field gradient tensors in atomic units are also given,
 showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
@@ -13413,7 +13415,7 @@ for some PAW calculations.
 
 Variable(
     abivarname="orbmag",
-    varset="gstate",
+    varset="dfpt",
     vartype="integer",
     topics=['MagField_expert'],
     dimensions="scalar",
@@ -13422,22 +13424,19 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="""[[usepaw]] == 1;
 [[usexcnhat]] == 0;
-[[nspinor]] == 1;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
     added_in_version="before_v9",
     text=r"""
-Compute quantities related to orbital magnetic moment. The
-    implementation assumes an insulator, so no empty or partially
-    filled bands, and currently restricted to [[nspinor]] 1. Such
-    insulators have orbital magnetization zero, except in the presence
-    of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
+Compute quantities related to orbital magnetic moment. Typically used in the
+presence of a nonzero nuclear magnetic dipole moment, see [[nucdipmom]], to compute
+the nuclear magnetic shielding as measured in NMR. [[orbmag]]
     is parallelized over k points only. The implementation follows the
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case.
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
-    both the ground state and DDK wavefunctions, and is triggered at the end of a
+    both the ground state and DDK wavefunctions (see [[rfddk]]), and is triggered at the end of a
     DDK calculation.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern number
@@ -17347,7 +17346,8 @@ Variable(
     text=r"""
 Activates computation of derivatives of ground state wavefunctions with
 respect to wavevectors. This is not strictly a response function but is a
-needed auxiliary quantity in the electric field calculations (see [[rfelfd]]).
+needed auxiliary quantity in the electric field calculations (see [[rfelfd]]) and orbital magnetism calculations
+(see [[orbmag]]).
 The directions for the derivatives are determined by [[rfdir]].
 
   * 0 --> no derivative calculation
