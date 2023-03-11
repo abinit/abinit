@@ -422,7 +422,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
- real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:),vhartr1(:),vxc1(:,:)
+ real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:,:),vhartr1(:),vxc1(:,:)
  real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),allocatable :: vtrial1_pq(:,:),vtrial1_mq(:,:),rhorfermi_mq(:,:)
@@ -694,10 +694,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  if(allocated(vectornd)) then
    ABI_FREE(vectornd)
  end if
- ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
+ ABI_MALLOC(vectornd,(with_vectornd*nfftf,dtset%nspden,3))
  if(with_vectornd .EQ. 1) then
    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,&
-   & ngfftf,dtset%nucdipmom,rprimd,vectornd,xred)
+   & ngfftf,dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
  endif
 
  call timab(154,2,tsec)
