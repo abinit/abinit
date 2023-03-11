@@ -7,6 +7,6 @@ dimensions:
   type: State
 elements:
   type: IeeeBinaryFile
-unit: 0.1917011272153577       # = sqrt(Eh/eV)
+unit: 1.0
 metaData:
   halfGrid: 0

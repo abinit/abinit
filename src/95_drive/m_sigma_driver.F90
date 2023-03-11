@@ -484,7 +484,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%pawrhoij, KS_Pawrhoij)
 
-   !  Evaluate form factor of radial part of phi.phj-tphi.tphj.
+   ! Evaluate form factor of radial part of phi.phj-tphi.tphj.
    rhoxsp_method = 1  ! Arnaud-Alouani (default in sigma)
    !rhoxsp_method = 2 ! Shiskin-Kresse
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
@@ -506,7 +506,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nq_spl = Psps%mqgrid_ff
    ! write(std_out,*)"using nq_spl",nq_spl,"qmax=",qmax
    ABI_MALLOC(Paw_pwff, (Psps%ntypat))
-
    call pawpwff_init(Paw_pwff,rhoxsp_method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
 
    ABI_FREE(nq_spl)

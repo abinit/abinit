@@ -28,7 +28,6 @@ MODULE m_ifc
  use m_xmpi
  use m_sort
  use m_cgtools
-
  use m_nctk
  use m_ddb
  use m_ddb_hdr

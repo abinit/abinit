@@ -423,7 +423,7 @@ subroutine ddb_copy(iddb, oddb)
 
 !Arguments ------------------------------------
 !array
- class(ddb_type),intent(inout) :: iddb
+ class(ddb_type),intent(in) :: iddb
  type(ddb_type),intent(out) :: oddb
 
 ! ************************************************************************
@@ -3624,6 +3624,7 @@ end subroutine ddb_write_block
 !! SOURCE
 
 subroutine ddb_write(ddb, ddb_hdr, filename, fullinit, comm)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(in) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -3659,6 +3660,7 @@ end subroutine ddb_write
 !! SOURCE
 
 subroutine ddb_write_txt(ddb, ddb_hdr, filename, fullinit, comm)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(in) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -4860,7 +4862,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
 
  do iblok=1,ddb%nblok
 
-   if (abs(ddb%typ(iblok))==abs(rfmeth)) then
+   if (abs(ddb%typ(iblok)) == abs(rfmeth)) then
      qq(1)=ddb%qpt(1,iblok)/ddb%nrm(1,iblok)
      qq(2)=ddb%qpt(2,iblok)/ddb%nrm(1,iblok)
      qq(3)=ddb%qpt(3,iblok)/ddb%nrm(1,iblok)

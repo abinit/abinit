@@ -367,6 +367,8 @@ meta: {optdriver: 6, }
 
  Writing CoulombPotential data to file: t07o_DS2_CoulombPotential.elements
 
+ Writing CoulombVertex data to file: t07o_DS2_CoulombVertex.elements
+
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
  Fundamental gap:     6.335 (eV)
