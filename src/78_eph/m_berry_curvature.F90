@@ -24,11 +24,11 @@ module m_berry_curvature
  use m_abicore
  use m_xmpi
  use m_errors
- !use netcdf
- !use m_nctk
  use m_crystal
  use m_dtset
  use m_dtfil
+ use netcdf
+ use m_nctk
 
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ktoa
@@ -36,8 +36,9 @@ module m_berry_curvature
  use m_kpts,            only : kpts_timrev_from_kptopt, kpts_map
  use m_ddb_hdr,         only : ddb_hdr_type
  use m_ddb,             only : ddb_type
- use m_ifc,             only : ifc_type
+ use m_ifc,             only : ifc_type, ifc_init
  use m_gstore,          only : gstore_t, gqk_t
+ use m_phonons,         only : phonon_dos_type, ifc_mkphbs, mkphdos
 
  implicit none
 
@@ -63,7 +64,7 @@ contains
 !!
 !! SOURCE
 
-subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ddb_hdr, berry_ddb)
+subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, dielt, zeff, qdrp_cart)
 
 !Arguments ------------------------------------
 !scalars
@@ -71,37 +72,44 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ddb_hdr, berry_ddb)
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
  type(ddb_type),intent(in) :: in_ddb
- type(ddb_hdr_type),intent(inout) :: in_ddb_hdr
- type(ddb_type),intent(out) :: berry_ddb
+ real(dp),intent(in) :: dielt(3,3), zeff(3,3,dtset%natom), qdrp_cart(3,3,3,dtset%natom)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0
- integer :: nproc, my_rank, ierr, itemp, ntemp
- integer :: my_is, spin, nsppol, natom3, band, ib1, ib2, band1, band2, nb, ebands_timrev
+ integer,parameter :: master = 0, nsphere0 = 0, prtsrlr0 = 0, rftyp1 = 1
+ integer :: nproc, my_rank, ierr, itemp, ntemp, comm, ddb_nqshift, ncid, mpert, msize
+ integer :: my_is, spin, nsppol, natom3, band, ib1, ib2, band1, band2, nb, ebands_timrev, index
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  integer :: my_iq, iq_glob, my_ik, ik_glob, my_ip1, my_ip2, ipc1, ipc2, ipert1, ipert2, iblok, idir1, idir2
  logical :: isirr_k, isirr_q, isirr_kq
- real(dp) :: e_kq_b1, e_k_b2,  f_kq_b1, f_k_b2, dene, inv_dene2, spin_occ
+ real(dp) :: e_kq_b1, e_k_b2,  f_kq_b1, f_k_b2, dene, inv_dene2, spin_occ, fact1, fact2
  real(dp) :: kt, wmax, cpu, wall, gflops
- !character(len=5000) :: msg
- character(len=fnlen) :: ddb_filepath
+ character(len=5000) :: msg
+ character(len=fnlen) :: berry_ddb_filepath, path
  class(crystal_t),pointer :: cryst
  class(ebands_t),pointer :: ebands
  type(gqk_t),pointer :: gqk
+ type(crystal_t) :: ddb_crystal
+ type(ddb_type) :: berry_ddb
+ type(ddb_hdr_type) :: in_ddb_hdr
+ type(ifc_type) :: berry_ifc
+ type(phonon_dos_type) :: phdos
 !arrays
- integer :: units(2)
+ integer :: count_wminmax(2), units(2), rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: my_kqmap(:,:) !, kmesh_map(:,:), flg(:,:,:,:)
- real(dp) :: kk_bz(3), kq_bz(3), kk_ibz(3), kq_ibz(3), qq_bz(3), qq_ibz(3), ddb_qq(3) !, vk(3)
+ real(dp) :: qphnrm(3), qphon_padded(3,3), g_ri(2) !,d2cart(2,ddb%msize),my_qpt(3)
+ real(dp),allocatable :: ddb_qshifts(:,:)
+ real(dp) :: wminmax(2) !, zeff_raw(3,3,dtset%natom)
+ real(dp) :: kk_bz(3), kq_bz(3), kk_ibz(3), kq_ibz(3), qq_bz(3), qq_ibz(3) !, ddb_qq(3) !, vk(3)
  !real(dp),allocatable :: ktmesh(:), phmesh(:), eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
- real(dp), allocatable :: d2matr(:,:,:,:,:)
+ !real(dp), allocatable :: d2matr(:,:,:,:,:)
  complex(dp),allocatable :: gmat(:,:,:)
 
 !----------------------------------------------------------------------
 
- nproc = xmpi_comm_size(gstore%comm); my_rank = xmpi_comm_rank(gstore%comm)
+ comm = gstore%comm; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
 
  call wrtout(std_out, " Computing berry curvature", pre_newlines=2)
@@ -117,6 +125,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ddb_hdr, berry_ddb)
  ABI_CHECK_NOSTOP(gstore%qzone == "ibz", "qzone == 'ibz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%kzone == "bz", "kzone == 'bz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 2, "cplex == 2 is required", ierr)
+ ! Need all perts on the same procs as we have to take the outer product (ipc1, ipc2)
  ABI_CHECK_NOSTOP(gstore%gqk(1)%pert_comm%nproc == 1, "berry_curvature is not compatible with pert_parallelism", ierr)
  ABI_CHECK(ierr == 0, "Wrong gstore object for berry_curvature. See messages above")
 
@@ -157,34 +166,40 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ddb_hdr, berry_ddb)
        isirr_kq = (isym_kq == 1 .and. trev_kq == 0 .and. all(g0_kq == 0))
        tsign_kq = 1; if (trev_kq == 1) tsign_kq = -1
 
-       ! Summation over the two band indices. occupancies f are rescaled in [0, 1] when nsppol 2.
+       ! Summation over the two band indices. NB: occupancies f are rescaled in [0, 1] when nsppol 2.
        do ib2=1,nb
          band2 = ib2 + gqk%bstart - 1
          e_k_b2 = ebands%eig(band2, ik_ibz, spin)
          f_k_b2 = ebands%occ(band2, ik_ibz, spin) / spin_occ
-         !g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
+         !f_k_b2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
          do ib1=1,nb
            band1 = ib1 + gqk%bstart - 1
            e_kq_b1 = ebands%eig(band1, ikq_ibz, spin)
            f_kq_b1 = ebands%occ(band1, ikq_ibz, spin) / spin_occ
-           !g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
+           !f_kq_b1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
            dene = e_kq_b1 - e_k_b2
-           ! TODO: add finite delta or do Taylor series expansion of numerator + denominator?
-           !if (abs(dene) < tol12) then ??
-           inv_dene2 = one / (dene ** 2)
+           if (abs(dene) > tol8) then
+             inv_dene2 = one / (dene ** 2)
+           else
+             ! TODO: add finite delta or do Taylor series expansion of numerator + denominator?
+             inv_dene2 = zero
+           end if
+           !print *, "inv_dene2: ",  inv_dene2
+           fact1 = f_k_b2  * (one - f_kq_b1)
+           fact2 = f_kq_b1 * (one - f_k_b2)
+           !if (abs(fact1) < tol20 .or. abs(fact2) < tol20) cycle
 
            ! Loop over perturbations and accumulate.
-           ! Need all perts on the same procs as we have to take the outer product (ipc1, ipc2)
            do my_ip1=1,gqk%my_npert
              ipc1 = gqk%my_iperts(my_ip1)
              do my_ip2=1,gqk%my_npert
                ipc2 = gqk%my_iperts(my_ip2)
                ! my_g(2, my_npert, nb, my_nq, nb, my_nk)
                gmat(ipc1, ipc2, iq_ibz) = gmat(ipc1, ipc2, iq_ibz) &
-                 + inv_dene2 * f_k_b2 * (one - f_kq_b1) &
+                 + inv_dene2 * fact1 &
                  ! TODO my_g should be complex
                  !* gqk%my_g(:,my_ip1,ib1,my_iq,ib2,my_ik) * gqk%my_g(:,my_ip2,ib1,my_iq,ib2,my_ik)
-                 - inv_dene2 * f_kq_b1 * (one - f_k_b2)
+                 - inv_dene2 * fact2
                  !* gqk%my_g(:,my_ip1,ib1,my_iq,ib2,my_ik) * gqk%my_g(:,my_ip2,ib1,my_iq,ib2,my_ik)
              end do
            end do
@@ -198,70 +213,143 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ddb_hdr, berry_ddb)
 
  ! ALL reduce partial terms so that we sum over MPI-distributed dims i.e. spins and k-points in BZ.
  gmat = j_dpc * gmat / gstore%nkbz
- ! Account for spin degeneracy.
+ ! Account for spin degeneracy as f in [0,1]
  if (nsppol == 1 .and. dtset%nspinor == 1) gmat = two * gmat
- call xmpi_sum(gmat, gstore%comm, ierr)
+ call xmpi_sum(gmat, comm, ierr)
  call cwtime_report(" berry_curvature:", cpu, wall, gflops)
 
- if (my_rank == 0) then
+ if (my_rank == master) then
    ! Print some results to ab_out for testing purposes.
    do iq_ibz=1,gstore%nqibz
-     write(ab_out, "(4a)")ch10,ch10," G(q) matrix for qpt: ", trim(ktoa(gstore%qibz(:,iq_ibz)))
-     write(ab_out, "(4(i4,2x), 2(a12,2x))")"idir1", "ipert1", "idir2", "ipert2", "Re(gmat)", "Im(gmat)"
+     write(msg, "(2a,2x,2a)")ch10,ch10,"G(q) matrix for qpt: ", trim(ktoa(gstore%qibz(:,iq_ibz)))
+     call wrtout(units, msg)
+     write(msg, "(2x,4(a4,2x), 2(a12,2x))")"idir1", "ipert1", "idir2", "ipert2", "Re(gmat)", "Im(gmat)"
+     call wrtout(units, msg)
      do ipc2=1,natom3
        idir2 = mod(ipc2-1, 3) + 1; ipert2 = (ipc2 - idir2) / 3 + 1
        do ipc1=1,natom3
          idir1 = mod(ipc1-1, 3) + 1; ipert1 = (ipc1 - idir1) / 3 + 1
-         write(ab_out, "(4(i4,2x), 2(es12.5,2x))") &
+         write(msg, "(2x,4(i4,2x), 2(es12.5,2x))") &
            idir1, ipert1, idir2, ipert2, real(gmat(ipc1, ipc2, iq_ibz)), aimag(gmat(ipc1, ipc2, iq_ibz))
+         call wrtout(units, msg)
        end do
      end do
    end do ! iq_ibz
  end if
+ stop
 
  ! Create berry_ddb object to add gmat to the input dynamical matrix.
  ! WARNING: gmat has all (3*natom)**2 entries whereas the DDB stores only the irred elements.
  ! on the one hand, one can eploit this to reduce the number of iterations.
  ! on the other hand, one assumes that D(q) and G(q) have the same symmetry.
  ! Note that ddb%val(2,msize,nblok) are in Cartesian coordinates whereas gmat is in reduced coords.
+ ! thus we need to use raw=1 to disable any symetrization or transformation to cartesian coordinates.
  !
  ! Symmetry properties:
  !
  ! 1) G(-k) = -G(k)^*
  ! 2) In the presence of time reversal symmetry, the Berry curvature would be zero
 
- call in_ddb%copy(berry_ddb)
+ call wrtout(units, sjoin("- Reading input DDB from file:", dtfil%filddbsin))
+ call berry_ddb%from_file_txt(dtfil%filddbsin, dtset%brav, in_ddb_hdr, ddb_crystal, comm, prtvol=dtset%prtvol, raw=1)
+ call ddb_crystal%free()
 
- ABI_MALLOC(d2matr, (2,3,in_ddb%mpert,3,in_ddb%mpert))
- !ABI_MALLOC(flg, (3,in_ddb%mpert,3,in_ddb%mpert))
+ ! mpert=maximum number of perturbations (atom displacements + electric field + ...)
+ ! msize=maximum size of one block of the ddb e.g. 3*mpert * 3*mpert.
+
+ mpert = berry_ddb%mpert; msize = berry_ddb%msize
+ !ABI_MALLOC(d2matr, (2,3,mpert,3,mpert))
+ !ABI_MALLOC(flg, (3, mpert, 3, mpert))
  !ABI_FREE(flg)
 
- do iblok=1,in_ddb%nblok
-   ddb_qq(:) = in_ddb%qpt(:,iblok) / in_ddb%nrm(:,iblok)
-   ! In principle the qpts in the DDB and in gstore%qibz should be the same.
-   !iq_ibz = gstore%find_qibz(ddb_qq)
-   !ABI_CHECK(iq_ibz /= -1, sjoin("Cannot find qpt:", ktoa(ddb_qq), "in gstore%qibz !"))
+ rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0; qphnrm = one
 
-   !do iq=1,db%nqpt
-   !  if (all(abs(db%qpts(:, iq) - qpt) < my_qtol)) then
-   !    iqpt = iq; exit
-   !  end if
-   !end do
+ do iq_ibz=1,gstore%nqibz
+   ! Find 2d block associated to gstore%qibz(:,iq_ibz)
+   qphon_padded = zero; qphon_padded(:,1) = gstore%qibz(:,iq_ibz)
+   call berry_ddb%get_block(iblok, qphon_padded, qphnrm, rfphon, rfelfd, rfstrs, rftyp1)
+   ABI_CHECK(iblok /= 0, sjoin("Cannot find q-point ", ktoa(gstore%qibz(:,iq_ibz))," in DDB file"))
 
-   !d2matr = reshape(in_ddb%val(:,:,iblok), [2,3,in_ddb%mpert,3,in_ddb%mpert])
-   !gmat(natom3, natom3, iq_ibz))
-   !call berry_ddb%set_d2matr(d2matr, in_ddb%flg(:,iblok), iblok)
+   do ipc2=1,natom3
+     idir2 = mod(ipc2-1, 3) + 1; ipert2 = (ipc2 - idir2) / 3 + 1
+     do ipc1=1,natom3
+       idir1 = mod(ipc1-1, 3) + 1; ipert1 = (ipc1 - idir1) / 3 + 1
+       index = idir1+3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+       ! TODO: In MGO all flags are set to 1
+       print *, "flg:", berry_ddb%flg(index, iblok)
+       !if (berry_ddb%flg(index, iblok) == 0) cycle
+       g_ri(:) = [real(gmat(ipc1, ipc2, iq_ibz)), aimag(gmat(ipc1, ipc2, iq_ibz))]
+       !berry_ddb%val(:,index,iblok) = berry_ddb%val(:,index,iblok) + g_ri
+       !call berry_ddb%set_d2matr(d2matr, in_ddb%flg(:,iblok), iblok)
+     end do
+   end do
  end do
 
- ABI_FREE(d2matr)
+ !ABI_FREE(d2matr)
  ABI_FREE(gmat)
 
- ! Write new DDB file with Berry curvature.
- if (my_rank == 0) then
-   ddb_filepath = strcat(dtfil%filnam_ds(4), "BERRY_DDB")
-   call wrtout(units, "- Writing DDB file with Berry curvature to: ", ddb_filepath)
-   call berry_ddb%write_txt(in_ddb_hdr, ddb_filepath) !, fullinit, comm)
+ ! Write new DDB file including Berry curvature.
+ berry_ddb_filepath = strcat(dtfil%filnam_ds(4), "_BERRY_DDB")
+ if (my_rank == master) then
+   call wrtout(units, sjoin("- Writing DDB file with Berry curvature to: ", berry_ddb_filepath), pre_newlines=2)
+   in_ddb_hdr%dscrpt = "DDB including Berry curvature"
+   call berry_ddb%write_txt(in_ddb_hdr, berry_ddb_filepath) !, fullinit, comm)
  end if
+ call in_ddb_hdr%free(); call berry_ddb%free()
+
+ ! ===============================
+ ! Now reopen berry_ddb with raw=0
+ ! ===============================
+ call xmpi_barrier(comm)
+ call berry_ddb%from_file_txt(berry_ddb_filepath, dtset%brav, in_ddb_hdr, ddb_crystal, comm, &
+                              prtvol=dtset%prtvol, raw=0)
+ call in_ddb_hdr%free(); call ddb_crystal%free()
+
+ ! Build berry_ifc from berry_ddb.
+ ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
+ ddb_nqshift = 1
+ ABI_CALLOC(ddb_qshifts, (3, ddb_nqshift))
+ ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
+
+ call ifc_init(berry_ifc, cryst, berry_ddb, &
+   dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
+   dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+   qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
+   dipquad=dtset%dipquad, quadquad=dtset%quadquad)
+
+ ABI_FREE(ddb_qshifts)
+
+ !call berry_ifc%print(unit=std_out)
+
+ ! Output phonon band structure (requires qpath)
+ ! TODO: Change prefix to encode berry curvature?
+ if (dtset%prtphbands /= 0) call ifc_mkphbs(berry_ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
+
+ if (dtset%prtphdos == 1) then
+   call wrtout(std_out, " Computing Phonon DOS. Use prtphdos 0 to disable this part.")
+   wminmax = zero
+   do
+     call mkphdos(phdos, cryst, berry_ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
+       dtset%ph_nqshift, dtset%ph_qshift, "", wminmax, count_wminmax, comm)
+     if (all(count_wminmax == 0)) exit
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05; wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     call phdos%free()
+     write(msg, "(a, 2f8.5)") "Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
+     call wrtout(std_out, msg)
+   end do
+
+   if (my_rank == master) then
+     path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
+     call wrtout(units, sjoin("- Writing phonon DOS to netcdf file:", path))
+     NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating PHDOS.nc file:", path))
+     NCF_CHECK(cryst%ncwrite(ncid))
+     call phdos%ncwrite(ncid)
+     NCF_CHECK(nf90_close(ncid))
+   end if
+   call phdos%free()
+ end if ! prtphdos
+
+ call berry_ifc%free(); call berry_ddb%free()
 
 end subroutine berry_curvature
 !!***

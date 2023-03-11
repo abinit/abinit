@@ -343,9 +343,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   Ifc_coarse,dipquad,quadquad) ! Optional
 
 !Arguments ------------------------------------
+ class(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
  real(dp),intent(in) :: rifcsph
- class(ifc_type),intent(inout) :: Ifc
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
