@@ -157,10 +157,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
- type(ddb_type) :: ddb, ddb_lw, berry_ddb
+ type(ddb_type) :: ddb, ddb_lw
  type(ddb_hdr_type) :: ddb_hdr
  type(dvdb_t) :: dvdb
- type(ifc_type) :: ifc, berry_ifc
+ type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
@@ -508,8 +508,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
        dtset%ph_nqshift, dtset%ph_qshift, "", wminmax, count_wminmax, comm)
      if (all(count_wminmax == 0)) exit
-     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
-     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05; wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos%free()
      write(msg, "(a, 2f8.5)") "Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
@@ -525,8 +524,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
      call wrtout(units, sjoin("- Writing phonon DOS to netcdf file:", path))
-     ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
-     NCF_CHECK_MSG(ncerr, sjoin("Creating PHDOS.nc file:", path))
+     NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating PHDOS.nc file:", path))
      NCF_CHECK(cryst%ncwrite(ncid))
      call phdos%ncwrite(ncid)
      NCF_CHECK(nf90_close(ncid))
@@ -746,28 +744,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
      call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"
      call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ddb, ddb_hdr, berry_ddb)
+   call berry_curvature(gstore, dtset, dtfil, ddb, dielt, zeff, qdrp_cart)
    call gstore%free()
-
-   ! Build new berry_ifc from berry_ddb.
-   call ifc_init(berry_ifc, cryst, berry_ddb, &
-     dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
-     dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
-     dipquad=dtset%dipquad, quadquad=dtset%quadquad)
-
-   call berry_ifc%print(unit=std_out)
-   call berry_ddb%free()
-
-   ! Output phonon band structure (requires qpath)
-   ! TODO: Change prefix to encode berry curvature?
-   if (dtset%prtphbands /= 0) call ifc_mkphbs(berry_ifc, cryst, dtset, dtfil%filnam_ds(4), comm)
-   call berry_ifc%free()
 
  case (15, -15)
    ! Write average of DFPT potentials to file.

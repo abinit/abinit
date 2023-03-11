@@ -928,6 +928,8 @@ subroutine priority_from_eph_task(eph_task, priority)
    priority = "qk"
  case (12, -12)
    priority = "q"
+ case (14)
+   priority = "kq"
  case default
    ABI_ERROR(sjoin("Please register default priority for eph_task:", itoa(eph_task)))
  end select
