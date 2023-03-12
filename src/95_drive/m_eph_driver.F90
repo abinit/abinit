@@ -147,8 +147,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
  integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
+ integer :: ncid ! ,ncerr
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
- integer :: ncid,ncerr
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk, use_wfq, use_dvdb
@@ -750,7 +750,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ddb, ifc, dielt, zeff, qdrp_cart)
+   call berry_curvature(gstore, dtset, dtfil, ifc, dielt, zeff, qdrp_cart)
    call gstore%free()
 
  case (15, -15)
