@@ -2591,24 +2591,20 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, ib_k, ib_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
- integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq
- integer :: spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: mpw, nb,ierr,cnt ! ii,jj,
- integer :: n1,n2,n3,n4,n5,n6,nspden,ndone
+ integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
+ integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf, nkpg, nkpg1
- integer :: qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
+ integer :: nfft,nfftf,mgfft,mgfftf, nkpg, nkpg1, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
  integer :: ii, my_nqibz, iq_start, iq_ibz, isym_q, trev_q, prev_iqbz
- real(dp) :: cpu, wall, gflops, cpu_q, wall_q, out_wall_q, gflops_q !, cpu_k, wall_k, gflops_k
- real(dp) :: cpu_all, wall_all, gflops_all
+ real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, weight_q, weight_k
- logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q
+ logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -2736,7 +2732,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
  ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
  ! that will be used to symmetrize the wavefunctions in G-space.
-
  call gstore%get_mpw_gmax(ecut, mpw, gmax)
 
  ! Init work_ngfft
@@ -2874,7 +2869,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      cnt = 0
      do my_ik=1,gqk%my_nk
-
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        kk_bz = gqk%my_kpts(:, my_ik)
        weight_k = gqk%my_wtk(my_ik)
@@ -2930,7 +2924,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
    my_npert = gqk%my_npert
-
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    ! Allocate workspace for wavefunctions using mpw and nb
@@ -2940,7 +2933,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, nb))
    ABI_MALLOC(gkk_atm, (2, nb, nb, natom3))
    ABI_MALLOC(gkq_nu, (2, nb, nb, natom3))
-
    ABI_MALLOC(iq_buf, (2, qbuf_size))
 
    ! Inside the loops we compute gkq_nu(2, nb, nb, natom3)
@@ -2948,10 +2940,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    ! Loop over my set of q-points
    prev_iqbz = -1
-
    do my_iq=1,gqk%my_nq
-     call cwtime(cpu_q, wall_q, gflops_q, "start")
-
+     print_time = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
+     if (print_time) call cwtime(cpu_q, wall_q, gflops_q, "start")
      iq_bz = gqk%my_q2bz(my_iq)
      if (done_qbz_spin(iq_bz, spin) == 1) cycle
 
@@ -2978,9 +2969,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end if
 
      if (isirr_q) then
-       displ_cart_qbz = displ_cart_qibz
-       displ_red_qbz = displ_red_qibz
-       pheigvec_qbz = pheigvec_qibz
+       displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
      else
        ! Rotate phonon eigenvectors from q_ibz to q_bz.
        ! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
@@ -2989,7 +2978,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end if
 
      !call ifc%fourq(cryst, qq_bz, phfrq, displ_cart_qbz, out_displ_red=displ_red_qbz, out_eigvec=pheigvec_qbz)
-
      ! Use Fourier interpolation of DFPT potentials to get my_npert potentials.
      !cplex = 2
      !ABI_MALLOC(v1scf, (cplex, nfft, nspden, dvdb%my_npert))
@@ -3013,7 +3001,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
      ! Loop over my k-points
      do my_ik=1,gqk%my_nk
-
        ! Set entry to zero. Important as there are cycle instructions inside these loops
        ! and we don't want to write random numbers to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
@@ -3038,8 +3025,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kq_bz, indkk_kq) /= 0) then
          write(msg, '(3a)' ) &
-          "Cannot find k+q in kmesh", ch10, &
-          'Action: check your WFK file and the (k, q) point input variables.'
+          "Cannot find k+q in kmesh", ch10, 'Action: check your WFK file and the (k, q) point input variables.'
           ABI_ERROR(msg)
        end if
 
@@ -3137,7 +3123,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          end do
 
          call rf_hamkq%free()
-
          ABI_FREE(kinpw1)
          ABI_FREE(dkinpw)
          ABI_FREE(ph3d)
@@ -3172,7 +3157,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        case (2)
          my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
        end select
-
      end do ! my_ik
 
      ABI_FREE(v1scf)
@@ -3181,24 +3165,14 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ! Dump buffers
      if (iqbuf_cnt == qbuf_size) call dump_data()
 
-     if (.True.) then
-     !if (my_iq <= 10 .or. mod(my_iq, 10) == 0) then
+     if (print_time) then
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
-       call cwtime_report(msg, cpu_q, wall_q, gflops_q, out_wall=out_wall_q)
-       !call wrtout(std_out, sjoin(" nskip_tetra_kq:", itoa(nskip_tetra_kq)))
-       if (my_iq == 10) then
-         call wrtout(std_out, " >>> Will print next iteration when mod(my_iq, 10) == 0) ...", do_flush=.True.)
-       end if
-       if (mod(my_iq, 10) == 0) then
-         call wrtout(std_out, sjoin(" Estimated time to completion:", sec2str((gqk%my_nq - my_iq) * out_wall_q)))
-       end if
+       call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      end if
-
-     if (my_rank == master) then
-       ! Print cache stats.
-       !call dvdb%ft_qcache%report_stats()
-     end if
-
+     !if (my_rank == master) then
+     !  ! Print cache stats.
+     !  !call dvdb%ft_qcache%report_stats()
+     !end if
    end do ! my_iq
 
    ! Dump the remainder.
@@ -3213,9 +3187,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(gkq_nu)
  end do ! my_is
 
- !call wrtout(std_out, " My computation completed. Waiting for other procs working on other q-points ", do_flush=.True.)
- call cwtime_report(" My gstore computation", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10) !, comm=gstore%comm)
-
+ call cwtime_report(" GSTORE computation", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10) !, comm=gstore%comm)
  !call xmpi_barrier(gstore%comm)
  NCF_CHECK(nf90_close(root_ncid))
 
@@ -3687,15 +3659,15 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  call cwtime_report(" gstore_from_ncpath", cpu, wall, gflops)
 
 contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
+end function vid
 
- integer function spin_vid(vname)
-   character(len=*),intent(in) :: vname
-   spin_vid = nctk_idname(spin_ncid, vname)
- end function spin_vid
+integer function spin_vid(vname)
+  character(len=*),intent(in) :: vname
+  spin_vid = nctk_idname(spin_ncid, vname)
+end function spin_vid
 
 end subroutine gstore_from_ncpath
 !!***

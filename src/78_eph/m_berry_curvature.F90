@@ -78,16 +78,16 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0, nsphere0 = 0, prtsrlr0 = 0, rftyp1 = 1
+ integer,parameter :: master = 0, nsphere0 = 0, prtsrlr0 = 0, rftyp1 = 1, LOG_MODQ = 5
  integer :: nproc, my_rank, ierr, itemp, ntemp, comm, ddb_nqshift, ncid, mpert, msize
  integer :: my_is, spin, nsppol, natom3, band, ib1, ib2, band1, band2, nb, ebands_timrev, index
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  integer :: my_iq, iq_glob, my_ik, ik_glob, my_ip1, my_ip2, ipc1, ipc2, ipert1, ipert2, iblok, idir1, idir2
- logical :: isirr_k, isirr_q, isirr_kq
+ logical :: isirr_k, isirr_q, isirr_kq, print_qtime
  real(dp) :: e_b1_k, e_b2_k, e_b1_kq, e_b2_kq, f_b1_k, f_b1_kq, f_b2_k, f_b2_kq, dene, spin_occ, fact(2)
- real(dp) :: kt, wmax, cpu, wall, gflops
+ real(dp) :: kt, wmax, cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
  character(len=5000) :: msg
  character(len=fnlen) :: berry_ddb_filepath, path
  class(crystal_t),pointer :: cryst
@@ -111,14 +111,17 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
 
  comm = gstore%comm; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
-
- call wrtout(std_out, " Computing berry curvature", pre_newlines=2)
- call cwtime(cpu, wall, gflops, "start")
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  cryst => gstore%cryst; ebands => gstore%ebands
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
  spin_occ = one; if (nsppol == 1 .and. dtset%nspinor == 1) spin_occ = two
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+
+ if (my_rank == master) then
+   call wrtout(std_out, " Computing berry curvature", pre_newlines=2)
+   call gstore%print(std_out, header="Gstore", prtvol=dtset%prtvol)
+ end if
 
  ! Consistency check
  ierr = 0
@@ -140,6 +143,8 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
 
    ! For each q-point in the IBZ treated by me.
    do my_iq=1,gqk%my_nq
+     print_qtime = (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
+     if (print_qtime) call cwtime(cpu_q, wall_q, gflops_q, "start")
      iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
      trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
      isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
@@ -173,7 +178,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
        ! - <b2,k|D_{-q,p1}|b1,k+q> <b1,k+q|D_{q,p2}|b2,k> / (e_{b2,k} - e_{b1,k+q})^2  <<< term 2
        !
        ! where b2 is the initial band and b1 the final band, p1, p2 are atomic perturbations in reduced coords
-       ! and we're summing over k at fixed q.
+       ! and we're summing over k in the BZ at fixed q.
        do ib2=1,nb
          band2 = ib2 + gqk%bstart - 1
          e_b2_k = ebands%eig(band2, ik_ibz, spin)
@@ -192,17 +197,19 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
            fact(2) = f_b1_kq * (one - f_b2_k)
            if (all(abs(fact) < tol20)) cycle
 
-           ! TODO: add finite delta or do Taylor series expansion of numerator + denominator?
            dene = e_b1_k - e_b2_kq
            if (abs(dene) > tol8) then
              fact(1) = fact(1) / dene**2
            else
+             ! TODO: add finite delta or do Taylor series expansion of numerator + denominator?
              fact(1) = zero
            end if
+
            dene = e_b2_k - e_b1_kq
            if (abs(dene) > tol8) then
              fact(2) = fact(2) / dene**2
            else
+             ! TODO: add finite delta or do Taylor series expansion of numerator + denominator?
              fact(2) = zero
            end if
 
@@ -217,10 +224,15 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
                 - fact(2) * conjg(gqk%my_g(my_ip1,ib2,my_iq,ib1,my_ik)) * gqk%my_g(my_ip2,ib2,my_iq,ib1,my_ik)
              end do
            end do
-         end do
-       end do
 
+         end do ! ib1
+       end do ! ib2
      end do ! my_ik
+
+     if (print_qtime) then
+       write(msg,'(4x,3(a,i0),a)')"my_iq [", my_iq, "/", gqk%my_nq, "] (tot: ", gstore%nqibz, ")"
+       call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, " ...")
+     end if
    end do ! my_iq
    ABI_FREE(my_kqmap)
  end do ! spin
@@ -231,12 +243,12 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
  if (nsppol == 1 .and. dtset%nspinor == 1) gmat = two * gmat
  call xmpi_sum(gmat, comm, ierr)
  call massmult_and_breaksym_cplx(cryst%natom, cryst%ntypat, cryst%typat, in_ifc%amu, gmat, herm_opt=0)
- call cwtime_report(" berry_curvature:", cpu, wall, gflops)
+ call cwtime_report(" berry_curvature:", cpu_all, wall_all, gflops_all)
 
  if (my_rank == master) then
    ! Print some results to ab_out for testing purposes.
    do iq_ibz=1,gstore%nqibz
-     write(msg, "(2a,2x,2a)")ch10,ch10,"G(q) matrix for qpt: ", trim(ktoa(gstore%qibz(:,iq_ibz)))
+     write(msg, "(2a,2x,2a)")ch10, ch10, "G(q) matrix for qpt: ", trim(ktoa(gstore%qibz(:,iq_ibz)))
      call wrtout(units, msg)
      write(msg, "(2x,4(a6,2x), 2(a12,2x))")"idir1", "ipert1", "idir2", "ipert2", "Re(gmat)", "Im(gmat)"
      call wrtout(units, msg)
@@ -251,7 +263,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
      end do
    end do ! iq_ibz
  end if
- stop
+ !stop
 
  ! Create berry_ddb object to add gmat to the input dynamical matrix.
  ! WARNING: gmat has all (3*natom)**2 entries whereas the DDB stores only the irred elements.
@@ -262,8 +274,8 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
  !
  ! Symmetry properties:
  !
- ! 1) G(-k) = -G(k)^*
- ! 2) In the presence of time reversal symmetry, the Berry curvature would be zero
+ !  1) G(-k) = -G(k)^*
+ !  2) In the presence of time reversal symmetry, the Berry curvature would be zero
 
  call wrtout(units, sjoin("- Reading input DDB from file:", dtfil%filddbsin))
  call berry_ddb%from_file_txt(dtfil%filddbsin, dtset%brav, in_ddb_hdr, ddb_crystal, comm, prtvol=dtset%prtvol, raw=1)
@@ -286,7 +298,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
        idir1 = mod(ipc1-1, 3) + 1; ipert1 = (ipc1 - idir1) / 3 + 1
        index = idir1+3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
        ! TODO: In MGO all flags are set to 1
-       print *, "flg:", berry_ddb%flg(index, iblok)
+       !print *, "flg:", berry_ddb%flg(index, iblok)
        !if (berry_ddb%flg(index, iblok) == 0) cycle
        g_ri(:) = [real(gmat(ipc1, ipc2, iq_ibz)), aimag(gmat(ipc1, ipc2, iq_ibz))]
        !berry_ddb%val(:,index,iblok) = berry_ddb%val(:,index,iblok) + g_ri
@@ -324,7 +336,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
    dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
    qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
    dipquad=dtset%dipquad, quadquad=dtset%quadquad)
- !call berry_ifc%print(unit=std_out)
+ if (dtset%prtvol > 0 .and. my_rank == master) call berry_ifc%print(unit=std_out)
 
  ABI_FREE(ddb_qshifts)
 
