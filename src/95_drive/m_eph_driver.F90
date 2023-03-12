@@ -69,6 +69,7 @@ module m_eph_driver
  use m_gstore,          only : gstore_t
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
  use m_berry_curvature,  only : berry_curvature
+ use m_cumulant,        only : cumulant_driver
 
  implicit none
 
@@ -151,9 +152,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk, use_wfq, use_dvdb
+ logical :: use_wfk, use_wfq, use_dvdb, use_sigeph
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, path
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
@@ -224,6 +225,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb_filepath = dtfil%filddbsin; ii = len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
 
+ sigeph_filepath = dtfil%filsigephin
+
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
  use_wfq = ((dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .or. dtset%getwfq_filepath /= ABI_NOFILE) .and. dtset%eph_frohlichm /= 1)
 
@@ -239,9 +242,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
 
+ use_sigeph = (dtset%eph_task == 9)
+
  if (my_rank == master) then
    if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
    if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
+
+   if (use_sigeph .and. .not. file_exists(sigeph_filepath)) ABI_ERROR(sjoin("Cannot find SIGEPH file:", sigeph_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
    if (use_wfk .and. nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
@@ -694,6 +701,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (8)
    ! Solve IBTE from SIGEPH file.
    call ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
+
+ case (9)
+   ! Compute cumulant from SIGEPH.nc file.
+   call cumulant_driver(dtfil, dtset, ebands, cryst,  comm)
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case

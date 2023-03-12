@@ -4297,6 +4297,7 @@ The choice is among:
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
+* 9 --> Compute cumulant from SIGEPH.nc file specifcy via [[getsigeph_filepath]].
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
          Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
 * 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
@@ -7306,11 +7307,11 @@ case, a cut-off Coulomb interaction might prove useful.
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
 in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
 and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
- 
+
 The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 5.
-For 1-dimensional and 2-dimensional systems, the geometry of the system (along which directions the cell is to be periodically repeated, 
-along which ones the system is finite) 
+For 1-dimensional and 2-dimensional systems, the geometry of the system (along which directions the cell is to be periodically repeated,
+along which ones the system is finite)
 has to be specified explicitly.
 This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length might be provided, depending
 on the methodology, thanks to [[rcut]].
@@ -18660,6 +18661,20 @@ See [[td_mexcit]] for an alternative way to decrease N.
 ),
 
 Variable(
+    abivarname="tolcum",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="TOLerance on CUMulant",
+    added_in_version="9.8.0",
+    text=r"""
+This variable is active when computing the cumulant with [[eph_task]] = 9.
+""",
+),
+
+Variable(
     abivarname="td_mexcit",
     varset="dfpt",
     vartype="real",
@@ -20171,7 +20186,7 @@ to be used. It has a meaning either for a periodic one-dimensional system, typic
 a nanowire, nanotube or polymer surrounded by vacuum separating the system
 from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
-typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). 
+typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2).
 
 When a non-zero component of this three-dimensional vector is non-zero, this indicate that the system is
 periodic along this dimension. Note that the components of this vector are real numbers, which is
