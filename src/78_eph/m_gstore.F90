@@ -249,8 +249,9 @@ type, public :: gqk_t
   ! List of perturbation indices treated by this MPI proc.
   ! Contiguous indices.
 
-  real(dp), allocatable :: my_g(:,:,:,:,:,:)
-  ! (2, my_npert, nb, my_nq, nb, my_nk)
+  complex(dp), allocatable :: my_g(:,:,:,:,:)
+  ! (my_npert, nb, my_nq, nb, my_nk)
+  ! (       p, b1,     q, b2, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
   ! e-ph matrix elements g (local buffer). Allocated if cplex == 2
 
   real(dp), allocatable :: my_g2(:,:,:,:,:)
@@ -1332,7 +1333,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
        ABI_MALLOC_OR_DIE(gqk%my_g2, (gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
        gqk%my_g2 = zero
      case (2)
-        ABI_MALLOC_OR_DIE(gqk%my_g, (2, gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
+        ABI_MALLOC_OR_DIE(gqk%my_g, (gqk%my_npert, gqk%nb, gqk%my_nq, gqk%nb, gqk%my_nk), ierr)
         gqk%my_g = zero
      case default
        ABI_ERROR(sjoin("Wrong with_cplex:", itoa(with_cplex)))
@@ -3540,7 +3541,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  !
  ! In memory, we have allocated:
  !
- !    my_g(2, my_npert, nb, my_nq, nb, my_nk) if with_cplex == 2
+ !    my_g(my_npert, nb, my_nq, nb, my_nk) if with_cplex == 2 (complex array)
  !
  ! or
  !
@@ -3634,13 +3635,12 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
           ik_glob = my_ik + gqk%my_kstart - 1
           do my_ip=1,gqk%my_npert
             ipert = gqk%my_iperts(my_ip)
-
             slice_bb = gwork_q(:,:,:, ipert, ik_glob)
 
             ! Put data in the right place and handle conversion g --> |g|^2
             if (with_cplex == gstore_cplex) then
-              if (with_cplex == 1) gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:)
-              if (with_cplex == 2) gqk%my_g(:, my_ip, :, my_iq, :, my_ik) = slice_bb
+              if (with_cplex == 1) gqk%my_g2(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:)
+              if (with_cplex == 2) gqk%my_g(my_ip,:,my_iq,:,my_ik) = slice_bb(1,:,:) + j_dpc * slice_bb(2,:,:)
             else
               if (with_cplex == 1 .and. gstore_cplex == 2) then
                 gqk%my_g2(my_ip, :, my_iq, :, my_ik) = slice_bb(1,:,:) ** 2 + slice_bb(2,:,:) ** 2

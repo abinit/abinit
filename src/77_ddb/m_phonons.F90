@@ -5,7 +5,7 @@
 !! FUNCTION
 !! Module for the phonon density of states.
 !! Container type is defined, and destruction, print subroutines
-!! as well as the central mkphdos
+!! as well as the central phdos_init
 !!
 !! COPYRIGHT
 !! Copyright (C) 1999-2022 ABINIT group (XG, MG, MJV, GMR)
@@ -75,16 +75,16 @@ module m_phonons
  public :: thermal_supercell_print
 !!***
 
-!!****t* m_phonons/phonon_dos_type
+!!****t* m_phonons/phdos_t
 !! NAME
-!! phonon_dos_type
+!! phdos_t
 !!
 !! FUNCTION
 !! Container for phonon DOS and atom projected contributions
 !!
 !! SOURCE
 
- type,public :: phonon_dos_type
+ type,public :: phdos_t
 
   integer :: ntypat
   ! Number of type of atoms.
@@ -169,10 +169,9 @@ module m_phonons
    procedure :: print_thermo => phdos_print_thermo
    procedure :: free => phdos_free
    procedure :: ncwrite => phdos_ncwrite
+   procedure :: init => phdos_init  ! Constructor
+ end type phdos_t
 
- end type phonon_dos_type
-
- public :: mkphdos        ! Constructor
 !!***
 
 !!****t* m_phonons/phstore_t
@@ -272,16 +271,14 @@ contains  !=====================================================
 subroutine phdos_print(PHdos, fname)
 
 !Arguments ------------------------------------
+ class(phdos_t),intent(in) :: PHdos
  character(len=*),intent(in) :: fname
- class(phonon_dos_type),intent(in) :: PHdos
 
 !Local variables-------------------------------
  integer :: io,itype,unt,unt_by_atom,unt_msqd,iatom
  real(dp) :: tens(3,3)
- character(len=500) :: msg
- character(len=500) :: msg_method
- character(len=fnlen) :: fname_by_atom
- character(len=fnlen) :: fname_msqd
+ character(len=500) :: msg, msg_method
+ character(len=fnlen) :: fname_by_atom, fname_msqd
  character(len=3) :: unitname
 
 ! *************************************************************************
@@ -394,13 +391,12 @@ end subroutine phdos_print
 subroutine phdos_print_debye(PHdos, ucvol)
 
 !Arguments ------------------------------------
+ class(phdos_t),intent(in) :: PHdos
  real(dp), intent(in) :: ucvol
- class(phonon_dos_type),intent(in) :: PHdos
 
 !Local variables-------------------------------
  integer :: io, iomax, iomin
- real(dp) :: avgom2dos, avgspeedofsound
- real(dp) :: debyefreq, meanfreq, meanfreq2
+ real(dp) :: avgom2dos, avgspeedofsound, debyefreq, meanfreq, meanfreq2
  character(len=500) :: msg
 !arrays
  real(dp), allocatable :: om2dos(:), om1dos(:), intdos(:)
@@ -441,8 +437,7 @@ subroutine phdos_print_debye(PHdos, ucvol)
    avgom2dos = avgom2dos + om2dos(io)
    ! first deviation from initial value of more than 10 percent
    if (abs(one-om2dos(iomin)/om2dos(io)) > 0.1_dp) then
-     iomax = io
-     exit
+     iomax = io; exit
    end if
  end do
 
@@ -493,9 +488,9 @@ end subroutine phdos_print_debye
 subroutine phdos_print_thermo(PHdos, fname, ntemper, tempermin, temperinc)
 
 !Arguments ------------------------------------
+ class(phdos_t),intent(in) :: PHdos
  integer, intent(in) :: ntemper
  real(dp), intent(in) :: tempermin, temperinc
- class(phonon_dos_type),intent(in) :: PHdos
  character(len=*),intent(in) :: fname
 
 !Local variables-------------------------------
@@ -600,11 +595,11 @@ end subroutine phdos_print_thermo
 subroutine phdos_free(PHdos)
 
 !Arguments -------------------------------
- class(phonon_dos_type),intent(inout) ::PHdos
+ class(phdos_t),intent(inout) ::PHdos
 
 ! *************************************************************************
 
- !@phonon_dos_type
+ !@phdos_t
  ABI_SFREE(PHdos%atom_mass)
  ABI_SFREE(PHdos%omega)
  ABI_SFREE(PHdos%phdos)
@@ -621,9 +616,9 @@ end subroutine phdos_free
 
 !--------------------------------------------------------------------------
 
-!!****f* m_phonons/phdos_init
+!!****f* m_phonons/phdos_malloc
 !! NAME
-!! phdos_init
+!! phdos_malloc
 !!
 !! FUNCTION
 !!
@@ -633,11 +628,11 @@ end subroutine phdos_free
 !!
 !! SOURCE
 
-subroutine phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
+subroutine phdos_malloc(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
 
- ! Arguments ------------------------------------------------------
+! Arguments ------------------------------------------------------
+ class(phdos_t),intent(out) :: phdos
  type(crystal_t),intent(in) :: crystal
- type(phonon_dos_type),intent(out) :: phdos
  type(ifc_type),intent(in) :: ifc
  integer,intent(in) :: prtdos
  real(dp),intent(in) :: dosdeltae,dossmear
@@ -682,14 +677,14 @@ subroutine phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
  ABI_MALLOC(phdos%atom_mass, (crystal%natom))
  phdos%atom_mass = crystal%amu(crystal%typat(:)) * amu_emass
 
-end subroutine phdos_init
+end subroutine phdos_malloc
 !!***
 
 !---------------------------------------------------------------
 
-!!****f* m_phonons/mkphdos
+!!****f* m_phonons/phdos_init
 !! NAME
-!! mkphdos
+!! phdos_init
 !!
 !! FUNCTION
 !! Calculate the phonon density of states as well as
@@ -709,7 +704,7 @@ end subroutine phdos_init
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!! phdos<phonon_dos_type>=Container with phonon DOS, IDOS and atom-projected DOS.
+!! phdos<phdos_t>=Container with phonon DOS, IDOS and atom-projected DOS.
 !! count_wminmax(2)=Number of (interpolated) phonon frequencies that are outside
 !!   input range (see wminmax). Client code can use count_wminmax and wminmax to
 !!   enlarge the mesh and call the routine again to recompute the DOS
@@ -723,17 +718,17 @@ end subroutine phdos_init
 !!
 !! SOURCE
 
-subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
-                   wminmax, count_wminmax, comm, dos_maxmode)
+subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqpt, nqshft, dos_qshift, prefix, &
+                      wminmax, count_wminmax, comm, dos_maxmode)
 
 !Arguments -------------------------------
 !scalars
+ class(phdos_t),intent(out) :: phdos
  integer,intent(in) :: prtdos,nqshft,comm
  real(dp),intent(in) :: dosdeltae_in,dossmear
  character(len=*),intent(in) ::  prefix
  type(crystal_t),intent(in) :: crystal
  type(ifc_type),intent(in) :: ifc
- type(phonon_dos_type),intent(out) :: phdos
  integer, optional, intent(in) :: dos_maxmode
 !arrays
  integer,intent(in) :: dos_ngqpt(3)
@@ -794,7 +789,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  end do
 
  natom = crystal%natom
- call phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
+ call phdos_malloc(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
  nomega = phdos%nomega
 
  ABI_MALLOC(gvals_wtq, (nomega))
@@ -806,12 +801,12 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
    gaussprefactor = one / (dossmear * sqrt(two_pi))
    gaussfactor = one / (sqrt2 * dossmear)
    write(msg, '(4a,f8.5,2a,f8.5,a,i0)') ch10, &
-    ' mkphdos: calculating phonon DOS using gaussian method:', ch10, &
+    ' phdos_init: calculating phonon DOS using gaussian method:', ch10, &
     '    gaussian smearing [meV] = ', dossmear * Ha_meV, ch10, &
     '    frequency step    [meV] = ', phdos%omega_step * Ha_meV, ", nomega = ",phdos%nomega
  else if (prtdos == 2) then
    write(msg, '(4a,f8.5,a,i0)') ch10, &
-    ' mkphdos: calculating phonon DOS using tetrahedron method:', ch10, &
+    ' phdos_init: calculating phonon DOS using tetrahedron method:', ch10, &
     '    frequency step    [meV] = ',phdos%omega_step * Ha_meV, ", nomega = ",phdos%nomega
  end if
  call wrtout(std_out, msg)
@@ -1099,7 +1094,7 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
          ABI_WARNING(msg)
          dosdeltae = dosdeltae / two
          call phdos%free()
-         call phdos_init(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
+         call phdos_malloc(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
          nomega = phdos%nomega
          ABI_FREE(wdt)
          ABI_FREE(energies)
@@ -1214,11 +1209,10 @@ subroutine mkphdos(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_ngqp
  ABI_FREE(qibz)
  ABI_FREE(wtq_ibz)
 
- call cwtime_report(" mkphdos", cpu_all, wall_all, gflops_all)
-
+ call cwtime_report(" phdos_init", cpu_all, wall_all, gflops_all)
  DBG_EXIT("COLL")
 
-end subroutine mkphdos
+end subroutine phdos_init
 !!***
 
 !----------------------------------------------------------------------
@@ -1711,7 +1705,7 @@ end subroutine thermal_supercell_print
 !!
 !! INPUTS
 !!  ncid=NC file handle (open in the caller)
-!!  phdos<phonon_dos_type>=Container object
+!!  phdos<phdos_t>=Container object
 !!
 !! OUTPUT
 !!  Only writing
@@ -1725,7 +1719,7 @@ subroutine phdos_ncwrite(phdos, ncid)
 
 !Arguments ------------------------------------
 !scalars
- class(phonon_dos_type),intent(in) :: phdos
+ class(phdos_t),intent(in) :: phdos
  integer,intent(in) :: ncid
 
 !Local variables-------------------------------
@@ -2002,7 +1996,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
  if (natprj_bs > 0) call atprj_destroy(atprj)
 
-
 ! WRITE OUT FILES
  if (my_rank == master) then
    ABI_MALLOC(weights, (nfineqpath))
@@ -2076,7 +2069,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  ABI_FREE(phfrq)
  ABI_FREE(eigvec)
  ABI_FREE(dos4bs)
-
  ABI_SFREE(alloc_path)
 
 end subroutine mkphbs
@@ -2229,7 +2221,7 @@ subroutine phdos_print_msqd(PHdos, fname, ntemper, tempermin, temperinc)
 !Arguments -------------------------------
 !scalars
  integer, intent(in) :: ntemper
- class(phonon_dos_type),intent(in) :: PHdos
+ class(phdos_t),intent(in) :: PHdos
  character(len=*),intent(in) :: fname
  real(dp), intent(in) :: tempermin, temperinc
 
