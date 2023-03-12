@@ -47,7 +47,7 @@ module m_vcoul
 
 ! Cut-off methods modules
  use m_cutoff_sphere,   only : cutoff_sphere
- use m_cutoff_surface,  only : cutoff_surface
+ use m_cutoff_slab,  only : cutoff_slab
  use m_cutoff_cylinder, only : cutoff_cylinder, K0cos
 
  implicit none
@@ -78,7 +78,7 @@ module m_vcoul
    ! Number of small q-points around Gamma
 
   real(dp) :: alpha(3) = -one
-   ! Lenght of the finite surface
+   ! Length of the finite slab
 
   real(dp) :: rcut = -one
    ! Cutoff radius
@@ -98,7 +98,7 @@ module m_vcoul
     ! Volume of the unit cell
 
   character(len=50) :: mode
-   ! String defining the cutoff mode, possible values are: sphere,cylinder,surface,crystal
+   ! String defining the cutoff mode, possible values are: sphere,cylinder,slab,crystal
 
   integer :: pdir(3)
    ! 1 if the system is periodic along this direction
@@ -203,7 +203,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  integer,parameter :: master=0, ncell=3, nmc_max=2500000
  integer :: nmc,nseed, i1,i2,i3,ig,imc
  integer :: ii,iqlwl,iq_bz,iq_ibz,npar,npt
- integer :: opt_cylinder,opt_surface,test,rank,nprocs
+ integer :: opt_cylinder,opt_slab,test,rank,nprocs
  real(dp),parameter :: tolq0 = 1.d-3, tol999 = 999.0
  real(dp) :: b1b1,b2b2,b3b3,b1b2,b2b3,b3b1
  real(dp) :: bz_geometry_factor,bz_plane,check,dx,integ,q0_vol,q0_volsph
@@ -250,7 +250,7 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  Vcp%mode = 'NONE'
  if (gw_icutcoul==0) Vcp%mode='SPHERE'
  if (gw_icutcoul==1) Vcp%mode='CYLINDER'
- if (gw_icutcoul==2) Vcp%mode='SURFACE'
+ if (gw_icutcoul==2) Vcp%mode='SLAB'
  if (gw_icutcoul==3) Vcp%mode='CRYSTAL'
  if (gw_icutcoul==4) Vcp%mode='ERF'
  if (gw_icutcoul==5) Vcp%mode='ERFC'
@@ -611,40 +611,40 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    call Vcp%print(unit=ab_out)
 
- CASE ('SURFACE')
+ CASE ('SLAB')
 
    test=COUNT(Vcp%vcutgeo/=zero)
    ABI_CHECK(test == 2, "Wrong vcutgeo")
 
    ! Default is Beigi"s method
-   opt_surface=1; Vcp%alpha(:)=zero
-   if (ANY(Vcp%vcutgeo<zero)) opt_surface=2
+   opt_slab=1; Vcp%alpha(:)=zero
+   if (ANY(Vcp%vcutgeo<zero)) opt_slab=2
    Vcp%pdir(:)=zero
    do ii=1,3
      check = Vcp%vcutgeo(ii)
      if (ABS(check) > zero) then
-       ! Use Rozzi's method with a finite surface along x-y
+       ! Use Rozzi's method with a finite slab along x-y
        Vcp%pdir(ii) = 1
        if (check < zero) Vcp%alpha(ii) = normv(check * Cryst%rprimd(:,ii), rmet, 'R')
      end if
    end do
 
-   ! Beigi's method: the surface must be along x-y and R must be L_Z/2.
-   if (opt_surface == 1) then
+   ! Beigi's method: the slab must be along x-y and R must be L_Z/2.
+   if (opt_slab == 1) then
      msg = "2D geometry, Beigi method, the periodicity must be in the x-y plane. Modify vcutgeo or your geometry."
      ABI_CHECK(ALL(Vcp%pdir == (/1,1,0/)), msg)
      Vcp%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
-   call cutoff_surface(Qmesh%nibz, Qmesh%ibz, ng, gvec, gprimd, Vcp%rcut, &
-                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul, opt_surface)
+   call cutoff_slab(Qmesh%nibz, Qmesh%ibz, ng, gvec, gprimd, Vcp%rcut, &
+                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul, opt_slab)
 
    ! q-points for optical limit.
-   call cutoff_surface(Vcp%nqlwl, Vcp%qlwl, ng, gvec, gprimd, Vcp%rcut, &
-                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl, opt_surface)
+   call cutoff_slab(Vcp%nqlwl, Vcp%qlwl, ng, gvec, gprimd, Vcp%rcut, &
+                       Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcoul_lwl, opt_slab)
 
    ! If Beigi, treat the limit q--> 0.
-   if (opt_surface == 1) then
+   if (opt_slab == 1) then
      ! Integrate numerically in the plane close to 0
      npt=100 ! Number of points in 1D
      gamma_pt=RESHAPE((/0,0,0/),(/3,1/)) ! Gamma point
@@ -672,8 +672,8 @@ subroutine vcoul_init(Vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
        qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii)) / (2*pi)
      end do
 
-     call cutoff_surface(npt, qfit, 1, gamma_pt, gprimd, Vcp%rcut, &
-                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit, opt_surface)
+     call cutoff_slab(npt, qfit, 1, gamma_pt, gprimd, Vcp%rcut, &
+                         Vcp%boxcenter, Vcp%pdir, Vcp%alpha, vcfit, opt_slab)
 
      ABI_MALLOC(xx,(npt))
      ABI_MALLOC(yy,(npt))
@@ -1297,7 +1297,7 @@ subroutine vcoul_print(Vcp, unit, prtvol, mode_paral)
    if (Vcp%hcyl/=zero) write(msg,'(a,f8.5,2a)')'  Finite length of ....... ',Vcp%hcyl,' [Bohr] ',ch10
    call wrtout(my_unt,msg,my_mode)
 
- CASE ('SURFACE')
+ CASE ('SLAB')
    write(msg,'(5a,f10.4,3a,3f10.2,2a)')ch10,&
      ' === Surface cutoff === ',ch10,ch10,&
      '  Cutoff radius .................... ',Vcp%rcut,' [Bohr] ',ch10,&
