@@ -2508,7 +2508,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
+  call ifc%init(crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
 &   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,qdrp_cart,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
@@ -2868,7 +2868,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 ! *************************************************************************
 
- filename_tmp = trim(filename)  
+ filename_tmp = trim(filename)
  !Open the atomicdata XML file for reading
  write(message,'(a,a)')'-Opening the file ',filename_tmp
 
@@ -3395,9 +3395,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
- if(present(sc_size))then 
-    ncell(:) = sc_size 
- else 
+ if(present(sc_size))then
+    ncell(:) = sc_size
+ else
     do ia=1,3
       scale_cell(:) = 0
       do ii=1,3
@@ -3424,8 +3424,8 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
         ncell(ia) = int(factor)
       end if
     end do
- end if 
- 
+ end if
+
  ncells = product(ncell)
 
 !Check if the energy stored in the hist is revelant, sometimes some MD files gives
@@ -3471,7 +3471,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  ABI_MALLOC(list_absdist,(3,natom_hist))
  ABI_MALLOC(list_dist,(natom_hist))
  ABI_MALLOC(xred_ref,(3,natom_hist))
- 
+
  !Putting maping list to zero
  list_map = 0
 
@@ -3581,7 +3581,7 @@ end do  ! ia
      hist_tmp%fcart(:,ia,:) = hist%fcart(:,list_map(ia),:)
      hist_tmp%vel(:,ia,:)   = hist%vel(:,list_map(ia),:)
    end do
-  
+
 ! free the old hist and reinit
    call abihist_free(hist)
    call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
@@ -3595,13 +3595,13 @@ end do  ! ia
    call abihist_free(hist_tmp)
 
    !map also fixes if present
-   if(need_fixmap)then  
+   if(need_fixmap)then
      ABI_MALLOC(iatfix_tmp,(3,natom_hist))
      do ia=1,natom_hist
         iatfix_tmp(:,ia) = iatfix(:,list_map(ia))
      end do
-     iatfix = iatfix_tmp 
-     ABI_FREE(iatfix_tmp)  
+     iatfix = iatfix_tmp
+     ABI_FREE(iatfix_tmp)
    end if
  end if !need map
 

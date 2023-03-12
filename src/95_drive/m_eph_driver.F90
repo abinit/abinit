@@ -163,7 +163,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
- type(phonon_dos_type) :: phdos
+ type(phdos_t) :: phdos
  type(gstore_t) :: gstore
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2), units(2)
@@ -486,7 +486,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- call ifc_init(ifc, cryst, ddb, &
+ call ifc%init(cryst, ddb, &
    dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
    dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
    qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
@@ -505,8 +505,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call wrtout(std_out, " Computing Phonon DOS. Use prtphdos 0 to disable this part.")
    wminmax = zero
    do
-     call mkphdos(phdos, cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
-       dtset%ph_nqshift, dtset%ph_qshift, "", wminmax, count_wminmax, comm)
+     call phdos%init(cryst, ifc, dtset%ph_intmeth, dtset%ph_wstep, dtset%ph_smear, dtset%ph_ngqpt, &
+                     dtset%ph_nqshift, dtset%ph_qshift, "", wminmax, count_wminmax, comm)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05; wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos%free()
@@ -750,7 +750,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ddb, dielt, zeff, qdrp_cart)
+   call berry_curvature(gstore, dtset, dtfil, ddb, ifc, dielt, zeff, qdrp_cart)
    call gstore%free()
 
  case (15, -15)

@@ -234,10 +234,12 @@ MODULE m_ifc
     procedure :: calcnwrite_nana_terms => ifc_calcnwrite_nana_terms
      ! Compute phonons for q--> 0 with LO-TO
 
- end type ifc_type
+    procedure :: init => ifc_init
+     ! Constructor from DDB datatype
 
- public :: ifc_init          ! Constructor from DDB datatype
- public :: ifc_init_fromFile ! Constructor from filename
+    procedure :: from_file => ifc_from_file
+     ! Constructor from filename
+ end type ifc_type
 !!***
 
 !----------------------------------------------------------------------
@@ -713,9 +715,9 @@ end subroutine ifc_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_ifc/ifc_init_fromFile
+!!****f* m_ifc/ifc_from_file
 !! NAME
-!!  ifc_init_fromFile
+!!  ifc_from_file
 !!
 !! FUNCTION
 !!  Need to be updated
@@ -726,7 +728,7 @@ end subroutine ifc_init
 !!
 !! SOURCE
 
-subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
+subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -790,13 +792,13 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  else
    dipdip=1
  end if
- call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
+ call ifc%init(ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
 
  ! Free them all
  call ddb%free()
  call ddb_hdr%free()
 
- end subroutine ifc_init_fromFile
+end subroutine ifc_from_file
 !!***
 
 !----------------------------------------------------------------------

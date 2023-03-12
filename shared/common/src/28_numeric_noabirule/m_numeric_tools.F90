@@ -6226,10 +6226,10 @@ elemental subroutine safe_div(n, d, altv, q)
 
 ! *********************************************************************
 
- if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==zero ) then
-    q = altv
+ if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d == zero) then
+   q = altv
  else
-    q = n / d
+   q = n / d
  endif
 
 end subroutine safe_div
