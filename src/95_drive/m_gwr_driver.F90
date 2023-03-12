@@ -965,10 +965,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: istwfk1 = 1, mG0(3) = 0, master = 0
- integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, ierr, bufsize
+ integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, bufsize ! ierr,
  integer :: band1, band1_start, band1_stop, batch1_size, n1dat, idat1
  integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_
- integer(XMPI_OFFSET_KIND) :: offset, my_offset
+ integer(XMPI_OFFSET_KIND) :: offset ! , my_offset
  real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3)
  character(len=500) :: msg
  character(len=fnlen) :: filepath
@@ -976,7 +976,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  type(vcgen_t) :: vcgen
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method
  integer,pointer :: gvec_max(:,:)
- integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
+ !integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
  integer,allocatable,target :: m_gvec(:,:)
  complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:)
  complex(gwpc),allocatable :: vc_qg(:)

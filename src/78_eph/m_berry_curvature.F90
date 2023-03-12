@@ -65,29 +65,29 @@ contains
 !!
 !! SOURCE
 
-subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qdrp_cart)
+subroutine berry_curvature(gstore, dtset, dtfil, in_ifc, dielt, zeff, qdrp_cart)
 
 !Arguments ------------------------------------
 !scalars
  type(gstore_t),target,intent(inout) :: gstore
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
- type(ddb_type),intent(in) :: in_ddb
+ !type(ddb_type),intent(in) :: in_ddb
  type(ifc_type),intent(in) :: in_ifc
  real(dp),intent(in) :: dielt(3,3), zeff(3,3,dtset%natom), qdrp_cart(3,3,3,dtset%natom)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, nsphere0 = 0, prtsrlr0 = 0, rftyp1 = 1, LOG_MODQ = 5
- integer :: nproc, my_rank, ierr, itemp, ntemp, comm, ddb_nqshift, ncid, mpert, msize
- integer :: my_is, spin, nsppol, natom3, band, ib1, ib2, band1, band2, nb, ebands_timrev, index
+ integer :: nproc, my_rank, ierr, comm, ddb_nqshift, ncid, mpert, msize
+ integer :: my_is, spin, nsppol, natom3, ib1, ib2, band1, band2, nb, ebands_timrev, index
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
  integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  integer :: my_iq, iq_glob, my_ik, ik_glob, my_ip1, my_ip2, ipc1, ipc2, ipert1, ipert2, iblok, idir1, idir2
  logical :: isirr_k, isirr_q, isirr_kq, print_qtime
  real(dp) :: e_b1_k, e_b2_k, e_b1_kq, e_b2_kq, f_b1_k, f_b1_kq, f_b2_k, f_b2_kq, dene, spin_occ, fact(2)
- real(dp) :: kt, wmax, cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q
  character(len=5000) :: msg
  character(len=fnlen) :: berry_ddb_filepath, path
  class(crystal_t),pointer :: cryst
@@ -102,7 +102,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ddb, in_ifc, dielt, zeff, qd
  integer :: count_wminmax(2), units(2), rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: my_kqmap(:,:)
  real(dp) :: qphnrm(3), qphon_padded(3,3), g_ri(2), wminmax(2)
- real(dp) :: kk_bz(3), kq_bz(3), kk_ibz(3), kq_ibz(3), qq_bz(3), qq_ibz(3) !, vk(3)
+ real(dp) :: qq_ibz(3) ! kk_bz(3), kq_bz(3), kk_ibz(3), kq_ibz(3), qq_bz(3),  !, vk(3)
  real(dp),allocatable :: ddb_qshifts(:,:)
  !real(dp),allocatable :: ktmesh(:), phmesh(:), eig_k(:,:), eig_kq(:,:), kmesh(:,:), wght_bz(:,:,:)
  complex(dp),allocatable :: gmat(:,:,:)
