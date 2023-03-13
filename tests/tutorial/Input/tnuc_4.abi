@@ -25,6 +25,7 @@ ndtset 2
 
 # two datasets, first is ground state
 tolvrs1 1.0D-18
+nstep1 25 # added to force stop on automatic tests, in general should be larger
 
 # second is DDK perturbation, in all 3 directions, 
 # with orbmag 2 (or 1) to trigger orbmag calculation at
@@ -35,13 +36,14 @@ iscf2 -3
 getwfk2 -1
 orbmag2 2
 tolwfr2 1.0D-20
+nstep2 10
 
 # lamb shielding for core electrons of this PAW set
 lambsig 341.0D-6
 
-nstep 500
-ecut 30 
-pawecutdg 60
+# ecut 30 gives better convergence
+ecut 15
+pawecutdg 30
 
 # some flags that orbmag and nucdipmom require
 optforces 0
