@@ -209,6 +209,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_BUG(msg)
  end if
 
+
 !Define some data
  ntypat=psps%ntypat
  natom=dtset%natom
