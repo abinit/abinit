@@ -61,7 +61,7 @@ module m_dvdb
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp, zerosym
  use m_crystal,       only : crystal_t
- use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map, kpts_timrev_from_kptopt
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
  use m_pawrhoij,      only : pawrhoij_type
@@ -2873,11 +2873,12 @@ end subroutine rotate_fqg
 !! \begin{equation}
 !! 	\label{eq:dfpt_pot_realspace}
 !!     W_{\kappa\alpha}(\rr,\RR) = \dfrac{1}{N_\qq} \sum_\qq e^{-i\qq\cdot(\RR - \rr)}\,
-!!     \partial_{\kappa\alpha\qq}{v^{\text{scf}}}(\rr),
+!!     \partial_{\kappa\alpha\qq}{v^{\text{scf}}}(\rr)
 !! \end{equation}
 !!
 !! INPUTS
 !!  ngqpt(3)=Divisions of the ab-initio q-mesh.
+!!  qptopt=option for the generation of q points (defines whether spatial symmetries and/or time-reversal can be used)
 !!  nqshift=Number of shifts used to generated the ab-initio q-mesh.
 !!  qshift(3,nqshift)=The shifts of the ab-initio q-mesh.
 !!  nfft=Number of fft-points treated by this processors
@@ -2886,11 +2887,11 @@ end subroutine rotate_fqg
 !!
 !! SOURCE
 
-subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt)
+subroutine dvdb_ftinterp_setup(db, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, comm_rpt)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nqshift,nfft,comm_rpt
+ integer,intent(in) :: qptopt,nqshift,nfft,comm_rpt
  class(dvdb_t),target,intent(inout) :: db
 !arrays
  integer,intent(in) :: ngqpt(3), ngfft(18)
@@ -2898,7 +2899,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0, qptopt1 = 1
+ integer,parameter :: master=0
  integer :: iq_ibz,nqibz,iq_bz,nqbz !, timerev_q
  integer :: ii,jj,cplex_qibz,ispden,imyp,irpt,idir,ipert,ipc
  integer :: iqst, itimrev, isym
@@ -2939,7 +2940,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  call wrtout(std_out, " Note: this part may take some time depending on the number of MPI procs, ngqpt and nfft points.")
  call wrtout(std_out, " Use boxcutmin < 2.0 (> 1.1) to decrease nfft, reduce memory requirements and speedup the calculation.")
 
- call prepare_ftinterp(db, ngqpt, qptopt1, nqshift, qshift, &
+ call prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
      qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, db%comm)
 
  nqibz = size(qibz, dim=2); nqbz = size(qbz, dim=2); db%nrtot = size(all_rpt, dim=2)
@@ -3230,9 +3231,8 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: timrev1 = 1, cutmode2 = 2
- integer :: iq_ibz,nqibz,iq_bz,nqbz
- integer :: ii,iq_dvdb
+ integer,parameter :: cutmode2 = 2
+ integer :: iq_ibz,nqibz,iq_bz,nqbz,ii,iq_dvdb,qtimrev
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
  real(dp) :: r_inscribed_sphere
  logical :: found
@@ -3257,8 +3257,9 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_CHECK(nqshift == 1, "nshift > 1 not supported")
  ABI_CHECK(all(qshift(:, 1) == zero), "qshift != 0 not supported")
 
+ qtimrev = kpts_timrev_from_kptopt(qptopt)
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nqshift, qshift, &
-   nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)
+                             nqibz, qibz, wtq, nqbz, qbz) ! new_kptrlatt, new_shiftk)
 
  ABI_CHECK(nqbz == product(ngqpt) * nqshift, "nqbz /= product(ngqpt) * nqshift")
 
@@ -3329,7 +3330,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ABI_MALLOC(indqq, (6, nqbz))
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+ if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
 
@@ -3386,7 +3387,7 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  ! Redo the mapping with the new IBZ
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+ if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, indqq) /= 0) then
    ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
  call qrank%free()
@@ -4023,7 +4024,7 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: sppoldbl1=1,timrev1=1
+ integer,parameter :: sppoldbl1=1, timrev1=1
  integer :: my_qptopt,iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb,cplex_qibz,ispden,irpt,idir,iat
  integer :: iqst,nqst,itimrev,tsign,isym,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3
@@ -5680,7 +5681,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  integer,parameter :: master = 0
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
  integer :: n1, n2, n3, unt, this_nqpt, interpolated
- integer :: i1, i2, i3, ifft, ig, ngsmall, ii
+ integer :: i1, i2, i3, ifft, ig, ngsmall, ii, qptopt
  integer :: ncid, ncerr
  real(dp) :: gsq_max, g2
  !type(vdiff_t) :: vd_max
@@ -5688,7 +5689,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  character(len=500) :: msg
  character(len=fnlen) :: dump_path
 !arrays
- integer :: ngfft(18)
+ integer :: ngfft(18), units(2)
  integer, allocatable :: gfft(:,:),ig2ifft(:), gsmall(:,:)
  real(dp) :: dvdb_qdamp(1)
  real(dp) :: vals2(2)
@@ -5699,9 +5700,9 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 ! *************************************************************************
 
  my_rank = xmpi_comm_rank(dvdb%comm)
+ units = [std_out, ab_out]
 
- call wrtout([std_out, ab_out], &
-     " Computing average over the unit cell of the periodic part of the DFPT potentials", newlines=2)
+ call wrtout(units, " Computing average over the unit cell of the periodic part of the DFPT potentials", newlines=2)
  call dvdb%print(unit=std_out)
  !call dvdb%print(unit=ab_out)
 
@@ -5752,27 +5753,28 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  ! Select list of q-points depending on eph_task (either from DVDB file or interpolated)
  write_v1r = .False.
  if (dtset%eph_task == -15) then
-   call wrtout([std_out, ab_out], " Using list of q-points found in the DVDB file")
+   call wrtout(units, " Using list of q-points found in the DVDB file")
    this_nqpt = dvdb%nqpt
    this_qpts => dvdb%qpts
    interpolated = 0
 
  else if (dtset%eph_task == +15) then
    msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    ABI_CHECK(dtset%ph_nqpath > 0, "When eph_task = +15, ph_qpath must be given in input.")
    this_nqpt = dtset%ph_nqpath
    this_qpts => dtset%ph_qpath(:, 1:this_nqpt)
    comm_rpt = xmpi_comm_self
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+   qptopt = dtset%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
    interpolated = 1
    write_v1r = dtset%prtpot > 0
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
 
- call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
- call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
+ call wrtout(units, sjoin(ch10, "- Results stored in: ", out_ncpath))
+ call wrtout(units, " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
 
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, out_ncpath, xmpi_comm_self))
@@ -6046,7 +6048,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0, chneut2 = 2
+ integer,parameter :: master = 0, chneut2 = 2, qptopt1 = 1
  integer :: nfft, iq, cplex, mu, ispden, comm_rpt, iblock_dielt, iblock_dielt_zeff, my_rank,  ierr
  logical :: autotest
  type(dvdb_t) :: dvdb, coarse_dvdb
@@ -6100,7 +6102,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
 
  autotest = .True.
  if (autotest) then
-   call dvdb%ftinterp_setup(dvdb_ngqpt, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
+   call dvdb%ftinterp_setup(dvdb_ngqpt, qptopt1, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
 
    ! First step: Use FT interpolation to get q-points in the initial ab-initio mesh.
    ! We should get the same result...
@@ -6157,7 +6159,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
 #endif
 
    coarse_fname = strcat(dvdb_filepath, "_COARSE")
-   call dvdb%qdownsample(coarse_fname, coarse_ngqpt, comm)
+   call dvdb%qdownsample(coarse_fname, qptopt1, coarse_ngqpt, comm)
 
    coarse_dvdb = dvdb_new(coarse_fname, comm)
    call coarse_dvdb%open_read(ngfft, comm)
@@ -6178,7 +6180,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
    !call coarse_dvdb%print()
 
    ! Prepare FT interpolation using coarse q-mesh.
-   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
+   call coarse_dvdb%ftinterp_setup(coarse_ngqpt, qptopt1, 1, [zero, zero, zero], nfft, ngfft, comm_rpt)
 
    do iq=1,dvdb%nqpt
      ! Read data from DVDB file and store it in file_v1r
@@ -6645,7 +6647,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  integer :: cplex,db_iqpt,natom,natom3,npc,trev_q,nspden
  integer :: nqbz, nqibz, iq, ifft, nqbz_coarse
  integer :: nperts_read, nperts_interpolate, nperts
- integer :: nqpt_read, nqpt_interpolate
+ integer :: nqpt_read, nqpt_interpolate, qptopt, qtimrev
  integer :: nfft,nfftf, dimv1
  integer :: ount, unt, fform
  integer :: ncid, ncerr
@@ -6678,7 +6680,10 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    ! Generate the list of irreducible q-points in the grid
    qptrlatt = 0
    qptrlatt(1,1) = dtset%eph_ngqpt_fine(1); qptrlatt(2,2) = dtset%eph_ngqpt_fine(2); qptrlatt(3,3) = dtset%eph_ngqpt_fine(3)
-   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, dtset%qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+   qptopt = 1; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   qtimrev = kpts_timrev_from_kptopt(qptopt)
+   call wrtout(std_out, sjoin(" Generating q-IBZ for DVDB with qptopt:", itoa(qptopt)))
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 
  else if (dtset%eph_task == -5) then
    msg = sjoin(" Using list of q-points specified by ph_qpath with ", itoa(dtset%ph_nqpath), "qpoints")
@@ -7042,6 +7047,7 @@ end subroutine dvdb_interpolate_and_write
 !!
 !! INPUTS
 !!  new_dvdb_fname=Path of output DVDB
+!!  qptopt=option for the generation of q points (defines whether spatial symmetries and/or time-reversal can be used)
 !!  ngqpt(3)=Division of coarse Q-mesh
 !!  comm=MPI communicator.
 !!
@@ -7050,7 +7056,7 @@ end subroutine dvdb_interpolate_and_write
 !!
 !! SOURCE
 
-subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
+subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, qptopt, ngqpt, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -7058,11 +7064,11 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  class(dvdb_t),intent(inout) :: dvdb
  character(len=*),intent(in) :: new_dvdb_fname
 !arrays
- integer,intent(in) :: ngqpt(3)
+ integer,intent(in) :: qptopt, ngqpt(3)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master=0, qptopt1=1, timrev1=1
+ integer,parameter :: master=0
  integer :: fform_pot=111
  integer :: ierr,my_rank,nproc,idir,ipert,iat,ipc,ispden
  integer :: cplex, db_iqpt, npc, nqbz, nqibz, iq, ifft, nperts_read, nfft, ount
@@ -7085,7 +7091,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  ! =======================
  ! Generate the list of irreducible q-points in the coarse grid
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(dvdb%cryst, qptrlatt, qptopt1, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+ call kpts_ibz_from_kptrlatt(dvdb%cryst, qptrlatt, qptopt, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 
  ! =======================================
  ! Open DVDB and copy important dimensions
