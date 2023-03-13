@@ -578,6 +578,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  ! Setup qIBZ, weights and BZ.
  ! Always use q --> -q symmetry for phonons even in systems without inversion
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
+ !qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
                              gstore%nqibz, gstore%qibz, gstore%wtq, gstore%nqbz, qbz)
                              !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,

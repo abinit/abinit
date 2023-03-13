@@ -241,13 +241,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
-
  use_sigeph = (dtset%eph_task == 9)
 
  if (my_rank == master) then
    if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
    if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
-
    if (use_sigeph .and. .not. file_exists(sigeph_filepath)) ABI_ERROR(sjoin("Cannot find SIGEPH file:", sigeph_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
@@ -380,7 +378,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        call wrtout(ab_out,msg)
      end if
    end if
-
    if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
  end if
 

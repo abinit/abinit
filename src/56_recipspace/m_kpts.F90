@@ -1121,8 +1121,7 @@ end subroutine listkk
 !! chksymbreak= if 1, will check whether the k point grid is symmetric (for kptopt=1,2 and 4), and stop if not.
 !! iout=unit number for echoed output . 0 if no output is wished.
 !! iscf= ( <= 0 =>non-SCF), >0 => SCF)  MG: FIXME I don't understand why we have to pass the value iscf.
-!! kptopt=option for the generation of k points
-!!   (defines whether spatial symmetries and/or time-reversal can be used)
+!! kptopt=option for the generation of k points. defines whether spatial symmetries and/or time-reversal can be used)
 !! msym=default maximal number of symmetries
 !! nsym=number of symmetries
 !! rprimd(3,3)=dimensional real space primitive translations (bohr)

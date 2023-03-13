@@ -786,12 +786,12 @@ subroutine xmpi_init()
  if (lflag) xmpi_tag_ub = attribute_val
 
 !  Define type values.
- call MPI_TYPE_SIZE(MPI_CHARACTER,xmpi_bsize_ch,mpierr)
- call MPI_TYPE_SIZE(MPI_INTEGER,xmpi_bsize_int,mpierr)
- call MPI_TYPE_SIZE(MPI_REAL,xmpi_bsize_sp,mpierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION,xmpi_bsize_dp,mpierr)
- call MPI_TYPE_SIZE(MPI_COMPLEX,xmpi_bsize_spc,mpierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX,xmpi_bsize_dpc,mpierr)
+ call MPI_TYPE_SIZE(MPI_CHARACTER, xmpi_bsize_ch, mpierr)
+ call MPI_TYPE_SIZE(MPI_INTEGER, xmpi_bsize_int, mpierr)
+ call MPI_TYPE_SIZE(MPI_REAL, xmpi_bsize_sp, mpierr)
+ call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION, xmpi_bsize_dp, mpierr)
+ call MPI_TYPE_SIZE(MPI_COMPLEX, xmpi_bsize_spc, mpierr)
+ call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX, xmpi_bsize_dpc, mpierr)
 
  ! Find the byte size of Fortran record marker used in MPI-IO routines.
  if (xmpio_bsize_frm == 0) then

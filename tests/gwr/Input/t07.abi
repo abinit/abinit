@@ -6,7 +6,7 @@ ndtset 2
 ngkpt     1 1 1              # Number of grid points for k-point generation
 nshiftk   1
 shiftk    0 0 0              # Mesh centered on gamma
-istwfk    *1
+istwfk    *1                 # Required (for the time being)
 
 # Definition of the unit cell: fcc
 #acell 3*7.6079786             # Lattice constants (in atomic units)

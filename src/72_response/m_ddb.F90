@@ -169,6 +169,8 @@ module m_ddb
     procedure :: copy => ddb_copy
      ! Copy the object.
 
+    !procedure :: get_qptopt => ddb_get_qptopt
+
     procedure :: set_qpt => ddb_set_qpt
      ! Set the wavevector
 
@@ -1696,9 +1698,7 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
    !  Here complete the matrix by symmetrisation of the existing elements
    if(ddb%typ(iblok)==1 .or. ddb%typ(iblok)==2) then
 
-     qpt(1)=ddb%qpt(1,iblok)/ddb%nrm(1,iblok)
-     qpt(2)=ddb%qpt(2,iblok)/ddb%nrm(1,iblok)
-     qpt(3)=ddb%qpt(3,iblok)/ddb%nrm(1,iblok)
+     qpt(:)=ddb%qpt(:,iblok)/ddb%nrm(1,iblok)
 
      ! Examine the symmetries of the q wavevector
      call littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol=0)

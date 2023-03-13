@@ -6,4 +6,4 @@ dimensions:
     type: Momentum
 elements:
   type: TextFile
-unit: 1.0
+unit: 1.0     # Atomic units 
