@@ -231,17 +231,19 @@ completion you will find in the output file:
 Orbital magnetic moment computed with DFPT derivative wavefunctions
 
     Orbital magnetic moment, Cartesian directions :
-    -5.52100200E-04  2.19310321E-16  6.50857866E-17
-
-
+    -5.54888268E-04 -1.71209435E-14  1.51847951E-14
+    
+    
     Chern vector, Cartesian directions :
-     1.02087299E-12  4.78717897E-19  1.37748712E-19
+    -2.52162344E-09 -1.72263462E-17  1.13073711E-17
 
 The first result is the induced magnetic moment, which is a vector--note that it points in the original dipole direction. To get the shielding, divide the
-dipole strength (1), and multiply by (-1) to get the normal NMR sign convention--the result is 552.1~ppm. This is in excellent agreement with the
-high quality all-electron wavefunction calculations in reference [[cite:Vaara2003relativistic]]. 
+dipole strength (1), and multiply by (-1) to get the normal NMR sign convention--the result is 554.9~ppm. This result is underconverged--the
+fully converged result, with [ecut]=30, is 552.1~ppm. For comparison, the all-electron, wavefunction-based calculation using CCSD(T) 
+of [[cite:Vaara2003relativistic]] yields 551.9, so clearly the present method is capable of excellent accuracy. 
 The second line is the Chern vector [[cite:Ceresoli2006]], that is, the integral of the Berry 
-curvature, which outside of exotic topological insulators, should be zero. We include it as a convergence check.
+curvature, which outside of exotic topological insulators, should be zero. We include it as a convergence check. In this fast test run we obtained
+$-2.5\times 10^{-9}$; in fully converged calculations one would like numbers about 3 orders of magnitude smaller.
 
 A final detail to note: the induced moment due to the filled core orbitals, is due to what is called the Lamb shielding. Usual PAW datasets do not 
 include this value, but you can add it to your input file with the variable [lambsig]. To compute it you must obtain the core wavefunctions, which is 
