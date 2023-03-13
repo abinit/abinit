@@ -31,8 +31,10 @@ module m_upf2abinit
  use defs_datatypes,  only : pseudopotential_type
  use m_io_tools,      only : open_file
  use m_numeric_tools, only : smooth, nderiv, ctrap
+ use m_copy,          only : alloc_copy
  use m_paw_numeric,   only : jbessel => paw_jbessel
- use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free
+ use m_pawpsp,        only : pawpsp_nl
+ use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_psptk,         only : cc_derivatives, psp8lo, psp8nl
 
  implicit none
@@ -351,8 +353,9 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  real(dp), intent(inout) :: xccc1d(psps%n1xccc,6)
 
 !Local variables -------------------------
- integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex !, ipsang
- real(dp) :: yp1, ypn, amesh, damesh
+ integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, iwfc !, iq
+ integer :: atmwfc_lmax
+ real(dp) :: yp1, ypn, amesh, damesh, intg
  character(len=500) :: msg
  logical :: linear_mesh
  type(pseudo_upf) :: upf
@@ -360,14 +363,16 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  type(pawrad_type) :: mesh
  integer :: my_nproj_l(0:3), my_nprojso_l(1:3)
  !integer :: nproj_tmp(psps%mpssoang)
+ integer,allocatable :: awfc_indlmn(:,:)
  logical,allocatable :: found_l(:)
- real(dp),allocatable :: work_space(:),work_spl(:)
+ real(dp),allocatable :: work_space(:), work_spl(:)
  real(dp),allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
  real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
 
 ! *********************************************************************
 
  ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
+ ! and https://github.com/QEF/qeschemas/files/9497267/pp.md
  call read_upf_new(filpsp, upf, ierr)
  ABI_CHECK(ierr == 0, sjoin("read_upf_new returned ierr:", itoa(ierr)))
 
@@ -577,7 +582,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    ABI_MALLOC(ff2, (mmax))
    ff(1:mmax) = upf%rho_atc(1:mmax) ! model core charge without derivative factor
    !smooth_niter = 15 ! run 15 iterations of smoothing?
-   smooth_niter = 0   ! Don't smooth core charges to be consistent with treatment done in psp8in
+   smooth_niter = 0   ! Don't smooth core charges to be consistent with the treatment done in psp8in
 
    ff1 = zero
    call nderiv(one, ff, ff1, mmax, 1) ! first derivative
@@ -613,13 +618,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  end if ! nlcc present
 
  ! Read pseudo valence charge in real space on the linear mesh
- ! and transform it to reciprocal space on a regular grid. Use vloc as workspace.
- !vloc(:) = zero
- !do irad=1,mmax
- !  read(tmp_unit,*, err=10, iomsg=errmsg)jj, rad(irad), vloc(irad)
- !  vloc(irad) = vloc(irad) / four_pi
- !end do
-
+ ! and transform it to reciprocal space on a regular grid
  ! TODO: Spline input data on linear mesh if not linear
  ABI_MALLOC(ff, (mmax))
  ff = upf%rho_at / four_pi
@@ -632,9 +631,77 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ! Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
  call pawrad_init(mesh, mesh_size=mmax, mesh_type=1, rstep=amesh)
  call nctab_eval_tvalespl(nctab, zion, mesh, ff, psps%mqgrid_vl, psps%qgrid_vl)
- call pawrad_free(mesh)
- ABI_FREE(ff)
 
+ nctab%num_tphi = upf%nwfc
+ if (upf%nwfc > 0) then
+   ! Store atomic wavefunctions and metadata in nctab, then compute form factors for spline.
+   ! NB: lchi is the radial part of the KS equation, multiplied by r.
+   ABI_MALLOC(awfc_indlmn, (6, upf%nwfc))
+   awfc_indlmn = huge(1)
+   atmwfc_lmax = -1
+
+   do iwfc=1, upf%nwfc
+     !print *, "label: ", upf%els(iwfc)
+     !print *, "n", upf%nchi(iwfc)
+     !print *, "nn", upf%nn(iwfc)
+     !print *, "j", upf%jchi(iwfc)
+     !print *, "l", upf%lchi(iwfc)
+     !print *, "occ:", upf%oc(iwfc)
+     atmwfc_lmax = max(atmwfc_lmax, upf%lchi(iwfc))
+     ff = upf%chi(:, iwfc) ** 2; call simp_gen(intg, ff, mesh)
+     write(std_out, *)" wavefunction (before rescaling) integrates to: ",intg
+     upf%chi(:, iwfc) = upf%chi(:, iwfc) / sqrt(intg)
+     ff = upf%chi(:, iwfc) ** 2; call simp_gen(intg, ff, mesh)
+     write(std_out, *)" wavefunction (after rescaling) integrates to: ",intg
+
+     ! NB: we only need ll (1), and iln (5) in psp8nl
+     awfc_indlmn(1, iwfc) = upf%lchi(iwfc)
+     awfc_indlmn(5, iwfc) = iwfc
+   end do
+
+   ! All this sfree/remalloc stuff is for handling memory in multi dataset mode!
+   ABI_REMALLOC(nctab%tphi_qspl, (psps%mqgrid_ff, 2, upf%nwfc))
+   ABI_SFREE(nctab%tphi_n)
+   ABI_SFREE(nctab%tphi_l)
+   ABI_SFREE(nctab%tphi_occ)
+   ABI_SFREE(nctab%tphi_jtot)
+   call alloc_copy(upf%nchi, nctab%tphi_n)
+   call alloc_copy(upf%lchi, nctab%tphi_l)
+   call alloc_copy(upf%oc, nctab%tphi_occ)
+   nctab%has_jtot = upf%has_so
+   if (upf%has_so) call alloc_copy(upf%jchi, nctab%tphi_jtot)
+
+   !call psp8nl(amesh, nctab%tphi_qspl, awfc_indlmn, atmwfc_lmax, upf%nwfc, upf%nwfc, mmax, &
+   !            psps%mqgrid_ff, psps%qgrid_ff, upf%r, upf%chi)
+
+   !do iwfc=1, upf%nwfc
+   !  do iq=1,psps%mqgrid_ff
+   !    write(555, *) nctab%tphi_qspl(iq,:,iwfc)
+   !  end do
+   !end do
+
+   !do iwfc=1, upf%nwfc
+   !  where (abs(upf%r) > tol16)
+   !    upf%chi(:,iwfc) = upf%chi(:,iwfc) / upf%r
+   !  else where
+   !    upf%chi(:,iwfc) = zero
+   !  end where
+   !end do
+
+   call pawpsp_nl(nctab%tphi_qspl, awfc_indlmn, upf%nwfc, upf%nwfc, psps%mqgrid_ff, psps%qgrid_ff, mesh, upf%chi)
+
+   !do iwfc=1, upf%nwfc
+   !  do iq=1,psps%mqgrid_ff
+   !    write(666, *) nctab%tphi_qspl(iq,:,iwfc)
+   !  end do
+   !end do
+
+   ABI_FREE(awfc_indlmn)
+   !stop "nwfc"
+ end if ! upf%nwfc > 0
+
+ ABI_FREE(ff)
+ call pawrad_free(mesh)
  call deallocate_pseudo_upf(upf)
 
 end subroutine upf2_to_abinit
@@ -688,20 +755,17 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: bessorder = 0 ! never calculate derivatives of bessel functions
  integer :: iproj, nr, ll, llold, ipsang, i_indlmn
- integer :: iproj_1l, ir, iq, mm, bessorder
+ integer :: iproj_1l, ir, iq, mm
  real(dp) :: res, arg, besfact, dummy, dummy2
  real(dp), allocatable :: work(:)
  character(len=500) :: msg
 
 !*************************************************************************
- bessorder = 0 ! never calculate derivatives of bessel functions
 
- ffspl = zero
- indlmn = 0
- i_indlmn = 0
- llold = -1
- iproj_1l = 1
+ ffspl = zero; indlmn = 0; i_indlmn = 0
+ llold = -1; iproj_1l = 1
 
  ! loop over all projectors
  do iproj=1,n_proj
@@ -745,7 +809,6 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
      ! FIXME: add semianalytic form for integral from 0 to first point
      do ir=1,nr
        call jbessel(besfact, dummy, dummy2, ll, bessorder, arg*r(ir))
-       ! besfact = sin(arg*r(ir))
        work(ir) = drdi(ir) * besfact * proj(ir, iproj) * r(ir) !* r(ir)
      end do
      call ctrap (nr, work, one, res)

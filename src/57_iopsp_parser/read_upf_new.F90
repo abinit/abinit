@@ -169,6 +169,8 @@ CONTAINS
     CALL xmlr_readtag( 'z_valence', upf%zp )
     CALL xmlr_readtag( 'type', upf%typ )
     CALL xmlr_readtag( 'functional', upf%dft )
+    call remove_non_ascii(upf%dft)
+
     CALL xmlr_readtag( 'relativistic', upf%rel )
     CALL xmlr_readtag( 'is_ultrasoft', upf%tvanp )
     CALL xmlr_readtag( 'is_paw', upf%tpawp )
@@ -218,6 +220,7 @@ CONTAINS
     CALL get_attr ('paw_as_gipaw', upf%paw_as_gipaw)
     CALL get_attr ('core_correction', upf%nlcc)
     CALL get_attr ('functional', upf%dft)
+    call remove_non_ascii(upf%dft)
     CALL get_attr ('z_valence', upf%zp)
     CALL get_attr ('total_psenergy', upf%etotps)
     CALL get_attr ('wfc_cutoff', upf%ecutwfc)
@@ -866,5 +869,30 @@ SUBROUTINE upf_error( calling_routine, message, ierr )
   if (.False.) write(std_out,*)trim(calling_routine), ierr
 
 END SUBROUTINE upf_error
+
+!
+subroutine remove_non_ascii(in_str)
+
+ character(len=*),intent(inout) :: in_str
+
+ character(len=len(in_str)) :: tmp_str
+ integer :: ii, cnt
+
+ ! in UTF8 character value c2 a0 (194 160) is defined as NO-BREAK SPACE.
+ ! According to ISO/IEC 8859 this is a space that does not allow a line break to be inserted.
+ cnt = 0
+ tmp_str = ""
+ do ii=1,len(in_str)
+   if ((iachar(in_str(ii:ii)) >= 127)) cycle
+   cnt = cnt + 1 !; write(std_out, *) "copying`", in_str(ii:ii), "` with iachar:", iachar(in_str(ii:ii))
+   tmp_str(cnt:cnt) = in_str(ii:ii)
+ end do
+
+ do ii=1,len(in_str)
+   in_str(ii:ii) = " "
+ end do
+ in_str = tmp_str
+
+end subroutine remove_non_ascii
 
 END MODULE read_upf_new_module

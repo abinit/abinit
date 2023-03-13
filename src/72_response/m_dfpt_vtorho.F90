@@ -765,6 +765,14 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  if(xmpi_paral==1)then
    call timab(129,1,tsec)
 
+   ! MG: For the record, buffer1 can be pretty big if we have dense k-meshes e.g. metals
+   ! this is what you get with nband 26 and ngkpt 42**3:
+   !
+   !    [0] <var=buffer1, A@m_dfpt_vtorho.F90:773, addr=0x150d5a59e010, size_mb=401.130>
+   !
+   ! and this can lead to OOM if we have 2Gb per core also because xmpi_sum allocates another array of the same size!
+   ! TODO: Avoid packing rhor1 in buffer
+
 !  Compute buffer size
    buffer_size=9+mbd2kpsp+mbdkpsp
    if (iscf_mod>0) then

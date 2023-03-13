@@ -53,6 +53,7 @@ module m_rmm_diis
 !!***
 
  public :: rmm_diis
+ public :: subspace_rotation   ! rayleigh-ritz procedure from gs_hamk
 !!***
 
  type,private :: rmm_diis_t
@@ -139,7 +140,7 @@ contains
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  my_nspinor=number of plane waves at this k point
+!!  my_nspinor=number of spinors treated by this MPI proc
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
@@ -1320,6 +1321,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  !cplex = 2; if (istwf_k == 2) cplex = 1
 
  ABI_CALLOC(h_ij, (cplex, nband, nband))
+
  ! Allocate full ghc and gvnlxc to be able to rotate residuals and Vnlx matrix elements
  ! after subdiago. More memory but we can save a call to H|psi>.
  if (savemem == 0) then

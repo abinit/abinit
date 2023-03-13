@@ -61,6 +61,7 @@ module m_wfk_analyze
  use m_classify_bands,  only : classify_bands
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
+ use m_iowf,            only : prtkbff
 
  implicit none
 
@@ -152,7 +153,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfkfull_path
  logical :: call_pawinit, use_paw_aeur
- type(hdr_type) :: wfk0_hdr
+ type(hdr_type) :: wfk0_hdr, hdr_kfull
  type(crystal_t) :: cryst
  type(ebands_t) :: ebands
  type(pawfgr_type) :: pawfgr
@@ -320,7 +321,13 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
+
+     ! Write KB form factors.
+     if (dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
+       call prtkbff(wfkfull_path, hdr_kfull, psps, dtset%prtvol)
+     end if
+     call hdr_kfull%free()
    end if
    call xmpi_barrier(comm)
 
@@ -347,6 +354,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  case (WFK_TASK_EINTERP)
    ! Band structure interpolation from eigenvalues computed on the k-mesh.
    call ebands_interpolate_kpath(ebands, dtset, cryst, [0, 0], dtfil%filnam_ds(4), comm)
+
+ case (WFK_TASK_CHECK_SYMTAB)
+   call wfk_check_symtab(wfk0_path, comm)
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
