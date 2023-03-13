@@ -538,6 +538,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    energies%e_corepspdc = zero
  end select
  if(wvlbigdft) energies%e_corepsp = zero
+ if(dtset%icutcoul.ne.3) energies%e_corepsp = zero
+
 
  fermie=energies%e_fermie
  ! CP added
