@@ -102,7 +102,7 @@ module m_melemts
  type,public :: melements_t
 
   integer :: nkibz
-  ! Number of k-points.
+  ! Number of k-points in the IBZ.
 
   integer :: nsppol
   ! Number of independent spin-polarizations.
@@ -113,7 +113,7 @@ module m_melemts
   integer :: nspden
   ! Number of independent spin-density components.
 
-  integer :: bmin,bmax
+  integer :: bmin, bmax
   ! min and Max band index over k-points and spin.
   ! Used to dimension the arrays below.
 
@@ -183,9 +183,9 @@ module m_melemts
  integer,parameter,private :: NNAMES = 9
  integer,parameter,private :: NAMELEN = 13
 
-! List of matrix element names.
-! Important note: Remember to add a new entry here when you add a new matrix element.
-! then change the routine my_select_melements accordingly.
+ ! List of matrix element names.
+ ! IMPORTANT: Remember to add a new entry here when you add a new matrix element.
+ ! then change the routine my_select_melements accordingly.
  character(len=NAMELEN),parameter,private :: ANAMES(NNAMES) = [ &
    "vxc          ", &
    "vxcval       ", &

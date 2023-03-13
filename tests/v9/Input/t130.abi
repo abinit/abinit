@@ -10,6 +10,7 @@ tolvrs    1.0d-8
 # Dataset 1: SCF run with useylm 0
 ###################################
 useylm1     0
+wfinit1     2
 
 ###################################
 # Dataset 2: SCF run with useylm 1

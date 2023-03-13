@@ -26,7 +26,7 @@ module m_pawxc
  USE_MEMORY_PROFILING
 
 #ifdef LIBPAW_ISO_C_BINDING
- use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
 
 #ifdef HAVE_LIBPAW_ABINIT

@@ -109,9 +109,8 @@ contains
 !!   At the input, it is already partially or completely initialized.
 !!
 !! NOTES
-!! The interplay with the multi-dataset mode is interesting :
-!! the pseudopotentials
-!! are independent of the dataset, but the largest q vector, the
+!! The interplay with the multi-dataset mode is interesting:
+!! the pseudopotentials are independent of the dataset, but the largest q vector, the
 !! spin-orbit characteristics, the use of Ylm as well as ixc
 !! play a role in the set up of pseudopotentials (ixc plays a very minor
 !! role, however). So, the pseudopotential data ought not be recomputed
