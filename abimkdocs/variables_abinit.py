@@ -9857,15 +9857,14 @@ Variable(
     added_in_version="v9",
     text=r"""
 Used to run the calculation of spatial dispersion tensorial quantities needed to
-build the bulk flexoelectric tensor (the clamped-ion contribution is alread calculated by
+build the bulk flexoelectric tensor (the clamped-ion flexoelectric tensor is directly calculated by
 abinit whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation,
 see [[flexoflag@anaddb]]).
 
-At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
-calculated. This **requires** the precalculation of the ground-state wave-functions and
-density as well as response functions and densities to a set of perturbations as specified below.
-All perturbations and directions need to be explicitly computed, and the linear response calculations
-have to be performed with [[prepalw]] /= 0.
+This **requires** the precalculation of the ground-state wave-functions and
+density, as well as response functions and densities to a set of perturbations as specified below.
+The number of linear-response calculations to be explicitly precomputed can be reduced via symmetry arguments
+selecting the appropiate value of the [[prepalw]] variable.
 
   * 0 --> No flexoelectric spatial dispersion tensors are calculated.
   * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
@@ -9885,6 +9884,31 @@ have to be performed with [[prepalw]] /= 0.
           are also printed: piezoelectric force response tensor and clamped-ion elastic tensor.
           Requires precomputed linear response functions and densities:
           ddk, atomic displacement and strain.
+""",
+),
+
+Variable(
+    abivarname="lw_natopt",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of NATural OPTical activity tensor",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run natural optical activity tensor calculation. 
+
+  * 0 --> No natural optical activity tensor is calculated.
+  * 1 --> Natural optical activity tensor is calculated.
+
+This **requires** the precalculation of the ground-state wave functions and
+density as well as response functions and densities to the following perturbations:
+ddk, d2_dkdk, electric fields. The number of linear-response calculations 
+to be explicitly precomputed can be reduced via symmetry arguments  
+selecting the appropiate value of the [[prepalw]] variable.
 """,
 ),
 
@@ -9909,11 +9933,11 @@ phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
           the dynamical quadrupoles are also printed: the first moment of the polarization
           response to an atomic displacement and the clamped-ion piezoelectric tensor.
 
-At present ( |today| ), all the elements of the dynamical quadrupoles tensor are necessarily
-calculated. This **requires** the precalculation of the ground-state wave functions and
+This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
-ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need
-to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] /= 0.
+ddk, d2_dkdk, atomic displacements and electric fields. The number of linear-response calculations 
+to be explicitly precomputed can be reduced via symmetry arguments  
+selecting the appropiate value of the [[prepalw]] variable.
 """,
 ),
 
@@ -13352,7 +13376,7 @@ The choice is among:
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
-  * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]] or [[lw_qdrpl]] input variables.
+  * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -15087,7 +15111,7 @@ a linear response calculation. The standard approach in a linear response calcul
   * compute only the irreducible perturbations;
   * use symmetries to reduce the number of k-points for the k-point integration.
 
-This approach cannot be applied, presently (v9.0), if the first-order
+This approach cannot be applied, presently (v9.x), if the first-order
 wavefunctions are to be used to compute spatial dispersion properties.
 During the linear response calculation, in order to prepare a longwave
 calculation, one should use [[prepalw]] /= 0 in order to force ABINIT to keep 
@@ -17488,7 +17512,7 @@ Variable(
 If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the 
 reference energy placed at the average electrostatic potential. The later is the reference adopted 
 in the longwave driver. Since v9.x, [[rfstrs_ref]] = 1 is warned if [[prepalw]]/=0 because first-order 
-energies are no longer recomputed by the longwave driver but read from the 1WF files. 
+energies are no longer recomputed by the longwave driver but read from the precalculated 1WF files. 
 
 Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, 
 in the calculation of absolute deformation potentials [[cite:Stengel2015]].
