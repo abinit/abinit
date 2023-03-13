@@ -6,14 +6,10 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2022 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -70,12 +66,6 @@ contains
 !! OUTPUT
 !! eew=final ewald energy in hartrees
 !! grewtn(3,natom)=grads of eew wrt xred(3,natom), hartrees.
-!!
-!! PARENTS
-!!      m_setvtr
-!!
-!! CHILDREN
-!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -412,12 +402,6 @@ end subroutine ewald
 !! Cartesian components of stress are provided for this symmetric
 !! tensor in the order 11 22 33 32 31 21.
 !!
-!! PARENTS
-!!      m_stress
-!!
-!! CHILDREN
-!!      dsyev,matr3inv,wrtout
-!!
 !! SOURCE
 
 subroutine ewald2(gmet,natom,ntypat,rmet,rprimd,stress,typat,ucvol,xred,zion)
@@ -679,12 +663,6 @@ end subroutine ewald2
 !! 3. There can be small numerical variations due to the
 !! fact that the input dielectric tensor is usually
 !! not perfectly symmetric ....
-!!
-!! PARENTS
-!!      m_dynmat,m_effective_potential,m_ifc
-!!
-!! CHILDREN
-!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 

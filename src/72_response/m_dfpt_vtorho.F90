@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -208,17 +204,6 @@ contains
 !! SIDE EFFECTS
 !!  pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!  rhor1(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3.
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_vtowfk,dfptff_gbefd,dfptff_gradberry,fftpac,getgh1c_setup
-!!      gs_hamkq%free,gs_hamkq%load_spin,init_hamiltonian,init_rf_hamiltonian
-!!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
-!!      pawrhoij_inquire_dim,pawrhoij_mpisum_unpacked,rf_hamk_dir2%free
-!!      rf_hamk_dir2%load_spin,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack,sqnorm_v,symrhg,timab,transgrid,xmpi_sum
 !!
 !! SOURCE
 

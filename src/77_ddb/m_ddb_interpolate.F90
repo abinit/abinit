@@ -7,14 +7,10 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (GA)
+!!  Copyright (C) 2008-2022 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -50,7 +46,6 @@ module m_ddb_interpolate
 !!***
 
  public :: ddb_interpolate
- public :: outddbnc
 !!***
 
 contains
@@ -71,11 +66,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
@@ -95,10 +85,9 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: unddb
  integer :: nsym,natom,ntypat,mband,nqpt_fine
  integer :: msize,nsize,mpert,nblok,mtyp
- integer :: rftyp,choice
+ integer :: rftyp
  integer :: ii,iblok,jblok,iqpt,ipert1,ipert2,idir1,idir2
  integer :: nprocs,my_rank
  character(len=500) :: msg
@@ -107,7 +96,7 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 !arrays
  integer :: rfphon(4),rfelfd(4),rfstrs(4)
  integer,allocatable :: blkflg(:,:,:,:)
- real(dp) :: qpt(3), qptnrm(3), qpt_padded(3,3), qred(3)
+ real(dp) :: qpt(3), qptnrm(3), qpt_padded(3,3)
  real(dp),allocatable :: d2cart(:,:,:,:,:),d2red(:,:,:,:,:)
  real(dp),pointer :: qpt_fine(:,:)
 
@@ -141,13 +130,13 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  mtyp = max(ddb_hdr%mblktyp, 2)  ! Limited to 2nd derivatives of total energy
  ddb_hdr%mblktyp = mtyp
 
- mpert = natom + MPERT_MAX
+ mpert = ddb%mpert
  msize = 3 * mpert * 3 * mpert  !; if (mtyp==3) msize=msize*3*mpert
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
 
  ddb_new%nblok = nblok
- call ddb_new%malloc(msize,nblok,natom,ntypat)
+ call ddb_new%malloc(msize,nblok,natom,ntypat,mpert)
  ddb_new%flg = 0
  ddb_new%amu = ddb%amu
  ddb_new%typ = 1
@@ -163,7 +152,6 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
  qpt_padded = zero
 
- ddb_out_filename = strcat(prefix, "_DDB")
 
  ddb_hdr%dscrpt = 'Interpolated DDB using interatomic force constants'
  ddb_hdr%nblok = nblok
@@ -186,13 +174,9 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
    call ddb%get_block(iblok,qpt_padded,qptnrm,rfphon,rfelfd,rfstrs,rftyp)
 
    if (iblok /= 0) then
-     ! DEBUG
-     !write(*,*) 'DDB found in file for qpt=', qpt
-     ! END DEBUG
 
      ! q-point is present in the ddb. No interpolation needed.
 
-     !d2cart(:,1:msize) = ddb%val(:,:,iblok)
      d2cart(1,:,:,:,:) = reshape(ddb%val(1,:,iblok), shape = (/3,mpert,3,mpert/))
      d2cart(2,:,:,:,:) = reshape(ddb%val(2,:,iblok), shape = (/3,mpert,3,mpert/))
    else
@@ -269,48 +253,16 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  if (my_rank == master) then
 
-   unddb = get_unit()
+   ddb_out_filename = strcat(prefix, "_DDB")
 
-   ! Write the DDB header
-   call ddb_hdr%open_write(ddb_out_filename, unddb)
+   call ddb_new%write_txt(ddb_hdr, ddb_out_filename)
 
-   ! Write the whole database
-   call wrtout(std_out,' write the DDB ','COLL')
-   choice=2
-   do iblok=1,nblok
-     call ddb_new%write_block(iblok,choice,ddb_hdr%mband,mpert,msize,ddb_hdr%nkpt,unddb)
-   end do
-
-   ! Also write summary of bloks at the end
-   write(unddb, '(/,a)' )' List of bloks and their characteristics '
-   choice=3
-   do iblok=1,nblok
-     call ddb_new%write_block(iblok,choice,ddb_hdr%mband,mpert,msize,ddb_hdr%nkpt,unddb)
-   end do
-
-   close (unddb)
-
-#ifdef HAVE_NETCDF
-   ! Write the DDB.nc files (one for each q-point)
+   ! Write one separate nc file for each q-point
    do jblok=1,nblok
-
      write(ddb_out_nc_filename,'(2a,i5.5,a)') trim(prefix),'_qpt_',jblok,'_DDB.nc'
-
-     d2red(1,:,:,:,:) = reshape(ddb_new%val(1,1:nsize,jblok), &
-&     shape = (/3,mpert,3,mpert/))
-     d2red(2,:,:,:,:) = reshape(ddb_new%val(2,1:nsize,jblok), &
-&     shape = (/3,mpert,3,mpert/))
-     blkflg(:,:,:,:)  = reshape(ddb_new%flg(1:nsize,jblok), &
-&     shape = (/3,mpert,3,mpert/))
-
-     do ii=1,3
-       qred(ii) = ddb_new%qpt(ii,jblok) / ddb_new%nrm(1,jblok)
-     end do
-
-     call outddbnc(ddb_out_nc_filename,mpert,d2red,blkflg,qred,crystal)
-
+     call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename, jblok)
    end do
-#endif
+
  end if
 
  ! ===========
@@ -323,178 +275,6 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  ABI_FREE(blkflg)
 
 end subroutine ddb_interpolate
-!!***
-
-
-!!****f* ABINIT/outddbnc
-!!
-!! NAME
-!! outddbnc
-!!
-!! FUNCTION
-!! Write Derivative DataBase in NetCDF format.
-!! See ~abinit/scripts/post_processing/merge_ddb_nc.py
-!! for a merging utility.
-!!
-!! INPUTS
-!!  filename=name of the DDB.nc file to be written.
-!!  Crystal <type(crystal_t)>=info on the crystal
-!!  natom = number of atoms in the unit cell.
-!!  mpert = maximum number of perturbations.
-!!  qpt(3)=curret q-point, in reduced coordinates.
-!!  d2matr(2,3,mpert,3,mpert)=second-order derivative of the total energy
-!!  blkflg(3,mpert,3,mpert)=mask telling whether each element is computed (1) or not (0).
-!!
-!! OUTPUT
-!!  Only writing
-!!
-!! PARENTS
-!!      m_ddb_interpolate,m_respfn_driver
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine outddbnc (filename, mpert, d2matr, blkflg, qpt, Crystal)
-
-!Arguments -------------------------------
-!scalars
- character(len=*),intent(in) :: filename
- integer,intent(in) :: mpert
- integer,intent(in) :: blkflg(3,mpert,3,mpert)
- real(dp),intent(in) :: d2matr(2,3,mpert,3,mpert)
- real(dp),intent(in) :: qpt(3)
- type(crystal_t), intent(in) :: Crystal
-
-!Local variables -------------------------
-!scalars
- integer :: natom
- integer :: ncid, ncerr
- integer :: cplex, cart_dir, one_dim
- integer :: ipert1, ipert2, idir1, idir2
- integer,allocatable :: dynmat_mask(:,:,:,:)
- integer,allocatable :: born_effective_charge_tensor_mask(:,:,:)
- real(dp),allocatable :: dynmat(:,:,:,:,:)
- real(dp),allocatable :: born_effective_charge_tensor(:,:,:)
-
-! *********************************************************************
-
-#ifdef HAVE_NETCDF
-
- natom = Crystal%natom
-
- ABI_MALLOC(dynmat, (2,3,natom,3,natom))
- ABI_MALLOC(dynmat_mask, (3,natom,3,natom))
- ABI_MALLOC(born_effective_charge_tensor, (3,natom,3))
- ABI_MALLOC(born_effective_charge_tensor_mask, (3,natom,3))
-
- ! Initialize NetCDF file.
- NCF_CHECK(nctk_open_create(ncid, filename, xmpi_comm_self))
-
- ! ------------------------------
- ! Construct local DDB
- ! ------------------------------
-
- ! Construct the dynamical matrix
- do ipert1=1,natom
-   do idir1=1,3
-     do ipert2=1,natom
-       do idir2=1,3
-         dynmat_mask(idir1,ipert1,idir2,ipert2) = blkflg(idir1,ipert1,idir2,ipert2)
-         if (blkflg(idir1,ipert1,idir2,ipert2)==1) then
-           dynmat(1,idir1,ipert1,idir2,ipert2) = d2matr(1,idir1,ipert1,idir2,ipert2)
-           dynmat(2,idir1,ipert1,idir2,ipert2) = d2matr(2,idir1,ipert1,idir2,ipert2)
-         else
-           dynmat(1,idir1,ipert1,idir2,ipert2) = zero
-           dynmat(2,idir1,ipert1,idir2,ipert2) = zero
-         end if
-       end do
-     end do
-   end do
- end do
-
- ! Construct the Born effective charge tensor
- ipert2 = natom + 2
- do ipert1=1,natom
-   do idir1=1,3
-     do idir2=1,3
-       born_effective_charge_tensor_mask(idir1,ipert1,idir2) = blkflg(idir1,ipert1,idir2,ipert2)
-       if (blkflg(idir1,ipert1,idir2,ipert2)==1) then
-            ! This is a real quantity
-         born_effective_charge_tensor(idir1,ipert1,idir2) = d2matr(1,idir1,ipert1,idir2,ipert2)
-       else
-         born_effective_charge_tensor(idir1,ipert1,idir2) = zero
-       end if
-     end do
-   end do
- end do
-
- ! TODO: also store the dielectric matrix
-
- ! ------------------------------
- ! Write crystal info
- ! ------------------------------
- NCF_CHECK(crystal%ncwrite(ncid))
-
- ! ------------------------------
- ! Write DDB
- ! ------------------------------
-
- ! Write the dimensions specified by ETSF
- one_dim = 1
- cplex = 2
- cart_dir = 3
-
- ncerr = nctk_def_dims(ncid, [&
-  nctkdim_t('current_one_dim', one_dim), &
-  nctkdim_t('number_of_atoms', natom), &
-  nctkdim_t('number_of_cartesian_directions', cart_dir), &
-  nctkdim_t('number_of_perturbations', mpert), &
-  nctkdim_t('cplex',cplex)], defmode=.True.)
- NCF_CHECK(ncerr)
-
-! Create the arrays
- ncerr = nctk_def_arrays(ncid, [&
- &nctkarr_t('atomic_masses_amu', "dp", 'number_of_atom_species'),&
- nctkarr_t('q_point_reduced_coord', "dp", 'number_of_cartesian_directions'),&
- nctkarr_t('second_derivative_of_energy', "dp", &
- &'cplex, number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
- nctkarr_t('second_derivative_of_energy_mask', "i",&
- &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions, number_of_atoms'),&
- nctkarr_t('born_effective_charge_tensor', "dp",'number_of_cartesian_directions,number_of_atoms,number_of_cartesian_directions'),&
- nctkarr_t('born_effective_charge_tensor_mask', "i",&
- &'number_of_cartesian_directions, number_of_atoms, number_of_cartesian_directions')])
- NCF_CHECK(ncerr)
-
-! Write data
- NCF_CHECK(nctk_set_datamode(ncid))
- NCF_CHECK(nf90_put_var(ncid, vid('atomic_masses_amu'), Crystal%amu))
- NCF_CHECK(nf90_put_var(ncid, vid('q_point_reduced_coord'), qpt))
- NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_of_energy'), dynmat))
- NCF_CHECK(nf90_put_var(ncid, vid('second_derivative_of_energy_mask'), dynmat_mask))
- NCF_CHECK(nf90_put_var(ncid, vid('born_effective_charge_tensor'), born_effective_charge_tensor))
- NCF_CHECK(nf90_put_var(ncid, vid('born_effective_charge_tensor_mask'), born_effective_charge_tensor_mask))
-
- ! Close file
- NCF_CHECK(nf90_close(ncid))
-
- ! Deallocate stuff
- ABI_FREE(dynmat)
- ABI_FREE(dynmat_mask)
- ABI_FREE(born_effective_charge_tensor)
- ABI_FREE(born_effective_charge_tensor_mask)
-
-#else
- ABI_ERROR("NETCDF support required to write DDB.nc file.")
-#endif
-
- contains
-   integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
- end function vid
-
-end subroutine outddbnc
 !!***
 
 end module m_ddb_interpolate

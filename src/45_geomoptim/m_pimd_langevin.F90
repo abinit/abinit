@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2021 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2022 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -92,16 +88,6 @@ contains
 !!  Here follows PIMD in the NPT ensemble within the Langevin barostat algorithm
 !!  of Quigley and Probert: J. Chem. Phys. 120, 11432 (2004) [[cite:Quigley2004]]
 !!  and Comput. Phys. Comm. 169, 322 (2005) [[cite:Quigley2005]]
-!!
-!! PARENTS
-!!      m_predict_pimd
-!!
-!! CHILDREN
-!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
-!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_langevin_forces
-!!      pimd_langevin_random,pimd_langevin_random_init,pimd_langevin_random_qtb
-!!      pimd_mass_spring,pimd_predict_taylor,pimd_predict_verlet,pimd_print
-!!      pimd_stresses,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -531,16 +517,6 @@ end subroutine pimd_langevin_npt
 !!
 !! NOTES
 !!   See Quigley,Probert, JCP 120, 11432 (2004) [[cite:Quigley2004]], part III
-!!
-!! PARENTS
-!!      m_predict_pimd
-!!
-!! CHILDREN
-!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
-!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_langevin_forces
-!!      pimd_langevin_random,pimd_langevin_random_init,pimd_langevin_random_qtb
-!!      pimd_mass_spring,pimd_predict_taylor,pimd_predict_verlet,pimd_print
-!!      pimd_stresses,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

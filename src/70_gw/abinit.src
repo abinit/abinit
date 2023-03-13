@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -19,6 +19,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "m_calc_ucrpa.F90",
+ #"m_sigmax.F90",
  "m_sigc.F90",
  "m_sigx.F90",
  "m_vhxc_me.F90",
@@ -45,6 +46,7 @@ sources = [
  "m_gwls_ComputeCorrelationEnergy.F90",
  "m_gwls_utility.F90",
  "m_gwrdm.F90",
+ "m_gwr.F90",
  "m_chi0tk.F90",
  "m_dyson_solver.F90",
  "m_fft_prof.F90",

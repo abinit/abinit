@@ -7,7 +7,7 @@
 !! It includes testing of complex and real numbers, and all2all and gatherv
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (JB)
+!! Copyright (C) 1998-2022 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,11 +20,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      timab,time_accu
 !!
 !! SOURCE
 
@@ -127,7 +122,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (JB)
+!! Copyright (C) 1998-2022 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -140,12 +135,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!      testtransposer
-!!
-!! CHILDREN
-!!      timab,time_accu
 !!
 !! SOURCE
   subroutine test1()
@@ -209,10 +198,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
   subroutine test2()
@@ -309,10 +294,6 @@ program testTransposer
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine initVectors()
@@ -358,10 +339,6 @@ program testTransposer
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
     subroutine backAndForth()
@@ -400,7 +377,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (JB)
+!! Copyright (C) 1998-2022 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -413,12 +390,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!      testtransposer
-!!
-!! CHILDREN
-!!      timab,time_accu
 !!
 !! SOURCE
 

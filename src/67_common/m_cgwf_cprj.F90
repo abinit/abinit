@@ -6,14 +6,10 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2020 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -97,12 +93,6 @@ contains
 !!  quit= if 1, proceeds to smooth ending of the job.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -784,12 +774,6 @@ end subroutine cgwf_cprj
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband,subovl,mpi_enreg)
@@ -854,12 +838,6 @@ end subroutine mksubovl
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_cgwf_cprj,m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
@@ -922,12 +900,6 @@ end subroutine cprj_update
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_cgwf_cprj,m_vtowfk
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
@@ -983,11 +955,6 @@ end subroutine cprj_update_oneband
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 !!
@@ -1088,11 +1055,6 @@ end subroutine cprj_check
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 !!
 subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
@@ -1178,10 +1140,6 @@ end subroutine cprj_check_oneband
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 real(dp) function get_cprj_id(cprj)
@@ -1223,12 +1181,6 @@ end function get_cprj_id
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_cgwf_cprj
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 !!

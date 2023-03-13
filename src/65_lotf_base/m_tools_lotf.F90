@@ -6,7 +6,7 @@
 !!  Contains simple functions for LOTF
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MMancini)
+!! Copyright (C) 2005-2022 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,11 +44,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine  pinterp(a0,a1,ainterpoled,ndim,nitex,n)
   ! interpolator : a0 for n=0
@@ -86,10 +81,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine  pinterp_nolinear(a0,a1,ainterpoled,ndim,nitex,n)
   ! interpolator : a0 for n=0
@@ -120,11 +111,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine dlvsum(local_pe,npes,sum_local_pe,ndimve)
   !------------------------------------------------------------
@@ -151,10 +137,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
- !!
- !! CHILDREN
- !!
  !! SOURCE
  FUNCTION icf(ix,iy,iz,ic1,ic2,ic3) 
 

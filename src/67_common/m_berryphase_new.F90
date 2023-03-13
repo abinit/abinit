@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2021 ABINIT  group (MVeithen)
+!!  Copyright (C) 2003-2022 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -157,13 +153,6 @@ contains
 !! - In case of a ddk calculation, the eigenvalues are not computed.
 !! - The ddk computed by this routine should not be used to
 !!   compute the electronic dielectric tensor.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_elpolariz
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -1719,7 +1708,7 @@ end subroutine berryphase_new
 !! This routine updates E field variables
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2022 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1792,13 +1781,6 @@ end subroutine berryphase_new
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
-!!
 !! SOURCE
 
 subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
@@ -1861,7 +1843,12 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
   usecprj=1; if (psps%usepaw==0)  usecprj = 0
   my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
-  mcprj=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+  mcprj=my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol/mpi_enreg%nproc_band
+  !Just to be sure
+  if (efield.and.mpi_enreg%nproc_band/=1) then
+    message='Berry phase calculations are not designed for band parallelization!'
+    ABI_BUG(message)
+  end if
 
   ncpgr = 0
   ctocprj_choice = 1 ! no derivs
@@ -1884,7 +1871,7 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
           &   dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
           &   mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,nattyp,dtset%nband,&
           &   dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-          &   dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
+          &   dtset%nsppol,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,&
           &   dtset%typat,ucvol,dtfil%unpaw,xred,ylm,ylmgr)
      ABI_FREE(ph1d)
   else
@@ -2277,7 +2264,7 @@ end subroutine update_e_field_vars
 !! Print components of electric field, displacement field and polarization in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2299,13 +2286,6 @@ end subroutine update_e_field_vars
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_berryphase_new,m_gstate
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -2665,7 +2645,7 @@ end subroutine prtefield
 !! calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group
+!! Copyright (C) 2004-2022 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2701,13 +2681,6 @@ end subroutine prtefield
 !! TO DO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 
@@ -2783,7 +2756,7 @@ end subroutine init_e_field_vars
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2022 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2844,13 +2817,6 @@ end subroutine init_e_field_vars
 !!      but for k-points in the iBZ. Used by vtorho.f
 !!           nproc = number of cpus
 !!           nneighbour = number of neighbours for each k-point (= 6)
-!!
-!! PARENTS
-!!      m_berryphase_new
-!!
-!! CHILDREN
-!!      expibi,kpgsph,listkk,metric,pawcprj_alloc,pawcprj_getdim,qijb_kk
-!!      setsym_ylm,smpbz,symatm,timab,wrtout,xmpi_max,xmpi_sum
 !!
 !! SOURCE
 

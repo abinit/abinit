@@ -8,7 +8,7 @@
 !! 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (AM)
+!! Copyright (C) 2010-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,13 +77,6 @@ CONTAINS
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential)> = effective potential datatype with new fitted coefficients
-!!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -352,13 +345,6 @@ end subroutine opt_effpot
 !! OUTPUT
 !! eff_pot new effective potential 
 !! 
-!!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -789,11 +775,6 @@ end subroutine opt_effpotbound
 !! order_start:possible start order 
 !! order_stop: possible stop order 
 !!
-!! PARENTS
-!! opt_effpotbound
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
@@ -882,13 +863,6 @@ end subroutine opt_getHOforterm
 !! ncombi: total number of combinations 
 !! ncombi_order: array with number of combinations per order
 !! 
-!!
-!! PARENTS
-!!      m_opt_effpot
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -984,12 +958,6 @@ end subroutine opt_getCombisforterm
 !! OUTPUT
 !! eff_pot new effective potential 
 !! 
-!!
-!! PARENTS
-!! multibinit
-!!
-!! CHILDREN
-!! opt_effpot 
 !!
 !! SOURCE
 
@@ -1224,12 +1192,6 @@ end subroutine opt_getHoTerms
 !! OUTPUT
 !! term<polynomial_coeff_type>: only the displacement part of original term 
 !!
-!! PARENTS
-!! opt_effpotbound
-!!
-!! CHILDREN
-!! m_polynomial_coeff.F90/polynomial_coeff_init 
-!!
 !! SOURCE
 
 subroutine opt_filterdisp(term,nterm_of_term)
@@ -1312,13 +1274,6 @@ end subroutine opt_filterdisp
 !! OUTPUT
 !! terms<polynomial_coeff_type>: list with original terms in effective
 !!                               potential + HO even strain terms
-!!
-!! PARENTS
-!!      m_opt_effpot
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -1407,13 +1362,6 @@ end subroutine opt_getHOstrain
 !! OUTPUT
 !! terms<polynomial_coeff_type>: list with original terms in effective
 !!                               potential + HO even disp terms
-!!
-!! PARENTS
-!!      m_opt_effpot
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -1596,13 +1544,6 @@ end subroutine opt_getHOcrossdisp
 !! 
 !! OUTPUT
 !! terms<polynomial_coeff_type>: list single displacement polynomial_coeffs
-!!
-!! PARENTS
-!!      m_opt_effpot
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 
@@ -1863,13 +1804,6 @@ end subroutine opt_getSingleDispTerms
 !! OUTPUT
 !! terms_out<polynomial_coeff_out>: output high order even terms 
 !! ncoeff: number of coefficients
-!!
-!! PARENTS
-!!      m_opt_effpot
-!!
-!! CHILDREN
-!!      polynomial_coeff_getname,polynomial_coeff_init
-!!      polynomial_coeff_list_free,polynomial_coeff_setname,wrtout
 !!
 !! SOURCE
 

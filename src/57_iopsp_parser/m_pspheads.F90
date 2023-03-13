@@ -6,14 +6,10 @@
 !!  Functions used to read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -76,12 +72,6 @@ contains
 !!  pspheads(npsp)=<type pspheader_type>=all the important information from the
 !!  pseudopotential file headers, as well as the psp file names
 !!  ecut_tmp(3,2,npsp)= possible ecut values as read in psp files
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -547,12 +537,6 @@ end subroutine inpspheads
 !!   pseudopotential file headers, as well as the psp file names. On one processor at input,
 !!   on all processors at output
 !!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
-!!
 !! SOURCE
 
 subroutine pspheads_comm(npsp,pspheads,test_paw)
@@ -718,12 +702,6 @@ end subroutine pspheads_comm
 !! OUTPUT
 !! pspheads data structure is filled
 !!
-!! PARENTS
-!!      m_pspheads,m_pspini
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
-!!
 !! SOURCE
 
 subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
@@ -805,12 +783,6 @@ end subroutine pawpsxml2ab
 !!  nproj_l= number of projectors for each channel
 !!  nprojso_l= number of projectors for each channel for SO correction projectors
 !!
-!! PARENTS
-!!      m_pspheads
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
-!!
 !! SOURCE
 
 subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
@@ -882,12 +854,6 @@ end subroutine upfheader2abi
 !!   FIXME: extend to more functionals with libxc
 !!   Could be included in separate module, eg read_upf_pwscf or funct_pwscf
 !!   Left without defs_basis or calls to abinit routines ON PURPOSE
-!!
-!! PARENTS
-!!      m_pspheads,m_upf2abinit
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 

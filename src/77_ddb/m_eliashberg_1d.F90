@@ -6,14 +6,10 @@
 !!  Solve the Eliashberg equations in the isotropic case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MVer)
+!!  Copyright (C) 2008-2022 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -62,11 +58,6 @@ contains
 !!  natom = number of atoms
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  na2f = number of frequency points for alpha^2F function
@@ -251,11 +242,6 @@ end subroutine eliashberg_1d
 !! SIDE EFFECTS
 !!   delta_1d = imaginary gap function as a function of frequency changed
 !!
-!! PARENTS
-!!      m_eliashberg_1d
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -368,11 +354,6 @@ end subroutine eli_app_m_1d
 !! SIDE EFFECTS
 !!   delta_1d = imaginary gap function as a function of frequency
 !!
-!! PARENTS
-!!      m_eliashberg_1d
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine eli_diag_m_1d (delta_1d,lambda_1d,maxeigval,mustar,nmatsu,tc,z_1d)
@@ -472,11 +453,6 @@ end subroutine eli_diag_m_1d
 !! OUTPUT
 !!   lambda_1d = coupling constant as a function of frequency
 !!
-!! PARENTS
-!!      m_eliashberg_1d
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  lambda is used at points which are differences of Matsubara freqs,
 !!  and hence is tabulated on points going through 0.
@@ -544,10 +520,6 @@ end subroutine eli_lambda_1d
 !!
 !! SIDE EFFECTS
 !!   delta_1d = imaginary gap function as a function of frequency
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -672,11 +644,6 @@ end subroutine eli_m_iter_1d
 !!
 !! OUTPUT
 !!   z_1d = renormalizing Z as a function of frequency
-!!
-!! PARENTS
-!!      m_eliashberg_1d
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  Because Z only depends on lambda(n-n'), and lambda(omega)

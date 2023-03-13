@@ -7,14 +7,10 @@
 !!  used for FFT parallelization with MPI and n2 plane sharing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (FD,MT)
+!! Copyright (C) 2011-2022 ABINIT group (FD,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -127,12 +123,6 @@ CONTAINS !===========================================================
 !! SIDE EFFECTS
 !!  distribfft = instance of distribfft_type to initialize
 !!  Update of "fft distrib" tabs accordingly to the fft parallelisation
-!!
-!! PARENTS
-!!      m_fft,m_fft_prof,m_mpi_setup,m_qparticles,m_scfcv_core,m_vtorhorec
-!!      m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -252,14 +242,6 @@ end subroutine init_distribfft
 !!  distribfft = instance of t_distribfft to initialize
 !!  Update of "fft distrib" tabs accordingly to the fft parallelisation
 !!
-!! PARENTS
-!!      cut3d,m_atm2fft,m_bethe_salpeter,m_cut3d,m_dvdb,m_eph_driver,m_fft_prof
-!!      m_gsphere,m_ioarr,m_ksdiago,m_kxc,m_multipoles,m_paw_dfpt,m_paw_nhat
-!!      m_ppmodel,m_prcref,m_scfcv_core,m_screening,m_screening_driver
-!!      m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfk,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_distribfft_seq(distribfft_arg,grid_type,n2,n3,type_four)
@@ -378,12 +360,6 @@ end subroutine init_distribfft_seq
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      m_atm2fft,m_cut3d,m_fft,m_mpinfo,m_multipoles,m_paw_dfpt,m_paw_nhat
-!!      m_qparticles,m_scfcv_core,m_vtorhorec,m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_distribfft(distribfft_arg)
@@ -455,11 +431,6 @@ end subroutine destroy_distribfft
 !!
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      m_mpinfo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

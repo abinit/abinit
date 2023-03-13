@@ -7,14 +7,10 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -93,11 +89,6 @@ contains
 !!  npsp=number of pseudopotentials
 !!  pseudo_paths(npsp): List of paths to pseudopotential files as read from input file.
 !!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -558,6 +549,14 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  end do
 
+ dtsets(:)%diago_apply_block_sliced=1
+ do idtset=1,ndtset_alloc
+    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
+    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
+ end do
+
+
 !GPU information
  use_gpu_cuda=0
  dtsets(:)%use_gpu_cuda=0
@@ -574,7 +573,17 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
    if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
+end do
+
+ dtsets(:)%use_nvtx=0
+#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+ do idtset=1,ndtset_alloc
+   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
+   if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
  end do
+#endif
+
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
@@ -615,6 +624,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
    ABI_MALLOC(dtsets(idtset)%kberry,(3,20))
+   ABI_MALLOC(dtsets(idtset)%lambsig,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lexexch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%ldaminushalf,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lpawu,(mxntypat))
@@ -686,11 +696,6 @@ end subroutine invars0
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
 !!   some of which are initialized here (see invars1.f for more details on the initialized records)
 !!  mx<ab_dimensions>=datatype storing the maximal dimensions. Partly initialized in input.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -905,11 +910,6 @@ end subroutine invars1m
 !!  dtset=<type datafiles_type>contains all input variables for one dataset,
 !!   some of which are given a default value here.
 !!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine indefo1(dtset)
@@ -1116,11 +1116,6 @@ end subroutine indefo1
 !!      mband_upper, occopt, fband, cellcharge
 !!
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
-!!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1965,7 +1960,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usepawu=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usepawu',tread,'INT')
  if(tread==1) dtset%usepawu=intarr(1)
- if ( dtset%usedmft > 0 .and. dtset%usepawu >= 0 ) dtset%usepawu = 1
+!if(dtset%usedmft>0.and.(dtset%usepawu==14.or.dtset%usepawu==4)) then
+!   dtset%usepawu=14
+!else if(dtset%usedmft>0.and.dtset%usepawu>=0) then
+!   dtset%usepawu=1
+!endif
+
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
@@ -2040,7 +2040,7 @@ end subroutine invars1
 !!
 !! FUNCTION
 !! Initialisation phase: default values for most input variables
-!! (some are initialized earlier, see indefo1 routine, or even 
+!! (some are initialized earlier, see indefo1 routine, or even
 !!  at the definition of the input variables (m_dtset.F90))
 !!
 !! INPUTS
@@ -2058,11 +2058,6 @@ end subroutine invars1
 !!
 !! NOTE that Scalars and static arrays can be initialized directly at the level of the datatype declaration
 !! provided the value does not depend on runtime conditions.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2132,7 +2127,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      else
        dtsets(idtset)%use_gpu_cuda=1
      end if
-   end if
+  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
@@ -2233,6 +2228,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_check =0
    dtsets(idtset)%dmftctqmc_correl=0
    dtsets(idtset)%dmftctqmc_grnns =0
+   dtsets(idtset)%dmftctqmc_config =0
    dtsets(idtset)%dmftctqmc_meas  =1
    dtsets(idtset)%dmftctqmc_mrka  =0
    dtsets(idtset)%dmftctqmc_mov   =0
@@ -2245,17 +2241,18 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
    dtsets(idtset)%dosdeltae=zero
    dtsets(idtset)%dtion=100.0_dp
-   dtsets(idtset)%d3e_pert1_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert1_dir(1:3)=0
+   dtsets(idtset)%dtele=0.1_dp
+   dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert1_dir(1:3)=1
    dtsets(idtset)%d3e_pert1_elfd=0
    dtsets(idtset)%d3e_pert1_phon=0
-   dtsets(idtset)%d3e_pert2_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert2_dir(1:3)=0
+   dtsets(idtset)%d3e_pert2_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert2_dir(1:3)=1
    dtsets(idtset)%d3e_pert2_elfd=0
    dtsets(idtset)%d3e_pert2_phon=0
    dtsets(idtset)%d3e_pert2_strs=0
-   dtsets(idtset)%d3e_pert3_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert3_dir(1:3)=0
+   dtsets(idtset)%d3e_pert3_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert3_dir(1:3)=1
    dtsets(idtset)%d3e_pert3_elfd=0
    dtsets(idtset)%d3e_pert3_phon=0
 !  E
@@ -2395,8 +2392,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%lotf_nneigx=40
    dtsets(idtset)%lotf_version=2
 #endif
+   dtsets(idtset)%lambsig(:) = zero
    dtsets(idtset)%lw_qdrpl=0
    dtsets(idtset)%lw_flexo=0
+   dtsets(idtset)%lw_natopt=0
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
@@ -2550,6 +2549,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
+   dtsets(idtset)%prtocc=0
    dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
@@ -2578,9 +2578,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
    dtsets(idtset)%rfasr=0
-   dtsets(idtset)%rfatpol(1:2)=1
+   dtsets(idtset)%rfatpol(1:2)=-1
    dtsets(idtset)%rfddk=0
-   dtsets(idtset)%rfdir(1:3)=0
+   dtsets(idtset)%rfdir(1:3)=1
    dtsets(idtset)%rfelfd=0
    dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
@@ -2590,8 +2590,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfuser=0
    dtsets(idtset)%rf2_dkdk=0
    dtsets(idtset)%rf2_dkde=0
-   dtsets(idtset)%rf2_pert1_dir(1:3)=0
-   dtsets(idtset)%rf2_pert2_dir(1:3)=0
+   dtsets(idtset)%rf2_pert1_dir(1:3)=1
+   dtsets(idtset)%rf2_pert2_dir(1:3)=1
    dtsets(idtset)%rhoqpmix=one
 !  S
    dtsets(idtset)%shiftk_orig(:,:)=one
@@ -2610,8 +2610,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
 !  T
+   dtsets(idtset)%td_exp_order=4
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
+   dtsets(idtset)%td_scnmax=3
+   dtsets(idtset)%td_prtstr=10
+   dtsets(idtset)%td_restart=0
+   dtsets(idtset)%td_propagator=1
+   dtsets(idtset)%td_scthr=1e-7_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30

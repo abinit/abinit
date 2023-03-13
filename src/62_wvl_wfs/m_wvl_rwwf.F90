@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DC)
+!!  Copyright (C) 1998-2022 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -70,12 +66,6 @@ contains
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      writemywaves,writeonewave,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -193,12 +183,6 @@ end subroutine wvl_read
 !!
 !! SIDE EFFECTS
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      writemywaves,writeonewave,wrtout,xred2xcart
 !!
 !! SOURCE
 

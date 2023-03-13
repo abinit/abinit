@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (hexu)
+!! Copyright (C) 2010-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,11 +116,6 @@ CONTAINS
 !! val= data to be pushed
 !! OUTPUT
 !! real_array<type(real_array_type)()> = real_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine real_array_type_push(self, val)
 
@@ -155,11 +150,6 @@ end subroutine real_array_type_push
 !! self= real_array_type object
 !! OUTPUT
 !! real_array<type(real_array_type)()> = real_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine real_array_type_finalize(self)
 
@@ -184,11 +174,6 @@ end subroutine real_array_type_finalize
 !! val= data to be pushed
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int_array_type_push(self, val)
 
@@ -302,11 +287,6 @@ end subroutine int_array_type_sort
 !! self= int_array_type object
 !! OUTPUT
 !! int_array<type(int_array_type)()> = int_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int_array_type_finalize(self)
 
@@ -333,11 +313,6 @@ end subroutine int_array_type_finalize
 !! val= data to be pushed
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int2d_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int2d_array_type_push(self, val)
 
@@ -375,11 +350,6 @@ end subroutine int2d_array_type_push
 !! val= data to be pushed
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int2d_array_type data
-!! PARENTS
-!!      m_dynarray
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine int2d_array_type_push_unique(self, val, position)
 
@@ -417,11 +387,6 @@ subroutine int2d_array_type_push_unique(self, val, position)
 !! self= int2d_array_type object
 !! OUTPUT
 !! int_array<type(int2d_array_type)()> = int2d_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int2d_array_type_finalize(self)
 

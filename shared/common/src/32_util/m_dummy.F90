@@ -6,7 +6,7 @@
 !!  Dummy module, to detect unused values
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2021 ABINIT group (XG)
+!!  Copyright (C) 2017-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,11 +19,6 @@
 !!
 !! SIDE EFFECTS
 !!  used_arg = used argument
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -48,7 +43,7 @@
 !!  Dummy subroutine, to test unused arguments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2021 ABINIT group (XG)
+!!  Copyright (C) 2017-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,11 +55,6 @@
 
 !! SIDE EFFECTS
 !!  used_arg = used argument
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -98,7 +88,7 @@
 !!  Dummy subroutine, to detect when the calling subroutine attributes to one variable results from two different arguments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2021 ABINIT group (XG)
+!!  Copyright (C) 2017-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -112,11 +102,6 @@
 !!
 !! SIDE EFFECTS
 !!  used_arg = used argument
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -145,7 +130,7 @@
 !!  Dummy subroutine
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2021 ABINIT group (XG)
+!!  Copyright (C) 2017-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -155,11 +140,6 @@
 !!
 !! OUTPUT
 !!  dummy_out1 = first output value
-!!
-!! PARENTS
-!!      dummy_tests
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

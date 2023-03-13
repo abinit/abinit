@@ -6,15 +6,11 @@
 !!  This module provides helper functions for MPI-IO operations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG)
+!! Copyright (C) 2009-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -71,12 +67,6 @@ CONTAINS
 !! FUNCTION
 !!   Empty placeholder.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mpi_file_read,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      xmpi_max,xmpi_min,xmpio_create_fsubarray_4d
-!!
 !! SOURCE
 
 subroutine no_mpiotk()
@@ -111,13 +101,6 @@ end subroutine no_mpiotk
 !!  my_starts(:,:)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
 !!    and therefore bufsz has not been read.
-!!
-!! PARENTS
-!!      m_mpiotk
-!!
-!! CHILDREN
-!!      mpi_file_read,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      xmpi_max,xmpi_min,xmpio_create_fsubarray_4d
 !!
 !! SOURCE
 
@@ -231,13 +214,6 @@ end subroutine setup_fsuba_dp2D
 !!  buffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
 !!    and therefore bufsz has not been read.
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      mpi_file_read,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      xmpi_max,xmpi_min,xmpio_create_fsubarray_4d
 !!
 !! SOURCE
 
@@ -372,13 +348,6 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
 !!    and therefore bufsz has not been written.
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      mpi_file_read,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      xmpi_max,xmpi_min,xmpio_create_fsubarray_4d
-!!
 !! SOURCE
 
 subroutine mpiotk_write_fsuba_dp2D(fh,offset,sizes,subsizes,starts,bufsz,buffer,chunk_bsize,sc_mode,comm,ierr)
@@ -509,13 +478,6 @@ end subroutine mpiotk_write_fsuba_dp2D
 !!  cbuffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
 !!    and therefore bufsz has not been read.
-!!
-!! PARENTS
-!!      m_io_screening
-!!
-!! CHILDREN
-!!      mpi_file_read,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      xmpi_max,xmpi_min,xmpio_create_fsubarray_4d
 !!
 !! SOURCE
 
@@ -705,13 +667,6 @@ end subroutine mpiotk_read_fsuba_dpc3D
 !!  cbuffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
 !!    and therefore bufsz has not been read.
-!!
-!! PARENTS
-!!      m_io_screening
-!!
-!! CHILDREN
-!!      mpi_file_read,mpi_file_read_all,mpi_file_set_view,mpi_type_free
-!!      xmpi_max,xmpi_min,xmpio_create_fsubarray_4d
 !!
 !! SOURCE
 

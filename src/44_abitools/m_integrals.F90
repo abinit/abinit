@@ -6,14 +6,10 @@
 !!  Helper functions to compute integrals
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (Camilo Espejo)
+!!  Copyright (C) 2010-2022 ABINIT group (Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -67,12 +63,6 @@ contains
 !!
 !! NOTES
 !!  This routine is a modified version of /src/65_psp/psp7lo.F90
-!!
-!! PARENTS
-!!      m_xc_vdw,test_radsintr
-!!
-!! CHILDREN
-!!      simpson_int
 !!
 !! SOURCE
 

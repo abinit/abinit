@@ -6,16 +6,12 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2002-2007 Stefan Goedecker, CEA Grenoble
-!!  Copyright (C) 2014-2021 ABINIT group (XG)
+!!  Copyright (C) 2014-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -114,11 +110,6 @@ contains
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft,m_sg2002
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -399,11 +390,6 @@ end subroutine sg2002_back
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft,m_sg2002
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sg2002_forw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,option,zr,zf,comm_fft)
@@ -673,11 +659,6 @@ end subroutine sg2002_forw
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1013,11 +994,6 @@ end subroutine sg2002_mpiback_wf
 !!  to a value so small, that not even a single one dimensional transform
 !!  can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sg2002_mpiforw_wf(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
@@ -1325,11 +1301,6 @@ end subroutine sg2002_mpiforw_wf
 !! TODO
 !!  Write simplified API for sequential version.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sg2002_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
@@ -1441,11 +1412,6 @@ end subroutine sg2002_mpifourdp
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1860,11 +1826,6 @@ end subroutine sg2002_applypot
 !!   slow and less dramatic decrease of performance. If NCACHE is set
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2298,11 +2259,6 @@ end subroutine sg2002_applypot_many
 !!   to a value so small, that not even a single one dimensional transform
 !!   can be done in the workarray zw, the program stops with an error message.
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sg2002_accrho(icplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
@@ -2552,11 +2508,6 @@ end subroutine sg2002_accrho
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_sg2002
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ctrig(n,trig,after,before,now,isign,ic)
@@ -2658,11 +2609,6 @@ end subroutine ctrig
 !!
 !! OUTPUT
 !!   zout
-!!
-!! PARENTS
-!!      m_sg2002
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

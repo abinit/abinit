@@ -4,14 +4,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (CMartins, FJ, MT, XG)
+!!  Copyright (C) 2013-2022 ABINIT group (CMartins, FJ, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -88,12 +84,6 @@ contains
 !!   * no "my_nspinor"
 !!   * no restriction to the value of istwfk_bz (but must be tested in all case)
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
-!!
-!! PARENTS
-!!      m_fock_getghc,m_forstr,m_getghc
-!!
-!! CHILDREN
-!!      dotprod_g
 !!
 !! SOURCE
 
@@ -800,12 +790,6 @@ end subroutine fock_getghc
 !! fock%fockACE(ikpt,isppol)%xi
 !! if optfor=1, fock%fock_common%forces
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_g
-!!
 !! SOURCE
 
 subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
@@ -1207,12 +1191,6 @@ end subroutine fock2ACE
 !!   * no "my_nspinor"
 !!   * no restriction to the value of istwfk_bz (but must be tested in all case)
 !!   * all the data for the occupied states (cgocc_bz) are the same as those for the current states (cg)
-!!
-!! PARENTS
-!!      m_getghc
-!!
-!! CHILDREN
-!!      dotprod_g
 !!
 !! SOURCE
 

@@ -35,8 +35,6 @@
   getwfk4   2
     nqpt4   1
      qpt4   0.0d0 0.0d0 0.0d0
- rfatpol4   1 2
-   rfdir4   1 1 1
   rfelfd4   3
   rfphon4   1
   tolwfr4   1.0d-16
@@ -56,8 +54,6 @@
                   # for comparison of portability accross platforms
   prtvol6   10
      qpt6   0.25d0 0.25d0 0.25d0
- rfatpol6   1 2
-   rfdir6   1 1 1
   rfphon6   1
   tolwfr6   1.0d-16
 
@@ -76,8 +72,6 @@
                   # for comparison of portability accross platforms
   prtvol8   10
      qpt8   0.25d0 0.5d0 0.5d0
- rfatpol8   1 2
-   rfdir8   1 1 1
   rfphon8   1
   tolwfr8   1.0d-16
 
@@ -96,8 +90,6 @@
   get1wf10  4
     nqpt10  1
      qpt10  0.0d0 0.0d0 0.0d0
- rfatpol10  1 2
-   rfdir10  1 1 1
   rfelfd10  3
   rfphon10  1
   tolwfr10  1.0d-16

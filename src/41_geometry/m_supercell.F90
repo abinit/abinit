@@ -9,7 +9,7 @@
 !! as well as the central init_supercell
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (MJV, DJA)
+!! Copyright (C) 2010-2022 ABINIT group (MJV, DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,11 +106,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! scell = supercell structure to be initialized
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
@@ -196,11 +191,6 @@ end subroutine init_supercell_for_qpt
 !!
 !! OUTPUT
 !! scell = supercell structure to be initialized
-!!
-!! PARENTS
-!!      m_effective_potential,m_fit_polynomial_coeff,m_phonons,m_supercell
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -300,11 +290,6 @@ end subroutine init_supercell
 !! OUTPUT
 !! scell = supercell structure: typat, xcart and so on will be updated
 !!
-!! PARENTS
-!!      m_supercell
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine order_supercell_typat (scell)
@@ -356,11 +341,6 @@ end subroutine order_supercell_typat
 !!
 !! OUTPUT
 !! scell = supercell structure: xcart will be updated with phonon displacement
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -433,11 +413,6 @@ end subroutine freeze_displ_supercell
 !! OUTPUT
 !! printing to file
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
@@ -493,11 +468,6 @@ end subroutine prt_supercell_for_qpt
 !!
 !! OUTPUT
 !! printing to file
-!!
-!! PARENTS
-!!      m_phonons,m_supercell
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -593,11 +563,6 @@ end subroutine prt_supercell
 !! OUTPUT
 !! scell = supercell structure with data to be output
 !!
-!! PARENTS
-!!      m_effective_potential,m_supercell
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine copy_supercell (scell_in,scell_copy)
@@ -683,11 +648,6 @@ end subroutine getPBCIndexes_supercell
 !! min = minimun of the range
 !! max = maximum of the range
 !!
-!! PARENTS
-!!      m_effective_potential,m_polynomial_coeff
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine findBound_supercell(min,max,ncell)
@@ -765,11 +725,6 @@ end function distance_supercell
 !! OUTPUT
 !! scell = supercell structure with data to be output
 !!
-!! PARENTS
-!!      m_effective_potential,m_fit_polynomial_coeff,m_phonons,m_supercell
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_supercell (scell)
@@ -827,11 +782,6 @@ end subroutine destroy_supercell
 !!  magv_sc magnetic ordering of atoms in supercell
 !!  xred_sc relative position of atoms in supercell
 !!  rprimd_sc unit cell dimensions of supercell
-!!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

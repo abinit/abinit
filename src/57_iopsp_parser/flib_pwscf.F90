@@ -8,12 +8,10 @@
 !!
 !! COPYRIGHT
 !   Copyright (C) 2001-2004 Carlo Cavazzoni and PWSCF group
-!!  Copyright (C) 2008-2021 ABINIT group (MVer)
+!!  Copyright (C) 2008-2022 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -39,10 +37,6 @@ module flib_pwscf
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !-----------------------------------------------------------------------
@@ -90,10 +84,6 @@ END FUNCTION matches
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !-----------------------------------------------------------------------
 FUNCTION capital( in_char )
@@ -139,10 +129,6 @@ END FUNCTION capital
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !
 !-----------------------------------------------------------------------
@@ -186,11 +172,6 @@ END FUNCTION lowercase
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      functionals_pwscf,m_read_upf_pwscf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

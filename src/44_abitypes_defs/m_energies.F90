@@ -8,14 +8,10 @@
 !!  to store energies from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MT, DC)
+!! Copyright (C) 2008-2022 ABINIT group (MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -219,12 +215,6 @@ CONTAINS !===========================================================
 !! OUTPUT
 !!   energies <type(energies_type)>=values to initialise
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_electronpositron,m_gstate,m_positron,m_results_gs
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine energies_init(energies)
@@ -295,11 +285,6 @@ end subroutine energies_init
 !!
 !! OUTPUT
 !!   energies_out <type(energies_type)>=output values
-!!
-!! PARENTS
-!!      m_afterscfloop,m_electronpositron,m_positron,m_results_gs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -377,11 +362,6 @@ end subroutine energies_copy
 !! SIDE EFFECTS
 !!   energies <type(energies_type)>=energies stored in a datastructure
 !!   energies_array=energies stored in a single array
-!!
-!! PARENTS
-!!      m_results_img
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -511,11 +491,6 @@ end subroutine energies_to_array
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_common,m_entropyDMFT
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine energies_eval_eint(energies,dtset,usepaw,optdc,eint,eintdc)
@@ -589,7 +564,7 @@ end subroutine energies_to_array
    eintdc = eintdc + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd + energies%e_constrained_dft
    if (positron) eintdc=eintdc-energies%edc_electronpositron &
 &   +energies%e0_electronpositron+energies%e_electronpositron
-   if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eintdc=eintdc+energies%e_extfpmd+energies%edc_extfpmd
+   if(abs(energies%e_extfpmd)>tiny(0.0_dp)) eintdc=eintdc+energies%edc_extfpmd
  end if
 
 end subroutine energies_eval_eint
@@ -609,11 +584,6 @@ end subroutine energies_eval_eint
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_results_gs
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

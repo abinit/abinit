@@ -6,16 +6,12 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (JB)
+!!  Copyright (C) 2014-2022 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -53,7 +49,6 @@ module m_scfcv
  use m_pawfgr,           only : pawfgr_type
  use m_paw_dmft,         only : paw_dmft_type
  use m_paw_uj,           only : macro_uj_type
- use m_orbmag,           only : orbmag_type
  use m_data4entropyDMFT, only : data4entropyDMFT_t, data4entropyDMFT_init, data4entropyDMFT_destroy
  use m_scfcv_core,       only : scfcv_core
 
@@ -76,7 +71,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (JB)
+!!  Copyright (C) 2014-2022 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -101,7 +96,6 @@ module m_scfcv
    type(datafiles_type),pointer :: dtfil => null()
    type(dataset_type),pointer :: dtset => null()
    type(efield_type),pointer :: dtefield => null()
-   type(orbmag_type),pointer :: dtorbmag => null()
    type(electronpositron_type),pointer :: electronpositron => null()
    type(hdr_type),pointer :: hdr => null()
    type(extfpmd_type),pointer :: extfpmd => null()
@@ -173,16 +167,10 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      scfcv_core
-!!
 !! SOURCE
 
 subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
-&  dmatpawu,dtefield,dtfil,dtorbmag,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
+&  dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
 &  indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &  nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &  pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -201,7 +189,6 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  type(datafiles_type),intent(in),target :: dtfil
  type(dataset_type),intent(in),target :: dtset
  type(efield_type),intent(in),target :: dtefield
- type(orbmag_type),intent(in),target :: dtorbmag
 ! type(electronpositron_type),pointer :: electronpositron
  type(hdr_type),intent(in),target :: hdr
  type(extfpmd_type),intent(in),pointer :: extfpmd
@@ -302,7 +289,6 @@ subroutine scfcv_init(this,atindx,atindx1,cg,cprj,cpus,&
  this%cprj=>cprj
  this%dmatpawu=>dmatpawu
  this%dtefield=>dtefield
- this%dtorbmag=>dtorbmag
  this%dtfil=>dtfil
  this%dtpawuj=>dtpawuj
  this%eigen=>eigen
@@ -373,12 +359,6 @@ end subroutine scfcv_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_gstate,m_mover_effpot
-!!
-!! CHILDREN
-!!      scfcv_core
-!!
 !! SOURCE
 
 subroutine scfcv_destroy(this)
@@ -409,7 +389,6 @@ type(scfcv_t), intent(inout) :: this
  this%dtfil => null()
  this%dtset => null()
  this%dtefield => null()
- this%dtorbmag => null()
  this%electronpositron => null()
  this%hdr => null()
  this%extfpmd => null()
@@ -477,12 +456,6 @@ end subroutine scfcv_destroy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstate,m_mover
-!!
-!! CHILDREN
-!!      scfcv_core
-!!
 !! SOURCE
 
 subroutine scfcv_run(this, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
@@ -543,10 +516,6 @@ end subroutine scfcv_run
 !!!!
 !!!! NOTES
 !!!!
-!!!! PARENTS
-!!!!
-!!!! CHILDREN
-!!!!
 !!!! SOURCE
 !!
 !!subroutine scfcv_reformatWFK(this,rhog, rhor, rprimd, xred, xred_old)
@@ -599,12 +568,6 @@ end subroutine scfcv_run
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
-!!      scfcv_core
 !!
 !! SOURCE
 
@@ -682,12 +645,6 @@ end subroutine scfcv_runWEntropyDMFT
 !! NOTES
 !!  Wrapper to scfcv to avoid circular dependencies ...
 !!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
-!!      scfcv_core
-!!
 !! SOURCE
 
 subroutine scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
@@ -703,7 +660,7 @@ subroutine scfcv_scfcv(this, electronpositron, itimes, rhog, rhor, rprimd, xred,
  integer , intent(out)   :: conv_retcode
 
    call scfcv_core(this%atindx,this%atindx1,this%cg,this%cprj,this%cpus,this%dmatpawu,this%dtefield,this%dtfil,&
-    this%dtorbmag,this%dtpawuj,&
+    this%dtpawuj,&
     this%dtset,this%ecore,this%eigen,electronpositron,this%fatvshift,this%hdr,this%extfpmd,this%indsym,&
     this%initialized,this%irrzon,itimes,this%kg,this%mcg,this%mcprj,this%mpi_enreg,this%my_natom,this%nattyp,this%ndtpawuj,&
     this%nfftf,this%npwarr,&

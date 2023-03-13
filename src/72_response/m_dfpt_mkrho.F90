@@ -6,14 +6,10 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -108,12 +104,6 @@ contains
 !!  rhor1(cplex*nfft,nspden)=electron density in r space
 !!   (if spin polarized, array contains total density in first half and
 !!    spin-up density in second half)
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -601,12 +591,6 @@ end subroutine dfpt_mkrho
 !!  perform Fourier transforms, and to treat separately the
 !!  two spinorial components of the wavefunction.
 !!  Was part of dfpt_vtowfk before.
-!!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 

@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2021 ABINIT group (BVT)
+!!  Copyright (C) 2015-2022 ABINIT group (BVT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -105,11 +101,6 @@ contains
 !!  DFT-D3(BJ) S. Grimme, S. Ehrlich and L. Goerigk
 !!  Effect of the damping function in dispersion corrected density functional theory
 !!  Comput. Chem. 32, 1456 (2011) [[cite:Grimme2011]]
-!!
-!! PARENTS
-!!      m_respfn_driver,m_setvtr,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -260,7 +251,12 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  integer,parameter :: voigt1(6)=(/1,2,3,2,1,1/),voigt2(6)=(/1,2,3,3,3,2/)
  real(dp),allocatable :: cn(:),cfgrad_no_c(:,:,:,:)
  real(dp),allocatable :: dcn(:,:,:),dcn_cart(:,:,:),dc6ri(:,:),dc6rj(:,:),dc9ijri(:,:),dc9ijrj(:,:)
- real(dp),allocatable:: d2cn(:,:,:,:,:,:)
+ !real(dp),allocatable:: d2cn(:,:,:,:,:,:)
+ real(dp),allocatable:: d2cn_iii(:,:,:,:)
+ real(dp),allocatable:: d2cn_jji(:,:,:,:,:)
+ real(dp),allocatable:: d2cn_iji(:,:,:,:,:)
+ real(dp),allocatable:: d2cn_jii(:,:,:,:,:)
+ real(dp),allocatable:: d2cn_tmp(:)
  real(dp),allocatable :: d2c6ri(:,:),d2c6rj(:,:),d2c6rirj(:,:)
  real(dp),allocatable:: elt_cn(:,:,:),e3bt_ij(:,:),e3bt_jk(:,:),e3bt_ki(:,:),e_no_c(:,:)
  real(dp),allocatable:: e_alpha1(:),e_alpha2(:),e_alpha3(:),e_alpha4(:)
@@ -484,7 +480,12 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_MALLOC(dcn,(3,natom,natom))
  ABI_MALLOC(dcn_cart,(3,natom,natom))
  ABI_MALLOC(str_dcn,(6,natom))
- ABI_MALLOC_OR_DIE(d2cn, (2,3,natom,3,natom,natom), ierr)
+! ABI_MALLOC_OR_DIE(d2cn, (2,3,natom,3,natom,natom), ierr)
+ ABI_MALLOC_OR_DIE(d2cn_iii, (2,3,3,natom), ierr)
+ ABI_MALLOC_OR_DIE(d2cn_jji, (2,3,3,natom,natom), ierr)
+ ABI_MALLOC_OR_DIE(d2cn_iji, (2,3,3,natom,natom), ierr)
+ ABI_MALLOC_OR_DIE(d2cn_jii, (2,3,3,natom,natom), ierr)
+ ABI_MALLOC(d2cn_tmp, (2))
  ABI_MALLOC(fdcn,(2,3,natom,natom))
  ABI_MALLOC(cfdcn,(2,3,natom,natom))
  ABI_MALLOC(elt_cn,(6+3*natom,6,natom))
@@ -494,7 +495,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  cn = zero
 ! Initializing the derivative of the computed quantities to zero (if required)
  dcn = zero ; str_dcn = zero
- d2cn = zero ;fdcn = zero; cfdcn = zero
+ d2cn_iii = zero
+ d2cn_jji = zero
+ d2cn_iji = zero
+ d2cn_jii = zero
+ fdcn = zero; cfdcn = zero
  elt_cn = zero ; dcn_cart = zero
 
  re_arg = zero ; im_arg = zero
@@ -600,30 +605,30 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
                        do alpha=1,3
                          if (ia/=ja) then
                                          ! ka = ia ; la = ia
-                           d2cn(1,alpha,ia,:,ia,ia) = d2cn(1,alpha,ia,:,ia,ia)+&
+                           d2cn_iii(1,alpha,:,ia) = d2cn_iii(1,alpha,:,ia)+&
 &                           (hess*rcart2(alpha,:)+grad*mcart(alpha,:))
                                          ! ka = ja ; la = ja
-                           d2cn(1,alpha,ja,:,ja,ia) = d2cn(1,alpha,ja,:,ja,ia)+&
+                           d2cn_jji(1,alpha,:,ja,ia) = d2cn_jji(1,alpha,:,ja,ia)+&
 &                           (hess*rcart2(alpha,:)+grad*mcart(alpha,:))
                            if (abs(re_arg)>tol12) then
                                             ! ka = ia ; la = ja
-                             d2cn(1,alpha,ia,:,ja,ia) = d2cn(1,alpha,ia,:,ja,ia)-&
+                             d2cn_iji(1,alpha,:,ja,ia) = d2cn_iji(1,alpha,:,ja,ia)-&
 &                             (hess*rcart2(alpha,:)+grad*mcart(alpha,:))*re_arg
                                             ! ka = ja ; la = ia
-                             d2cn(1,alpha,ja,:,ia,ia) = d2cn(1,alpha,ja,:,ia,ia)-&
+                             d2cn_jii(1,alpha,:,ja,ia) = d2cn_jii(1,alpha,:,ja,ia)-&
 &                             (hess*rcart2(alpha,:)+grad*mcart(alpha,:))*re_arg
                            end if
                            if (abs(im_arg)>tol12) then
                                             ! ka = ia ; la = ja
-                             d2cn(2,alpha,ia,:,ja,ia) = d2cn(2,alpha,ia,:,ja,ia)-&
+                             d2cn_iji(2,alpha,:,ja,ia) = d2cn_iji(2,alpha,:,ja,ia)-&
 &                             (hess*rcart2(alpha,:)+grad*mcart(alpha,:))*im_arg
                                             ! ka = ja ; la = ia
-                             d2cn(2,alpha,ja,:,ia,ia) = d2cn(2,alpha,ja,:,ia,ia)+&
+                             d2cn_jii(2,alpha,:,ja,ia) = d2cn_jii(2,alpha,:,ja,ia)+&
 &                             (hess*rcart2(alpha,:)+grad*mcart(alpha,:))*im_arg
                            end if
                          else
                            if (abs(re_arg-one)>tol12) then
-                             d2cn(1,alpha,ia,:,ja,ia) = d2cn(1,alpha,ia,:,ja,ia)+&
+                             d2cn_iji(1,alpha,:,ja,ia) = d2cn_iji(1,alpha,:,ja,ia)+&
 &                             two*(hess*rcart2(alpha,:)+grad*mcart(alpha,:))*(one-re_arg)
                            end if
                          end if
@@ -1128,10 +1133,28 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
            do alpha=1,3
              do beta=1,3
                do ia=1,natom
+!TODO: avoid stupid if clauses inside the loops
+                 d2cn_tmp = zero
+                 if (ia==la) then 
+                   if (ia==ka) then    ! iii
+                     d2cn_tmp(:) = d2cn_iii(:,alpha,beta,ia)
+                   else                ! jii
+                     d2cn_tmp(:) = d2cn_jii(:,alpha,beta,ka,ia)
+                   end if
+                 else if (ia==ka) then !iji
+                   d2cn_tmp(:) = d2cn_iji(:,alpha,beta,la,ia)
+                 else if (ka==la) then    ! jji
+                   d2cn_tmp(:) = d2cn_jji(:,alpha,beta,ka,ia)
+                 end if 
 !                 Add the second derivative of C6 contribution to the dynamical matrix
 !                 First, add the second derivative of CN-related term
                  dyn_vdw_dftd3(:,alpha,ka,beta,la)=dyn_vdw_dftd3(:,alpha,ka,beta,la)+&
-&                 (e_alpha1(ia)+e_alpha2(ia))*d2cn(:,alpha,ka,beta,la,ia)
+&                 (e_alpha1(ia)+e_alpha2(ia))*d2cn_tmp(:)
+!OLDVERSION                 dyn_vdw_dftd3(:,alpha,ka,beta,la)=dyn_vdw_dftd3(:,alpha,ka,beta,la)+&
+!&                 (e_alpha1(ia)+e_alpha2(ia))*d2cn(:,alpha,ka,beta,la,ia)
+
+
+
 !                 Then the term related to dCNi/dr*dCNi/dr and dCNj/dr*dCNj/dr
                  call comp_prod(cfdcn(:,alpha,ia,ka),fdcn(:,beta,ia,la),temp_comp)
                  dyn_vdw_dftd3(:,alpha,ka,beta,la)=dyn_vdw_dftd3(:,alpha,ka,beta,la)+&
@@ -1534,7 +1557,11 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_FREE(d2c6rj)
  ABI_FREE(d2c6rirj)
  ABI_FREE(cn)
- ABI_FREE(d2cn)
+ ABI_FREE(d2cn_iii)
+ ABI_FREE(d2cn_jji)
+ ABI_FREE(d2cn_iji)
+ ABI_FREE(d2cn_jii)
+ ABI_FREE(d2cn_tmp)
  ABI_FREE(dcn)
  ABI_FREE(fdcn)
  ABI_FREE(cfdcn)
@@ -1556,11 +1583,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !!
 !! FUNCTION
 !! Return the product of two complex numbers stored in rank 1 array
-!!
-!! PARENTS
-!!      m_vdw_dftd3
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1586,11 +1608,6 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 !!
 !! FUNCTION
 !! Convert gradients from cartesian to reduced coordinates
-!!
-!! PARENTS
-!!      m_vdw_dftd3
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -7,14 +7,10 @@
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2022 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -38,7 +34,7 @@ MODULE m_ppmodel
  use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t, get_bz_item
+ use m_bz_mesh,        only : kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
  use m_qplusg,         only : cmod_qpg
@@ -218,11 +214,6 @@ CONTAINS  !=====================================================================
 !!
 !! * Notice that eig is used only if PPm%model==3
 !!
-!! PARENTS
-!!      m_ppmodel,m_sigc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
@@ -253,7 +244,7 @@ subroutine ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,botsq,otq,eig)
  isym_q=Qmesh%tabo(iq_bz)
  itim_q=(3-Qmesh%tabi(iq_bz))/2
 
- !call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ !call Qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1
 
@@ -335,11 +326,6 @@ end subroutine ppm_get_qbz
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_ppmodel,m_screen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ppm_nullify(PPm)
@@ -368,11 +354,6 @@ end subroutine ppm_nullify
 !!
 !! SIDE EFFECTS
 !!  PPm<ppmodel_t>=All dynamic memory is released.
-!!
-!! PARENTS
-!!      m_screen,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -472,11 +453,6 @@ end subroutine ppm_free
 !! SIDE EFFECTS
 !!  PPm<ppmodel_t>=PPm tables are allocated.
 !!
-!! PARENTS
-!!      m_ppmodel
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ppm_mallocq(PPm,iq_ibz)
@@ -514,11 +490,6 @@ end subroutine ppm_mallocq
 !! SIDE EFFECTS
 !!  PPm<ppmodel_t>=PPm tables are deallocated.
 !!
-!! PARENTS
-!!      m_ppmodel
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ppm_table_free(PPm,iq_ibz)
@@ -555,11 +526,6 @@ end subroutine ppm_table_free
 !! SIDE EFFECTS
 !!  PPm<ppmodel_t>=Arrays needed to store the ppmodel parameters are allocated with
 !!   proper dimensions according to the plasmon-pole model.
-!!
-!! PARENTS
-!!      m_screen,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -698,11 +664,6 @@ end subroutine ppm_init
 !! * FFT parallelism not implemented.
 !! * TODO: rhor_tot should be replaced by rhog_tot
 !!
-!! PARENTS
-!!      m_sigc,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngfftf,rhor_tot,&
@@ -819,11 +780,6 @@ end subroutine setup_ppmodel
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_ppmodel
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -963,11 +919,6 @@ end subroutine getem1_from_ppm
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_ppmodel,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getem1_from_ppm_one_ggp(PPm,iqibz,zcut,nomega,omega,Vcp,em1q,ig1,ig2)
@@ -1077,11 +1028,6 @@ end subroutine getem1_from_ppm_one_ggp
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      mrgscr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1220,11 +1166,6 @@ end subroutine get_ppm_eigenvalues
 !! TODO
 !!  Calculation can be done in place.
 !!
-!! PARENTS
-!!      m_ppmodel
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
@@ -1350,11 +1291,6 @@ end subroutine cppm1par
 !!  omegatw(npwc,npwc)= plasmon frequencies \tilde\omega_{G1 G2}(q) where:
 !!  \tilde\omega^2_{G1 G2}(q) =
 !!    \frac {\Omega^2_{G1 G2}(q)} {\delta_{G1 G2}-\tilde\epsilon^{-1}_{G1 G2} (q, \omega=0)}
-!!
-!! PARENTS
-!!      m_ppmodel
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1562,11 +1498,6 @@ end subroutine cppm2par
 !!   where E^{-1} is the eigenvalue of the inverse dielectric matrix
 !!  eigtot(npwc,npwc)=the eigvectors of the symmetrized inverse dielectric matrix
 !!   (first index for G, second index for bands)
-!!
-!! PARENTS
-!!      m_ppmodel
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1823,11 +1754,6 @@ end subroutine cppm3par
 !!  bigomegatwsq(npwc,npwc)=plasmon-pole strength
 !!  omegatw(npwc)=plasmon-pole frequencies
 !!
-!! PARENTS
-!!      m_ppmodel
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,omegatw)
@@ -2073,11 +1999,6 @@ end subroutine cppm4par
 !! OUTPUT
 !!  qratio(npwc,npwc)=(q+G).(q+Gp)
 !!
-!! PARENTS
-!!      m_ppmodel,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cqratio(npwc,gvec,q,gmet,gprimd,qratio)
@@ -2179,11 +2100,6 @@ end subroutine cqratio
 !!    ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
 !!                            ---------------------------------------------------
 !!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
-!!
-!! PARENTS
-!!      m_sigc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2364,11 +2280,6 @@ end subroutine calc_sig_ppm
 !!  Internal tables are modified so that they (point|store) the plasmon-pole parameters
 !!  for the specified q-point in the BZ.
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_ggw,nfftf,ngfftf,rhor_tot)
@@ -2405,7 +2316,7 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
  !isym_q=Qmesh%tabo(iq_bz)
  !itim_q=(3-Qmesh%tabi(iq_bz))/2
 
- call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
  iq_curr=iq_ibz; if (PPm%mqmem==0) iq_curr=1
  !
  ! =======================================================
@@ -2516,11 +2427,6 @@ end subroutine ppm_symmetrizer
 !! NOTES
 !! * FFT parallelism not implemented.
 !! * TODO: rhor_tot should be replaced by rhog_tot
-!!
-!! PARENTS
-!!      m_ppmodel,m_screen
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2644,10 +2550,6 @@ end subroutine new_setup_ppmodel
 !!   ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
 !!                          ---------------------------------------------------
 !!                            2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

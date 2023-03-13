@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2021 ABINIT group (XG, NSAI, MKV)
+!!  Copyright (C) 2005-2022 ABINIT group (XG, NSAI, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -120,11 +116,6 @@ contains
 !! etotal=total energy, might be correct by improved polarization computation
 !! pel(3) = reduced coordinates of the electronic polarization (a. u.)
 !! pion(3)= reduced coordinates of the ionic polarization (a. u.)
-!!
-!! PARENTS
-!!      m_afterscfloop
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -471,11 +462,6 @@ end subroutine elpolariz
 !!  tr(2)=variable that changes k to -k
 !!                              G to -G
 !!                     $c_g$ to $c_g^*$ when time-reversal symetrie is used
-!!
-!! PARENTS
-!!      m_elpolariz
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -960,11 +946,6 @@ end subroutine uderiv
 !!   set of planewaves at k
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_elpolariz
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

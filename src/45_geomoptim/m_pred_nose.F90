@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -79,12 +75,6 @@ contains
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      hist2var,metric,var2hist,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
@@ -134,12 +124,8 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(fcart_m))     then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_FREE(fcart_mold)
-   end if
+    ABI_SFREE(fcart_m)
+    ABI_SFREE(fcart_mold)
    return
  end if
 
@@ -148,12 +134,8 @@ subroutine pred_nose(ab_mover,hist,itime,ntime,zDEBUG,iexit)
 !### 01. Allocate the arrays fcart_m and fcart_mold
 
  if(itime==1)then
-   if (allocated(fcart_m))     then
-     ABI_FREE(fcart_m)
-   end if
-   if (allocated(fcart_mold))  then
-     ABI_FREE(fcart_mold)
-   end if
+   ABI_SFREE(fcart_m)
+   ABI_SFREE(fcart_mold)
  end if
 
  if(.not.allocated(fcart_m))     then

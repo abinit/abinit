@@ -8,14 +8,10 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2021 ABINIT group (AL)
+!! Copyright (C) 2014-2022 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -101,12 +97,6 @@ contains
 !! INPUTS
 !! nkpt= number of k-points
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
-!!
 !! SOURCE
  subroutine init_gemm_nonlop(nkpt)
 
@@ -133,12 +123,6 @@ contains
 !!
 !! INPUTS
 !! nkpt= number of k-points
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
 !!
 !! SOURCE
  subroutine destroy_gemm_nonlop(nkpt)
@@ -172,12 +156,6 @@ contains
 !! Build the gemm_nonlop array
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_dft_energy,m_vtorho
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
 !!
 !! SOURCE
 
@@ -303,12 +281,6 @@ contains
 !! Replacement of nonlop. same prototype as nonlop although not all options are implemented.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
 !!
 !! SOURCE
  subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&

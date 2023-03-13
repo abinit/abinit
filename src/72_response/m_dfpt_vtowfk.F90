@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -164,13 +160,6 @@ contains
 !!                       cprj1=<p_i|C1nk,q> where p_i is a non-local projector
 !!    pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!                                            (cumulative, so input as well as output)
-!!
-!! PARENTS
-!!      m_dfpt_vtorho
-!!
-!! CHILDREN
-!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -440,14 +429,20 @@ unit_me = 6
        bands_treated_now = 0
        bands_treated_now(iband) = 1
        call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-
-       call dfpt_cgwf(iband,iband_me,band_procs,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
-&       rf2,dcwavef,&
-&       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
-&       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
-&       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
-&       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
-       resid_k(iband)=resid
+       
+       if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
+         eig1_k = zero 
+         resid_k(iband) = zero
+       else
+         call dfpt_cgwf(iband,iband_me,band_procs,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+ &       rf2,dcwavef,&
+ &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
+ &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
+ &       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+ &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+         resid_k(iband)=resid
+       end if
+       
      else
        resid_k(iband)=zero
      end if
@@ -735,13 +730,6 @@ end subroutine dfpt_vtowfk
 !!  cwaveprj1(natom,nspinor)= 1st-order wave-function after correction
 !!                            projected on NL projectors (PAW)
 !!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1,&
@@ -904,13 +892,6 @@ end subroutine full_active_wf1
 !!
 !! NOTES
 !!  Was part of dfpt_vtowfk before.
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zaxpy,dotprod_g,pawcprj_alloc,pawcprj_copy,pawcprj_free
-!!      pawcprj_mpi_sum,pawcprj_set_zero,pawcprj_zaxpby,timab,xmpi_sum
 !!
 !! SOURCE
 

@@ -6,14 +6,10 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2021 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2022 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -92,13 +88,6 @@ contains
 !!  of primitive translations
 !! tnons(3,1:msym)=nonsymmorphic translations for each symmetry (would
 !!  be 0 0 0 each for a symmorphic space group)
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
-!!      m_mover_effpot,m_tdep_sym,m_thmeig,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -622,12 +611,6 @@ end subroutine symfind
 !! ptgroupma = magnetic point group number
 !! spgroup=symmetry space group
 !!
-!! PARENTS
-!!      m_ab7_symmetry,m_ingeo,m_mover_effpot,m_phonons,m_tdep_sym,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
-!!
 !! SOURCE
 
 subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym,verbose)
@@ -829,12 +812,6 @@ end subroutine symanal
 !! ptgroup=symmetry point group
 !! [axis(3)]=Invariant axis in the conventional vector coordinates
 !!   Set to (/0,0,0/) if the lattice belongs to the same holohedry as the lattice+atoms (+electric field + ...).
-!!
-!! PARENTS
-!!      m_esymm,m_symfind
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1207,12 +1184,6 @@ end subroutine symbrav
 !!
 !! For the detailed description of the labelling of the axes,
 !! see symaxes.f and symplanes.f
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1637,13 +1608,6 @@ end subroutine symspgr
 !! center=1        A-face centered
 !! center=2        B-face centered
 !! center=3        C-face centered
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
-!!      m_mover_effpot,m_symfind,m_tdep_sym,m_thmeig,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 

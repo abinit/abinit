@@ -8,12 +8,10 @@
 !! and contains the mapping between the two meshes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (YG, SP, MJV)
+!! Copyright (C) 2008-2022 ABINIT group (YG, SP, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -166,12 +164,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  grid = double_grid to be created
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
-!!
 !! SOURCE
 
 subroutine double_grid_init(Kmesh_coarse,Kmesh_dense,kptrlatt_coarse,kmult,grid)
@@ -285,12 +277,6 @@ end subroutine double_grid_init
 !!  iktoint(nbz) = mapping between k-points in the bz and int indices
 !!  inttoik(nbz_closed) = mapping between int indices and k-points in the bz
 !!
-!! PARENTS
-!!      m_double_grid
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
-!!
 !! SOURCE
 
 subroutine create_indices_coarse(bz, nbz, klatt, nshiftk, shiftk, maxcomp, nbz_closed, indices, g0, iktoint, inttoik)
@@ -368,12 +354,6 @@ end subroutine create_indices_coarse
 !!  ikpt = index of k-point we search
 !!  g0(3) = g-vector obtained
 !!
-!! PARENTS
-!!      m_bseinterp,m_double_grid
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
-!!
 !! SOURCE
 
 subroutine get_kpt_from_indices_coarse(indices,maxcomp,inttoik,allg0,nkpt,ikpt,g0)
@@ -425,12 +405,6 @@ end subroutine get_kpt_from_indices_coarse
 !!  g0(3,nbz_dense) = g vectors between k-point inside bz and k-point given by indices
 !!  iktoint(nbz_dense) = mapping between k-points in the bz and int indices
 !!  inttoik(nbz_dense) = mapping between int indices and k-points in the bz
-!!
-!! PARENTS
-!!      m_double_grid
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -526,8 +500,6 @@ end subroutine create_indices_dense
 !!  ikpt = index of k-point we search
 !!  g0(3) = g-vector obtained
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine get_kpt_from_indices_dense(indices,maxcomp,kmult,inttoik,allg0,nkpt,ikpt,g0)
@@ -577,12 +549,6 @@ end subroutine get_kpt_from_indices_dense
 !! OUTPUT
 !!  dense_to_coarse(nbz_dense)
 !!  coarse_to_dense(nbz_coarse,ndiv)
-!!
-!! PARENTS
-!!      m_double_grid
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -657,12 +623,6 @@ end subroutine compute_neighbours
 !! kdense2div(double_grid%nbz_dense)
 !! k_dense -> idiv
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
-!!
 !! SOURCE
 
 subroutine compute_corresp(double_grid, div2kdense, kdense2div)
@@ -722,12 +682,6 @@ end subroutine compute_corresp
 !! SIDE EFFECTS
 !! All allocated memory is released.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
-!!
 !! SOURCE
 
 subroutine double_grid_free(grid)
@@ -780,12 +734,6 @@ end subroutine double_grid_free
 !!  kpt_fine_sub(nkpt_sub) = k-points of the fine grid that are around center(3)
 !!  nkpt_sub = number of k-points of the fine grid that are around center(3)
 !!  wgt_sub(nkpt_sub) = weight of the k-points of the fine grid that are around center(3).
-!!
-!! PARENTS
-!!      m_eig2d
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -934,11 +882,6 @@ end subroutine kptfine_av
 !!
 !! TODO
 !!  This routine is not used anymore. Deprecate or Remove?
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      interpol3d_indices,wrap2_zero_one
 !!
 !! SOURCE
 

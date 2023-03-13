@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -73,12 +69,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      zgemm,zhbev
 !!
 !! SOURCE
 
@@ -175,12 +165,6 @@ end subroutine get_seeds
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon,m_gwls_LanczosResolvents
-!!
-!! CHILDREN
-!!      zgemm,zhbev
 !!
 !! SOURCE
 
@@ -478,12 +462,6 @@ end subroutine block_lanczos_algorithm
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputePoles,m_gwls_GenerateEpsilon,m_gwls_LanczosResolvents
-!!
-!! CHILDREN
-!!      zgemm,zhbev
 !!
 !! SOURCE
 

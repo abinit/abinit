@@ -6,16 +6,12 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2021 ABINIT group (MR,MS)
+!!  Copyright (C) 2019-2022 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -73,12 +69,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 
@@ -351,12 +341,6 @@ end subroutine ddb_flexo
 !! OUTPUT
 !! ciflexo(3,3,3,3) = type-II Clamped Ion Flexoelectric Tensor
 !!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
 subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
@@ -389,7 +373,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
 !Extraction of the clamped-ion flexoelectric coeficients 
- fac=two/ucvol
+ fac=one/ucvol
  do qvecd=1,3
    do istrs=1,6
      strsd1=alpha(istrs)
@@ -397,7 +381,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
      strst=natom+3; if (istrs>3) strst=natom+4
      strsd=istrs; if (istrs>3) strsd=istrs-3
      do elfd=1,3
-       ciflexo(elfd,qvecd,strsd1,strsd2)=-fac*d3cart(2,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
+       ciflexo(elfd,qvecd,strsd1,strsd2)=fac*d3cart(1,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
        if (istrs>3) ciflexo(elfd,qvecd,strsd2,strsd1)=ciflexo(elfd,qvecd,strsd1,strsd2)
      end do
    end do
@@ -463,12 +447,6 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! intstrn(3,3,3,natom) = relaxed-ion internal strain tensor
 !! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix
 !!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
 subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only, &
@@ -523,7 +501,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
      do jatd=1,3
        do iat=1,natom
          do iatd=1,3
-           phi1(iatd,iat,jatd,jat,qvecd)=-two*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
+           phi1(iatd,iat,jatd,jat,qvecd)=-d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
          end do
        end do
      end do
@@ -697,12 +675,6 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! OUTPUT
 !! lattflexo(3,3,3,3) = type-II lattice contribution to the Flexoelectric Tensor
 !!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
 subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,&
@@ -775,7 +747,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      do jatd=1,3
        do iat=1,natom
          do iatd=1,3
-           phi1(iatd,iat,jatd,jat,qvecd)=-two*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
+           phi1(iatd,iat,jatd,jat,qvecd)=-d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
          end do
        end do
      end do
@@ -803,8 +775,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  end do
 
 !Calculate now the Lagrange elastic tensors 
-!First we need to extract the tensor with the q-gradient of the internal strain
-!(a.k.a flexoelectric force response tensor) 
+!First we need to extract the clamped-ion flexoelectric force response tensor
  d3cart(1,:,:,:,:,:,:) = reshape(blkvalA(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkvalA(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
@@ -816,7 +787,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
    do qvecd=1,3
      do iat=1,natom
        do iatd=1,3
-         flexofr(iatd,iat,qvecd,strsd1,strsd2)=-two*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
+         flexofr(iatd,iat,qvecd,strsd1,strsd2)=d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
          if (istrs>3) flexofr(iatd,iat,qvecd,strsd2,strsd1)=flexofr(iatd,iat,qvecd,strsd1,strsd2)
        end do
      end do
@@ -1248,12 +1219,6 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 !! 
 !! OUTPUT
 !! kmatrix(3*natom,3*natom) = array with the pseudo-inverse of dynamical matrix
-!!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 

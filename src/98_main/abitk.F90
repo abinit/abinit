@@ -7,7 +7,7 @@
 !!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MG)
+!! Copyright (C) 2013-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,10 +17,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -174,7 +170,7 @@ program abitk
    ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
    call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk) !, bz2ibz)  ! Optional
+      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
    new_nshiftk = size(new_shiftk, dim=2)
 
    write(std_out, "(/, a)")" Input_kptrlatt | New_kptrlatt"
@@ -484,11 +480,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine abitk_show_help()
@@ -536,11 +527,6 @@ end subroutine abitk_show_help
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_path_ebands_cryst(path, ebands, cryst, comm, argpos)
@@ -577,11 +563,6 @@ end subroutine get_path_ebands_cryst
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_path_ebands(path, ebands, comm)
@@ -614,11 +595,6 @@ end subroutine get_path_ebands
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_path_cryst(path, cryst, comm)
@@ -650,11 +626,6 @@ end subroutine get_path_cryst
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

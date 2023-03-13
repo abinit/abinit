@@ -7,7 +7,7 @@
 !!  of PAW data over atomic sites
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2021 ABINIT group (MT, MD)
+!! Copyright (C) 2012-2022 ABINIT group (MT, MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,11 +58,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!  my_natom=number of atoms treated by current process
-!!
-!! PARENTS
-!!      m_mpinfo,m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -116,15 +111,6 @@ end subroutine get_my_natom
 !!               nothing is done if my_atmtab(:) is already associated to a target
 !!  my_atmtab_allocated=true if my_atmtab is allocated
 !!  paral_atom=flag controlling parallelism over atoms
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_mkrho,m_dfpt_scfcv,m_hamiltonian,m_mpinfo,m_nucprop
-!!      m_outscfcv,m_paw_an,m_paw_correlations,m_paw_denpot,m_paw_dfpt
-!!      m_paw_dfptnl,m_paw_ij,m_paw_mkaewf,m_paw_mkrho,m_paw_nhat,m_paw_nmr
-!!      m_paw_occupancies,m_paw_pwaves_lmn,m_paw_tools,m_paw_uj,m_pawdij
-!!      m_pawfgrtab,m_pawrhoij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -213,14 +199,6 @@ end subroutine get_my_atmtab
 !!  my_atmtab(:)=indexes of atoms treated by current process
 !!               nothing is done if my_atmtab(:) is already associated to a target
 !!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_scfcv,m_hamiltonian,m_nucprop,m_outscfcv,m_paw_an
-!!      m_paw_correlations,m_paw_denpot,m_paw_dfpt,m_paw_dfptnl,m_paw_ij
-!!      m_paw_mkaewf,m_paw_mkrho,m_paw_nhat,m_paw_nmr,m_paw_occupancies
-!!      m_paw_pwaves_lmn,m_paw_tools,m_paw_uj,m_pawdij,m_pawfgrtab,m_pawrhoij
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine free_my_atmtab(my_atmtab,my_atmtab_allocated)
@@ -267,10 +245,6 @@ end subroutine free_my_atmtab
 !! NOTES
 !! In case of modification of the distribution of atom over proc,
 !!   get_atmtab must be modified accordingly
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -329,7 +303,7 @@ end subroutine get_proc_atmtab
 !!  containing the corresponding processor indexes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2021 ABINIT group (MD)
+!! Copyright (C) 2012-2022 ABINIT group (MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -348,11 +322,6 @@ end subroutine get_proc_atmtab
 !!  on all the procs (see get_my_atmtab).
 !!  In case of modification of the distribution of atom over proc, this routine
 !!  must be modified accordingly.
-!!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

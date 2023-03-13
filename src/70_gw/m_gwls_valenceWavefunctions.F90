@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -60,11 +56,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -136,11 +127,6 @@ end subroutine prepareValenceWavefunctions
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cleanupValenceWavefunctions()
@@ -169,11 +155,6 @@ end subroutine cleanupValenceWavefunctions
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

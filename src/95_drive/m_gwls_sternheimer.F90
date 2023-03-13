@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!!  Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -47,17 +43,6 @@ contains
 !! dtset <type(dataset_type)>=all input variables in this dataset
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      cleanupvalencewavefunctions,close_timing_log
-!!      compute_correlations_no_model_shift_lanczos
-!!      compute_correlations_shift_lanczos
-!!      compute_exchange_and_correlation_energies,destroy_h
-!!      driver_generateprintdielectriceigenvalues,gstateimg
-!!      preparevalencewavefunctions,setup_timing_log,timab
 !!
 !! SOURCE
 

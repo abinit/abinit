@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -91,12 +87,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
-!!
 !! SOURCE
 
 subroutine setup_Lanczos_basis(lmax,lmax_model)
@@ -127,12 +117,6 @@ end subroutine setup_Lanczos_basis
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
 !!
 !! SOURCE
 
@@ -165,12 +149,6 @@ end subroutine cleanup_Lanczos_basis
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      g_to_r,gr_to_g,sqrt_vc_k,wf_block_distribute
 !!
 !! SOURCE
 

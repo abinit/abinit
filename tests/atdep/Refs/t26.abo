@@ -1,0 +1,1009 @@
+  
+.Version    3.0 of PHONONS
+.Copyright (C) 1998-2022 ABINIT group (FB,JB).
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+  
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see
+ ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see http://www.abinit.org .
+
+.Starting date : 13 Dec 2020.
+  
+ #############################################################################
+ ######################### ECHO OF INPUT FILE ################################
+ #############################################################################
+ ======================= Define the unitcell =================================
+ brav                    3    3
+ natom_unitcell          2
+ xred_unitcell       
+                         0.0000000000    0.0000000000    0.0000000000
+                        -0.2022000000    0.2022000000    0.5000000000
+ typat_unitcell          1    1
+ ntypat                  1
+ amu                   238.0289000000
+ ======================= Define the supercell ================================
+ rprimd              
+                        32.3700000000    0.0000000000    0.0000000000
+                         0.0000000000   22.1860000000    0.0000000000
+                         0.0000000000    0.0000000000   28.1010000000
+ multiplicity        
+                         6.0000000000    6.0000000000    0.0000000000
+                        -2.0000000000    2.0000000000    0.0000000000
+                         0.0000000000    0.0000000000    3.0000000000
+ natom                 144
+ typat               
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1    1    1    1    1    1    1
+                         1    1    1    1
+ temperature           300.0000000000
+ ======================= Define computational details ========================
+ nstep_max               20
+ nstep_min                1
+ rcut                   11.0900000000
+ ======================= Optional input variables ============================
+ order                   3    5.0000000000
+ use_ideal_positions     1
+ enunit                  1 (Phonon frequencies in cm-1)
+ USE IDEAL POSITIONS TO COMPUTE SPECTRUM
+-Number of processors    1    1
+ 
+ All quantities are computed from nstep_min=    1
+                               to nstep_max=   20
+ So, the real number of time steps is nstep=   20
+ 
+ The positions, forces and energies are extracted from the ASCII files: xred.dat, fcart.dat & etot.dat
+  
+ #############################################################################
+ ########################## Computed quantities ##############################
+ #############################################################################
+ acell_unitcell=     5.3950000000    11.0930000000     9.3670000000
+ rprimd_md=    32.3700000000     0.0000000000     0.0000000000
+ rprimd_md=     0.0000000000    22.1860000000     0.0000000000
+ rprimd_md=     0.0000000000     0.0000000000    28.1010000000
+ bravais=    3    3    1    1    0   -1    1    0    0    0    2
+ See the sym.dat file
+  
+ #############################################################################
+ ########################## Q points generation  #############################
+ #############################################################################
+ Generate the BZ path using the Q points defined by default
+ See the qpt.dat file
+  
+ #############################################################################
+ ###### Find the matching between ideal and average positions  ###############
+ #############################################################################
+  Determine ideal positions and distances...
+  Compute average positions...
+  Search the unitcell basis of atoms in the MD trajectory...
+  Compare ideal and average positions using PBC...
+  Write the xred_average.xyz file with ideal and average positions...
+  Compute cartesian coordinates and forces...
+  
+ #############################################################################
+ ###################### Find the symetry operations ##########################
+ #################### (connecting the atoms together) ########################
+ #############################################################################
+ Search the matrix transformation going from (k) to (i)...
+ Search the matrix transformation going from (k,l) to (i,j)...
+ See the Indsym*.dat files (if debug)
+  
+ #############################################################################
+ ####### FIRST ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref1at and Isym1at tables...
+  Build the Shell1at datatype...
+  Number of shells=           1
+ ============================================================================
+ Shell number:           1
+  For atom    1:
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           0
+ ============================================================================
+   >>>>>> Total number of coefficients at the first order=           0
+  
+ #############################################################################
+ ###### SECOND ORDER : find the number of coefficients #######################
+ #############################################################################
+  Build the ref2at and Isym2at tables...
+  Build the Shell2at datatype...
+  Number of shells=          13
+ ============================================================================
+ Shell number:           1
+  Between atom    1 and     1 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           0
+   Number of interactions in this shell=           1
+ ============================================================================
+ Shell number:           2
+  Between atom    1 and     2 the distance is=    5.1929030306
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           2
+ ============================================================================
+ Shell number:           3
+  Between atom    1 and     3 the distance is=    9.3670000000
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           2
+ ============================================================================
+ Shell number:           4
+  Between atom    1 and     7 the distance is=    6.1676712380
+   Number of independant coefficients in this shell=           5
+   Number of interactions in this shell=           4
+ ============================================================================
+ Shell number:           5
+  Between atom    1 and     8 the distance is=    9.4809314106
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=           4
+ ============================================================================
+ Shell number:           6
+  Between atom    1 and    14 the distance is=   10.0128712580
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           2
+ ============================================================================
+ Shell number:           7
+  Between atom    1 and    20 the distance is=    6.3344108138
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=           4
+ ============================================================================
+ Shell number:           8
+  Between atom    1 and    25 the distance is=    5.3950000000
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           2
+ ============================================================================
+ Shell number:           9
+  Between atom    1 and    26 the distance is=    7.4881417512
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=           4
+ ============================================================================
+ Shell number:          10
+  Between atom    1 and    27 the distance is=   10.8095658562
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=           4
+ ============================================================================
+ Shell number:          11
+  Between atom    1 and    31 the distance is=    9.8108214998
+   Number of independant coefficients in this shell=           5
+   Number of interactions in this shell=           4
+ ============================================================================
+ Shell number:          12
+  Between atom    1 and    44 the distance is=    9.9164918372
+   Number of independant coefficients in this shell=           6
+   Number of interactions in this shell=           4
+ ============================================================================
+ Shell number:          13
+  Between atom    1 and    49 the distance is=   10.7900000000
+   Number of independant coefficients in this shell=           4
+   Number of interactions in this shell=           2
+ ============================================================================
+   >>>>>> Total number of coefficients at the second order=          60
+  
+ #############################################################################
+ ###### THIRD ORDER : find the number of coefficients ########################
+ #############################################################################
+ Number of shells=           1
+ ============================================================================
+ Shell number:           1
+  Between atom    1 and     1 the distance is=    0.0000000000
+  Between atom    1 and     1 the distance is=    0.0000000000
+  Between atom    1 and     1 the distance is=    0.0000000000
+   Number of independant coefficients in this shell=           3
+   Number of interactions in this shell=           1
+ ============================================================================
+   >>>>>> Total number of coefficients at the third order=           3
+  
+ #############################################################################
+ ############## Fill the matrices used in the pseudo-inverse #################
+ #############################################################################
+  Compute the coefficients (at the 1st order) used in the Moore-Penrose...
+  ------- achieved
+  Compute the coefficients (at the 2nd order) used in the Moore-Penrose...
+  ------- achieved
+  Compute the coefficients (at the 3rd order) used in the Moore-Penrose...
+  ------- achieved
+  
+ #############################################################################
+ ###################### Compute the constraints ##############################
+ ########################## At the 1st order #################################
+ ########################## At the 2nd order #################################
+ ########################## At the 3rd order #################################
+ ################## Reduce the number of constraints #########################
+ ############### (Solve simultaneously all the orders) #######################
+ ################### And compute the pseudo-inverse ##########################
+ #############################################################################
+  The problem is solved
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (first order) IFC for the reference atom=   1
+   0.000000  0.000000  0.000000
+  
+ ############# List of (first order) IFC for the reference atom=   2
+   0.000000  0.000000  0.000000
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ############# List of (second order) IFC for the reference atom=   1
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell at distance= 0.000000
+  For jatom=   1 ,with type=   1
+   0.064313  0.000000  0.000000
+   0.000000  0.064313  0.000000
+   0.000000  0.000000  0.064313
+  The components of the vector are:    0.000000    0.000000    0.000000
+  Trace=  0.192940
+  
+ ======== NEW SHELL (ishell=   2): There are   2 atoms on this shell at distance= 5.192903
+  For jatom=   2 ,with type=   2
+  -0.005092  0.000000  0.000000
+   0.000000 -0.006562 -0.007174
+   0.000000 -0.007174 -0.009121
+  The components of the vector are:    0.000000    2.243005    4.683500
+  Trace= -0.020775
+  
+  For jatom=   6 ,with type=   2
+  -0.005092  0.000000  0.000000
+   0.000000 -0.006562  0.007174
+   0.000000  0.007174 -0.009121
+  The components of the vector are:    0.000000    2.243005   -4.683500
+  Trace= -0.020775
+  
+ ======== NEW SHELL (ishell=   8): There are   2 atoms on this shell at distance= 5.395000
+  For jatom=  25 ,with type=   1
+   0.007019 -0.000595  0.000000
+   0.000595 -0.000810  0.000000
+   0.000000  0.000000  0.000214
+  The components of the vector are:    5.395000    0.000000    0.000000
+  Trace=  0.006424
+  
+  For jatom= 121 ,with type=   1
+   0.007019  0.000595  0.000000
+  -0.000595 -0.000810  0.000000
+   0.000000  0.000000  0.000214
+  The components of the vector are:   -5.395000    0.000000    0.000000
+  Trace=  0.006424
+  
+ ======== NEW SHELL (ishell=   4): There are   4 atoms on this shell at distance= 6.167671
+  For jatom=   7 ,with type=   1
+  -0.004909 -0.003284  0.000000
+  -0.004072 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:    2.697500    5.546500    0.000000
+  Trace= -0.011357
+  
+  For jatom=  19 ,with type=   1
+  -0.004909  0.004072  0.000000
+   0.003284 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:    2.697500   -5.546500    0.000000
+  Trace= -0.011357
+  
+  For jatom= 127 ,with type=   1
+  -0.004909  0.003284  0.000000
+   0.004072 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:   -2.697500    5.546500    0.000000
+  Trace= -0.011357
+  
+  For jatom= 139 ,with type=   1
+  -0.004909 -0.004072  0.000000
+  -0.003284 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:   -2.697500   -5.546500    0.000000
+  Trace= -0.011357
+  
+ ======== NEW SHELL (ishell=   7): There are   4 atoms on this shell at distance= 6.334411
+  For jatom=  20 ,with type=   2
+  -0.002060  0.003057 -0.003711
+   0.003057 -0.003654  0.004088
+  -0.003711  0.004088 -0.003396
+  The components of the vector are:    2.697500   -3.303495    4.683500
+  Trace= -0.009111
+  
+  For jatom=  24 ,with type=   2
+  -0.002060  0.003057  0.003711
+   0.003057 -0.003654 -0.004088
+   0.003711 -0.004088 -0.003396
+  The components of the vector are:    2.697500   -3.303495   -4.683500
+  Trace= -0.009111
+  
+  For jatom= 140 ,with type=   2
+  -0.002060 -0.003057  0.003711
+  -0.003057 -0.003654  0.004088
+   0.003711  0.004088 -0.003396
+  The components of the vector are:   -2.697500   -3.303495    4.683500
+  Trace= -0.009111
+  
+  For jatom= 144 ,with type=   2
+  -0.002060 -0.003057 -0.003711
+  -0.003057 -0.003654 -0.004088
+  -0.003711 -0.004088 -0.003396
+  The components of the vector are:   -2.697500   -3.303495   -4.683500
+  Trace= -0.009111
+  
+ ======== NEW SHELL (ishell=   9): There are   4 atoms on this shell at distance= 7.488142
+  For jatom=  26 ,with type=   2
+  -0.004226 -0.001843 -0.003274
+  -0.001843 -0.000644 -0.000313
+  -0.003274 -0.000313 -0.001198
+  The components of the vector are:    5.395000    2.243005    4.683500
+  Trace= -0.006068
+  
+  For jatom=  30 ,with type=   2
+  -0.004226 -0.001843  0.003274
+  -0.001843 -0.000644  0.000313
+   0.003274  0.000313 -0.001198
+  The components of the vector are:    5.395000    2.243005   -4.683500
+  Trace= -0.006068
+  
+  For jatom= 122 ,with type=   2
+  -0.004226  0.001843  0.003274
+   0.001843 -0.000644 -0.000313
+   0.003274 -0.000313 -0.001198
+  The components of the vector are:   -5.395000    2.243005    4.683500
+  Trace= -0.006068
+  
+  For jatom= 126 ,with type=   2
+  -0.004226  0.001843 -0.003274
+   0.001843 -0.000644  0.000313
+  -0.003274  0.000313 -0.001198
+  The components of the vector are:   -5.395000    2.243005   -4.683500
+  Trace= -0.006068
+  
+ ======== NEW SHELL (ishell=   3): There are   2 atoms on this shell at distance= 9.367000
+  For jatom=   3 ,with type=   1
+   0.002065  0.000000  0.000000
+   0.000000  0.000965  0.000291
+   0.000000 -0.000291 -0.005195
+  The components of the vector are:    0.000000    0.000000    9.367000
+  Trace= -0.002165
+  
+  For jatom=   5 ,with type=   1
+   0.002065  0.000000  0.000000
+   0.000000  0.000965 -0.000291
+   0.000000  0.000291 -0.005195
+  The components of the vector are:    0.000000    0.000000   -9.367000
+  Trace= -0.002165
+  
+ ======== NEW SHELL (ishell=   5): There are   4 atoms on this shell at distance= 9.480931
+  For jatom=   8 ,with type=   2
+   0.000691 -0.000247 -0.000208
+  -0.000247 -0.002668 -0.000950
+  -0.000208 -0.000950 -0.000599
+  The components of the vector are:    2.697500    7.789505    4.683500
+  Trace= -0.002577
+  
+  For jatom=  12 ,with type=   2
+   0.000691 -0.000247  0.000208
+  -0.000247 -0.002668  0.000950
+   0.000208  0.000950 -0.000599
+  The components of the vector are:    2.697500    7.789505   -4.683500
+  Trace= -0.002577
+  
+  For jatom= 128 ,with type=   2
+   0.000691  0.000247  0.000208
+   0.000247 -0.002668 -0.000950
+   0.000208 -0.000950 -0.000599
+  The components of the vector are:   -2.697500    7.789505    4.683500
+  Trace= -0.002577
+  
+  For jatom= 132 ,with type=   2
+   0.000691  0.000247 -0.000208
+   0.000247 -0.002668  0.000950
+  -0.000208  0.000950 -0.000599
+  The components of the vector are:   -2.697500    7.789505   -4.683500
+  Trace= -0.002577
+  
+ ======== NEW SHELL (ishell=  11): There are   4 atoms on this shell at distance= 9.810821
+  For jatom=  31 ,with type=   1
+  -0.000504 -0.000443  0.000000
+  -0.000939  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:    8.092500    5.546500    0.000000
+  Trace= -0.000880
+  
+  For jatom=  43 ,with type=   1
+  -0.000504  0.000939  0.000000
+   0.000443  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:    8.092500   -5.546500    0.000000
+  Trace= -0.000880
+  
+  For jatom= 103 ,with type=   1
+  -0.000504  0.000443  0.000000
+   0.000939  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:   -8.092500    5.546500    0.000000
+  Trace= -0.000880
+  
+  For jatom= 115 ,with type=   1
+  -0.000504 -0.000939  0.000000
+  -0.000443  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:   -8.092500   -5.546500    0.000000
+  Trace= -0.000880
+  
+ ======== NEW SHELL (ishell=  12): There are   4 atoms on this shell at distance= 9.916492
+  For jatom=  44 ,with type=   2
+  -0.001076  0.000315 -0.000366
+   0.000315 -0.000888  0.000057
+  -0.000366  0.000057  0.000328
+  The components of the vector are:    8.092500   -3.303495    4.683500
+  Trace= -0.001635
+  
+  For jatom=  48 ,with type=   2
+  -0.001076  0.000315  0.000366
+   0.000315 -0.000888 -0.000057
+   0.000366 -0.000057  0.000328
+  The components of the vector are:    8.092500   -3.303495   -4.683500
+  Trace= -0.001635
+  
+  For jatom= 116 ,with type=   2
+  -0.001076 -0.000315  0.000366
+  -0.000315 -0.000888  0.000057
+   0.000366  0.000057  0.000328
+  The components of the vector are:   -8.092500   -3.303495    4.683500
+  Trace= -0.001635
+  
+  For jatom= 120 ,with type=   2
+  -0.001076 -0.000315 -0.000366
+  -0.000315 -0.000888 -0.000057
+  -0.000366 -0.000057  0.000328
+  The components of the vector are:   -8.092500   -3.303495   -4.683500
+  Trace= -0.001635
+  
+ ======== NEW SHELL (ishell=   6): There are   2 atoms on this shell at distance=10.012871
+  For jatom=  14 ,with type=   2
+   0.000601  0.000000  0.000000
+   0.000000 -0.002118  0.000602
+   0.000000  0.000602 -0.000851
+  The components of the vector are:    0.000000   -8.849995    4.683500
+  Trace= -0.002369
+  
+  For jatom=  18 ,with type=   2
+   0.000601  0.000000  0.000000
+   0.000000 -0.002118 -0.000602
+   0.000000 -0.000602 -0.000851
+  The components of the vector are:    0.000000   -8.849995   -4.683500
+  Trace= -0.002369
+  
+ ======== NEW SHELL (ishell=  13): There are   2 atoms on this shell at distance=10.790000
+  For jatom=  49 ,with type=   1
+  -0.010018 -0.000035  0.000000
+   0.000035 -0.000712  0.000000
+   0.000000  0.000000 -0.001942
+  The components of the vector are:   10.790000    0.000000    0.000000
+  Trace= -0.012672
+  
+  For jatom=  97 ,with type=   1
+  -0.010018  0.000035  0.000000
+  -0.000035 -0.000712  0.000000
+   0.000000  0.000000 -0.001942
+  The components of the vector are:  -10.790000    0.000000    0.000000
+  Trace= -0.012672
+  
+ ======== NEW SHELL (ishell=  10): There are   4 atoms on this shell at distance=10.809566
+  For jatom=  27 ,with type=   1
+  -0.001282 -0.000663  0.000121
+   0.000663 -0.000105  0.000045
+   0.000121 -0.000045  0.000558
+  The components of the vector are:    5.395000    0.000000    9.367000
+  Trace= -0.000829
+  
+  For jatom=  29 ,with type=   1
+  -0.001282 -0.000663 -0.000121
+   0.000663 -0.000105 -0.000045
+  -0.000121  0.000045  0.000558
+  The components of the vector are:    5.395000    0.000000   -9.367000
+  Trace= -0.000829
+  
+  For jatom= 123 ,with type=   1
+  -0.001282  0.000663 -0.000121
+  -0.000663 -0.000105  0.000045
+  -0.000121 -0.000045  0.000558
+  The components of the vector are:   -5.395000    0.000000    9.367000
+  Trace= -0.000829
+  
+  For jatom= 125 ,with type=   1
+  -0.001282  0.000663  0.000121
+  -0.000663 -0.000105 -0.000045
+   0.000121  0.000045  0.000558
+  The components of the vector are:   -5.395000    0.000000   -9.367000
+  Trace= -0.000829
+  
+ ############# List of (second order) IFC for the reference atom=   2
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell at distance= 0.000000
+  For jatom=   2 ,with type=   2
+   0.064313  0.000000  0.000000
+   0.000000  0.064313  0.000000
+   0.000000  0.000000  0.064313
+  The components of the vector are:    0.000000    0.000000    0.000000
+  Trace=  0.192940
+  
+ ======== NEW SHELL (ishell=   2): There are   2 atoms on this shell at distance= 5.192903
+  For jatom=   1 ,with type=   1
+  -0.005092  0.000000  0.000000
+   0.000000 -0.006562 -0.007174
+   0.000000 -0.007174 -0.009121
+  The components of the vector are:    0.000000   -2.243005   -4.683500
+  Trace= -0.020775
+  
+  For jatom=   3 ,with type=   1
+  -0.005092  0.000000  0.000000
+   0.000000 -0.006562  0.007174
+   0.000000  0.007174 -0.009121
+  The components of the vector are:    0.000000   -2.243005    4.683500
+  Trace= -0.020775
+  
+ ======== NEW SHELL (ishell=   8): There are   2 atoms on this shell at distance= 5.395000
+  For jatom=  26 ,with type=   2
+   0.007019  0.000595  0.000000
+  -0.000595 -0.000810  0.000000
+   0.000000  0.000000  0.000214
+  The components of the vector are:    5.395000    0.000000    0.000000
+  Trace=  0.006424
+  
+  For jatom= 122 ,with type=   2
+   0.007019 -0.000595  0.000000
+   0.000595 -0.000810  0.000000
+   0.000000  0.000000  0.000214
+  The components of the vector are:   -5.395000    0.000000    0.000000
+  Trace=  0.006424
+  
+ ======== NEW SHELL (ishell=   4): There are   4 atoms on this shell at distance= 6.167671
+  For jatom=   8 ,with type=   2
+  -0.004909 -0.004072  0.000000
+  -0.003284 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:    2.697500    5.546500    0.000000
+  Trace= -0.011357
+  
+  For jatom=  20 ,with type=   2
+  -0.004909  0.003284  0.000000
+   0.004072 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:    2.697500   -5.546500    0.000000
+  Trace= -0.011357
+  
+  For jatom= 128 ,with type=   2
+  -0.004909  0.004072  0.000000
+   0.003284 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:   -2.697500    5.546500    0.000000
+  Trace= -0.011357
+  
+  For jatom= 140 ,with type=   2
+  -0.004909 -0.003284  0.000000
+  -0.004072 -0.004106  0.000000
+   0.000000  0.000000 -0.002342
+  The components of the vector are:   -2.697500   -5.546500    0.000000
+  Trace= -0.011357
+  
+ ======== NEW SHELL (ishell=   7): There are   4 atoms on this shell at distance= 6.334411
+  For jatom=   7 ,with type=   1
+  -0.002060 -0.003057  0.003711
+  -0.003057 -0.003654  0.004088
+   0.003711  0.004088 -0.003396
+  The components of the vector are:    2.697500    3.303495   -4.683500
+  Trace= -0.009111
+  
+  For jatom=   9 ,with type=   1
+  -0.002060 -0.003057 -0.003711
+  -0.003057 -0.003654 -0.004088
+  -0.003711 -0.004088 -0.003396
+  The components of the vector are:    2.697500    3.303495    4.683500
+  Trace= -0.009111
+  
+  For jatom= 127 ,with type=   1
+  -0.002060  0.003057 -0.003711
+   0.003057 -0.003654  0.004088
+  -0.003711  0.004088 -0.003396
+  The components of the vector are:   -2.697500    3.303495   -4.683500
+  Trace= -0.009111
+  
+  For jatom= 129 ,with type=   1
+  -0.002060  0.003057  0.003711
+   0.003057 -0.003654 -0.004088
+   0.003711 -0.004088 -0.003396
+  The components of the vector are:   -2.697500    3.303495    4.683500
+  Trace= -0.009111
+  
+ ======== NEW SHELL (ishell=   9): There are   4 atoms on this shell at distance= 7.488142
+  For jatom=  25 ,with type=   1
+  -0.004226  0.001843  0.003274
+   0.001843 -0.000644 -0.000313
+   0.003274 -0.000313 -0.001198
+  The components of the vector are:    5.395000   -2.243005   -4.683500
+  Trace= -0.006068
+  
+  For jatom=  27 ,with type=   1
+  -0.004226  0.001843 -0.003274
+   0.001843 -0.000644  0.000313
+  -0.003274  0.000313 -0.001198
+  The components of the vector are:    5.395000   -2.243005    4.683500
+  Trace= -0.006068
+  
+  For jatom= 121 ,with type=   1
+  -0.004226 -0.001843 -0.003274
+  -0.001843 -0.000644 -0.000313
+  -0.003274 -0.000313 -0.001198
+  The components of the vector are:   -5.395000   -2.243005   -4.683500
+  Trace= -0.006068
+  
+  For jatom= 123 ,with type=   1
+  -0.004226 -0.001843  0.003274
+  -0.001843 -0.000644  0.000313
+   0.003274  0.000313 -0.001198
+  The components of the vector are:   -5.395000   -2.243005    4.683500
+  Trace= -0.006068
+  
+ ======== NEW SHELL (ishell=   3): There are   2 atoms on this shell at distance= 9.367000
+  For jatom=   4 ,with type=   2
+   0.002065  0.000000  0.000000
+   0.000000  0.000965 -0.000291
+   0.000000  0.000291 -0.005195
+  The components of the vector are:    0.000000    0.000000    9.367000
+  Trace= -0.002165
+  
+  For jatom=   6 ,with type=   2
+   0.002065  0.000000  0.000000
+   0.000000  0.000965  0.000291
+   0.000000 -0.000291 -0.005195
+  The components of the vector are:    0.000000    0.000000   -9.367000
+  Trace= -0.002165
+  
+ ======== NEW SHELL (ishell=   5): There are   4 atoms on this shell at distance= 9.480931
+  For jatom=  19 ,with type=   1
+   0.000691  0.000247  0.000208
+   0.000247 -0.002668 -0.000950
+   0.000208 -0.000950 -0.000599
+  The components of the vector are:    2.697500   -7.789505   -4.683500
+  Trace= -0.002577
+  
+  For jatom=  21 ,with type=   1
+   0.000691  0.000247 -0.000208
+   0.000247 -0.002668  0.000950
+  -0.000208  0.000950 -0.000599
+  The components of the vector are:    2.697500   -7.789505    4.683500
+  Trace= -0.002577
+  
+  For jatom= 139 ,with type=   1
+   0.000691 -0.000247 -0.000208
+  -0.000247 -0.002668 -0.000950
+  -0.000208 -0.000950 -0.000599
+  The components of the vector are:   -2.697500   -7.789505   -4.683500
+  Trace= -0.002577
+  
+  For jatom= 141 ,with type=   1
+   0.000691 -0.000247  0.000208
+  -0.000247 -0.002668  0.000950
+   0.000208  0.000950 -0.000599
+  The components of the vector are:   -2.697500   -7.789505    4.683500
+  Trace= -0.002577
+  
+ ======== NEW SHELL (ishell=  11): There are   4 atoms on this shell at distance= 9.810821
+  For jatom=  32 ,with type=   2
+  -0.000504 -0.000939  0.000000
+  -0.000443  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:    8.092500    5.546500    0.000000
+  Trace= -0.000880
+  
+  For jatom=  44 ,with type=   2
+  -0.000504  0.000443  0.000000
+   0.000939  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:    8.092500   -5.546500    0.000000
+  Trace= -0.000880
+  
+  For jatom= 104 ,with type=   2
+  -0.000504  0.000939  0.000000
+   0.000443  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:   -8.092500    5.546500    0.000000
+  Trace= -0.000880
+  
+  For jatom= 116 ,with type=   2
+  -0.000504 -0.000443  0.000000
+  -0.000939  0.000606  0.000000
+   0.000000  0.000000 -0.000982
+  The components of the vector are:   -8.092500   -5.546500    0.000000
+  Trace= -0.000880
+  
+ ======== NEW SHELL (ishell=  12): There are   4 atoms on this shell at distance= 9.916492
+  For jatom=  31 ,with type=   1
+  -0.001076 -0.000315  0.000366
+  -0.000315 -0.000888  0.000057
+   0.000366  0.000057  0.000328
+  The components of the vector are:    8.092500    3.303495   -4.683500
+  Trace= -0.001635
+  
+  For jatom=  33 ,with type=   1
+  -0.001076 -0.000315 -0.000366
+  -0.000315 -0.000888 -0.000057
+  -0.000366 -0.000057  0.000328
+  The components of the vector are:    8.092500    3.303495    4.683500
+  Trace= -0.001635
+  
+  For jatom= 103 ,with type=   1
+  -0.001076  0.000315 -0.000366
+   0.000315 -0.000888  0.000057
+  -0.000366  0.000057  0.000328
+  The components of the vector are:   -8.092500    3.303495   -4.683500
+  Trace= -0.001635
+  
+  For jatom= 105 ,with type=   1
+  -0.001076  0.000315  0.000366
+   0.000315 -0.000888 -0.000057
+   0.000366 -0.000057  0.000328
+  The components of the vector are:   -8.092500    3.303495    4.683500
+  Trace= -0.001635
+  
+ ======== NEW SHELL (ishell=   6): There are   2 atoms on this shell at distance=10.012871
+  For jatom=  13 ,with type=   1
+   0.000601  0.000000  0.000000
+   0.000000 -0.002118  0.000602
+   0.000000  0.000602 -0.000851
+  The components of the vector are:    0.000000    8.849995   -4.683500
+  Trace= -0.002369
+  
+  For jatom=  15 ,with type=   1
+   0.000601  0.000000  0.000000
+   0.000000 -0.002118 -0.000602
+   0.000000 -0.000602 -0.000851
+  The components of the vector are:    0.000000    8.849995    4.683500
+  Trace= -0.002369
+  
+ ======== NEW SHELL (ishell=  13): There are   2 atoms on this shell at distance=10.790000
+  For jatom=  50 ,with type=   2
+  -0.010018  0.000035  0.000000
+  -0.000035 -0.000712  0.000000
+   0.000000  0.000000 -0.001942
+  The components of the vector are:   10.790000    0.000000    0.000000
+  Trace= -0.012672
+  
+  For jatom=  98 ,with type=   2
+  -0.010018 -0.000035  0.000000
+   0.000035 -0.000712  0.000000
+   0.000000  0.000000 -0.001942
+  The components of the vector are:  -10.790000    0.000000    0.000000
+  Trace= -0.012672
+  
+ ======== NEW SHELL (ishell=  10): There are   4 atoms on this shell at distance=10.809566
+  For jatom=  28 ,with type=   2
+  -0.001282  0.000663  0.000121
+  -0.000663 -0.000105 -0.000045
+   0.000121  0.000045  0.000558
+  The components of the vector are:    5.395000    0.000000    9.367000
+  Trace= -0.000829
+  
+  For jatom=  30 ,with type=   2
+  -0.001282  0.000663 -0.000121
+  -0.000663 -0.000105  0.000045
+  -0.000121 -0.000045  0.000558
+  The components of the vector are:    5.395000    0.000000   -9.367000
+  Trace= -0.000829
+  
+  For jatom= 124 ,with type=   2
+  -0.001282 -0.000663 -0.000121
+   0.000663 -0.000105 -0.000045
+  -0.000121  0.000045  0.000558
+  The components of the vector are:   -5.395000    0.000000    9.367000
+  Trace= -0.000829
+  
+  For jatom= 126 ,with type=   2
+  -0.001282 -0.000663  0.000121
+   0.000663 -0.000105  0.000045
+   0.000121 -0.000045  0.000558
+  The components of the vector are:   -5.395000    0.000000   -9.367000
+  Trace= -0.000829
+  
+  
+ #############################################################################
+ #### For each shell, list of coefficients (IFC), number of neighbours... ####
+ #############################################################################
+ ======== NEW SHELL (ishell=   1): There are   1 atoms on this shell
+  For iatcell=   1 ,with type=   1
+  For jatom  =   1 ,with type=   1
+  For katom  =   1 ,with type=   1
+  \Phi3^{\alpha\beta x}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta y}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  \Phi3^{\alpha\beta z}=
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+   0.000000  0.000000  0.000000
+  (i,j) vector components: 0.000000  0.000000  0.000000
+  (j,k) vector components: 0.000000  0.000000  0.000000
+  (k,i) vector components: 0.000000  0.000000  0.000000
+  
+  
+ #############################################################################
+ ############## Compute the phonon spectrum, the DOS, ########################
+ ##############  the dynamical matrix and write them  ########################
+ #############################################################################
+ 
+ #############################################################################
+ ################### vibrational Density OF States (vDOS) ####################
+ #############################################################################
+ See the vdos.dat and TDEP_PHDOS* files
+ Write the IFC of TDEP in ifc_out.dat (and ifc_out.nc)
+ ------- achieved
+ Compute the vDOS
+ ------- achieved
+ (Please, pay attention to convergency wrt the BZ mesh : the ngqpt2 input variable)
+ See the dij.dat, omega.dat and eigenvectors files
+ See also the DDB file
+ 
+ #############################################################################
+ ######################### Elastic constants #################################
+ ################ Bulk and Shear modulus--Sound velocities ###################
+ #############################################################################
+ 
+ ========== Using the formulation proposed by Wallace (using the IFC) =========
+ Cijkl [in GPa]=
+ | C11 C12 C13 C14 C15 C16 |    331.887   54.173   26.237    0.000    0.000    0.000
+ | C21 C22 C23 C24 C25 C26 |     54.173  177.112   29.417    0.000    0.000    0.000
+ | C31 C32 C33 C34 C35 C36 |     26.237   29.417  165.864    0.000    0.000    0.000
+ | C41 C42 C43 C44 C45 C46 | =    0.000    0.000    0.000   98.410    0.000    0.000
+ | C51 C52 C53 C54 C55 C56 |      0.000    0.000    0.000    0.000   91.307    0.000
+ | C61 C62 C63 C64 C65 C66 |      0.000    0.000    0.000    0.000    0.000   71.121
+ 
+ ========== For an Anisotropic Material =======================================
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.003   -0.001   -0.000    0.000    0.000   -0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.001    0.006   -0.001    0.000    0.000   -0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.000   -0.001    0.006    0.000    0.000   -0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.010    0.000   -0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.011   -0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.014
+ 
+ ========== For an Orthotropic Material (see B. M. Lempriere (1968)) ==========
+ Young modulus E1, E2 and E3 [in GPa]= 313.471  164.413  160.035
+ Poisson ratio Nu21, Nu31, Nu23, Nu12, Nu13 and Nu32=   0.151    0.055    0.153    0.288    0.107    0.149
+ Shear modulus G23, G13 and G12 [in GPa]=  98.410   91.307   71.121
+ Sijkl [in GPa-1]=
+ | S11 S12 S13 S14 S15 S16 |      0.003   -0.001   -0.000    0.000    0.000    0.000
+ | S21 S22 S23 S24 S25 S26 |     -0.001    0.006   -0.001    0.000    0.000    0.000
+ | S31 S32 S33 S34 S35 S36 |     -0.000   -0.001    0.006    0.000    0.000    0.000
+ | S41 S42 S43 S44 S45 S46 | =    0.000    0.000    0.000    0.010    0.000    0.000
+ | S51 S52 S53 S54 S55 S56 |      0.000    0.000    0.000    0.000    0.011    0.000
+ | S61 S62 S63 S64 S65 S66 |      0.000    0.000    0.000    0.000    0.000    0.014
+ For density rho [in kg.m-3]=19032.880
+ 
+ ========================= Voigt average (constant strain) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=   99.391 and Shear G=   89.837
+ Average of Young modulus E [in GPa]=  207.110 Lame modulus Lambda [in GPa]=   39.500 and Poisson ratio Nu=    0.153
+ Velocities [in m.s-1]: compressional Vp= 3393.449  shear Vs= 2172.573  and bulk Vphi= 2285.183
+ Debye velocity [in m.s-1]= 2386.842  and temperature [in K]=  258.526
+ 
+ ========================= Reuss average (constant stress) ===================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=   89.823 and Shear G=   85.042
+ Average of Young modulus E [in GPa]=  193.926 Lame modulus Lambda [in GPa]=   33.128 and Poisson ratio Nu=    0.140
+ Velocities [in m.s-1]: compressional Vp= 3267.561  shear Vs= 2113.808  and bulk Vphi= 2172.412
+ Debye velocity [in m.s-1]= 2319.448  and temperature [in K]=  251.227
+ 
+ ============================== Hill average =================================
+ ISOTHERMAL modulus [in GPa]: Bulk Kt=   94.607 and Shear G=   87.439
+ Average of Young modulus E [in GPa]=  200.537 Lame modulus Lambda [in GPa]=   36.314 and Poisson ratio Nu=    0.147
+ Velocities [in m.s-1]: compressional Vp= 3331.099  shear Vs= 2143.392  and bulk Vphi= 2229.511
+ Debye velocity [in m.s-1]= 2353.403  and temperature [in K]=  254.904
+ 
+ ========================= Elastic anisotropy =================================
+ Elastic anisotropy index : A_U= 5*G_V/G_R + K_V/K_R - 6 =    0.388
+ Bulk anisotropy ratio : A_B= (B_V-B_R)/(B_V+B_R) =    0.051
+ Shear anisotropy ratio : A_G= (G_V-G_R)/(G_V+G_R) =    0.027
+  
+ #############################################################################
+ ######################### Energies, errors,...  #############################
+ #############################################################################
+ Thermodynamic quantities and convergence parameters of THE MODEL,
+      as a function of the step number (energies in eV/atom and forces in Ha/bohr) :
+ <U_TDEP> = U_0 + U_1 + U_2 + U_3
+       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3 ui uj uk >
+        and U_1 = <      sum_i    Phi1 ui >
+        and U_2 = < 1/2  sum_ij   Phi2 ui uj >
+        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >
+  Delta_U =   < U_MD - U_TDEP > 
+  Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 
+  Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
+  Sigma   = (< (F_MD - F_TDEP)^2 >/<F_MD**2>)**0.5 
+     <U_MD>            U_0              U_1              U_2              U_3            Delta_U          Delta_U2          Delta_F2          Sigma
+ -1416.73102      -1416.77525          0.00000          0.04423          0.00000         -0.00000          0.05843          0.00369          0.42240
+ NOTE : in the harmonic and classical limit (T>>T_Debye), U_2=3/2*kB*T=      0.03878
+ 
+ See the etotMDvsTDEP.dat & fcartMDvsTDEP.dat files
+ 
+ #############################################################################
+ ################# Thermodynamic quantities: Free energy,...##################
+ #############################################################################
+ See the thermo.dat file
+  
+ #############################################################################
+ ####### Gruneisen parameter, Thermal expansion, Thermal pressure... #########
+ #############################################################################
+ See the gruneisen.dat, alpha_gamma.dat and thermo3.dat files
+ 
+ Gruneisen parameter :                 Gamma=           0.000
+                The Gruneisen matrix is  |    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+ Thermal expansion (K^{-1}*10^6) :   alpha_v=           0.000
+        The thermal expansion matrix is  |    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+ Thermal pressure (in GPa) : 
+    ------- w   intrinsic effects and w   ZPE --------
+                 P_th=sum_i Gamma_i*E_i/V   =           0.000
+           The thermal pressure matrix is|    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+    ------- w   intrinsic effects and w/o ZPE --------
+                 P_th=integ{Gamma*C_v/V dT} =           0.000
+    ------- w/o intrinsic effects and w/o ZPE --------
+                 P_th=Gamma*E_th/V          =           0.000
+           The thermal pressure matrix is|    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+                                         |    0.000    0.000    0.000|
+ Volume (bohr^3 per unit cell):            V=         280.292
+ Thermal energy (eV) :                  E_th=           0.157
+ Heat capacity at constant V (k_B/f.u.): C_v=           5.919
+ Heat capacity at constant P (k_B/f.u.): C_p=           5.919
+ Isothermal Bulk Modulus (GPa):          B_T=          94.607
+ Isentropic Bulk Modulus (GPa):          B_S=          94.607
+ Longitudinal sound velocity (m.s-1):     Vp=        3331.099
+ Transverse sound velocity (m.s-1):       Vs=        2143.392
+  
+ #############################################################################
+ ######################### CALCULATION COMPLETED #############################
+ #############################################################################
+ Suggested references for the acknowledgment of ABINIT usage.
+ 
+ The users of ABINIT have little formal obligations with respect to the ABINIT group
+ (those specified in the GNU General Public License, http://www.gnu.org/copyleft/gpl.txt).
+ However, it is common practice in the scientific literature,
+ to acknowledge the efforts of people that have made the research possible.
+ In this spirit, please find below suggested citations of work written by ABINIT developers,
+ corresponding to implementations inside of ABINIT that you have used in the present run.
+ Note also that it will be of great value to readers of publications presenting these results,
+ to read papers enabling them to understand the theoretical formalism and details
+ of the ABINIT implementation.
+ For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
+ 
+ [1] a-TDEP: Temperature Dependent Effective Potential for Abinit 
+ -- Lattice dynamic properties including anharmonicity
+ F. Bottin, J. Bieder and J. Bouchet, Comput. Phys. Comm. 254, 107301 (2020).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [2] Thermal evolution of vibrational properties of alpha-U
+ J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).
+ Strong suggestion to cite this paper in your publications.
+ 
+ [3] Lattice dynamics of anharmonic solids from first principles
+ O. Hellman, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 84, 180301(R) (2011).
+ 
+ [4] Temperature dependent effective potential method for accurate free energy calculations of solids
+ O. Hellman, P. Steneteg, I.A. Abrikosov and S.I. Simak, Phys. Rev. B 87, 104111 (2013).

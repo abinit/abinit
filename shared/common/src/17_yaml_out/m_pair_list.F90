@@ -8,7 +8,7 @@
 !!  It is implemented in C as a simple linked pair list (associative list).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2022 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,12 +19,6 @@
 !! - Simplify the usage of get by removing the limit in key and string size
 !! - Simplify the usage of get by removing the need for variable for all possible
 !!   content when you know what is stored
-!!
-!! PARENTS
-!!   m_yaml_out, m_neat, m_common
-!!
-!! CHILDREN
-!!   m_type_pair_list
 !!
 !! SOURCE
 
@@ -146,10 +140,6 @@ module m_pair_list
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function pair_list_length(pl) result(length)
@@ -180,12 +170,6 @@ end function pair_list_length
 !!     -1 if the key was not present (neither i nor r are setted)
 !!     -2 if the list is empty (neither i nor r are setted)
 !!  r <real(kind=c_double)>=
-!!
-!! PARENTS
-!!      m_pair_list
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
 !!
 !! SOURCE
 
@@ -224,12 +208,6 @@ end subroutine pair_list_get
 !!  i <integer(kind=c_int)>=
 !!  r <real(kind=c_double)>=
 !!
-!! PARENTS
-!!      m_pair_list
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
-!!
 !! SOURCE
 
 subroutine pair_list_look(pl, key, type_code, i, r, s)
@@ -254,11 +232,6 @@ end subroutine pair_list_look
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
-!!
 !! SOURCE
   subroutine pair_list_next(pl)
     class(pair_list),intent(in) :: pl
@@ -273,11 +246,6 @@ end subroutine pair_list_look
 !! FUNCTION
 !!  free memory occupied by the list (not the pair_list variable itself !)
 !!  and reset the pair_list variable (it can be reused as an empty list)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
 !!
 !! SOURCE
 
@@ -307,12 +275,6 @@ end subroutine pair_list_free
 !!  s <character(len=*)>=optional
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_pair_list
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
 !!
 !! SOURCE
 
@@ -354,11 +316,6 @@ end subroutine pair_list_set
 !!  s <character(len=*)>=optional
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
 !!
 !! SOURCE
 
@@ -424,11 +381,6 @@ end subroutine pair_list_set_keys
 !! INPUTS
 !!  keylist: List of comma-separated keys
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
-!!
 !! SOURCE
 
 subroutine pair_list_set_keys_to_null(pl, keylist)
@@ -463,11 +415,6 @@ end subroutine pair_list_set_keys_to_null
 !! FUNCTION
 !!  have the cursor going back to the first element (cf: pair_list_next)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
-!!
 !! SOURCE
 
 subroutine pair_list_restart(pl)
@@ -494,11 +441,6 @@ end subroutine pair_list_restart
 !!  i <integer>=
 !!  r <real(kind=c_double)>=
 !!  s <character(len=*)>=
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
 !!
 !! SOURCE
 
@@ -528,11 +470,6 @@ end subroutine pair_list_iter
 !!  pl <class(pair_list)>=
 !!  key <character(len=*)>=
 !!  cnt=Increment
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      pair_list_get,pair_list_set
 !!
 !! SOURCE
 

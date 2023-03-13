@@ -6,14 +6,10 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG, DC, DW)
+!!  Copyright (C) 2008-2022 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -73,14 +69,6 @@ contains
 !!
 !! OUTPUT
 !!   printing only
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -478,14 +466,6 @@ end subroutine memory_eval
 !! One might also estimate if there must be a chain arriving at:
 !!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro, clnup1.
 !! This is because there are allocated arrays in these routines.
-!!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -1383,14 +1363,6 @@ end subroutine memory
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
@@ -1923,14 +1895,6 @@ end subroutine memana
 !! Some BIG approximations, not present in the GS corresponding routine
 !!  have been done : nsym=nsym1, nkpt=nkpt_rbz, mpw=mpw1 ...
 !!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
@@ -2289,14 +2253,6 @@ end subroutine memorf
 !!  lnmax=maximum number of l,n projectors, not taking into account the spin-orbit
 !!  lnmaxso=maximum number of l,n projectors, taking into account the spin-orbit
 !!
-!! PARENTS
-!!      m_memeval,m_psps
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
@@ -2438,14 +2394,6 @@ end subroutine getdim_nloc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_memeval,m_psps
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine setmqgrid(mqgrid,mqgriddg,ecut,ecutdg,gprimd,nptsgvec,usepaw)
@@ -2546,14 +2494,6 @@ end subroutine setmqgrid
 !!
 !! NOTES
 !! The estimator is the one provided by BigDFT.
-!!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 

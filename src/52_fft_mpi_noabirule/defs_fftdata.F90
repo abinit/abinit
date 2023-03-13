@@ -7,7 +7,7 @@
 !! used to define fft grids within Abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2021 ABINIT group (LG, PMA)
+!! Copyright (C) 2000-2022 ABINIT group (LG, PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -154,11 +154,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!  n_out=Output N value
 !!  ierr=Status error 
-!!
-!! PARENTS
-!!      m_fft_mesh
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

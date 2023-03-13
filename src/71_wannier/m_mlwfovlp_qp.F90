@@ -7,14 +7,10 @@
 !!  Interpolate GW corrections with Wannier functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (DRH)
+!!  Copyright (C) 2008-2022 ABINIT group (DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -45,7 +41,7 @@ module m_mlwfovlp_qp
  use m_geometry,       only : metric
  use m_crystal,        only : crystal_t
  use m_kpts,           only : listkk
- use m_bz_mesh,        only : kmesh_t, kmesh_init, kmesh_free
+ use m_bz_mesh,        only : kmesh_t
  use m_ebands,         only : ebands_init, ebands_free
  use m_qparticles,     only : rdqps, rdgw
  use m_sort,           only : sort_dp
@@ -103,12 +99,6 @@ contains
 !!   or inaccuracies may result.
 !!  This is at best a beta version of this code, with little consistency
 !!   checking, so the user must be very careful or the results may be invalid.
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
@@ -223,10 +213,10 @@ subroutine mlwfovlp_qp(cg,Cprj_BZ,dtset,dtfil,eigen,mband,mcg,mcprj,mkmem,mpw,na
 
  !different conventions are used in GW and abinit!!
  cryst = hdr%get_crystal(gw_timrev=timrev+1)
- call kmesh_init(Kibz_mesh,Cryst,nkibz,kibz,Dtset%kptopt)
+ call Kibz_mesh%init(Cryst,nkibz,kibz,Dtset%kptopt)
  wtk_ibz=Kibz_mesh%wt
  call cryst%free()
- call kmesh_free(Kibz_mesh)
+ call Kibz_mesh%free()
 
  ABI_MALLOC(ibz2bz,(nkibz,6))
  call listkk(dksqmax,gmet,ibz2bz,dtset%kpt,dtset%kptgw,nkpt,dtset%nkptgw,&
@@ -550,12 +540,6 @@ end subroutine mlwfovlp_qp
 !!
 !! TODO
 !! To be moved to cprj_utils, although here we use complex variables.
-!!
-!! PARENTS
-!!      m_mlwfovlp_qp
-!!
-!! CHILDREN
-!!      pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 !!

@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (DRH,XG)
+!!  Copyright (C) 2001-2022 ABINIT group (DRH,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -85,12 +81,6 @@ contains
 !! OUTPUT
 !!  vxc1(cplex*nfft,nspden)=change in exchange-correlation potential (including
 !!   core-correction, if applicable)
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      xcden,xcpot
 !!
 !! SOURCE
 
@@ -331,12 +321,6 @@ end subroutine dfpt_mkvxcstr
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
-!!
-!! PARENTS
-!!      m_dfpt_mkvxcstr
-!!
-!! CHILDREN
-!!      xcden,xcpot
 !!
 !! SOURCE
 

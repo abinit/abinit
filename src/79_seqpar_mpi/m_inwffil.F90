@@ -6,14 +6,10 @@
 !!  Do initialization of wavefunction files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -166,12 +162,6 @@ contains
 !!
 !! If ground state format (formeig=0) occ(mband*nkpt*nsppol) was output.
 !! NOT OUTPUT NOW !
-!!
-!! PARENTS
-!!      m_dfpt_lw,m_dfptnl_loop,m_gstate,m_longwave,m_nonlinear,m_pead_nl_loop
-!!
-!! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -975,6 +965,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &   dtset%prtvol,randalg,restart,hdr%rprimd,sppoldbl_eff,symrel,tnons,unkg,wff1,wffnow)
 
    if (nsppol2nspinor/=0)  then
+     ABI_FREE(indkk_eff)
      ABI_FREE(nband_eff)
    end if
 
@@ -1099,12 +1090,6 @@ end subroutine inwffil
 !!
 !! TODO
 !! THE DESCRIPTION IS TO BE COMPLETELY REVISED, AS THIS ONE COMES FROM inwffil.f
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -1825,12 +1810,6 @@ end subroutine wfsinp
 !! occ_k(nband_k)=list of occupations (input or left to their initial value)
 !! ikptsp_old=number of the previous spin-k point, or 0 if first call of present file
 !!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
-!!
 !! SOURCE
 
 subroutine initwf(cg,eig_k,formeig,headform,icg,ikpt,ikptsp_old,&
@@ -2051,12 +2030,6 @@ end subroutine initwf
 !! This allows for changing the number of plane waves.
 !!
 !! * In the present status of this routine, occ is not output.
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -2645,12 +2618,6 @@ end subroutine newkpt
 !! The number of input bands must already be minimal at the input.
 !! This means, when input and output nspinor are equal : nbd1<nbd2
 !! When the two nspinor differ, one must have nbd1/nspinor1<nbd2/nspinor2
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 
@@ -3292,12 +3259,6 @@ end subroutine wfconv
 !!
 !! * This routine should not be used for RF wavefunctions, since
 !!   it does not treat the eigenvalues as a matrix.
-!!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      timab,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 

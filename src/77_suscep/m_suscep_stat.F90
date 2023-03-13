@@ -6,14 +6,10 @@
 !! Compute the susceptibility matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG, AR, MB)
+!!  Copyright (C) 2008-2022 ABINIT group (XG, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -146,13 +142,6 @@ CONTAINS  !=====================================================================
 !!   dielectric matrix within RPA approximation; in this approximation, only
 !!   four susceptibilities are non-zero: chi0-(s1,s1),(s3,s3).
 !!   They are stored in susmat(:,ipw1,1:2,ipw2,1:2)
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat
-!!      timab
 !!
 !! SOURCE
 
@@ -883,13 +872,6 @@ end subroutine suscep_stat
 !! This is in slight violation of programming rules, but I think it is safe, since the pointers remain local
 !! GZ
 !!
-!! PARENTS
-!!      m_suscep_stat
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat
-!!      timab
-!!
 !! SOURCE
 
 subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbound,&
@@ -1475,13 +1457,6 @@ end subroutine susk
 !!   effect of change of fermi energy
 !!  susmat(2,npwdiel,nspden,npwdiel,nspden)=
 !!   the susceptibility (or density-density response) matrix in reciprocal space
-!!
-!! PARENTS
-!!      m_suscep_stat
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourwf,init_distribfft_seq,initmpi_seq,pawsushat
-!!      timab
 !!
 !! SOURCE
 
