@@ -5645,7 +5645,7 @@ end subroutine dfpt_prtph
 !!  ntypat=number of atom types
 !!  typat(natom)=integer label of each type of atom (1,2,...)
 !!  [herm_opt]= 1 to hermitianize mat (default)
-!!          0 if no symmetrization should be performed
+!!              0 if no symmetrization should be performed
 !!
 !! SIDE EFFECTS
 !!  mat(2*3*natom*3*natom)=Multiplies by atomic masses in output.

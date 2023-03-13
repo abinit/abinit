@@ -458,6 +458,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  wtq = one / nqbz ! Weights sum up to one
  ABI_MALLOC(bz2ibz_smap, (6, nqbz))
 
+ ! FIXME: timrev1 should be set to 0 if TR cannot be used
  call symkpt(chksymbreak0,crystal%gmet,ibz2bz,iout0,qbz,nqbz,ifc%nqibz,crystal%nsym,&
    crystal%symrec,timrev1,wtq,wtq_folded, bz2ibz_smap, xmpi_comm_self)
 
@@ -2587,7 +2588,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
    do iatom = 1, natom
      do idir = 1, 3
        imode = idir + 3*(iatom-1)
-!      factor two for Ry output - this may change in definitive BT and abinit formats
+       ! factor two for Ry output - this may change in definitive BT and abinit formats
        write (unit_btrap,trim(format_line_btrap))phfrq(imode)*two,d2cart(1:2,1:3,1:natom,idir,iatom)
      end do
    end do
