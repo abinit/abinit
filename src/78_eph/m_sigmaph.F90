@@ -654,7 +654,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,iq_ibz_frohl,iq_bz_frohl,my_npert
- integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
+ integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs, qptopt ! = 1
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ibsum, ii, jj, iw !ib_kq,
  !integer :: u1_master, ip
  integer :: mcgq, mgscq, ig, ispinor, ifft !nband_kq,
@@ -1159,13 +1159,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    !if (sigma%imag_only) comm_rpt = xmpi_comm_self
    !comm_rpt = sigma%bsum_comm%value
    comm_rpt = xmpi_comm_self
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+   qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
    ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
    ABI_MALLOC(qselect, (sigma%nqibz))
    qselect = 1
    if (sigma%imag_only .and. sigma%qint_method == 1) then
-     call qpoints_oracle(sigma, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
+     call qpoints_oracle(sigma, dtset, cryst, ebands, sigma%qibz, sigma%nqibz, sigma%nqbz, sigma%qbz, qselect, comm)
    end if
    call dvdb%ftqcache_build(nfftf, ngfftf, sigma%nqibz, sigma%qibz, dtset%dvdb_qcache_mb, qselect, sigma%itreat_qibz, comm)
 
@@ -1174,7 +1175,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    qselect = 1
    ! Try to predict the q-points required to compute tau.
    if (sigma%imag_only .and. sigma%qint_method == 1) then
-     call qpoints_oracle(sigma, cryst, ebands, dvdb%qpts, dvdb%nqpt, sigma%nqbz, sigma%qbz, qselect, comm)
+     call qpoints_oracle(sigma, dtset, cryst, ebands, dvdb%qpts, dvdb%nqpt, sigma%nqbz, sigma%qbz, qselect, comm)
    end if
  end if
 
@@ -2619,8 +2620,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: master = 0, qptopt1 = 1, istwfk1 = 1, timrev1 = 1
- integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz
+ integer,parameter :: master = 0, istwfk1 = 1
+ integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz, qptopt, qtimrev
  integer :: onpw, ii, ipw, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
  integer :: jj, bstart, natom, natom3 !, ip, iatom, idir, pertcase,
  integer :: isym_k, trev_k, mband, i1,i2,i3, nrest, color
@@ -2687,19 +2688,20 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
 
- ! Setup IBZ, weights and BZ. Always use q --> -q symmetry for phonons even in systems without inversion
+ ! Setup IBZ, weights and BZ.
+ ! Assume qptopt == kptopt unless value is specified in input
  qptrlatt = 0; qptrlatt(1, 1) = new%ngqpt(1); qptrlatt(2, 2) = new%ngqpt(2); qptrlatt(3, 3) = new%ngqpt(3)
  !my_shiftq(:,1) = [0.1, 0, 0]
- !qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
+ qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+ qtimrev = kpts_timrev_from_kptopt(qptopt)
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, my_nshiftq, my_shiftq, &
                              new%nqibz, new%qibz, new%wtq, new%nqbz, new%qbz, bz2ibz=new%ind_qbz2ibz)
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(temp, (6, new%nqbz))
 
  qrank = krank_from_kptrlatt(new%nqibz, new%qibz, qptrlatt, compute_invrank=.False.)
-
- if (kpts_map("symrec", timrev1, cryst, qrank, new%nqbz, new%qbz, temp) /= 0) then
+ if (kpts_map("symrec", qtimrev, cryst, qrank, new%nqbz, new%qbz, temp) /= 0) then
    ABI_ERROR("Cannot map qBZ to qIBZ!")
  end if
 
@@ -4202,8 +4204,8 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
- integer,parameter :: timrev1 = 1, master = 0
- integer :: spin, my_rank, iq_ibz, nprocs !, nbcalc_ks !, bstart_ks
+ integer,parameter :: master = 0
+ integer :: spin, my_rank, iq_ibz, nprocs, qtimrev, qptopt  !, nbcalc_ks !, bstart_ks
  integer :: ikpt, ibz_k, isym_k, itim_k !isym_lgk,
  real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
@@ -4307,10 +4309,13 @@ subroutine sigmaph_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
    ! Find correspondence IBZ_k --> IBZ
    ABI_MALLOC(iqk2dvdb, (6, self%nqibz_k))
 
+   ! Assume qptopt == kptopt unless value is specified in input
+   qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   qtimrev = kpts_timrev_from_kptopt(qptopt)
    qptrlatt = 0; qptrlatt(1,1) = self%ngqpt(1); qptrlatt(2,2) = self%ngqpt(2); qptrlatt(3,3) = self%ngqpt(3)
    qrank = krank_from_kptrlatt(self%nqibz, self%qibz, qptrlatt, compute_invrank=.False.)
 
-   if (kpts_map("symrec", timrev1, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
+   if (kpts_map("symrec", qtimrev, cryst, qrank, self%nqibz_k, self%qibz_k, iqk2dvdb) /= 0) then
      write(msg, '(3a)' )&
        "At least one of the q points in the IBZ_k could not be generated from one in the IBZ.", ch10,&
        "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."
@@ -5440,23 +5445,24 @@ end subroutine sigmaph_get_all_qweights
 !!
 !! SOURCE
 
-subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, comm)
+subroutine qpoints_oracle(sigma, dtset, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nqpt, nqbz, comm
  class(sigmaph_t),intent(in) :: sigma
+ type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
+ integer,intent(in) :: nqpt, nqbz, comm
 !arrays
  real(dp),intent(in) :: qpts(3,nqpt), qbz(3,nqbz)
  integer,intent(out) :: qselect(nqpt)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: timrev1 = 1, master = 0
+ integer,parameter :: master = 0
  integer :: spin, ikcalc, ik_ibz, iq_bz, ierr, db_iqpt, ibsum_kq, ikq_ibz, ikq_bz
- integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank
+ integer :: cnt, my_rank, nprocs, ib_k, band_ks, nkibz, nkbz, kq_rank, qptopt, qtimrev
  real(dp) :: eig0nk, eig0mkq, ediff, cpu, wall, gflops
  character(len=5000) :: msg
  type(krank_t) :: krank, qrank
@@ -5529,13 +5535,15 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
  call cwtime_report(" qbz_count", cpu, wall, gflops)
 
  ! Get mapping QBZ --> List of q-points involved in e-ph scattering for e/h in pockets.
- ! Note that time-reversal is always used for phonons.
+ ! Assume qptopt == kptopt unless value is specified in input
  ABI_MALLOC(qbz2qpt, (6, nqbz))
 
  qptrlatt = 0; qptrlatt(1,1) = sigma%ngqpt(1); qptrlatt(2,2) = sigma%ngqpt(2); qptrlatt(3,3) = sigma%ngqpt(3)
  qrank = krank_from_kptrlatt(nqpt, qpts, qptrlatt, compute_invrank=.False.)
+ qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+ qtimrev = kpts_timrev_from_kptopt(qptopt)
 
- if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, qbz2qpt) /= 0) then
+ if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, qbz2qpt) /= 0) then
    write(msg, '(3a)' )&
      "At least one of the q-points could not be generated from a symmetrical one in the DVDB.", ch10, &
      "Action: check your DVDB file and use eph_task to interpolate the potentials on a denser q-mesh."

@@ -503,9 +503,9 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: qptopt1 = 1, timrev1 = 1, master = 0
+ integer,parameter :: master = 0
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol
- integer :: spin, natom3, cnt
+ integer :: spin, natom3, cnt, qptopt, qtimrev
  integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, ebands_timrev, max_nq, max_nk
  integer :: ncid, spin_ncid, ncerr, gstore_fform
  real(dp) :: cpu, wall, gflops
@@ -576,10 +576,12 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  ! NB: only sigmaph seems to be using this optional argument
 
  ! Setup qIBZ, weights and BZ.
- ! Always use q --> -q symmetry for phonons even in systems without inversion
+ ! Assume qptopt == kptopt unless value is specified in input
  qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
- !qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
+ qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+ qtimrev = kpts_timrev_from_kptopt(qptopt)
+ call wrtout(std_out, sjoin(" Generating q-IBZ for with qptopt:", itoa(qptopt)))
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, my_nshiftq, my_shiftq, &
                              gstore%nqibz, gstore%qibz, gstore%wtq, gstore%nqbz, qbz)
                              !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
@@ -589,7 +591,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
 
  qrank = krank_from_kptrlatt(gstore%nqibz, gstore%qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", timrev1, cryst, qrank, gstore%nqbz, qbz, qbz2ibz) /= 0) then
+ if (kpts_map("symrec", qtimrev, cryst, qrank, gstore%nqbz, qbz, qbz2ibz) /= 0) then
    ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
  call qrank%free()
@@ -622,9 +624,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
 
  ABI_MALLOC(kbz2ibz, (6, gstore%nkbz))
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-
  gstore%krank_ibz = krank_from_kptrlatt(gstore%nkibz, gstore%kibz, ebands%kptrlatt, compute_invrank=.False.)
-
  if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gstore%nkbz, kbz, kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
@@ -764,8 +764,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
       nctkdim_t("natom", gstore%cryst%natom), &
       nctkdim_t("natom3", 3 * gstore%cryst%natom), &
       nctkdim_t("gstore_cplex", dtset%gstore_cplex) &
-     ], &
-   defmode=.True.)
+   ], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "gstore_with_vk"])
@@ -840,8 +839,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
         nctkdim_t("nb", gstore%brange_spin(2, spin) - gstore%brange_spin(1, spin) + 1), &
         nctkdim_t("glob_nk", gstore%glob_nk_spin(spin)), &
         nctkdim_t("glob_nq", gstore%glob_nq_spin(spin))  &
-       ], &
-       defmode=.True.)
+     ], defmode=.True.)
      NCF_CHECK(ncerr)
 
      ! Define scalars
@@ -2592,7 +2590,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5
+ integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, ider0 = 0, idir0 = 0, LOG_MODQ = 5, qptopt1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
@@ -2685,7 +2683,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Prepare Fourier interpolation of DFPT potentials.
  comm_rpt = xmpi_comm_self
  !comm_rpt = bqs_comm%value
- call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+ call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
  ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
  ABI_MALLOC(itreat_qibz, (gstore%nqibz))
