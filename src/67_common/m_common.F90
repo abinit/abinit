@@ -8,14 +8,10 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -169,14 +165,6 @@ contains
 !! OUTPUT
 !!  quit= 0 if the SCF cycle is not finished; 1 otherwise.
 !!  conv_retcode=Only if choice==3, != 0 if convergence is not achieved.
-!!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
 !!
 !! SOURCE
 
@@ -989,14 +977,6 @@ end subroutine scprqt
 !! NOTES
 !! SHOULD BE CLEANED !
 !!
-!! PARENTS
-!!      m_gstate,m_longwave,m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
@@ -1135,14 +1115,6 @@ end subroutine setup1
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_common,m_dfpt_looppert,m_gstate,m_respfn_driver,m_vtorho
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
 !!
 !! SOURCE
 
@@ -1444,14 +1416,6 @@ end subroutine prteigrs
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_gstate,m_scfcv_core
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 subroutine prtene(dtset,energies,iout,usepaw)
@@ -1750,14 +1714,6 @@ end subroutine prtene
 !!  pspheads(npsp)=<type pspheader_type>=all the important information from the
 !!   pseudopotential file headers, as well as the psp file names
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
@@ -1947,10 +1903,6 @@ end subroutine get_dtsets_pspheads
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -2005,10 +1957,6 @@ end function ebands_from_file
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

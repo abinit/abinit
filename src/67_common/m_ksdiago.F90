@@ -6,14 +6,10 @@
 !!  Direct diagonalization of the KS Hamiltonian H_k(G,G')
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -237,12 +233,6 @@ contains
 !!   ksdiago is designed such that it is possible to diagonalize the Hamiltonian at an arbitrary k-point
 !!   or spin (not efficient but easy to code). Therefore ksdiago is useful non only for
 !!   the KSS generation but also for testing more advanced iterative algorithms as well as interpolation techniques.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 
@@ -631,12 +621,6 @@ end subroutine ksdiago
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,initmpi_seq,kpgsph,wrtout
 !!
 !! SOURCE
 

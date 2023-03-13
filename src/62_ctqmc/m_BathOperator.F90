@@ -11,18 +11,12 @@
 !!  simgle Anderson Impurity Model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -48,7 +42,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,7 +110,7 @@ CONTAINS
 !!  Initialize and allocate data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -134,12 +128,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -202,7 +190,7 @@ END SUBROUTINE BathOperator_init
 !!  Reset all internal variables
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -215,12 +203,6 @@ END SUBROUTINE BathOperator_init
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -262,7 +244,7 @@ END SUBROUTINE BathOperator_reset
 !!  It is better to use the macro defined in defs.h
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -276,12 +258,6 @@ END SUBROUTINE BathOperator_reset
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -313,7 +289,7 @@ END SUBROUTINE BathOperator_activateParticle
 !!  at time time
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -327,12 +303,6 @@ END SUBROUTINE BathOperator_activateParticle
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -359,7 +329,7 @@ END FUNCTION BathOperator_hybrid
 !!  is trying to be added and store some array for setMadd
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -376,12 +346,6 @@ END FUNCTION BathOperator_hybrid
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 DOUBLE PRECISION  FUNCTION BathOperator_getDetAdd(this,CdagC_1, position, particle)
@@ -525,7 +489,7 @@ END FUNCTION BathOperator_getDetAdd
 !!  is trying to be removed 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -540,12 +504,6 @@ END FUNCTION BathOperator_getDetAdd
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -605,7 +563,7 @@ END FUNCTION BathOperator_getDetRemove
 !!  segments of particle
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -621,12 +579,6 @@ END FUNCTION BathOperator_getDetRemove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -695,7 +647,7 @@ END FUNCTION BathOperator_getDetF
 !!  Update de M this inserting a row and a column
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -709,12 +661,6 @@ END FUNCTION BathOperator_getDetF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -966,7 +912,7 @@ END SUBROUTINE BathOperator_setMAdd
 !!  delete one row and one column of the M this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -980,12 +926,6 @@ END SUBROUTINE BathOperator_setMAdd
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1145,7 +1085,7 @@ END SUBROUTINE BathOperator_setMRemove
 !!  Recompute 2 M this swaping the segments
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1160,12 +1100,6 @@ END SUBROUTINE BathOperator_setMRemove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1194,7 +1128,7 @@ END SUBROUTINE BathOperator_swap
 !!  Copy input hybridization functions from a file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1209,12 +1143,6 @@ END SUBROUTINE BathOperator_swap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1246,7 +1174,7 @@ END SUBROUTINE BathOperator_initF
 !!  Copy F from input array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1260,12 +1188,6 @@ END SUBROUTINE BathOperator_initF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1302,7 +1224,7 @@ END SUBROUTINE BathOperator_setF
 !!  print F function
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1316,12 +1238,6 @@ END SUBROUTINE BathOperator_setF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1365,7 +1281,7 @@ END SUBROUTINE BathOperator_printF
 !!  print M =F^{-1} this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1380,12 +1296,6 @@ END SUBROUTINE BathOperator_printF
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1413,7 +1323,7 @@ END SUBROUTINE BathOperator_printM
 !!  Deallocate and reset every thing
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1426,12 +1336,6 @@ END SUBROUTINE BathOperator_printM
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1476,7 +1380,7 @@ END SUBROUTINE BathOperator_destroy
 !!  Just store if we perfom check for updates of M
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1490,12 +1394,6 @@ END SUBROUTINE BathOperator_destroy
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1519,7 +1417,7 @@ END SUBROUTINE BathOperator_doCheck
 !!  with the already computed M this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1533,12 +1431,6 @@ END SUBROUTINE BathOperator_doCheck
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1636,7 +1528,7 @@ END SUBROUTINE BathOperator_checkM
 !!  compute a percentage error / checkM
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1650,12 +1542,6 @@ END SUBROUTINE BathOperator_checkM
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

@@ -8,7 +8,7 @@
 !!  Mainly used in Berry phase formalism.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
+!! Copyright (C) 2018-2022 ABINIT group (JWZ,TRangel,BA,FJ,PHermet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,11 +89,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
-!!
-!! PARENTS
-!!      m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -207,11 +202,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!  The mpi part will work with mlwfovlp but not for berryphase_new
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -620,11 +610,6 @@ CONTAINS  !=====================================================================
 !! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
 !!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine smatrix_k_paw(cprj_k,cprj_kb,dtefield,kdir,kfor,mband,natom,smat_k_paw,typat)
@@ -715,11 +700,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !! this function computes the on-site data for the PAW version of
 !! <u_nk|u_mk+b>, that is, two Bloch vectors at two different k points.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_paw_overlap
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -856,11 +836,6 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_berryphase_new,m_paw_overlap
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

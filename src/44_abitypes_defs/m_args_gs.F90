@@ -8,14 +8,10 @@
 !!  especially those depending on the image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2015-2021 ABINIT group (MT)
+!! Copyright (C) 2015-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -113,11 +109,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  args_gs=<type(args_gs_type)>=args_gs datastructure
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine args_gs_init(args_gs,amu,cellcharge,mixalch,dmatpawu,upawu,jpawu,rprimd_orig)
@@ -159,11 +150,6 @@ end subroutine args_gs_init
 !!
 !! SIDE EFFECTS
 !!  args_gs(:)=<type(args_gs_type)>=args_gs datastructure
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

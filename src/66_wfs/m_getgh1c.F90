@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -116,13 +112,6 @@ contains
 !!                       or part of <G|K^(1)+Vnl^(1)-lambda.S^(1)|C> not depending on VHxc^(1) (sij_opt==-1)
 !! if (sij_opt=1)
 !!  gs1c(2,npw1*nspinor)=<G|S^(1)|C> (S=overlap) on the k+q sphere.
-!!
-!! PARENTS
-!!      m_ddk,m_dfpt_cgwf,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_gkk,m_phgamma
-!!      m_phpi,m_rf2,m_sigmaph
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -855,13 +844,6 @@ end subroutine getgh1c
 !!  vlocal(n4,n5,n6,nvloc)= GS local potential in real space, on the augmented coarse fft grid
 !!  vlocal1(cplex*n4,n5,n6,nvloc)= RF local potential in real space, on the augmented coarse fft grid
 !!
-!! PARENTS
-!!      m_dfpt_lwwf,m_dfpt_vtorho,m_dfptnl_pert,m_gkk,m_phgamma,m_phpi
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 
 subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvloc,&
@@ -957,12 +939,6 @@ end subroutine rf_transgrid_and_pack
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_ddk,m_dfpt_lwwf,m_dfpt_vtorho,m_gkk,m_phgamma,m_phpi,m_sigmaph
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -1270,12 +1246,6 @@ end subroutine getgh1c_setup
 !!  === if optcprj=1 ===
 !!  dcwaveprj(natom,nspinor*optcprj)=change of wavefunction due to change of overlap PROJECTED ON NL-PROJECTORS:
 !!
-!! PARENTS
-!!      m_dfpt_cgwf,m_dfpt_nstwf
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 
 subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
@@ -1439,12 +1409,6 @@ end subroutine getdc1
 !! 				    Which is equivalent (except for an i factor) to the first
 !!                                  q-derivative along cartesian coordinates of the strain
 !!                                  perturbation hamiltonian.
-!!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 
@@ -1671,24 +1635,18 @@ end subroutine getgh1dqc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      fourwf
-!!
 !! SOURCE
 
 subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qdir1,&    ! In
-&                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&                    ! In
+&                natom,rmet,rprimd,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&             ! In
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                            ! In
 &                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&       ! Out
-&                qdir2)                                                                  ! Optional
+&                reuse_ffnlk,reuse_ffnl1,qdir2)                                          ! Optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,ipert,istwf_k,natom,npw_k,npw1_k,nylmgr,qdir1,useylmgr1
- integer,intent(in),optional :: qdir2
+ integer,intent(in),optional :: reuse_ffnlk,reuse_ffnl1,qdir2
  integer,intent(out) :: nkpg,nkpg1
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
@@ -1696,28 +1654,33 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: kg_k(3,npw_k),kg1_k(3,npw1_k)
- real(dp),intent(in) :: kpoint(3),kpq(3),gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),intent(in) :: kpoint(3),kpq(3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
 ! real(dp),intent(in) :: ylmgr1_k(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: ylmgr1_k(npw1_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: ylm1_k(npw1_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),allocatable,intent(out) :: dqdqkinpw(:),kinpw1(:)
- real(dp),allocatable,intent(out) :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable,intent(inout) :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
  real(dp),allocatable,intent(out) :: kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: dimffnl1,dimffnlk,ider,idir0,ig,mu,mua,mub,ntypat
  integer :: nu,nua,nub
+ integer :: reuse_ffnlk_,reuse_ffnl1_
  logical :: qne0
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ffnl1_tmp(:,:,:,:)
+ real(dp) :: rprim(3,3)
 
 
 ! *************************************************************************
+
+ reuse_ffnlk_ = 0; if (present(reuse_ffnlk)) reuse_ffnlk_ = reuse_ffnlk
+ reuse_ffnl1_ = 0; if (present(reuse_ffnl1)) reuse_ffnl1_ = reuse_ffnl1
 
  ntypat = psps%ntypat
  qne0=((kpq(1)-kpoint(1))**2+(kpq(2)-kpoint(2))**2+(kpq(3)-kpoint(3))**2>=tol14)
@@ -1739,16 +1702,20 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
 !===== Preparation of the non-local contributions
 
  dimffnlk=0;if (ipert<=natom) dimffnlk=1
- ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,ntypat))
 
 !Compute nonlocal form factors ffnlk at (k+G)
-if (ipert<=natom) then
- ider=0;idir0=0
- call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
-& gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
-& psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
-& psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
-end if
+ if (reuse_ffnlk_ == 0) then
+   ABI_MALLOC(ffnlk,(npw_k,dimffnlk,psps%lmnmax,ntypat))
+   if (ipert<=natom) then
+     ider=0;idir0=0
+     call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
+   & gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+   & psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
+   & psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
+   end if
+ else 
+   ABI_CHECK(all(shape(ffnlk) == [npw_k, dimffnlk, psps%lmnmax, ntypat]), "Wrong shape in input ffnlk")
+ end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G)
 !TODO: For the second order gradients, this routine is called for each 3 directions of the
@@ -1762,16 +1729,22 @@ end if
    ider=2;idir0=4
  !-- 2nd q-grad of metric (1st q-grad of strain) perturbation
  else if (ipert==natom+3.or.ipert==natom+4) then
-   ider=2;idir0=0
+   ider=2;idir0=4
  end if
 
 !Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
  dimffnl1=1+ider
  if (ider==2.and.(idir0==0.or.idir0==4)) dimffnl1=3+7*psps%useylm
- ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
- call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
-& psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
-& npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+
+ if (reuse_ffnl1_ == 0) then
+   ABI_MALLOC(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
+   call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
+  & psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+  & npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+ else
+   ABI_CHECK(all(shape(ffnl1) == [npw1_k, dimffnl1, psps%lmnmax, ntypat]), "Wrong shape in input ffnl1")
+ end if
+ 
 
 !Convert nonlocal form factors to cartesian coordinates.
 !For metric (strain) perturbation only.
@@ -1784,7 +1757,7 @@ end if
    do mu=1,3
      do ig=1,npw1_k
        do nu=1,3
-         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*gprimd(mu,nu)
+         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*rprimd(mu,nu)
        end do
      end do
    end do
@@ -1798,7 +1771,7 @@ end if
          do nub=1,3
            nu=gamma(nua,nub)
            ffnl1(ig,4+mu,:,:)=ffnl1(ig,4+mu,:,:)+ &
-         & ffnl1_tmp(ig,4+nu,:,:)*gprimd(mua,nua)*gprimd(mub,nub)
+         & ffnl1_tmp(ig,4+nu,:,:)*rprimd(mua,nua)*rprimd(mub,nub)
          end do
        end do
      end do
@@ -1876,12 +1849,6 @@ end subroutine getgh1dqc_setup
 !! A.p=\alpha^2 m x (r-R)/(r-R)^3 . p. Here the components of A have been precomputed in real space
 !! by make_vectornd. The first-order DDK contribution is d A.p/dk = A_idir where idir is the
 !! direction of the DDK perturbation, or 2\pi A_idir when k is given in reduced coords as is usual
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_getgh1c
-!!
-!! CHILDREN
-!!      fourwf
 !!
 !! SOURCE
 

@@ -6,16 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2021 ABINIT group (T. Rangel, MT)
+!!  Copyright (C) 2011-2022 ABINIT group (T. Rangel, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
 !!
 !! SOURCE
 
@@ -65,11 +59,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -347,12 +336,6 @@ end subroutine paw2wvl
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
-!!
 !! SOURCE
 
 subroutine paw2wvl_ij(option,paw_ij,wvl)
@@ -463,12 +446,6 @@ end subroutine paw2wvl_ij
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
-!!
 !! SOURCE
 
 
@@ -538,12 +515,6 @@ end subroutine wvl_paw_free
 !!   From atom-sorted wvl%paw%cprj to unsorted wvl%paw%cprj (atm_indx=atindx1)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      cprj_clean,cprj_paw_alloc
 !!
 !! SOURCE
 

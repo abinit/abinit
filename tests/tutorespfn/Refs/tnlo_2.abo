@@ -1,8 +1,8 @@
 
-.Version 9.3.4 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  9 Feb 2021.
-- ( at 14h42 )
+.Starting date : Wed  4 May 2022.
+- ( at 03h29 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/TestBot_MPI1/tutorespfn_tnlo_2-tnlo_3-tnlo_4/tnlo_2.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_tnlo_2-tnlo_3-tnlo_4/tnlo_2.abi
 - output file    -> tnlo_2.abo
 - root for input  files -> tnlo_2i
 - root for output files -> tnlo_2o
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =          28
        mpw =          73          nfft =        1728          nkpt =          28
 ================================================================================
-P This job should need less than                       1.834 Mbytes of memory.
+P This job should need less than                       1.883 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.127 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         432
        mpw =          73          nfft =        1728          nkpt =         432
 ================================================================================
-P This job should need less than                       4.007 Mbytes of memory.
+P This job should need less than                       4.056 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -104,7 +104,7 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =         432
        mpw =          73          nfft =        1728          nkpt =         432
 ================================================================================
-P This job should need less than                       4.218 Mbytes of memory.
+P This job should need less than                       4.267 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -123,16 +123,6 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
             acell      7.1391127387E+00  7.1391127387E+00  7.1391127387E+00 Bohr
               amu      3.09737620E+01  2.69815390E+01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -143,21 +133,11 @@ _ WF disk file :      1.927 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -485,21 +465,16 @@ P          mk1mem5        432
            prtden4          1
            prtden5          0
            prteig           0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          1
             prtwf5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -634,8 +609,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -649,8 +624,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.024864   -0.802189
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/baguetl_v9.3.4-tutonlo/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -898,7 +873,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -920,7 +894,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -981,7 +954,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1042,7 +1014,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1143,7 +1114,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
          ecut(hartree)=      3.087   => boxcut(ratio)=   2.12522
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
  symkchk : k-point set has full space-group symmetry.
 
  ==>  initialize data related to q vector <== 
@@ -1188,7 +1158,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1208,7 +1177,7 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   5.9340123684034     -2.621E-06 6.852E-09 3.992E-06
  ETOT  6   5.9340123535070     -1.490E-08 2.343E-11 6.160E-08
  ETOT  7   5.9340123533159     -1.911E-10 2.402E-13 7.230E-10
- ETOT  8   5.9340123533138     -2.089E-12 3.405E-15 1.212E-12
+ ETOT  8   5.9340123533138     -2.075E-12 3.405E-15 1.212E-12
 -open ddk wf file :tnlo_2o_DS3_1WF7
 -open ddk wf file :tnlo_2o_DS3_1WF8
 -open ddk wf file :tnlo_2o_DS3_1WF9
@@ -1250,7 +1219,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1270,7 +1238,7 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   5.9692648467080     -1.939E-07 2.966E-10 5.756E-07
  ETOT  6   5.9692648447072     -2.001E-09 3.024E-12 7.182E-09
  ETOT  7   5.9692648446797     -2.750E-11 4.617E-14 7.427E-11
- ETOT  8   5.9692648446793     -3.872E-13 5.638E-16 8.812E-13
+ ETOT  8   5.9692648446793     -3.908E-13 5.638E-16 8.812E-13
 
  At SCF step    8       vres2   =  8.81E-13 < tolvrs=  1.00E-12 =>converged.
 -open ddk wf file :tnlo_2o_DS3_1WF7
@@ -1309,7 +1277,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1365,7 +1332,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1421,7 +1387,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1442,7 +1407,7 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5  -121.84960553136     -1.602E-05 2.427E-08 4.206E-05
  ETOT  6  -121.84960570412     -1.728E-07 1.372E-10 1.535E-06
  ETOT  7  -121.84960570979     -5.667E-09 5.137E-12 3.639E-08
- ETOT  8  -121.84960570992     -1.307E-10 1.454E-13 3.922E-10
+ ETOT  8  -121.84960570992     -1.306E-10 1.454E-13 3.922E-10
 -open ddk wf file :tnlo_2o_DS3_1WF7
 -open ddk wf file :tnlo_2o_DS3_1WF8
 -open ddk wf file :tnlo_2o_DS3_1WF9
@@ -1476,7 +1441,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1539,7 +1503,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1559,7 +1522,7 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   1.4600836311026     -5.401E-06 7.812E-09 8.984E-06
  ETOT  6   1.4600835994846     -3.162E-08 5.778E-11 9.508E-08
  ETOT  7   1.4600835990979     -3.867E-10 5.633E-13 4.249E-09
- ETOT  8   1.4600835990754     -2.248E-11 2.917E-14 1.379E-10
+ ETOT  8   1.4600835990754     -2.249E-11 2.917E-14 1.379E-10
 -open ddk wf file :tnlo_2o_DS3_1WF7
 -open ddk wf file :tnlo_2o_DS3_1WF8
 -open ddk wf file :tnlo_2o_DS3_1WF9
@@ -1602,7 +1565,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1665,7 +1627,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1728,7 +1689,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1748,7 +1708,7 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   1.0569777099329     -4.082E-06 5.411E-09 9.270E-06
  ETOT  6   1.0569776760501     -3.388E-08 6.346E-11 8.591E-08
  ETOT  7   1.0569776756746     -3.755E-10 6.267E-13 1.376E-09
- ETOT  8   1.0569776756673     -7.375E-12 1.271E-14 9.719E-12
+ ETOT  8   1.0569776756673     -7.379E-12 1.271E-14 9.719E-12
 -open ddk wf file :tnlo_2o_DS3_1WF7
 -open ddk wf file :tnlo_2o_DS3_1WF8
 -open ddk wf file :tnlo_2o_DS3_1WF9
@@ -1791,7 +1751,6 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tnlo_2o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1811,7 +1770,7 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  5   1.0569777084991     -4.078E-06 5.405E-09 9.262E-06
  ETOT  6   1.0569776746227     -3.388E-08 6.332E-11 8.585E-08
  ETOT  7   1.0569776742479     -3.747E-10 6.245E-13 1.370E-09
- ETOT  8   1.0569776742406     -7.365E-12 1.255E-14 9.589E-12
+ ETOT  8   1.0569776742406     -7.363E-12 1.255E-14 9.589E-12
 -open ddk wf file :tnlo_2o_DS3_1WF7
 -open ddk wf file :tnlo_2o_DS3_1WF8
 -open ddk wf file :tnlo_2o_DS3_1WF9
@@ -2773,16 +2732,6 @@ meta: {optdriver: 5, }
             acell      7.1391127387E+00  7.1391127387E+00  7.1391127387E+00 Bohr
               amu      3.09737620E+01  2.69815390E+01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -2793,21 +2742,11 @@ meta: {optdriver: 5, }
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -3147,21 +3086,16 @@ P          mk1mem5        432
            prtden4          1
            prtden5          0
            prteig           0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
             prtwf1          1
             prtwf2          1
             prtwf3          1
             prtwf4          1
             prtwf5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -3375,11 +3309,10 @@ P          mk1mem5        432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        142.3  wall=        142.9
+- Proc.   0 individual time (sec): cpu=        122.2  wall=        122.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  24 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        142.3  wall=        142.9
-
+.Delivered  57 WARNINGs and  32 COMMENTs to log file.
++Overall time at end (sec) : cpu=        122.2  wall=        122.7

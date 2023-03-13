@@ -6,7 +6,7 @@
 !!  Helper functions used in the optic code
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2021 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
+!! Copyright (C) 2002-2022 ABINIT group (SSharma,MVer,VRecoules,TD,YG, NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,12 +82,6 @@ contains
 !! OUTPUT
 !!  pmat(mband,mband,nkpt,3,nsppol) = matrix elements of momentum operator, in cartesian coordinates
 !!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
-!!
 !! SOURCE
 
 subroutine pmat2cart(eigen11, eigen12, eigen13, mband, nkpt, nsppol, pmat, rprimd)
@@ -148,12 +142,6 @@ end subroutine pmat2cart
 !!
 !! OUTPUT
 !!  pmat(mband,mband,nkpt,3,nsppol) = momentum matrix elements, renormalized by denominator change with scissor shift
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -236,12 +224,6 @@ end subroutine pmat_renorm
 !!
 !!  Comment:
 !!    Right now the routine sums over the kpoints. In future linear tetrahedron method should be useful.
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -621,12 +603,7 @@ end subroutine linopt
 !!  ChiRe.out  : contributions to Re\chi_{v1v2v3}(2\omega,\omega,-\omega) from various terms
 !!  ChiAbs.out : abs\chi_{v1v2v3}(2\omega,\omega,-\omega). The headers in these files contain
 !!  information about the calculation.
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
+!!  See eqs. (A4)-A(11) of S. Sharma et al Phys. Rev. B 67, 165332 (2003)
 !!
 !! SOURCE
 
@@ -881,8 +858,10 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
              do lx=1,3
                do ly=1,3
                  do lz=1,3
+!                  See Sharma03, A10, last term of first line, corrected ! Should be Delta^b_mn r c_mn, see A2.
                    mat2w_tra=mat2w_tra+px(istn,istm,lx,ly,lz)*pmat(istm,istn,ik,lz,isp)    &
                    *delta(istm,istn,ly)
+!                  See Sharma03, A11, last term.
                    mat1w3_tra=mat1w3_tra+px(istn,istm,lx,ly,lz)*pmat(istm,istn,ik,ly,isp)  &
                    *delta(istm,istn,lz)
                    ! NOTE:: lx to ly m to n in pmat matrices respectively
@@ -892,14 +871,14 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                end do
              end do
              b331=mat1w3_tra/wnm
+             b231=8._dp*mat2w_tra/wmn
+
              b11=zero
              b12_13=zero
              b24=zero
              b31_32=zero
              b21_22=zero
 
-             b231=8._dp*mat2w_tra/wmn
-             b331=mat1w3_tra/(wnm)
              ! istl < istn
              do istl=1,istn-1  ! istl is a valence state below istn
                el=ks_ebands%eig(istl,ik,isp)
@@ -1112,9 +1091,9 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                intra1wS(iw)=intra1wS(iw)+(ks_ebands%wtk(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
              end do
            end if
-         end do ! istn and istm
+         end do ! istm
        end if
-     end do
+     end do ! istn
    end do  ! spins
  end do ! k-points
 
@@ -1345,12 +1324,6 @@ end subroutine nlinopt
 !!    - The routine has been written using notations of Ref. 2
 !!    - This routine does not symmetrize the tensor (up to now)
 !!    - Sum over all the states and use occupation factors instead of looping only on resonant contributions
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 
@@ -1879,12 +1852,6 @@ end subroutine linelop
 !!    - The routine has been written using notations of Ref. 2
 !!    - This routine does not symmetrize the tensor (up to now)
 !!    - Sum over all the states and use occupation factors instead of looping only on resonant contributions
-!!
-!! PARENTS
-!!      optic
-!!
-!! CHILDREN
-!!      xmpi_max,xmpi_min,xmpi_split_work,xmpi_sum
 !!
 !! SOURCE
 

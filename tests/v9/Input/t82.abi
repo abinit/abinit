@@ -19,7 +19,7 @@ spin_temperature = 600
 spin_ntime =1000
 spin_nctime=100
 spin_dt=1e-16 s
-
+randomseed=111111 # for testing only
 
 
 #%%<BEGIN TEST_INFO>
@@ -27,7 +27,8 @@ spin_dt=1e-16 s
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
 #%% exclude_builders = .*_nag_7.[01]_.*
-#%% system_xml = t81.xml
+#%% spin_pot = t81.xml
+#%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
 #%%   t82.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
@@ -35,7 +36,7 @@ spin_dt=1e-16 s
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He 
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, spinpot
 #%% description = 
 #%%   read xml and run spin dynamics. This is to test the spin_damping option.
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)

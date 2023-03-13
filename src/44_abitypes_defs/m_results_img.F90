@@ -7,7 +7,7 @@
 !!  to store results from GS calculations for a given image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (MT)
+!! Copyright (C) 2011-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -158,12 +154,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  results_img(:)=<type(results_img_type)>=results_img datastructure array
 !!
-!! PARENTS
-!!      m_gstateimg,m_results_img
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
-!!
 !! SOURCE
 
 subroutine init_results_img(natom,npspalch,nspden,nsppol,ntypalch,ntypat,results_img)
@@ -234,12 +224,6 @@ end subroutine init_results_img
 !!
 !! SIDE EFFECTS
 !!  results_img(:)=<type(results_img_type)>=results_img datastructure array
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
 !!
 !! SOURCE
 
@@ -317,11 +301,6 @@ end subroutine destroy_results_img
 !! SIDE EFFECTS
 !!  results_img(:)=<type(results_img_type)>=results_img datastructure array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
-!!
 !! SOURCE
 
 subroutine nullify_results_img(results_img)
@@ -369,12 +348,6 @@ end subroutine nullify_results_img
 !!
 !! OUTPUT
 !!  results_img_out=<type(results_img_type)>=output results_img datastructure
-!!
-!! PARENTS
-!!      m_gstateimg,m_results_img
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
 !!
 !! SOURCE
 
@@ -481,12 +454,6 @@ end subroutine copy_results_img
 !!
 !! SIDE EFFECTS
 !!  results_img_all(:)=<type(results_img_type)>=global (gathered) results_img datastructure array
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
 !!
 !! SOURCE
 
@@ -783,11 +750,6 @@ end subroutine gather_results_img
 !!  array_img_all(:,:)= (real) global (gathered) 1D-array
 !!                      (has 2 dimensions; the 2nd one is nimagetot)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
-!!
 !! SOURCE
 
 subroutine gather_array_img_1D(array_img,array_img_all,mpi_enreg,&
@@ -939,11 +901,6 @@ end subroutine gather_array_img_1D
 !! SIDE EFFECTS
 !!  array_img_all(:,:,:)= (real) global (gathered) 2D-array
 !!                        (has 3 dimensions; the 3rd one is nimagetot)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
 !!
 !! SOURCE
 
@@ -1097,12 +1054,6 @@ end subroutine gather_array_img_2D
 !!  array_img(:,:,:)= (real) distributed 2D-array
 !!                    (has 3 dimensions; the 3rd one is nimage)
 !!
-!! PARENTS
-!!      m_predict_pimd
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
-!!
 !! SOURCE
 
 subroutine scatter_array_img(array_img,array_img_all,mpi_enreg,&
@@ -1248,12 +1199,6 @@ end subroutine scatter_array_img
 !!  xred(3,natom,nimage) =reduced coordinates of atoms in each image
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_predict_neb,m_predict_steepest,m_predict_string
-!!
-!! CHILDREN
-!!      mkrdim,xred2xcart
 !!
 !! SOURCE
 

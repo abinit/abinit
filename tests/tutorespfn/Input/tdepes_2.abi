@@ -36,8 +36,6 @@ nsym 0
                        # smdelta = 1 ==> Fermi-Dirac smearing.
  nbdbuf3  2            # 2 buffer bands. RF converges much faster.
  rfphon3  1            # Do phonon response
- rfatpol3 1 2          # Treat displacements of all atoms
- rfdir3   1 1 1        # Do all directions 
  tolwfr3  1.0d-8       # Underconverged : tolwfr 1.0d-22 should be used for converged results
  kptopt3  3
 

@@ -67,3 +67,7 @@ post-processing tools
     output file. Program is documented internally.
 
 
+- compare_phbands.py
+    Script to plot the phonon band structure and compare with the LWF phonon
+    band structure from the anaddb output file. The code is documented internally.
+    --help option is also available.                                                  

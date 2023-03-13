@@ -13,7 +13,7 @@
 !!    where U is an upper triangular matrix and L is lower triangular.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,8 +29,6 @@
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -65,8 +63,6 @@ end subroutine abi_dpotrf
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_zpotrf_2d(uplo,n,a,lda,info)
@@ -91,8 +87,6 @@ end subroutine abi_zpotrf_2d
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -139,8 +133,6 @@ end subroutine abi_d2zpotrf
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

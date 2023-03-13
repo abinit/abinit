@@ -6,7 +6,7 @@
 !!  Unit test for the test_md5_sum_from_string routine of m_hash_md5.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2021 ABINIT Group (Yann Pouillon)
+!!  Copyright (C) 2016-2022 ABINIT Group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,10 +21,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

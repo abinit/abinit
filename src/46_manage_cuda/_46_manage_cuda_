@@ -1,0 +1,21 @@
+!!****d* ABINIT/46_manage_cuda
+!! NAME
+!!  46_manage_cuda
+!!
+!! DESCRIPTION
+!!  This directory adds support in ABINIT for CUDA.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2009-2022 ABINIT group (Marco Mancini, Yann Pouillon)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!  For the initials of contributors, see
+!!  ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! interfaces_46_manage_cuda.F90
+!! m_alloc_hamilt_gpu.F90
+!! m_nvtx_data.F90
+!!
+!!***

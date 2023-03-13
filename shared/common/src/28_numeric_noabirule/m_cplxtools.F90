@@ -6,7 +6,7 @@
 !! This module defines helper functions to operate on complex arrays (mainly used in the GW code)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2021 ABINIT group (MG)
+!! Copyright (C) 1992-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -107,10 +107,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  ocplx(n)=Output complex array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cplx_fromreal(n,ireal,ocplx)
@@ -152,10 +148,6 @@ end subroutine cplx_fromreal
 !! SIDE EFFECTS
 !!  x(n)=See description.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cplx_filter(n, x, mask)
@@ -191,10 +183,6 @@ end subroutine cplx_filter
 !!
 !! OUTPUT
 !!  res=Real part of the scalar product.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -237,10 +225,6 @@ end function cplx_real_zdotc
 !!
 !! OUTPUT
 !! y Contains the updated vector y.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -286,10 +270,6 @@ end subroutine cplx_zaxpby
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -358,10 +338,6 @@ end subroutine cplx_zgemv
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cplx_zgemm(transa,transb,npws,ncola,ncolb,amat,bmat,cmat,alpha,beta)
@@ -426,10 +402,6 @@ end subroutine cplx_zgemm
 !!
 !! OUTPUT
 !!  oarrsph(npw_k*ndat)=Complex Data defined on the G-sphere.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -528,10 +500,6 @@ end subroutine cplx_box2gsph_spc
 !!
 !! OUTPUT
 !!  oarrsph(npw_k*ndat)=Complex Data defined on the G-sphere.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -636,10 +604,6 @@ end subroutine cplx_box2gsph_dpc
 !! If istwf_k differs from 1, then special storage modes must be taken
 !! into account, for symmetric wavefunctions coming from k=(0 0 0) or other
 !! special k points.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -805,10 +769,6 @@ end subroutine cplx_gsph2box_spc
 !! into account, for symmetric wavefunctions coming from k=(0 0 0) or other
 !! special k points.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cplx_gsph2box_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,npw,istwf_k,kg_k,iarrsph,oarrbox)
@@ -961,11 +921,6 @@ end subroutine cplx_gsph2box_dpc
 !! SIDE EFFECT
 !!  arr(ldx,ldy,ldz*ndat)= all entries in the augmented region are set to zero
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cplx_setaug_zero_spc(nx,ny,nz,ldx,ldy,ldz,ndat,arr)
@@ -1023,11 +978,6 @@ end subroutine cplx_setaug_zero_spc
 !!
 !! SIDE EFFECT
 !!  arr(ldx,ldy,ldz*ndat)= all entries in the augmented region are set to zero
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1090,10 +1040,6 @@ end subroutine cplx_setaug_zero_dpc
 !! SIDE EFFECTS
 !!  rho(ldx,ldy,ldz) = contains the input density at input,
 !!                     modified in input with the contribution gived by ur.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -67,7 +67,8 @@ dmft_occnd_imag2 0
 dmft_wanorthnorm2 3
 
 ##### DFT+U
-usepawu1    1   # DFT+U is not used.
+usepawu1    1  
+usepawu     10
 dmatpuopt  1   # choose expression of the density matrix
 lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
 upawu1  0.00  0.0   # values in Hartree

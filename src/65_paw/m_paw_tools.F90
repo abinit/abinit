@@ -6,7 +6,7 @@
 !!  This module contains miscelaneous routines used in the PAW context.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (FJ,MT)
+!! Copyright (C) 2018-2022 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,16 +74,6 @@ CONTAINS  !=====================================================================
 !!  (only checking)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_nonlinear,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
-!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
-!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 
@@ -314,7 +304,7 @@ end subroutine chkpawovlp
 !! To be called at the end of the SCF cycle
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (FJ,MT,BA)
+!! Copyright (C) 1998-2022 ABINIT group (FJ,MT,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -339,15 +329,6 @@ end subroutine chkpawovlp
 !!
 !! OUTPUT
 !!  (only printing)
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_outscfcv,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
-!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
-!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 

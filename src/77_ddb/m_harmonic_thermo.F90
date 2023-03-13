@@ -7,14 +7,10 @@
 !! thermodynamical properties, Debye-Waller factor, and atomic mean square velocity
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (CL, XG)
+!!  Copyright (C) 2008-2022 ABINIT group (CL, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -82,12 +78,6 @@ contains
 !!
 !! NOTES
 !! dosinc=increment between the channels for the phonon DOS in cm-1
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      end_sortph,ifc%fourq,matr3inv,mkrdim,smpbz,sortph,symkpt,wrtout
 !!
 !! SOURCE
 

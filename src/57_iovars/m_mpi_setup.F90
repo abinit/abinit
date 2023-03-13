@@ -6,14 +6,10 @@
 !!  Initialize MPI parameters and datastructures for parallel execution
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (FJ, MT, FD)
+!!  Copyright (C) 1999-2022 ABINIT group (FJ, MT, FD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -82,13 +78,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!   mpi_enregs=information about MPI parallelization
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -173,7 +162,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ABI_WARNING(msg)
    end if
 
-   if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS]) .and. dtsets(idtset)%paral_kgb/=0) then
+   if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT]) .and. dtsets(idtset)%paral_kgb/=0) then
      dtsets(idtset)%paral_kgb=0
      write(msg, '(a,i0,a)') &
       "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
@@ -274,7 +263,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
    if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
 
-   if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
+   if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS.and.optdriver/=RUNL_RTTDDFT).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
 !&   .or.(dtsets(idtset)%iscf<0)) then
@@ -497,6 +486,31 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      !In this case, we just use the largest nband, and the input will probably fail
      !at the bandpp check later on
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+   end if
+
+   !Check parallelization in case of RTTDDFT 
+   !In particular ensure that bandpp = nband / npband
+   if (optdriver == RUNL_RTTDDFT) then
+      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+      if ( tread(8) == 1 ) then 
+         write(msg, '(a,a)') 'Setting bandpp is useless in RT-TDDFT because it is automatically set to nband/npband.', ch10
+         ABI_WARNING(msg)
+      end if
+      if (dtsets(idtset)%npfft/=1) then 
+         dtsets(idtset)%npfft=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with FFT-parallelization. Remove npfft or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
+      if (dtsets(idtset)%npspinor/=1) then 
+         dtsets(idtset)%npspinor=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with spinor parallelization. Remove npspinor or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
+      if (dtsets(idtset)%nphf/=1) then 
+         dtsets(idtset)%nphf=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with HF parallelization. Remove nphf or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
    end if
 
 !  Set mpi_enreg
@@ -1028,13 +1042,6 @@ end subroutine mpi_setup
 !!  dtset%use_slk  = flag for ScalaPAck use
 !!  dtset%np_slk   = number of processors used in ScaLapack routines
 !!  dtset%gpu_linalg_limit=threshold activating Linear Algebra on GPU
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1981,13 +1988,6 @@ end subroutine finddistrproc
 !!   This indicator is returned in acc_kgb
 !! This routine can be used to find the optimal values of np_slk parameter (ScaLapack)
 !!   and wheter or not we should use Magma for Linear Algebra in lobpcgwf
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 

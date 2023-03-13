@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -88,7 +84,7 @@ contains
 !!   - 1st-order WFs DDK,DDE and 2nd-order WF DKDE (ddk_f)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (LB)
+!! Copyright (C) 2018-2022 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -181,12 +177,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  TO DO!
-!!
-!! PARENTS
-!!      m_dfptnl_loop
-!!
-!! CHILDREN
-!!      dotprod_vn
 !!
 !! SOURCE
 
@@ -1154,7 +1144,7 @@ end subroutine dfptnl_pert
 !!   and not only to 'pert2', as in the first case.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2020-2021 ABINIT group (LB)
+!! Copyright (C) 2020-2022 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1181,12 +1171,6 @@ end subroutine dfptnl_pert
 !!  exc3(2)=real and imaginray part of the exchange correlation energy term
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_dfptnl_pert,m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dotprod_vn
 !!
 !! SOURCE
 

@@ -6,7 +6,7 @@
 !! Bessel functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -917,10 +917,6 @@ SUBROUTINE CALJY1(ARG,RESULT,JINT)
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 SUBROUTINE CALCK0(ARG,RESULT,JINT)
@@ -1227,10 +1223,6 @@ SUBROUTINE CALCK0(ARG,RESULT,JINT)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -6,7 +6,7 @@
 !!  Generates vdW-DF kernels from the user input.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2021 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2022 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.
@@ -22,13 +22,6 @@
 !! NOTES
 !!  The input data must be provided in a pre-defined order and contain all
 !!  adjustable parameters related to the generation of vdW-DF kernels.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,herald,wrtout
-!!      xc_vdw_done,xc_vdw_get_params,xc_vdw_init,xc_vdw_memcheck,xc_vdw_show
-!!      xc_vdw_write,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

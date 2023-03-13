@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t96-t97-t98-t99/t96.in
-- output file    -> t96.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v5_t96-t97-t98-t99/t96.abi
+- output file    -> t96.abo
 - root for input  files -> t96i
 - root for output files -> t96o
 
@@ -34,7 +34,7 @@
 -    mband =          14        mffmem =           1         mkmem =           8
        mpw =          69          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       3.324 Mbytes of memory.
+P This job should need less than                       3.446 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.238 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
@@ -361,6 +361,16 @@ P          mk1mem           8
            prtdos8          0
            prtdos9          0
            prtdos10         0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
+           prtpot10         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -371,7 +381,7 @@ P          mk1mem           8
               qpt8     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt9     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt10    5.00000000E-01  5.00000000E-01  0.00000000E+00
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          0       1       0
             rfdir4          0       0       1
@@ -513,8 +523,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
 -  Troullier-Martins psp for element  Ni        Thu Oct 27 17:35:45 EDT 1994
 - 28.00000  10.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -706,7 +716,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -724,7 +733,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -741,11 +749,11 @@ tolerances: {tolvrs: 1.00E-05, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   131.90291375722     -2.768E+03 9.410E+00 9.969E+04
  ETOT  2   30.285335633569     -1.016E+02 1.283E-01 2.020E+04
- ETOT  3  0.41093603549731     -2.987E+01 2.056E-02 3.458E+01
+ ETOT  3  0.41093603549777     -2.987E+01 2.056E-02 3.458E+01
  ETOT  4  0.37133843555281     -3.960E-02 1.984E-05 4.306E-02
  ETOT  5  0.37126856688016     -6.987E-05 8.303E-08 2.547E-03
- ETOT  6  0.37126242712199     -6.140E-06 4.977E-09 1.586E-05
- ETOT  7  0.37126239979622     -2.733E-08 3.335E-11 4.869E-06
+ ETOT  6  0.37126242712290     -6.140E-06 4.977E-09 1.586E-05
+ ETOT  7  0.37126239979713     -2.733E-08 3.335E-11 4.869E-06
 
  At SCF step    7       vres2   =  4.87E-06 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -769,7 +777,7 @@ tolerances: {tolvrs: 1.00E-05, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.66582102E+02  frxc 2 =   1.76964137E+02
  Resulting in :
- 2DEtotal=    0.3712623998E+00 Ha. Also 2DEtotal=    0.101025636736E+02 eV
+ 2DEtotal=    0.3712623998E+00 Ha. Also 2DEtotal=    0.101025636737E+02 eV
     (2DErelax=   -2.8994991270E+03 Ha. 2DEnonrelax=    2.8998703894E+03 Ha)
     (  non-var. 2DEtotal :    3.7124124956E-01 Ha)
 
@@ -826,7 +834,7 @@ tolerances: {tolvrs: 1.00E-05, }
    2    1   2    1         0.0151527041         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0151527041         0.0000000000
 
@@ -875,7 +883,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -893,7 +900,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -911,10 +917,10 @@ tolerances: {tolvrs: 1.00E-05, }
 -ETOT  1   131.98804313441     -2.768E+03 9.123E+00 9.972E+04
  ETOT  2   30.311706322531     -1.017E+02 1.277E-01 2.022E+04
  ETOT  3  0.41072319326329     -2.990E+01 2.057E-02 3.441E+01
- ETOT  4  0.37133716420956     -3.939E-02 1.972E-05 4.351E-02
- ETOT  5  0.37126683426803     -7.033E-05 8.478E-08 2.548E-03
- ETOT  6  0.37126069210015     -6.142E-06 4.941E-09 1.616E-05
- ETOT  7  0.37126065455166     -3.755E-08 3.488E-11 5.368E-07
+ ETOT  4  0.37133716421138     -3.939E-02 1.972E-05 4.351E-02
+ ETOT  5  0.37126683426712     -7.033E-05 8.478E-08 2.548E-03
+ ETOT  6  0.37126069210106     -6.142E-06 4.941E-09 1.616E-05
+ ETOT  7  0.37126065455121     -3.755E-08 3.488E-11 5.368E-07
 
  At SCF step    7       vres2   =  5.37E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1044,7 +1050,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1062,7 +1067,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1078,12 +1082,12 @@ tolerances: {tolvrs: 1.00E-05, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   131.91150913152     -2.768E+03 9.279E+00 9.970E+04
- ETOT  2   30.288127375359     -1.016E+02 1.283E-01 2.020E+04
- ETOT  3  0.41091153494372     -2.988E+01 2.056E-02 3.457E+01
+ ETOT  2   30.288127375358     -1.016E+02 1.283E-01 2.020E+04
+ ETOT  3  0.41091153494236     -2.988E+01 2.056E-02 3.457E+01
  ETOT  4  0.37133306793467     -3.958E-02 1.982E-05 4.309E-02
- ETOT  5  0.37126317748326     -6.989E-05 8.320E-08 2.547E-03
- ETOT  6  0.37125703894381     -6.139E-06 4.975E-09 1.576E-05
- ETOT  7  0.37125701049436     -2.845E-08 3.335E-11 9.101E-07
+ ETOT  5  0.37126317748280     -6.989E-05 8.320E-08 2.547E-03
+ ETOT  6  0.37125703894426     -6.139E-06 4.975E-09 1.576E-05
+ ETOT  7  0.37125701049482     -2.845E-08 3.335E-11 9.101E-07
 
  At SCF step    7       vres2   =  9.10E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1130,7 +1134,7 @@ tolerances: {tolvrs: 1.00E-05, }
    1    1   3    3         0.0000000000         0.0000000000
   
    2    1   1    1         0.1856179701         0.0000000000
-   2    1   2    1         0.3712359401         0.0000000000
+   2    1   2    1         0.3712359402         0.0000000000
    2    1   3    1         0.1856179701         0.0000000000
    2    1   1    3         0.0000000000         0.0000000000
    2    1   3    3         0.0000000000         0.0000000000
@@ -1160,7 +1164,7 @@ tolerances: {tolvrs: 1.00E-05, }
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
+   2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0151524874         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
   
@@ -1206,7 +1210,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.13120
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1224,10 +1227,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+01 and    1.000000E+01.
  Initialisation of the first-order wave-functions :
@@ -1243,7 +1244,7 @@ tolerances: {tolvrs: 1.00E-05, }
 -ETOT  1   2299.3247450719     -8.235E+02 9.329E+00 4.664E+06
  ETOT  2   1019.8117379963     -1.280E+03 1.985E+00 1.368E+06
  ETOT  3   288.25959719662     -7.316E+02 4.899E-01 1.695E+04
- ETOT  4   280.33102375082     -7.929E+00 4.016E-03 1.308E+01
+ ETOT  4   280.33102375083     -7.929E+00 4.016E-03 1.308E+01
  ETOT  5   280.31326368893     -1.776E-02 1.366E-05 9.235E-01
  ETOT  6   280.31226756685     -9.961E-04 4.538E-07 3.989E-02
  ETOT  7   280.31222597503     -4.159E-05 1.452E-08 9.182E-03
@@ -1290,12 +1291,12 @@ tolerances: {tolvrs: 1.00E-05, }
   dir pert dir pert     real part     imaginary part
   
    1    1   1    1       280.3121827428         0.0000000000
-   1    1   2    1        80.5362331423         0.0000000000
-   1    1   3    1        80.5362331423         0.0000000000
+   1    1   2    1        80.5362331423        -0.0000000000
+   1    1   3    1        80.5362331423        -0.0000000000
   
-   2    1   1    1        80.5362331423        -0.0000000000
+   2    1   1    1        80.5362331423         0.0000000000
   
-   3    1   1    1        80.5362331423        -0.0000000000
+   3    1   1    1        80.5362331423         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -1310,7 +1311,7 @@ tolerances: {tolvrs: 1.00E-05, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1344,7 +1345,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.13120
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1361,10 +1361,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+01 and    1.000000E+01.
  Initialisation of the first-order wave-functions :
@@ -1385,8 +1383,8 @@ tolerances: {tolvrs: 1.00E-05, }
  ETOT  6   161.07235370501     -1.225E-05 9.915E-09 1.589E-03
  ETOT  7   161.07235238893     -1.316E-06 8.079E-10 5.531E-05
  ETOT  8   161.07235237228     -1.665E-08 2.314E-11 4.525E-05
- ETOT  9   161.07235235225     -2.003E-08 3.225E-13 1.339E-05
- ETOT 10   161.07235234388     -8.375E-09 1.897E-13 7.149E-08
+ ETOT  9   161.07235235225     -2.002E-08 3.225E-13 1.339E-05
+ ETOT 10   161.07235234388     -8.377E-09 1.897E-13 7.149E-08
 
  At SCF step   10       vres2   =  7.15E-08 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1426,14 +1424,14 @@ tolerances: {tolvrs: 1.00E-05, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   2    1        80.5362208624         0.0000000000
-   1    1   3    1        80.5362208624         0.0000000000
+   1    1   2    1        80.5362208624        -0.0000000000
+   1    1   3    1        80.5362208624        -0.0000000000
   
-   2    1   1    1        80.5362208624        -0.0000000000
+   2    1   1    1        80.5362208624         0.0000000000
    2    1   2    1       161.0723523844         0.0000000000
    2    1   3    1        80.5361123598         0.0000000000
   
-   3    1   1    1        80.5362208624        -0.0000000000
+   3    1   1    1        80.5362208624         0.0000000000
    3    1   2    1        80.5361123598        -0.0000000000
    3    1   3    1       161.0723523844         0.0000000000
   
@@ -1450,7 +1448,7 @@ tolerances: {tolvrs: 1.00E-05, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -1484,7 +1482,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.13120
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1501,10 +1498,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+01 and    1.000000E+01.
  Initialisation of the first-order wave-functions :
@@ -1524,7 +1519,7 @@ tolerances: {tolvrs: 1.00E-05, }
  ETOT  5   161.07236431587     -1.561E-04 1.385E-07 4.722E-03
  ETOT  6   161.07235099609     -1.332E-05 1.179E-08 3.549E-04
  ETOT  7   161.07235043962     -5.565E-07 4.663E-10 6.245E-05
- ETOT  8   161.07235073733      2.977E-07 2.688E-11 5.817E-04
+ ETOT  8   161.07235073732      2.977E-07 2.688E-11 5.817E-04
  ETOT  9   161.07235037319     -3.641E-07 1.866E-12 7.660E-07
 
  At SCF step    9       vres2   =  7.66E-07 < tolvrs=  1.00E-05 =>converged.
@@ -1565,15 +1560,15 @@ tolerances: {tolvrs: 1.00E-05, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   2    1        80.5361043157        -0.0000000000
-   1    1   3    1        80.5361043157        -0.0000000000
+   1    1   2    1        80.5361043157         0.0000000000
+   1    1   3    1        80.5361043157         0.0000000000
   
-   2    1   1    1        80.5361043157         0.0000000000
+   2    1   1    1        80.5361043157        -0.0000000000
    2    1   2    1       161.0723343511         0.0000000000
-   2    1   3    1        80.5361503137         0.0000000000
+   2    1   3    1        80.5361503137        -0.0000000000
   
-   3    1   1    1        80.5361043157         0.0000000000
-   3    1   2    1        80.5361503137        -0.0000000000
+   3    1   1    1        80.5361043157        -0.0000000000
+   3    1   2    1        80.5361503137         0.0000000000
    3    1   3    1       161.0723343511         0.0000000000
   
   
@@ -1589,7 +1584,7 @@ tolerances: {tolvrs: 1.00E-05, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  8 ==================================================================
@@ -1623,7 +1618,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.13357
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1641,10 +1635,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+01 and    1.000000E+01.
  Initialisation of the first-order wave-functions :
@@ -1662,8 +1654,8 @@ tolerances: {tolvrs: 1.00E-05, }
  ETOT  3   207.32906307874     -3.920E+02 1.687E-01 3.066E+03
  ETOT  4   204.81948593090     -2.510E+00 1.397E-03 1.815E+02
  ETOT  5   204.67506317552     -1.444E-01 5.994E-05 1.288E-01
- ETOT  6   204.67696221574      1.899E-03 1.642E-07 2.412E+00
- ETOT  7   204.67509055091     -1.872E-03 9.062E-10 2.306E-01
+ ETOT  6   204.67696221601      1.899E-03 1.642E-07 2.412E+00
+ ETOT  7   204.67509055088     -1.872E-03 9.062E-10 2.306E-01
  ETOT  8   204.67488056345     -2.100E-04 1.674E-08 6.798E-04
  ETOT  9   204.67487948449     -1.079E-06 8.135E-10 4.247E-05
  ETOT 10   204.67487963255      1.481E-07 3.557E-11 6.166E-05
@@ -1731,10 +1723,10 @@ tolerances: {tolvrs: 1.00E-05, }
   
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         5.9157674993         0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1        10.7923990397         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
@@ -1775,7 +1767,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.13357
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1793,10 +1784,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+01 and    1.000000E+01.
  Initialisation of the first-order wave-functions :
@@ -1814,13 +1803,13 @@ tolerances: {tolvrs: 1.00E-05, }
  ETOT  3   207.29890609415     -3.942E+02 1.694E-01 3.021E+03
  ETOT  4   204.81938340543     -2.480E+00 1.388E-03 1.813E+02
  ETOT  5   204.67506327561     -1.443E-01 5.986E-05 1.304E-01
- ETOT  6   204.67626491128      1.202E-03 1.668E-07 1.601E+00
- ETOT  7   204.67518773106     -1.077E-03 7.850E-10 3.460E-01
+ ETOT  6   204.67626491153      1.202E-03 1.668E-07 1.601E+00
+ ETOT  7   204.67518773101     -1.077E-03 7.850E-10 3.460E-01
  ETOT  8   204.67487876487     -3.090E-04 1.676E-08 6.818E-04
- ETOT  9   204.67487768395     -1.081E-06 8.162E-10 4.240E-05
+ ETOT  9   204.67487768396     -1.081E-06 8.162E-10 4.240E-05
  ETOT 10   204.67487773109      4.713E-08 3.802E-11 3.484E-05
- ETOT 11   204.67487763836     -9.273E-08 1.638E-12 1.004E-05
- ETOT 12   204.67487760527     -3.308E-08 3.868E-12 5.914E-07
+ ETOT 11   204.67487763835     -9.274E-08 1.638E-12 1.004E-05
+ ETOT 12   204.67487760527     -3.308E-08 3.868E-12 5.910E-07
 
  At SCF step   12       vres2   =  5.91E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1860,12 +1849,12 @@ tolerances: {tolvrs: 1.00E-05, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1       204.6749032274        -0.0000000000
-   1    1   2    1       132.2067995592        -0.0000000000
+   1    1   1    1       204.6749032274         0.0000000000
+   1    1   2    1       132.2067995592         0.0000000000
    1    1   3    1        72.4681036682         0.0000000000
   
-   2    1   1    1       132.2067995592        -0.0000000000
-   2    1   2    1       204.6749032274        -0.0000000000
+   2    1   1    1       132.2067995592         0.0000000000
+   2    1   2    1       204.6749032274         0.0000000000
    2    1   3    1        72.4681036682         0.0000000000
   
    3    1   1    1        72.4681036682         0.0000000000
@@ -1878,17 +1867,17 @@ tolerances: {tolvrs: 1.00E-05, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         5.9157635647        -0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   1    1         5.9157635647         0.0000000000
+   1    1   2    1        -0.0000000000        -0.0000000000
+   1    1   3    1        -0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         5.9157635647        -0.0000000000
-   2    1   3    1         0.0000000000        -0.0000000000
+   2    1   1    1        -0.0000000000        -0.0000000000
+   2    1   2    1         5.9157635647         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000        -0.0000000000
-   3    1   3    1        10.7923918008        -0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000        -0.0000000000
+   3    1   3    1        10.7923918008         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
@@ -1928,7 +1917,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.13357
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1946,10 +1934,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t96o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    1.000000E+01 and    1.000000E+01.
  Initialisation of the first-order wave-functions :
@@ -1966,8 +1952,8 @@ tolerances: {tolvrs: 1.00E-05, }
  ETOT  2   374.38514593002     -1.970E+02 5.101E-01 1.849E+05
  ETOT  3   145.36907068918     -2.290E+02 1.155E-01 3.996E+02
  ETOT  4   144.93657375878     -4.325E-01 2.092E-04 2.110E-01
- ETOT  5   144.93630192244     -2.718E-04 3.582E-07 8.606E-02
- ETOT  6   144.95578647392      1.948E-02 8.690E-09 2.283E+01
+ ETOT  5   144.93630192243     -2.718E-04 3.582E-07 8.606E-02
+ ETOT  6   144.95578647422      1.948E-02 8.690E-09 2.283E+01
  ETOT  7   144.93619373552     -1.959E-02 1.254E-08 1.030E-03
  ETOT  8   144.93619207604     -1.659E-06 1.568E-09 1.292E-04
  ETOT  9   144.93619199498     -8.105E-08 3.738E-11 3.544E-06
@@ -2031,7 +2017,7 @@ tolerances: {tolvrs: 1.00E-05, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2206,6 +2192,16 @@ P          mk1mem           8
            prtdos8          0
            prtdos9          0
            prtdos10         0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          1
+           prtpot8          1
+           prtpot9          1
+           prtpot10         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2216,7 +2212,7 @@ P          mk1mem           8
               qpt8     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt9     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt10    5.00000000E-01  5.00000000E-01  0.00000000E+00
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          0       1       0
             rfdir4          0       0       1
@@ -2405,10 +2401,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         10.6  wall=         10.7
+- Proc.   0 individual time (sec): cpu=         14.5  wall=         14.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  69 WARNINGs and 179 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.6  wall=         10.7
+.Delivered   4 WARNINGs and  41 COMMENTs to log file.
++Overall time at end (sec) : cpu=         14.5  wall=         14.8

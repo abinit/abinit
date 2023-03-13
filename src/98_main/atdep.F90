@@ -6,7 +6,7 @@
 !! Calculations of phonons using molecular dynamic simulations
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (FB,JB)
+!! Copyright (C) 1998-2022 ABINIT group (FB,JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,21 +26,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abimem_init,abinit_doctor,tdep_build_phijnn,tdep_build_pijn
-!!      tdep_calc_alpha_gamma,tdep_calc_constraints,tdep_calc_dij
-!!      tdep_calc_elastic,tdep_calc_model,tdep_calc_moorepenrose
-!!      tdep_calc_phdos,tdep_calc_phijfcoeff,tdep_calc_pijfcoeff
-!!      tdep_calc_psijfcoeff,tdep_calc_psijtot,tdep_calc_thermo
-!!      tdep_check_constraints,tdep_destroy_eigen2nd,tdep_destroy_shell
-!!      tdep_init_crystal,tdep_init_ddb,tdep_init_eigen2nd,tdep_init_ifc
-!!      tdep_init_shell1at,tdep_init_shell2at,tdep_init_shell3at,tdep_make_latt
-!!      tdep_make_qptpath,tdep_make_sym,tdep_matchideal2average
-!!      tdep_print_aknowledgments,tdep_readecho,tdep_write_dij
-!!      tdep_write_gruneisen,tdep_write_yaml,wrtout,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -54,75 +39,205 @@ program atdep
   use defs_basis
   use m_abicore
   use m_phonons
-  use m_xmpi
-  use m_io_tools
   use m_errors
+  use m_abi_linalg
+  use m_xmpi             
+  use m_abihist
+  use m_io_tools
   use m_argparse
 
   use m_ifc,              only : ifc_type
-  use m_crystal,          only : crystal_t
+  use m_crystal,          only : crystal_t, crystal_free
   use m_ddb,              only : ddb_type
-  use m_tdep_abitypes,    only : tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ifc
-  use m_tdep_psij,        only : tdep_calc_psijfcoeff, tdep_calc_psijtot, tdep_calc_alpha_gamma, tdep_write_gruneisen
-  use m_tdep_phij,        only : tdep_calc_phijfcoeff, tdep_calc_pijfcoeff, tdep_build_phijNN, tdep_calc_dij, tdep_write_dij, &
-                                 Eigen_Variables_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, &
-                                 tdep_write_yaml, tdep_build_pijN
-  use m_tdep_latt,        only : tdep_make_latt, Lattice_Variables_type
-  use m_tdep_sym,         only : tdep_make_sym, Symetries_Variables_type
-  use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_ReadEcho, Input_Variables_type
+  use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
+&                                tdep_destroy_qbz, tdep_destroy_ddb, tdep_ifc2phi2          
+  use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
+  use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
+&                                tdep_calc_alpha_gamma, tdep_write_gruneisen
+  use m_tdep_phi2,        only : tdep_calc_phi2fcoeff, tdep_calc_phi1fcoeff, tdep_calc_phi2, tdep_write_phi2, tdep_calc_ftot2, &
+&                                Eigen_type, tdep_init_eigen2nd, tdep_destroy_eigen2nd, tdep_calc_phi1, &
+&                                tdep_write_phi1, tdep_init_phi2, tdep_destroy_phi2, Phi2_type
+  use m_tdep_latt,        only : tdep_make_latt, Lattice_type
+  use m_tdep_sym,         only : tdep_make_sym, Symetries_type, tdep_destroy_sym
+  use m_tdep_readwrite,   only : tdep_print_Aknowledgments, tdep_read_input, tdep_distrib_data, tdep_init_MPIdata, &
+&                                tdep_destroy_mpidata, Input_type, MPI_enreg_type, tdep_destroy_invar
   use m_tdep_utils,       only : Coeff_Moore_type, tdep_calc_MoorePenrose, tdep_MatchIdeal2Average, tdep_calc_model
-  use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type
+  use m_tdep_qpt,         only : tdep_make_qptpath, Qpoints_type, tdep_destroy_qpt
   use m_tdep_phdos,       only : tdep_calc_phdos,tdep_calc_elastic,tdep_calc_thermo
-  use m_tdep_shell,       only : Shell_Variables_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell1at, &
-                                 tdep_destroy_shell
+  use m_tdep_shell,       only : Shell_type, tdep_init_shell2at, tdep_init_shell3at, tdep_init_shell4at, &
+&                                tdep_init_shell1at, tdep_destroy_shell
   use m_tdep_constraints, only : tdep_calc_constraints, tdep_check_constraints
 
   implicit none
 
-  integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ntotcoeff,ntotconst
-  integer :: stdout,iqpt,nshell_max
-  double precision :: U0,Free_Anh
-  double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:)
-  double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:)
-!FB  double precision, allocatable :: fcoeff(:,:),Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:)
-  double precision, allocatable :: Phij_coeff(:,:),Forces_MD(:),Phij_NN(:,:),Pij_N(:),Pij_coeff(:,:)
-  double precision, allocatable :: Psij_coeff(:,:),Psij_ref(:,:,:,:),MP_coeff(:,:)
+  integer :: natom,natom_unitcell,ncoeff1st,ncoeff2nd,ncoeff3rd,ncoeff4th,ntotcoeff,ntotconst
+  integer :: stdout,stdlog,nshell_max,ii,jj,ishell,istep,iatom
+  integer :: print_mem_report,ierr
+  double precision :: U0
+  double precision, allocatable :: ucart(:,:,:),proj1st(:,:,:),proj2nd(:,:,:),proj3rd(:,:,:),proj4th(:,:,:)
+  double precision, allocatable :: proj_tmp(:,:,:),Forces_TDEP(:),Fresid(:)
+  double precision, allocatable :: Phi1(:)  ,Phi1_coeff(:,:)
+  double precision, allocatable :: Phi2_coeff(:,:)
+  double precision, allocatable :: Phi3_ref(:,:,:,:)  ,Phi3_coeff(:,:)
+  double precision, allocatable :: Phi4_ref(:,:,:,:,:),Phi4_coeff(:,:)
+  double precision, allocatable :: Forces_MD(:),MP_coeff(:,:)
   double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
-  double precision, allocatable :: omega (:),ftot3(:,:)
-  double precision :: qpt_cart(3)
-  double complex  , allocatable :: dij(:,:),eigenV(:,:)
+  double precision, allocatable :: Phi1Ui(:),Phi2UiUj(:),Phi3UiUjUk(:),Phi4UiUjUkUl(:)
   type(args_t) :: args
   type(phonon_dos_type) :: PHdos
-  type(Input_Variables_type) :: InVar
-  type(Lattice_Variables_type) :: Lattice
-  type(Symetries_Variables_type) :: Sym
+  type(Phi2_type) :: Phi2
+  type(Input_type) :: Invar
+  type(Lattice_type) :: Lattice
+  type(Symetries_type) :: Sym
   type(Qpoints_type) :: Qpt
+  type(Qbz_type) :: Qbz
   type(ifc_type) :: Ifc
   type(ddb_type) :: DDB
   type(crystal_t) :: Crystal
-  type(Shell_Variables_type) :: Shell1at,Shell2at,Shell3at
+  type(Shell_type) :: Shell1at,Shell2at,Shell3at,Shell4at
   type(Coeff_Moore_type) :: CoeffMoore
-  type(Eigen_Variables_type) :: Eigen2nd
+  type(Eigen_type) :: Eigen2nd_MP
+  type(Eigen_type) :: Eigen2nd_path
+  type(MPI_enreg_type) :: MPIdata
+  type(abihist) :: Hist
+
+!TEST
+!FB  integer, allocatable :: data_tmp(:,:),data_loc(:,:),data_gather(:,:),shft_step(:)
+!FB  integer, allocatable :: nstep_acc(:),tab_step(:)
+!FB  integer :: istep,ierr,iproc,dim1,dim2,remain,idim1
+!TEST
 
 !******************************************************************
 
 !==========================================================================================
 !===================== Initialization & Reading  ==========================================
 !==========================================================================================
+! Change communicator for I/O (mandatory!)
+ call abi_io_redirect(new_io_comm=xmpi_world)
+! Initialize MPI
  call xmpi_init()
 
- ! Parse command line arguments.
+! Parse command line arguments.
  args = args_parser(); if (args%exit /= 0) goto 100
 
- ! Initialize memory profiling if activated at configure time.
- ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
- ! note that the file can easily be multiple GB in size so don't use this option normally
+! Initialize memory profiling if activated at configure time.
+! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
+! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
 ! Read input values from the input.in input file
- call tdep_ReadEcho(InVar)
+ call tdep_read_input(Hist,Invar)
+ call tdep_init_MPIdata(Invar,MPIdata)
+ call tdep_distrib_data(Hist,Invar,MPIdata)
+ call abihist_free(Hist)
+
+!FB TEST
+!FB Invar%nstep_tot=10
+!FB dim1=1
+!FB dim2=1
+!FB ABI_MALLOC(data_tmp,(dim1,Invar%nstep_tot*dim2)); data_tmp(:,:)=zero
+!FB do istep=1,Invar%nstep_tot
+!FB   data_tmp(:,dim2*(istep-1)+1:dim1*istep)=istep
+!FB end do
+!FB if (MPIdata%iam_master) write(Invar%stdlog,*) MPIdata%me_step,data_tmp(:,:)
+!FB
+!FB Invar%my_nstep=int(Invar%nstep_tot/MPIdata%nproc)
+!FB remain=Invar%nstep_tot-MPIdata%nproc*Invar%my_nstep
+!FB do ii=1,remain
+!FB   if ((ii-1).eq.MPIdata%me_step) Invar%my_nstep=Invar%my_nstep+1
+!FB end do
+!FB!FB ABI_MALLOC(MPIdata%nstep_all,(MPIdata%nproc)); MPIdata%nstep_all(:)=zero
+!FB call xmpi_allgather(Invar%my_nstep,MPIdata%nstep_all,MPIdata%comm_step,ierr)
+!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'Nstep(nproc)=',MPIdata%nstep_all(:)
+!FB call flush_unit(6)
+!FB call xmpi_barrier(MPIdata%comm_step)
+!FB
+!FB ABI_MALLOC(nstep_acc,(MPIdata%nproc+1)); nstep_acc(:)=zero
+!FB nstep_acc(1)=0
+!FB do ii=2,MPIdata%nproc+1
+!FB   nstep_acc(ii)=nstep_acc(ii-1)+MPIdata%nstep_all(ii-1)
+!FB end do
+!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'NSTEP_ACC=',nstep_acc(:)
+!FB call flush_unit(6)
+!FB call xmpi_barrier(MPIdata%comm_step)
+!FB
+!FB ABI_MALLOC(tab_step,(Invar%nstep_tot)); tab_step(:)=zero
+!FB! First distrib
+!FB do iproc=1,MPIdata%nproc
+!FB   do istep=1,Invar%nstep_tot
+!FB     if ((istep.gt.nstep_acc(iproc)).and.(istep.le.nstep_acc(iproc+1))) then
+!FB       tab_step(istep)=iproc-1
+!FB     end if
+!FB   end do
+!FB end do
+!FB
+!FB! Second distrib
+!FB tab_step(:)=zero
+!FB do istep=1,Invar%nstep_tot
+!FB   do iproc=1,MPIdata%nproc
+!FB     if (mod((istep-1),MPIdata%nproc).eq.(iproc-1)) then
+!FB       tab_step(istep)=iproc-1
+!FB     end if
+!FB   end do
+!FB end do
+!FB
+!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) 'TAB_STEP=',tab_step(:)
+!FB call flush_unit(6)
+!FB call xmpi_barrier(MPIdata%comm_step)
+!FB
+!FB if (nstep_acc(MPIdata%nproc+1).ne.Invar%nstep_tot) then
+!FB   write(Invar%stdlog,*) 'STOP : pb in nstep_acc'
+!FB   stop
+!FB end if
+!FB
+!FB ii=1
+!FB ABI_MALLOC(data_loc,(dim1,Invar%my_nstep*dim2)); data_loc(:,:)=zero
+!FB do istep=1,Invar%nstep_tot
+!FB   if (tab_step(istep).eq.MPIdata%me_step) then
+!FB     data_loc(:,dim2*(ii-1)+1:dim2*ii)=data_tmp(:,dim2*(istep-1)+1:dim2*istep)
+!FB     ii=ii+1
+!FB   end if  
+!FB end do
+!FB
+!FB do iproc=1,MPIdata%nproc
+!FB   if (iproc-1.eq.MPIdata%me_step) write(Invar%stdlog,*) 'DATA_LOC =',MPIdata%me_step,data_loc(:,:)
+!FB end do
+!FB call flush_unit(6)
+!FB call xmpi_barrier(MPIdata%comm_step)
+!FB
+!FB!FB ABI_MALLOC(shft_step,(MPIdata%nproc)); shft_step(:)=zero
+!FB!FB shft_step(1)=0
+!FB!FB do ii=2,MPIdata%nproc
+!FB!FB   shft_step(ii)=shft_step(ii-1)+MPIdata%nstep_all(ii-1)
+!FB!FB end do
+!FB!FB
+!FB!FB ABI_MALLOC(data_gather,(dim1,Invar%nstep_tot*dim2)); data_gather(:,:)=zero
+!FB!FB do idim1=1,dim1
+!FB!FB   call xmpi_gatherv(data_loc(idim1,:),Invar%my_nstep*dim2,data_gather(idim1,:),MPIdata%nstep_all*dim2,dim2*shft_step,&
+!FB!FB&                    MPIdata%master,MPIdata%comm_step,ierr)
+!FB!FB end do
+!FB!FB
+!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) "============================================"
+!FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) MPIdata%me_step,data_gather(:,:)
+!FB!FB call flush_unit(6)
+!FB!!FBFB
+!FB 
+!FB ABI_MALLOC(data_gather,(dim1,Invar%nstep_tot*dim2)); data_gather(:,:)=zero
+!FB call xmpi_allgatherv(data_loc,dim1*Invar%my_nstep,data_gather,dim1*MPIdata%nstep_all,dim1*nstep_acc(1:MPIdata%nproc),MPIdata%comm_step,ierr)
+!FB!FB call xmpi_scatterv(data_gather,MPIdata%nstep_all,nstep_acc,data_loc,Invar%my_nstep,&
+!FB!FB&                    MPIdata%master,MPIdata%comm_step,ierr)
+!FB do iproc=1,MPIdata%nproc
+!FB   if (MPIdata%me_step.eq.(iproc-1)) write(Invar%stdlog,*) "============================================"
+!FB   if (MPIdata%me_step.eq.(iproc-1)) write(Invar%stdlog,*) MPIdata%me_step,data_gather(:,:)
+!FB   call flush_unit(6)
+!FB   call xmpi_barrier(MPIdata%comm_step)
+!FB end do
+!FB write(Invar%stdlog,*) '====== END ======='
+!FB call flush_unit(6)
+!FB call abi_abort("COLL")
+!TEST
 
  if (args%dry_run /= 0) then
    call wrtout(std_out, "Dry run mode. Exiting after have read the input")
@@ -130,43 +245,45 @@ program atdep
  end if
 
 ! Initialize basic quantities
- natom         =InVar%natom
- natom_unitcell=InVar%natom_unitcell
- stdout        =InVar%stdout
- nshell_max    =500
+ print_mem_report = 1
+ natom            = Invar%natom
+ natom_unitcell   = Invar%natom_unitcell
+ stdout           = Invar%stdout
+ stdlog           = Invar%stdlog
+ nshell_max       = 500
 
 !==========================================================================================
 !============== Define the ideal lattice, symmetries and Brillouin zone ===================
 !==========================================================================================
 ! Define all the quantities needed to buid the lattice (rprim*, acell*, brav*...)
- call tdep_make_latt(InVar,Lattice)
+ call tdep_make_latt(Invar,Lattice)
 
 ! Compute all the symmetries coming from the bravais lattice
- call tdep_make_sym(Invar,Lattice,Sym)
+ call tdep_make_sym(Invar,Lattice,MPIdata,Sym)
 
-! Initialize the Brillouin zone and compute the q-points path
- call tdep_make_qptpath(InVar,Lattice,Qpt)
+! Initialize the Brillouin zone and compute the q-points path 
+ call tdep_make_qptpath(Invar,Lattice,MPIdata,Qpt)
 
 !==========================================================================================
 !======== 1/ Determine ideal positions and distances ======================================
 !======== 2/ Find the matching between the ideal and average ==============================
 !========   (from the MD simulations) positions. ==========================================
-!======== 3/ Find the symmetry operation between the reference and image bonds =============
+!======== 3/ Find the symmetry operation between the reference and image bonds ============
 !======== 4/ Write output quantities needed to visualize the neighbouring distances =======
 !==========================================================================================
  ABI_MALLOC(Rlatt4Abi ,(3,natom_unitcell,natom))   ; Rlatt4Abi (:,:,:)=0.d0
  ABI_MALLOC(distance,(natom,natom,4))              ; distance(:,:,:)=0.d0
  ABI_MALLOC(Rlatt_cart,(3,natom_unitcell,natom))   ; Rlatt_cart(:,:,:)=0.d0
- ABI_MALLOC(ucart,(3,natom,InVar%nstep))           ; ucart(:,:,:)=0.d0
- ABI_MALLOC(Forces_MD,(3*natom*InVar%nstep))       ; Forces_MD(:)=0.d0
+ ABI_MALLOC(ucart,(3,natom,Invar%my_nstep))           ; ucart(:,:,:)=0.d0
+ ABI_MALLOC(Forces_MD,(3*natom*Invar%my_nstep))       ; Forces_MD(:)=0.d0
 
- call tdep_MatchIdeal2Average(distance,Forces_MD,InVar,Lattice,Rlatt_cart,Rlatt4Abi,Sym,ucart)
+ call tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,Rlatt_cart,Rlatt4Abi,Sym,ucart)
 
 !==========================================================================================
 !============== Initialize Crystal and DDB ABINIT Datatypes ===============================
 !==========================================================================================
- call tdep_init_crystal(Crystal,InVar,Lattice,Sym)
- call tdep_init_ddb(DDB,InVar,Lattice)
+ call tdep_init_crystal(Crystal,Invar,Lattice,Sym)
+ call tdep_init_ddb(Crystal,DDB,Invar,Lattice,MPIdata,Qbz)
 
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
@@ -178,161 +295,348 @@ program atdep
 !============== Initialize the Shell1at datatype ==========================================
 !==========================================================================================
  ABI_MALLOC(proj_tmp,(3,3,nshell_max)) ; proj_tmp(:,:,:)=0.d0
- call tdep_init_shell1at(distance,InVar,3,nshell_max,ncoeff1st,1,proj_tmp,Shell1at,Sym)
+ call tdep_init_shell1at(distance,Invar,MPIdata,3,nshell_max,ncoeff1st,1,proj_tmp,Shell1at,Sym)
  ABI_MALLOC(proj1st  ,(3,3,Shell1at%nshell)) ; proj1st(:,:,:)=0.d0
- proj1st = reshape (proj_tmp, (/ 3,3,Shell1at%nshell /))
+ do ishell=1,Shell1at%nshell
+   proj1st(:,:,ishell) = proj_tmp(:,:,ishell)
+ end do
  ABI_FREE(proj_tmp)
 !Rotational invariances (1st order)
 !    constraints = 3
- CoeffMoore%nconst_1st=3
- ntotconst=CoeffMoore%nconst_1st
+ CoeffMoore%nconst_1st=3**2
 
 !==========================================================================================
 !============== Initialize the Shell2at datatype ==========================================
 !==========================================================================================
  ABI_MALLOC(proj_tmp,(9,9,nshell_max)) ; proj_tmp(:,:,:)=0.d0
- call tdep_init_shell2at(distance,InVar,9,nshell_max,ncoeff2nd,2,proj_tmp,Shell2at,Sym)
+ call tdep_init_shell2at(distance,Invar,MPIdata,9,nshell_max,ncoeff2nd,2,proj_tmp,Shell2at,Sym)
  ABI_MALLOC(proj2nd  ,(9,9,Shell2at%nshell)) ; proj2nd(:,:,:)=0.d0
- proj2nd = reshape (proj_tmp, (/ 9,9,Shell2at%nshell /))
+ do ishell=1,Shell2at%nshell
+   proj2nd(:,:,ishell) = proj_tmp(:,:,ishell)
+ end do
  ABI_FREE(proj_tmp)
 !Rotational invariances (2nd order) + Symetry of the Dynamical Matrix + Huang invariances
 !    constraints = natom*3**2 + (3*natom_unitcell)**2 + 3**4
- CoeffMoore%nconst_rot2nd = natom_unitcell*9
+ CoeffMoore%nconst_rot2nd = 3**3*natom_unitcell
  CoeffMoore%nconst_dynmat = (3*natom_unitcell)**2
- CoeffMoore%nconst_huang  = 81
+ CoeffMoore%nconst_huang  = 3**4
  CoeffMoore%nconst_2nd = CoeffMoore%nconst_rot2nd + CoeffMoore%nconst_dynmat + CoeffMoore%nconst_huang
- ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd
 
 !==========================================================================================
 !============== Initialize the IFC Abinit datatype ========================================
 !==========================================================================================
- ABI_MALLOC(Pij_N  ,(3*natom))         ; Pij_N  (:)  =0.d0
- ABI_MALLOC(Phij_NN,(3*natom,3*natom)) ; Phij_NN(:,:)=0.d0
- call tdep_init_ifc(Crystal,DDB,Ifc,InVar,Lattice,Phij_NN,Rlatt4Abi,Shell2at,Sym)
+ ABI_MALLOC(Phi1,(3*natom)); Phi1(:)  =0.d0
+ call tdep_init_phi2(Phi2,Invar%loto,natom)
+ call tdep_init_ifc(Crystal,DDB,Ifc,Invar,Lattice,MPIdata,Phi2,Rlatt4Abi,Shell2at,Sym)
 
 !==========================================================================================
-!============== Initialize the Shell3at datatype (if SC_order==1) =========================
+!============== Initialize the Shell3at datatype ==========================================
 !==========================================================================================
  ncoeff3rd=0
- if (InVar%Order==3) then
+ CoeffMoore%nconst_3rd=0
+ Shell3at%nshell=1
+ if (Invar%order.ge.3) then
    ABI_MALLOC(proj_tmp,(27,27,nshell_max)) ; proj_tmp(:,:,:)=0.d0
-   call tdep_init_shell3at(distance,InVar,27,nshell_max,ncoeff3rd,3,proj_tmp,Shell3at,Sym)
+   call tdep_init_shell3at(distance,Invar,MPIdata,27,nshell_max,ncoeff3rd,3,proj_tmp,Shell3at,Sym)
    ABI_MALLOC(proj3rd  ,(27,27,Shell3at%nshell)) ; proj3rd(:,:,:)=0.d0
-   proj3rd = reshape (proj_tmp, (/ 27,27,Shell3at%nshell /))
+   do ishell=1,Shell3at%nshell
+     proj3rd(:,:,ishell) = proj_tmp(:,:,ishell)
+   end do
    ABI_FREE(proj_tmp)
 !  Rotational invariances (3rd order) + acoustic sum rules (3rd order)
-!    constraints = natom_unitcell*natom*3**3) + 3permutations*3**3*nshell2at
-!FB   CoeffMoore%nconst_rot3rd =   natom_unitcell*natom*3**3
-   CoeffMoore%nconst_rot3rd = 3*natom_unitcell*natom*3**4
-   CoeffMoore%nconst_asr3rd = 8*natom_unitcell*natom*3**3
+!    constraints = natom_unitcell*natom*3**4 + natom_unitcell*natom*3**3
+   CoeffMoore%nconst_rot3rd = 3**4*natom_unitcell*natom
+   CoeffMoore%nconst_asr3rd = 3**3*natom_unitcell*natom
    CoeffMoore%nconst_3rd = CoeffMoore%nconst_rot3rd + CoeffMoore%nconst_asr3rd
-   ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd + CoeffMoore%nconst_3rd
  end if
- ntotcoeff=ncoeff1st+ncoeff2nd+ncoeff3rd
- CoeffMoore%ntotcoeff=ntotcoeff
- CoeffMoore%ntotconst=ntotconst
+
+!==========================================================================================
+!============== Initialize the Shell4at datatype ==========================================
+!==========================================================================================
+ ncoeff4th=0
+ CoeffMoore%nconst_4th=0
+ Shell4at%nshell=1
+ if (Invar%order==4) then
+   ABI_MALLOC(proj_tmp,(81,81,nshell_max)) ; proj_tmp(:,:,:)=0.d0
+   call tdep_init_shell4at(distance,Invar,MPIdata,81,nshell_max,ncoeff4th,4,proj_tmp,Shell4at,Sym)
+   ABI_MALLOC(proj4th  ,(81,81,Shell4at%nshell)) ; proj4th(:,:,:)=0.d0
+   do ishell=1,Shell4at%nshell
+     proj4th(:,:,ishell) = proj_tmp(:,:,ishell)
+   end do
+   ABI_FREE(proj_tmp)
+!  Rotational invariances (4th order) + acoustic sum rules (4th order)
+!    constraints = natom_unitcell*natom**2*3**5 + natom_unitcell*natom**2*3**4
+!FB   CoeffMoore%nconst_rot4th = 3**5*natom_unitcell*natom**2
+!FB4TH   CoeffMoore%nconst_asr4th = 3**4*natom_unitcell*natom**2
+   CoeffMoore%nconst_rot4th = 0
+   CoeffMoore%nconst_asr4th = 0
+   CoeffMoore%nconst_4th = CoeffMoore%nconst_rot4th + CoeffMoore%nconst_asr4th
+ end if
  CoeffMoore%ncoeff1st=ncoeff1st
  CoeffMoore%ncoeff2nd=ncoeff2nd
  CoeffMoore%ncoeff3rd=ncoeff3rd
- ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*InVar%nstep+ntotconst,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0
+ CoeffMoore%ncoeff4th=ncoeff4th
 
 !==========================================================================================
-!============= Build fcoeff, needed for the Moore-Penrose method just below ===============
-!============================== and compute constraints ===================================
+!================= Build fcoeff and compute constraints ===================================
 !==========================================================================================
- if (InVar%ReadIFC.ne.1) then
-   call tdep_calc_pijfcoeff(CoeffMoore,InVar,proj1st,Shell1at,Sym)
-   call tdep_calc_phijfcoeff(CoeffMoore,InVar,proj2nd,Shell2at,Sym,ucart)
+ ABI_MALLOC(Forces_TDEP,(3*Invar%natom*Invar%my_nstep)); Forces_TDEP(:)=0.d0 
+ ABI_MALLOC(Fresid     ,(3*Invar%natom*Invar%my_nstep)); Fresid(:)=Forces_MD(:)
+ ABI_MALLOC(Phi1Ui      ,(Invar%my_nstep)); Phi1Ui      (:)=0.d0 
+ ABI_MALLOC(Phi2UiUj    ,(Invar%my_nstep)); Phi2UiUj    (:)=0.d0 
+ ABI_MALLOC(Phi3UiUjUk  ,(Invar%my_nstep)); Phi3UiUjUk  (:)=0.d0 
+ ABI_MALLOC(Phi4UiUjUkUl,(Invar%my_nstep)); Phi4UiUjUkUl(:)=0.d0 
+ ntotcoeff=CoeffMoore%ncoeff1st  + CoeffMoore%ncoeff2nd  + CoeffMoore%ncoeff3rd  + CoeffMoore%ncoeff4th
+ ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd + CoeffMoore%nconst_3rd + CoeffMoore%nconst_4th
+ CoeffMoore%ntotcoeff=ntotcoeff
+ CoeffMoore%ntotconst=ntotconst
+
+!LOTO 
+!Remove the supercell contribution (the "LR part") included in total forces
+!before computing the "SR part". The full "LR part" will be added later.
+ if (Invar%loto) then
+   call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
+   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%Tot,Phi2UiUj,ucart) 
+   Fresid(:)=Fresid(:)-Forces_TDEP(:)
+   Phi1       (:)=0.d0
+   Phi1Ui     (:)=0.d0 
+   Phi2%SR  (:,:)=0.d0
+   if (Invar%loto) then
+     Phi2%LR  (:,:)=0.d0
+     Phi2%Tot (:,:)=0.d0
+   end if  
+   Phi2UiUj   (:)=0.d0 
+   Forces_TDEP(:)=0.d0 
  end if
- if (InVar%Order==3) then
-   call tdep_calc_psijfcoeff(CoeffMoore,InVar,proj3rd,Shell3at,Sym,ucart)
-   CoeffMoore%fcoeff(:,ncoeff2nd+1:ntotcoeff)=CoeffMoore%fcoeff(:,ncoeff2nd+1:ntotcoeff)/2.d0
-   call tdep_calc_constraints(CoeffMoore,distance,InVar,Shell1at%nshell,Shell2at%nshell,Shell3at%nshell,Sym,&
-&                             proj1st,Shell1at,proj2nd,Shell2at,proj3rd,Shell3at)
- else
-   call tdep_calc_constraints(CoeffMoore,distance,InVar,Shell1at%nshell,Shell2at%nshell,Shell3at%nshell,Sym,&
-&                             proj1st,Shell1at,proj2nd,Shell2at)
- end if
+!LOTO 
+
+ do istep=1,Invar%my_nstep
+    do iatom=1,Invar%natom
+       do ii=1,3
+          Fresid(ii+3*(iatom-1)+3*Invar%natom*(istep-1))=Fresid(ii+3*(iatom-1)+3*Invar%natom*(istep-1))*&
+&                                                        Invar%weights(istep)
+       end do
+    end do
+ end do
+
+ ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*Invar%my_nstep,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0 
+ if (Invar%readifc.ne.1) then
+   call tdep_calc_phi1fcoeff(CoeffMoore,Invar,proj1st,Shell1at,Sym)
+   call tdep_calc_phi2fcoeff(CoeffMoore,Invar,proj2nd,Shell2at,Sym,ucart)
+ end if 
+ if (Invar%order.ge.3) then
+   ABI_MALLOC(Phi3_ref,(3,3,3,Shell3at%nshell))  ; Phi3_ref(:,:,:,:)=0.d0
+   call tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj3rd,Shell3at,Sym,ucart)
+ end if  
+ if (Invar%order.eq.4) then
+   ABI_MALLOC(Phi4_ref,(3,3,3,3,Shell4at%nshell)); Phi4_ref(:,:,:,:,:)=0.d0
+   call tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj4th,Shell4at,Sym,ucart)
+ end if  
+ if (Invar%order.eq.2) then
+ call tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,Shell1at%nshell,Shell2at%nshell,&
+&                           Shell3at%nshell,Shell4at%nshell,proj1st,proj2nd,&
+&                           Shell1at,Shell2at,Sym) 
+ else if (Invar%order.eq.3) then
+ call tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,Shell1at%nshell,Shell2at%nshell,&
+&                           Shell3at%nshell,Shell4at%nshell,proj1st,proj2nd,&
+&                           Shell1at,Shell2at,Sym,proj3rd,Shell3at) 
+ else if (Invar%order.eq.4) then
+ call tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,Shell1at%nshell,Shell2at%nshell,&
+&                           Shell3at%nshell,Shell4at%nshell,proj1st,proj2nd,&
+&                           Shell1at,Shell2at,Sym,proj3rd,Shell3at,proj4th,Shell4at) 
+ end if 
 
 !==========================================================================================
 !============= Compute the pseudo inverse using the Moore-Penrose method ==================
 !==========================================================================================
  ABI_MALLOC(MP_coeff,(ntotcoeff,1)); MP_coeff(:,:)=0.d0
- if (InVar%ReadIFC.ne.1) then
-   call tdep_calc_MoorePenrose(Forces_MD,CoeffMoore,InVar,MP_coeff)
+!==========================================================================================
+!=================== If all the Orders are solved simultaneously ==========================
+!==========================================================================================
+ if (Invar%together.eq.1) then
+   write(stdout,*) '############### (Solve simultaneously all the orders) #######################'  
+   if (Invar%readifc.ne.1) then
+     call tdep_calc_MoorePenrose(CoeffMoore,Fresid,0,Invar,MP_coeff,MPIdata)
+   end if  
+   ABI_MALLOC(Phi1_coeff,(ncoeff1st,1)); Phi1_coeff(:,:)=MP_coeff(1:ncoeff1st,:)
+   ABI_MALLOC(Phi2_coeff,(ncoeff2nd,1)); Phi2_coeff(:,:)=MP_coeff(ncoeff1st+1:ncoeff1st+ncoeff2nd,:)
+   if (Invar%readifc.ne.1) then
+     call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1   ,Shell1at,Sym)
+     call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2%SR,Shell2at,Sym)
+   end if
+   ABI_FREE(proj1st)
+   ABI_FREE(proj2nd)
+   ABI_FREE(Phi1_coeff)
+   ABI_FREE(Phi2_coeff)
+   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart) 
+   if (Invar%order.ge.3) then 
+     ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
+     Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
+     call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
+     ABI_FREE(proj3rd)
+     ABI_FREE(Phi3_coeff)
+     call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
+   end if
+   if (Invar%order.ge.4) then 
+     ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
+     Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
+     call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
+     ABI_FREE(proj4th)
+     ABI_FREE(Phi4_coeff)
+     call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
+   end if  
+
+!==========================================================================================
+!=================== If all the Orders are solved successively ============================
+!==========================================================================================
+!ATTENTION : Le LR semble enleve a l'ordre 2 mais pas a l'ordre 3 et 4. On repart de 
+!            Forces_MD tout en bas et pas de Fresid (car les ordres 2 et 3 sont supprimes au
+ else if (Invar%together.eq.0) then
+   write(stdout,*) '################## (Solve successively each order) ##########################'  
+   do ii=1,Invar%order-1
+     write(stdout,*) ' For order=',ii+1
+     if (Invar%readifc.eq.1) cycle
+     call tdep_calc_MoorePenrose(CoeffMoore,Fresid,ii,Invar,MP_coeff,MPIdata)
+     if (ii.eq.1) then
+       ABI_MALLOC(Phi1_coeff,(ncoeff1st,1)); Phi1_coeff(:,:)=MP_coeff(1:ncoeff1st,:)
+       ABI_MALLOC(Phi2_coeff,(ncoeff2nd,1)); Phi2_coeff(:,:)=MP_coeff(ncoeff1st+1:ncoeff1st+ncoeff2nd,:)
+       if (Invar%readifc.ne.1) then
+         call tdep_calc_phi1(Invar,ncoeff1st,proj1st,Phi1_coeff,Phi1   ,Shell1at,Sym)
+         call tdep_calc_phi2(Invar,ncoeff2nd,proj2nd,Phi2_coeff,Phi2%SR,Shell2at,Sym)
+       end if
+       ABI_FREE(proj1st)
+       ABI_FREE(proj2nd)
+       ABI_FREE(Phi1_coeff)
+       ABI_FREE(Phi2_coeff)
+       call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart) 
+     else if (ii.eq.2) then 
+       ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
+       Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
+       call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
+       ABI_FREE(proj3rd)
+       ABI_FREE(Phi3_coeff)
+       call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
+     else if (ii.eq.3) then 
+       ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
+       Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
+       call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
+       ABI_FREE(proj4th)
+       ABI_FREE(Phi4_coeff)
+       call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
+     end if  
+     do istep=1,Invar%my_nstep
+       do iatom=1,Invar%natom
+         do jj=1,3
+            Fresid(jj+3*(iatom-1)+3*Invar%natom*(istep-1))=(Forces_MD(jj+3*(iatom-1)+3*Invar%natom*(istep-1)) -&
+&                                                           Forces_TDEP(jj+3*(iatom-1)+3*Invar%natom*(istep-1)))*&
+&                                                           Invar%weights(istep)
+         end do ! ii
+       end do ! iatom
+     end do ! istep
+   end do  
+ end if  
+ ABI_FREE(CoeffMoore%const)
+ ABI_FREE(CoeffMoore%fcoeff)
+ ABI_FREE(Fresid)
+ ABI_FREE(MP_coeff)
+ ABI_FREE(ucart)
+ call tdep_destroy_shell(natom,1,Shell1at)
+
+!LOTO 
+ if (Invar%loto) then
+   Phi2%Tot=Phi2%LR+Phi2%SR
  end if
- ABI_MALLOC(Pij_coeff ,(ncoeff1st,1)); Pij_coeff (:,:)=MP_coeff(1:ncoeff1st,:)
- ABI_MALLOC(Phij_coeff,(ncoeff2nd,1)); Phij_coeff(:,:)=MP_coeff(ncoeff1st+1:ncoeff1st+ncoeff2nd,:)
+!LOTO 
 
 !==========================================================================================
-!==== Reorganize the IFC coefficients into the whole Pij_N & Phij_NN matrices =============
-!=================== and check the constraints ============================================
+!=================== Write the IFC and check the constraints ==============================
 !==========================================================================================
- if (InVar%ReadIFC.ne.1) then
-   call tdep_build_pijN(InVar,ncoeff1st,proj1st,Pij_coeff,Pij_N,Shell1at,Sym)
-   call tdep_build_phijNN(distance,InVar,ncoeff2nd,proj2nd,Phij_coeff,Phij_NN,Shell2at,Sym)
-   call tdep_check_constraints(distance,InVar,Phij_NN,Pij_N,1)
+ call tdep_write_phi1(Invar,Phi1)
+ call tdep_write_phi2(distance,Invar,MPIdata,Phi2%SR,Shell2at)
+ if (Invar%order.ge.3) then 
+   call tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
+ end if  
+ if (Invar%order.ge.4) then 
+   call tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
+ end if  
+
+ if (Invar%order.eq.2) then
+   call tdep_check_constraints(distance,Invar,Phi2%SR,Phi1,Shell3at%nshell,Shell4at%nshell,Sym)
+ else if (Invar%order.eq.3) then
+   call tdep_check_constraints(distance,Invar,Phi2%SR,Phi1,Shell3at%nshell,Shell4at%nshell,Sym,&
+&                              Phi3_ref,Shell3at)
+ else if (Invar%order.eq.4) then
+   call tdep_check_constraints(distance,Invar,Phi2%SR,Phi1,Shell3at%nshell,Shell4at%nshell,Sym,&
+&                              Phi3_ref,Shell3at,Phi4_ref,Shell4at)
  end if
- ABI_FREE(proj2nd)
- ABI_FREE(Pij_coeff)
- ABI_FREE(Phij_coeff)
-
+ ABI_FREE(Phi1)
+   
 !==========================================================================================
-!===================== Compute the phonons density of states ==============================
-!==========================================================================================
- call tdep_calc_phdos(Crystal,Ifc,InVar,Lattice,natom,natom_unitcell,Phij_NN,PHdos,Qpt,Rlatt4Abi,Shell2at,Sym)
- call tdep_destroy_shell(natom,2,Shell2at)
- ABI_FREE(Rlatt4Abi)
-
-!==========================================================================================
-!============= Compute the dynamical matrix and phonon spectrum ===========================
-!================ then print Dij, omega, eigenvectors =====================================
+!===================== Compute the phonon spectrum, the DOS, ==============================
+!=====================  the dynamical matrix and write them ===============================
 !==========================================================================================
  write(stdout,*)' '
  write(stdout,*) '#############################################################################'
- write(stdout,*) '######################## Dynamical matrix ###################################'
+ write(stdout,*) '############## Compute the phonon spectrum, the DOS, ########################'
+ write(stdout,*) '##############  the dynamical matrix and write them  ########################'
  write(stdout,*) '#############################################################################'
- open(unit=53,file=trim(InVar%output_prefix)//'omega.dat')
- open(unit=52,file=trim(InVar%output_prefix)//'dij.dat')
- open(unit=51,file=trim(InVar%output_prefix)//'eigenvectors.dat')
- ABI_MALLOC(dij   ,(3*InVar%natom_unitcell,3*InVar%natom_unitcell))
- ABI_MALLOC(eigenV,(3*InVar%natom_unitcell,3*InVar%natom_unitcell))
- ABI_MALLOC(omega,(3*InVar%natom_unitcell))
- call tdep_init_eigen2nd(Eigen2nd,InVar%natom_unitcell,Qpt%nqpt)
- do iqpt=1,Qpt%nqpt
-   dij(:,:)=zero ; eigenV(:,:)=zero ; omega(:)=zero
-   qpt_cart(:)=Qpt%qpt_cart(:,iqpt)
-   call tdep_calc_dij (dij,eigenV,iqpt,InVar,Lattice,omega,Phij_NN,qpt_cart,Rlatt_cart)
-   call tdep_write_dij(dij,eigenV,iqpt,InVar,Lattice,omega,qpt_cart)
-   Eigen2nd%eigenval(:,iqpt)=  omega(:)
-   Eigen2nd%eigenvec(:,:,iqpt)=eigenV(:,:)
- end do
- ABI_FREE(dij)
- ABI_FREE(eigenV)
- ABI_FREE(omega)
- close(53)
- close(52)
- close(51)
- call tdep_write_yaml(Eigen2nd,Qpt,InVar%output_prefix)
- write(InVar%stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
+ call tdep_init_eigen2nd(Eigen2nd_MP,Invar%natom_unitcell,Qbz%nqbz)
+!FB call tdep_init_eigen2nd(Eigen2nd_MP,Invar%natom_unitcell,Qbz%nqibz)
+ call tdep_init_eigen2nd(Eigen2nd_path,Invar%natom_unitcell,Qpt%nqpt)
+ call tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Lattice,MPIdata,natom,&
+&                          natom_unitcell,Phi2,PHdos,Qbz,Qpt,Rlatt4abi,Shell2at,Sym)
+ call tdep_destroy_shell(natom,2,Shell2at)
+ ABI_FREE(Rlatt4Abi)
+ write(stdout,'(a)') ' See the dij.dat, omega.dat and eigenvectors files'
+ write(stdout,'(a)') ' See also the DDB file'
+
 !==========================================================================================
 !===================== Compute the elastic constants ======================================
 !==========================================================================================
- call tdep_calc_elastic(Phij_NN,distance,InVar,Lattice)
+ call tdep_calc_elastic(Phi2%SR,distance,Invar,Lattice)
+ call tdep_destroy_phi2(Phi2,Invar%loto)
 
 !==========================================================================================
 !=========== Compute U_0, the "free energy" and the forces (from the model) ===============
 !==========================================================================================
- ABI_MALLOC(Forces_TDEP,(3*InVar%natom*InVar%nstep)); Forces_TDEP(:)=0.d0
- call tdep_calc_model(Free_Anh,Forces_MD,Forces_TDEP,InVar,Phij_NN,Pij_N,ucart,U0)
+ call tdep_calc_model(Forces_MD,Forces_TDEP,Invar,MPIdata,Phi1Ui,Phi2UiUj,&
+&                     Phi3UiUjUk,Phi4UiUjUkUl,U0) 
+ ABI_FREE(Forces_MD)
+ ABI_FREE(Forces_TDEP)
+ ABI_FREE(Phi1Ui)
+ ABI_FREE(Phi2UiUj)
+ ABI_FREE(Phi3UiUjUk)
+ ABI_FREE(Phi4UiUjUkUl)
 
 !==========================================================================================
 !===================== Compute the thermodynamical quantities =============================
 !==========================================================================================
- call tdep_calc_thermo(Free_Anh,InVar,Lattice,PHdos,U0)
+ call tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
+ call PHdos%free()
 
- if (InVar%Order==2) then
-   call tdep_print_Aknowledgments(InVar)
+
+ if (Invar%order==2) then
+
+   ABI_FREE(distance)
+   ABI_FREE(Rlatt_cart)
+   call Ifc%free()
+   call crystal_free(Crystal)
+   call tdep_destroy_eigen2nd(Eigen2nd_path)
+   call tdep_destroy_eigen2nd(Eigen2nd_MP)
+   call tdep_destroy_sym(Sym)
+   call tdep_destroy_qbz(Qbz)
+   call tdep_destroy_qpt(Qpt)
+   call tdep_destroy_ddb(DDB)
+   call tdep_destroy_invar(Invar)
+   call tdep_destroy_mpidata(MPIdata)
+
+   call tdep_print_Aknowledgments(Invar)
+   call delete_file(Invar%foo,ierr) 
+   call delete_file('fort.8',ierr) 
+   call flush_unit(stdout)
+   close(unit=stdout)
+   call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
+   call flush_unit(stdlog)
    call xmpi_end()
    stop
  end if
@@ -343,44 +647,44 @@ program atdep
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 !#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=#=
 
-!==========================================================================================
-!============= Initialize Psij_coeff from Moore-Penrose coefficients ======================
-!==========================================================================================
- ABI_MALLOC(Psij_coeff,(ncoeff3rd,1)); Psij_coeff(:,:)=0.d0
- Psij_coeff(:,:)=MP_coeff(ncoeff2nd+1:ntotcoeff,:)
- ABI_FREE(MP_coeff)
+ if (MPIdata%iam_master) then
+   call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
+ end if  
+ call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
-!==========================================================================================
-!============= Compute all the IFC coefficients of the Psi_ijk matrix =====================
-!==========================================================================================
- ABI_MALLOC(Psij_ref,(3,3,3,Shell3at%nshell)) ; Psij_ref(:,:,:,:)=0.d0
- call tdep_calc_psijtot(distance,InVar,ncoeff3rd,proj3rd,Psij_coeff,Psij_ref,Shell3at,Sym)
- ABI_MALLOC(ftot3,(3*InVar%natom,InVar%nstep)); ftot3(:,:)=0.d0
- call tdep_check_constraints(distance,InVar,Phij_NN,Pij_N,Shell3at%nshell,ftot3,Psij_ref,Shell3at,Sym,ucart)
- ABI_FREE(Psij_coeff)
- ABI_FREE(proj3rd)
- call tdep_write_gruneisen(distance,Eigen2nd,InVar,Lattice,Psij_ref,Qpt,Rlatt_cart,Shell3at,Sym)
- call tdep_calc_alpha_gamma(Crystal,distance,DDB,Ifc,InVar,Lattice,Psij_ref,Rlatt_cart,Shell3at,Sym)
-!FB stop
+!FB Begin Lifetime
+!FB call tdep_calc_lifetime1(Crystal,distance,Eigen2nd_MP,Ifc,Invar,Lattice,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
+!FB End Lifetime
+
  ABI_FREE(Rlatt_cart)
- call tdep_destroy_eigen2nd(Eigen2nd)
- call tdep_destroy_shell(natom,3,Shell3at)
- call tdep_calc_model(Free_Anh,Forces_MD,Forces_TDEP,InVar,Phij_NN,Pij_N,ucart,U0,ftot3)
- ABI_FREE(ftot3)
  ABI_FREE(distance)
- ABI_FREE(Forces_MD)
- ABI_FREE(Forces_TDEP)
- ABI_FREE(Pij_N)
- ABI_FREE(Phij_NN)
- ABI_FREE(Psij_ref)
- ABI_FREE(ucart)
+ call tdep_destroy_eigen2nd(Eigen2nd_path)
+ call tdep_destroy_eigen2nd(Eigen2nd_MP)
+ call tdep_destroy_shell(natom,3,Shell3at)
+ ABI_FREE(Phi3_ref)
+ if (Invar%order.eq.4) then
+   call tdep_destroy_shell(natom,4,Shell4at)
+   ABI_FREE(Phi4_ref)
+ end if  
+ call Ifc%free()
+ call crystal_free(Crystal)
+ call tdep_destroy_sym(Sym)
+ call tdep_destroy_qbz(Qbz)
+ call tdep_destroy_qpt(Qpt)
+ call tdep_destroy_ddb(DDB)
+ call tdep_destroy_invar(Invar)
+ call tdep_destroy_mpidata(MPIdata)
+
 !==========================================================================================
 !================= Write the last informations (aknowledgments...)  =======================
 !==========================================================================================
- call tdep_print_Aknowledgments(InVar)
-
- call abinit_doctor("__fftprof")
-
+ call tdep_print_Aknowledgments(Invar)
+ call delete_file(Invar%foo,ierr) 
+ call delete_file('fort.8',ierr) 
+ call flush_unit(stdout)
+ close(unit=stdout)
+ call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
+ call flush_unit(stdlog)
 100 call xmpi_end()
 
  end program atdep

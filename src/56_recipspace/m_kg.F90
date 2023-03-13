@@ -6,14 +6,10 @@
 !!  Low-level functions to operate of G-vectors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
+!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -96,12 +92,6 @@ contains
 !! 2*gcut arises from rho(g)=sum g prime (psi(g primt)*psi(g prime+g))
 !!               where psi(g) is only nonzero for |g| <= gcut).
 !! ecut (currently in hartree) is proportional to gcut(sphere)**2.
-!!
-!! PARENTS
-!!      m_common,m_dfpt_looppert,m_dfpt_lw,m_dfpt_scfcv,m_nonlinear,m_pawfgr
-!!      m_positron,m_respfn_driver,m_scfcv_core,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -219,7 +209,7 @@ end subroutine getcut
 !! FUNCTION
 !! From input ecut, combined with ucvol and gmet, compute recommended mpw
 !! mpw is the maximum number of plane-waves in the wave-function basis
-!!  for one processor of the WF group
+!! for one processor of the WF group
 !!
 !! INPUTS
 !! ecut=plane-wave cutoff energy in Hartrees
@@ -233,11 +223,6 @@ end subroutine getcut
 !! OUTPUT
 !! mpw=maximal number of plane waves over all k points of the processor
 !!  (for one processor of the WF group)
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_memeval,m_mpi_setup,m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -334,12 +319,6 @@ end subroutine getmpw
 !! sometimes a degeneracy of eigenvalues and do not allow to obtain
 !! the same results on different machines, there is a modification
 !! by one part over 1.0e12 of the metric tensor elements (1,1) and (3,3)
-!!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_getgh1c
-!!      m_io_kss,m_ksdiago,m_mkffnl,m_orbmag,m_vhxc_me,m_vkbr,m_vtorho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -494,12 +473,6 @@ end subroutine mkkin
 !! Note that in case of band parallelism, the number of spin-up
 !! and spin-down bands must be equal at each k points
 !!
-!! PARENTS
-!!      m_cut3d,m_dfpt_fef,m_dfpt_looppert,m_dfpt_lw,m_gstate,m_inwffil
-!!      m_longwave,m_nonlinear,m_respfn_driver,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
@@ -548,7 +521,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
      end do
    end if
  end if
-
  npwarr(:)=0
  npwtot(:)=0
 
@@ -641,12 +613,6 @@ end subroutine kpgio
 !! OUTPUT
 !!  ph3d(2,npw_k,matblk)=$e^{2 i \pi (k+G) cdot xred}$ for vectors (Gx,Gy,Gz),
 !!   and for atoms in the range iatom to jatom with respect to ph1d
-!!
-!! PARENTS
-!!      m_cgprj,m_cgtk,m_cut3d,m_epjdos,m_fock,m_hamiltonian,m_inwffil
-!!      m_nonlop_pl,m_nonlop_ylm,m_orbmag,m_suscep_stat,m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -742,15 +708,6 @@ end subroutine ph1d3d
 !!   integer vector G with components ranging from -nj <= G <= nj.
 !!   Real and imag given in usual Fortran convention.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_berryphase_new,m_bethe_salpeter,m_cgtk,m_cut3d
-!!      m_dfpt_looppert,m_dfpt_lw,m_epjdos,m_extraprho,m_fock,m_gkk,m_gstate
-!!      m_hamiltonian,m_inwffil,m_nonlinear,m_orbmag,m_pead_nl_loop,m_phgamma
-!!      m_phpi,m_prcref,m_respfn_driver,m_scfcv_core,m_screening_driver
-!!      m_sigma_driver,m_sigmaph,m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getph(atindx,natom,n1,n2,n3,ph1d,xred)
@@ -837,11 +794,6 @@ end subroutine getph
 !!
 !! NOTES
 !!  Src_6response/kpg3.f
-!!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_getgh1c
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -948,13 +900,6 @@ end subroutine kpgstr
 !!  === if nkpg==9 ===
 !!    kpg(npw,4:9)= [(k+G)_a].[(k+G)_b] quantities
 !!
-!! PARENTS
-!!      m_bandfft_kpt,m_cgprj,m_d2frnl,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dfptnl_pert,m_fock_getghc,m_forstr,m_getgh1c,m_ksdiago,m_nonlop_test
-!!      m_nonlop_ylm,m_orbmag,m_pead_nl_loop,m_phgamma,m_sigmaph,m_vtorho,m_wfd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -1042,10 +987,6 @@ end subroutine mkkpg
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1184,11 +1125,6 @@ end subroutine mkpwind_k
 !! OUTPUT
 !!  kpg(npw,3)= (k+G) components
 !!
-!! PARENTS
-!!      m_nonlop_ylm
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -1283,11 +1219,6 @@ end subroutine mkkpgcart
 !!  **A -i factor has been factorized out in all the contributions of the second
 !!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
-!!
-!! PARENTS
-!!      m_getgh1c
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

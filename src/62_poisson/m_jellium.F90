@@ -6,14 +6,10 @@
 !!  Routines related to jellium
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2021 ABINIT group (SC)
+!! Copyright (C) 2007-2022 ABINIT group (SC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -73,12 +69,6 @@ contains
 !! SIDE EFFECTS
 !!  (if option==2) rhog(2,nfft), rhor(nfft,nspden)=reciprocal, real space
 !!   updated initial electronic density
-!!
-!! PARENTS
-!!      m_extraprho,m_gstate,m_setvtr
-!!
-!! CHILDREN
-!!      fourdp
 !!
 !! SOURCE
 

@@ -17,7 +17,7 @@
 
 #Fourth dataset : phonons and  homogeneous electric field response
  rfelfd4 3     getwfk4 2     getddk4 3
- rfdir4  1 1 1 rfphon4 1     rfatpol4  1 2
+ rfphon4 1     
  diemix4  0.85
  diemac4  1.0
  tolwfr4  1.0d-12

@@ -18,14 +18,10 @@
 !! than the irredubile zone defined by the point group of the crystal. The two zones coincide when q=0
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -166,10 +162,6 @@ contains  !=====================================================
 !!  kibz(3,nkibz)=Irreducible zone.
 !!  comm= MPI communicator.
 !!  sord=Defines how to order the points in %ibz. ">" for increasing norm. "<" decreasing. Default: ">"
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -339,10 +331,6 @@ end function lgroup_new
 !!  [qtol]=Optional tolerance for q-point comparison.
 !!         For each reduced direction the absolute difference between the coordinates must be less that qtol
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
@@ -386,10 +374,6 @@ end function lgroup_findq_ibzk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
@@ -432,10 +416,6 @@ end function lgroup_find_ibzimage
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -483,10 +463,6 @@ end subroutine lgroup_print
 !!
 !! FUNCTION
 !!  Free memory
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

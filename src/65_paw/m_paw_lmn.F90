@@ -7,7 +7,7 @@
 !!  over the the (l,m,n) channels of the PAW partial waves.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,10 +59,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  ll=The angular momentun defined in [0,1,2,3,4].
 !!  mm=The magnetic number in the interval [-l,....+l].
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -116,11 +112,6 @@ end subroutine ilm2lm
 !!
 !! OUTPUT
 !!  indlmn(6,lmn_size)=array giving l,m,n,lm,ln,s for i=lmn
-!!
-!! PARENTS
-!!      m_paw_atomorb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -187,11 +178,6 @@ end subroutine make_indlmn
 !!  indklmn(6,lmn2_size)=Array giving klm, kln, abs(il-jl), (il+jl), ilm and jlm, ilmn and jlmn
 !!    for each klmn=(ilmn,jlmn). Note: ilmn=(il,im,in) and ilmn<=jlmn
 !!  klm_diag(lmn2_size)=1 il==jl and im==jm, 0 otherwise.
-!!
-!! PARENTS
-!!      m_paw_atomorb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -276,11 +262,6 @@ end subroutine make_indklmn
 !!  kln2ln(6,ln2_size)=Table giving il, jl ,in, jn, iln, jln for each kln=(iln,jln)
 !!  where iln=(il,in) and iln<=jln. NB: kln2ln is an application and not a bijection
 !!
-!! PARENTS
-!!      m_paw_atomorb,m_paw_slater
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_kln2ln(lmn_size,lmn2_size,ln2_size,indlmn,indklmn,kln2ln)
@@ -360,11 +341,6 @@ end subroutine make_kln2ln
 !!  are ordered by increasing l and m. This is the standard convention
 !!  used in most of the PAW datasets. This routines, howevever, works
 !!  works also in the unlikely case in with (l,m) are not ordered.
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -449,11 +425,6 @@ end subroutine make_klm2lm
 !! OUTPUT
 !!  jlmn, ilmn=The two symmetrix indices corresponding to klmn. NB: jlmn >= ilmn
 !!
-!! PARENTS
-!!      m_paw_lmn,m_paw_slater
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)
@@ -505,11 +476,6 @@ end subroutine klmn2ijlmn
 !! OUTPUT
 !!  indln(2,ln_size)=Array giving l and n for i=ln
 !!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_indln(lmn_size,ln_size,indlmn,indln)
@@ -559,8 +525,6 @@ end subroutine make_indln
 !! INPUTS
 !!  ii=Row index
 !!  jj=column index
-!!
-!! PARENTS
 !!
 !! SOURCE
 

@@ -80,6 +80,8 @@ sigma_ngkpt4 2 2 2
 eph_intmeth4 2  # Tetra are more stable when bands are selected. No long-range Lorentzian.
 getdvdb4   2  # Use interpolated DVDB produced in dataset 2
 eph_ngqpt_fine4 4 4 4
+eph_phrange_w4 0 100 meV  # This is just for testing purposes.  Well, max(omega) ~ 80 so 0-100 has not effect!
+eph_prtscratew4 1
 
 ############
 # DATASET 5

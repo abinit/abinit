@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XW)
+!!  Copyright (C) 1999-2022 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -76,12 +72,6 @@ contains
 !! In output of internal strain tensor,column runs from strain1 to
 !! strain6(in Voigt notation),row runs from atom1x,atom1y,atom1z,atom2x,.......
 !! sum rule is applied on the internal strain tensor
-!!
-!! PARENTS
-!!      anaddb,m_effective_potential_file
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 

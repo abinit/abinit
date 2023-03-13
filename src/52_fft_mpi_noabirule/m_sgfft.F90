@@ -7,7 +7,7 @@
 !!
 !! COPYRIGHT
 !! Copyright by Stefan Goedecker, Ithaca, NY USA, July 14, 1993
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,12 +84,6 @@ CONTAINS  !====================================================================
 !!  Note that the meaning of fftcache has changed from the original
 !!  ncache of SG (that was the maximum number of COMPLEX*16 in the cache)
 !!
-!! PARENTS
-!!      m_fft,m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fft_cc(fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign,arr,ftarr)
@@ -156,12 +150,6 @@ end subroutine sg_fft_cc
 !!  This fft is particularly efficient for cache architectures.
 !!  Note that the meaning of fftcache has changed from the original
 !!  ncache of SG (that was the maximum number of COMPLEX*16 in the cache)
-!!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 
@@ -264,12 +252,6 @@ end subroutine fft_cc_one_nothreadsafe
 !! Input/Output
 !! fofg(2,nfft)=f(G), complex.
 !! fofr(cplex*nfft)=input function f(r) (real or complex)
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 
@@ -604,12 +586,6 @@ end subroutine sg_fft_rc
 !!  mg sets the maximum 1 dimensional fft length (any one of n1, n2, or n3)
 !!  XG: the signification of mg is changed with respect to fft3dp !!!
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftpad(fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,gbound,isign,arr,ftarr)
@@ -670,12 +646,6 @@ end subroutine sg_fftpad
 !!  contained within any n1, n2, or n3
 !!  mg sets the maximum 1 dimensional fft length (any one of n1, n2, or n3)
 !!  XG: the signification of mg is changed with respect to fft3dp !!!
-!!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 
@@ -870,12 +840,6 @@ end subroutine fftpad_one_nothreadsafe
 !!
 !! TODO
 !! Use latex for the equation above
-!!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 
@@ -1615,12 +1579,6 @@ end subroutine sg_fftpx
 !! TODO
 !! Use latex for the equation above
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
@@ -2330,12 +2288,6 @@ end subroutine sg_fftx
 !! TODO
 !! Use latex for the equation above
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
@@ -3006,12 +2958,6 @@ end subroutine sg_ffty
 !!
 !! TODO
 !! Use latex for the equation above
-!!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 
@@ -3754,12 +3700,6 @@ end subroutine sg_fftz
 !! Should describe arguments
 !! Should suppress one-letter variables
 !!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
@@ -3913,12 +3853,6 @@ end subroutine sg_ctrig
 !! * This routine is not thread-safe due to the presence of variables with the save attribute!
 !!   DO NOT CALL THIS ROUTINE INSIDE A OPENMP PARALLEL REGION
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      sg_fft_cc
-!!
 !! SOURCE
 
 subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
@@ -4056,12 +3990,6 @@ end subroutine sg_fftrisc
 !!  for option==3, fofr(2,n4,n5,n6) contains the real space wavefunction;
 !!                 fofgout(2,npwout) contains its Fourier transform;
 !!                 no use of fofgin and npwin.
-!!
-!! PARENTS
-!!      m_sgfft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 
@@ -4981,12 +4909,6 @@ end subroutine fftrisc_one_nothreadsafe
 !!
 !! TODO
 !! Complete input and output list.
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 
@@ -6010,12 +5932,6 @@ end subroutine sg_fftrisc_2
 !! NOTES
 !!   vg is given on the FFT mesh instead of the augmented mesh [ldx,ldy,ldz]
 !!   in order to simplify the interface with the other routines operating of vg
-!!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!      sg_fft_cc
 !!
 !! SOURCE
 

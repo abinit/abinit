@@ -7,7 +7,7 @@
 !!  depends on sort_tetra and on m_kpt_rank
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (MJV)
+!!  Copyright (C) 2010-2022 ABINIT group (MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,10 +17,6 @@
 !!  2) Change API so that we can pass the energy mesh instead of omega_min and omega_max
 !!  3) Add table ik_ibz --> tetra_list to avoid cycling inside big loop over ntetra
 !!  4) Add options to get only delta and/or theta ?
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -129,12 +125,6 @@ contains
 !! FUNCTION
 !! deallocate tetrahedra pointers if needed
 !!
-!! PARENTS
-!!      m_epweights,m_phgamma,m_thmeig,m_unittests
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
-!!
 !! SOURCE
 
 subroutine destroy_tetra (tetra)
@@ -184,12 +174,6 @@ end subroutine destroy_tetra
 !!  tetra%tetra_wrap(3,4,ntetra) = store flag to wrap tetrahedron summit into IBZ
 !!  tetra%ntetra = final number of irred tetra (dimensions of tetra_* remain larger)
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
-!!
-!! PARENTS
-!!      m_epweights,m_phgamma,m_thmeig,m_unittests
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -554,11 +538,6 @@ end subroutine init_tetra
 !! OUTPUT
 !!  Output is written to file.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
-!!
 !! SOURCE
 
 subroutine tetra_write(tetra, nkibz, kibz, path)
@@ -654,12 +633,6 @@ end subroutine tetra_write
 !!  tweight(nkpt,nene) = integration weights for each irred kpoint from all adjacent tetrahedra
 !!  dtweightde(nkpt,nene) = derivative of tweight wrt energy
 !!
-!! PARENTS
-!!      m_epweights,m_thmeig
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
-!!
 !! SOURCE
 
 ! %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -706,12 +679,6 @@ end subroutine get_tetra_weight
 !! FUNCTION
 !! calculate integration weights and their derivatives from Blochl et al PRB 49 16223 [[cite:Bloechl1994a]]
 !! Same API as get_tetra_weight but output weights here have shape (nene, nkpt)
-!!
-!! PARENTS
-!!      m_tetrahedron,m_unittests
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -832,12 +799,6 @@ end subroutine tetra_blochl_weights
 !! OUTPUT
 !!  tweight(nkpt,nene1,nene2) = integration weights for each irred kpoint from all adjacent tetrahedra
 !!  dtweightde(nkpt,nene1,nene2) = derivative of tweight wrt energy
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1327,12 +1288,6 @@ end subroutine get_dbl_tetra_weight
 !!  list(n)  sorted list
 !!  iperm(n) index of permutation given the right ascending order
 !!
-!! PARENTS
-!!      m_tetrahedron
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
-!!
 !! SOURCE
 
 
@@ -1420,10 +1375,6 @@ end subroutine sort_tetra
 !! FUNCTION
 !! Return True if library has been compiled with MPI support
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function tetralib_has_mpi() result(ans)
@@ -1466,12 +1417,6 @@ end function tetralib_has_mpi
 !!  end do
 !!
 !!  are not executed. Moreover allocation such as foo(my_start:my_stop) will generate a zero-sized array.
-!!
-!! PARENTS
-!!      m_tetrahedron
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -1517,10 +1462,6 @@ end subroutine split_work
 !! FUNCTION
 !! Private function to calculate the contributions to the weights due to a single tetrahedron.
 !! Extracted from get_tetra_weight
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1857,11 +1798,6 @@ end subroutine get_onetetra_
 !!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
 !!    for a given (band, k-point, spin).
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
-!!
 !! SOURCE
 
 subroutine tetra_get_onewk(tetra,ik_ibz,bcorr,nene,nkibz,eig_ibz,enemin,enemax,max_occ,weights)
@@ -1937,11 +1873,6 @@ end subroutine tetra_get_onewk
 !!  weights(nw,2) = integration weights for
 !!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
 !!    for a given (band, k-point, spin).
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 
@@ -2033,11 +1964,6 @@ end subroutine tetra_get_onewk_wvals
 !!  weights(nw,2) = integration weights for
 !!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
 !!    for a given (band, k-point, spin).
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_,sort_tetra
 !!
 !! SOURCE
 

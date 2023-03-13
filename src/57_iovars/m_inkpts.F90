@@ -6,14 +6,10 @@
 !!  Routines to initialize k-point and q-point sampling from input file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -123,12 +119,6 @@ contains
 !! Warning: this routine can be called with nkpt=0 (in which
 !! case it returns the true value of nkpt), which can lead
 !! to strange bugs in the debugging procedure, if one tries to print wtk or istwfk, in this case!
-!!
-!! PARENTS
-!!      m_invars1,m_invars2
-!!
-!! CHILDREN
-!!      getkgrid,intagm,metric,symfind,symlatt
 !!
 !! SOURCE
 
@@ -571,12 +561,6 @@ end subroutine inkpts
 !!  qptn(3)=reduced coordinates of eventual q point (normalisation is already included)
 !!  kptrlatt(3,3)=q-point lattice specification (if kptopt/=0)
 !!  wtqc=weigth of the eventual current q point
-!!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
-!!      getkgrid,intagm,metric,symfind,symlatt
 !!
 !! SOURCE
 

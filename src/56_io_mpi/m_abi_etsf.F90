@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (DCA,YP,MJV,MG)
+!! Copyright (C) 2006-2022 ABINIT group (DCA,YP,MJV,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,10 +74,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!  Data written in file whose name is filapp//'-etsf.nc'
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine abi_etsf_init(dtset,filapp,itype,kdep,lmn_size,psps,wfs)
@@ -127,10 +123,6 @@ end subroutine abi_etsf_init
 !!
 !! SIDE EFFECTS
 !!  New dimensions and variables are added to the initial NetCDF file.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

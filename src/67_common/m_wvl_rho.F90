@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2021 ABINIT group (TRangel, DC)
+!!  Copyright (C) 2012-2022 ABINIT group (TRangel, DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -71,11 +67,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -410,11 +401,6 @@ end subroutine wvl_initro
 !!  proj <type(wvl_projector_type)>=projectors information for wavelets.
 !!   | proj(OUT)=computed projectors.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_gstate,m_mkrho,m_mover,m_vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl_wfs, wvl_den)
@@ -499,11 +485,6 @@ end subroutine wvl_mkrho
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_newrho,m_newvtr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

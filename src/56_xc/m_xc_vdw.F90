@@ -6,7 +6,7 @@
 !!  Calculates van der Waals corrections to exchange-correlation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2022 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -267,12 +267,6 @@ contains
 !!
 !! NOTES
 !!  exc_vdw includes deltae_vdw.
-!!
-!! PARENTS
-!!      m_rhotoxc
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -709,12 +703,6 @@ end subroutine xc_vdw_aggregate
 !!  are  present.
 !!  For performance reasons, this routine should not allocate any variable.
 !!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
@@ -932,12 +920,6 @@ end subroutine xc_vdw_energy
 !! INPUTS
 !!  vdw_params= van der Waals parameters
 !!
-!! PARENTS
-!!      m_driver,vdw_kernelgen
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine xc_vdw_done(vdw_params)
@@ -982,12 +964,6 @@ end subroutine xc_vdw_done
 !!
 !! OUTPUT
 !!  vdw_params= van der Waals parameters
-!!
-!! PARENTS
-!!      vdw_kernelgen
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1036,12 +1012,6 @@ end subroutine xc_vdw_get_params
 !!
 !! INPUTS
 !!  vdw_params= parameters for the van der Waals calculations
-!!
-!! PARENTS
-!!      m_driver,vdw_kernelgen
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1476,12 +1446,6 @@ end subroutine xc_vdw_init
 !!  Internal variable vdw_funcs is set according to specified ixc_vdw.
 !!  Internal variable my_vdw_params receives the selected functional.
 !!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine xc_vdw_libxc_init(ixc_vdw)
@@ -1547,12 +1511,6 @@ end subroutine xc_vdw_libxc_init
 !! INPUTS
 !!  unt= unit to write the data to
 !!  vp= van der Waals parameters
-!!
-!! PARENTS
-!!      m_driver,vdw_kernelgen
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1655,12 +1613,6 @@ end subroutine xc_vdw_memcheck
 !!
 !! TODO
 !!  design an extension for ETSF_IO
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1840,11 +1792,6 @@ end subroutine xc_vdw_read
 !!  vdw_func= van der Waals functional
 !!  vdw_zab= Zab parameter to use for the calculations
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine xc_vdw_set_functional(vdw_func,vdw_zab)
@@ -1875,12 +1822,6 @@ end subroutine xc_vdw_set_functional
 !!
 !! INPUT
 !!  vdw_params= van der Waals parameters
-!!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1930,12 +1871,6 @@ end subroutine xc_vdw_set_params
 !! INPUTS
 !!  unt= unit to write the data to
 !!  vp= van der Waals parameters
-!!
-!! PARENTS
-!!      m_driver,vdw_kernelgen
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2001,12 +1936,6 @@ end subroutine xc_vdw_show
 !! INPUTS
 !!  None
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 function xc_vdw_status()
@@ -2032,12 +1961,6 @@ end function xc_vdw_status
 !!
 !! INPUTS
 !!  condition= boolean condition to trigger the calculations
-!!
-!! PARENTS
-!!      m_common,m_driver
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2092,12 +2015,6 @@ end subroutine xc_vdw_trigger
 !!
 !! TODO
 !!  FIXME: design an extension for ETSF_IO
-!!
-!! PARENTS
-!!      m_driver,vdw_kernelgen
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2277,12 +2194,6 @@ end subroutine xc_vdw_write
 !!  phir= the softened kernel in real space
 !!  phir_u= the unsoftened kernel in real space
 !!  phig= the softened kernel in reciprocal space
-!!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2534,12 +2445,6 @@ end subroutine vdw_df_filter
 !!  phisoft= value of the softened kernel at d=0
 !!           will be automatically set if negative
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
@@ -2624,12 +2529,6 @@ end function vdw_df_kernel
 !!  acutmin= minimum angular cut-off
 !!  aratio= ratio between highest and lowest angular delta
 !!  damax= maximum angular delta
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2813,12 +2712,6 @@ end function vdw_df_kernel_value
 !!  vx= exchange potential
 !!  vc= correlation potential
 !!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
@@ -2961,12 +2854,6 @@ end subroutine vdw_df_ldaxc
 !!
 !! OUTPUT
 !!  mesh= the desired mesh
-!!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3171,12 +3058,6 @@ end subroutine vdw_df_create_mesh
 !! NOTES
 !!  The returned index is such that list_1d(index) < value < list_1d(index+1)
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 function vdw_df_indexof(list_1d,npts,value)
@@ -3220,12 +3101,6 @@ end function vdw_df_indexof
 !!  d1= first coordinate
 !!  d2= second coordinate
 !!  sofswt= switch for the kernel softening
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -3300,12 +3175,6 @@ end function vdw_df_interpolate
 !!
 !! INPUTS
 !!  test_mode= bitfield to enable/disable tests
-!!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3926,11 +3795,6 @@ end subroutine vdw_df_internal_checks
 !!  This routine is usually interfaced with the macros defined in abi_common.h
 !!  and uses this information to define a line offset.
 !!
-!! PARENTS
-!!      xc_vdw_energy,vdw_df_filter
-!! CHILDREN
-!!      
-!!
 !! SOURCE
 
 subroutine vdw_df_saturation(q0,q0c,q0s)
@@ -3977,11 +3841,6 @@ end subroutine vdw_df_saturation
 !! NOTES
 !!  This routine is usually interfaced with the macros defined in abi_common.h
 !!  and uses this information to define a line offset.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -4030,12 +3889,6 @@ end subroutine vdw_df_netcdf_ioerr
 !! OUTPUT
 !!  output_tweaks= expanded tweaks
 !!
-!! PARENTS
-!!      m_xc_vdw
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine vdw_df_set_tweaks(input_tweaks,output_tweaks)
@@ -4068,11 +3921,6 @@ end subroutine vdw_df_set_tweaks
 !! INPUTS
 !!  func_name= name of the function to print
 !!  mode= write mode (see wrtout)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

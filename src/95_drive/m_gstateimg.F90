@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -172,14 +168,6 @@ contains
 !!
 !! TODO
 !! Not yet possible to use restartxf in parallel when localrdwf==0
-!!
-!! PARENTS
-!!      m_driver,m_gwls_sternheimer
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -824,14 +812,6 @@ end subroutine gstateimg
 !! OUTPUT
 !!  (data written to unit iout)
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine prtimg(dynimage,imagealgo_str,imgmov,iout,mpi_enreg,nimage,nimage_tot,&
@@ -1022,14 +1002,6 @@ end subroutine prtimg
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_dynimage,&
@@ -1177,14 +1149,6 @@ end subroutine predictimg
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
@@ -1260,14 +1224,6 @@ end subroutine predict_copy
 !!   results_img(:,:)%xred(3,natom)
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 

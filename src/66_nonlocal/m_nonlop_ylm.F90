@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (MT)
+!!  Copyright (C) 1998-2022 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -346,12 +342,6 @@ contains
 !! TODO
 !! * Complete implementation of spin-orbit
 !!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
  subroutine nonlop_ylm(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
@@ -643,6 +633,7 @@ contains
    end if
  end if
 
+
 !Additional steps before calculation
 !==============================================================
 
@@ -848,7 +839,7 @@ contains
                end if
              end do
            end do
-         else
+         else ! cplex != 2
            do ispinor=1,nspinor
              do ia=1,nincat
                do ilmn=1,nlmn
@@ -876,8 +867,8 @@ contains
                end do
              end do
            end do
-         end if
-       end if
+         end if ! cplex == 2
+       end if ! cpopt==4 and ndgxdt>0
 
        ! Computation or <p_lmn|c> (and derivatives) for this block of atoms if :
        !    <p_lmn|c> are not in memory : cpopt<=1
@@ -953,7 +944,7 @@ contains
 &           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
            call timab(1105,2,tsec)
          else
-           gxfac_sij=gx
+            gxfac_sij=gx
          end if
 
 !        Operate with the non-local potential on the projected scalars,
@@ -997,7 +988,7 @@ contains
              end if
              ABI_FREE(gx_left)
            end if
-         end if
+         end if ! signs == 1
 
 !        Operate with the non-local potential on the projected scalars,
 !        in order to get matrix element
@@ -1021,9 +1012,9 @@ contains
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout)
              call timab(1104,2,tsec)
            end if
-         end if
+         end if ! signs == 2
 
-       end if ! choice==0
+       end if ! choice>=0
 
 !      Deallocate temporary projected scalars
        ABI_FREE(gx)
@@ -1353,12 +1344,6 @@ end subroutine nonlop_ylm
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine nonlop_ylm_init_counters()
@@ -1379,11 +1364,6 @@ end subroutine nonlop_ylm_init_counters
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine nonlop_ylm_stop_counters()
@@ -1403,12 +1383,6 @@ end subroutine nonlop_ylm_stop_counters
 !! nonlop_ylm_output_counters
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 

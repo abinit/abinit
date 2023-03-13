@@ -595,11 +595,11 @@ The density will be output in the *tbase1_4o_DEN* file. Try to edit it...
 No luck! This file is unformatted, not written using the ASCII code.
 Even if you cannot read it, its description is provided in the abinit help file. It
 contains first a header, then the density numbers. The description of the
-header is presented in [[help:abinit#header|section 6.4]] of the abinit_help
-file, while the body of the _DEN file is presented in [[help:abinit#denfile|section 6.5]].
+header is presented in [[help:abinit#header|section 5.4]] of the abinit_help
+file, while the body of the _DEN file is presented in [[help:abinit#denfile|section 5.5]].
 It is the appropriate time to read also the description of the potential files and
 wavefunctions files, as these files contain the same header as the density
-file, see sections [[help:abinit#localpotfile|6.6]] and [[help:abinit#wfkfile|6.7]].
+file, see sections [[help:abinit#localpotfile|5.6]] and [[help:abinit#wfkfile|5.7]].
 
 Such a density file can be read by abinit, to restart a calculation
 (see the input variable [[iscf]], when its value is -2), but more usually, by an utility called *cut3d*.

@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -79,12 +75,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k
 !!
 !! SOURCE
 
@@ -661,12 +651,6 @@ end subroutine Pk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k
-!!
 !! SOURCE
 
 subroutine epsilon_k(psi_out,psi_in,omega)
@@ -698,13 +682,6 @@ end subroutine epsilon_k
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy,m_gwls_ComputePoles
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      epsilon_k
-!!
 !! SOURCE
 
 subroutine set_dielectric_function_frequency(omega)
@@ -731,11 +708,6 @@ end subroutine set_dielectric_function_frequency
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      epsilon_k
 !!
 !! SOURCE
 

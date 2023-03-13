@@ -7,7 +7,7 @@
 !!  Uses some functions from a previous implementation by MJV
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (HM,MJV)
+!!  Copyright (C) 2010-2022 ABINIT group (HM,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! TODO
 !!  1) Test more carefully the case of degenerate tethraedron
 !!  2) Add options to get only delta and/or theta ?
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -181,16 +177,11 @@ contains
 !!  tetra%ibz(4,24,nkibz)=for each k-point, the indexes in the IBZ
 !!  tetra%vv = tetrahedron volume divided by full BZ volume
 !!
-!! PARENTS
-!!      m_ephwg,m_fstab,m_kpts,m_phonons,m_unittests
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
-subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kpt_ibz, nkpt_ibz, ierr, errorstring, comm, opt)
+subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kpt_ibz, nkpt_ibz, &
+                       ierr, errorstring, comm, &
+                       opt) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -225,11 +216,11 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
  ! Use the shifts from kpclib developed by Atsushi Togo
  ! This part is produced by a python script
  ! This implementation is based on spglib and kpclib by Atsushi Togo
- ! after a discussion with in on the APS 2019 where he provided
+ ! after a discussion with hin on the APS 2019 where he provided
  ! details of his implementation.
  ! Note that we don't use it in production as we found that is approach, although faster than the original
  ! one proposed by Blochl (and implemented by MJV) does not preserve symmetries that is calculations done on the full BZ
- ! and the IBZ do not produced the same result. The diff, however, decreases if the sampling is densified.
+ ! and the IBZ do not produce the same result. The diff, however, decreases if the sampling is densified.
 
  tetra_shifts(:, 1, 1,1) = [  0,  0,  0]
  tetra_shifts(:, 2, 1,1) = [  1,  0,  0]
@@ -821,6 +812,7 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
                         '2. Generate tetrahedra in the FBZ a map to IBZ (default)'
    return
  end select
+
  !ierr = octree_free(oct)
  ABI_FREE(tetra_hash_count)
  call krank%free()
@@ -902,13 +894,6 @@ end subroutine htetra_init
 !!  The mapping to the IBZ has its own allocation routine.
 !!  I will only allocate this memory if the htetra_get_onewk_* routines are called (lazy evaluation)
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine htetra_init_mapping_ibz(tetra)
@@ -930,7 +915,7 @@ subroutine htetra_init_mapping_ibz(tetra)
    mem_mb = mem_mb + 2 * tetra%tetra_count(ikibz) * 4 * b2Mb
  end do
 
- !call wrtout(std_out, sjoin(" Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
+ call wrtout(std_out, sjoin(" Allocating tetra%ibz%indexes with memory:", ftoa(mem_mb, fmt="f8.1"), " [Mb] <<< MEM"))
 
  ! Create mapping from IBZ to unique tetrahedra
  tetra_count = 0
@@ -959,10 +944,6 @@ end subroutine htetra_init_mapping_ibz
 !! FUNCTION
 !!  Get the itetra tetrahedron contributing to the ikibz k-point
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine htetra_get_ibz(tetra, ikibz, itetra, tetra_mibz)
@@ -988,12 +969,6 @@ end subroutine htetra_get_ibz
 !! FUNCTION
 !!  write information about the tetrahedra object
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine htetra_print(self, unit)
@@ -1005,7 +980,7 @@ subroutine htetra_print(self, unit)
 
  if (unit == dev_null) return
 
- unique_tetra_size = self%nunique_tetra*5*four/1024/1024
+ unique_tetra_size = self%nunique_tetra * 5* four / 1024 ** 2
  total_size        = unique_tetra_size
  !write(unit,'(a,i0)')     ' htetra unique_tetra:', self%nunique_tetra
  !write(unit,'(a,f12.1,a)') ' htetra unique_tetra_size ', unique_tetra_size, ' [Mb] <<< MEM'
@@ -1030,12 +1005,6 @@ end subroutine htetra_print
 !!
 !! FUNCTION
 !! deallocate tetrahedra pointers if needed
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1074,10 +1043,6 @@ end subroutine htetra_free
 !! FUNCTION
 !! Private function to calculate the contributions to the weights due to a single tetrahedron.
 !! Extracted from get_tetra_weight
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1314,13 +1279,6 @@ end subroutine get_onetetra_blochl
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
 !pure
@@ -1527,10 +1485,6 @@ end subroutine get_onetetra_lambinvigneron
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine get_onetetetra_lambinvigneron_imag(eig, energies, nene, wt)
@@ -1657,13 +1611,6 @@ end subroutine get_onetetetra_lambinvigneron_imag
 !!    Dirac delta (derivative of theta wrt energy) and Theta (Heaviside function)
 !!    for a given (band, k-point, spin).
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine htetra_get_onewk_wvals(tetra, ik_ibz, opt, nw, wvals, max_occ, nkibz, eig_ibz, weights)
@@ -1747,10 +1694,6 @@ end subroutine htetra_get_onewk_wvals
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine htetra_get_onewk(tetra, ik_ibz, bcorr, nw, nkibz, eig_ibz, enemin, enemax, max_occ, weights)
@@ -1806,12 +1749,6 @@ end subroutine htetra_get_onewk
 !!    for a given (band, k-point, spin).
 !!  [erange(2)]: if present, weights are computed with an approximated asyntotic expression if
 !!   real(z) is outside of this interval and with tetra if inside.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1977,13 +1914,6 @@ end subroutine htetra_get_delta_mask
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine htetra_wvals_weights(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, tweight, dweight, comm)
@@ -2076,24 +2006,18 @@ end subroutine htetra_wvals_weights
 !!  Same as above but computing only delta for performance and memory
 !!  HM: Should find a clean way to avoid copy paste routine
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
-subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dweight,comm)
+subroutine htetra_wvals_weights_delta(tetra, eig_ibz, nw, wvals, max_occ, nkpt, opt, dweight, comm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: nw,nkpt,opt,comm
+ integer,intent(in) :: nw, nkpt, opt, comm
  class(htetra_t), intent(in) :: tetra
- real(dp) ,intent(in) :: max_occ
+ real(dp),intent(in) :: max_occ
 !arrays
- real(dp),intent(in) :: eig_ibz(nkpt)
- real(dp),intent(out) :: dweight(nw,nkpt)
+ real(dp),intent(in) :: eig_ibz(nkpt), wvals(nw)
+ real(dp),intent(out) :: dweight(nw, nkpt)
 
 !Local variables-------------------------------
 !scalars
@@ -2101,7 +2025,7 @@ subroutine htetra_wvals_weights_delta(tetra,eig_ibz,nw,wvals,max_occ,nkpt,opt,dw
  integer :: tetra_count, itetra, isummit, ihash
 !arrays
  integer :: ind_ibz(4)
- real(dp) :: eig(4), wvals(nw), dweight_tmp(4,nw),tweight_tmp(4,nw)
+ real(dp) :: eig(4), dweight_tmp(4,nw),tweight_tmp(4,nw)
 
 ! *********************************************************************
 
@@ -2171,12 +2095,6 @@ end subroutine htetra_wvals_weights_delta
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_onetetra_lambinvigneron,get_onetetra_ppart_lv,sim0twoi,sort_4tetra
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine htetra_blochl_weights(tetra, eig_ibz, enemin, enemax, max_occ, nw, nkpt, bcorr, tweight, dweight, comm)
@@ -2224,10 +2142,6 @@ end subroutine htetra_blochl_weights
 !! comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2385,11 +2299,6 @@ end subroutine htetra_weights_wvals_zinv
 !!  list(4) sorted list
 !!  perm(4) index of permutation given the right ascending order
 !!
-!! PARENTS
-!!      m_htetra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure subroutine sort_4tetra(list, perm)
@@ -2525,10 +2434,6 @@ end subroutine sort_4tetra_int
 !!
 !! OUTPUT
 !!  rwg(nw, 4)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

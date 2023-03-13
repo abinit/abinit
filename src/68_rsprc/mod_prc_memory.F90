@@ -7,7 +7,7 @@
 !! preconditionning of potential residuals.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (PMA).
+!! Copyright (C) 2009-2022 ABINIT group (PMA).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,11 +55,6 @@ public :: prc_mem_free
 !! FUNCTION
 !! This subroutine allocates the module's main component
 !!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prc_mem_init(nfft)
@@ -89,11 +84,6 @@ integer, intent(in) :: nfft
 !!
 !! FUNCTION
 !! This subroutine deallocates the module's main component
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

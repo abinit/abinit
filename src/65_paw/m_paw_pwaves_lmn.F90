@@ -10,7 +10,7 @@
 !!  inside the spheres around each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG,MT)
+!! Copyright (C) 2008-2022 ABINIT group (MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,10 +22,6 @@
 !!   Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure
 !!   that all the strongly connected routines are changed accordingly to accommodate the modification of the data type.
 !!   Typical examples of strongly connected routines are creation, destruction or reset methods.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -124,12 +120,6 @@ CONTAINS !===========================================================
 !!  comm_atom=--optional-- MPI communicator over atoms
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_classify_bands,m_exc_analyze,m_paw_mkaewf,m_screening_driver
-!!      m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -433,12 +423,6 @@ end subroutine paw_pwaves_lmn_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_classify_bands,m_exc_analyze,m_paw_mkaewf,m_paw_pwaves_lmn
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

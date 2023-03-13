@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
 
 #
 # Maximally-Localized Wannier Functions library (BigDFT)

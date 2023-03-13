@@ -6,15 +6,11 @@
 !!  Routines for computing excitation energies within TDDFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
+!! Copyright (C) 1999-2022 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!
@@ -120,14 +116,6 @@ contains
 !!   in Recent Developments and Applications of Modern Density Functional
 !!   Theory, edited by J.M. Seminario (Elsevier, Amsterdam, 1996).
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      fourdp,fourwf,hartre,matr3inv,mpi_bcast,mpi_gatherv,mpi_reduce
-!!      mpi_scatterv,sort_dp,sphereboundary,timab,wrtout,xmpi_barrier
-!!      xmpi_bcast,xmpi_exch,xmpi_sum,zhpev
-!!
 !! SOURCE
 
  subroutine tddft(cg,dtfil,dtset,eigen,etotal,gmet,gprimd,gsqcut,&
@@ -159,7 +147,7 @@ contains
  integer :: nstate_win,ndiel,ndiel1,ndiel2,ndiel3,ndiel4
  integer :: ndiel5,ndiel6,nexcit,nexcit_max,nexcit_win,nfftdiel,nlargest,nnext
  integer :: nnext1,nnext2
- integer :: nproc_loc,npw_k,pole_approx,sing_trip,spaceComm,tim_fourwf
+ integer :: nproc_loc,npw_k,pole_approx,sing_trip,spaceComm,mtag,tim_fourwf
  integer :: tim_rwwf,save_iomode
  integer :: rec,recl,idummy,jdummy
  real(dp) :: buffer,buffer_inv,diffeig,eigunocc,emax_win
@@ -520,6 +508,7 @@ contains
      npw_k=npwarr(ikpt)
 #if defined HAVE_MPI
      if (dtset%usewvl == 0) then
+       mtag=ikpt+(isppol-1)*nkpt
        call xmpi_barrier(spaceComm)
 !      Must transfer the wavefunctions to the master processor
 !      Separate sections for paralbd=1 or other values ; might be merged
@@ -562,12 +551,12 @@ contains
          if ( action==2.or.action==3) then
            call timab(48,1,tsec)
            if(action==2)then
-             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceComm,ierr)
+             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceComm,2*(mtag-1)+1,ierr)
              call xmpi_exch(cg(:,icg+1:icg+nband_k_*npw_k*nspinor),2*nband_k_*npw_k*nspinor &
-&             ,source,cg_disk,nmaster,spaceComm,ierr)
+&             ,source,cg_disk,nmaster,spaceComm,2*(mtag-1)+2,ierr)
            else
-             call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceComm,ierr)
-             call xmpi_exch(cg_disk,2*nband_k_*npw_k*nspinor,source,cg_disk,nmaster,spaceComm,ierr)
+             call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceComm,2*(mtag-1)+1,ierr)
+             call xmpi_exch(cg_disk,2*nband_k_*npw_k*nspinor,source,cg_disk,nmaster,spaceComm,2*(mtag-1)+2,ierr)
            end if
            call timab(48,2,tsec)
          end if
@@ -611,21 +600,21 @@ contains
              if ( iband == 1 ) then
                if (action==2) then
                  call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,isppol) &
-&                 ,kg_disk,nmaster,spaceComm,ierr)
+&                 ,kg_disk,nmaster,spaceComm,iband*(mtag-1)+1,ierr)
                else
                  call xmpi_exch(kg_disk,3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,isppol)  &
-&                 ,kg_disk,nmaster,spaceComm,ierr)
+&                 ,kg_disk,nmaster,spaceComm,iband*(mtag-1)+1,ierr)
                end if
              end if       ! iband =1
              ipwnbd=(iband-1)*npw_k*nspinor
              if (action==2)then
                call xmpi_exch( cg(:,ipwnbd+icg+1:ipwnbd+icg+npw_k*nspinor),2*npw_k*nspinor &
 &               ,mpi_enreg%proc_distrb(ikpt,iband,isppol)                    &
-&               ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*nspinor),nmaster,spaceComm,ierr)
+&               ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*nspinor),nmaster,spaceComm,iband*(mtag-1)+2,ierr)
              else
                call xmpi_exch( cg_disk(:,ipwnbd+1:ipwnbd+npw_k*nspinor),2*npw_k*nspinor    &
 &               ,mpi_enreg%proc_distrb(ikpt,iband,isppol)                    &
-&               ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*nspinor),nmaster,spaceComm,ierr)
+&               ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*nspinor),nmaster,spaceComm,iband*(mtag-1)+2,ierr)
              end if
              call timab(48,2,tsec)
            end if        ! action=2 or action=3

@@ -6,7 +6,7 @@
 !! Prepare CTQMC and call CTQMC
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon, VPlanes)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon, VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +14,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -52,11 +48,12 @@ MODULE m_forctqmc
 & diag_matlu,init_matlu,destroy_matlu,rotate_matlu,checkdiag_matlu,checkreal_matlu, &
 & copy_matlu, diff_matlu, slm2ylm_matlu, shift_matlu, prod_matlu,fac_matlu,&
 & add_matlu,printplot_matlu,identity_matlu,zero_matlu
- use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r
+ use m_hu, only : hu_type,rotatevee_hu,vee_ndim2tndim_hu_r,copy_hu,destroy_hu
  use m_io_tools, only : flush_unit, open_file
  use m_datafordmft, only : hybridization_asymptotic_coefficient,compute_levels
  use m_special_funcs, only : sbf8
  use m_paw_numeric, only : jbessel=>paw_jbessel
+ use m_paw_correlations, only : calc_vee
 #ifdef HAVE_NETCDF
   use netcdf !If calling TRIQS via python invocation, write a .nc file
 #endif
@@ -94,13 +91,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 
@@ -124,8 +114,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  integer :: lpawu,master,mbandc,natom,nflavor,nkpt,nspinor,nsppol,nsppol_imp,tndim,ispa,ispb,ima,imb
  integer :: nproc,opt_diag,opt_nondiag,testcode,testrot,dmft_nwlo,opt_fk,useylm,nomega,opt_rot
  integer :: ier,rot_type_vee
+ real(dp) :: f4of2_sla,f6of2_sla
  complex(dpc) :: omega_current,integral(2,2)
- real(dp) :: doccsum,noise,omega
+ real(dp) :: doccsum,noise,omega,EE
  logical :: nondiaglevels
 ! arrays
  real(dp), allocatable :: docc(:,:)
@@ -141,6 +132,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc), allocatable :: shift(:)
  integer,parameter :: optdb=0
  type(coeff2_type), allocatable :: udens_atoms(:)
+ type(coeff2_type), allocatable :: udens_atoms_for_s(:)
 ! Type    -----------------------------------------
  type(coeff2c_type), allocatable :: eigvectmatlu(:,:)
  type(green_type)  :: weiss_for_rot
@@ -152,6 +144,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(matlu_type), allocatable :: identity(:)
  type(matlu_type), allocatable :: level_diag(:)
  type(oper_type)  :: energy_level
+ type(hu_type), allocatable :: hu_for_s(:)
  !type(self_type) :: self
 ! type(green_type) :: gw_loc
  type(CtqmcInterface) :: hybrid   !!! WARNING THIS IS A BACKUP PLAN
@@ -190,6 +183,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! ======================================
  ABI_MALLOC(udens_atoms,(natom))
  ABI_MALLOC(eigvectmatlu,(natom,nsppol))
+ if(paw_dmft%ientropy==1) then
+   ABI_MALLOC(udens_atoms_for_s,(natom))
+ endif
  ABI_MALLOC(dmat_diag,(natom))
  ABI_MALLOC(identity,(natom))
  call init_matlu(natom,nspinor,nsppol,paw_dmft%lpawu,dmat_diag)
@@ -203,6 +199,9 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        ABI_MALLOC(eigvectmatlu(iatom,isppol)%value,(tndim,tndim))
      end do
      ABI_MALLOC(udens_atoms(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     if(paw_dmft%ientropy==1) then
+       ABI_MALLOC(udens_atoms_for_s(iatom)%value,(2*(2*lpawu+1),2*(2*lpawu+1)))
+     endif
      dmat_diag(iatom)%mat=czero
    end if
  end do
@@ -388,6 +387,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,rot_type_vee)
 
+
    else if (opt_diag==0) then
      do iatom=1,cryst_struc%natom
        lpawu=paw_dmft%lpawu(iatom)
@@ -443,10 +443,26 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 !   call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms)
    call rotatevee_hu(cryst_struc,hu,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms,rot_type_vee)
 
+
  end if
 ! ===========================================================================================
 ! END Of diagonalization
 ! ===========================================================================================
+     if(paw_dmft%ientropy==1) then
+       ABI_MALLOC(hu_for_s,(cryst_struc%ntypat))
+       ! Usefull to compute interaction energy for U=1 J=J/U when U=0.
+       call copy_hu(cryst_struc%ntypat,hu,hu_for_s)
+       f4of2_sla=-1_dp
+       f6of2_sla=-1_dp
+       do itypat=1,cryst_struc%ntypat
+         call calc_vee(f4of2_sla,f6of2_sla,paw_dmft%j_for_s/paw_dmft%u_for_s,hu_for_s(itypat)%lpawu,pawang,one,hu_for_s(itypat)%vee)
+       enddo
+       call rotatevee_hu(cryst_struc,hu_for_s,nspinor,nsppol,pawprtvol,eigvectmatlu,udens_atoms_for_s,rot_type_vee)
+       call destroy_hu(hu_for_s,cryst_struc%ntypat,paw_dmft%dmftqmc_t2g,paw_dmft%dmftqmc_x2my2d)
+!      udens_atoms_for_s will be used later.
+       ABI_FREE(hu_for_s)
+     endif
+
 
  call flush_unit(std_out)
 
@@ -1234,6 +1250,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcInterface_setOpts(hybrid,&
        opt_Fk      =opt_fk,&
 &       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_histo   =paw_dmft%dmftctqmc_config ,&
 &       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &       opt_analysis=paw_dmft%dmftctqmc_correl,&
 &       opt_check   =paw_dmft%dmftctqmc_check ,&
@@ -1253,6 +1270,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
        call CtqmcoffdiagInterface_setOpts(hybridoffdiag,&
        opt_Fk      =opt_fk,&
 &       opt_order   =paw_dmft%dmftctqmc_order ,&
+&       opt_histo   =paw_dmft%dmftctqmc_config ,&
 &       opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &       opt_analysis=paw_dmft%dmftctqmc_correl,&
 &       opt_check   =paw_dmft%dmftctqmc_check ,&
@@ -1323,6 +1341,31 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
 &        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
 &        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit)
+         ! For entropy (alternative formulation)
+         if(paw_dmft%ientropy==1) then
+           EE=zero
+           do if1=1,nflavor
+             do if2=if1+1,nflavor
+               EE=EE+docc(if1,if2)*udens_atoms_for_s(iatom)%value(if1,if2)
+         !      write(std_out,*) udens_atoms_for_s(iatom)%value(if1,if2),docc(if1,if2)
+             enddo
+           enddo
+           ! Here in udens U=1, J=J/U, so we need to multiply bu U/Ha_eV
+           write(message,'(a,3(f14.10,3x))') "For entropy calculation E_corr_qmc, u_for_s, j_for,s", &
+&          paw_dmft%u_for_s*EE/Ha_eV,paw_dmft%u_for_s,paw_dmft%j_for_s
+           call wrtout(std_out,message,'COLL')
+           EE=zero
+           do if1=1,nflavor
+             do if2=if1+1,nflavor
+               EE=EE+docc(if1,if2)*udens_atoms(iatom)%value(if1,if2)
+         !      write(std_out,*) udens_atoms(iatom)%value(if1,if2),docc(if1,if2)
+             enddo
+           enddo
+           ! Here in udens U=U, J=J, so we obtain directly the results
+           write(message,'(a,3(f14.10,3x))') "Reference   calculation E_corr_qmc, upawu  , jpawu  ", &
+&             EE,hu(itypat)%upawu*Ha_eV,hu(itypat)%jpawu*Ha_eV
+           call wrtout(std_out,message,'COLL')
+         endif
          ABI_FREE(docc)
        ! TODO: Handle de luj0 case for entropy
 
@@ -1441,7 +1484,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 ! =========================================================================================
 !  End big loop over atoms to compute hybridization and do the CTQMC
 ! =========================================================================================
-
 
  if(paw_dmft%dmft_prgn==1) then
    call print_green('QMC_diag_notsym',green,1,paw_dmft,pawprtvol=1,opt_wt=2)
@@ -1706,13 +1748,6 @@ end subroutine qmc_prep_ctqmc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine testcode_ctqmc_b(energy_level,hybri_coeff,weiss_for_rot,dmftqmc_l,fw1_nd,levels_ctqmc,&
@@ -1815,13 +1850,6 @@ end subroutine testcode_ctqmc_b
 !!  gw_tmp_nd
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2097,13 +2125,6 @@ end subroutine testcode_ctqmc
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine ctqmcoutput_to_green(green,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom,leg_measure,opt_nondiag)
@@ -2234,13 +2255,6 @@ end subroutine ctqmcoutput_to_green
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2413,13 +2427,6 @@ end subroutine ctqmcoutput_printgreen
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      ctqmc_triqs_run,flush_unit,invoke_python_triqs,jbessel,sbf8
-!!      vee_ndim2tndim_hu_r,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_nd,fw1_nd,leg_measure,iatom)
@@ -2483,7 +2490,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
  integer(kind=4) :: varid
  logical :: file_exists
  complex :: i
- character(len=500) :: filename
+ character(len=100) :: filename
 
  real(dp), allocatable, target :: new_re_g_iw(:,:,:), new_im_g_iw(:,:,:)
  real(dp), allocatable, target :: new_g_tau(:,:,:), new_gl(:,:,:)
@@ -2628,8 +2635,10 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   ABI_ERROR(message)
 #else
   ! Creating the NETCDF file
-  write(std_out, '(2a)') ch10, "    Creating NETCDF file: abinit_output_for_py.nc"
-  NCF_CHECK(nf90_create("abinit_output_for_py.nc", NF90_CLOBBER, ncid))
+  ! write(std_out, "(a)") trim(paw_dmft%filapp)
+  write(filename, '(a, a)') trim(paw_dmft%filnamei), "_abinit_output_for_py.nc"
+  write(std_out, '(3a)') ch10, "    Creating NETCDF file: ", trim(filename)
+  NCF_CHECK(nf90_create(filename, NF90_CLOBBER, ncid))
  
   ! Defining the dimensions of the variables to write in the NETCDF file
   NCF_CHECK(nf90_def_dim(ncid, "one", 1, dim_one_id))
@@ -2722,10 +2731,13 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   NCF_CHECK(nf90_put_var(ncid, var_spacecomm_id,          paw_dmft%spacecomm))
   NCF_CHECK(nf90_close(ncid))
 
-  write(std_out, '(2a)') ch10, "    NETCDF file abinit_output_for_py.nc written; Launching python invocation"
+  write(std_out, '(4a)') ch10, "    NETCDF file ", trim(filename), " written; Launching python invocation"
  
   ! Invoking python to execute the script
+  ! call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char, paw_dmft%spacecomm)
   call Invoke_python_triqs (paw_dmft%myproc, trim(paw_dmft%filnamei)//c_null_char)
+  call xmpi_barrier(paw_dmft%spacecomm)
+  call flush_unit(std_out)
  
   ! Allocating the fortran variables for the results
   ABI_MALLOC(new_re_g_iw,(nflavor,nflavor, paw_dmft%dmft_nwli))
@@ -2735,16 +2747,16 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
   i = (0, 1)
   
   ! Check if file exists
-  write(filename, '(a,i4.4,a)') "py_output_for_abinit_rank_", paw_dmft%myproc, ".nc"
+  write(filename, '(a, a)') trim(paw_dmft%filnamei), "_py_output_for_abinit.nc"
 
   INQUIRE(FILE=filename, EXIST=file_exists)
   if(.not. file_exists) then
-   write(message,'(4a)') ch10,' Cannot find file ', filename, '! Make sure the python script writes it with the right name and at the right place!'
+   write(message,'(4a)') ch10,' Cannot find file ', trim(filename), '! Make sure the python script writes it with the right name and at the right place!'
    call wrtout(std_out,message,'COLL')
    ABI_ERROR(message)
   endif
 
-  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", filename
+  write(std_out, '(3a)') ch10, "    Reading NETCDF file ", trim(filename)
 
   ! Opening the NETCDF file
   NCF_CHECK(nf90_open(filename, nf90_nowrite, ncid))

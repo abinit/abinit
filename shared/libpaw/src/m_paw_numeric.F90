@@ -6,7 +6,7 @@
 !!  Wrappers for various numeric operations (spline, sort, ...)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2021 ABINIT group (MT,TR)
+!!  Copyright (C) 2012-2022 ABINIT group (MT,TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -68,13 +68,6 @@ CONTAINS
 !! OUTPUT
 !!    Output, real(dp) YPP(N), the second derivatives of the cubic spline.
 !!    Work space, real(dp) DIAG(N) - should be removed ...
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_paw_atom,m_paw_gaussfit,m_paw_pwaves_lmn,m_pawpsp
-!!      m_pawpwij,m_pawxmlps,m_psps
-!!
-!! CHILDREN
-!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -237,13 +230,6 @@ end subroutine paw_spline
 !!  [ierr]=A non-zero value is used to signal that some points in xfit exceed xspline(nspline).
 !!    The input value is incremented by the number of such points.
 !!
-!! PARENTS
-!!      m_mkcore,m_mklocl_realspace,m_paw_atom,m_paw_finegrid,m_paw_gaussfit
-!!      m_paw_pwaves_lmn,m_pawpsp,m_pawxmlps,mkcore_wvl
-!!
-!! CHILDREN
-!!      paw_jbessel
-!!
 !! SOURCE
 
 subroutine paw_splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
@@ -322,12 +308,6 @@ end subroutine paw_splint
 !!  dydxfit(nfit): 1st-derivative of function on output mesh
 !!  [ierr]=A non-zero value is used to signal that some points in xfit exceed xspline(nspline).
 !!    The input value is incremented by the number of such points.
-!!
-!! PARENTS
-!!      m_mklocl_realspace,mkcore_wvl
-!!
-!! CHILDREN
-!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -418,12 +398,6 @@ end subroutine paw_splint_der
 !!  if ider=0, compute only the function (contained in fun)
 !!  if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
 !!  if ider=2, compute only the second derivative of the function (in derfun)
-!!
-!! PARENTS
-!!      m_paw_finegrid
-!!
-!! CHILDREN
-!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -547,12 +521,6 @@ end subroutine paw_uniform_splfit
 !! SIDE EFFECTS
 !!  a(mesh)=array to be smoothed
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!      paw_jbessel
-!!
 !! SOURCE
 
 subroutine paw_smooth(a,mesh,it)
@@ -618,12 +586,6 @@ end subroutine paw_smooth
 !! OUTPUT
 !!  list(n)  sorted list
 !!  iperm(n) index of permutation given the right ascending order
-!!
-!! PARENTS
-!!      m_paw_finegrid
-!!
-!! CHILDREN
-!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -718,12 +680,6 @@ end subroutine paw_sort_dp
 !!  bes= Bessel function j_l at xx
 !!  besp= first derivative of j_l at xx (only if order>=1)
 !!  bespp= second derivative of j_l at xx (only if order=2)
-!!
-!! PARENTS
-!!      m_cutoff_cylinder,m_gtermcutoff,m_paw_atom,m_paw_finegrid,m_paw_numeric
-!!
-!! CHILDREN
-!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -848,12 +804,6 @@ end subroutine paw_jbessel
 !! OUTPUT
 !!  root(nq)= roots of instrinsic equation
 !!
-!! PARENTS
-!!      m_paw_atom
-!!
-!! CHILDREN
-!!      paw_jbessel
-!!
 !! SOURCE
 
  subroutine paw_solvbes(root,alpha,beta,ll,nq)
@@ -931,12 +881,6 @@ end subroutine paw_solvbes
 !!
 !! TODO
 !! Remove inline definitions, they are obsolete in F2003
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawpwij
-!!
-!! CHILDREN
-!!      paw_jbessel
 !!
 !! SOURCE
 
@@ -1047,11 +991,6 @@ end subroutine paw_jbessel_4spline
 !!
 !! OUTPUT
 !! derfc_yy=complementary error function of yy
-!!
-!! PARENTS
-!!     screened_coul_kernel
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

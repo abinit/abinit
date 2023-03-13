@@ -88,7 +88,8 @@ dmftqmc_therm    10000  # Thermalization
 dmftctqmc_gmove  0      # Global move occurence in QMC
 dmftctqmc_order  50     # Perturbation order
 #DFT+U
-usepawu     1           # For density matrix printout.
+usepawu1    1  
+usepawu     10
 dmatpuopt   1           # The density matrix: the simplest expression.
 lpawu       2 -1 -1     # Angular momentum for the projected Hamiltonian
 f4of2_sla3  0.0  0.0  0.0 

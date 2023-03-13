@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -103,12 +99,6 @@ contains
 !! In consequence, no use of message and wrtout routine.
 !! The lines of code needed to output the defaults are preserved
 !! (see last section of the routine, but are presently disabled)
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      create_nc_file,outvar_a_h,outvar_i_n,outvar_o_z,wrtout
 !!
 !! SOURCE
 

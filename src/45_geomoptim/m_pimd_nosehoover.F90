@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2021 ABINIT group (GG,MT)
+!!  Copyright (C) 2011-2022 ABINIT group (GG,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -84,16 +80,6 @@ contains
 !!  vel_cell(3,3)=time derivative of cell parameters
 !!    at input,  values at time t
 !!    at output, values at time t+dt
-!!
-!! PARENTS
-!!      m_predict_pimd
-!!
-!! CHILDREN
-!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
-!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_mass_spring
-!!      pimd_nosehoover_forces,pimd_nosehoover_propagate,pimd_predict_taylor
-!!      pimd_predict_verlet,pimd_print,pimd_stresses,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -272,16 +258,6 @@ end subroutine pimd_nosehoover_npt
 !!  Thermization by Nose-Hoover chains according to
 !!  Martyna, Klein, Tuckerman, J. Chem. Phys. 97, 2635 (1992) [[cite:Martyna1992]]
 !!  Tuckerman, Marx, Klein, Parrinello, J. Chem. Phys. 104, 5579 (1996) [[cite:Tuckerman1996]]
-!!
-!! PARENTS
-!!      m_predict_pimd
-!!
-!! CHILDREN
-!!      pimd_apply_constraint,pimd_coord_transform,pimd_energies
-!!      pimd_force_transform,pimd_forces,pimd_initvel,pimd_mass_spring
-!!      pimd_nosehoover_forces,pimd_nosehoover_propagate,pimd_predict_taylor
-!!      pimd_predict_verlet,pimd_print,pimd_stresses,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 

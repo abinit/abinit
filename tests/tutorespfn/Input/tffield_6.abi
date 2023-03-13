@@ -15,7 +15,7 @@ jdtset  11
         31  # 32  33  34  35
 
 # the initial run is at zero field and uses berryopt -1                                                                                
-berryopt11 -1       rfdir11    1 1 1
+berryopt11 -1       
                                                       
 # runs with finite field use berryopt 4, efield, and
 # must read in the wavefunctions of the previous run with smaller field
@@ -81,7 +81,7 @@ shiftk 0.5 0.5 0.5
        0.0 0.0 0.5
 
 #Parameters for the SCF procedure
-nstep 8
+nstep 7
 toldfe 1.0d-15
 
 # suppress printing of density and eigenvalues for this tutorial, 

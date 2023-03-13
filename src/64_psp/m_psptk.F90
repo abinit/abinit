@@ -6,14 +6,10 @@
 !!  This module collects low-level procedures used by the other psp modules
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -86,12 +82,6 @@ contains
 !!
 !! WARNINGS
 !! Warning: the fifth derivative is not yet delivered.
-!!
-!! PARENTS
-!!      m_psp1,m_psp5
-!!
-!! CHILDREN
-!!      spline,splint
 !!
 !! SOURCE
 
@@ -218,12 +208,6 @@ end subroutine psp1cc
 !! OUTPUT
 !!  gg1cc_xx= gg1cc_x(xx)
 !!
-!! PARENTS
-!!      m_psptk
-!!
-!! CHILDREN
-!!      spline,splint
-!!
 !! SOURCE
 
 subroutine gg1cc(gg1cc_xx,xx)
@@ -283,12 +267,6 @@ end subroutine gg1cc
 !! $ gg(x)= phi(x)^2$
 !! $ gp(x)= 2 * phi(x) * phi''(x)$
 !! $ phi''(x)=\frac{\cos(2\pi x)-(1-15x^2+20x^4) phi(x)}{x(1-4x^2)(1-x^2)}$
-!!
-!! PARENTS
-!!      m_psptk
-!!
-!! CHILDREN
-!!      spline,splint
 !!
 !! SOURCE
 
@@ -355,12 +333,6 @@ end subroutine gp1cc
 !! OUTPUT
 !!  gpp1cc_xx=second derivative of gg wrt xx.
 !!
-!!
-!! PARENTS
-!!      m_psptk
-!!
-!! CHILDREN
-!!      spline,splint
 !!
 !! SOURCE
 
@@ -502,12 +474,6 @@ end subroutine gpp1cc
 !!\end{equation} }}
 !!  yp1,ypn=derivative of q^2 V(q) wrt q at q=0 and q=qmax
 !!   (needed for spline fitter).
-!!
-!! PARENTS
-!!      m_psp5,m_psp6
-!!
-!! CHILDREN
-!!      spline,splint
 !!
 !! SOURCE
 
@@ -680,12 +646,6 @@ end subroutine psp5lo
 !! Xavier Gonze s E_KB = $ dvms/\int_0^{rmax}[(u_l(r))^2 dV_l(r) dr]$.
 !! This is the eigenvalue of the Kleinman-Bylander operator and sets
 !! the energy scale of the nonlocal psp corrections.
-!!
-!! PARENTS
-!!      m_psp5,m_psp6
-!!
-!! CHILDREN
-!!      spline,splint
 !!
 !! SOURCE
 
@@ -1184,12 +1144,6 @@ end subroutine psp5nl
 !!  yp1,ypn=derivative of q^2 V(q) wrt q at q=0 and q=qmax
 !!   (needed for spline fitter).
 !!
-!! PARENTS
-!!      m_psp8,m_psp9
-!!
-!! CHILDREN
-!!      spline,splint
-!!
 !! SOURCE
 
 subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
@@ -1359,12 +1313,6 @@ end subroutine psp8lo
 !! Xavier Gonze s E_KB = $ dvms/\int_0^{rmax}[(u_l(r))^2 dV_l(r) dr]$.
 !! This is the eigenvalue of the Kleinman-Bylander operator and sets
 !! the energy scale of the nonlocal psp corrections.
-!!
-!! PARENTS
-!!      m_psp8,m_psp9
-!!
-!! CHILDREN
-!!      spline,splint
 !!
 !! SOURCE
 
@@ -1562,12 +1510,6 @@ end subroutine psp8nl
 !!
 !! OUTPUT
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
-!!
-!! PARENTS
-!!      m_psp6,m_upf2abinit
-!!
-!! CHILDREN
-!!      spline,splint
 !!
 !! NOTES
 !! Test version by DRH - requires very smooth model core charge

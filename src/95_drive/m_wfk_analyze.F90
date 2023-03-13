@@ -6,14 +6,10 @@
 !!  Post-processing tools for WFK file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -107,9 +103,6 @@ contains
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -126,9 +119,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -440,12 +430,6 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !!
 !! FUNCTION
 !!  Initialize the wavefunction descriptor
-!!
-!! PARENTS
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 

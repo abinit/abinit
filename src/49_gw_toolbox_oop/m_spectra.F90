@@ -10,7 +10,7 @@
 !! matrix as calculated in the GW part of ABINIT (screening.F90)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,11 +110,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine spectra_init(Spectra,nomega,omega,nqpts,qpts)
@@ -157,10 +152,6 @@ end subroutine spectra_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine spectra_free(Spectra)
@@ -194,10 +185,6 @@ end subroutine spectra_free
 !!  fname=Name of the file to be written.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -280,11 +267,6 @@ CONTAINS
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_spectra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine dump_Qlist()
@@ -312,10 +294,6 @@ end subroutine spectra_write
 !!  Spectra=The Object containing the spectra
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

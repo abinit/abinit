@@ -6,18 +6,12 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -53,7 +47,7 @@ module m_data4entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,7 +78,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,11 +92,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -183,7 +172,7 @@ end subroutine data4entropyDMFT_init
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -197,11 +186,6 @@ end subroutine data4entropyDMFT_init
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -274,7 +258,7 @@ end subroutine data4entropyDMFT_setDocc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -288,11 +272,6 @@ end subroutine data4entropyDMFT_setDocc
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -335,7 +314,7 @@ end subroutine data4entropyDMFT_setHu
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -349,12 +328,6 @@ end subroutine data4entropyDMFT_setHu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -389,7 +362,7 @@ end subroutine data4entropyDMFT_setDc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -403,11 +376,6 @@ end subroutine data4entropyDMFT_setDc
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

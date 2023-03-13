@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2021 ABINIT group (MT).
+!!  Copyright (C) 2005-2022 ABINIT group (MT).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -163,14 +159,6 @@ contains
 !!  ! Developpers have to be careful when introducing others arrays:
 !!      they have to be stored on the fine FFT grid (except f_fftgr).
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      ab7_mixing_copy_current_step,ab7_mixing_eval,ab7_mixing_eval_allocate
-!!      ab7_mixing_eval_deallocate,ab7_mixing_use_moving_atoms,fourdp,metric
-!!      pawrhoij_filter,prcref,timab,wvl_prcref,wvl_rho_abi2big
 !!
 !! SOURCE
 

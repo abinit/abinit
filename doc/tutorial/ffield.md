@@ -141,10 +141,9 @@ Na Sai implementation is restricted to [[kptopt]] = 2, which is less convenient.
 
 The input file is typical for a self-consistent ground state calculation. In addition to the
 usual variables, for the Berry phase calculation we simply need
-to include [[berryopt]] and [[rfdir]]:
+to include [[berryopt]] (see also [[rfdir]], the default being usually adequate):
 ```
 berryopt      -1
-rfdir          1 1 1
 ```
 
 Make the run, then open the output file and look for the occurrence "Berry".
@@ -382,10 +381,9 @@ As general parameters, one has to specify [[nband]], [[nbdbuf]] and [[kptopt]]:
 
 As a first step (dataset 11), the code must perform a Berry phase calculation
 in zero electric field. For that purpose, 
-it is necessary to set the values of [[berryopt]] and [[rfdir]]:
+it is necessary to set the values of [[berryopt]]:
 
             berryopt11     -1
-            rfdir11        1 1 1
 
 !!! warning
 

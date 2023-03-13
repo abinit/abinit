@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.7.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed  4 May 2022.
+- ( at 01h23 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t83/t83.in
-- output file    -> t83.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t83/t83.abi
+- output file    -> t83.abo
 - root for input  files -> t83i
 - root for output files -> t83o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          43          nfft =        1000          nkpt =           2
 ================================================================================
-P This job should need less than                       1.252 Mbytes of memory.
+P This job should need less than                       1.281 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
        mpw =          43          nfft =        1000          nkpt =          16
 ================================================================================
-P This job should need less than                       1.180 Mbytes of memory.
+P This job should need less than                       1.209 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -104,7 +104,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
        mpw =          43          nfft =        1000          nkpt =          16
 ================================================================================
-P This job should need less than                       1.302 Mbytes of memory.
+P This job should need less than                       1.331 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -121,7 +121,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
        mpw =          43          nfft =        1000          nkpt =          16
 ================================================================================
-P This job should need less than                       1.302 Mbytes of memory.
+P This job should need less than                       1.331 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -138,7 +138,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          16
        mpw =          43          nfft =        1000          nkpt =          16
 ================================================================================
-P This job should need less than                       1.302 Mbytes of memory.
+P This job should need less than                       1.331 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -156,6 +156,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol           1       1
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -177,6 +178,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
    d3e_pert1_phon5          1
    d3e_pert1_phon6          0
    d3e_pert1_phon7          0
+  d3e_pert2_atpol           1       1
     d3e_pert2_dir1          0       0       0
     d3e_pert2_dir2          0       0       0
     d3e_pert2_dir3          0       0       0
@@ -198,6 +200,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
    d3e_pert2_phon5          0
    d3e_pert2_phon6          1
    d3e_pert2_phon7          0
+  d3e_pert3_atpol           1       1
     d3e_pert3_dir1          0       0       0
     d3e_pert3_dir2          0       0       0
     d3e_pert3_dir3          0       0       0
@@ -432,14 +435,16 @@ P          mk1mem7         16
         optdriver5          5
         optdriver6          5
         optdriver7          5
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
+           prtpot6          0
+           prtpot7          0
            prtvol           1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       0       0
-            rfdir4          1       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+          rfatpol           1       1         
+            rfdir           1       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -715,8 +720,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11326
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Al,  from PRB58, 3641 (1998)
 - 13.00000   3.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -738,8 +743,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.692782
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1028,23 +1033,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11326
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t83o_DS2_WFK
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -1064,43 +1052,10 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t83o_DS2_WFK
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -1165,7 +1120,7 @@ tolerances: {tolwfr: 1.00E-18, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1200,23 +1155,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.11326
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t83o_DS2_WFK
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  ==>  initialize data related to q vector <== 
 
@@ -1234,43 +1172,10 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t83o_DS2_WFK
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
 --- !BeginCycle
 iteration_state: {dtset: 4, }
@@ -1287,10 +1192,10 @@ tolerances: {toldfe: 8.00E-11, }
  ETOT  6   6.4769311759089     -8.501E-08 3.416E-11 1.523E-07
  ETOT  7   6.4769311747965     -1.112E-09 4.566E-13 1.042E-09
  ETOT  8   6.4769311747894     -7.123E-12 4.512E-15 3.977E-12
- ETOT  9   6.4769311747894     -2.132E-14 1.449E-17 6.326E-14
+ ETOT  9   6.4769311747894     -1.954E-14 1.449E-17 6.326E-14
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  2.132E-14 < toldfe=  8.000E-11
+  for the second time, diff in etot=  1.954E-14 < toldfe=  8.000E-11
 -open ddk wf file :t83o_DS3_1WF7
 ================================================================================
 
@@ -1326,43 +1231,10 @@ tolerances: {toldfe: 8.00E-11, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t83o_DS2_WFK
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   1 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   2 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   3 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   4 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   5 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   6 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   7 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=   8 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=   9 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  10 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  11 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  12 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  13 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  14 by node    0
-P newkpt: treating      4 bands with npw=      41 for ikpt=  15 by node    0
-P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 - dfpt_looppert: read the DDK wavefunctions from file: t83o_DS3_1WF7
 
 --- !BeginCycle
@@ -1379,12 +1251,12 @@ tolerances: {toldfe: 8.00E-11, }
  ETOT  5  -183.07129976359     -1.404E-05 4.927E-09 4.246E-05
  ETOT  6  -183.07130004291     -2.793E-07 9.630E-11 1.542E-06
  ETOT  7  -183.07130005229     -9.388E-09 2.380E-12 3.638E-08
- ETOT  8  -183.07130005254     -2.413E-10 1.517E-13 2.946E-10
- ETOT  9  -183.07130005254     -2.871E-12 7.520E-16 1.715E-12
- ETOT 10  -183.07130005254     -3.979E-13 5.765E-18 1.573E-14
+ ETOT  8  -183.07130005254     -2.412E-10 1.517E-13 2.946E-10
+ ETOT  9  -183.07130005254     -2.899E-12 7.520E-16 1.715E-12
+ ETOT 10  -183.07130005254     -3.695E-13 5.765E-18 1.573E-14
 
  At SCF step   10, etot is converged : 
-  for the second time, diff in etot=  3.979E-13 < toldfe=  8.000E-11
+  for the second time, diff in etot=  3.695E-13 < toldfe=  8.000E-11
 -open ddk wf file :t83o_DS3_1WF7
 ================================================================================
 
@@ -1484,7 +1356,7 @@ tolerances: {toldfe: 8.00E-11, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1717,7 +1589,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -1747,7 +1619,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1980,7 +1852,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -2010,7 +1882,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2243,7 +2115,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -2273,7 +2145,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2281,6 +2153,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
  -outvars: echo values of variables after computation  --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol           1       1
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -2302,6 +2175,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
    d3e_pert1_phon5          1
    d3e_pert1_phon6          0
    d3e_pert1_phon7          0
+  d3e_pert2_atpol           1       1
     d3e_pert2_dir1          0       0       0
     d3e_pert2_dir2          0       0       0
     d3e_pert2_dir3          0       0       0
@@ -2323,6 +2197,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
    d3e_pert2_phon5          0
    d3e_pert2_phon6          1
    d3e_pert2_phon7          0
+  d3e_pert3_atpol           1       1
     d3e_pert3_dir1          0       0       0
     d3e_pert3_dir2          0       0       0
     d3e_pert3_dir3          0       0       0
@@ -2575,14 +2450,16 @@ P          mk1mem7         16
         optdriver5          5
         optdriver6          5
         optdriver7          5
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
+           prtpot6          0
+           prtpot7          0
            prtvol           1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       0       0
-            rfdir4          1       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+          rfatpol           1       1         
+            rfdir           1       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -2918,10 +2795,10 @@ P          mk1mem7         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  53 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.6  wall=          2.6
+.Delivered  85 WARNINGs and  22 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.1  wall=          3.4

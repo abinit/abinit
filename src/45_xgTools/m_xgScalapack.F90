@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2017-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,12 +89,6 @@ module m_xgScalapack
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_lobpcg2
-!!
-!! CHILDREN
-!!      blacs_gridexit,mpi_comm_free,timab
 !!
 !! SOURCE
   subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,usable)

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MMancini)
+!! Copyright (C) 2005-2022 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,11 +55,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_pbc_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine vecp(a,b,c)
@@ -82,11 +77,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -118,8 +108,6 @@ contains
 !!
 !! INPUTS
 !!
-!! CHILDREN
-!!
 !! SOURCE
 
  function pbc_aa_contract()
@@ -140,8 +128,6 @@ contains
 !! FUNCTION
 !!  Compute the contraction of bb
 !! INPUTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -168,8 +154,6 @@ contains
 !!  Compute the application of a vector on bb
 !! INPUTS
 !!  vi(3)=real vector
-!! CHILDREN
-!!
 !! SOURCE
 
  function pbc_bb_proj(vi)
@@ -194,10 +178,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine dist_pbc_ext(RI,RJ,r2,RD)
@@ -241,10 +221,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine dist_pbc_int(RI,RJ)

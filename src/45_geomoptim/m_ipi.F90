@@ -13,7 +13,7 @@
 !!  No parallelism over images.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2020-2021 ABINIT group (MG)
+!!  Copyright (C) 2020-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,10 +56,6 @@
 !!  3. The server socket waits until the force data for each replica of the system has
 !!  been calculated and returned, then the MD can be propagated for one more time
 !!  step, and new force requests will be dispatched.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -122,13 +118,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
-!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine ipi_setup(string, comm)
@@ -182,13 +171,6 @@ end subroutine ipi_setup
 !! OUTPUT
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_invars2
-!!
-!! CHILDREN
-!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
-!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -252,13 +234,6 @@ end subroutine ipi_check_initial_consistency
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_ipi
-!!
-!! CHILDREN
-!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
-!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine handle_posdata(out_natom, out_rprimd, out_xred)
@@ -299,12 +274,6 @@ end subroutine handle_posdata
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
-!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine ipi_shutdown()
@@ -338,13 +307,6 @@ end subroutine ipi_shutdown
 !! hist <type(abihist)>: History of positions,forces,acell, rprimd, stresses
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      handle_posdata,hist2var,readbuffer,stress_voigt_to_mat,var2hist
-!!      writebuffer,writebuffer_dv,wrtout,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 

@@ -10,16 +10,11 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (JB)
+!! Copyright (C) 1998-2022 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

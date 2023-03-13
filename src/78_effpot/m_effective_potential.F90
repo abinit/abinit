@@ -9,7 +9,7 @@
 !! Contain also routine to evaluate the energy,forces and stresses
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (AM)
+!! Copyright (C) 2010-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -189,12 +189,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype to be initialized
-!!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -393,12 +387,6 @@ end subroutine effective_potential_init
 !!  eff_pot%mpi_ifc%my_cells(:)  = Number of the cells in the supercell treat by this CPU
 !!  eff_pot%mpi_ifc%my_index_cells(:,:) = indexes of the cells in the supercell treat by this CPU
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_initmpi(eff_pot,comm)
@@ -460,12 +448,6 @@ end subroutine effective_potential_initmpi
 !! OUTPUT
 !! eff_pot_out<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_copy(eff_pot_out,eff_pot_in,comm) 
@@ -508,13 +490,6 @@ end subroutine effective_potential_copy
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)>  = effective_potential datatype
-!!
-!! PARENTS
-!!      m_compute_anharmonics,m_effective_potential,m_effective_potential_file
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -567,12 +542,6 @@ end subroutine effective_potential_free
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)>  = effective_potential datatype
 !!
-!! PARENTS
-!!      m_fit_polynomial_coeff
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_freeCoeffs(eff_pot)
@@ -604,12 +573,6 @@ end subroutine effective_potential_freeCoeffs
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)>  = effective_potential datatype
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -650,12 +613,6 @@ end subroutine effective_potential_freempi
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective potential datatype
-!!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -1120,13 +1077,6 @@ end subroutine effective_potential_generateDipDip
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
-!! PARENTS
-!!      m_effective_potential,m_effective_potential_file,m_fit_polynomial_coeff
-!!      m_mover_effpot,m_opt_effpot
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setCoeffs(coeffs,eff_pot,ncoeff)
@@ -1192,12 +1142,6 @@ end subroutine effective_potential_setCoeffs
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
 !!
-!! PARENTS
-!!      m_compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setElastic3rd(eff_pot,elastics)
@@ -1234,12 +1178,6 @@ end subroutine effective_potential_setElastic3rd
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
 !!
-!!
-!! PARENTS
-!!      m_compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -1278,12 +1216,6 @@ end subroutine effective_potential_setElastic4th
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
-!!
-!! PARENTS
-!!      m_compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -1325,12 +1257,6 @@ end subroutine effective_potential_setStrainPhononCoupling
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
-!!
-!! PARENTS
-!!      m_compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -1375,12 +1301,6 @@ end subroutine effective_potential_setElasticDispCoupling
 !!
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = datatype for effective potential
-!!
-!! PARENTS
-!!      m_effective_potential,m_multibinit_driver
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -1440,12 +1360,6 @@ end subroutine effective_potential_setConfinement
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype
 !!
-!! PARENTS
-!!      m_effective_potential,m_effective_potential_file,m_mover_effpot
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_setSupercell(eff_pot,comm,ncell,supercell)
@@ -1500,12 +1414,6 @@ end subroutine effective_potential_setSupercell
 !!
 !! OUTPUT
 !!
-!!
-!! PARENTS
-!!      m_effective_potential_file
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -1620,11 +1528,6 @@ end subroutine effective_potential_print
 !! supercell<type(supercell_type)> = optional, supercell type to define
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -1770,12 +1673,6 @@ end subroutine effective_potential_printSupercell
 !!                - The model (Anharmonic)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -2096,12 +1993,6 @@ end subroutine effective_potential_writeXML
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_compute_anharmonics
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_writeAbiInput(eff_pot,filename,strain)
@@ -2275,12 +2166,6 @@ end subroutine effective_potential_writeAbiInput
 !! fcart(3,natom) =  forces in cartesian coordinates (Ha/Bohr)
 !! gred(3,natom)  =  gradient wrt nuclear positions in reduced coordinates
 !! strten(6) = stress tensor (Ha/Bohr^3)
-!!
-!! PARENTS
-!!      m_effective_potential,m_fit_data,m_fit_polynomial_coeff,m_mover
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -2826,12 +2711,6 @@ end subroutine effective_potential_evaluate
 !! displacement(3,natom) = cartesian atomic displacement between two configurations (Bohr)
 !! du_delta(6,3,natom)   = variation of the displacmeent wr to strain
 !!
-!! PARENTS
-!!      m_effective_potential,m_fit_data
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,rprimd_ref,comm,&
@@ -3004,12 +2883,6 @@ end subroutine effective_potential_getDisp
 !! OUTPUT
 !! fcart   = forces in cartesian coordinates
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
-!!
 !! SOURCE
 
 subroutine effective_potential_distributeResidualForces(eff_pot,fcart,natom)
@@ -3060,12 +2933,6 @@ end subroutine effective_potential_distributeResidualForces
 !! eff_pot = effective potential structure
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_mover_effpot,m_opt_effpot
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -3169,12 +3036,6 @@ end function effective_potential_compare
 ! !!
 ! !! OUTPUT
 ! !! ddb   = ddb with all information
-! !!
-! !! PARENTS
-! !!      m_effective_potential
-! !!
-! !! CHILDREN
-! !!      ab_define_var,isfile,wrtout
 ! !!
 ! !! SOURCE
 
@@ -3338,11 +3199,6 @@ end function effective_potential_compare
 ! !! OUTPUT
 ! !! eff_pot
 ! !!
-! !! PARENTS
-! !!
-! !! CHILDREN
-! !!      ab_define_var,isfile,wrtout
-! !!
 ! !! SOURCE
 
 ! subroutine effective_potential_printPDOS(eff_pot,filename,ncell,nph1l,option,qph1l)
@@ -3412,11 +3268,6 @@ end function effective_potential_compare
 !!
 !! OUTPUT
 !! dynmat   = ddb with all information
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -3554,11 +3405,6 @@ subroutine effective_potential_computeGradient(delta,fcart_out,eff_pot,natom,nce
 !! ntime = number of time in the hist
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
@@ -3746,12 +3592,6 @@ end subroutine effective_potential_checkDEV
 !!            1 print the xml for a system
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      ab_define_var,isfile,wrtout
 !!
 !! SOURCE
 
