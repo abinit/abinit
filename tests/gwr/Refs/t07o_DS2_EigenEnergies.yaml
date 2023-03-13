@@ -6,7 +6,7 @@ dimensions:
   type: State
 elements:
   type: TextFile
-unit: 1.0
+unit: 1.0     # Hartree units
 metaData:
   fermiEnergy:  0.181298369372308E+00
   energies:

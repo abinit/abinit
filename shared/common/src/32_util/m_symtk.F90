@@ -988,7 +988,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 
  if(timrev==1.and.my_prtvol>0)then
    write(msg, '(3a)' )&
-   ' littlegroup_q : able to use time-reversal symmetry. ',ch10,&
+   ' littlegroup_q: able to use time-reversal symmetry. ',ch10,&
    '  (except for gamma, not yet able to use time-reversal symmetry)'
    call wrtout(std_out,msg)
  end if

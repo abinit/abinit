@@ -7,6 +7,6 @@ dimensions:
   type: State
 elements:
   type: IeeeBinaryFile
-unit: 1.0
+unit: 1.0   # Atomic units
 metaData:
   halfGrid: 0

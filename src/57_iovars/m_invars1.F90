@@ -1580,7 +1580,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
 
+ ! In EPH we may want to change qptopt when generating the IBZ for phonons and DFPT potentials.
+ ! Typical example: we have a DDB/DDVB with q/-q and we want to reintroduce TR for testing purposes.
+ ! For this reason, the default value of qptopt is set to zero if RUNL_EPH.
+ ! EPH will use this value as sentinel to understand if qptopt should be set equal to kptopt
+ ! or if it should be taken from the input file.
+
  dtset%qptopt=1
+ if (dtset%optdriver == RUNL_EPH) dtset%qptopt = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
  if(tread==1) dtset%qptopt=intarr(1)
 

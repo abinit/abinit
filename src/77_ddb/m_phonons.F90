@@ -3466,9 +3466,7 @@ subroutine phstore_wait(self, cryst, phfrq, displ_cart, displ_red)
  real(dp),intent(out) :: displ_red(2, 3, self%natom, self%natom3)
 
 !Local variables ------------------------------
-!scalars
  integer :: ierr
-
 ! *************************************************************************
 
  if (.not. self%use_ifc_fourq) call xmpi_waitall(self%requests, ierr)
@@ -3480,6 +3478,7 @@ end subroutine phstore_wait
 !!***
 
 !----------------------------------------------------------------------
+
 !!****f* m_phonons/test_phrotation
 !! NAME
 !! test_phrotation
@@ -3488,7 +3487,6 @@ end subroutine phstore_wait
 !!  Test the symmetrization of the phonon eigenvalues and eigenvectors.
 !!
 !! INPUTS
-!!
 
 subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
