@@ -41,7 +41,7 @@ MODULE m_numeric_tools
  public :: get_diag              ! Return the diagonal of a matrix as a vector
  public :: isdiagmat             ! True if matrix is diagonal
  public :: l2int                 ! convert logical data to int array
- public :: r2c,c2r               ! Transfer complex data stored in a real array to a complex array and vice versa
+ public :: r2c, c2r              ! Transfer complex data stored in a real array to a complex array and vice versa
  public :: iseven                ! True if int is even
  public :: isinteger             ! True if all elements of rr differ from an integer by less than tol
  public :: is_zero               ! True if all elements of rr differ from zero by less than tol
@@ -61,10 +61,12 @@ MODULE m_numeric_tools
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
- public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
+ public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it
+                                 ! to its hermitian conjugate.
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
  public :: pack_matrix           ! Packs a matrix into hermitian format
+ public :: check_vec_conjg       ! Test whether two complex vectors are the conjugate of each other.
  public :: print_arr             ! Print a vector/array
  public :: pade, dpade           ! Functions for Pade approximation (complex case)
  public :: newrap_step           ! Apply single step Newton-Raphson method to find root of a complex function
@@ -77,11 +79,14 @@ MODULE m_numeric_tools
  public :: cmplx_sphcart         ! Convert an array of cplx numbers from spherical to Cartesian coordinates or vice versa.
  public :: pfactorize            ! Factorize a number in terms of an user-specified set of prime factors.
  public :: isordered             ! Check the ordering of a sequence.
- public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ where 1 is not included (tol12)
- public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] where -1/2 is not included (tol12)
+ public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[
+                                 ! where 1 is not included (tol12)
+ public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2]
+                                 ! where -1/2 is not included (tol12)
  public :: interpol3d_0d         ! Linear interpolation in 3D
  public :: interpol3d_1d         ! Linear interpolation in 3D for an array
- public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
+ public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point
+                                 ! to be interpolated in interpol3d
  public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
@@ -94,7 +99,8 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
- public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
+ public :: bool2index            ! Allocate and return array with the indices in a boolean array that evaluates to .True.
+ public :: blocked_loop          ! Helper function to implement blocked algorithms inside do loops.
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
@@ -160,6 +166,7 @@ MODULE m_numeric_tools
  end interface r2c
 
  interface c2r
+   module procedure cdp2rdp_0D
    module procedure cdp2rdp_1D
    module procedure cdp2rdp_2D
    module procedure cdp2rdp_3D
@@ -1165,6 +1172,39 @@ pure function rdp2cdp_6D(rr) result(cc)
 end function rdp2cdp_6D
 !!***
 
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/cdp2rdp_0D
+!! NAME
+!!  cdp2rdp_0D
+!!
+!! FUNCTION
+!!  Create a real variable containing real and imaginary part starting from a complex array
+!!
+!! INPUTS
+!!  cc=the input complex number
+!!
+!! OUTPUT
+!!  rr(2=the real array
+!!
+!! SOURCE
+
+pure function cdp2rdp_0D(cc) result(rr)
+
+!Arguments ------------------------------------
+!scalars
+ complex(dpc),intent(in) :: cc
+ real(dp) :: rr(2)
+
+! *********************************************************************
+
+ rr(1)=REAL (cc)
+ rr(2)=AIMAG(cc)
+
+end function cdp2rdp_0D
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_numeric_tools/cdp2rdp_1D
@@ -1330,7 +1370,7 @@ elemental function iseven(nn)
  logical :: iseven
 ! *********************************************************************
 
- iseven=.FALSE.; if ((nn/2)*2==nn) iseven=.TRUE.
+ iseven = ((nn / 2) * 2 == nn)
 
 end function iseven
 !!***
@@ -1508,13 +1548,13 @@ end function inrange_dp
 !!  bisect_rdp
 !!
 !! FUNCTION
-!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1).
+!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j) <= x <= AA(j + 1).
 !!  AA must be monotonic, either increasing or decreasing. j=0 or
 !!  j=N is returned to indicate that x is out of range.
 !!
 !! SOURCE
 
-pure function bisect_rdp(AA,xx) result(loc)
+pure function bisect_rdp(AA, xx) result(loc)
 
 !Arguments ------------------------------------
 !scalars
@@ -1560,7 +1600,7 @@ end function bisect_rdp
 !!  bisect_int
 !!
 !! FUNCTION
-!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j)<=x<= AA(j + 1).
+!!  Given an array AA(1:N), and a value x, returns the index j such that AA(j) <= x <= AA(j + 1).
 !!  AA must be monotonic, either increasing or decreasing. j=0 or
 !!  j=N is returned to indicate that x is out of range.
 !!
@@ -1974,7 +2014,7 @@ end subroutine mask2blocks
 !! OUTPUT
 !!  aa=coefficient of linear term of fit
 !!  bb=coefficient of constant term of fit
-!!  function linfit=root mean square of differences between data and fit
+!!  res=root mean square of differences between data and fit
 !!
 !! SOURCE
 
@@ -2025,6 +2065,7 @@ end function linfit_rdp
 !!  linfit_spc
 !!
 !! FUNCTION
+!!  Perform a linear fit, y=ax+b, of data
 !!
 !! INPUTS
 !!
@@ -2077,6 +2118,7 @@ end function linfit_spc
 !!  linfit_dpc
 !!
 !! FUNCTION
+!!  Perform a linear fit, y=ax+b, of data
 !!
 !! INPUTS
 !!
@@ -2502,7 +2544,7 @@ end subroutine midpoint_
 !!  The routine improves the resolution of the grid until a given accuracy is reached
 !!
 !! INPUTS
-!!  func(external)=the name of the function to be integrated
+!!  func(external)=the function to be integrated
 !!  xmin,xmax=the limits of integration
 !!  npts=Initial number of points, only for Gauss-Legendre. At each step this number is doubled
 !!  accuracy=fractional accuracy required
@@ -2699,7 +2741,7 @@ recursive subroutine quadrature(func,xmin,xmax,qopt,quad,ierr,ntrial,accuracy,np
  end select
 
  write(msg,'(a,i0,2(a,es14.6))')&
-&  "Results are not converged within the given accuracy. ntrial= ",NT,"; EPS= ",EPS,"; TOL= ",TOL
+  "Results are not converged within the given accuracy. ntrial= ",NT,"; EPS= ",EPS,"; TOL= ",TOL
  ABI_WARNING(msg)
  ierr = -1
 
@@ -3567,7 +3609,7 @@ end subroutine symmetrize_spc
 !!
 !! SOURCE
 
-subroutine symmetrize_dpc(mat,uplo)
+subroutine symmetrize_dpc(mat, uplo)
 
 !Arguments ------------------------------------
 !scalars
@@ -3636,14 +3678,16 @@ end subroutine symmetrize_dpc
 
 subroutine pack_matrix(mat_in, mat_out, N, cplx)
 
+!Arguments ------------------------------------
+!scalars
  integer, intent(in) :: N, cplx
  real(dp), intent(in) :: mat_in(cplx, N*N)
  real(dp), intent(out) :: mat_out(cplx*N*(N+1)/2)
 
-!local variables
+!Local variables-------------------------------
  integer :: isubh, i, j
 
- ! *************************************************************************
+! *************************************************************************
 
  isubh = 1
  do j=1,N
@@ -3658,6 +3702,46 @@ subroutine pack_matrix(mat_in, mat_out, N, cplx)
  end do
 
 end subroutine pack_matrix
+!!***
+
+
+!!****f* m_numeric_tools/check_vec_conjg
+!! NAME
+!! check_vec_conjg
+!!
+!! FUNCTION
+!! Test whether two complex vectors `vec1` and `vec2` of size `nn` are conjugate of each other.
+!! within an optional tolerance abs_tol (default: 1e-6).
+!! Return max absolute difference for real and imag part in abs_diff(2) and exit status in ierr.
+!!
+!! SOURCE
+
+integer function check_vec_conjg(nn, vec1, vec2, abs_diff, abs_tol) result(ierr)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: nn
+ complex(dp), intent(in) :: vec1(nn), vec2(nn)
+ real(dp),intent(out) :: abs_diff(2)
+ real(dp),optional,intent(in) :: abs_tol
+
+!Local variables-------------------------------
+ integer :: ii
+ real(dp) :: my_abs_tol
+
+ ! *************************************************************************
+
+ my_abs_tol = tol6; if (present(abs_tol)) my_abs_tol = abs_tol
+ ierr = 0
+ abs_diff = zero
+
+ do ii=1,nn
+   abs_diff(1) = max(abs_diff(1), abs(real(vec1(ii)) - real(vec2(ii))))
+   abs_diff(2) = max(abs_diff(2), abs(aimag(vec1(ii)) + aimag(vec2(ii))))
+ end do
+
+ if (any(abs_diff > abs_tol)) ierr = 1
+
+end function check_vec_conjg
 !!***
 
 !----------------------------------------------------------------------
@@ -3916,7 +4000,7 @@ end subroutine print_arr2d_dpc
 !!
 !! SOURCE
 
-function pade(n,z,f,zz)
+function pade(n, z, f, zz)
 
 !Arguments ------------------------------------
 !scalars
@@ -3924,7 +4008,7 @@ function pade(n,z,f,zz)
  complex(dpc),intent(in) :: zz
  complex(dpc) :: pade
 !arrays
- complex(dpc),intent(in) :: z(n),f(n)
+ complex(dpc),intent(in) :: z(n), f(n)
 
 !Local variables-------------------------------
 !scalars
@@ -3933,7 +4017,7 @@ function pade(n,z,f,zz)
  integer :: i
 ! *************************************************************************
 
- call calculate_pade_a(a,n,z,f)
+ call calculate_pade_a(a, n, z, f)
 
  Az(0)=czero
  Az(1)=a(1)
@@ -3945,7 +4029,7 @@ function pade(n,z,f,zz)
    Bz(i+1)=Bz(i)+(zz-z(i))*a(i+1)*Bz(i-1)
  end do
  !write(std_out,*) 'Bz(n)',Bz(n)
- if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
+ !if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) ' Bz(n) ',Bz(n)
  pade=Az(n)/Bz(n)
  !write(std_out,*) 'pade_approx ', pade_approx
 
@@ -3963,7 +4047,7 @@ end function pade
 !!
 !! SOURCE
 
-function dpade(n,z,f,zz)
+function dpade(n, z, f, zz)
 
 !Arguments ------------------------------------
 !scalars
@@ -3982,7 +4066,7 @@ function dpade(n,z,f,zz)
  complex(dpc) :: dAz(0:n), dBz(0:n)
 ! *************************************************************************
 
- call calculate_pade_a(a,n,z,f)
+ call calculate_pade_a(a, n, z, f)
 
  Az(0)=czero
  Az(1)=a(1)
@@ -4000,7 +4084,7 @@ function dpade(n,z,f,zz)
    dBz(i+1)=dBz(i)+a(i+1)*Bz(i-1)+(zz-z(i))*a(i+1)*dBz(i-1)
  end do
  !write(std_out,*) 'Bz(n)', Bz(n)
- if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) 'Bz(n)',Bz(n)
+ !if (REAL(Bz(n))==zero.and.AIMAG(Bz(n))==zero) write(std_out,*) 'Bz(n)',Bz(n)
  !pade_approx = Az(n) / Bz(n)
  dpade=dAz(n)/Bz(n) -Az(n)*dBz(n)/(Bz(n)*Bz(n))
  !write(std_out,*) 'pade_approx ', pade_approx
@@ -4022,7 +4106,7 @@ end function dpade
 !!
 !! SOURCE
 
-subroutine calculate_pade_a(a,n,z,f)
+subroutine calculate_pade_a(a, n, z, f)
 
 !Arguments ------------------------------------
 !scalars
@@ -4062,11 +4146,11 @@ end subroutine calculate_pade_a
 !!
 !! FUNCTION
 !!  Apply single step newton-raphson method to find the root of a complex function
-!!   z_k+1=z_k-f(z_k)/(df/dz(z_k))
+!!   z_k+1 = z_k - f(z_k) / (df/dz(z_k))
 !!
 !! SOURCE
 
-complex(dp) function newrap_step(z,f,df)
+complex(dp) function newrap_step(z, f, df)
 
 !Arguments ------------------------------------
 !scalars
@@ -4078,7 +4162,7 @@ complex(dp) function newrap_step(z,f,df)
 
  dfm2=ABS(df)*ABS(df)
 
- newrap_step= z - (f*CONJG(df))/dfm2
+ newrap_step = z - (f*CONJG(df))/dfm2
  !& z-one/(ABS(df)*ABS(df)) * CMPLX( REAL(f)*REAL(df)+AIMAG(f)*AIMAG(df), -REAL(f)*AIMAG(df)+AIMAG(f)*EAL(df) )
 
 end function newrap_step
@@ -4160,7 +4244,7 @@ end function l2norm_rdp
 !!
 !! FUNCTION
 !!  Given an initial set of elements, set_in, return the subset of inequivalent items
-!!  packed in the firt n_out positions of set_in. Use the logical function is_equal
+!!  packed in the first n_out positions of set_in. Use the logical function is_equal
 !!  to define whether two items are equivalent.
 !!
 !! INPUTS
@@ -4181,13 +4265,12 @@ end function l2norm_rdp
 !!
 !! SOURCE
 
-subroutine remove_copies(n_in,set_in,n_out,is_equal)
+subroutine remove_copies(n_in, set_in, n_out, is_equal)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n_in
  integer,intent(out) :: n_out
-
 !arrays
  real(dp),target,intent(inout) :: set_in(3,n_in)
 
@@ -5166,18 +5249,17 @@ end function simpson
 !!
 !! OUTPUT
 !!  phi = phase of cx fold into [-pi,pi]
-!!  rho = modul of cx
+!!  rho = module of cx
 !!
 !! SOURCE
 
-pure subroutine rhophi(cx,phi,rho)
+pure subroutine rhophi(cx, phi, rho)
 
 !Arguments ------------------------------------
 !scalars
  real(dp),intent(out) :: phi,rho
 !arrays
  real(dp),intent(in) :: cx(2)
-
 
 ! ***********************************************************************
 
@@ -5187,7 +5269,7 @@ pure subroutine rhophi(cx,phi,rho)
 
    phi = atan(cx(2)/cx(1))
 
-!  phi is an element of [-pi,pi]
+   ! phi is an element of [-pi,pi]
    if (cx(1) < zero) then
      if (phi < zero) then
        phi = phi + pi
@@ -5201,9 +5283,9 @@ pure subroutine rhophi(cx,phi,rho)
    if (cx(2) > tol8) then
      phi = pi*half
    else if (cx(2) < tol8) then
-     phi = -0.5_dp*pi
+     phi = -pi*half
    else
-     phi = 0
+     phi = zero
    end if
 
  end if
@@ -6144,10 +6226,10 @@ elemental subroutine safe_div(n, d, altv, q)
 
 ! *********************************************************************
 
- if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==zero ) then
-    q = altv
+ if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d == zero) then
+   q = altv
  else
-    q = n / d
+   q = n / d
  endif
 
 end subroutine safe_div
@@ -6184,6 +6266,38 @@ subroutine bool2index(bool_list, out_index)
  end do
 
 end subroutine bool2index
+!!***
+
+!!****f* ABINIT/blocked_loop
+!! NAME
+!! blocked_loop
+!!
+!! FUNCTION
+!!  Helper function to implement blocked algorithms inside do loops i.e. algorithms
+!!  operating on multiple items up to a maximum `batch_size`.
+!!
+!! Usage:
+!!
+!!   batch_size = 4
+!!   allocate(work(..., batch_size)
+!!
+!!   do loop_index=1, loop_stop, batch_size
+!!     ndat = blocked_loop(loop_index, loop_stop, batch_size)
+!!     ! operate on ndat items in work
+!!   end do
+!!
+!! SOURCE
+
+integer pure function blocked_loop(loop_index, loop_stop, batch_size) result(ndat)
+
+!Arguments ----------------------------------------------
+ integer,intent(in) :: loop_index, loop_stop, batch_size
+
+! *********************************************************************
+
+ ndat = merge(batch_size, loop_stop - loop_index + 1, loop_index + batch_size - 1 <= loop_stop)
+
+end function blocked_loop
 !!***
 
 END MODULE m_numeric_tools

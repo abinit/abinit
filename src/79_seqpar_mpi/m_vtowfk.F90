@@ -92,11 +92,11 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  fixed_occ=true if electronic occupations are fixed (occopt<3)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
-!!  icg=shift to be applied on the location of data in the array cprj
+!!  ibg=shift to be applied on the location of data in the array cprj
 !!  icg=shift to be applied on the location of data in the array cg
 !!  ikpt=number of the k-point
 !!  iscf=(<= 0  =>non-SCF), >0 => SCF
-!!  isppol isppol=1 for unpolarized, 2 for spin-polarized
+!!  isppol= 1 for unpolarized, 2 for spin-polarized
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kinpw(npw_k)=(modified) kinetic energy for each plane wave (Hartree)
 !!  mcg=second dimension of the cg array
@@ -356,7 +356,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !nnsclo_now=number of non-self-consistent loops for the current vtrial
 !(often 1 for SCF calculation, =nstep for non-SCF calculations)
  call timab(39,1,tsec) ! "vtowfk (loop)"
- 
+
  do inonsc=1,nnsclo_now
    if (iscf < 0 .and. (inonsc <= enough .or. mod(inonsc, 10) == 0)) call cwtime(cpu, wall, gflops, "start")
 
@@ -403,7 +403,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
      end if
    end do
-   
+
    ! JLJ 17/10/2014: If it is a GWLS calculation, construct the hamiltonian
    ! as in a usual GS calc., but skip any minimisation procedure.
    ! This would be equivalent to nstep=0, if the latter did work.
@@ -647,7 +647,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2
    if (update_cprj) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg,tim_getcprj)
  end if
- 
+
  call timab(39,2,tsec)
  call timab(30,1,tsec) ! "vtowfk  (afterloop)"
 

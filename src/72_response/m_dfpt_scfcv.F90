@@ -461,8 +461,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  paral_atom=(my_natom/=dtset%natom)
  my_atmtab=>mpi_enreg%my_atmtab
 
- _IBM6("XLF in dfpt_scfcv")
-
 !Save some variables from dataset definition
  ecut=dtset%ecut
  ecutf=ecut;if (psps%usepaw==1) ecutf=dtset%pawecutdg

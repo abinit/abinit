@@ -281,7 +281,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(ebands_t) :: bstruct,ebands
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
- type(hdr_type) :: hdr,hdr_den
+ type(hdr_type) :: hdr, hdr_den, hdr_kfull
  type(extfpmd_type),pointer :: extfpmd => null()
  type(macro_uj_type) :: dtpawuj(1)
  type(paw_dmft_type) :: paw_dmft
@@ -1142,14 +1142,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
        if (rdwrpaw/=0) then
-         ! CP modified
-         !call hdr%update(bantot,etot,fermie,residm,&
-         !  rprimd,occ,pawrhoij,xred,args_gs%amu,&
-         !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
          call hdr%update(bantot,etot,fermie,fermih,residm,&
            rprimd,occ,pawrhoij,xred,args_gs%amu,&
            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-         ! End CP modified
        end if
 
        ! Read kinetic energy density
@@ -1482,7 +1477,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (me == master .and. dtset%prtwf == 1 .and. dtset%prtwf_full == 1 .and. dtset%nqpt == 0) then
    wfkfull_path = strcat(dtfil%filnam_ds(4), "_FULL_WFK")
    if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-   call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
+   call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
+   call hdr_kfull%free()
    call cryst%free()
  end if
 

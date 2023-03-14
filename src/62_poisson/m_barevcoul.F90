@@ -32,12 +32,12 @@ module m_barevcoul
  use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.)
  use m_geometry,        only : normv
  use m_crystal,         only : crystal_t
- use m_gsphere,         only : gsphere_t
+ !use m_gsphere,         only : gsphere_t
 
 ! Cut-off methods modules
- use m_cutoff_sphere,   only : cutoff_sphere
- use m_cutoff_slab,     only : cutoff_slab
- use m_cutoff_cylinder, only : cutoff_cylinder, K0cos
+ !use m_cutoff_sphere,   only : cutoff_sphere
+ !use m_cutoff_slab,     only : cutoff_slab
+ !use m_cutoff_cylinder, only : cutoff_cylinder
 
  implicit none
 
@@ -153,12 +153,12 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
  real(dp),intent(in)        :: qphon(3)
  real(dp),intent(inout)     :: gmet(3,3)
  real(dp),intent(inout)     :: barev(nfft)
- real(dp)                   :: a1(3),a2(3),a3(3)
- real(dp)                   :: b1(3),b2(3),b3(3),gprimd(3,3),rmet(3,3)
+ !real(dp)                   :: a1(3),a2(3),a3(3)
+ real(dp)                   :: b1(3),b2(3),b3(3),rmet(3,3) !,gprimd(3,3),
  type(dataset_type)         :: dtset
  type(MPI_type)             :: mpi_enreg   !!!!
  type(crystal_t)            :: Cryst       !!!!
- type(gsphere_t)            :: Gsph
+ !type(gsphere_t)            :: Gsph
  type(vcut_t)               :: vcut        !!!!
 !Local variables-------------------------------
 !scalars
@@ -275,9 +275,10 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 
  barev(:)=zero
 
- a1=Cryst%rprimd(:,1); b1=two_pi*gprimd(:,1)
- a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
- a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
+ ! MG: This triggers SIGFPE as cryst is not initialized
+ !a1=Cryst%rprimd(:,1); b1=two_pi*gprimd(:,1)
+ !a2=Cryst%rprimd(:,2); b2=two_pi*gprimd(:,2)
+ !a3=Cryst%rprimd(:,3); b3=two_pi*gprimd(:,3)
 
  SELECT CASE (TRIM(vcut%mode))
  CASE('SPHERE') ! Spencer-Alavi method
@@ -315,8 +316,10 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      ABI_ERROR("The cylinder must be along the z-axis")
    end if
 
-   call cutoff_cylinder(nfft,gq,ng,Gsph%gvec,vcut%rcut,vcut%hcyl,vcut%pdir,&
-&                       vcut%boxcenter,Cryst%rprimd,barev,opt_cylinder,comm)
+   ABI_BUG("cutoff cylinder API has changed!")
+
+!   call cutoff_cylinder(nfft,gq,ng,Gsph%gvec,vcut%rcut,vcut%hcyl,vcut%pdir,&
+!&                       vcut%boxcenter,Cryst%rprimd,barev,opt_cylinder,comm)
 
    ! === If Beigi, treat the limit q--> 0 ===
    if (opt_cylinder==1) then
@@ -329,8 +332,8 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
      qfit(:,:)=zero
      step=half/(npt*(nfft-1))              ; qfit(3,:)=arth(tol6,step,npt)
 
-     call cutoff_cylinder(npt,qfit,1,gamma_pt,vcut%rcut,vcut%hcyl,vcut%pdir,&
-&                         vcut%boxcenter,Cryst%rprimd,vcfit,opt_cylinder,comm)
+     !call cutoff_cylinder(npt,qfit,1,gamma_pt,vcut%rcut,vcut%hcyl,vcut%pdir,&
+     !                    vcut%boxcenter,Cryst%rprimd,vcfit,opt_cylinder,comm)
 
      ABI_MALLOC(xx,(npt))
      ABI_MALLOC(yy,(npt))
@@ -395,11 +398,12 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    ! Beigi"s method: the slab must be along x-y and R must be L_Z/2.
    if (opt_slab==1) then
      ABI_CHECK(ALL(vcut%pdir == (/1,1,0/)),"Surface must be in the x-y plane")
-     vcut%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
+     !vcut%rcut = half*SQRT(DOT_PRODUCT(a3,a3))
    end if
 
-   call cutoff_slab(nfft,gq,ng,Gsph%gvec,gprimd,vcut%rcut,&
-&    vcut%boxcenter,vcut%pdir,vcut%alpha,barev,opt_slab)
+   ABI_BUG("cutoff surface API has changed!")
+   !call cutoff_slab(nfft,gq,ng,Gsph%gvec,gprimd,vcut%rcut,&
+   !   vcut%boxcenter,vcut%pdir,vcut%alpha,barev,opt_slab)
 
    !
    ! === If Beigi, treat the limit q--> 0 ===
@@ -431,8 +435,10 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
        qfit(:,ii) = MATMUL(TRANSPOSE(Cryst%rprimd),qcart(:,ii))/(2*pi)
      end do
 
-     call cutoff_slab(npt,qfit,1,gamma_pt,gprimd,vcut%rcut,&
-&       vcut%boxcenter,vcut%pdir,vcut%alpha,vcfit,opt_slab)
+     ABI_BUG("cutoff surface API has changed!")
+
+!     call cutoff_slab(npt,qfit,1,gamma_pt,gprimd,vcut%rcut,&
+!       vcut%boxcenter,vcut%pdir,vcut%alpha,vcfit,opt_slab)
 
      ABI_MALLOC(xx,(npt))
      ABI_MALLOC(yy,(npt))

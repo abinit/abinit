@@ -490,7 +490,7 @@ CONTAINS
     !
     ! As writetag_c, for a vector of complex values
     !
-    USE iso_c_binding
+    use, intrinsic :: iso_c_binding
     CHARACTER(LEN=*), INTENT(IN) :: name
     COMPLEX(dp), INTENT(IN), TARGET:: zvec(:)
     INTEGER, INTENT(OUT), OPTIONAL :: ierr
@@ -519,7 +519,7 @@ CONTAINS
     !
     ! As writetag_c for a matrix of complex values - see comments in writetag_zv
     !
-    USE iso_c_binding
+    use, intrinsic :: iso_c_binding
     CHARACTER(LEN=*), INTENT(IN) :: name
     COMPLEX(dp), INTENT(IN), TARGET:: zmat(:,:)
     INTEGER, INTENT(OUT), OPTIONAL :: ierr
@@ -541,7 +541,7 @@ CONTAINS
     !
     ! As writetag_c for a matrix of complex values - see comments in writetag_zv
     !
-    USE iso_c_binding
+    use, intrinsic :: iso_c_binding
     CHARACTER(LEN=*), INTENT(IN) :: name
     COMPLEX(dp), INTENT(IN), TARGET:: ztens(:,:,:)
     INTEGER, INTENT(OUT), OPTIONAL :: ierr
@@ -854,7 +854,7 @@ CONTAINS
     !
     ! As readtag_c, for a vector of complex values - see comments in writetag_zv
     !
-    USE iso_c_binding
+    use, intrinsic :: iso_c_binding
     CHARACTER(LEN=*), INTENT(IN) :: name
     COMPLEX(dp), INTENT(OUT), target     :: zvec(:)
     INTEGER, INTENT(OUT),OPTIONAL :: ierr
@@ -881,7 +881,7 @@ CONTAINS
     !
     ! As readtag_c, for a matrix of complex values - see comments in writetag_zv
     !
-    USE iso_c_binding
+    use, intrinsic :: iso_c_binding
     CHARACTER(LEN=*), INTENT(IN) :: name
     COMPLEX(dp), INTENT(OUT), target     :: zmat(:,:)
     INTEGER, INTENT(OUT),OPTIONAL :: ierr
@@ -907,7 +907,7 @@ CONTAINS
     !
     ! As readtag_c, for a matrix of complex values - see comments in writetag_zv
     !
-    USE iso_c_binding
+    use, intrinsic :: iso_c_binding
     CHARACTER(LEN=*), INTENT(IN) :: name
     COMPLEX(dp), INTENT(OUT), target     :: ztens(:,:,:)
     INTEGER, INTENT(OUT),OPTIONAL :: ierr
