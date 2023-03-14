@@ -1,5 +1,3 @@
-! CP modified
-
 !!****m* ABINIT/m_screening_driver
 !! NAME
 !!  m_screening_driver
@@ -46,12 +44,13 @@ module m_screening_driver
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
  use m_energies,      only : energies_type, energies_init
- use m_numeric_tools, only : print_arr, coeffs_gausslegint
+ use m_numeric_tools, only : print_arr, coeffs_gausslegint, c2r
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_get_valence_idx, ebands_get_occupied, &
-                             ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
+                             ebands_apply_scissors, ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init, &
+                             gaps_t, ebands_get_gaps
  use m_bz_mesh,       only : kmesh_t, littlegroup_t, littlegroup_free, get_ng0sh, find_qmesh
  use m_kg,            only : getph
  use m_gsphere,       only : gsphere_t, setshells
@@ -91,6 +90,9 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
+#ifdef __HAVE_GREENX
+ use gx_minimax,      only : gx_minimax_grid, gx_get_error_message
+#endif
 
  implicit none
 
@@ -180,8 +182,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: nfftf,nfftf_tot,nfftgw,nfftgw_tot,ngrvdw,nhatgrdim,nprocs,nspden_rhoij
  integer :: nscf,nzlmopt,mband
  integer :: optcut,optgr0,optgr1,optgr2,option,approx_type,option_test,optgrad
- integer :: optrad,optrhoij,psp_gencond,my_rank
- integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat
+ integer :: optrad,optrhoij,psp_gencond,my_rank, ig
+ integer :: rhoxsp_method,comm,test_type,tordering,unt_em1,unt_susc,usexcnhat, ncerr
  real(dp) :: compch_fft,compch_sph,domegareal,e0,ecore,ecut_eff,ecutdg_eff
  real(dp) :: gsqcutc_eff,gsqcutf_eff,gsqcut_shp,omegaplasma,ucvol,vxcavg,gw_gsq,r_s
  real(dp) :: alpha,rhoav,factor,ec_gm
@@ -206,6 +208,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(spectra_t) :: spectra
  type(chi_t) :: chihw
  type(wvl_data) :: wvl_dummy
+ character(len=nctk_slen) :: wing_shape
 !arrays
  integer :: ibocc(Dtset%nsppol),ngfft_gw(18),ngfftc(18),ngfftf(18)
  integer,allocatable :: irottb(:,:),ktabr(:,:),ktabrf(:,:),l_size_atm(:)
@@ -219,7 +222,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
  complex(dpc),allocatable :: m_ks_to_qp(:,:,:,:)
- complex(dpc),allocatable :: chi0_lwing(:,:,:),chi0_uwing(:,:,:),chi0_head(:,:,:)
+ complex(dpc),allocatable :: chi0_head(:,:,:), chi0_lwing(:,:,:), chi0_uwing(:,:,:)
+ real(dp),allocatable :: rwork_wing(:,:,:,:)
  complex(dpc),allocatable :: chi0intra_lwing(:,:,:),chi0intra_uwing(:,:,:),chi0intra_head(:,:,:)
  complex(gwpc),allocatable,target :: chi0(:,:,:),chi0intra(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: epsm1(:,:,:)
@@ -234,6 +238,15 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(plowannier_type) :: wanbz,wanibz,wanibz_in
+
+#ifdef __HAVE_GREENX
+ integer :: gap_err
+ real(dp) :: te_min, te_max
+ type(gaps_t) :: gaps
+ real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
+ real(dp),allocatable :: t2w_cos_wgs(:,:), w2t_cos_wgs(:,:), t2w_sin_wgs(:,:)
+ real(dp) :: ft_max_error(3), cosft_duality_error
+#endif
 
 !************************************************************************
 
@@ -364,6 +377,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    Pawtab(:)%usepawu   = 0
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
+   Pawtab(:)%lamb_shielding = zero
 
    ! Evaluate <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for the long wavelength limit.
    ! TODO solve problem with memory leak and clean this part as well as the associated flag
@@ -990,15 +1004,40 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(z)
    ABI_FREE(zw)
 
-  !if (dtset%gwr_ntau > 0) then
-  !  call wrtout(std_out, "Imaginary frequency mesh from minmax grid with ntau:", itoa(dtset%gwr_ntau))
+#ifdef __HAVE_GREENX
+if (.False.) then
+!if (dtset%gwr_ntau /= 0) then
+   call wrtout(std_out, sjoin("Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
+   gaps = ebands_get_gaps(ks_ebands, gap_err)
+   ABI_CHECK(gap_err == 0, "gap_err")
+   ! ================================
+   ! Setup tau/omega mesh and weights
+   ! ================================
+   ! Compute min/max transition energy taking into account nsppol if any.
+   te_min = minval(gaps%cb_min - gaps%vb_max)
+   te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
+   if (te_min <= tol6) then
+     te_min = tol6
+     ABI_WARNING("System is metallic or with a very small fundamental gap!")
+   end if
 
-  !  call gx_minimax_grid(gwr%ntau, te_min, te_max,  &  ! in
-  !                       gwr%tau_mesh, gwr%tau_wgs, &  ! all these args are out and allocated by the routine.
-  !                       gwr%iw_mesh, gwr%iw_wgs,   &
-  !                       gwr%t2w_cos_wgs, gwr%w2t_cos_wgs, gwr%t2w_sin_wgs, &
-  !                       gwr%ft_max_error)
-  !end if
+   call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
+                        tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
+                        iw_mesh, iw_wgs,   &
+                        t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
+                        ft_max_error, cosft_duality_error, ierr)
+   if (ierr /= 0) then
+     call gx_get_error_message(msg)
+     ABI_ERROR(msg)
+   end if
+
+   call gaps%free()
+   do iomega=1,Ep%nomegaei
+     Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
+     write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
+   end do
+end if
+#endif
 
  else if (Ep%contour_deformation .and. Dtset%cd_customnimfrqs /= 0) then
    Ep%omega(Ep%nomegaer+1)=CMPLX(zero,Dtset%cd_imfrqs(1))
@@ -1049,7 +1088,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  write(msg,'(a,f12.1,a)')' Memory required for chi0 matrix= ',two*gwpc*Ep%npwe**2*Ep%nI*Ep%nJ*Ep%nomega*b2Mb," [Mb]."
  call wrtout(std_out, msg)
- ABI_MALLOC_OR_DIE(chi0,(Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
+ ABI_MALLOC_OR_DIE(chi0, (Ep%npwe*Ep%nI,Ep%npwe*Ep%nJ,Ep%nomega), ierr)
 !
 !============================== END OF THE INITIALIZATION PART ===========================
 !
@@ -1096,13 +1135,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call timab(306,2,tsec)
 
-   if (is_qeq0==1) then
+   if (is_qeq0 == 1) then
      ! Special treatment of the long wavelength limit.
      call timab(307,1,tsec)
 
-     ABI_MALLOC(chi0_lwing,(Ep%npwe*Ep%nI,Ep%nomega,3))
-     ABI_MALLOC(chi0_uwing,(Ep%npwe*Ep%nJ,Ep%nomega,3))
-     ABI_MALLOC(chi0_head,(3,3,Ep%nomega))
+     ABI_MALLOC(chi0_head, (3,3,Ep%nomega))
+     ABI_MALLOC(chi0_lwing, (Ep%npwe*Ep%nI, Ep%nomega,3))
+     ABI_MALLOC(chi0_uwing, (Ep%npwe*Ep%nJ, Ep%nomega,3))
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_epsG0,&
       Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
@@ -1163,35 +1202,35 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Only master works but this part could be parallelized over frequencies.
    call timab(309,1,tsec)
 
-   do iomega=1,MIN(Ep%nomega,NOMEGA_PRINTED)
+   do iomega=1,MIN(Ep%nomega, NOMEGA_PRINTED)
      write(msg,'(1x,a,i4,a,2f9.4,a)')' chi0(G,G'') at the ',iomega,' th omega',Ep%omega(iomega)*Ha_eV,' [eV]'
      call wrtout([ab_out, std_out], msg)
      write(msg,'(1x,a,i3,a,i4,a)')' chi0(q =',iqibz, ', omega =',iomega,', G,G'')'
-     if (Ep%nqcalc/=Ep%nqibz) write(msg,'(a,i3,a,i4,a)')'  chi0(q=',iqcalc,', omega=',iomega,', G,G'')'
+     if (Ep%nqcalc /= Ep%nqibz) write(msg,'(a,i3,a,i4,a)')'  chi0(q=',iqcalc,', omega=',iomega,', G,G'')'
      call wrtout(std_out, msg)
      ! arr99 is needed to avoid the update of all the tests. Now chi0 is divided by ucvol inside (cchi0|cchi0q0).
      ! TODO should be removed but GW tests have to be updated.
-     ii = MIN(9,Ep%npwe)
-     ABI_MALLOC(arr_99,(ii,ii))
-     arr_99 = chi0(1:ii,1:ii,iomega)*ucvol
-     call print_arr(arr_99,max_r=2,unit=ab_out)
-     call print_arr(arr_99,unit=std_out)
+     ii = MIN(9, Ep%npwe)
+     ABI_MALLOC(arr_99,(ii, ii))
+     arr_99 = chi0(1:ii,1:ii,iomega) * ucvol
+     call print_arr(arr_99, max_r=2, unit=ab_out)
+     call print_arr(arr_99, unit=std_out)
      ABI_FREE(arr_99)
      !call print_arr(chi0(:,:,iomega),max_r=2,unit=ab_out)
      !call print_arr(chi0(:,:,iomega),unit=std_out)
    end do
 
-   if (Ep%nomega>NOMEGA_PRINTED) then
+   if (Ep%nomega > NOMEGA_PRINTED) then
      write(msg,'(a,i3,a)')' No. of calculated frequencies > ',NOMEGA_PRINTED,', stop printing '
      call wrtout([ab_out, std_out], msg)
    end if
 
    ! Write chi0 to _SUSC file
    ! Master creates and write the header if this is the first q-point calculated.
-   if (Dtset%prtsuscep>0 .and. my_rank==master) then
+   if (Dtset%prtsuscep > 0 .and. my_rank == master) then
      title(1)='CHI0 file: chi0'
      title(2)=' '
-     if (is_qeq0==1) then
+     if (is_qeq0 == 1) then
        string='0'; if (Dtset%usepaw==0.and.Ep%inclvkb/=0) call int2char10(Ep%inclvkb,string)
        title(1)=title(1)(1:21)//', calculated using inclvkb = '//string
      end if
@@ -1200,6 +1239,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      if (is_first_qcalc) then
        ikxc=0; test_type=0; tordering=1
        hchi0 = hscr_new("polarizability",dtset,ep,hdr_local,ikxc,test_type,tordering,title,Ep%npwe,Gsph_epsG0%gvec)
+
        if (dtset%iomode == IO_MODE_ETSF) then
          NCF_CHECK(nctk_open_create(unt_susc, nctk_ncify(dtfil%fnameabo_sus), xmpi_comm_self))
          NCF_CHECK(cryst%ncwrite(unt_susc))
@@ -1210,12 +1250,47 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
            ABI_ERROR(msg)
          end if
        end if
+
        fform_chi0 = hchi0%fform
        call hscr_io(hchi0,fform_chi0,2,unt_susc,xmpi_comm_self,0,Dtset%iomode)
        call Hchi0%free()
      end if
-     call write_screening("polarizability",unt_susc,Dtset%iomode,Ep%npwe,Ep%nomega,iqcalc,chi0)
-   end if
+
+     call write_screening("polarizability", unt_susc, Dtset%iomode, Ep%npwe, Ep%nomega, iqcalc, chi0)
+
+     if (dtset%iomode == IO_MODE_ETSF .and. is_qeq0 == 1 .and. Ep%nI == 1 .and. Ep%nJ == 1) then
+       ! Write head and wings to file. See cchi0 for the equations needed to build chi0(q) for q--> 0.
+       wing_shape = "two, three, number_of_coefficients_dielectric_function, number_of_frequencies_dielectric_function"
+       ncerr = nctk_def_arrays(unt_susc, [ &
+         nctkarr_t("sus_head", "dp", "two, three, three, number_of_frequencies_dielectric_function"),   &
+         nctkarr_t("sus_upper_wing", "dp", wing_shape),  &
+         nctkarr_t("sus_lower_wing", "dp", wing_shape) &
+         ], defmode=.True.)
+       NCF_CHECK(ncerr)
+
+       NCF_CHECK(nctk_set_datamode(unt_susc))
+       NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_head"), c2r(chi0_head)))
+
+       ABI_MALLOC(rwork_wing, (2, 3, Ep%npwe * Ep%nI, Ep%nomega))
+       do iomega=1,Ep%nomega
+         do ig=1, Ep%npwe * Ep%nI
+           rwork_wing(1,:,ig,iomega) = real(chi0_lwing(ig,iomega,:))
+           rwork_wing(2,:,ig,iomega) = aimag(chi0_lwing(ig,iomega,:))
+         end do
+       end do
+       NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_lower_wing"), rwork_wing))
+
+       do iomega=1,Ep%nomega
+         do ig=1, Ep%npwe * Ep%nI
+           rwork_wing(1,:,ig,iomega) = real(chi0_uwing(ig,iomega,:))
+           rwork_wing(2,:,ig,iomega) = aimag(chi0_uwing(ig,iomega,:))
+         end do
+       end do
+       NCF_CHECK(nf90_put_var(unt_susc, nctk_idname(unt_susc, "sus_upper_wing"), rwork_wing))
+       ABI_FREE(rwork_wing)
+     end if
+
+   end if ! is_first_qcalc
 
    ! Calculate the Galitskii-Migdal and RPA functionals for the correlation energy if the polarizability on a
    ! Gauss-Legendre mesh along imaginary axis is available
@@ -1364,11 +1439,11 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(chi0_uwing)
    ABI_FREE(chi0_head)
 
-   if (my_rank==master .and. is_qeq0==1) then
+   if (my_rank == master .and. is_qeq0==1) then
      call spectra%repr(msg)
      call wrtout([ab_out, std_out], msg)
 
-     if (Ep%nomegaer>2) then
+     if (Ep%nomegaer > 2) then
        call spectra%write(W_EELF  ,Dtfil%fnameabo_eelf)
        call spectra%write(W_EM_LF ,Dtfil%fnameabo_em1_lf)
        call spectra%write(W_EM_NLF,Dtfil%fnameabo_em1_nlf)
@@ -1400,7 +1475,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
 
    ! Write heads and wings to main output file.
-   if (is_qeq0==1) then
+   if (is_qeq0 == 1) then
      write(msg,'(1x,2a)')' Heads and wings of the symmetrical epsilon^-1(G,G'') ',ch10
      call wrtout(ab_out,msg)
      do iomega=1,Ep%nomega
@@ -1794,12 +1869,12 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  ! * Here we calculate the enlargement of the G-sphere, npwepG0, needed to account for umklapps.
  ! TODO Switch on use_umklp, write all this stuff to ab_out
 
- Ep%npwepG0=Ep%npwe
- ABI_MALLOC(Ltg_q,(Qmesh%nibz))
+ Ep%npwepG0 = Ep%npwe
+ ABI_MALLOC(Ltg_q, (Qmesh%nibz))
 
  do iq=1,Qmesh%nibz
    qtmp = Qmesh%ibz(:,iq); if (normv(qtmp,gmet,'G') < GW_TOLQ0) qtmp(:) = zero; use_umklp = 0
-   call Ltg_q(iq)%init(qtmp,Kmesh,Cryst,use_umklp,Ep%npwe,gvec=gvec_kss)
+   call Ltg_q(iq)%init(qtmp, Kmesh%nbz, Kmesh%bz, Cryst, use_umklp, Ep%npwe, gvec=gvec_kss)
  end do
 
  ecutepspG0 = Dtset%ecuteps
@@ -1813,8 +1888,8 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
 
  if (Ep%npwepG0>Ep%npwvec) then
    write(msg,'(3a,i5,a,i5)')&
-&    ' npwepG0 > npwvec, decrease npweps or increase npwwfn. ',ch10,&
-&    ' npwepG0 = ',Ep%npwepG0,' npwvec = ',Ep%npwvec
+    ' npwepG0 > npwvec, decrease npweps or increase npwwfn. ',ch10,&
+    ' npwepG0 = ',Ep%npwepG0,' npwvec = ',Ep%npwvec
    ABI_ERROR(msg)
  end if
 
@@ -2548,7 +2623,7 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  integer :: ig1,ig2,ilambda,io,master,rank,nprocs,unt,ierr
  real(dp) :: ecorr,ecorr_gm
  real(dp) :: lambda
- logical :: qeq0
+ logical :: q_is_gamma
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: z(:),zl(:),zlw(:),zw(:)
@@ -2567,11 +2642,11 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  !if (rank==master) then ! presently only master has chi0 in screening
 
  ! vc_sqrt contains vc^{1/2}(q,G), complex-valued to allow for a possible cutoff
- qeq0=(normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0)
+ q_is_gamma = normv(Qmesh%ibz(:,iq),gmet,'G')<GW_TOLQ0
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the omega integration
- ABI_MALLOC(zw,(Ep%nomegaei))
- ABI_MALLOC(z,(Ep%nomegaei))
+ ABI_MALLOC(zw, (Ep%nomegaei))
+ ABI_MALLOC(z, (Ep%nomegaei))
  call coeffs_gausslegint(zero,one,z,zw,Ep%nomegaei)
 
  ! Calculate Gauss-Legendre quadrature knots and weights for the lambda integration
@@ -2588,6 +2663,9 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
  end if
 
  do io=2,Ep%nomega
+   !if (q_is_gamma) then
+   !  call wrtout([std_out, ab_out], "RPA: Ignoring q==0"); cycle
+   !end if
 
    if(gwrpacorr==1) then ! exact integration over the coupling constant
 
@@ -2598,8 +2676,9 @@ subroutine calc_rpa_functional(gwrpacorr,gwgmcorr,iqcalc,iq,Ep,Pvc,Qmesh,Dtfil,g
          chitmp(ig1,ig2) = Pvc%vc_sqrt(ig1,iq) * Pvc%vc_sqrt(ig2,iq) * chi0(ig1,ig2,io)
        end do !ig1
      end do !ig2
+
      ABI_MALLOC(eig,(Ep%npwe))
-     call xheev('V','U',Ep%npwe,chitmp,eig)
+     call xheev('N','U',Ep%npwe,chitmp,eig)
 
      do ig1=1,Ep%npwe
        ec_rpa(:) = ec_rpa(:) &

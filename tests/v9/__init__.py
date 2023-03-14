@@ -143,7 +143,10 @@ inp_files = [
     # UPF2 format for norm-conserving pseudopotentials
     "t130.abi",  # UPF2
     "t131.abi",  # UPF2 with SOC
+    "t132.abi",  # Forces using Beigi 2D cut-off
     # more DFPT
     "t140.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
     "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
+    "t142.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nsppol 2
+    "t143.abi",  # test orbital magnetism with DDK wavefunctions and metallic sodium
 ]

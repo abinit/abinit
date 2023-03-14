@@ -51,7 +51,6 @@ module m_ddb
 
  private
 
-
  public :: rdddb9           ! This routine reads the derivative database entirely,
  public :: nlopt            ! Output of all quantities related to third-order derivatives of the energy.
  public :: chkin9
@@ -341,14 +340,13 @@ CONTAINS  !===========================================================
 !!   ddb=the new ddb object
 !!   dtset=dtset object of the current calculation
 !!   nblok=number of blocks
-!!   mpert=maximum number of perturbations
-!!         (atom displacements + electric field + ...)
-!!   msize=maximum size of one block of the ddb
-!!         (e.g. 3*mpert * 3*mpert)
+!!   mpert=maximum number of perturbations (atom displacements + electric field + ...)
+!!   msize=maximum size of one block of the ddb e.g. 3*mpert * 3*mpert.
 !!
 !! SOURCE
 
 subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(inout) :: ddb
  type(dataset_type),intent(in) :: dtset
@@ -370,7 +368,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
  ddb%qpt(:,:) = zero
  ddb%nrm(:,:) = one
  ddb%typ(:) = one
- ddb%flg(:,:) = zero
+ ddb%flg(:,:) = 0
 
 end subroutine ddb_init
 !!***
@@ -423,7 +421,7 @@ subroutine ddb_copy(iddb, oddb)
 
 !Arguments ------------------------------------
 !array
- class(ddb_type),intent(inout) :: iddb
+ class(ddb_type),intent(in) :: iddb
  type(ddb_type),intent(out) :: oddb
 
 ! ************************************************************************
@@ -940,7 +938,7 @@ end subroutine ddb_bcast
 !! [rfqvec(4)] = 1=> d/dq (optional)
 !!
 !! OUTPUT
-!! iblok= number of the block that corresponds to the specifications
+!! iblok= number of the block that corresponds to the specifications. 0 if not found.
 !!
 !! SOURCE
 
@@ -1535,8 +1533,8 @@ end subroutine ddb_read_eig2d_txt
 !! FUNCTION
 !! This routine reads the derivative database entirely,
 !! for use in ppddb9, and performs some checks and symmetrisation
-!! At the end, the whole DDB is in central memory, contained in the
-!! array ddb%val(2,msize,ddb%nblok).
+!! At the end, the whole DDB is in central memory, contained in the array ddb%val(2,msize,ddb%nblok).
+!!
 !! The information on it is contained in the four arrays
 !!   ddb%flg(msize,ddb%nblok) : blok flag for each element
 !!   ddb%qpt(9,ddb%nblok)  : blok wavevector (unnormalized)
@@ -1556,8 +1554,8 @@ end subroutine ddb_read_eig2d_txt
 !! natom = number of atoms
 !! ntypat=number of atom types
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
-!!  raw = 1 -> do not perform any symetrization or transformation to cartesian coordinates.
-!!        0 (default) -> do perform these transformations.
+!! [raw] = 1 -> do not perform any symetrization or transformation to cartesian coordinates.
+!!         0 (default) -> do perform these transformations.
 !!
 !! OUTPUT
 !! acell(3)=length scales of cell (bohr)
@@ -2123,7 +2121,6 @@ subroutine ddb_from_file_txt(ddb, filename, brav, ddb_hdr, crystal, comm, prtvol
  character(len=*),intent(in) :: filename
  type(crystal_t),intent(out) :: Crystal
  type(ddb_hdr_type),intent(out) :: ddb_hdr
-!array
 
 !Local variables-------------------------------
 !scalars
@@ -3278,17 +3275,12 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  qphnrm = one; my_qpt = qpt
 
  ! Look for the information in the DDB (no interpolation here!)
- rfphon(1:2)=1
- rfelfd(1:2)=0
- rfstrs(1:2)=0
- qphon_padded = zero
- qphon_padded(:,1) = qpt
+ rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
+ qphon_padded = zero; qphon_padded(:,1) = qpt
  natom = crystal%natom
 
- call ddb%get_block(iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
- if (iblok == 0) then
-   ABI_ERROR(sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
- end if
+ call ddb%get_block(iblok, qphon_padded, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+ ABI_CHECK(iblok /= 0, sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
 
  ! Copy the dynamical matrix in d2cart
  d2cart(:,1:ddb%msize) = ddb%val(:,:,iblok)
@@ -3624,6 +3616,7 @@ end subroutine ddb_write_block
 !! SOURCE
 
 subroutine ddb_write(ddb, ddb_hdr, filename, fullinit, comm)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(in) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -3659,6 +3652,7 @@ end subroutine ddb_write
 !! SOURCE
 
 subroutine ddb_write_txt(ddb, ddb_hdr, filename, fullinit, comm)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(in) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -4213,12 +4207,10 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
-   write(msg, '(a)' )'Cannot merge a single DDB.'
-   ABI_ERROR(msg)
+   ABI_ERROR('Cannot merge a single DDB.')
  end if
 
  comm = xmpi_world
-
  ddbun = get_unit()
 
 ! ==============================================================
@@ -4226,7 +4218,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 ! ==============================================================
 
  if (xmpi_comm_rank(comm) == master) then
-   call wrtout(std_out, sjoin(ch10, " merge_ddb: Reading all headers."), 'COLL')
+   call wrtout(std_out, sjoin(ch10, " merge_ddb: Reading all headers."))
  end if
 
  dimekb=0 ; matom=0 ; mband=0  ; mblok=0 ; mkpt=0
@@ -4860,7 +4852,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
 
  do iblok=1,ddb%nblok
 
-   if (abs(ddb%typ(iblok))==abs(rfmeth)) then
+   if (abs(ddb%typ(iblok)) == abs(rfmeth)) then
      qq(1)=ddb%qpt(1,iblok)/ddb%nrm(1,iblok)
      qq(2)=ddb%qpt(2,iblok)/ddb%nrm(1,iblok)
      qq(3)=ddb%qpt(3,iblok)/ddb%nrm(1,iblok)

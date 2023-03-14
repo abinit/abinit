@@ -1321,6 +1321,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  !cplex = 2; if (istwf_k == 2) cplex = 1
 
  ABI_CALLOC(h_ij, (cplex, nband, nband))
+
  ! Allocate full ghc and gvnlxc to be able to rotate residuals and Vnlx matrix elements
  ! after subdiago. More memory but we can save a call to H|psi>.
  if (savemem == 0) then
