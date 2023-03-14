@@ -737,9 +737,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !else
    !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
    !  call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+   ! Customize input vars for this task.
+   !  dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
    !  call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    !  call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
    !                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   !  call gstore%free()
+   !  call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    !end if
    !call variational_polaron(gstore, dtset, dtfil)
    !call gstore%free()
@@ -751,7 +755,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein), "for Berry curvature")
+     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein, "for Berry curvature from scracth"))
+     ! Customize input vars for this eph_task.
      dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
      call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
@@ -760,7 +765,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ifc, dielt, zeff, qdrp_cart)
+   call berry_curvature(gstore, dtset, dtfil)
    call gstore%free()
 
  case (15, -15)
