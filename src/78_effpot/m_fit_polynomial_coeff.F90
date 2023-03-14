@@ -2573,7 +2573,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
      do ia1=1,natom_sc
        do idir1=1,3
          do idir2=1,6
-              strten_out(idir2,itime,icoeff) = strten_out(idir2,itime,icoeff) + &
+              strten_out(idir2,itime,icoeff) = strten_out(idir2,itime,icoeff) - &
 &                     du_delta(idir2,idir1,ia1,itime)*fcart_out(idir1,ia1,icoeff,itime)
          end do
        end do
