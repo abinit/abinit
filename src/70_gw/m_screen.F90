@@ -694,32 +694,18 @@ subroutine screen_free(W)
  !@screen_t
  !
  ! integer
- if (allocated(W%gvec)) then
-   ABI_FREE(W%gvec)
- end if
+ ABI_SFREE(W%gvec)
  !
  !real
- if (allocated(W%ae_rhor)) then
-   ABI_FREE(W%ae_rhor)
- end if
-
- if (allocated(W%qibz)) then
-   ABI_FREE(W%qibz)
- end if
-
- if (allocated(W%qlwl)) then
-   ABI_FREE(W%qlwl)
- end if
+ ABI_SFREE(W%ae_rhor)
+ ABI_SFREE(W%qibz)
+ ABI_SFREE(W%qlwl)
  !
  !complex
- if (allocated(W%omega)) then
-   ABI_FREE(W%omega)
- end if
+ ABI_SFREE(W%omega)
 
  ! logical
- if (allocated(W%keep_q)) then
-   ABI_FREE(W%keep_q)
- end if
+ ABI_SFREE(W%keep_q)
  !
  ! types ------------------------------------------
  !

@@ -43,7 +43,7 @@ module m_cgtools
 
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
- use m_numeric_tools, only : hermit
+ use m_numeric_tools, only : hermit, rhophi
  use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
  use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
 
@@ -111,6 +111,7 @@ module m_cgtools
                                     ! in the case of real WFs (istwfk/=1)
  public :: cg_zprecon_block         ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band
  public :: fxphas_seq               ! Fix phase of all bands. Keep normalization but maximize real part
+ public :: fxphas_and_cmp           ! Fix phase and compare two set of wavefunctions
  public :: overlap_g                ! Compute the scalar product between WF at two different k-points
  public :: subdiago                 ! Diagonalizes the Hamiltonian in the eigenfunction subspace
  public :: subdiago_low_memory      ! Diagonalizes the Hamiltonian in the eigenfunction subspace
@@ -166,7 +167,7 @@ subroutine cg_tocplx(n, cg, ocplx)
 
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(ii,idx)
+!$OMP PARALLEL DO PRIVATE(idx)
  do ii=1,n
    idx = 2*ii-1
    ocplx(ii) = DCMPLX(cg(idx),cg(idx+1))
@@ -208,7 +209,7 @@ subroutine cg_fromcplx(n, icplx, ocg)
 
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(ii,idx)
+!$OMP PARALLEL DO PRIVATE(idx)
  do ii=1,n
    idx = 2*ii-1
    ocg(idx  ) = DBLE (icplx(ii))
@@ -252,7 +253,7 @@ pure subroutine cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg)
    do iband=1,nband_k
      iwavef=(iband-1)*npw_k*my_nspinor
      do ipw=1+igs,npw_k+igs
-       if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
+       if (kinpw(ipw-igs)>huge(zero)*1.d-11)then
          cg(1,ipw+iwavef)=zero
          cg(2,ipw+iwavef)=zero
        end if
@@ -714,7 +715,7 @@ end subroutine cg_zaxpy
 !!
 !! SOURCE
 
-subroutine cg_zaxpby(n, a, x ,b, y)
+subroutine cg_zaxpby(n, a, x, b, y)
 
 !Arguments ------------------------------------
 !scalars
@@ -1033,9 +1034,7 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
  real(dp),intent(in) :: vect1(2,npw),vect2(2,npw)
 
 !Local variables-------------------------------
-!scalars
  integer :: ierr
-!arrays
  real(dp) :: dotarr(2)
 
 ! *************************************************************************
@@ -2900,7 +2899,7 @@ end subroutine cgpaw_gsortho
 
 !!****f* m_cgtools/cgpaw_gramschmidt
 !! NAME
-!!  cgpaw_grortho
+!!  cgpaw_gramschmidt
 !!
 !! FUNCTION
 !!  Gram-Schmidt orthonormalization of the vectors stored in cg
@@ -3000,6 +2999,7 @@ end subroutine cgpaw_gramschmidt
 !!  1) MPIWF Might have to be recoded for efficient paralellism
 !!
 !!  2) The new version employs BLAS2 routine so that the OMP parallelism is delegated to BLAS library.
+!!     May use BLAS3 if multiple wavefunctions are optimized at the same time.
 !!
 !!  3) Note for PAW: ref.= PRB 73, 235101 (2006) [[cite:Audouze2006]], equations (71) and (72):
 !!     in normal use, projbd applies P_c projector
@@ -4036,10 +4036,8 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
    ABI_FREE(sabb)
    ABI_FREE(sbbb)
 
-!  ====================================================================
-
-!  Storages that take into account the time-reversal symmetry : the freedom is only a sign freedom
  else  ! if istwfk/=1
+   !  Storages that take into account the time-reversal symmetry: the freedom is only a sign freedom
 
    ABI_MALLOC(creb,(nband_k))
    creb(:)=zero
@@ -4082,6 +4080,111 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
  end if ! istwfk
 
 end subroutine fxphas_seq
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/fxphas_and_cmp
+!! NAME
+!! fxphas_and_com
+!!
+!! FUNCTION
+!! Fix phase and compare two set of wavefunctions
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k, msg, atol_rho, atol_dphi) result(ok)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: npw_k, nspinor, nband_k, istwfk
+ real(dp),intent(inout) :: cg1(2, npw_k*nspinor, nband_k), cg2(2, npw_k*nspinor, nband_k)
+ real(dp),intent(in) :: eig_k(nband_k)
+ character(len=*),intent(out) :: msg
+ real(dp),optional,intent(in) :: atol_rho, atol_dphi
+
+!Local variables-------------------------------
+ integer, parameter :: useoverlap0 = 0, mgsc = 0
+ integer :: ipw, ipwsp, isp, mcg, band
+ real(dp) :: phi1, rho1, phi2, rho2, max_rho_adiff, atol_rho__, phi_diff_ref, max_dphi_adiff, atol_dphi__, gsc(0,0)
+ character(len=500) :: btype
+
+! ***********************************************************************
+
+ atol_rho__ = tol6; if (present(atol_rho)) atol_rho__ = atol_rho
+ atol_dphi__ = tol3; if (present(atol_dphi)) atol_dphi__ = atol_dphi
+ max_rho_adiff = zero; max_dphi_adiff = zero; phi_diff_ref = huge(one)
+
+ mcg = npw_k * nspinor * nband_k
+ call fxphas_seq(cg1, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
+ call fxphas_seq(cg2, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
+
+ do band=1,nband_k
+   call band_type(band, btype)
+   if (btype == "degenerate") cycle
+   write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
+   write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
+   write(234, *)"cg1:"; write(235, *)"cg2:"
+   !write(234, *)"cg1 rho:"; write(235, *)"cg2 rho phi:"
+   do isp=1,nspinor
+     do ipw=1,npw_k
+       ipwsp = ipw + (isp - 1) * npw_k
+       if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
+       !write(234, *)ipwsp, cg1(1, ipwsp, band); write(234, *)ipwsp, cg1(2, ipwsp, band)
+       !write(235, *)ipwsp, cg2(1, ipwsp, band); write(235, *)ipwsp, cg2(2, ipwsp, band)
+       call rhophi(cg1(:, ipwsp, band), phi1, rho1)
+       call rhophi(cg2(:, ipwsp, band), phi2, rho2)
+       write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
+       write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
+     end do
+   end do
+ end do
+
+ do band=1,nband_k
+   do ipw=1,npw_k * nspinor
+     call rhophi(cg1(:, ipw, band), phi1, rho1)
+     call rhophi(cg2(:, ipw, band), phi2, rho2)
+     max_rho_adiff = max(max_rho_adiff, abs(rho1 - rho2))
+     if (rho1 > atol_rho__ ** 2) then
+       if (phi_diff_ref /= huge(one)) phi_diff_ref = phi1 - phi2
+       max_dphi_adiff = max(max_dphi_adiff, abs(phi_diff_ref - (phi1 - phi2)))
+     end if
+   end do
+ end do
+
+ write(msg, "(2(a,es12.4))")"max_rho_adiff: ", max_rho_adiff, ", max_dphi_adiff: ", max_dphi_adiff
+ ok = (max_rho_adiff < atol_rho__ .and. max_dphi_adiff < atol_dphi__)
+
+contains
+subroutine band_type(band, btype)
+  integer,intent(in) :: band
+  character(len=*),intent(out) :: btype
+  real(dp) :: e0
+
+  e0 = eig_k(band)
+
+  if (band == 1) then
+    btype = "last_state"
+    if (nband_k > 1) then
+      btype = "non-degenerate"
+      if (abs(e0 - eig_k(band + 1)) < tol6) btype = "degenerate"
+    end if
+
+  else if (band == nband_k) then
+    btype = "last_state"
+    if (band - 1 > 0) then
+      if (abs(e0 - eig_k(band - 1)) < tol6) btype = "degenerate"
+    end if
+
+  else
+    btype = "non-degenerate"
+    if (abs(e0 - eig_k(band - 1)) < tol6 .or. abs(e0 - eig_k(band + 1)) < tol6) btype = "degenerate"
+  end if
+
+end subroutine band_type
+
+end function fxphas_and_cmp
 !!***
 
 !!****f* m_cgtools/overlap_g
@@ -5521,13 +5624,13 @@ subroutine cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
 
  if (usepaw == 1) then
    ! (H - e) |psi>
-!$OMP PARALLEL DO
+   !$OMP PARALLEL DO IF (ndat > 1)
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * gsc(:,idat)
    end do
  else
    ! (H - eS) |psi>
-!$OMP PARALLEL DO
+   !$OMP PARALLEL DO IF (ndat > 1)
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * cg(:,idat)
    end do
@@ -5559,7 +5662,7 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  integer :: idat, ierr
 ! *************************************************************************
 
-!$OMP PARALLEL DO
+!$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
@@ -5592,7 +5695,7 @@ subroutine cg_zdotg_zip(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, com
  real(dp) :: dotr, doti, re_dots(ndat)
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(dotr, doti)
+!$OMP PARALLEL DO IF (ndat > 1) PRIVATE(dotr, doti)
  do idat=1,ndat
    call dotprod_g(dotr, doti, istwf_k, npwsp, option, cg1(:,idat), cg2(:,idat), me_g0, xmpi_comm_self)
    if (istwf_k == 2) then
@@ -5690,7 +5793,7 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
  integer :: idat
 ! *************************************************************************
 
-!$OMP PARALLEL DO
+!$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
  end do

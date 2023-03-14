@@ -2427,6 +2427,57 @@ end subroutine xmpi_sum_c0dc
 
 !----------------------------------------------------------------------
 
+!!****f* ABINIT/xmpi_sum_c0sc
+!! NAME
+!!  xmpi_sum_c0sc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: single-precision complex scalar
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= scalar to be summed.
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c0sc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(sp),intent(inout) :: xval
+ integer,intent(in) :: comm
+ integer,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ complex(sp) :: xsum
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     ! Accumulate xval on all proc. in comm
+     call MPI_ALLREDUCE(xval,xsum,1,MPI_COMPLEX,MPI_SUM,comm,ier)
+     xval = xsum
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c0sc
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* ABINIT/xmpi_sum_c1dc
 !! NAME
 !!  xmpi_sum_c1dc

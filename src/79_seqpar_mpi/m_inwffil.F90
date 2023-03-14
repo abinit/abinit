@@ -3004,10 +3004,10 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
          ai=wavefspinor(2,ipw)
          br=wavefspinor(1,npw2+ipw)
          bi=wavefspinor(2,npw2+ipw)
-         wavefspinor(1,ipw)     = spinrots*ar-spinrotz*ai +spinroty*br-spinrotx*bi
-         wavefspinor(2,ipw)     = spinrots*ai+spinrotz*ar +spinroty*bi+spinrotx*br
-         wavefspinor(1,npw2+ipw)=-spinroty*ar-spinrotx*ai +spinrots*br+spinrotz*bi
-         wavefspinor(2,npw2+ipw)=-spinroty*ai+spinrotx*ar +spinrots*bi-spinrotz*br
+         wavefspinor(1,ipw)     =  spinrots*ar - spinrotz*ai + spinroty*br - spinrotx*bi
+         wavefspinor(2,ipw)     =  spinrots*ai + spinrotz*ar + spinroty*bi + spinrotx*br
+         wavefspinor(1,npw2+ipw)= -spinroty*ar - spinrotx*ai + spinrots*br + spinrotz*bi
+         wavefspinor(2,npw2+ipw)= -spinroty*ai + spinrotx*ar + spinrots*bi - spinrotz*br
        end do
 !$OMP END DO
 !$OMP END PARALLEL
