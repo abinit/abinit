@@ -40,7 +40,7 @@ MODULE m_pspheads
  use m_time,         only : timab
  use m_io_tools,     only : open_file
  use m_numeric_tools,only : simpson
- use m_fstrings,     only : basename, lstrip, sjoin, startswith, atoi, itoa, ftoa
+ use m_fstrings,     only : basename, lstrip, sjoin, startswith, atoi, itoa, ftoa, toupper, next_token
  use m_pawpsp,       only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps,     only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
  use pseudo_types,    only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
@@ -1186,6 +1186,10 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  character(len=*),intent(out) :: msg
  integer,intent(out) :: ixc
 
+!Local variables-------------------------------
+ integer :: start !, ii
+ character(len=500) :: x_name, c_name, gcx_name, gcc_name
+
 !*************************************************************************
 
  ! This list taken from oncvpsp/src/upfout.f90
@@ -1209,16 +1213,42 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ixc = -106131
  case ("WC")
    ixc = -118130
+ case ('SLA  PW   NOGX NOGC')  ! string produced by oncvpsp3
+   ixc = -1012
  case default
    ierr = 1
-   write(msg, "(4a)") &
-     "Cannot find ABINIT ixc value corresponding to QE dft:", trim(dft), ch10, &
-     "Please update mapping in m_pspheads/upfdft_to_ixc."
  end select
+
+ ! Extract substrings with
+ !  1) exchange
+ !  2) correlation
+ !  3) gradient correction, exchange
+ !  4) gradient correction, correlation
+ if (ierr == 1) then
+   ierr = 0; start = 1
+   ABI_CHECK(next_token(dft, start, x_name) == 0 , "Error reading x_name")
+   ABI_CHECK(next_token(dft, start, c_name) == 0 , "Error reading c_name")
+   ABI_CHECK(next_token(dft, start, gcx_name) == 0 , "Error reading gcx_name")
+   ABI_CHECK(next_token(dft, start, gcc_name) == 0 , "Error reading gcc_name")
+   !print *, "dft: `", trim(dft), "`"
+   !print *, trim(x_name), ", " trim(c_name), ", ", trim(gcx_name), ", ", trim(gcc_name)
+
+   if (x_name == "SLA" .and. c_name == "PW") then
+     if (gcx_name == "NOGX" .and. gcc_name == "NOGV") ixc = -1012
+   else
+     ierr = 1
+   end if
+ end if
+
+ if (ierr == 1) then
+   write(msg, "(5a)") &
+     "Cannot find ABINIT ixc value corresponding to QE dft string: `", trim(dft), "`", ch10, &
+     "Please update mapping in m_pspheads/upfdft_to_ixc."
+ end if
 
 end function upfdft_to_ixc
 !!***
-!
+
 ! Copyright (c) 1989-2019 by D. R. Hamann, Mat-Sim Research LLC and Rutgers
 ! University
 !

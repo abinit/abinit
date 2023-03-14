@@ -111,6 +111,7 @@ kptopt7   1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
 #%% files_to_test = 
