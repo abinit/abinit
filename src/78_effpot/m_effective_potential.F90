@@ -2630,7 +2630,7 @@ if(need_elec_eval)then
 
 energy = energy + energy_part
 do ia = 1, natom 
-fcart(:,ia) = fcart(:,ia) + fcart_part(:,ia) / (1 + strain_tmp(1:3))
+fcart(:,ia) = fcart(:,ia) + fcart_part(:,ia)
 end do 
 endif
 
@@ -2653,7 +2653,7 @@ endif
     do ia = 1,eff_pot%supercell%natom
       do mu = 1,3
         do alpha=1,6
-          strten_part(alpha) = strten_part(alpha) + fcart(mu,ia) * du_delta_tmp(alpha,mu,ia)
+          strten_part(alpha) = strten_part(alpha) - fcart(mu,ia) * du_delta_tmp(alpha,mu,ia)
         end do
       end do
     end do
