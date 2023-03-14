@@ -218,6 +218,8 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ifc, dielt, zeff, qdrp_cart)
              ipc1 = gqk%my_iperts(my_ip1)
              do my_ip2=1,gqk%my_npert
                ipc2 = gqk%my_iperts(my_ip2)
+               !print *, "shape my_g:", shape(gqk%my_g)
+               !print *, "           ", my_ip1,ib1,my_iq,ib2,my_ik, " my_ip1,ib1,my_iq,ib2,my_ik"
                ! my_g(my_npert, nb, my_nq, nb, my_nk)
                gmat(ipc1, ipc2, iq_ibz) = gmat(ipc1, ipc2, iq_ibz) &
                 + fact(1) * conjg(gqk%my_g(my_ip1,ib1,my_iq,ib2,my_ik)) * gqk%my_g(my_ip2,ib1,my_iq,ib2,my_ik) &
