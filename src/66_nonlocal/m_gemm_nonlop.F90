@@ -37,6 +37,7 @@ module m_gemm_nonlop
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_fstrings,    only : itoa, ftoa, sjoin
  use m_abi_linalg  ! copy_on_gpu, copy_from_gpu, alloc_on_gpu, dealloc_on_gpu, gpu_memset, gpu_allocated
 
  use defs_abitypes, only : MPI_type
@@ -490,6 +491,8 @@ contains
 #ifdef DEBUG_VERBOSE_GPU
     if(xmpi_comm_rank(xmpi_world) == 0) then
       call check_gpu_mem("make_gemm_nonlop begin")
+      call wrtout(std_out,sjoin(" npw    .......", itoa(npw)),    'COLL')
+      call wrtout(std_out,sjoin(" nprojs .......", itoa(nprojs)), 'COLL')
     end if
 #endif
 
