@@ -65,16 +65,13 @@ contains
 !!
 !! SOURCE
 
-subroutine berry_curvature(gstore, dtset, dtfil, in_ifc, dielt, zeff, qdrp_cart)
+subroutine berry_curvature(gstore, dtset, dtfil)
 
 !Arguments ------------------------------------
 !scalars
  type(gstore_t),target,intent(inout) :: gstore
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
- !type(ddb_type),intent(in) :: in_ddb
- type(ifc_type),intent(in) :: in_ifc
- real(dp),intent(in) :: dielt(3,3), zeff(3,3,dtset%natom), qdrp_cart(3,3,3,dtset%natom)
 
 !Local variables-------------------------------
 !scalars
@@ -244,7 +241,7 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ifc, dielt, zeff, qdrp_cart)
  gmat = j_dpc * gmat / gstore%nkbz
  if (nsppol == 1 .and. dtset%nspinor == 1) gmat = two * gmat
  call xmpi_sum(gmat, comm, ierr)
- call massmult_and_breaksym_cplx(cryst%natom, cryst%ntypat, cryst%typat, in_ifc%amu, gmat, herm_opt=0)
+ call massmult_and_breaksym_cplx(cryst%natom, cryst%ntypat, cryst%typat, gstore%ifc%amu, gmat, herm_opt=0)
  call cwtime_report(" berry_curvature:", cpu_all, wall_all, gflops_all)
 
  if (my_rank == master) then
@@ -333,11 +330,14 @@ subroutine berry_curvature(gstore, dtset, dtfil, in_ifc, dielt, zeff, qdrp_cart)
  ABI_CALLOC(ddb_qshifts, (3, ddb_nqshift))
  ddb_qshifts(:,1) = dtset%ddb_shiftq(:)
 
+ associate (dielt => gstore%ifc%dielt, zeff => gstore%ifc%zeff, qdrp_cart => gstore%ifc%qdrp_cart)
  call berry_ifc%init(cryst, berry_ddb, &
    dtset%brav, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, &
    dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
    qdrp_cart, nsphere0, dtset%rifcsph, prtsrlr0, dtset%enunit, comm, &
    dipquad=dtset%dipquad, quadquad=dtset%quadquad)
+ end associate
+
  if (dtset%prtvol > 0 .and. my_rank == master) call berry_ifc%print(unit=std_out)
 
  ABI_FREE(ddb_qshifts)

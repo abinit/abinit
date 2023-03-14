@@ -1228,15 +1228,15 @@ subroutine gstore_print(gstore, unit, header, prtvol)
    call wrtout(unit, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
    call wrtout(unit, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
    call wrtout(unit, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
-   if (gqk%cplex == 1) then
-     write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [Mb] <<< MEM'
-     call wrtout(unit, msg)
-     !print *, "my_g2 shape:", shape(gqk%my_g2)
-   else
-     write(msg,'(a,f8.1,a)')'- Local memory allocated for g array: ',ABI_MEM_MB(gqk%my_g),' [Mb] <<< MEM'
-     call wrtout(unit, msg)
-     !print *, "my_g shape:", shape(gqk%my_g)
-   end if
+   !if (gqk%cplex == 1) then
+   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [Mb] <<< MEM'
+   !  call wrtout(unit, msg)
+   !  !print *, "my_g2 shape:", shape(gqk%my_g2)
+   !else
+   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for g array: ',ABI_MEM_MB(gqk%my_g),' [Mb] <<< MEM'
+   !  call wrtout(unit, msg)
+   !  !print *, "my_g shape:", shape(gqk%my_g)
+   !end if
  end do
 
 end subroutine gstore_print
