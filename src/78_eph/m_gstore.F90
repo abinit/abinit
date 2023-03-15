@@ -129,6 +129,7 @@ module m_gstore
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
  use m_fstrings,       only : tolower, itoa, ftoa, sjoin, ktoa, ltoa, strcat, replace_ch0
+ !use m_yaml,           only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
  use m_io_tools,       only : iomode_from_fname
@@ -1190,6 +1191,7 @@ subroutine gstore_print(gstore, unit, header, prtvol)
  integer :: my_is, spin, my_prtvol
  type(gqk_t),pointer :: gqk
  character(len=500) :: msg
+ !type(yamldoc_t) :: ydoc
 !----------------------------------------------------------------------
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol

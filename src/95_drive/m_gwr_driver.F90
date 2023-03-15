@@ -889,6 +889,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  character(len=fnlen) :: filepath
 ! *************************************************************************
 
+ ! See https://manuals.cc4s.org/user-manual/objects/EigenEnergies.html
  filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.yaml'
  write(ab_out, "(3a)")ch10," Writing Eigenenergies info to file: ", trim(filepath)
  if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
@@ -898,12 +899,10 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  write(unt,'(A)')    'type: Tensor'
  write(unt,'(A)')    'scalarType: Real64'
  write(unt,'(A)')    'dimensions:'
- !write(unt,'(A,I0)') '- length: ',((NBANDSDUMP)*WDES%ISPIN)
  write(unt,'(A,I0)') '- length: ',ebands%mband * ebands%nkpt * ebands%nsppol
  write(unt,'(A)')    '  type: State'
  write(unt,'(A)')    'elements:'
  write(unt,'(A)')    '  type: TextFile'
- !write(unt,'(A)')    'unit: 0.03674932217563878       # = (Eh/eV)'
  write(unt,'(A)')    'unit: 1.0     # Hartree units'
  write(unt,'(A)')    'metaData:'
  write(unt,'(A,E22.15)')    '  fermiEnergy: ',ebands%fermie
@@ -963,14 +962,17 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mG0(3) = 0, master = 0
+ integer,parameter :: mG0(3) = 0, master = 0, M_ = 5
+ !logical,parameter :: debug = .True.
+ logical,parameter :: debug = .False.
  integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, bufsize ! ierr,
- integer :: band1, band1_start, band1_stop, batch1_size, n1dat, idat1, m_istwfk
- integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_
- integer(XMPI_OFFSET_KIND) :: offset !, my_offset
- real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3)
+ integer :: band1, band1_start, band1_stop, batch1_size, n1dat, idat1, m_istwfk, cnt
+ integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt
+ integer(XMPI_OFFSET_KIND) :: offset
+ real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), mabs_err
  character(len=500) :: msg
  character(len=fnlen) :: filepath
+ logical :: k_is_gamma
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
  type(vcgen_t) :: vcgen
  !type(pstat_t) :: pstat
@@ -978,9 +980,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  integer,pointer :: gvec_max(:,:)
  !integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
  integer,allocatable,target :: m_gvec(:,:)
- complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:)
+ complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
  complex(gwpc),allocatable :: vc_qg(:)
- !integer :: sizes(2),subsizes(2),array_of_starts(2), mg_type
 
 ! *************************************************************************
 
@@ -990,9 +991,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  units = [std_out, ab_out]
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
 
+ call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
+
  ! m_gvec is the g-sphere for the oscillators M computed from ecuteps
- m_istwfk = 1
- call get_kg([zero, zero, zero], m_istwfk, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.False.)
+ kpt = dtset%kptns(:,ik_ibz); k_is_gamma = all(abs(kpt) < tol12)
+ m_istwfk = 1 !; if (k_is_gamma .and. dtset%nspinor == 1) m_istwfk = 2
+ call get_kg(kpt, m_istwfk, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.False.)
 
  ! Setup FFT mesh
  u_ngfft = dtset%ngfft
@@ -1002,7 +1006,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  if (dtset%fftgw==20 .or. dtset%fftgw==21) method=2
  if (dtset%fftgw==30 .or. dtset%fftgw==31) method=3
  enforce_sym = mod(dtset%fftgw, 10)
- enforce_sym = 0 ! Gamma only --> we don't need to rotate wavefunctions in the BZ
+ ! Gamma only --> we don't need to rotate wavefunctions in the BZ
+ if (k_is_gamma) enforce_sym = 0
 
  npwvec = npw_k; gvec_max => ugb%kg_k
  if (m_npw > npw_k) then
@@ -1030,36 +1035,32 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  if (my_rank == master) then
    call wrtout(units, " Computing oscilator matrix elements for CC4S.")
    do ii=1,size(units)
-     call print_ngfft(u_ngfft, header='FFT mesh for the wavefunctions', unit=units(ii))
+     call print_ngfft(u_ngfft, header='FFT mesh for wavefunctions', unit=units(ii))
    end do
 
    ! =====================
    ! Write files for CC4S
    ! =====================
    if (ik_ibz == 1 .and. spin == 1) then
-     ! Write g-vector files, see https://manuals.cc4s.org/user-manual/objects/GridVectors.html#ID-GridVectors
+     ! Write g-vector files, see https://manuals.cc4s.org/user-manual/objects/GridVectors.html
      filepath = trim(dtfil%filnam_ds(4))//'_GridVectors.yaml'
      write(ab_out, "(3a)")ch10," Writing Gridvectors info to file: ", trim(filepath)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-     write(unt,'(A)')    'version: 100'
-     write(unt,'(A)')    'type: Tensor'
-     write(unt,'(A)')    'scalarType: Real64'
-     write(unt,'(A)')    'dimensions:'
-     write(unt,'(A)')    '  - length: 3'
-     write(unt,'(A)')    '    type: Vector'
-     !#ifdef gammareal
-     !write(unt,'(A,I0)') '  - length: ',NGVECTOR*2-1     ! TODO: TR symmetry>
-     !#else
-     write(unt,'(A,I0)') '  - length: ',m_npw
-     !#endif
-     write(unt,'(A)')    '    type: Momentum'
-     write(unt,'(A)')    'elements:'
-     write(unt,'(A)')    '  type: TextFile'
-     !write(unt,'(A)')    'unit: 0.529177249       # =(Bohr^-1/Angstrom^-1)'
-     write(unt,'(A)')    'unit: 1.0'
-     write(unt,'(A)')    'metaData:'
+     write(unt,'(a)')    'version: 100'
+     write(unt,'(a)')    'type: Tensor'
+     write(unt,'(a)')    'scalarType: Real64'
+     write(unt,'(a)')    'dimensions:'
+     write(unt,'(a)')    '  - length: 3'
+     write(unt,'(a)')    '    type: Vector'
+     write(unt,'(a,i0)') '  - length: ',m_npw
+     write(unt,'(a)')    '    type: Momentum'
+     write(unt,'(a)')    'elements:'
+     write(unt,'(a)')    '  type: TextFile'
+     write(unt,'(a)')    'unit: 1.0  # Bohr^-1'
+     ! The last three lines correspond to the reciprocal lattice vectors (including the factor 2pi)
+     write(unt,'(a)')    'metaData:'
      write(unt,'("  Gi: [",E22.15,",",E22.15,",",E22.15,"]")')  &
         two_pi*cryst%gprimd(1, 1),two_pi*cryst%gprimd(2,1),two_pi*cryst%gprimd(3, 1)
      write(unt,'("  Gj: [",E22.15,",",E22.15,",",E22.15,"]")')  &
@@ -1075,6 +1076,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
      end if
 
      !TODO: k-points to be implemented.
+     ! MG-TODO: I believe these are cart coords
      do ig=1,m_npw
        gcart = two_pi * matmul(cryst%gprimd, m_gvec(:,ig))
        do ii=1,3
@@ -1090,25 +1092,25 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-     write(unt,'(A)')    'version: 100'
-     write(unt,'(A)')    'type: Tensor'
-     write(unt,'(A)')    'scalarType: Complex64'
-     write(unt,'(A)')    'dimensions:'
-     !write(unt,'(A,I0)') '- length: ',NOPTAUX
-     write(unt,'(A)')    '  type: AuxiliaryField'
-     !write(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
-     write(unt,'(A)')    '  type: State'
-     !write(unt,'(A,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
-     write(unt,'(A)')    '  type: State'
-     write(unt,'(A)')    'elements:'
-     write(unt,'(A)')    '  type: IeeeBinaryFile'
-     write(unt,'(A)')    'unit: 1.0   # Atomic units'
-     !write(unt,'(A)')    'unit: 0.1917011272153577       # = sqrt(Eh/eV)'
-     write(unt,'(A)')    'metaData:'
+     write(unt,'(a)')    'version: 100'
+     write(unt,'(a)')    'type: Tensor'
+     write(unt,'(a)')    'scalarType: Complex64'
+     write(unt,'(a)')    'dimensions:'
+     !write(unt,'(a,i0)') '- length: ',NOPTAUX
+     write(unt,'(a)')    '  type: AuxiliaryField'
+     !write(unt,'(a,i0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+     write(unt,'(a)')    '  type: State'
+     !write(unt,'(a,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+     write(unt,'(a)')    '  type: State'
+     write(unt,'(a)')    'elements:'
+     write(unt,'(a)')    '  type: IeeeBinaryFile'
+     write(unt,'(a)')    'unit: 1.0   # Atomic units'
+     !write(unt,'(a)')    'unit: 0.1917011272153577       # = sqrt(Eh/eV)'
+     write(unt,'(a)')    'metaData:'
      if (m_istwfk == 2) then
-       write(unt,'(A)')    '  halfGrid: 1'
+       write(unt,'(a)')    '  halfGrid: 1'
      else
-       write(unt,'(A)')    '  halfGrid: 0'
+       write(unt,'(a)')    '  halfGrid: 0'
      end if
      close(unt)
 
@@ -1116,10 +1118,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
      !ALLOCATE(CVERTEX_TMP(NOPTAUX,(NBANDSDUMP),WDES%ISPIN))
      !filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
      !write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(filepath)
-     !if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
-     !  ABI_ERROR(msg)
-     !end if
-     close(unt)
      !COMPLEX(q), ALLOCATABLE :: CVERTEX_TMP(:,:,:), CVERTEX_TMP_SINGLE(:)
      !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
      !write(unt) CVERTEX_TMP_SINGLE(:)
@@ -1130,20 +1128,16 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
-     write(unt,'(A)')    'version: 100'
-     write(unt,'(A)')    'type: Tensor'
-     write(unt,'(A)')    'scalarType: Real64'
-     write(unt,'(A)')    'dimensions:'
-     !#ifdef gammareal
-     !write(unt,'(A,I0)') '  - length: ',NGVECTOR*2-1
-     !#else
-     write(unt,'(A,I0)') '  - length: ',m_npw
-     !#endif
-     write(unt,'(A)')    '    type: Momentum'
-     write(unt,'(A)')    'elements:'
-     write(unt,'(A)')    '  type: TextFile'
-     write(unt,'(A)')    'unit: 1.0     # Atomic units '
-     !rite(unt,'(A)')    'unit: 0.2479966649373453       # =(Eh/eV*Bohr^3/Angstrom^3)'
+     write(unt,'(a)')    'version: 100'
+     write(unt,'(a)')    'type: Tensor'
+     write(unt,'(a)')    'scalarType: Real64'
+     write(unt,'(a)')    'dimensions:'
+     write(unt,'(a,i0)') '  - length: ',m_npw
+     write(unt,'(a)')    '    type: Momentum'
+     write(unt,'(a)')    'elements:'
+     write(unt,'(a)')    '  type: TextFile'
+     write(unt,'(a)')    'unit: 1.0     # Atomic units '
+     !rite(unt,'(a)')    'unit: 0.2479966649373453       # =(Eh/eV*Bohr^3/Angstrom^3)'
      close(unt)
 
      filepath = trim(dtfil%filnam_ds(4))//'_CoulombPotential.elements'
@@ -1165,14 +1159,21 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
    end if ! ik_ibz == 1 .and. spin == 1
  end if ! my_rank == master
 
+ ! Open binary file to store CoulombVertex
  filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
  if (my_rank == master) write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(filepath)
 #ifdef HAVE_MPI_IO
- call MPI_FILE_OPEN(comm, filepath, MPI_MODE_WRONLY, xmpio_info, fh, mpierr)
+ call MPI_FILE_OPEN(comm, filepath, MPI_MODE_CREATE + MPI_MODE_WRONLY, xmpio_info, fh, mpierr)
  ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
 #else
  ABI_ERROR("CC4S interface requires MPI-IO!")
 #endif
+
+ if (debug .and. my_rank == 0) then
+   if (open_file("test_mg", msg, newunit=test_unt, form="formatted", status="replace", action="write") /= 0) then
+     ABI_ERROR(msg)
+   end if
+ end if
 
  !ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
  !call sphereboundary(gbound_k, ugb%istwf_k, ugb%kg_k, u_mgfft, npw_k)
@@ -1181,16 +1182,15 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
  ! Define batch sizes and allocate workspace arrays.
  !call pstat%from_pid()
- !call gwr%pstat%print([std_out], reload=.True.)
- batch1_size = min(12, ugb%nband_k)
- batch2_size = min(12, ugb%nband_k)
+ !call pstat%print([std_out], reload=.True.)
+ batch1_size = min(24, ugb%nband_k); batch2_size = min(24, ugb%nband_k)
  !batch1_size = 1; batch2_size = 1
 
- ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S interface")
+ !ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S interface")
  ABI_MALLOC(ur1_batch, (u_nfft * nspinor, batch1_size))
  ABI_MALLOC(ur2_batch, (u_nfft * nspinor, batch2_size))
- ABI_MALLOC(ur12_batch, (u_nfft * nspinor**2, batch2_size))
- ABI_MALLOC(ug12_batch, (m_npw * nspinor**2, batch2_size))
+ ABI_MALLOC(ur12_batch, (u_nfft * nspinor, batch2_size))
+ ABI_MALLOC(ug12_batch, (m_npw * nspinor, batch2_size))
 
  ! TODO: take advantage of
  ! M_{b1,b2}(g) = <b1|e^{-ig.r}|b2> => M_{b1,b2}(g) = M_{b2,b1}(-g)^*
@@ -1202,12 +1202,13 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
  ! Blocked loop over group of b1 indices.
  ! NB: Assuming bands distributed in contiguous blocks.
+ cnt = 0
  do band1_start=1, ugb%nband_k, batch1_size
 
    ! Collect n1dat bands starting from band1_start on each proc.
    n1dat = blocked_loop(band1_start, ugb%nband_k, batch1_size)
    band1_stop = band1_start + n1dat - 1
-   call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1,band1_start], ug1_batch)
+   call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1, band1_start], ug1_batch)
 
    ! FFT: ug1_batch --> ur1_batch
    !call fft_ug(ugb%npw_k, u_nfft, nspinor, n1dat, u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, ug1_batch, ur1_batch)
@@ -1216,7 +1217,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
    if (ugb%istwf_k /= 2) ur1_batch = conjg(ur1_batch)  ! Not needed if k == Gamma as ur1 is real.
    ABI_FREE(ug1_batch)
 
-   ! Blocked loop over group of b2 indidces.
+   ! Blocked loop over group of b2 indices.
    do band2_start=ugb%my_bstart, ugb%my_bstop, batch2_size
      n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
      my_ib2 = band2_start - ugb%my_bstart + 1
@@ -1238,7 +1239,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
        call uplan_m%execute_rg(n2dat, ur12_batch(:,1), ug12_batch(:,1))
 
-       ! FIXME: nspinor
        !call fft_ur(m_npw, u_nfft, nspinor, n2dat, &
        !            u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
 
@@ -1246,21 +1246,34 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
        do idat2=1,n2dat
          !band2 = band2_start + idat2 - 1
          !write(std_out,*) ug12_batch(1,idat2), idat2, "ug12_batch(1,idat2), idat"
-         ug12_batch(:,idat2) = ug12_batch(:,idat2) * vc_qg(:)
+         !ug12_batch(:,idat2) = ug12_batch(:,idat2) * vc_qg(:)
        end do
+
+       if (nspinor == 2) then
+         ! Sum over spinor components and repack data in the first n2dat positions.
+         do idat2=1,n2dat
+            ug12_batch(1:m_npw,idat2) = ug12_batch(1:m_npw,idat2) + ug12_batch(m_npw+1:,idat2)
+          end do
+         do idat2=2,n2dat,2
+            ug12_batch(m_npw+1:,idat2-1) = ug12_batch(1:m_npw,idat2)
+         end do
+       end if
 
 #ifdef HAVE_MPI_IO
        ! Write ug12_batch using Stream-IO
-       !  - Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
-       !  - Format for nspinor == 2?
-       !band2_start
-       bufsize = m_npw*nspinor**2 * n2dat
-       offset = 0 ! F(band1, band2, idat1, idat2) TODO
-       !offset = (band2_start - 1) * m_npw*nspinor**2 * xmpi_bsize_dpc
-       !         (band1 - 1) * m_npw*nspinor**2 * ugb%nband_k * xmpi_bsize_dpc
-       !index = idir1+3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
+       !  - TODO: Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
+       bufsize = m_npw * n2dat
+       offset = (band2_start - 1) + (band1 - 1) * m_npw * ugb%nband_k
+       offset = offset * xmpi_bsize_dpc
        call MPI_FILE_WRITE_AT(fh, offset, ug12_batch, bufsize, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
        ABI_HANDLE_MPIERR(mpierr)
+
+       if (my_rank == 0 .and. debug) then
+         do idat2=1,n2dat
+           cnt = cnt + 1; write(test_unt, *)cnt, ug12_batch(1:M_,idat2)
+         end do
+      end if
+
 #endif
      end do ! idat1
    end do ! my_ib2
@@ -1270,6 +1283,34 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  call MPI_FILE_CLOSE(fh, mpierr)
  ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
 #endif
+
+ ! =======================
+ ! BEGIN DEBUGGING SECTION
+ ! =======================
+ if (my_rank == 0 .and. debug) then
+   filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
+   if (open_file(filepath, msg, newunit=unt, access="stream", form="unformatted", status="old", action="read") /= 0) then
+     ABI_ERROR(msg)
+   end if
+   close(test_unt)
+   if (open_file("test_mg", msg, newunit=test_unt, form="formatted", status="old", action="read") /= 0) then
+     ABI_ERROR(msg)
+   end if
+
+   ABI_MALLOC(work, (m_npw))
+   mabs_err = zero
+   do ig=1, ugb%nband_k**2
+     write(std_out, *)" Reading ig:", ig, "/", ugb%nband_k**2
+     read(test_unt,*) cnt, ug12_batch(1:M_,1)
+     read(unt) work
+     mabs_err = max(mabs_err, maxval(abs(ug12_batch(1:M_,1) - work(1:M_))))
+     !write(std_out, *) ug12_batch(1:M_,1); print *, work(1:M_)
+   end do
+   write(std_out,*)" mabs_err:", mabs_err
+   ABI_CHECK(mabs_err < tol16, sjoin("mabs_err:", ftoa(mabs_err)))
+   close(unt); close(test_unt)
+   ABI_FREE(work)
+ end if
 
  call uplan_1%free(); call uplan_2%free(); call uplan_m%free()
 
