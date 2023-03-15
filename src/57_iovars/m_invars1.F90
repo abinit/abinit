@@ -374,7 +374,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
-
+   
+   ! Read extfpmd calculations
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
+   if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -1969,12 +1972,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
+ dtset%optdcmagpawu=3
  if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usedmatpu',tread,'INT')
    if(tread==1) dtset%usedmatpu=intarr(1)
+   if (dtset%nspden==4) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdcmagpawu',tread,'INT')
+     if(tread==1) dtset%optdcmagpawu=intarr(1)
+   end if
  end if
 
 !Some PAW+Exact exchange keywords

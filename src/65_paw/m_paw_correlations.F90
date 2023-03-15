@@ -112,12 +112,19 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
-&           nspinor,ntypat,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,useexexch,usepawu,&
+&           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
+&           useexexch,usepawu,&
 &           ucrpa) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: dmatpuopt,nspinor,ntypat,pawprtvol,use_dmft,useexexch,usepawu
+!Option for interaction energy in case of non-collinear magnetism:
+!           1: E_int=-J/4.N.(N-2)
+!           2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1))   (Nup and Ndn are ill-defined)
+!           3: E_int=-J/4.( N.(N-2) + mx^2 + my^2 + mz^2 )
+! Default is 3
+ integer,intent(in) :: option_interaction
  logical :: is_dfpt
  real(dp),intent(in) :: exchmix
  type(pawang_type), intent(in) :: pawang
@@ -136,9 +143,11 @@ CONTAINS  !=====================================================================
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
  integer :: mesh_size,int_meshsz,mkyc,sz1
+ integer :: option_interaction_
  logical :: compute_euijkl,compute_euij_fll
  real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
  character(len=500) :: message
+
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(3)
@@ -190,8 +199,12 @@ CONTAINS  !=====================================================================
      & (no use of occupation matrix) - experimental"
  end if
  if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
- if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
-&  write(message, '(3a)' ) trim(message),ch10," ******************************************"
+ if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) then
+   if (nspinor==2) then
+     write(message, '(3a,i1)' ) trim(message),ch10," Magnetic DC : option_interaction = ",option_interaction
+   end if
+   write(message, '(3a)' ) trim(message),ch10," ******************************************"
+ end if
  if(use_dmft==0 .and. abs(usepawu)<=4) then
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
@@ -200,6 +213,16 @@ CONTAINS  !=====================================================================
 !write(message, '(3a)' ) ch10, " (see DMFT data in log file) "
 !call wrtout(ab_out,message,'COLL')
 !endif
+ option_interaction_ = option_interaction
+ if(abs(usepawu)>=10.and.nspinor==2.and.option_interaction/=1) then
+   option_interaction_ = 1
+   write(message, '(a)' ) "When usepawu>=10, option_interaction for DC is set to 1"
+   call wrtout(std_out,message,'COLL')
+ end if
+ if(usepawu<0.and.nspinor==2.and.option_interaction_==2) then
+   write(message, '(a)' ) "option_interaction=2 is not implemented for usepawu<0. Change 'usepawu' or 'optdcmagpawu' in the input."
+   ABI_ERROR(message)
+ end if
 
 !Loop on atom types
  do itypat=1,ntypat
@@ -220,12 +243,14 @@ CONTAINS  !=====================================================================
        pawtab(itypat)%jpawu=jpawu(itypat)
        pawtab(itypat)%f4of2_sla=f4of2_sla(itypat)
        pawtab(itypat)%f6of2_sla=f6of2_sla(itypat)
+       pawtab(itypat)%option_interaction_pawu=option_interaction_
      else
        pawtab(itypat)%usepawu=0
        pawtab(itypat)%upawu=zero
        pawtab(itypat)%jpawu=zero
        pawtab(itypat)%f4of2_sla=zero
        pawtab(itypat)%f6of2_sla=zero
+       pawtab(itypat)%option_interaction_pawu=option_interaction_
      end if
    end if
 
@@ -526,7 +551,8 @@ CONTAINS  !=====================================================================
                  m31=m3+lpawu+1
 
                  euijkl_dc(:) = zero
-!                Compute the double-counting part of euijkl (invariant when exchanging i<-->j or ip<-->jp)
+                 ! Compute the double-counting part of euijkl (invariant when exchanging i<-->j or ip<-->jp)
+                 ! Must be consistent with pawuenergy and pawpupot
                  if (m1==m2.and.m3==m4) then ! In that case, we have to add the double-counting term
 
                    if (abs(usepawu)==1.and.nspinor==1) then ! FLL
@@ -547,6 +573,15 @@ CONTAINS  !=====================================================================
 
                      euijkl_dc(1:2) = &
 &                     phiint_ij * phiint_ipjp * ( pawtab(itypat)%upawu - half*pawtab(itypat)%jpawu )
+
+                     ! Add term taking into account global magnetization
+                     if (abs(usepawu)/=4.and.pawtab(itypat)%option_interaction_pawu==3) then
+
+                       euijkl_dc(1) = euijkl_dc(1) - half  * phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
+                       euijkl_dc(2) = euijkl_dc(2) + half  * phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
+                       euijkl_dc(3) = eUijkl_dc(3) -         phiint_ij * phiint_ipjp * pawtab(itypat)%jpawu
+
+                     end if
 
                    end if
 
@@ -919,7 +954,7 @@ CONTAINS  !=====================================================================
          end do
        end do
        ABI_FREE(fk)
-   endif 
+   endif
 
  end subroutine calc_vee
 !!***
@@ -963,10 +998,6 @@ CONTAINS  !=====================================================================
 
 !Local variables ---------------------------------------
 !scalars
-!Option for interaction energy in case of non-collinear magnetism:
-!           1: E_int=-U/4.N.(N-2)
-!           2: E_int=-U/2.(Nup.(Nup-1)+Ndn.(Ndn-1))
- integer,parameter :: option_interaction=1
  integer :: cplex_occ,dmftdc,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden
  real(dp) :: eks_opt3,edcdc_opt3,edcdctemp,edctemp,edftutemp,jpawu,jpawu_dc,mnorm,mx,my,mz
  real(dp) :: n_sig,n_sigs,n_msig,n_msigs,n_dndn,n_tot,n_upup
@@ -1176,7 +1207,7 @@ CONTAINS  !=====================================================================
    end if
    edcdctemp=edcdctemp-half*upawu*n_tot**2
    edctemp  =edctemp  +half*upawu*(n_tot*(n_tot-one))
-   if (nspden/=4.or.option_interaction==2) then
+   if (nspden/=4.or.pawtab%option_interaction_pawu==2) then
      if(dmftdc/=5.and.pawtab%usepawu/=4) then
        edcdctemp=edcdctemp+half*jpawu_dc*(n_upup**2+n_dndn**2)
        edctemp  =edctemp  -half*jpawu_dc*(n_upup*(n_upup-one)+n_dndn*(n_dndn-one))
@@ -1184,12 +1215,12 @@ CONTAINS  !=====================================================================
        edcdctemp=edcdctemp+quarter*jpawu_dc*n_tot**2
        edctemp  =edctemp  -quarter*jpawu_dc*(n_tot*(n_tot-two))
      end if
-   else if (nspden==4.and.option_interaction==1) then
+   else if (nspden==4.and.(pawtab%usepawu==4.or.pawtab%option_interaction_pawu==1)) then
 !    write(message,'(a)') "  warning: option_interaction==1 for test         "
 !    call wrtout(std_out,message,'COLL')
      edcdctemp=edcdctemp+quarter*jpawu_dc*n_tot**2
      edctemp  =edctemp  -quarter*jpawu_dc*(n_tot*(n_tot-two))
-   else if (nspden==4.and.option_interaction==3) then
+   else if (nspden==4.and.pawtab%option_interaction_pawu==3) then
 !    edcdctemp= \frac{J}/{4}[ N(N) + \vect{m}.\vect{m}]
      edcdctemp=edcdctemp+quarter*jpawu_dc*(n_tot**2 + &
 &     mx**2+my**2+mz**2)  ! +\frac{J}/{4}\vect{m}.\vect{m}

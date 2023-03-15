@@ -567,27 +567,16 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Compute occupation numbers and fermi energy, in case occupation scheme is metallic.
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
- ! CP modified
- ! if( dtset%occopt>=3.and.dtset%occopt<=8 ) then
  if( dtset%occopt>=3.and.dtset%occopt<=9 ) then
- ! End CP modified
 
-   ! CP modified (list of arguments of newocc changes)
-   !call newocc(doccde,eigen0,entropy,fermie,dtset%spinmagntarget,dtset%mband,dtset%nband,&
-!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,dtset%prtvol,dtset%stmbias,&
-!&   dtset%tphysel,dtset%tsmear,dtset%wtk)
    call newocc(doccde,eigen0,entropy,fermie,fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-&   dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,dtset%prtvol,dtset%stmbias,&
+&   dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,dtset%prtvol,&
 &   dtset%tphysel,dtset%tsmear,dtset%wtk)
-   ! End CP modified
 
 !  Update fermie and occ
    etot=hdr%etot ; residm=hdr%residm
-   !CP modified
-   !call hdr%update(bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
    call hdr%update(bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
-   ! End CP modified
 
  else
 !  doccde is irrelevant in this case
@@ -638,7 +627,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    psps%n1xccc=maxval(pawtab(1:psps%ntypat)%usetcore)
    call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,rprimd,symrec,pawang%zarot)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,ntypat,pawang,dtset%pawprtvol,pawrad,&
+&   is_dfpt,dtset%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,pawrad,&
 &   pawtab,dtset%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu)
    compch_fft=-1.d5;compch_sph=-1.d5
    usexcnhat=maxval(pawtab(:)%usexcnhat)

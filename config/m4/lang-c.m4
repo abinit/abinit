@@ -384,7 +384,7 @@ AC_DEFUN([ABI_PROG_CC],[
       fi
     fi
   fi
-  AC_PROG_CC
+  AC_PROG_CC([ mpiicc mpicc icc xlc CC cc gcc ])
 
   # Fail if no C compiler is available
   if test "${CC}" = ""; then

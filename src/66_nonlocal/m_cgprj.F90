@@ -548,7 +548,8 @@ contains
      spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
      cg_band_distributed=.true.
      cprj_band_distributed=.true.
-     npband_dfpt=1
+     !npband_dfpt=1
+     npband_dfpt=mpi_enreg%nproc_band
    else
      spaceComm_band=xmpi_comm_self
      cg_band_distributed=.false.
