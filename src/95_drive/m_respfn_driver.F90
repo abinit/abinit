@@ -1234,6 +1234,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      rfpert_lw(:,natom+2,:,1:natom,:,natom+8)=1
    else if (dtset%prepalw==3) then
      rfpert_lw(:,1:natom+2,:,1:natom,:,natom+8)=1
+   else if (dtset%prepalw==4) then
+     rfpert_lw(:,natom+2,:,natom+2,:,natom+8)=1
    end if
 
    call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel,symrel_cart)

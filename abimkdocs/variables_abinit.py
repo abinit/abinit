@@ -15149,6 +15149,11 @@ are enforced to be explicitly calculated:
           perturbations as well as two atomic displacements. It is therefore the 
           option to choose if one intends to run subsequent longwave calculations 
           with [[lw_flexo]] = 3.
+
+  * 4 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which combine two electric field perturbations. 
+          It is therefore the option to choose if one intends to run subsequent 
+          longwave calculations with [[lw_natopt]] = 1.
 """,
 ),
 
