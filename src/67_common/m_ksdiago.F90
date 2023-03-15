@@ -75,7 +75,7 @@ module m_ksdiago
  type, public :: ugb_t
 
    integer :: istwf_k = -1
-   ! WF Storage mode.
+   ! Storage mode of cg_k
 
    integer :: nspinor = -1
    ! Number of spinors
@@ -88,6 +88,8 @@ module m_ksdiago
 
    integer :: nband_k = - 1
    ! Total number of bands (global)
+
+   !integer :: usepaw
 
    integer :: my_bstart = -1, my_bstop = - 1, my_nband = - 1
    ! 1) Initial band
@@ -124,15 +126,16 @@ module m_ksdiago
    procedure :: from_diago  => ugb_from_diago
     ! Build object by direct diagonalization of the KS Hamiltonian
 
+   !procedure :: from_wfk  => ugb_from_wfk
+    ! Build object from WFK file
+
    procedure :: free => ugb_free
     ! Free memory.
 
    procedure :: print => ugb_print
     ! Print info on object.
-
  end type ugb_t
 !!***
-
 
 !!****t* m_ksdiago/ddiago_ctl_type
 !! NAME
@@ -633,7 +636,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  if (prtvol > 0 .and. my_rank == master) then
    ! Write eigenvalues.
-   frmt1='(8x,9(1x,f7.2))' ; frmt2='(8x,9(1x,f7.2))'
+   frmt1 = '(8x,9(1x,f7.2))'; frmt2 = '(8x,9(1x,f7.2))'
    write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin)
    call wrtout(std_out, msg)
 
@@ -641,7 +644,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
    call wrtout(std_out, msg)
    if (onband_diago >9 ) then
      do jj=10,onband_diago,9
-       write(msg,frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,onband_diago))
+       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,onband_diago))
        call wrtout(std_out, msg)
      end do
    end if
@@ -873,7 +876,6 @@ end subroutine init_ddiago_ctl
 !!
 !! OUTPUT
 !!  eig_k(1:nband_k)=The calculatated eigenvalues in ascending order.
-!!  cprj_k(natom,nspinor*onband_diago): Projected eigenstates <Proj_i|Cnk> from output eigenstates. PAW only
 !!
 !! SOURCE
 
@@ -1224,7 +1226,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  if (dtset%prtvol > 0 .and. my_rank == master) then
    ! Write eigenvalues.
-   frmt1='(8x,9(1x,f7.2))' ; frmt2='(8x,9(1x,f7.2))'
+   frmt1 = '(8x,9(1x,f7.2))'; frmt2 = '(8x,9(1x,f7.2))'
    write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin)
    call wrtout(std_out, msg)
 
@@ -1232,7 +1234,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call wrtout(std_out, msg)
    if (nband_k > 9 ) then
      do jj=10,nband_k,9
-       write(msg,frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,nband_k))
+       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,nband_k))
        call wrtout(std_out, msg)
      end do
    end if
