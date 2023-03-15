@@ -148,4 +148,6 @@ inp_files = [
     "t142.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nsppol 2
     "t143.abi",  # test orbital magnetism with DDK wavefunctions and metallic sodium
     "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
+    "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
+    "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
 ]
