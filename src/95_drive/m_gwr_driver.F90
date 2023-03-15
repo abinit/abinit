@@ -916,7 +916,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  end do
  close(unt)
 
- filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.element'
+ filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.elements'
  write(ab_out, "(3a)")ch10," Writing Eigenenergies to file: ", trim(filepath)
  if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
    ABI_ERROR(msg)
@@ -939,7 +939,7 @@ end subroutine cc4s_write_eigens
 !!
 !! FUNCTION
 !! Interface with CC4S code.
-!! Compute <i,k|e^{-iGr}|j,k> matrix elements and store them to disk
+!! Compute <b1,k|e^{-iGr}|b2,k> matrix elements and store them to disk
 !!
 !! INPUTS
 
@@ -962,14 +962,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mG0(3) = 0, master = 0, M_ = 5
- !logical,parameter :: debug = .True.
- logical,parameter :: debug = .False.
- integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, bufsize ! ierr,
+ integer,parameter :: mG0(3) = 0, master = 0
+ logical,parameter :: debug_this = .True.
+ !logical,parameter :: debug_this = .False.
+ integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, buf_size ! ierr,
  integer :: band1, band1_start, band1_stop, batch1_size, n1dat, idat1, m_istwfk, cnt
- integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt
+ integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
  integer(XMPI_OFFSET_KIND) :: offset
- real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), mabs_err
+ real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err
  character(len=500) :: msg
  character(len=fnlen) :: filepath
  logical :: k_is_gamma
@@ -1169,7 +1169,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  ABI_ERROR("CC4S interface requires MPI-IO!")
 #endif
 
- if (debug .and. my_rank == 0) then
+ if (debug_this .and. my_rank == 0) then
    if (open_file("test_mg", msg, newunit=test_unt, form="formatted", status="replace", action="write") /= 0) then
      ABI_ERROR(msg)
    end if
@@ -1184,7 +1184,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  !call pstat%from_pid()
  !call pstat%print([std_out], reload=.True.)
  batch1_size = min(24, ugb%nband_k); batch2_size = min(24, ugb%nband_k)
- !batch1_size = 1; batch2_size = 1
+
+ ! FIXME: IO with batch1_size > 1is buggy
+ batch1_size = 1; batch2_size = 1
+ batch1_size = 1; batch2_size = 7
+ !batch1_size = 3; batch2_size = 1
 
  !ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S interface")
  ABI_MALLOC(ur1_batch, (u_nfft * nspinor, batch1_size))
@@ -1202,7 +1206,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
  ! Blocked loop over group of b1 indices.
  ! NB: Assuming bands distributed in contiguous blocks.
- cnt = 0
+ cnt = 0; M_ = m_npw
  do band1_start=1, ugb%nband_k, batch1_size
 
    ! Collect n1dat bands starting from band1_start on each proc.
@@ -1217,7 +1221,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
    if (ugb%istwf_k /= 2) ur1_batch = conjg(ur1_batch)  ! Not needed if k == Gamma as ur1 is real.
    ABI_FREE(ug1_batch)
 
-   ! Blocked loop over group of b2 indices.
+   ! Blocked loop over my group of b2 indices.
    do band2_start=ugb%my_bstart, ugb%my_bstop, batch2_size
      n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
      my_ib2 = band2_start - ugb%my_bstart + 1
@@ -1230,17 +1234,15 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
      call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
 
      do idat1=1,n1dat
-       ! Build n2dat products (idat1, idat2) in real space, then r --> g.
+
+       ! For each row of the submatrix, build n2dat products (band1, idat2) in r-space, then r --> g.
        band1 = band1_start + idat1 - 1
-
        do idat2=1,n2dat
-         ur12_batch(:, idat2) = ur1_batch(:,idat1) * ur2_batch(:,idat2)
+         ur12_batch(:,idat2) = ur1_batch(:,idat1) * ur2_batch(:,idat2)
        end do
-
        call uplan_m%execute_rg(n2dat, ur12_batch(:,1), ug12_batch(:,1))
 
-       !call fft_ur(m_npw, u_nfft, nspinor, n2dat, &
-       !            u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
+       !call fft_ur(m_npw, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
 
        ! Multiply by the Coulomb kernel.
        do idat2=1,n2dat
@@ -1262,19 +1264,19 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 #ifdef HAVE_MPI_IO
        ! Write ug12_batch using Stream-IO
        !  - TODO: Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
-       bufsize = m_npw * n2dat
-       offset = (band2_start - 1) + (band1 - 1) * m_npw * ugb%nband_k
+       buf_size = m_npw * n2dat
+       offset = (band2_start-1) * m_npw + (band1-1) * m_npw * ugb%nband_k
        offset = offset * xmpi_bsize_dpc
-       call MPI_FILE_WRITE_AT(fh, offset, ug12_batch, bufsize, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+       call MPI_FILE_WRITE_AT(fh, offset, ug12_batch, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
        ABI_HANDLE_MPIERR(mpierr)
 
-       if (my_rank == 0 .and. debug) then
+       if (my_rank == 0 .and. debug_this) then
          do idat2=1,n2dat
            cnt = cnt + 1; write(test_unt, *)cnt, ug12_batch(1:M_,idat2)
          end do
       end if
-
 #endif
+
      end do ! idat1
    end do ! my_ib2
  end do ! band1_start
@@ -1284,10 +1286,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
 #endif
 
- ! =======================
- ! BEGIN DEBUGGING SECTION
- ! =======================
- if (my_rank == 0 .and. debug) then
+ ! =============
+ ! DEBUG SECTION
+ ! =============
+ if (my_rank == 0 .and. debug_this) then
    filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
    if (open_file(filepath, msg, newunit=unt, access="stream", form="unformatted", status="old", action="read") /= 0) then
      ABI_ERROR(msg)
@@ -1298,16 +1300,17 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
    end if
 
    ABI_MALLOC(work, (m_npw))
-   mabs_err = zero
+   max_abs_err = zero
    do ig=1, ugb%nband_k**2
-     write(std_out, *)" Reading ig:", ig, "/", ugb%nband_k**2
      read(test_unt,*) cnt, ug12_batch(1:M_,1)
      read(unt) work
-     mabs_err = max(mabs_err, maxval(abs(ug12_batch(1:M_,1) - work(1:M_))))
-     !write(std_out, *) ug12_batch(1:M_,1); print *, work(1:M_)
+     abs_err = maxval(abs(ug12_batch(1:M_,1) - work(1:M_)))
+     max_abs_err = max(max_abs_err, abs_err)
+     if (abs_err > zero) write(std_out, *)" For ig:", ig, "/", ugb%nband_k**2, "abs_err", abs_err
+     !write(std_out, *)"1:", ug12_batch(1:M_,1); write(std_out, *)"2:", work(1:M_)
    end do
-   write(std_out,*)" mabs_err:", mabs_err
-   ABI_CHECK(mabs_err < tol16, sjoin("mabs_err:", ftoa(mabs_err)))
+   write(std_out,*)" max_abs_err:", max_abs_err
+   ABI_CHECK(max_abs_err < tol16, sjoin("max_abs_err:", ftoa(max_abs_err)))
    close(unt); close(test_unt)
    ABI_FREE(work)
  end if

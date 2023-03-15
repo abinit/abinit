@@ -351,7 +351,7 @@ meta: {optdriver: 6, }
 
  Computing oscilator matrix elements for CC4S.
 
- ==== FFT mesh for the wavefunctions ====
+ ==== FFT mesh for wavefunctions ====
   FFT mesh divisions ........................    20   20   15
   Augmented FFT divisions ...................    21   21   15
   FFT algorithm .............................   312
@@ -377,7 +377,7 @@ meta: {optdriver: 6, }
 
  Writing Eigenenergies info to file: t07o_DS2_EigenEnergies.yaml
 
- Writing Eigenenergies to file: t07o_DS2_EigenEnergies.element
+ Writing Eigenenergies to file: t07o_DS2_EigenEnergies.elements
 
 == END DATASET(S) ==============================================================
 ================================================================================
