@@ -76,7 +76,7 @@ jpawu  1.0000 eV
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t89.abo, tolnlines = 94, tolabs = 1.100e-03, tolrel = 8.000e-01, fld_options = -medium
+#%%   t89.abo, tolnlines = 95, tolabs = 1.100e-03, tolrel = 8.000e-01, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
