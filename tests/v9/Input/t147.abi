@@ -53,7 +53,7 @@ tolvrs4   1.0d-8
 prepalw4  2   
 
 #Set 5: Long-wave magnitudes calculation
-#***********************************************************************
+#***************************************
 optdriver5     10 
 kptopt5        2
 get1wf5        4

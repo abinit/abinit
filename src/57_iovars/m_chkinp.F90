@@ -2934,6 +2934,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
+! prepalw
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'prepalw',dt%prepalw,5,(/0,1,2,3,4/),iout)
+
 !  prepanl
 !  Must have prtden=1 to prepare a nonlinear calculation
    if (dt%prepanl==1.and.(dt%rfelfd/=0.or.dt%rfphon/=0)) then

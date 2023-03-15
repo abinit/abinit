@@ -2567,15 +2567,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
 
-!MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
-! if (dtset%prepalw/=0) then
-!   do ipert=1,dtset%natom+6
-!     do idir=1,3
-!       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-!     end do
-!   end do
-! end if
-
  npert=0
 ! ABI_MALLOC(pert_tmp,(3*mpert))
 
