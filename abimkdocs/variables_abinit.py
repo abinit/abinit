@@ -17267,6 +17267,19 @@ if rf2_pert1_dir[idir1] AND rf2_pert2_dir[idir2] are equal to 1, where "idir1" (
 the perturbation "lambda_1" ("lambda_2").
 If ALL directions are activated (default behavior) AND [[prepanl]] == 1, then the code automatically selects
 only the directions that will be used by the non-linear routine ([[optdriver]] == 5) using crystal symmetries.
+
+Since v9.x this variable also activates the computation of the response to a vector potential
+in the long-wavelength limit. At first order in the momentum, the perturbation and response can be split 
+into symmetric plus antisymmetric parts, see Refs. [[cite:Royo2019]] and [[cite:Zabalo2022]].
+The symmetric part, activated with [[rf2_dkdk]] == 1, corresponds to the aforementioned second derivatives 
+of wavefunctions with respect to wavevectors. The antisymmetric part, activated with [[rf2_dkdk]] == 2, 
+gives the response to a uniform orbital magnetic field, as defined in Ref. [[cite:Essin2010]]. The total, 
+symmetric plus antisymmetric, response is activated with [[rf2_dkdk]] == 3.
+
+The response function to a long-wavelength vector potential is a crucial ingredient to compute some of the 
+spatial-dispersion quantities available in the longwave driver. In particular, those that involve the gradient of an
+electric field: the clamped-ion flexoelectric tensor, the first moment of the polarization
+response to an atomic displacement and the natural optical activity tensor.
 """,
 ),
 
