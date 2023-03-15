@@ -473,7 +473,7 @@ end if
   do ii = atom_start, atom_end
     if (fit_iatom_all) then  ! fit_iatom=-2
         fit_iatom_in=eff_pot%crystal%irredatindx(ii)
-    end if  
+    end if
    if(need_verbose)then
      if(fit_iatom_in > 0)then
        write(message, '(2a,I3,4a)' )ch10,' The coefficients for the fit around atom', fit_iatom_in,': ',&
@@ -1074,14 +1074,13 @@ end if   ! generateterm == 1
        list_coeffs(icycle) = index_min
      end if
 
+     ! TODO: hexu: add the bounding terms here.
+
 !    Check if this coeff is treat by this cpu and fill the
 !    temporary array before broadcast
      rank_to_send = 0
      do icoeff=1,my_ncoeff
-
-
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
-
          if(need_initialize_data)then
            my_icoeff = icoeff
          else
@@ -2565,7 +2564,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
  end do!End do i1
 
 ! multiply by -1
- fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:) 
+ fcart_out(:,:,:,:) = -1 * fcart_out(:,:,:,:)
 
 !ADD stress due to forces on atoms and variation of disp with strain
  do icoeff=1,ncoeff
@@ -2580,7 +2579,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
      end do
    end do
  end do
- 
+
  do itime=1, ntime
     do idir1=1,6
        if (idir1 < 4) then
@@ -2589,7 +2588,7 @@ subroutine fit_polynomial_coeff_getFS(coefficients,du_delta,displacement,energy_
           strten_out(idir1,itime,:) = strten_out(idir1,itime,:) * (1 - strain(idir1,itime)**2)/ucvol(itime)
        end if
     end do
- end do 
+ end do
 
 end subroutine fit_polynomial_coeff_getFS
 !!***

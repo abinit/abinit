@@ -41,7 +41,7 @@ module m_polynomial_coeff
  !use m_geometry,  only : xcart2xred,metric
  use m_dtfil,     only : isfile
  use m_hashtable_strval, only: hash_table_t
- use m_dynamic_array, only: int2d_array_type
+ use m_dynamic_array, only: int2d_array_type, int1d_array_type
 
 
  implicit none
@@ -167,6 +167,8 @@ module m_polynomial_coeff
 !     polynomial_term(nterm)<type(polynomial_term)>
 !     contains all the displacements for this coefficient
 
+   logical :: isbound = .False.
+   integer :: nbody = -1
  end type polynomial_coeff_type
 !!***
 
@@ -215,7 +217,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,check)
+subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, isbound, check)
 
  implicit none
 
@@ -224,6 +226,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  integer, intent(in) :: nterm
  real(dp),intent(in) :: coefficient
  logical,optional,intent(in) :: check
+ logical,optional,intent(in) :: isbound
 !arrays
  character(len=200),optional,intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterm)
@@ -242,6 +245,8 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
  call polynomial_coeff_free(polynomial_coeff)
  check_in = .false.
  if(present(check)) check_in = check
+
+
  if(check_in)then
 !  Check if the list of term is available or contains identical terms
 !  in this case, remove all the not needed terms
@@ -291,6 +296,12 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name,c
    name_tmp = name
  else
    name_tmp = ""
+ end if
+
+ if(present(isbound)) then
+   polynomial_coeff%isbound=isbound
+ else
+   polynomial_coeff%isbound=.False.
  end if
 
 
@@ -351,6 +362,7 @@ subroutine polynomial_coeff_free(polynomial_coeff)
  polynomial_coeff%name = ""
  polynomial_coeff%nterm = 0
  polynomial_coeff%coefficient = zero
+ polynomial_coeff%isbound = .False.
 
 
 end subroutine polynomial_coeff_free
@@ -653,6 +665,7 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
   call xmpi_bcast(coefficients%name, source, comm, ierr)
   call xmpi_bcast(coefficients%nterm, source, comm, ierr)
   call xmpi_bcast(coefficients%coefficient, source, comm, ierr)
+  call xmpi_bcast(coefficients%isbound, source, comm, ierr)
 
  !Allocate arrays on the other nodes.
   if (xmpi_comm_rank(comm) /= source) then
@@ -754,6 +767,8 @@ subroutine polynomial_coeff_MPIsend(coefficients, tag, dest, comm)
       call xmpi_send(coefficients%terms(ii)%strain, dest, 9*tag+11, comm, ierr)
   end do
 
+  call xmpi_send(coefficients%isbound, dest, 9*tag+12, comm, ierr)
+
 end subroutine polynomial_coeff_MPIsend
 !!***
 
@@ -834,6 +849,8 @@ subroutine polynomial_coeff_MPIrecv(coefficients, tag, source, comm)
     call xmpi_recv(coefficients%terms(ii)%power_strain, source, 9*tag+10, comm, ierr)
     call xmpi_recv(coefficients%terms(ii)%strain, source, 9*tag+11, comm, ierr)
   end do
+
+  call xmpi_recv(coefficients%isbound, source, 9*tag+12, comm, ierr)
 
 end subroutine polynomial_coeff_MPIrecv
 !!***
@@ -3385,6 +3402,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   !arrays
   !integer,intent(inout) ::
   type(int2d_array_type), intent(inout) :: array_combination ! list_combination(ndisp_max, nirred*nsym**(ndisp-1))
+  type(int1d_array_type), intent(inout) :: array_isbound
   integer,intent(in)    :: list_symcoeff(6,ncoeff,nsym),index_coeff_in(ndisp+nstrain)
   integer,intent(in)    :: list_symstr(6,nsym,2),compatibleCoeffs(ncoeff+nsym_str,ncoeff+nsym_str)
   integer, intent(in)   :: max_nbody(:)
@@ -3404,10 +3422,13 @@ subroutine computeSymmetricCombinations(array_combination, &
   !integer, pointer :: symlist_i(:)
   integer :: nbody, totpower, nbody_strain, totpower_strain, nbody_disp, totpower_disp
   type(polyform_t) :: polyform
+integer :: isbound
+integer ::   max_nbody_copy(size(max_nbody))
   !Source
 
   ABI_UNUSED(compute)
   ABI_UNUSED(comm)
+
 
   need_only_even = .FALSE.
   if(present(only_even))need_only_even=only_even
@@ -3440,7 +3461,16 @@ subroutine computeSymmetricCombinations(array_combination, &
   !nbody=count(powers/=0)+nbody_strain
   !totpower=sum(powers) + totpower_strain
 
-  if(max_nbody(totpower)/=0 .and. nbody> max_nbody(totpower)) then
+  max_nbody_copy(:)=max_nbody(:)
+  if(max_nbody(totpower)==-1) then
+    isbound=1
+  else
+    isbound=0
+  end if
+  max_nbody_copy(totpower)=1
+
+
+  if(max_nbody_copy(totpower)/=0 .and. nbody> max_nbody_copy(totpower)) then
     call irred_combinations%free()
     return
   end if
@@ -3448,6 +3478,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   block
     logical:: allsym
     integer :: ibody, ind(nbody_disp)
+    ! allsym: allow all combination of symmetry adapted terms.
     allsym= (max_nbody(totpower)==0 .or. max_nbody(totpower)>=totpower)
     ind(:)=0
     if(allsym) then
@@ -3465,14 +3496,7 @@ subroutine computeSymmetricCombinations(array_combination, &
           index_coeff_tmp(idisp) = list_symcoeff(6,index_coeff_in(idisp), symlist%list(idisp))
         end do !idisp=1,ndisp
       else
-        !print *, "nbody_disp", nbody_disp
-        !print *, "ind:", polyform%ind
-        !print *, "list:", symlist%list
-        !print *, "ind2:", ind
         do ibody=1, nbody_disp
-          !print *, "ibody"
-          !print *, "ind(ibody)", polyform%ind(ibody)
-          !print *, "sym(ibody)", symlist%list(ibody)
           ind(ibody)= list_symcoeff(6,polyform%ind(ibody), symlist%list(ibody))
         end do
         call expand_poly(ind, polyform%order, nbody_disp, index_coeff_tmp(:ndisp) )
@@ -3533,6 +3557,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   end block
 
   call array_combination%concate(irred_combinations%array)
+  call array_isbound%concate(isbound)
   call symlist%free()
   call irred_combinations%free()
   !ABI_FREE(index_isym)

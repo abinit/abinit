@@ -25,6 +25,7 @@ sources = [
     "m_abstract_mover.F90",
     "m_abstract_potential.F90",
     "m_anharmonics_terms.F90",
+    "m_bvls.F90",
     "m_dynarray.F90",
     "m_effective_potential.F90",
     "m_effective_potential_file.F90",
