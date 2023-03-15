@@ -35,6 +35,7 @@ module m_ksdiago
  use defs_abitypes,       only : MPI_type
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
+ use m_yaml,              only : yamldoc_t, yamldoc_open
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report, timab
  use m_geometry,          only : metric
@@ -108,7 +109,7 @@ module m_ksdiago
 
    integer, allocatable :: kg_k(:,:)
    ! (3, npw_k)
-   ! G-vectors
+   ! G-vectors in reduced coordinates.
 
    real(dp), contiguous, pointer :: cg_k(:,:,:)
    ! (2, npwsp * my_nband)
@@ -123,10 +124,11 @@ module m_ksdiago
    procedure :: from_diago  => ugb_from_diago
     ! Build object by direct diagonalization of the KS Hamiltonian
 
-   !procedure :: print => ugb_print
-
    procedure :: free => ugb_free
-    ! Free memory
+    ! Free memory.
+
+   procedure :: print => ugb_print
+    ! Print info on object.
 
  end type ugb_t
 !!***
@@ -927,8 +929,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
 ! *********************************************************************
 
- nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  call timab(1919, 1, tsec)
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! See sequence of calls in vtorho.
  ! Check that usekden is not 0 if want to use vxctau
@@ -973,12 +975,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call get_kg(kpoint, istwf_k, ecut, cryst%gmet, npw_k, ugb%kg_k)
  npwsp = npw_k * nspinor
 
- ! The coarse FFT mesh.
+ ! The coarse FFT mesh for the application of the Hamiltonian.
  n1 = ngfftc(1); n2 = ngfftc(2); n3 = ngfftc(3)
  n4 = ngfftc(4); n5 = ngfftc(5); n6 = ngfftc(6)
  nfftc = product(ngfftc(1:3)); mgfftc = maxval(ngfftc(1:3))
 
- ! Initialize the Hamiltonian datatype on the coarse FFT mesh.
+ ! Initialize the Hamiltonian on the coarse FFT mesh.
  if (present(electronpositron)) then
    call init_hamiltonian(gs_hamk, psps, pawtab, nspinor, nsppol, nspden, cryst%natom, cryst%typat, cryst%xred, nfftc, &
     mgfftc, ngfftc, cryst%rprimd, dtset%nloalg, paw_ij=paw_ij, usecprj=0, electronpositron=electronpositron)
@@ -992,7 +994,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    nband_k = npwsp
    write(msg,'(4a, i0)')ch10,&
     ' Since the number of bands to be computed was -1 or',ch10,&
-    ' too large, it has been set to the maximum value npw_k*nspinor: ',npwsp
+    ' too large, it has been set to the maximum value. npw_k*nspinor: ',npwsp
    call wrtout(std_out, msg)
  end if
 
@@ -1003,9 +1005,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! option=2: vtrial(n1*n2*n3,ispden) --> vlocal(nd1,nd2,nd3) real case
 
  ABI_MALLOC(vlocal, (n4, n5, n6, gs_hamk%nvloc))
-
- ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
-
  call gspot_transgrid_and_pack(spin, psps%usepaw, paral_kgb0, nfftc, ngfftc, nfftf, &
                                nspden, gs_hamk%nvloc, ncomp1, pawfgr, mpi_enreg_seq, vtrial, vlocal)
  call gs_hamk%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
@@ -1033,7 +1032,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_MALLOC(dum_ylm_gr_k, (npw_k, 3+6*(optder/2),psps%mpsang**2))
    kptns_(:,1) = kpoint
 
-   ! Here mband is not used if paral_compil_kpt=0
+   ! NB: Here mband is not used if paral_compil_kpt=0
    call initylmg(cryst%gprimd, ugb%kg_k, kptns_, mkmem_, mpi_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
      [npw_k], 1, optder, cryst%rprimd, ylm_k, dum_ylm_gr_k)
 
@@ -1055,7 +1054,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ABI_FREE(ylm_k)
 
- ! Load k-dependent part in the Hamiltonian datastructure
+ ! Load k-dependent part of the Hamiltonian.
  ABI_MALLOC(ph3d, (2, npw_k, gs_hamk%matblk))
  call gs_hamk%load_k(kpt_k=kpoint, istwf_k=istwf_k, npw_k=npw_k, kinpw_k=kinpw, &
                      kg_k=ugb%kg_k, kpg_k=kpg_k, ffnl_k=ffnl, ph3d_k=ph3d, compute_ph3d=.true., compute_gbound=.true.)
@@ -1072,8 +1071,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Define batch size for the application of the Hamiltonian
  ! This is useful if OpenMP is activated thus we use multiple of omp_nt.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
- batch_size = 4 * omp_nt
- !batch_size = 1
+ batch_size = 8 * omp_nt !; batch_size = 1
 
  ABI_MALLOC(ghc, (2, npwsp * batch_size))
  ABI_MALLOC(gvnlxc, (2, npwsp * batch_size))
@@ -1102,8 +1100,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! Loop over the |beta,G''> component.
  loc2_size = ghg_mat%sizeb_local(2)
-
  call cwtime(cpu, wall, gflops, "start")
+
  do il_g2=1, ghg_mat%sizeb_local(2), batch_size
    ndat = blocked_loop(il_g2, loc2_size, batch_size)
    igsp2 = ghg_mat%loc2gcol(il_g2)
@@ -1169,7 +1167,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_FREE(ghc)
  ABI_FREE(gvnlxc)
  ABI_FREE(gsc)
-
  if (psps%usepaw == 1 .and. cpopt == 0) call pawcprj_free(Cwaveprj)
  ABI_FREE(cwaveprj)
 
@@ -1245,7 +1242,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call gsg_4diag%free()
  call proc_1d%free()
 
- ! Now transfer eigvec to ugb datastructure using 1d grid (block column distribution)
+ ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution)
  call wrtout(std_out, " Moving to PBLAS block column distribution...")
  call cwtime(cpu, wall, gflops, "start")
  call ugb%processor%init(comm, grid_dims=[1, nproc])
@@ -1287,16 +1284,17 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
    do my_ib=1,ugb%my_nband
      ibs1 = nspinor * (my_ib - 1) + 1
-     call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1),&
-      gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,&
-      gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft, mpi_enreg_seq,&
-      gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,&
-      gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+     call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1), &
+                  gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k, &
+                  gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft, mpi_enreg_seq, &
+                  gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor, &
+                  gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
    end do
 
    !  Reorder the cprj (order is now the same as in input file)
    call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
  end if ! usepaw
+
  call cwtime_report(" block column distribution", cpu, wall, gflops)
 
  ! Free memory.
@@ -1304,7 +1302,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_FREE(kpg_k)
  ABI_FREE(ph3d)
  ABI_FREE(ffnl)
-
  call destroy_mpi_enreg(mpi_enreg_seq)
  call gs_hamk%free()
 
@@ -1320,7 +1317,7 @@ end subroutine ugb_from_diago
 !!  ugb_free
 !!
 !! FUNCTION
-!!  Free memory
+!!  Free dynamic memory.
 !!
 !! SOURCE
 
@@ -1328,7 +1325,6 @@ subroutine ugb_free(ugb)
 
 !Arguments ------------------------------------
  class(ugb_t),intent(inout) :: ugb
-
 ! *************************************************************************
 
  call ugb%mat%free()
@@ -1343,6 +1339,46 @@ subroutine ugb_free(ugb)
  end if
 
 end subroutine ugb_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/ugb_print
+!! NAME
+!!  ugb_print
+!!
+!! FUNCTION
+!!  Print info on the object.
+!!
+!! SOURCE
+
+subroutine ugb_print(ugb, units, prtvol, header)
+
+!Arguments ------------------------------------
+ class(ugb_t),intent(in) :: ugb
+ integer,intent(in) :: units(:), prtvol
+ character(len=*),optional,intent(in) :: header
+
+!Local variables-------------------------------
+ character(len=500) :: msg
+ type(yamldoc_t) :: ydoc
+
+! *************************************************************************
+
+ msg = ' ==== Info on the ugb_t object ==== '; if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(units, msg)
+
+ ydoc = yamldoc_open('ugb_t') !, width=11, real_fmt='(3f8.3)')
+ call ydoc%add_int("istwf_k", ugb%istwf_k)
+ call ydoc%add_int("nspinor", ugb%nspinor)
+ call ydoc%add_int("npw_k", ugb%npw_k)
+ call ydoc%add_int("nband_k", ugb%nband_k)
+ call ydoc%add_int("my_bstart", ugb%my_bstart)
+ call ydoc%add_int("my_bstop", ugb%my_bstop)
+ call ydoc%add_int("my_nband", ugb%my_nband)
+ call ydoc%write_units_and_free(units)
+
+end subroutine ugb_print
 !!***
 
 end module m_ksdiago

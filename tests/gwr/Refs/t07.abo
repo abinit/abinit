@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat  4 Mar 2023.
-- ( at 22h39 )
+.Starting date : Tue 14 Mar 2023.
+- ( at 16h50 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t07/t07.abi
 - output file    -> t07.abo
@@ -360,8 +360,6 @@ meta: {optdriver: 6, }
  Writing Gridvectors info to file: t07o_DS2_GridVectors.yaml
 
  Writing CoulombVertex info to file: t07o_DS2_CoulombVertex.yaml
-
- Writing CoulombVertex data to file: t07o_DS2_CoulombVertex.elements
 
  Writing CoulombPotential info to file: t07o_DS2_CoulombPotential.yaml
 

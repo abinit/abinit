@@ -3854,8 +3854,7 @@ subroutine gwr_print(gwr, units, header)
 
 ! *********************************************************************
 
- msg = ' ==== Info on the GWR object ==== '
- if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
+ msg = ' ==== Info on the gwr_t object ==== '; if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(units, msg)
 
  ydoc = yamldoc_open('GWR_params') !, width=11, real_fmt='(3f8.3)')
