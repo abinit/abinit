@@ -2254,7 +2254,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftqmc_seed=jdtset
    dtsets(idtset)%dmftqmc_therm=1000
    dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
-   dtsets(idtset)%dosdeltae=zero
+   dtsets(idtset)%dosdeltae=0.0
    dtsets(idtset)%dtion=100.0_dp
    dtsets(idtset)%dtele=0.1_dp
    dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
