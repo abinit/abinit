@@ -364,6 +364,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    Pawtab(:)%usepawu   = 0
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
+   Pawtab(:)%lamb_shielding = zero
 
    ! Evaluate <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for the long wavelength limit.
    ! TODO solve problem with memory leak and clean this part as well as the associated flag
@@ -374,8 +375,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Initialize and compute data for DFT+U.
    ! paw_dmft%use_dmft=dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
-     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
+&    is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,dtset%optdcmagpawu,Pawang,Dtset%pawprtvol,&
+&    Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
 
    if (my_rank == master) call pawtab_print(Pawtab)
 
@@ -2115,7 +2116,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
  !write(std_out,*)MAXVAL(ABS(occfact(:)-ks_ebands%occ(:)))
 
  !TODO call ebands_update_occ here
- !$call ebands_update_occ(ks_ebands,spinmagntarget,stmbias,Dtset%prtvol)
+ !$call ebands_update_occ(ks_ebands,spinmagntarget,Dtset%prtvol)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)

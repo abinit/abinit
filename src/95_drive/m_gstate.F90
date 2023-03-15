@@ -853,15 +853,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize (eventually) extfpmd object
  if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
-   if(dtset%useextfpmd/=1.and.dtset%mband<dtset%extfpmd_nbcut) then
-     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate extfpmd routines.",ch10,&
-     & "nband=",dtset%mband," < extfpmd_nbcut=",dtset%extfpmd_nbcut,".",ch10,&
-     & "Action: Increase nband or decrease extfpmd_nbcut."
+   if(dtset%useextfpmd/=1.and.dtset%extfpmd_nbcut>dtset%mband) then
+     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
+&     "extfpmd_nbcut = ",dtset%extfpmd_nbcut," should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&     "Action: Increase nband or decrease extfpmd_nbcut."
      ABI_ERROR(msg)
    else
+     if(dtset%useextfpmd/=1.and.(dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut)>dtset%mband) then
+       write(msg,'(a,i0,a,i0,a,i0,2a,i0,3a)') "(extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf," + extfpmd_nbcut = ",&
+&       dtset%extfpmd_nbcut,") = ",dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut,ch10,&
+&       "should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     else if(dtset%extfpmd_nbdbuf>dtset%mband) then
+       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
+&       " should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     end if
      ABI_MALLOC(extfpmd,)
-     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,nfftf,&
-&     dtset%nspden,rprimd,dtset%useextfpmd)
+     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+&     dtset%nfft,dtset%nspden,rprimd,dtset%useextfpmd)
    end if
  end if
 
@@ -886,19 +900,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
-! CP modified
-!   call newocc(doccde,eigen,results_gs%energies%entropy,&
-!&   results_gs%energies%e_fermie,&
-!&   dtset%spinmagntarget,dtset%mband,dtset%nband,&
-!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-!&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
    call newocc(doccde,eigen,results_gs%energies%entropy,&
 &   results_gs%energies%e_fermie,results_gs%energies%e_fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,&
-&   extfpmd)
-! End CP modified
+&   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_FREE(doccde)
@@ -1017,7 +1024,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,pawang,dtset%pawprtvol,&
+&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
  end if
 

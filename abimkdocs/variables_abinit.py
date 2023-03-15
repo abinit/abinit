@@ -303,7 +303,7 @@ distribution if not specified in input file.
 
     Note that this variable is only used when running **ground-state calculations** in parallel with MPI.
     Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
-    not automatically set by [[autoparal]]. Please consult the tutorials to learn how
+    not automatically set by [[autoparal]]. Please consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI.
 
 Given a total number of processors, ABINIT can find a suitable distribution that fill (when possible)
@@ -2947,7 +2947,7 @@ When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
 of k-resolved spectral function (or density of state) is possible.
 However, the calculation requires as input the self-energy computed in the real
 axis using an external analytical continuation code.
-The section 7 of the DFT+DMFT tutorial  details how to obtain this data
+The section 7 of the [[tutorial:dmft|tutorial on DFT+DMFT]]  details how to obtain this data
 and related informations.
 """,
 ),
@@ -4031,16 +4031,16 @@ einterp consists of 4 entries.
 The first element specifies the interpolation method.
 
   * 0 --> No interpolation (default)
-  * 1 --> Star-function interpolation (Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]
+  * 1 --> Star-function interpolation (modified Shankland-Koelling-Wood Fourier interpolation scheme, see [[cite:Pickett1988]]).
 
 The meaning of the other entries depend on the interpolation technique selected.
 In the case of star-function interpolation:
 
   * einterp(2): Number of star-functions per ab-initio k-point
-  * einterp(3): If non-zero, activate Fourier filtering according to Eq 9 of [[cite:Uehara2000]].
+  * einterp(3): If non-zero, activate Fourier filtering according to Eq. 9 of [[cite:Uehara2000]].
     In this case, rcut is given by einterp(2) * Rmax where Rmax is the maximum length of
     the lattice vectors included in the star expansion
-  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq 9
+  * einterp(4): Used if einterp(3) /= 0. It defines rsigma in Eq. 9
 
 """,
 ),
@@ -4219,7 +4219,7 @@ Electron-phonon self-energy (also spectral function) with **eph_task** = 4):
 
 Imaginary part of the electron-phonon self-energy (**eph_task** = -4):
 
-:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Blochl1994]] except when [[symsigma]] == 0,
+:   The default is [[eph_intmeth]] == 2, Tetrahedron method by [[cite:Bloechl1994]] except when [[symsigma]] == 0,
     where it is [[eph_intmeth]] == 1.
 """,
 ),
@@ -7366,11 +7366,14 @@ case, a cut-off Coulomb interaction might prove useful.
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
 in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
 and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
-.
+ 
 The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 5.
-For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
-This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+For 1-dimensional and 2-dimensional systems, the geometry of the system (along which directions the cell is to be periodically repeated, 
+along which ones the system is finite) 
+has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length might be provided, depending
+on the methodology, thanks to [[rcut]].
 
   * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
   * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
@@ -8445,8 +8448,12 @@ convergence, all values are OK)
 compromise between speed and reliability. The value **iscf** =  2 is safer but slower.
 - In the PAW case, default option is **iscf** = 17. In PAW you have the
 possibility to mix density/potential on the fine or coarse FFT grid (see [[pawmixdg]]).
-- Note that a Pulay mixing (**iscf** = 7 or 17) with [[npulayit]] = 1 (resp. 2)
+- Note 1: a Pulay mixing (**iscf** = 7 or 17) with [[npulayit]] = 1 (resp. 2)
 is equivalent to an Anderson mixing with **iscf** = 3 or 13 (resp. 4 or 14).
+- Note 2: when a mixing of the density is activated ([[iscf]]>=10) the density residual
+correction added to forces (see [[densfor_pred]]) needs the second derivative of the
+exchange-correlation functionnal (namely Kxc). When the latter is not provided, [[iscf]]
+is automatically switched to select the coresponding mixing of the potential ([[iscf]]<10).
 - Also note that:
 * when mixing is done on potential (iscf < 10), total energy is computed by "direct" decomposition.
 * when mixing is done on density (iscf >= 10), total energy is computed by "double counting" decomposition.
@@ -8714,6 +8721,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 40 --> Hartree-Fock
   * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
+  * 50 --> IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter). The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
 
 **ETSF Lib XC functionals**
 
@@ -8762,6 +8770,16 @@ This means having [[usekden]] = 1.
   * 029 --> XC_LDA_C_VWN_2  Vosko, Wilk, & Nussair (2) [[cite:Vosko1980]]
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
+
+==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)  
+  The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
+  Use of [[occopt]]=3 is recommended to have a physical meaning of the temperature.  
+  As these functionals do not provide Kxc (2nd derivative of Exc), a SCF mixing
+  of the potential is automatically selected ([[iscf]]<10).
+
+  * 259 --> XC_LDA_XC_KSDT, LDA T-dependent functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]]
+  * 318 --> XC_LDA_XC_CORRKSDT, corrected KSDT by Karasiev, Dufty, & Trickey [[cite:Karasiev2018]]
+  * 577 --> XC_LDA_XC_GDSMFB, LDA T-dependent functional: Groth, Dornheim, Sjostrom, Malone, Foulkes, & Bonitz [[cite:Groth2017]]
 
 ==GGA functionals== (do not forget to add a minus sign, as discussed above)
 
@@ -9696,7 +9714,7 @@ input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
 will be included. Because the PAW input files do not include the core orbitals,
-the user must compute this value separately, from the Lamb formula [[cite:Abragam1961Principles]],
+the user must compute this value separately, from the Lamb formula [[cite:Abragam1961]],
 and input it here.
 """,
 ),
@@ -10118,7 +10136,7 @@ Variable(
 [[mdf_epsinf]] specifies the value of the macroscopic dielectric function used
 to model the screening function (see [[cite:Bechstedt1992]]).
 The proper spatial symmetry of the screening $W(\mathbf{r},\mathbf{r}^\prime)$ is enforced using
-Eq. (7) of [[cite:vonderLinden1988]].
+Eq. (7) of [[cite:VonDerLinden1988]].
 """,
 ),
 
@@ -12737,7 +12755,7 @@ Variable(
     dimensions=[3, '[[natom]]'],
     defaultval=0.0,
     mnemonics="NUClear DIPole MOMents",
-    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] > 2",
+    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] = 3",
     added_in_version="before_v9",
     text=r"""
 Places an array of nuclear magnetic dipole moments on the atomic
@@ -13468,18 +13486,15 @@ Compute quantities related to orbital magnetic moment. The
     insulators have orbital magnetization zero, except in the presence
     of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
     is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Ceresoli2010]], [[cite:Ceresoli2006]],
-    and [[cite:Gonze2011a]] extended to the PAW case.
+    theory outlined in [[cite:Gonze2011a]] extended to the PAW case.
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
     both the ground state and DDK wavefunctions, and is triggered at the end of a
     DDK calculation.
 
-* [[orbmag]] = 1: Compute orbital magnetization and integral of the
-Berry curvature (Chern number) over the Brillouin zone.
+* [[orbmag]] = 1: Compute orbital magnetization and Chern number
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
-orbital magnetic moment.
-* [[orbmag]] = 3: Same as [[orbmag]] 2 but print out values of each term for each band.
+orbital magnetic moment and a band-by-band decomposition.
 """,
 ),
 
@@ -15073,7 +15088,7 @@ Variable(
     text=r"""
   * **ppmodel** = 1: PP model of Godby and Needs [[cite:Godby1989]].
   * **ppmodel** = 2: PP model of Hybertsen and Louie [[cite:Hybertsen1986]].
-  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:vonderLinden1988]].
+  * **ppmodel** = 3: PP model of W. von der Linden and P. Horsh [[cite:VonDerLinden1988]].
   * **ppmodel** = 4: PP model of Farid and Engel [[cite:Engel1993]].
   * **ppmodel** = 0: no PP model, numerical integration (contour deformation method [[cite:Lebegue2003]]).
 
@@ -15727,7 +15742,8 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph]].
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]] 
+and [[tutorial:eph4zpr]].
 """,
 ),
 
@@ -16035,11 +16051,18 @@ Variable(
     mnemonics="PRinT the STM density",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of the electron density in real
+If set to 1, provide output of the electron density in real
 space rho(r), made only from the electrons close to the Fermi energy, in a
 range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
-This is a very approximate way to obtain STM profiles: one can choose an
+Specifying a non-zero negative value is also allowed, and will produce also
+the output of an electron density in real space, like the above, but moreover
+will additionally filter it to have the contribution of one band only, 
+whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
+must be smaller or equal to [[nband]].
+
+The electron density obtained from [[prtstm]]=1,
+is a very approximate way to obtain STM profiles: one can choose an
 equidensity surface, and consider that the STM tip will follow this surface.
 Such equidensity surface might be determined with the help of Cut3D, and
 further post-processing of it (to be implemented). The big approximations of
@@ -16048,11 +16071,16 @@ independent transfer matrix elements between the tip and the surface.
 The charge density is provided in units of electrons/Bohr^3. The name of the
 STM density file will be the root output name, followed by _STM. Like a _DEN
 file, it can be analyzed by cut3d.
+
+The negative values of [[prtstm]] allows one to perform a detailed band-by-band
+analysis of the [[prtstm]]=1 result.
+
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 For the STM charge density to be generated, one must give, as an input file,
 the converged wavefunctions obtained from a previous run, at exactly the same
 k-points and cut-off energy, self-consistently determined, using the
 occupation numbers from [[occopt]] = 7.
+
 In the run with positive [[prtstm]], one has to use:
 
   * positive [[iscf]]
@@ -16066,7 +16094,6 @@ Note that you might have to adjust the value of [[nband]] as well, for the
 treatment of unoccupied states, because the automatic determination of
 [[nband]] will often not include enough unoccupied states.
 When [[prtstm]] is non-zero, the stress tensor is set to zero.
-No output of _STM file is provided by [[prtstm]] lower or equal to 0.
 No other printing variables for density or potentials should be activated
 (e.g. [[prtden]] has to be set to zero).
 """,
@@ -16943,6 +16970,20 @@ Variable(
     text=r"""
 Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
 is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
+See complementary information in [[vcutgeo]].
+
+In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
+Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
+thus automatically defined by the unit cell and there is no need to specify
+the value of [[rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
+at half the replication length perpendicular to the (truly) periodic plane.
+
+Thus, when the Beigi methods in 1D or 2D are expected, [[rcut]] must be 0.0.
+Using another value of [[rcut]] will prevent the Beigi method to be used.
+See complementary information in [[vcutgeo]].
+
+On the other hand, when the Rozzi methods in 1D or 2D are expected, which is the case when one component of [[vcutgeo]] is negative,
+[[rcut]] mut be defined.
 
 If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the primitive cell.
@@ -19242,7 +19283,8 @@ has to specify an independent broadening [[tsmear]]. The combination of the
 two parameters [[tphysel]] and [[tsmear]] is described in [[cite:Verstraete2002]].
 Note that the signification of the entropy is modified with respect to the usual entropy.
 The choice has been made to use [[tsmear]] as a prefactor of the entropy, to
-define the entropy contribution to the free energy.
+define the entropy contribution to the free energy.  
+Note that [[tphysel]] might be used as parameter for Free Energy exchange-correlation functionals (see [[ixc]]).
 """,
 ),
 
@@ -19521,12 +19563,13 @@ Variable(
     topics=['parallelism_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="activate USE of NVTX tracing/profiling (only meaningful use_gpu_cuda=1)",
+    mnemonics="activate USE of NVTX tracing/profiling",
     added_in_version="9.7.2",
     text=r"""
-Only available if ABINIT executable has been compiled with cuda nvcc compiler.
+Only available if ABINIT executable has been compiled with cuda nvcc compiler,
+and only meaningful when [[use_gpu_cuda]]=1.
 This parameter activates the use of nvtx tracing/profiling if present.
-If [[use_nvtx]] = 1, when profiling with nsys, additional information with be added in report.
+If [[use_nvtx]] = 1, when profiling with nsys, additional information with be added in the report.
 If [[use_nvtx]] = 0, nothing happens.
 """,
 ),
@@ -20208,15 +20251,19 @@ to be used. It has a meaning either for a periodic one-dimensional system, typic
 a nanowire, nanotube or polymer surrounded by vacuum separating the system
 from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
-typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). For each
+typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). 
+
+When a non-zero component of this three-dimensional vector is non-zero, this indicate that the system is
+periodic along this dimension. Note that the components of this vector are real numbers, which is
+useful in the current implementation of the Rozzi methods [[cite:Rozzi2006]]. Of course, just specifying 0 or 1 is allowed,
+but will be read as 0.0 or 1.0.
+
+For each
 geometry, two different definitions of the cutoff region are available (see
 [[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
-of the methods)
-
-In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
-Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
-thus automatically defined by the unit cell and there is no need to specify
-the value of [[rcut]].
+of the methods).
+The Beigi method is used by default. The Rozzi method is used if [[rcut]] is not at its default value (0.0), or if
+one component of [[vcutgeo]] is negative.
 
 To define a cylinder along the z-axis use the following lines:
 ```
@@ -20249,8 +20296,8 @@ For two-dimensional systems ([[icutcoul]] = 2), [[vcutgeo]] is used to define th
 two periodic directions. Also in this case two different
 techniques are available. In the method of Ismail-Beigi, the (positive) non-zero
 components of vcutgeo define the periodic directions of the infinite surface.
-The interaction is truncated within a slab of width L where L is the length of
-the primitive vector of the lattice along the non-periodic dimension. For
+The interaction is truncated within a slab of width L where L is the projection of
+the primitive vector of the lattice along the direction perpendicular to the periodic plane. For
 example:
 ```
 icutcoul 2
@@ -21610,7 +21657,7 @@ Variable(
     defaultval=0,
     dimensions="scalar",
     requires="[[optdriver]] == 8",
-    mnemonics="WFK TASK",
+    mnemonics="WaveFunction at K TASK",
     added_in_version="9.0.0",
     text=r"""
 
@@ -21622,11 +21669,11 @@ Possible values are:
      This option can be used to interface Abinit with external tools (e.g. lobster)
      requiring $\kk$-points in the full BZ.
 
-  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the SKW method
+  * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
      using the parameters specified by [[einterp]].
 
   * "wfk_ddk" --> Compute velocity matrix elements for all bands and $\kk$-points found the input WFK file.
-     The code generates three `_EVK.nc` netcdf files with the matrix element of the $ \dfrac{d}{d_{\kk_i}} $
+     The code generates three `_EVK.nc` netcdf files with the matrix element of the $\frac{d}{d{\kk_i}}$
      operator using the same list of $\kk$-points found in the input WFK file i.e. the same value of [[kptopt]].
      These files can then be passed to optics via the `ddkfile_1, ddkfile_2, ddkfile_3` variables
      without having to call the DFPT part that is much more expensive at the level of memory.
@@ -21644,7 +21691,7 @@ Possible values are:
   * "wfk_optics_fullbz" --> Similar to "wfk_ddk" but accepts a WFK with wavefunctions in the IBZ
      and generates a new WFK and three `_EVK.nc` files with $\kk$-points in the full BZ.
      This procedure is equivalent to performing a NSCF + DDK calculation with [[kptopt]] = 3 as documented
-     in the optic tutorial for non-linear optical properties but it is much faster and, most importantly,
+     in the tutorial [[tutorial:optic]] for non-linear optical properties but it is much faster and, most importantly,
      less memory demanding.
 
   * "wfk_kpts_erange" --> Read WFK file, use star-function and [[einterp]] parameters to interpolate
@@ -22964,6 +23011,13 @@ Enables the calculation of contributions to the energy, entropy, stresses,
 number of electrons and chemical potential using the extended first principle
 molecular dynamics model for high temperature simulations.
 
+For now, ExtFPMD is only available with [[occopt]] = 3, with [[tsmear]] defined
+as the electronic temperature. More occupation options will be supported in the
+future.
+
+In case of electronic SCF cycle convergency problems, try to set a number of
+unoccupied bands in the buffer with [[extfpmd_nbdbuf]] input variable.
+
   * **useextfpmd** = 1 *(Recommanded)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
 contributions will be computed with integrals over the band number.
@@ -22993,7 +23047,33 @@ Variable(
 Specifies the number of bands to use when averaging over last bands to get the
 energy shift when [[useextfpmd]] = 2 or 3.
 
-**extfpmd_nbcut** must be less than [[nband]].
+**extfpmd_nbcut** must be less than or equal to [[nband]].
+""",
+),
+
+Variable(
+    abivarname="extfpmd_nbdbuf",
+    varset="gstate",
+    vartype="integer",
+    topics=['ExtFPMD_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXTended FPMD: Number of BanDs for the BUFfer",
+    added_in_version="9.9.0",
+    text=r"""
+Specifies the number of bands to use for the buffer when [[useextfpmd]] /= 0.
+Among the total number of bands [[nband]], last [[extfpmd_nbdbuf]] bands
+occupation will be set to 0, and ExtFPMD model will take charge of computing
+electronic contributions starting from [[nband]] - [[extfpmd_nbdbuf]].
+
+In some cases, setting this input variable to a positive number can solve
+convergency problems due to high variations of electron density within the SCF
+cycle.
+
+Moreover, setting [[extfpmd_nbdbuf]] = [[nband]] should theoretically give
+access to Fermi gas orbital free calculations (not tested yet).
+
+**extfpmd_nbdbuf** must be less than or equal to [[nband]].
 """,
 ),
 
@@ -23317,7 +23397,22 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable ...
+See the corresponding input variable for the usual GS grid [[boxcutmin]].
+""",
+),
+
+Variable(
+    abivarname="optdcmagpawu",
+    varset="paw",
+    vartype="integer",
+    topics=['DFT+U_expert'],
+    dimensions="scalar",
+    defaultval=3,
+    mnemonics="OPTion for Double-Counting MAGnetic term in PAW+U formalism",
+    requires="[[usepaw]] == 1, [[usepawu]] == 1 or 4, and [[nspden]] == 4",
+    added_in_version="9.8.2",
+    text=r"""
+This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), it defines how the double counting term in the PAW+U formalism is computed. The default is 3, but Abinit versions before 9.8 correspond to 1.
 """,
 ),
 

@@ -206,7 +206,7 @@ contains
 !!  usecprj=1 if cprj datastructure is stored in memory
 !!  wffnew,unit numbers for wf disk files.
 !!  with_vectornd = 1 if vectornd allocated
-!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
+!!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
 !!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
 !!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
@@ -328,7 +328,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: phnonsdiel(2,nfftdiel**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),rmet(3,3),rprimd(3,3)
- real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
+ real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,dtset%nspden,3),vtrial(nfftf,dtset%nspden)
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp), intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -719,7 +719,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(has_vectornd) then
         do idir = 1, 3
           ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,:,idir))
           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
           ABI_FREE(cgrvtrial)
         end do
@@ -905,7 +905,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            !Init the arrays
            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
 &           gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&           gs_hamk%ph3d_k)
+&           gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
          end if
        end if
 
@@ -1195,16 +1195,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute the new occupation numbers from eigen
      call timab(990,1,tsec)
-     ! CP modified
-     !call newocc(doccde,eigen,energies%entropy,energies%e_fermie,dtset%spinmagntarget,&
-!&     dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
-!&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,&
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
 &     dtset%tsmear,dtset%wtk,&
-&     extfpmd)
-     ! End CP modified
+&     prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
      call timab(990,2,tsec)
 
 
@@ -2170,8 +2165,8 @@ subroutine wvl_occ()
 !  Compute the new occupation numbers from eigen
    call newocc(doccde_,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,&
 &   dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,&
-&   dtset%nsppol,occ,dtset%occopt,prtvol,&
-&   dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
+&   dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   prtstm=dtset%prtstm,stmbias=dtset%stmbias)
 
 ! Copy occupations and efermi to BigDFT variables
    call wvl_occ_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,occ,1,wvl%wfs)

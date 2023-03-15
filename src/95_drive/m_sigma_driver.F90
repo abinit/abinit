@@ -472,14 +472,15 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! Initialize optional flags in Pawtab to zero
    ! Cannot be done in Pawinit since the routine is called only if some pars. are changed
    pawtab(:)%has_nabla = 0
+   Pawtab(:)%lamb_shielding = zero
 
    call setsym_ylm(gprimd, pawang%l_max-1, cryst%nsym, dtset%pawprtvol, cryst%rprimd, cryst%symrec, pawang%zarot)
 
    ! Initialize and compute data for DFT+U
-   Paw_dmft%use_dmft = Dtset%usedmft
-   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla, &
-                   is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol, &
-                   Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
+   Paw_dmft%use_dmft=Dtset%usedmft
+   call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
+     is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,dtset%optdcmagpawu,Pawang,Dtset%pawprtvol,&
+     Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
 
    if (my_rank == master) call pawtab_print(Pawtab)
 

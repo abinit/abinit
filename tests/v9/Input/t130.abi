@@ -1,111 +1,76 @@
-# Dynamic quadrupoles calculation for AlAs 
-# (conflictive Al PSP for useylm=1 due to all KB energies being negative)
-# (M. Royo, 22.11.2021) 
+# Crystalline alpha-quartz: GS calculations with UPF2 pseudos
+ndtset 2
 
-ndtset 5
+ecut      25 # 35
+rmm_diis  1
+nband1    32
+tolvrs    1.0d-8
 
-#Set 1 : ground state self-consistency
-#*************************************
-getwfk1   0            
-kptopt1   1           
-nqpt1   0           
-tolvrs1   1.0d-4  
+###################################
+# Dataset 1: SCF run with useylm 0
+###################################
+useylm1     0
 
+###################################
+# Dataset 2: SCF run with useylm 1
+###################################
+useylm2     1
+getwfk2    -1
 
-#Set 2: Response function calculation of d/dk wave function
-#**********************************************************
-iscf2    -3     
-rfelfd2   2    
-tolwfr2   1.0d-4
-rfdir2   1 1 1 
+#################### COMMON PART #########################
 
-#Set 3: Response function calculation of d2/dkdk wave function
-#*************************************************************
-getddk3   2
-iscf3    -3
-rf2_dkdk3 3
-tolwfr3   1.0d-4
+nstep    20
+diemac   4.0
 
-#Set 4 : Response function calculation of Q=0 phonons and electric field
-#***********************************************************************
-getddk4   2
-rfelfd4   3
-rfphon4   1
-rfatpol4  1 2
-rfdir4   1 1 1
-tolvrs4   1.0d-3
-prepalw4  2
+# Definition of the k-point grid
+occopt 1            # Semiconductor
+ngkpt   2 2 2
+nshiftk 1
+shiftk  0.0 0.0 0.0 # Gamma-centered
 
-#Set 5 : Dynamic Quadrupoles calculation
-#***************************************
-optdriver5 10
-get1wf5   4
-get1den5  4
-getddk5   2
-getdkdk5  3
-lw_qdrpl5 1
+# Definition of the atom types
+npsp   2
+znucl  14  8
+ntypat 2
 
-#######################################################################
-#Common input variables
+# Definition of the atoms
+natom 9
+typat 3*1  6*2
 
-getwfk  1            
-useylm  1
-kptopt 2
+# Experimental parameters (Wyckoff pag 312)
+# u(Si)= 0.465
+# x= 0.415 ; y= 0.272 ; z= 0.120
+acell   2*4.91304  5.40463  Angstrom
 
-#Definition of the unit cell
-acell 3*10.61          
-rprim  0.0  0.5  0.5   
-       0.5  0.0  0.5   
-       0.5  0.5  0.0   
+xred   0.465   0.000   0.000              #Si
+       0.000   0.465   2/3                #Si
+      -0.465  -0.465   1/3                #Si
+       0.415   0.272   0.120              #O
+      -0.143  -0.415   0.4533333333333333 #O
+      -0.272   0.143   0.7866666666666666 #O
+       0.143  -0.272  -0.120              #O
+       0.272   0.415   0.5466666666666666 #O
+      -0.415  -0.143   0.2133333333333333 #O
 
-#Definition of the atom types
-ntypat 2               
-znucl 13 33            
-                       
-#Definition of the atoms
-natom 2               
-typat 1 2            
-xred                
-                    
-   0.0  0.0  0.0    
-   0.25 0.25 0.25   
+rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
+        5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
+        0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
-#Gives the number of bands
-nband  4  
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8"
+pseudos "Si.upf, O.upf"
+#pseudos "Si.psp8, O.psp8"
 
-#Definition of the planewave basis set
-ecut    5.0           # Maximal kinetic energy cut-off, in Hartree
-
-#Definition of the k-point grid
-ngkpt 2 2 2
-nshiftk 4 
-shiftk 0.5 0.5 0.5
-       0.5 0.0 0.0
-       0.0 0.5 0.0
-       0.0 0.0 0.5
-
-#Definition of the SCF procedure
-nstep 30       
-diemac 9.0    
-             
- pp_dirpath "$ABI_PSPDIR"
- pseudos "13al.981214.fhi, As.fhi"
-
-##############################################################
-# This section is used only for regression testing of ABINIT #
-##############################################################
-## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
-#%%   t130.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
+#%% files_to_test = t130.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 1.0e-02
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 12
 #%% [extra_info]
-#%% authors = M. Royo
-#%% keywords = DFPT, LONGWAVE
-#%% description = Dynamic Quadrupoles Calculation for AlAs
-#%% topics = longwave
+#%% authors =  M. Giantomassi
+#%% keywords = NC, UPF2
+#%% description =
+#%%   Crystalline alpha-quartz: GS calculations with UPF2 pseudos.
+#%%   Test scalar-relativistic pseudos with useylm 0 and 1.
 #%%<END TEST_INFO>

@@ -2,9 +2,9 @@
 authors: JWZ, XG
 ---
 
-# Tutorial on properties at the nuclei
+# Properties at the nucleus
 
-## Observables near the atomic nuclei.
+## Observables near the atomic nucleus.
 
 The purpose of this tutorial is to show how to compute several observables of
 interest in M&ouml;ssbauer, NMR, and NQR spectroscopy, namely:

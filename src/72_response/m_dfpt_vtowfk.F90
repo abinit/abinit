@@ -501,28 +501,28 @@ unit_me = 6
 !      Compute the 0-order nuclear dipole contribution (with cwavef)
 !      only relevant for DDK
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(gs_hamkq%vectornd)) ) then
-         ABI_MALLOC(ghc_vectornd,(2,npw_k))
-         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         ABI_MALLOC(ghc_vectornd,(2,npw_k*nspinor))
+         ! ndat hard-coded as 1
          call getghc_nucdip(cwavef,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpt_k,&
 &          gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
-&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,gs_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,gs_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
 !        There is an additional factor of 2 with respect to the bare matrix element
-         end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
-           & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k*nspinor),ghc_vectornd(1,1:npw_k*nspinor))+&
+           & DOT_PRODUCT(cwavef(2,1:npw_k*nspinor),ghc_vectornd(2,1:npw_k*nspinor)))
          ABI_FREE(ghc_vectornd)
        end if
 
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
 !      only relevant for DDK
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(rf_hamkq%vectornd)) ) then
-         ABI_MALLOC(ghc_vectornd,(2,npw_k))
-         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         ABI_MALLOC(ghc_vectornd,(2,npw1_k*nspinor))
+         ! ndat hard-coded as 1
          call getgh1ndc(cwave1,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
-           & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
-           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,rf_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+           & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw1_k,gs_hamkq%nvloc,&
+           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,rf_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
 !        There is an additional factor of 4 with respect to the bare matrix element
-         end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
-           & DOT_PRODUCT(cwave0(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k*nspinor),ghc_vectornd(1,1:npw_k*nspinor))+&
+           & DOT_PRODUCT(cwave0(2,1:npw_k*nspinor),ghc_vectornd(2,1:npw_k*nspinor)))
          ABI_FREE(ghc_vectornd)
        end if
 !

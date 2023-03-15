@@ -61,6 +61,8 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
+ use m_gemm_nonlop,      only : make_gemm_nonlop,gemm_nonlop_use_gemm, &
+&                               gemm_nonlop_ikpt_this_proc_being_treated
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -925,6 +927,15 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ffnl_k   =my_bandfft_kpt%ffnl_gather, &
        ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
      end if
+
+!    Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
+&            gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
+&            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
+&            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
+       end if
 
      call timab(922,2,tsec)
 
