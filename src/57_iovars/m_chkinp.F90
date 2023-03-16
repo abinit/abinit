@@ -1357,8 +1357,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,11,(/-3,-2,2,3,4,7,12,13,14,17,22/),iout)
    end if
 !  Mixing on density is only allowed for GS calculations or for drivers where it is not used.
-   if(optdriver /= RUNL_GSTATE .and. all(optdriver/=[RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_EPH,&
-&     RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT])) then
+   if(optdriver /= RUNL_GSTATE .and. all(optdriver /= [RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_EPH, &
+     RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT, RUNL_GWR])) then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_le(1,1,cond_string,cond_values,ierr,'iscf',dt%iscf,9,iout)
    end if
@@ -2361,8 +2361,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(usepaw==1)then
      ! Is optdriver compatible with PAW?
      cond_string(1)='usepaw' ; cond_values(1)=usepaw
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',optdriver,8,&
-&       [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT],iout)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',optdriver,9,&
+        [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_WFK,RUNL_NONLINEAR,RUNL_RTTDDFT,RUNL_GWR],iout)
    end if
 
 !  Linear and Non-linear response calculations
@@ -4007,21 +4007,25 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    if (optdriver == RUNL_GWR) then
+     msg = "G0W0, HDIAGO, HDIAGO_FULL, RPA_ENERGY, EGEW, EGW0, G0EW, G0V, CC4S, CC4S_FULL"
+     if (.not. string_in(dt%gwr_task, msg)) then
+       ABI_ERROR_NOSTOP(sjoin("Invalid gwr_task:`", dt%gwr_task, "`, must be among:", msg), ierr)
+     end if
+#ifndef HAVE_LINALG_SCALAPACK
+       ABI_ERROR("GWR code requires scalapack library")
+#endif
+
      ! Avoid wasting CPUs if nsppol==2.
      !if (dt%nsppol == 2 .and. .not. iseven(nproc) .and. nproc > 1) then
      !  write(msg,'(3a)') "Spin-polarized GW calculations should be run with an even number of processors ",ch10,&
      !   " for achieving an optimal distribution of memory and CPU load. Please change the number of processors."
      !  ABI_ERROR_NOSTOP(msg, ierr)
      !end if
-     if (dt%usepaw == 1) then
-       ABI_ERROR_NOSTOP("GWR with PAW not yet implemented", ierr)
-     end if
+     !if (dt%usepaw == 1) then
+     !  ABI_ERROR_NOSTOP("GWR with PAW not yet implemented", ierr)
+     !end if
      if (dt%nshiftk /= 1 .or. any(abs(dt%shiftk(:,1)) > tol6)) then
        ABI_ERROR_NOSTOP('GWR requires Gamma-centered k-meshes', ierr)
-     end if
-     msg = "G0W0, HDIAGO, HDIAGO_FULL, RPA_ENERGY, EGEW, EGW0, G0EW, G0V, CC4S, CC4S_FULL"
-     if (.not. string_in(dt%gwr_task, msg)) then
-       ABI_ERROR_NOSTOP(sjoin("Invalid gwr_task:`", dt%gwr_task, "`, must be among:", msg), ierr)
      end if
    end if
 
@@ -4099,14 +4103,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
  if (ierr==1) then
    write(msg,'(6a)')ch10,&
-   ' Checking consistency of input data against itself revealed some problem(s).',ch10,&
-   ' So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
-   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+   'Checking consistency of input data against itself revealed some problem(s).',ch10,&
+   'So, stopping. The details of the problem(s) are given in the error file or the standard output file (= "log" file).',ch10,&
+   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call wrtout(iout,msg)
    write(msg,'(a,i0,5a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistency.',ch10,&
    'The details of the problem can be found above (or in output or log file).',ch10,&
-   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call flush_unit(std_out)
    ABI_ERROR(msg)
  end if
@@ -4114,7 +4118,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    write(msg,'(a,i0,5a)')&
    'Checking consistency of input data against itself gave ',ierr,' inconsistencies.',ch10,&
    'The details of the problems can be found above (or in output or log file), in an earlier WARNING.',ch10,&
-   ' In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
+   'In parallel, the details might not even be printed there. Then, try running in sequential to see the details.'
    call flush_unit(std_out)
    ABI_ERROR(msg)
  end if

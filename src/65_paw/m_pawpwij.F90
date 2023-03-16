@@ -754,7 +754,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
    ABI_FREE(tmp_jgl)
 
  CASE DEFAULT
-   ABI_BUG('Called with wrong value for method:', itoa(method))
+   ABI_BUG(sjoin('Called with wrong value for method:', itoa(method)))
  END SELECT
 
  DBG_EXIT("COLL")

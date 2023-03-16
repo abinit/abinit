@@ -1,0 +1,15 @@
+version: 100
+type: Tensor
+scalarType: Real64
+dimensions:
+  - length: 3
+    type: Vector
+  - length: 59
+    type: Momentum
+elements:
+  type: TextFile
+unit: 1.0  # Bohr^-1
+metaData:
+  Gi: [-0.815629935555269E+00, 0.815629935555269E+00, 0.815629935555269E+00]
+  Gj: [ 0.815629935555269E+00,-0.815629935555269E+00, 0.815629935555269E+00]
+  Gk: [ 0.815629935555269E+00, 0.815629935555269E+00,-0.815629935555269E+00]
