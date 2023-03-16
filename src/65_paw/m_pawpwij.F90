@@ -29,6 +29,7 @@ MODULE m_pawpwij
  use m_abicore
  use m_fft
 
+ use m_fstrings,       only : sjoin, itoa
  use defs_datatypes,   only : pseudopotential_type
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : arth
@@ -53,25 +54,24 @@ MODULE m_pawpwij
 !! pawpwff_t
 !!
 !! FUNCTION
-!! For PAW, form factors used to evaluate $<phi|e^{-i(q+G).r}|phj> - <tphi|e^{-i(q+G).r}|tphj>$
+!!  PAW form factors used to evaluate $<phi|e^{-i(q+G).r}|phj> - <tphi|e^{-i(q+G).r}|tphj>$
 !!
 !! SOURCE
 
  type,public :: pawpwff_t
 
-  integer :: method
+  integer :: method = -1
   ! 1 For Arnaud-Alouani"s exact expression.
   ! 2 For Shishkin-Kresse"s approximated expression.
 
-  integer :: dim1
-  integer :: dim2
+  integer :: dim1 = -1, dim2 = -1
   ! Dimensions of pwff_spl, depending on method.
 
-  integer :: nq_spl
+  integer :: nq_spl = -1
    ! Number of points in the reciprocal space grid on which
    ! the radial integrals are evaluated.
 
-  real(dp) :: gmet(3,3)
+  real(dp) :: gmet(3,3) = zero
   ! Reciprocal space metric tensor in Bohr**-2
 
   real(dp),allocatable :: qgrid_spl(:)
@@ -125,9 +125,8 @@ MODULE m_pawpwij
 
  end type pawpwij_t
 
- public :: pawpwij_init       ! Calculate onsite matrix elements of a set of plane waves.
+ public :: pawpwij_init        ! Calculate onsite matrix elements of a set of plane waves.
  public :: pawpwij_free        ! Deallocate dynamic memory in the structure.
- !public :: paw_pwij_bcast
  public :: paw_rho_tw_g        ! Calculate the PAW contribution to the oscillator matrix element.
  public :: paw_cross_rho_tw_g  ! Calculate the PAW cross term contribution to the oscillator matrix element.
 !!***
@@ -206,16 +205,14 @@ subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
      dim1 = Pawtab(itypat)%l_size**2
      dim2 = Pawtab(itypat)%lmn2_size
    case default
-     ABI_BUG("Wrong method")
+     ABI_BUG(sjoin("Wrong method:", itoa(method)))
    end select
 
    Paw_pwff(itypat)%dim1 = dim1
    Paw_pwff(itypat)%dim2 = dim2
-
    Paw_pwff(itypat)%gmet = gmet
 
-   ! === Setup of the q-mesh for spline ===
-   ! * It can be type-dependent.
+   ! Setup of the q-mesh for spline. It can be type-dependent.
    nq = nq_spl(itypat)
    dq = qmax(itypat)/(one*(nq-1))
    !write(std_out,*)"nq,dq",nq,dq
@@ -227,9 +224,9 @@ subroutine pawpwff_init(Paw_pwff,method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
    ! === Calculate form factors depending on method ===
    ABI_MALLOC(Paw_pwff(itypat)%pwff_spl,(nq,2,0:dim1,dim2))
 
-   call paw_mkrhox_spl(itypat,Psps%ntypat,method,dim1,dim2,nq,&
-&    Paw_pwff(itypat)%qgrid_spl,Pawrad,Pawtab,Paw_pwff(itypat)%pwff_spl)
- end do !itypat
+   call paw_mkrhox_spl(itypat,Psps%ntypat,method,dim1,dim2,nq, &
+     Paw_pwff(itypat)%qgrid_spl,Pawrad,Pawtab,Paw_pwff(itypat)%pwff_spl)
+ end do ! itypat
 
 end subroutine pawpwff_init
 !!***
@@ -241,10 +238,7 @@ end subroutine pawpwff_init
 !!  pawpwff_free
 !!
 !! FUNCTION
-!!  Free the memory allocated in a structure of type pawpwff_t
-!!
-!! SIDE EFFECTS
-!!  Paw_pwff(:)=<pawpwff_t>=Object storing form factors for the spline of wf into PAW spheres
+!!  Free memory
 !!
 !! SOURCE
 
@@ -255,19 +249,13 @@ subroutine pawpwff_free(Paw_pwff)
  type(pawpwff_t),intent(inout) :: Paw_pwff(:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
 
 !************************************************************************
 
- !@pawpwff_t
  do ii=1,SIZE(Paw_pwff)
-   if (allocated(Paw_pwff(ii)%qgrid_spl)) then
-     ABI_FREE(Paw_pwff(ii)%qgrid_spl)
-   end if
-   if (allocated(Paw_pwff(ii)%pwff_spl )) then
-     ABI_FREE(Paw_pwff(ii)%pwff_spl)
-   end if
+   ABI_SFREE(Paw_pwff(ii)%qgrid_spl)
+   ABI_SFREE(Paw_pwff(ii)%pwff_spl)
  end do
 
 end subroutine pawpwff_free
@@ -281,8 +269,10 @@ end subroutine pawpwff_free
 !!
 !! FUNCTION
 !!  Creation method for pawpwij_t. Calculates the onsite matrix elements
+!!
 !!   $ <phj|e^{-i(q+G)}|phi> - <tphj|e^{-i(q+G)}|tphi> $
-!!  for a given q and a set of G"s for a given __TYPE__ of atom.
+!!
+!!  for a given q and a set of G"s for a given TYPE of atom.
 !!  Phase factors arising from atom positions are therefore not included.
 !!
 !! INPUTS
@@ -295,7 +285,6 @@ end subroutine pawpwff_free
 !!  Pawtab(%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  Paw_pwff(%ntypat) <pawpwff_t>=Object storing the form factors for the spline used in pawpwij_init.
 !!  Psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!    %ntypat
 !!
 !! OUTPUT
 !!  Pwij(%ntypat)<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}.
@@ -327,12 +316,9 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 !arrays
  integer,allocatable :: npwarr(:),dummy_nband(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
- real(dp),allocatable :: my_qtmp(:,:)
- real(dp),allocatable :: ylm_q(:,:),ylmgr_q(:,:,:)
+ real(dp),allocatable :: my_qtmp(:,:), ylm_q(:,:),ylmgr_q(:,:,:)
 
 ! *********************************************************************
-
- !@pawpwij_t
 
  ! ===============================================
  ! === Get real spherical harmonics in G space ===
@@ -340,7 +326,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- ! * Set up of REAL Ylm(q+G) up to 2*l_max for this q-point.
+ ! Set up of REAL Ylm(q+G) up to 2*l_max for this q-point.
  my_mqmem=1; two_lmaxp1=2*Psps%mpsang-1; optder=0
 
  ABI_MALLOC(ylm_q  ,(npw*my_mqmem,two_lmaxp1**2))
@@ -349,7 +335,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
  my_nqpt=1
  ABI_MALLOC(my_qtmp,(3,my_nqpt))
  my_qtmp(:,1)=qpt_in(:)
- !
+
  ! dummy_nband and dummy_nsppol are not used in sequential mode.
  dummy_nsppol=1
  ABI_MALLOC(dummy_nband,(my_nqpt*dummy_nsppol))
@@ -394,8 +380,8 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 
    ! Evaluate oscillator matrix elements mqpgij
    call paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,Paw_pwff(itypat)%qgrid_spl,Paw_pwff(itypat)%pwff_spl,&
-&    gmet,qpt_in,npw,gvec,ylm_q,Psps,Pawtab,Pwij(itypat)%mqpgij)
- end do !itypat
+                   gmet,qpt_in,npw,gvec,ylm_q,Psps,Pawtab,Pwij(itypat)%mqpgij)
+ end do ! itypat
 
  ABI_FREE(ylm_q)
 
@@ -411,28 +397,19 @@ end subroutine pawpwij_init
 !! FUNCTION
 !!  Free all memory allocated in a structure of type pawpwij_t
 !!
-!! SIDE EFFECTS
-!!  Paw_pwij(:)=<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}
-!!
 !! SOURCE
 
 subroutine pawpwij_free_d1(Pwij)
 
 !Arguments ------------------------------------
-!scalars
  type(pawpwij_t),intent(inout) :: Pwij(:)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii
-
 !************************************************************************
 
- !@pawpwij_t
  do ii=1,SIZE(Pwij)
-   if (allocated(Pwij(ii)%mqpgij))  then
-     ABI_FREE(Pwij(ii)%mqpgij)
-   end if
+   ABI_SFREE(Pwij(ii)%mqpgij)
  end do
 
 end subroutine pawpwij_free_d1
@@ -447,9 +424,6 @@ end subroutine pawpwij_free_d1
 !! FUNCTION
 !!  Free all memory allocated in a structure of type pawpwij_t
 !!
-!! SIDE EFFECTS
-!!  Paw_pwij(:)=<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}
-!!
 !! SOURCE
 
 subroutine pawpwij_free_d2(Pwij)
@@ -459,7 +433,6 @@ subroutine pawpwij_free_d2(Pwij)
  type(pawpwij_t),intent(inout) :: Pwij(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: jj
 
 !************************************************************************
@@ -556,7 +529,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
    !    \int_0^{r_a} j_L(2\pi qr) [phi_{n_i,l_i}.phi_{n_j l_j}(r)-tphi_{n_i l_i}.tph_{n_j l_j}(r)]dr$
    ! * It does not descrive correctly the multipoles of the AE charge density if low cutoff on G
    write(msg,'(a,i3)')' paw_mkrhox_spl: Using Arnaud-Alouani expression for atom type: ',itypat
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
 
    nln     = Pawtab(itypat)%basis_size
    ij_size = Pawtab(itypat)%ij_size
@@ -565,7 +538,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
    ABI_MALLOC(tmp_spl,(nq_spl,2,0:l_size-1,ij_size))
 
    ! Is mesh beginning with r=0 ?
-   if (ABS(Pawrad(itypat)%rad(1))>tol10) then
+   if (abs(Pawrad(itypat)%rad(1)) > tol10) then
      ABI_ERROR("Radial mesh starts with r/=0")
    end if
    !
@@ -667,12 +640,12 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
    ABI_FREE(rr)
    ABI_FREE(tmp_spl)
 
-   if (.FALSE.) then ! write form factors on file for plotting purpose.
-     ll=0
-     do iq=1,nq_spl
-       write(777+itypat,'(50(es16.8))')qgrid_spl(iq),((pwff_spl(iq,ider,ll,iln),ider=1,2),iln=1,dim2)
-     end do
-   end if
+   !if (.FALSE.) then ! write form factors on file for plotting purpose.
+   !  ll=0
+   !  do iq=1,nq_spl
+   !    write(777+itypat,'(50(es16.8))')qgrid_spl(iq),((pwff_spl(iq,ider,ll,iln),ider=1,2),iln=1,dim2)
+   !  end do
+   !end if
 
  CASE (PWIJ_SHISHKIN)
    ! ==== Shishkin-Kresse approximated expression ====
@@ -680,7 +653,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
    ! * Better description of multipoles of AE charge,
    ! * Better results for energy degeneracies in GW band structure
    write(msg,'(a,i3)')' paw_mkrhox_spl: Using Shishkin-Kresse expression for atom type ',itypat
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    l_size = Pawtab(itypat)%l_size
    nlmn   = Pawtab(itypat)%lmn_size
 
@@ -691,9 +664,8 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
    if (ABS(Pawrad(itypat)%rad(1))>tol10) then
      ABI_ERROR("Radial mesh starts with r/=0")
    end if
-   !
-   ! === Initialize temporary arrays and variables ===
 
+   ! === Initialize temporary arrays and variables ===
    call pawrad_copy(Pawrad(itypat),Tmpmesh)
    meshsz=Pawtab(itypat)%mesh_size ; mmax=meshsz
    ABI_MALLOC(ff,(meshsz))
@@ -782,8 +754,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
    ABI_FREE(tmp_jgl)
 
  CASE DEFAULT
-   write(msg,'(a,i3)')' Called with wrong value for method ',method
-   ABI_BUG(msg)
+   ABI_BUG('Called with wrong value for method:', itoa(method))
  END SELECT
 
  DBG_EXIT("COLL")
@@ -823,7 +794,7 @@ end subroutine paw_mkrhox_spl
 !! SOURCE
 
 subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_spl,&
-&  gmet,qpt,npw,gvec,ylm_q,Psps,Pawtab,paw_rhox)
+                       gmet,qpt,npw,gvec,ylm_q,Psps,Pawtab,paw_rhox)
 
 !Arguments ------------------------------------
 !scalars
@@ -853,16 +824,15 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
 ! *************************************************************************
 
  !write(std_out,*)itypat,dim1,dim2,method,npw,nq_spl,lmn2_size,Psps%mpsang
-
- mpsang=Psps%mpsang
+ mpsang = Psps%mpsang
  indlmn => Pawtab(itypat)%indlmn
- !
+
  ! === Pre-calculate (-i)^l ===
  mi_l(1,0)=one  ; mi_l(2,0)=zero
  mi_l(1,1)=zero ; mi_l(2,1)=-one
  mi_l(1,2)=-one ; mi_l(2,2)=zero
  mi_l(1,3)=zero ; mi_l(2,3)=one
- !
+
  ! === Calculate |q+G| ===
  ! * 2\pi is not included to be consistent with the spline.
  ABI_MALLOC(qpg_norm,(npw))
@@ -874,9 +844,9 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
  ! Check q-grid as %qgrid_spl must be large enoung.
  if (MAXVAL(qpg_norm)>MAXVAL(qgrid_spl)) then
    write(msg,'(3a,f8.4,a,f8.4,2a)')&
-&    ' Function values are being requested outside range of data. ',ch10,&
-&    ' Max qpg_norm = ',MAXVAL(qpg_norm),' Max qgrid_spl = ',MAXVAL(qgrid_spl),ch10,&
-&    ' Increase ecut(wfn), check qrid_ff and gsqcut '
+    ' Function values are being requested outside range of data. ',ch10,&
+    ' Max qpg_norm = ',MAXVAL(qpg_norm),' Max qgrid_spl = ',MAXVAL(qgrid_spl),ch10,&
+    ' Increase ecut(wfn), check qrid_ff and gsqcut '
    ABI_ERROR(msg)
  end if
 
@@ -885,7 +855,6 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
  ABI_MALLOC(derfun,(npw))
 
  SELECT CASE (method)
-
  CASE (PWIJ_ARNAUD)
    ! === Arnaud-Alouani exact expression ===
    ! * It does not describe the multipoles of the AE charge density
@@ -900,8 +869,8 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
    ABI_MALLOC(gntselect,((2*mpsang-1)**2, mpsang**2*(mpsang**2+1)/2))
    call realgaunt(mpsang,ngnt,gntselect,realgnt)
    paw_rhox=zero
-   !
-   ! === Loop on (jl,jm,jn) channels for this atom ===
+
+   ! Loop on (jl,jm,jn) channels for this atom
    do jlmn=1,Pawtab(itypat)%lmn_size
      jl =indlmn(1,jlmn)
      jm =indlmn(2,jlmn)
@@ -911,7 +880,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
      k0lmn=jlmn*(jlmn-1)/2
      k0lm =jlm *(jlm -1)/2
      k0ln =jln *(jln -1)/2
-     !
+
      ! === Loop on (il,im,in) channels; klmn is index for packed form ===
      do ilmn=1,jlmn
        il =indlmn(1,ilmn)
@@ -922,7 +891,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
        klmn=k0lmn+ilmn
        klm =k0lm +ilm
        kln =k0ln +iln
-       !
+
        ! === Summing over allowed (L,M), taking into account Gaunt selection rules ===
        do ll_G=ABS(jl-il),jl+il,2
          ipow=MOD(ll_G,4)
@@ -934,15 +903,12 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
            ignt=gntselect(ilm_G,klm)
            if (ignt==0) CYCLE
            rgnt=realgnt(ignt)
-           !
+
            ! === Evaluate matrix elements for each plane wave ===
            do ig=1,npw
              dummy = newfun(ig) * ylm_q(ig,ilm_G) * rgnt
-             paw_rhox(1,ig,klmn) = paw_rhox(1,ig,klmn) &
-&               + ( dummy * mi_l(1,ipow) )
-
-             paw_rhox(2,ig,klmn) = paw_rhox(2,ig,klmn) &
-&               + ( dummy * mi_l(2,ipow) )
+             paw_rhox(1,ig,klmn) = paw_rhox(1,ig,klmn) + ( dummy * mi_l(1,ipow) )
+             paw_rhox(2,ig,klmn) = paw_rhox(2,ig,klmn) + ( dummy * mi_l(2,ipow) )
            end do
          end do !mm_G
        end do !ll_G
@@ -950,8 +916,7 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
      end do !ilmn
    end do !jlmn
 
-   !
-   ! * Multiply by 4\pi arising from the expansion of the plane wave
+   ! Multiply by 4\pi arising from the expansion of the plane wave
    paw_rhox = four_pi*paw_rhox
    ABI_FREE(realgnt)
    ABI_FREE(gntselect)
@@ -1001,23 +966,21 @@ subroutine paw_mkrhox(itypat,lmn2_size,method,dim1,dim2,nq_spl,qgrid_spl,pwff_sp
            do ig=1,npw
              dummy = newfun(ig) * ylm_q(ig,ilm_G)
              paw_rhox(1,ig,klmn) = paw_rhox(1,ig,klmn) &
-&              + dummy * mi_l(1,ipow) !(ph3d(1,ig)*mi_l(1,ipow)-ph3d(2,ig)*mi_l(2,ipow))
-
+               + dummy * mi_l(1,ipow) !(ph3d(1,ig)*mi_l(1,ipow)-ph3d(2,ig)*mi_l(2,ipow))
              paw_rhox(2,ig,klmn) = paw_rhox(2,ig,klmn) &
-&              + dummy * mi_l(2,ipow) !(ph3d(1,ig)*mi_l(2,ipow)+ph3d(2,ig)*mi_l(1,ipow))
+               + dummy * mi_l(2,ipow) !(ph3d(1,ig)*mi_l(2,ipow)+ph3d(2,ig)*mi_l(1,ipow))
            end do
          end do !mm_G
        end do !ll_G
 
      end do !ilmn
    end do !jlmn
-   !
-   ! * Multiply by 4\pi arising from the expansion of the plane wave
+
+   ! Multiply by 4\pi arising from the expansion of the plane wave
    paw_rhox=four_pi*paw_rhox
 
  CASE DEFAULT
-   write(msg,'(a,i3)')' Wrong value for method= ',method
-   ABI_BUG(msg)
+   ABI_BUG(sjoin('Wrong value for method:', itoa(method)))
  END SELECT
 
  ABI_FREE(wk_ffnl)
@@ -1210,34 +1173,33 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
 
      rhotwg=rhotwg + rho
 
-   CASE (1) ! Need results on the G-sphere. Call zero-padded FFT routines if required.
-
+   CASE (1)
+     ! Need results on the G-sphere. Call zero-padded FFT routines if required.
      if (use_padfft==1) then
        nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
        ldx=nx      ; ldy=ny      ; ldz=nz
        call fftpad(rho,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,-1,gbound)
      else
-
        call plan%init(ndat1, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0)
        call plan%execute(rho, -1)
        call plan%free()
      end if
 
-     do ig=1,npwvec       ! Have to map FFT to G-sphere.
+     ! Have to map FFT to G-sphere.
+     do ig=1,npwvec
        igfft=igfftg0(ig)
-       if (igfft/=0) then ! G-G0 belong to the FFT mesh.
-         rhotwg(ig)=rhotwg(ig)+rho(igfft)
-       end if
+       ! If G-G0 belong to the FFT mesh.
+       if (igfft/=0) rhotwg(ig)=rhotwg(ig)+rho(igfft)
      end do
 
    CASE DEFAULT
-     ABI_BUG("Wrong map2sphere")
+     ABI_BUG(sjoin("Wrong map2sphere:", itoa(map2sphere)))
    END SELECT
 
    RETURN
 
- CASE (2) ! Spinorial case.
-
+ CASE (2)
+   ! Spinorial case.
    isprot1=spinrot1(1); isprot2=spinrot2(1) ! This is to bypass abirule
    ABI_ERROR("Spinorial case not implemented yet")
 
@@ -1248,11 +1210,10 @@ subroutine paw_cross_rho_tw_g(nspinor,npwvec,nr,ngfft,map2sphere,use_padfft,igff
    CASE DEFAULT
      ABI_BUG("Wrong map2sphere")
    END SELECT
-
    RETURN
 
  CASE DEFAULT
-   ABI_BUG('Wrong nspinor')
+   ABI_BUG(sjoin('Wrong nspinor:', itoa(nspinor)))
  END SELECT
 
 end subroutine paw_cross_rho_tw_g

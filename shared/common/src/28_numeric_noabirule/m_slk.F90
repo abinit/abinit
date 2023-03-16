@@ -191,7 +191,7 @@ module m_slk
     ! Free memory
 
    procedure :: change_size_blocs => slk_change_size_blocs
-    ! Change the block sizes and the processor, return new object.
+    ! Change the block sizes, return new object.
 
    procedure :: get_trace => slk_get_trace
     ! Compute the trace of an N-by-N distributed matrix.
@@ -1128,6 +1128,7 @@ subroutine matrix_scalapack_free(mat)
 
 ! *********************************************************************
 
+ ! Don't free the grid. Just nullify the pointer as there might be other objects keeping a ref to processor.
  mat%processor => null()
 
  mat%sizeb_global = 0
@@ -4729,19 +4730,21 @@ end subroutine slkmat_sp_ptrans
 !!  Change the block sizes, return new matrix in out_mat
 !!
 !! INPUTS
+!!  [free]: True if `in_mat` should be deallocated. Default: False
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
 subroutine slk_change_size_blocs(in_mat, out_mat, &
-                                 size_blocs, processor)  ! Optional
+                                 size_blocs, processor, free)  ! Optional
 
 !Arguments ------------------------------------
- class(basemat_t),target,intent(in) :: in_mat
+ class(basemat_t),target,intent(inout) :: in_mat
  class(basemat_t),intent(out) :: out_mat
  integer,optional,intent(in) :: size_blocs(2)
  class(processor_scalapack), target, optional,intent(in) :: processor
+ logical,optional,intent(in) :: free
 
 !Local variables-------------------------------
  type(processor_scalapack), pointer :: processor__
@@ -4808,6 +4811,10 @@ subroutine slk_change_size_blocs(in_mat, out_mat, &
  end select
 #endif
 
+ if (present(free)) then
+   if (free) call in_mat%free()
+ end if
+
 end subroutine slk_change_size_blocs
 !!***
 
@@ -4822,21 +4829,23 @@ end subroutine slk_change_size_blocs
 !!  and create new matrix with `size_blocs` and `processor`
 !!
 !! INPUTS
+!!  [free]: True if `in_mat` should be deallocated. Default: False
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
 subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
-                   size_blocs, processor, ija, ijb)  ! Optional
+                   size_blocs, processor, ija, ijb, free)  ! Optional
 
 !Arguments ------------------------------------
- class(matrix_scalapack),target,intent(in) :: in_mat
+ class(matrix_scalapack),target,intent(inout) :: in_mat
  integer,intent(in) :: glob_nrows, glob_ncols
  class(matrix_scalapack),intent(out) :: out_mat
  integer,optional,intent(in) :: size_blocs(2)
  class(processor_scalapack), target, optional,intent(in) :: processor
  integer,optional,intent(in) :: ija(2), ijb(2)
+ logical,optional,intent(in) :: free
 
 !Local variables-------------------------------
  type(processor_scalapack), pointer :: processor__
@@ -4875,6 +4884,10 @@ subroutine slk_cut(in_mat, glob_nrows, glob_ncols, out_mat, &
 #endif
  else
    ABI_ERROR("Neither buffer_cplx nor buffer_real are allocated!")
+ end if
+
+ if (present(free)) then
+   if (free) call in_mat%free()
  end if
 
 end subroutine slk_cut
@@ -5456,10 +5469,10 @@ subroutine slk_write(Slk_mat, uplo, is_fortran_file, fname,mpi_fh, offset, flags
  call MPI_FILE_SET_VIEW(my_fh, my_offset, etype, slk_type, 'native', MPI_INFO_NULL, ierr)
  ABI_CHECK_MPI(ierr,"SET_VIEW")
 
- call MPI_type_FREE(slk_type,ierr)
+ call MPI_TYPE_FREE(slk_type,ierr)
  ABI_CHECK_MPI(ierr,"MPI_type_FREE")
 
- if (nelw==buffer_size) then
+ if (nelw == buffer_size) then
    ! Dump Slk_mat% immediately.
    call MPI_FILE_WRITE_ALL(my_fh, Slk_mat%buffer_cplx, buffer_size, MPI_DOUBLE_complex, MPI_STATUS_IGNORE, ierr)
    ABI_CHECK_MPI(ierr,"WRITE_ALL")

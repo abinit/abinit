@@ -485,7 +485,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      q0=zero
      call get_gftt(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
      ABI_MALLOC(Pwij_fft,(Psps%ntypat))
-     call pawpwij_init(Pwij_fft,gwc_nfftot,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
+     call pawpwij_init(Pwij_fft,gwc_nfftot, [zero,zero,zero], gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if ! usepaw==1
 

@@ -946,6 +946,7 @@ end subroutine cc4s_write_eigens
 subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
  use m_numeric_tools, only : blocked_loop
+ use m_gwdefs,        only : GW_Q0_DEFAULT
  use m_fftcore,       only : sphereboundary !, getng
  use m_fft_mesh,      only : setmesh
  use m_fft,           only : fft_ug, fft_ur, uplan_t
@@ -963,16 +964,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mG0(3) = 0, master = 0
- logical,parameter :: debug_this = .True.
- !logical,parameter :: debug_this = .False.
  integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, buf_size ! ierr,
  integer :: band1, band1_start, band1_stop, batch1_size, n1dat, idat1, m_istwfk, cnt
  integer :: band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
  integer(XMPI_OFFSET_KIND) :: offset
- real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err
+ real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3)
  character(len=500) :: msg
  character(len=fnlen) :: filepath
- logical :: k_is_gamma
+ logical :: k_is_gamma,  debug_this
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
  type(vcgen_t) :: vcgen
  !type(pstat_t) :: pstat
@@ -981,7 +980,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  !integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
  integer,allocatable,target :: m_gvec(:,:)
  complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
- complex(gwpc),allocatable :: vc_qg(:)
+ complex(gwpc),allocatable :: sqrt_vc(:)
 
 ! *************************************************************************
 
@@ -991,11 +990,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  units = [std_out, ab_out]
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
 
- call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
+ debug_this = merge(.False., .True., nproc > 1)
+ !debug_this = .False.
+
+ if (dtset%prtvol > 10) call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
 
  ! m_gvec is the g-sphere for the oscillators M computed from ecuteps
  kpt = dtset%kptns(:,ik_ibz); k_is_gamma = all(abs(kpt) < tol12)
- m_istwfk = 1 !; if (k_is_gamma .and. dtset%nspinor == 1) m_istwfk = 2
+ m_istwfk = 1; if (ugb%istwf_k == 2) m_istwfk = 2
  call get_kg(kpt, m_istwfk, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.False.)
 
  ! Setup FFT mesh
@@ -1026,10 +1028,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
                  dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
 
  ! NB: npweps = m_npw
- ABI_CALLOC(vc_qg, (m_npw))
+ ABI_CALLOC(sqrt_vc, (m_npw))
  qpt = zero
- call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, dtset%gw_qlwl(:,1), cryst, vc_qg, comm)
- vc_qg = vc_qg**2
+ my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
+ call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, my_gw_qlwl, cryst, sqrt_vc, comm)
  call vcgen%free()
 
  if (my_rank == master) then
@@ -1114,14 +1116,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
      end if
      close(unt)
 
-     !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
-     !ALLOCATE(CVERTEX_TMP(NOPTAUX,(NBANDSDUMP),WDES%ISPIN))
-     !filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
-     !write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(filepath)
-     !COMPLEX(q), ALLOCATABLE :: CVERTEX_TMP(:,:,:), CVERTEX_TMP_SINGLE(:)
-     !ALLOCATE(CVERTEX_TMP_SINGLE(NOPTAUX))
-     !write(unt) CVERTEX_TMP_SINGLE(:)
-
      ! https://manuals.cc4s.org/user-manual/objects/CoulombPotential.html
      filepath = trim(dtfil%filnam_ds(4))//'_CoulombPotential.yaml'
      write(ab_out, "(3a)")ch10, ' Writing CoulombPotential info to file: ', trim(filepath)
@@ -1145,16 +1139,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
+     do ig=1,m_npw
+       write(unt,*)real(sqrt_vc(ig) * conjg(sqrt_vc(ig)), kind=dp)
+       !write(unt,*)real(sqrt_vc(ig)**2)
+     end do
      !KQ=1 !k-points to be implemented
      !DO NG=1,NGVECTOR
      !  write(unt,*) REAL(POTFAK_FULL(NG,KQ)*CONJG(POTFAK_FULL(NG,KQ)),kind=q)
      !ENDDO
-     !#ifdef gammareal
-     !DO NG=2,NGVECTOR
-     !  write(unt,*) REAL(POTFAK_FULL(NG,KQ)*CONJG(POTFAK_FULL(NG,KQ)),kind=q)
-     !ENDDO
-     !#else
-     !#endif
      close(unt)
    end if ! ik_ibz == 1 .and. spin == 1
  end if ! my_rank == master
@@ -1180,14 +1172,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  !ABI_MALLOC(m_gbound, (2 * u_mgfft + 8, 2))
  !call sphereboundary(m_gbound, m_istwfk, m_gvec, u_mgfft, m_npw)
 
+ ! FIXME: IO with batch1_size > 1 is buggy
  ! Define batch sizes and allocate workspace arrays.
- !call pstat%from_pid()
- !call pstat%print([std_out], reload=.True.)
- batch1_size = min(24, ugb%nband_k); batch2_size = min(24, ugb%nband_k)
-
- ! FIXME: IO with batch1_size > 1is buggy
+ ! Increasing this value improves efficiency (less communication) at the price of more memory.
+ !call pstat%from_pid(); call pstat%print([std_out], reload=.True.)
+ batch1_size = min(48, ugb%nband_k); batch2_size = min(48, ugb%nband_k)
  batch1_size = 1; batch2_size = 1
  batch1_size = 1; batch2_size = 7
+ !batch1_size = 7; batch2_size = 1
  !batch1_size = 3; batch2_size = 1
 
  !ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S interface")
@@ -1196,19 +1188,21 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  ABI_MALLOC(ur12_batch, (u_nfft * nspinor, batch2_size))
  ABI_MALLOC(ug12_batch, (m_npw * nspinor, batch2_size))
 
- ! TODO: take advantage of
- ! M_{b1,b2}(g) = <b1|e^{-ig.r}|b2> => M_{b1,b2}(g) = M_{b2,b1}(-g)^*
- ! once I have a better understanding of the fileformat expected by CC4S.
+ ! TODO:
+ ! 1) take advantage of M_{b1,b2}(g) = <b1|e^{-ig.r}|b2> => M_{b1,b2}(g) = M_{b2,b1}(-g)^*
+ !   once I have a better understanding of the fileformat expected by CC4S.
+ ! 2) Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
+ ! 3) Clarify ordering of CoulombVertex and eigenvalues
+ ! 4) See other TODO below.
 
  call uplan_1%init(npw_k, nspinor, batch1_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
  call uplan_2%init(npw_k, nspinor, batch2_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
  call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, m_istwfk, m_gvec, dp, dtset%use_gpu_cuda)
 
- ! Blocked loop over group of b1 indices.
- ! NB: Assuming bands distributed in contiguous blocks.
  cnt = 0; M_ = m_npw
- do band1_start=1, ugb%nband_k, batch1_size
 
+ ! Blocked loop over group of b1 indices. NB: Assuming bands distributed in contiguous blocks.
+ do band1_start=1, ugb%nband_k, batch1_size
    ! Collect n1dat bands starting from band1_start on each proc.
    n1dat = blocked_loop(band1_start, ugb%nband_k, batch1_size)
    band1_stop = band1_start + n1dat - 1
@@ -1221,7 +1215,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
    if (ugb%istwf_k /= 2) ur1_batch = conjg(ur1_batch)  ! Not needed if k == Gamma as ur1 is real.
    ABI_FREE(ug1_batch)
 
-   ! Blocked loop over my group of b2 indices.
+   ! Blocked loop over MY group of b2 indices (again contiguous blocks)
    do band2_start=ugb%my_bstart, ugb%my_bstop, batch2_size
      n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
      my_ib2 = band2_start - ugb%my_bstart + 1
@@ -1233,9 +1227,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
      call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
 
+     ! For each row of the submatrix, build n2dat products (band1, idat2) in r-space, then r --> g.
      do idat1=1,n1dat
-
-       ! For each row of the submatrix, build n2dat products (band1, idat2) in r-space, then r --> g.
        band1 = band1_start + idat1 - 1
        do idat2=1,n2dat
          ur12_batch(:,idat2) = ur1_batch(:,idat1) * ur2_batch(:,idat2)
@@ -1244,26 +1237,24 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
        !call fft_ur(m_npw, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
 
-       ! Multiply by the Coulomb kernel.
-       do idat2=1,n2dat
-         !band2 = band2_start + idat2 - 1
-         !write(std_out,*) ug12_batch(1,idat2), idat2, "ug12_batch(1,idat2), idat"
-         !ug12_batch(:,idat2) = ug12_batch(:,idat2) * vc_qg(:)
-       end do
-
        if (nspinor == 2) then
          ! Sum over spinor components and repack data in the first n2dat positions.
          do idat2=1,n2dat
-            ug12_batch(1:m_npw,idat2) = ug12_batch(1:m_npw,idat2) + ug12_batch(m_npw+1:,idat2)
-          end do
+           ug12_batch(1:m_npw,idat2) = ug12_batch(1:m_npw,idat2) + ug12_batch(m_npw+1:,idat2)
+         end do
          do idat2=2,n2dat,2
-            ug12_batch(m_npw+1:,idat2-1) = ug12_batch(1:m_npw,idat2)
+           ug12_batch(m_npw+1:,idat2-1) = ug12_batch(1:m_npw,idat2)
          end do
        end if
 
+       ! Multiply by sqrt(vc(g))
+       do idat2=1,n2dat
+         !if (band1 == band2_start +idat2 -1) write(std_out,*) "ug12_batch(1,idat2), idat", ug12_batch(1,idat2), idat2
+         ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) ! * sqrt(cryst%ucvol) FIXME
+       end do
+
 #ifdef HAVE_MPI_IO
        ! Write ug12_batch using Stream-IO
-       !  - TODO: Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
        buf_size = m_npw * n2dat
        offset = (band2_start-1) * m_npw + (band1-1) * m_npw * ugb%nband_k
        offset = offset * xmpi_bsize_dpc
@@ -1272,7 +1263,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
 
        if (my_rank == 0 .and. debug_this) then
          do idat2=1,n2dat
-           cnt = cnt + 1; write(test_unt, *)cnt, ug12_batch(1:M_,idat2)
+           cnt = cnt + 1; write(test_unt,*)cnt, ug12_batch(1:M_,idat2)
          end do
       end if
 #endif
@@ -1324,7 +1315,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, ugb)
  ABI_FREE(ur2_batch)
  ABI_FREE(ur12_batch)
  ABI_FREE(ug12_batch)
- ABI_FREE(vc_qg)
+ ABI_FREE(sqrt_vc)
 
  call cwtime_report(" cc4s_gamma", cpu, wall, gflops)
 

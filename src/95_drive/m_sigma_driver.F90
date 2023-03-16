@@ -485,11 +485,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Get Pawrhoij from the header of the WFK file.
    call pawrhoij_copy(Hdr_wfk%pawrhoij, KS_Pawrhoij)
 
-   ! Evaluate form factor of radial part of phi.phj-tphi.tphj.
-   rhoxsp_method = 1  ! Arnaud-Alouani (default in sigma)
-   !rhoxsp_method = 2 ! Shiskin-Kresse
-   if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
-
+   ! Evaluate form factor of radial part of phi.phj - tphi.tphj.
    ! The q-grid must contain the FFT mesh used for sigma_c and the G-sphere for the exchange part.
    ! We use the FFT mesh for sigma_c since COHSEX and the extrapolar method require oscillator
    ! strengths on the FFT mesh.
@@ -497,17 +493,20 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call get_gftt(gwc_ngfft, k0, gmet, gwc_gsq, tmp_gfft)
    ABI_FREE(tmp_gfft)
 
-   gwx_gsq = Dtset%ecutsigx/(two*pi**2)
-   gw_gsq = MAX(gwx_gsq, gwc_gsq)
-
    ! Set up q-grid, make qmax 20% larger than largest expected.
    ABI_MALLOC(nq_spl, (Psps%ntypat))
    ABI_MALLOC(qmax, (Psps%ntypat))
-   qmax = SQRT(gw_gsq)*1.2d0
+   gwx_gsq = Dtset%ecutsigx / (two*pi**2)
+   gw_gsq = max(gwx_gsq, gwc_gsq)
+   qmax = sqrt(gw_gsq)*1.2d0
    nq_spl = Psps%mqgrid_ff
    ! write(std_out,*)"using nq_spl",nq_spl,"qmax=",qmax
-   ABI_MALLOC(Paw_pwff, (Psps%ntypat))
-   call pawpwff_init(Paw_pwff,rhoxsp_method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
+   rhoxsp_method = 1  ! Arnaud-Alouani (default in sigma)
+   !rhoxsp_method = 2 ! Shiskin-Kresse
+   if (dtset%pawoptosc /= 0) rhoxsp_method = dtset%pawoptosc
+
+   ABI_MALLOC(paw_pwff, (Psps%ntypat))
+   call pawpwff_init(paw_pwff, rhoxsp_method, nq_spl, qmax, gmet, pawrad, pawtab, psps)
 
    ABI_FREE(nq_spl)
    ABI_FREE(qmax)
