@@ -451,7 +451,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    call paw_gencond(dtset, gnt_option, "test", call_pawinit)
 
    if (psp_gencond == 1 .or. call_pawinit) then
-     call timab(553,1,tsec)
+     call timab(553, 1, tsec)
      gsqcut_shp = two * abs(dtset%diecut) * dtset%dilatmx**2 / pi**2
      call pawinit(dtset%effmass_free, gnt_option, gsqcut_shp, zero, dtset%pawlcutd, dtset%pawlmix, &
                   psps%mpsang, dtset%pawnphi, cryst%nsym, dtset%pawntheta, pawang, pawrad, &
@@ -470,7 +470,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! Initialize optional flags in Pawtab to zero
    ! Cannot be done in Pawinit since the routine is called only if some pars. are changed
    pawtab(:)%has_nabla = 0
-   Pawtab(:)%lamb_shielding = zero
+   pawtab(:)%lamb_shielding = zero
 
    call setsym_ylm(gprimd, pawang%l_max-1, cryst%nsym, dtset%pawprtvol, cryst%rprimd, cryst%symrec, pawang%zarot)
 

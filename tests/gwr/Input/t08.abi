@@ -1,4 +1,4 @@
-# LiF. Interface with CC4S code (NC pseudos)
+# LiF. Interface with CC4S code (PAW pseudos)
 
 # Number of datasets: 2-step calculation
 ndtset 2
@@ -25,6 +25,7 @@ xred   0.00    0.00    0.00   # Reduced coordinates of atom 1
 
 # Definition of the plane-wave basis set
 ecut 15.0                     # Kinetic energy cut-off, in Hartree
+pawecutdg 30.0
 
 gw_icutcoul 3      # For legacy reasons
 
@@ -43,27 +44,27 @@ getden2     1
 nband2     40         # Number of (occ + empty) bands
 ecuteps2   4
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pw_standard_psp8"
-pseudos "Li.psp8, F.upf"
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pw_standard"
+pseudos "Li.xml, F.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t07.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;
-#%%   t07o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t07o_DS2_GridVectors.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
-#%%   t07o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t07o_DS2_EigenEnergies.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
-#%%   t07o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t07o_DS2_CoulombPotential.elements, tolnlines = 10, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t07o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;
+#%%   t08o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_GridVectors.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
+#%%   t08o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_EigenEnergies.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
+#%%   t08o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_CoulombPotential.elements, tolnlines = 10, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = NC, CC4S
+#%% keywords = PAW, CC4S
 #%% description =
-#%%   LiF. Interface with CC4S code with NC pseudos
+#%%   LiF. Interface with CC4S code with PAW pseudos
 #%%<END TEST_INFO>
