@@ -179,8 +179,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 !arrays
  real(dp), parameter :: k0(3) = zero
  integer :: cplex, cplex_dij, cplex_rhoij
- integer :: gnt_option,has_dijU,has_dijso !,iab,bmin,bmax,irr_idx1,irr_idx2
- integer :: ider, izero
+ integer :: gnt_option,has_dijU,has_dijso,ider,izero
  integer :: istep, moved_atm_inside, moved_rhor, n3xccc, sc_mode
  !integer :: ngrvdw,nhatgrdim,nkxc,nkxc1,nprocs,nscf,nspden_rhoij,nzlmopt,optene
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
@@ -199,7 +198,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(ugb_t), target :: ugb
  type(xmpi_pool2d_t) :: diago_pool
 !arrays
- integer :: ngfftc(18),ngfftf(18),unts(2) ! gwc_ngfft(18),gwx_ngfft(18),
+ integer :: ngfftc(18),ngfftf(18),units(2) ! gwc_ngfft(18),gwx_ngfft(18),
  integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:)
  integer,allocatable :: tmp_kstab(:,:,:), npwarr_ik(:), gvec_(:,:), istwfk_ik(:), nband_iks(:,:)
  real(dp) :: strsxc(6), diago_info(3, dtset%nkpt, dtset%nsppol),tsec(2)
@@ -233,26 +232,26 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !   * This routines shall not allocate big chunks of memory. The CPU-demanding sections should be
  !     performed in the subdriver that will employ different MPI distribution schemes optimized for that particular task.
 
+ ! abirules!
+ if (.False.) write(std_out,*)acell,codvsn,rprim,xred
+
+ comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ units(:) = [std_out, ab_out]
+
  call cwtime(cpu, wall, gflops, "start")
 
 ! write(msg,'(7a)')&
 ! ' SIGMA: Calculation of the GW corrections ',ch10,ch10,&
 ! ' Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.',ch10,&
 ! ' Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.'
-! call wrtout([std_out, ab_out], msg)
+! call wrtout(units, msg)
 !
 #if defined HAVE_GW_DPC
  write(msg,'(a,i2,a)')'.Using double precision arithmetic; gwpc = ',gwpc,ch10
 #else
  write(msg,'(a,i2,a)')'.Using single precision arithmetic; gwpc = ',gwpc,ch10
 #endif
- call wrtout([std_out, ab_out], msg)
-
- ! abirules!
- if (.False.) write(std_out,*)acell,codvsn,rprim,xred
-
- comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- unts(:) = [std_out, ab_out]
+ call wrtout(units, msg)
 
  ! autoparal section
  ! TODO: This just to activate autoparal in AbiPy. Lot of things should be improved.
@@ -312,13 +311,13 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    if (nctk_try_fort_or_ncfile(den_path, msg) /= 0) then
      ABI_ERROR(sjoin("Cannot find DEN file:", den_path, ". Error:", msg))
    end if
-   call wrtout(unts, sjoin("- Reading GS density from: ", den_path))
+   call wrtout(units, sjoin("- Reading GS density from: ", den_path))
 
    if (dtset%usekden == 1) then
      if (nctk_try_fort_or_ncfile(kden_path, msg) /= 0) then
        ABI_ERROR(sjoin("Cannot find KDEN file:", kden_path, ". Error:", msg))
      end if
-     call wrtout(unts, sjoin("- Reading KDEN kinetic energy density from: ", kden_path))
+     call wrtout(units, sjoin("- Reading KDEN kinetic energy density from: ", kden_path))
    end if
    call wrtout(ab_out, ch10//ch10)
  end if ! master
@@ -362,6 +361,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ! Test if we have to call pawinit
    gnt_option = 1; if (dtset%pawxcdev == 2 .or. (dtset%pawxcdev == 1 .and. dtset%positron /= 0)) gnt_option = 2
    call paw_gencond(dtset, gnt_option, "test", call_pawinit)
+   !call_pawinit = .True.
 
    if (psp_gencond == 1 .or. call_pawinit) then
      call timab(553, 1, tsec)
@@ -378,12 +378,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      if (pawtab(1)%has_nabla==1) pawtab(1:cryst%ntypat)%has_nabla = 2
    end if
 
-   psps%n1xccc = MAXVAL(pawtab(1:cryst%ntypat)%usetcore)
+   psps%n1xccc = maxval(pawtab(1:cryst%ntypat)%usetcore)
 
    ! Initialize optional flags in Pawtab to zero
-   ! Cannot be done in Pawinit since the routine is called only if some pars. are changed
+   ! Cannot be done in Pawinit since the routine is called only if some parts. are changed
    pawtab(:)%has_nabla = 0
-   Pawtab(:)%lamb_shielding = zero
+   pawtab(:)%lamb_shielding = zero
 
    call setsym_ylm(cryst%gprimd, pawang%l_max-1, cryst%nsym, dtset%pawprtvol, cryst%rprimd, cryst%symrec, pawang%zarot)
 
@@ -393,13 +393,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,dtset%nspinor,Cryst%ntypat,dtset%optdcmagpawu,Pawang,Dtset%pawprtvol, &
      Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu,dtset%ucrpa)
 
-   !if (my_rank == master) call pawtab_print(Pawtab)
+   if (my_rank == master) call pawtab_print(Pawtab)
 
    ! Get Pawrhoij from the header of the WFK file.
    !call pawrhoij_copy(wfk_hdr%pawrhoij, KS_Pawrhoij)
 
-   !gwx_gsq = Dtset%ecutsigx / (two*pi**2)
-   !gw_gsq = MAX(gwx_gsq, gwc_gsq)
+   !  Evaluate form factor of radial part of phi.phj-tphi.tphj.
    gw_gsq = max(Dtset%ecutsigx, Dtset%ecuteps) / (two*pi**2)
 
    ! Set up q-grid, make qmax 20% larger than largest expected.
@@ -409,27 +408,26 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    nq_spl = Psps%mqgrid_ff
    ! write(std_out,*)"using nq_spl",nq_spl,"qmax=",qmax
 
-   !  Evaluate form factor of radial part of phi.phj-tphi.tphj.
    rhoxsp_method = 1  ! Arnaud-Alouani (default in sigma)
    !rhoxsp_method = 2 ! Shiskin-Kresse
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
 
-   ABI_MALLOC(Paw_pwff, (Psps%ntypat))
-   call pawpwff_init(Paw_pwff,rhoxsp_method,nq_spl,qmax,cryst%gmet,Pawrad,Pawtab,Psps)
+   ABI_MALLOC(paw_pwff, (psps%ntypat))
+   call pawpwff_init(Paw_pwff, rhoxsp_method, nq_spl, qmax, cryst%gmet, pawrad, pawtab, psps)
 
    ABI_FREE(nq_spl)
    ABI_FREE(qmax)
 
    ! Variables/arrays related to the fine FFT grid
-   ABI_MALLOC(ks_nhat, (nfftf, Dtset%nspden))
-   ks_nhat = zero
-   ABI_MALLOC(Pawfgrtab, (Cryst%natom))
-   call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
+   ABI_CALLOC(ks_nhat, (nfftf, Dtset%nspden))
+
+   ABI_MALLOC(pawfgrtab, (cryst%natom))
+   call pawtab_get_lsize(pawtab, l_size_atm, cryst%natom, cryst%typat)
 
    cplex = 1
-   call pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,Dtset%nspden,Dtset%typat)
+   call pawfgrtab_init(pawfgrtab, cplex, l_size_atm, dtset%nspden, dtset%typat)
    ABI_FREE(l_size_atm)
-   !compch_fft=greatest_real
+   compch_fft=greatest_real
    usexcnhat = MAXVAL(Pawtab(:)%usexcnhat)
    ! * 0 if Vloc in atomic data is Vbare    (Blochl's formulation)
    ! * 1 if Vloc in atomic data is VH(tnzc) (Kresse's formulation)
@@ -440,7 +438,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    if (Dtset%pawcross==1) optrad=1
    if (Dtset%xclevel==2.and.usexcnhat>0) optgr1=Dtset%pawstgylm
 
-   call nhatgrid(cryst%atindx1, cryst%gmet, cryst%natom,Cryst%natom,Cryst%nattyp,ngfftf,Cryst%ntypat,&
+   call nhatgrid(cryst%atindx1, cryst%gmet, cryst%natom, cryst%natom, cryst%nattyp, ngfftf, cryst%ntypat,&
     optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,Pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
 
    call pawfgrtab_print(Pawfgrtab,Cryst%natom,unit=std_out,prtvol=Dtset%pawprtvol)
@@ -458,7 +456,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_MALLOC(dijexc_core, (1, 1, 0))
  end if
 
- ! Read density and compare crystal structures.
+ !=============================================
+ ! Read density and compare crystal structures
+ ! ============================================
  ABI_MALLOC(ks_rhor, (nfftf, dtset%nspden))
 
  call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg_seq, ks_rhor, &
@@ -534,18 +534,21 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !                 Dtset%usepaw,usexcnhat,Pawfgr%usefinegrid,compch_sph,compch_fft,drude_plsmf)
 
  ! For PAW, add the compensation charge on the FFT mesh, then get rho(G).
- if (Dtset%usepaw==1) ks_rhor = ks_rhor + ks_nhat
+ ! NB: ks_nhat is already included in the density stored on file so we don't need to add it.to ks_rhor
+ !if (dtset%usepaw==1) ks_rhor = ks_rhor + ks_nhat
 
  ! TODO: Overloaded interface with units or just change the API to accept units
  call prtrhomxmn(std_out, mpi_enreg_seq, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
  call prtrhomxmn(ab_out, mpi_enreg_seq, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
 
+ if (Dtset%usekden==1) then
+   call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=cryst%ucvol)
+   call prtrhomxmn(ab_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=cryst%ucvol)
+ endif
+
  ! FFT n(r) --> n(g)
  ABI_MALLOC(ks_rhog, (2, nfftf))
  call fourdp(cplex1, ks_rhog, ks_rhor(:, 1), -1, mpi_enreg_seq, nfftf, 1, ngfftf, 0)
-
- !call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_rhor,ucvol=cryst%ucvol)
- !if (Dtset%usekden==1) call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=cryst%ucvol)
 
  ! Compute structure factor phases and large sphere cutoff
  ABI_MALLOC(ph1d, (2, 3 * (2 * Dtset%mgfft + 1) * Cryst%natom))
@@ -611,6 +614,30 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
 
+ !============================
+ !==== Compute KS PAW Dij ====
+ !============================
+ if (Dtset%usepaw == 1) then
+   call timab(561,1,tsec)
+
+   ! Calculate the unsymmetrized Dij.
+   call pawdij(cplex,Dtset%enunit,Cryst%gprimd,ipert0,&
+               Cryst%natom,Cryst%natom,nfftf,ngfftf(1)*ngfftf(2)*ngfftf(3),&
+               Dtset%nspden,Cryst%ntypat,KS_paw_an,KS_paw_ij,Pawang,Pawfgrtab,&
+               Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,&
+               k0,Dtset%spnorbscl,Cryst%ucvol,dtset%cellcharge(1),ks_vtrial,ks_vxc,Cryst%xred,&
+               nucdipmom=Dtset%nucdipmom)
+
+   ! Symmetrize KS Dij
+   !call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
+   !                Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,KS_paw_ij,Pawang,&
+   !                Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec)
+
+   ! Output the pseudopotential strengths Dij and the augmentation occupancies Rhoij.
+   call pawprt(Dtset,Cryst%natom,KS_paw_ij,KS_Pawrhoij,Pawtab)
+   call timab(561,2,tsec)
+ end if
+
  call cwtime_report(" prepare gwr_driver_init", cpu, wall, gflops)
 
  if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
@@ -620,10 +647,12 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_MALLOC(nband_iks, (dtset%nkpt, dtset%nsppol))
    ABI_MALLOC(npwarr_ik, (dtset%nkpt))
    ABI_MALLOC(istwfk_ik, (dtset%nkpt))
-   istwfk_ik = 1 ! TODO: istwkf 2 is not yet supported.
+   ! TODO: istwkf 2 is not yet supported.
+   istwfk_ik = 1
 
    ! Compute npw_k from ecut so that we can update the header.
    do ik_ibz=1,dtset%nkpt
+     !if (dtset%istwfk(ik_ibz) == 2) istwfk_ik(ik_ibz) = 2
      call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
      ABI_FREE(gvec_)
    end do
@@ -650,8 +679,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
 
    ! Build pools to distribute (kpt, spin)
    ! Try to have rectangular grids in each pool to improve efficiency in scalapack diago.
-   rectangular = .True.
-   if (dtset%nkpt == 1) rectangular = .False.
+   rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
@@ -742,8 +770,6 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    end if
 
    ! Collect eigenvalues
-   ! TODO: CHECK THIS PART WITH MANY PROCS AS I'VE SEEN WEIRD RESULTS ON LUMI
-   ! Also, Si4x4x4 with gamma-only seems not to work
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(:, ik_ibz, spin) = zero
@@ -784,7 +810,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
           ABI_ERROR(sjoin("Cannot find GS WFK file:", wfk_path, ". Error:", msg))
        end if
-       call wrtout(unts, sjoin("- Reading GS states from WFK file:", wfk_path))
+       call wrtout(units, sjoin("- Reading GS states from WFK file:", wfk_path))
      end if
 
      ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -798,8 +824,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
      if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
        ABI_ERROR("Crystal structure from input and from WFK file do not agree! Check messages above!")
      end if
-     call wfk_cryst%free()
      !call wfk_cryst%print(header="crystal structure from WFK file")
+     call wfk_cryst%free()
 
      ! Make sure that ef is inside the gap if semiconductor.
      call ebands_update_occ(ks_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.True.)

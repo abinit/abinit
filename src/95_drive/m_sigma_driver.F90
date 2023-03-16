@@ -443,7 +443,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ABI_MALLOC(ks_pawrhoij, (cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, &
-                             nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=Dtset%pawcpxocc)
+                             nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=dtset%pawcpxocc)
    call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, dtset%nsppol, cryst%typat, pawtab=pawtab)
 
    ! Test if we have to call pawinit
@@ -465,10 +465,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      if (pawtab(1)%has_nabla==1) pawtab(1:cryst%ntypat)%has_nabla = 2
    end if
 
-   psps%n1xccc = MAXVAL(pawtab(1:cryst%ntypat)%usetcore)
+   psps%n1xccc = maxval(pawtab(1:cryst%ntypat)%usetcore)
 
    ! Initialize optional flags in Pawtab to zero
-   ! Cannot be done in Pawinit since the routine is called only if some pars. are changed
+   ! Cannot be done in Pawinit since the routine is called only if some parts are changed
    pawtab(:)%has_nabla = 0
    pawtab(:)%lamb_shielding = zero
 
@@ -501,21 +501,22 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    qmax = sqrt(gw_gsq)*1.2d0
    nq_spl = Psps%mqgrid_ff
    ! write(std_out,*)"using nq_spl",nq_spl,"qmax=",qmax
+
    rhoxsp_method = 1  ! Arnaud-Alouani (default in sigma)
    !rhoxsp_method = 2 ! Shiskin-Kresse
    if (dtset%pawoptosc /= 0) rhoxsp_method = dtset%pawoptosc
 
-   ABI_MALLOC(paw_pwff, (Psps%ntypat))
+   ABI_MALLOC(paw_pwff, (psps%ntypat))
    call pawpwff_init(paw_pwff, rhoxsp_method, nq_spl, qmax, gmet, pawrad, pawtab, psps)
 
    ABI_FREE(nq_spl)
    ABI_FREE(qmax)
 
    ! Variables/arrays related to the fine FFT grid
-   ABI_MALLOC(ks_nhat, (nfftf, Dtset%nspden))
-   ks_nhat = zero
-   ABI_MALLOC(Pawfgrtab, (Cryst%natom))
-   call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
+   ABI_CALLOC(ks_nhat, (nfftf, Dtset%nspden))
+
+   ABI_MALLOC(pawfgrtab, (cryst%natom))
+   call pawtab_get_lsize(pawtab, l_size_atm, cryst%natom, cryst%typat)
 
    cplex = 1
    call pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,Dtset%nspden,Dtset%typat)
@@ -861,6 +862,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_rhor,ucvol=ucvol)
  if (Dtset%usekden==1) call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=ucvol)
 
+ ! FFT n(r) --> n(g)
  ABI_MALLOC(ks_rhog, (2, nfftf))
  call fourdp(1, ks_rhog, ks_rhor(:,1),-1, MPI_enreg_seq, nfftf, 1, ngfftf, tim_fourdp5)
 
@@ -903,9 +905,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
              optene,pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
              Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,Wvl,xccc3d,Cryst%xred,taur=ks_taur)
 
-  !============================
-  !==== Compute KS PAW Dij ====
-  !============================
+ !============================
+ !==== Compute KS PAW Dij ====
+ !============================
  if (Dtset%usepaw == 1) then
    call timab(561,1,tsec)
 

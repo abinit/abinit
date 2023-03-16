@@ -466,7 +466,6 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  !  ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
  !end if
 
-
  ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
 
  call gspot_transgrid_and_pack(spin, psps%usepaw, paral_kgb0, nfftc, ngfftc, nfftf, &
@@ -950,8 +949,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (istwf_k == 2) then
-   ABI_ERROR("istwfk == 2 is still under development")
-   !ABI_WARNING("istwfk == 2 is still under development")
+   !ABI_ERROR("istwfk == 2 with direct diago is still under development")
+   ABI_WARNING("istwfk == 2 with direct diago is still under development")
  end if
 
  if (dtset%ixc < 0) then
@@ -1065,7 +1064,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  sij_opt = 0; if (psps%usepaw==1) sij_opt = 1 ! For PAW, <k+G|S|k+G"> is also needed.
 
  cpopt = -1    ! If cpopt=-1, <p_lmn|in> (and derivatives) are computed here (and not saved)
- if (psps%usepaw == 1 .and. .FALSE.) then ! TODO Calculate <p_lmn|k+G>.
+ !if (psps%usepaw == 1 .and. .FALSE.) then ! TODO Calculate <p_lmn|k+G>.
+ if (psps%usepaw == 1) then ! TODO Calculate <p_lmn|k+G>.
    cpopt = 0  ! <p_lmn|in> are computed here and saved
  end if
 
@@ -1074,14 +1074,17 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  batch_size = 8 * omp_nt !; batch_size = 1
 
+ if (psps%usepaw == 1) batch_size = 1  ! FIXME
+ if (istwf_k == 2) batch_size = 1      ! FIXME
+ call wrtout(std_out, sjoin(" Using batch_size:", itoa(batch_size)))
+
  ABI_MALLOC(ghc, (2, npwsp * batch_size))
  ABI_MALLOC(gvnlxc, (2, npwsp * batch_size))
  ABI_MALLOC(gsc, (2, npwsp * batch_size*(sij_opt+1)/2))
 
- ! Init 1D PBLAS grid to block-distribute matrices along columns.
+ ! Init 1D PBLAS grid to block-distribute H along columns.
  call proc_1d%init(comm, grid_dims=[1, nproc])
-
- h_size = npwsp; if (istwf_k == 2) h_size = 2 * npwsp - 1
+ h_size = npwsp; if (istwf_k == 2) h_size = 2*npwsp - 1
 
  ABI_CHECK(block_dist_1d(h_size, nproc, col_bsize, msg), msg)
  call ghg_mat%init(h_size, h_size, proc_1d, istwf_k, size_blocs=[h_size, col_bsize])
@@ -1104,9 +1107,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  loc2_size = ghg_mat%sizeb_local(2)
 
  do il_g2=1, ghg_mat%sizeb_local(2), batch_size
-   ! Operate of ndat wavefunctions start and igsp2 global index.
-   ndat = blocked_loop(il_g2, loc2_size, batch_size)
+   ! Operate of ndat g-vectores starting at the igsp2 global index.
    igsp2 = ghg_mat%loc2gcol(il_g2)
+   ndat = blocked_loop(il_g2, loc2_size, batch_size)
 
    bras = zero
    if (istwf_k == 1) then
@@ -1114,14 +1117,16 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
        bras(1, igsp2 + idat * npwsp + idat) = one
      end do
    else
-     ! only istwf_k == 2 is coded here. There's a check at the beginning of the routine.
+     ! only istwf_k == 2 is coded here. There's a check at the beginning of this routine.
      do idat=0,ndat-1
        if (igsp2 + idat <= npwsp) then
-         bras(1, igsp2 + idat * npwsp + idat) = half   ! Cosine
+         ! Cosine
+         bras(1, igsp2 + idat*npwsp + idat) = half
          if (igsp2 == 1) bras(1, igsp2 + idat * npwsp + idat) = one
        else
+         ! Sine
          ig = igsp2 - npwsp + 1 + 1
-         bras(2, ig + idat * npwsp + idat) = +half  ! Sine
+         bras(2, ig + idat*npwsp + idat) = half
        end if
      end do
    end if
@@ -1130,8 +1135,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call multithreaded_getghc(cpopt, bras, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, mpi_enreg_seq, ndat, &
                              dtset%prtvol, sij_opt, tim_getghc, type_calc)
 
-   ! Fill my local buffer.
+   ! Fill my local buffer of ghg
    if (istwf_k == 1) then
+     ! Complex wavefunctions.
      do idat=0,ndat-1
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
        ghg_mat%buffer_cplx(:, il_g2+idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
@@ -1144,25 +1150,20 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      end if
 
    else
-     ! Version for real wavefunctions.
+     ! Real wavefunctions.
      do idat=0,ndat-1
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
        !if (igsp2 == 1 .or. igsp2 == npwsp + 1 .and. idat == 0) then
        !  ghc(:, igs:ige) = tol3 !; print *, ghc(:, igs:ige)
        !end if
-       ghg_mat%buffer_real(1:npwsp, il_g2 + idat) = ghc(1, igs:ige)    ! CC or CS
-       !ghg_mat%buffer_real(npwsp+1:, il_g2 + idat) = -ghc(2, igs:ige)  ! SC or SS
-       ghg_mat%buffer_real(npwsp+1:, il_g2 + idat) = -ghc(2, igs+1:ige)  ! SC or SS
+       ghg_mat%buffer_real(1:npwsp,  il_g2+ idat) = ghc(1, igs:ige)     ! CC or CS
+       ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. note igs+1
      end do
      if (psps%usepaw == 1) then
        NOT_IMPLEMENTED_ERROR()
      end if
    end if
 
-   ! Reset the |G,beta> components that has been treated.
-   !do idat=0,ndat-1
-   !  bras(1, igsp2 + idat * npwsp + idat) = zero
-   !end do
  end do ! il_g2
  call cwtime_report(" build_hg1g2", cpu, wall, gflops)
 
