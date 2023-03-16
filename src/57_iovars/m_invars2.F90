@@ -1170,9 +1170,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%zcut = dprarr(1)
 
  ! q-points for long wave-length limit.
- if (dtset%gw_nqlwl>0) then
+ if (dtset%gw_nqlwl > 0) then
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%gw_nqlwl,string(1:lenstr),'gw_qlwl',tread,'DPR')
-   if(tread==1) dtset%gw_qlwl(1:3,1:dtset%gw_nqlwl) = reshape(dprarr(1:3*dtset%gw_nqlwl),(/3,dtset%gw_nqlwl/))
+   if(tread==1) dtset%gw_qlwl(1:3,1:dtset%gw_nqlwl) = reshape(dprarr(1:3*dtset%gw_nqlwl), [3, dtset%gw_nqlwl])
  end if
 
  !@bethe_salpeter

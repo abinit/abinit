@@ -31,7 +31,6 @@ module m_dfpt_nstwf
  use m_dtset
  use m_dtfil
 
-
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,     only : timab
@@ -49,7 +48,7 @@ module m_dfpt_nstwf
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
+                        pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
@@ -68,7 +67,7 @@ module m_dfpt_nstwf
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
- use m_cgprj,           only : getcprj
+ use m_cgprj,      only : getcprj
 
  implicit none
 
@@ -520,7 +519,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
- 
+
 has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
     ABI_MALLOC(vectornd_pac,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,3))
@@ -927,7 +926,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  if (iband > endband) endband = iband
                end if
              end do
-! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+! NB: eig_k is band distributed in call to read_band_block, though array has full size,
 !     only certain columns for my iband are filled, then used below
              call ddks(idir1)%read_band_block((/startband,endband/),ik_ddk,isppol,xmpio_collective, &
 &                 cg_k=cg_ddk(:,:,idir1))
@@ -1287,9 +1286,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                if (bands_treated_now(iband_) == 0) cycle
 
 ! distribute gvnlx1 to my subcomm
-               gvnlx1_tmp = zero 
+               gvnlx1_tmp = zero
                if (iband_ == iband) then
-                 gvnlx1_tmp = gvnlx1 
+                 gvnlx1_tmp = gvnlx1
                end if
 ! TODO CHECK IF IT IS BAND_PROCS(IBAND_)
                !call xmpi_bcast(gvnlx1_tmp, band_procs(iband_), mpi_enreg%comm_band, ierr)
@@ -1299,7 +1298,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
                end if
 
- 
+
 !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
                call projbd(cgq,gvnlx1_tmp,-1,icgq,0,istwf_k,mcgq,0,nband_me,npw1_k,nspinor,&
 &                 dum1,ch1c_tmp,option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
@@ -1396,7 +1395,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                    end if
                  end if
                end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
-  
+
                if (abs(occ_k(iband))>tol8) then
 !                Computation of term (I)
                  if (has_dcwf2) then
@@ -2133,7 +2132,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          if (iband > endband) endband = iband
        end if
      end do
-! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+! NB: eig_k is band distributed in call to read_band_block, though array has full size,
 !     only certain columns for my iband are filled, then used below
      call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, &
 &         cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
@@ -2179,8 +2178,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !  Get ddk wavefunctions for iband
      if(nddk_needed > 0) then
        cwaveddk(:,:,:)=cg_ddk(:,1+(iband_me-1)*npw1_k*dtset%nspinor:iband_me*npw1_k*dtset%nspinor,:)
-     end if 
-   end if 
+     end if
+   end if
    call xmpi_bcast(cwave0, band_procs(iband), mpi_enreg%comm_band, ierr)
    call xmpi_bcast(cwavef, band_procs(iband), mpi_enreg%comm_band, ierr)
    if(nddk_needed > 0) then
@@ -2283,7 +2282,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          end do ! idir
 
          call rf_hamkq%free()
-       end if     ! ipert1<=dtset%natom .or. ipert1==dtset%natom+2 
+       end if     ! ipert1<=dtset%natom .or. ipert1==dtset%natom+2
      end do     ! ipert1
    end if     ! ipert /= natom +1
 

@@ -644,8 +644,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
    call wrtout(std_out, msg)
    if (onband_diago >9 ) then
      do jj=10,onband_diago,9
-       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,onband_diago))
-       call wrtout(std_out, msg)
+       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,onband_diago)); call wrtout(std_out, msg)
      end do
    end if
  end if
@@ -961,7 +960,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if
  end if
 
- ABI_CHECK_IEQ(dtset%usefock,  0, "direct diagonalization does not support usefock")
+ ABI_CHECK_IEQ(dtset%usefock, 0, "direct diagonalization does not support usefock")
 
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)
@@ -1101,10 +1100,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_CALLOC(bras, (2, npwsp * batch_size))
 
  ! Loop over the |beta,G''> component.
- loc2_size = ghg_mat%sizeb_local(2)
  call cwtime(cpu, wall, gflops, "start")
+ loc2_size = ghg_mat%sizeb_local(2)
 
  do il_g2=1, ghg_mat%sizeb_local(2), batch_size
+   ! Operate of ndat wavefunctions start and igsp2 global index.
    ndat = blocked_loop(il_g2, loc2_size, batch_size)
    igsp2 = ghg_mat%loc2gcol(il_g2)
 
@@ -1114,6 +1114,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
        bras(1, igsp2 + idat * npwsp + idat) = one
      end do
    else
+     ! only istwf_k == 2 is coded here. There's a check at the beginning of the routine.
      do idat=0,ndat-1
        if (igsp2 + idat <= npwsp) then
          bras(1, igsp2 + idat * npwsp + idat) = half   ! Cosine
@@ -1129,30 +1130,33 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call multithreaded_getghc(cpopt, bras, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, mpi_enreg_seq, ndat, &
                              dtset%prtvol, sij_opt, tim_getghc, type_calc)
 
-   ! Fill local buffer.
+   ! Fill my local buffer.
    if (istwf_k == 1) then
      do idat=0,ndat-1
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
-       ghg_mat%buffer_cplx(:, il_g2 + idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
+       ghg_mat%buffer_cplx(:, il_g2+idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
      end do
      if (psps%usepaw == 1) then
        do idat=0,ndat-1
          igs = 1 + idat * npwsp; ige = igs + npwsp - 1
-         gsg_mat%buffer_cplx(:,il_g2+idat) = cmplx(gsc(1,igs:ige), gsc(2,igs:ige), kind=dp)
+         gsg_mat%buffer_cplx(:, il_g2+idat) = cmplx(gsc(1,igs:ige), gsc(2,igs:ige), kind=dp)
        end do
      end if
 
    else
+     ! Version for real wavefunctions.
      do idat=0,ndat-1
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
        !if (igsp2 == 1 .or. igsp2 == npwsp + 1 .and. idat == 0) then
-       !  ghc(:, igs:ige) = tol3
-       !  !print *, ghc(:, igs:ige)
+       !  ghc(:, igs:ige) = tol3 !; print *, ghc(:, igs:ige)
        !end if
        ghg_mat%buffer_real(1:npwsp, il_g2 + idat) = ghc(1, igs:ige)    ! CC or CS
        !ghg_mat%buffer_real(npwsp+1:, il_g2 + idat) = -ghc(2, igs:ige)  ! SC or SS
        ghg_mat%buffer_real(npwsp+1:, il_g2 + idat) = -ghc(2, igs+1:ige)  ! SC or SS
      end do
+     if (psps%usepaw == 1) then
+       NOT_IMPLEMENTED_ERROR()
+     end if
    end if
 
    ! Reset the |G,beta> components that has been treated.
@@ -1179,25 +1183,20 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
  call proc_4diag%init(comm)
+ call ghg_mat%change_size_blocs(ghg_4diag, processor=proc_4diag, free=.True.)
+ if (psps%usepaw == 1) call gsg_mat%change_size_blocs(gsg_4diag, processor=proc_4diag, free=.True.)
 
- call ghg_mat%change_size_blocs(ghg_4diag, processor=proc_4diag)
- call ghg_mat%free()
- if (psps%usepaw == 1) then
-   call gsg_mat%change_size_blocs(gsg_4diag, processor=proc_4diag)
-   call gsg_mat%free()
- end if
-
- ! global dimension is (h_size, h_size) even for partial diago.
+ ! global H shape is (h_size, h_size) even for partial diago.
  ! then one extracts the (hsize, nband_k) sub-matrix before returning
  call ghg_4diag%copy(eigvec)
 
  if (do_full_diago) then
    write(msg,'(5a, (a,i0), 2a)')ch10,&
      ' Begin full diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     " H_GG' Matrix size: ",npwsp, ", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
+     " H_gg' Matrix size: ",npwsp, ", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
-   call cwtime(cpu, wall, gflops, "start")
 
+   call cwtime(cpu, wall, gflops, "start")
    if (psps%usepaw == 0) then
      !call ghg_4diag%pzheev("V", "U", eigvec, eig_ene)
      call compute_eigen_problem(ghg_4diag%processor, ghg_4diag, eigvec, eig_ene, comm, istwf_k)
@@ -1209,10 +1208,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  else
    write(msg,'(6a,i0,(a,i0), 2a)') ch10,&
      ' Begin partial diagonalization for kpt: ',trim(ktoa(kpoint)), stag(spin), ch10,&
-     " H_GG' Matrix size: ",npwsp,', nband_k: ', nband_k,", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
+     " H_gg' Matrix size: ",npwsp,', nband_k: ', nband_k,", Scalapack grid: ", trim(ltoa(ghg_4diag%processor%grid%dims))
    call wrtout(std_out, msg)
-   call cwtime(cpu, wall, gflops, "start")
 
+   call cwtime(cpu, wall, gflops, "start")
    if (psps%usepaw == 0) then
      !call ghg_4diag%pzheevx("V", "I", "U", zero, zero, 1, nband_k, -tol8, eigvec, mene_found, eig_ene)
      call compute_eigen_problem(ghg_4diag%processor, ghg_4diag, eigvec, eig_ene, comm, istwf_k, nev=nband_k)
@@ -1234,8 +1233,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call wrtout(std_out, msg)
    if (nband_k > 9 ) then
      do jj=10,nband_k,9
-       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,nband_k))
-       call wrtout(std_out, msg)
+       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,nband_k)); call wrtout(std_out, msg)
      end do
    end if
  end if
@@ -1250,8 +1248,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call ugb%processor%init(comm, grid_dims=[1, nproc])
 
  ABI_CHECK(block_dist_1d(nband_k, nproc, col_bsize, msg), msg)
- call eigvec%cut(h_size, nband_k, ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor)
- call eigvec%free()
+ call eigvec%cut(h_size, nband_k, ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor, free=.True.)
  call proc_4diag%free()
 
  ABI_MALLOC(eig_k, (nband_k))
@@ -1279,7 +1276,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ugb%has_idle_procs = min_my_nband == 0
 
  if (psps%usepaw == 1 .and. ugb%my_nband > 0) then
-   ! Calculate <Proj_i|Cnk> from output eigenstates. Note my_nband
+   ! Calculate <Proj_i|Cnk> from output eigenstates. Note array allocated with ugb%my_nband
    ABI_MALLOC(ugb%cprj_k, (cryst%natom, nspinor * ugb%my_nband))
    call pawcprj_alloc(ugb%cprj_k, 0, gs_hamk%dimcprj)
    idir = 0; cprj_choice = 1  ! Only projected wave functions.
@@ -1287,13 +1284,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    do my_ib=1,ugb%my_nband
      ibs1 = nspinor * (my_ib - 1) + 1
      call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1), &
-                  gs_hamk%ffnl_k,idir,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k, &
-                  gs_hamk%kpg_k,gs_hamk%kpt_k,gs_hamk%lmnmax,gs_hamk%mgfft, mpi_enreg_seq, &
-                  gs_hamk%natom,gs_hamk%nattyp,gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor, &
-                  gs_hamk%ntypat,gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
+                  gs_hamk%ffnl_k, idir, gs_hamk%indlmn, gs_hamk%istwf_k, gs_hamk%kg_k, &
+                  gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, &
+                  gs_hamk%natom, gs_hamk%nattyp, gs_hamk%ngfft, gs_hamk%nloalg, gs_hamk%npw_k, gs_hamk%nspinor, &
+                  gs_hamk%ntypat, gs_hamk%phkxred, gs_hamk%ph1d, gs_hamk%ph3d_k, gs_hamk%ucvol, gs_hamk%useylm)
    end do
 
-   !  Reorder the cprj (order is now the same as in input file)
+   !  Reorder the cprj (order is now the same as in the input file)
    call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
  end if ! usepaw
 
