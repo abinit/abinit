@@ -453,10 +453,162 @@ meta: {optdriver: 6, }
 
 --------------------------------------------------------------------------------
 
+ ==================================== 
+ ==== Info on PAW TABulated data ==== 
+ ==================================== 
+
+
+  ******************************
+  **** Atom type    1 ****
+  ******************************
+  Number of (n,l) elements .......................    5
+  Number of (l,m,n) elements .....................    9
+  Number of (i,j) elements (packed form) .........   15
+  Max L+1 leading to non-zero Gaunt ..............    3
+  Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
+  lmn2_size ......................................   45
+  lmnmix_sz ......................................   45
+  Size of radial mesh ............................ 1276
+  Size of radial mesh for partial waves........... 2001
+  Size of radial mesh for [pseudo] core density... 1276
+  Size of radial mesh for [pseudo] kin core density   0
+  Size of radial mesh for pseudo valence density.. 2001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
+  No of Q-points for the radial shape functions ..    0
+  Radial shape function type .....................    3
+  shape_lambda ...................................    0
+  Use pseudized core density .....................    0
+  Option for the use of hat density in XC terms ..    0
+  Use DFT+U ......................................    0
+  Use Local Exact exchange .......................    0
+  Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    2
+  Has kij   ......................................    0
+  Has tproj ......................................    0
+  Has tvale ......................................    1
+  Has coretau ....................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
+  Has nabla ......................................    0
+  Has nablaphi ...................................    0
+  Has shapefuncg .................................    0
+  Has wvl ........................................    0
+  beta ............................................ -6.03111374E+00
+  1/q d(tNcore(q))/dq for q=0 .....................  0.00000000E+00
+  d^2(tNcore(q))/dq^2 for q=0 .....................  0.00000000E+00
+  1/q d(tNvale(q))/dq for q=0 ..................... -2.58553992E+02
+  Core-core Fock energy  ..........................  0.00000000E+00
+  XC energy for the core density ..................  0.00000000E+00
+  Lamb shielding due to core density ..............  0.00000000E+00
+  Radius of the PAW sphere ........................  1.60264751E+00
+  Compensation charge radius (if >rshp, g(r)=0) ...  1.30023672E+00
+
+  ******************************
+  **** Atom type    2 ****
+  ******************************
+  Number of (n,l) elements .......................    4
+  Number of (l,m,n) elements .....................    8
+  Number of (i,j) elements (packed form) .........   10
+  Max L+1 leading to non-zero Gaunt ..............    3
+  Max L+1 leading to non-zero Gaunt (pawlcutd) ...    3
+  lmn2_size ......................................   36
+  lmnmix_sz ......................................   36
+  Size of radial mesh ............................ 1316
+  Size of radial mesh for partial waves........... 2001
+  Size of radial mesh for [pseudo] core density... 1316
+  Size of radial mesh for [pseudo] kin core density   0
+  Size of radial mesh for pseudo valence density.. 2001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
+  No of Q-points for the radial shape functions ..    0
+  Radial shape function type .....................    2
+  shape_lambda ...................................    0
+  Use pseudized core density .....................    1
+  Option for the use of hat density in XC terms ..    0
+  Use DFT+U ......................................    0
+  Use Local Exact exchange .......................    0
+  Use potential zero .............................    0
+  Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    2
+  Has kij   ......................................    0
+  Has tproj ......................................    0
+  Has tvale ......................................    1
+  Has coretau ....................................    0
+  Has vhtnzc .....................................    2
+  Has vhnzc ......................................    2
+  Has vminushalf .................................    0
+  Has nabla ......................................    0
+  Has nablaphi ...................................    0
+  Has shapefuncg .................................    0
+  Has wvl ........................................    0
+  beta ............................................ -5.82285041E+00
+  1/q d(tNcore(q))/dq for q=0 ..................... -1.17194919E-03
+  d^2(tNcore(q))/dq^2 for q=0 .....................  1.00000000E+00
+  1/q d(tNvale(q))/dq for q=0 ..................... -1.41207447E+02
+  Core-core Fock energy  .......................... -5.31743243E+00
+  XC energy for the core density .................. -4.76284634E+00
+  Lamb shielding due to core density ..............  0.00000000E+00
+  Radius of the PAW sphere ........................  1.40288605E+00
+  Compensation charge radius (if >rshp, g(r)=0) ...  1.20455331E+00
+  Sigma parameter in gaussian shape function ......  1.20455331E+00
  Total charge density [el/Bohr^3]
-)     Maximum=    2.9861E+00  at reduced coord.    0.5000    0.5000    0.5000
+)     Maximum=    1.8030E+00  at reduced coord.    0.5000    0.5000    0.5000
 )     Minimum=    1.3953E-03  at reduced coord.    0.2667    0.2333    0.2333
-   Integrated=    1.2389E+01
+   Integrated=    1.0000E+01
+
+ ==== Results concerning PAW augmentation regions ====
+
+ Total pseudopotential strength Dij (hartree):
+ Atom #  1
+  -1.94238   0.17496   0.32546   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.17496  -0.00421   0.03428  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.32546   0.03428   0.28920  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000  -0.00000  -0.00640  -0.00000   0.00000  -0.02471  -0.00000   0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.00640  -0.00000  -0.00000  -0.02471  -0.00000
+   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00640   0.00000  -0.00000  -0.02471
+   0.00000  -0.00000  -0.00000  -0.02471  -0.00000   0.00000  -0.09530  -0.00000   0.00000
+   0.00000  -0.00000  -0.00000  -0.00000  -0.02471  -0.00000  -0.00000  -0.09530  -0.00000
+   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.02471   0.00000  -0.00000  -0.09530
+ Atom #  2
+   0.30807  -0.50008  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
+  -0.50008   0.92814   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000
+  -0.00000   0.00000  -0.47243  -0.00000  -0.00000   0.70075   0.00000   0.00000
+   0.00000  -0.00000  -0.00000  -0.47243  -0.00000   0.00000   0.70075   0.00000
+  -0.00000   0.00000  -0.00000  -0.00000  -0.47243   0.00000   0.00000   0.70075
+   0.00000  -0.00000   0.70075   0.00000   0.00000   0.19675  -0.00000  -0.00000
+  -0.00000   0.00000   0.00000   0.70075   0.00000  -0.00000   0.19675  -0.00000
+   0.00000  -0.00000   0.00000   0.00000   0.70075  -0.00000  -0.00000   0.19675
+
+
+ Augmentation waves occupancies Rhoij:
+ Atom #  1
+   2.08333   0.87810  -0.18793   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.87810   1.23243  -0.15110   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+  -0.18793  -0.15110   0.02295   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000  30.14907   0.00000   0.00000  -6.74229   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  30.14907   0.00000   0.00000  -6.74229   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  30.14907   0.00000   0.00000  -6.74229
+   0.00000   0.00000   0.00000  -6.74229   0.00000   0.00000   1.50779   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -6.74229   0.00000   0.00000   1.50779   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000  -6.74229   0.00000   0.00000   1.50779
+ pawio_print_ij: WARNING -
+  The matrix seems to have high value(s) !
+  (  3 components have a value greater than   25.0).
+  It can cause instabilities during SCF convergence.
+  Action: you should check your atomic dataset (psp file)
+          and look for "high" projector functions...
+ Atom #  2
+   1.89425   0.06889   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.06889   0.00261   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   2.18705   0.00000   0.00000   0.06340   0.00000   0.00000
+   0.00000   0.00000   0.00000   2.18705   0.00000   0.00000   0.06340   0.00000
+   0.00000   0.00000   0.00000   0.00000   2.18705   0.00000   0.00000   0.06340
+   0.00000   0.00000   0.06340   0.00000   0.00000   0.00184   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.06340   0.00000   0.00000   0.00184   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.06340   0.00000   0.00000   0.00184
+
+
  setmesh: FFT mesh size selected  =    20x   20x   15
           total number of points  =         6000
 
@@ -480,10 +632,10 @@ meta: {optdriver: 6, }
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
- Fundamental gap:     4.467 (eV)
-   VBM:    14.950 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
-   CBM:    19.418 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
- Direct gap:         4.467 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Fundamental gap:     6.707 (eV)
+   VBM:     0.296 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     7.002 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         6.707 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
  Writing Eigenenergies info to file: t08o_DS2_EigenEnergies.yaml
@@ -665,7 +817,7 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.3
+- Proc.   0 individual time (sec): cpu=          7.5  wall=          7.8
 
 ================================================================================
 

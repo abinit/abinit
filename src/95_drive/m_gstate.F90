@@ -59,7 +59,7 @@ module m_gstate
  use m_fft,              only : fourdp
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
+ use m_pawtab,           only : pawtab_type, pawtab_print
  use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_alloc, pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
@@ -1026,6 +1026,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
+
+   ! DEBUG:
+   !if (me == master) call pawtab_print(Pawtab)
  end if
 
 !###########################################################
@@ -1450,9 +1453,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  hdr%rprimd=rprimd_for_kg
 
  if (write_wfk) then
-   call outresid(dtset,dtset%kptns,dtset%mband,&
-&                dtset%nband,dtset%nkpt,&
-&                dtset%nsppol,resid)
+   call outresid(dtset,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt, dtset%nsppol,resid)
 
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
