@@ -1698,7 +1698,7 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
    !  Here complete the matrix by symmetrisation of the existing elements
    if(ddb%typ(iblok)==1 .or. ddb%typ(iblok)==2) then
 
-     qpt(:)=ddb%qpt(:,iblok)/ddb%nrm(1,iblok)
+     qpt(:)=ddb%qpt(1:3,iblok)/ddb%nrm(1,iblok)
 
      ! Examine the symmetries of the q wavevector
      call littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol=0)

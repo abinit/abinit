@@ -1190,7 +1190,7 @@ subroutine gstore_print(gstore, unit, header, prtvol)
 !Local variables ------------------------------
  integer :: my_is, spin, my_prtvol
  type(gqk_t),pointer :: gqk
- character(len=500) :: msg
+ !character(len=500) :: msg
  !type(yamldoc_t) :: ydoc
 !----------------------------------------------------------------------
 

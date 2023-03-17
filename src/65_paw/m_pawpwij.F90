@@ -502,7 +502,7 @@ subroutine paw_mkrhox_spl(itypat,ntypat,method,dim1,dim2,nq_spl,qgrid_spl,Pawrad
 
 !Local variables-------------------------------
 !scalars
- integer :: mm,nlmn,jlmn,ilmn,klmn,ij_size,l_size,ider
+ integer :: mm,nlmn,jlmn,ilmn,klmn,ij_size,l_size !,ider
  integer :: iq,ir,ll,meshsz,mmax,iln,jln,nln,k0ln,kln,qlm
  real(dp),parameter :: EPS=tol14**4,TOLJ=0.001_dp
  real(dp) :: arg,argn,bes,besp,qr,yp1,ypn

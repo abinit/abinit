@@ -1362,6 +1362,8 @@ subroutine ugb_print(ugb, units, prtvol, header)
 
 ! *************************************************************************
 
+ ABI_UNUSED(prtvol)
+
  msg = ' ==== Info on the ugb_t object ==== '; if (present(header)) msg = ' ==== '//trim(adjustl(header))//' ==== '
  call wrtout(units, msg)
 
