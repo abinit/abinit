@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 16 Mar 2023.
-- ( at 17h48 )
+.Starting date : Fri 17 Mar 2023.
+- ( at 01h21 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t08/t08.abi
 - output file    -> t08.abo
@@ -83,7 +83,6 @@ _ WF disk file :      0.204 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
 -          fftalg         312
            getden1          0
            getden2          1
-      gw_icutcoul           3
            istwfk        1
               ixc       -1012
            jdtset        1    2
@@ -660,7 +659,6 @@ meta: {optdriver: 6, }
 -          fftalg         312
            getden1          0
            getden2          1
-      gw_icutcoul           3
            istwfk        1
               ixc       -1012
            jdtset        1    2

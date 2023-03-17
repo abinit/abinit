@@ -268,23 +268,22 @@ end subroutine pawpwff_free
 !!  pawpwij_init
 !!
 !! FUNCTION
-!!  Creation method for pawpwij_t. Calculates the onsite matrix elements
+!!  Calculate the onsite matrix elements
 !!
 !!   $ <phj|e^{-i(q+G)}|phi> - <tphj|e^{-i(q+G)}|tphi> $
 !!
-!!  for a given q and a set of G"s for a given TYPE of atom.
+!!  for a given q and a set of g in gvec for a given TYPE of atom.
 !!  Phase factors arising from atom positions are therefore not included.
 !!
 !! INPUTS
 !!  npw=Number of plane waves
 !!  Psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!    %ntypat=Number of type of atoms,
 !   gvec(3,npw)=Plane wave reduced components.
 !!  qpt_in(3)=The reduced components of the q-point.
 !!  rprim(3,3)=dimensionless real space primitive translations
 !!  Pawtab(%ntypat) <type(pawtab_type)>=paw tabulated starting data
 !!  Paw_pwff(%ntypat) <pawpwff_t>=Object storing the form factors for the spline used in pawpwij_init.
-!!  Psps <type(pseudopotential_type)>=variables related to pseudopotentials
+!!  Psps<type(pseudopotential_type)>=variables related to pseudopotentials
 !!
 !! OUTPUT
 !!  Pwij(%ntypat)<pawpwij_t>=Structure containing the onsite matrix elements of e^{-i(q+G).r}.
@@ -292,7 +291,7 @@ end subroutine pawpwff_free
 !!
 !! SOURCE
 
-subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
+subroutine pawpwij_init(Pwij, npw, qpt_in, gvec, rprimd, Psps, Pawtab, Paw_pwff)
 
 !Arguments ------------------------------------
 !scalars
@@ -308,8 +307,7 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: unkg0=0,unylm0=0
- integer :: dim1,dim2,method
- integer :: my_mqmem,my_nqpt,optder,two_lmaxp1,itypat
+ integer :: dim1,dim2,method, my_mqmem,my_nqpt,optder,two_lmaxp1,itypat
  integer :: dummy_nsppol,lmn_size,lmn2_size,nq_spl,ierr
  real(dp) :: ucvol
  type(MPI_type) :: MPI_enreg_seq
@@ -323,7 +321,6 @@ subroutine pawpwij_init(Pwij,npw,qpt_in,gvec,rprimd,Psps,Pawtab,Paw_pwff)
  ! ===============================================
  ! === Get real spherical harmonics in G space ===
  ! ===============================================
-
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ! Set up of REAL Ylm(q+G) up to 2*l_max for this q-point.
@@ -999,6 +996,7 @@ end subroutine paw_mkrhox
 !!
 !! FUNCTION
 !!  Evaluates the PAW onsite contribution to the oscillator strengths:
+!!
 !!  sum_{i,j} <\tpsi_{k-q,b1}|\cprj_i> <\cprj_j|\tpsi_{k,b2}>*
 !!   \[ <\phi_i|e^{-i(q+G).r}|\phi_j> - <\tilde\phi_i|e^{-i(q+G).r}|\tilde\phi_j> \].
 !!
@@ -1021,7 +1019,7 @@ end subroutine paw_mkrhox
 !!
 !! SOURCE
 
-pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,Cprj_kmqb1,Cprj_kb2,Pwij,rhotwg)
+pure subroutine paw_rho_tw_g(npw, dim_rtwg, nspinor, natom, ntypat, typat, xred, gvec, Cprj_kmqb1, Cprj_kb2, Pwij, rhotwg)
 
 !Arguments ------------------------------------
 !scalars
@@ -1029,9 +1027,9 @@ pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,C
 !arrays
  integer,intent(in) :: gvec(3,npw),typat(natom)
  real(dp),intent(in) :: xred(3,natom)
- complex(gwpc),intent(inout) :: rhotwg(npw*dim_rtwg)
  type(pawcprj_type),intent(in) :: Cprj_kmqb1(natom,nspinor),Cprj_kb2(natom,nspinor)
  type(pawpwij_t),intent(in) :: Pwij(ntypat)
+ complex(gwpc),intent(inout) :: rhotwg(npw*dim_rtwg)
 
 !Local variables-------------------------------
 !scalars
@@ -1043,11 +1041,11 @@ pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,C
 
 ! *************************************************************************
 
- ! === Loop over the four spinorial combinations ===
+ ! Loop over the four spinorial combinations
  do iab=1,dim_rtwg
-   isp1=spinor_idxs(1,iab)
-   isp2=spinor_idxs(2,iab)
-   spad=npw*(iab-1)
+   isp1 = spinor_idxs(1,iab)
+   isp2 = spinor_idxs(2,iab)
+   spad = npw*(iab-1)
 
    do ig=1,npw
      tmp(:)=zero
@@ -1056,25 +1054,25 @@ pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,C
        nlmn   = Pwij(itypat)%lmn_size
        x0(:) = xred(:,iat)
 
-       ! === Structure factor e^{-i(q+G)*xred} ===
+       ! Structure factor e^{-i(q+G)*xred}
        qpg(:)= Pwij(itypat)%qpt(:) + gvec(:,ig)
        arg=-two_pi*DOT_PRODUCT(qpg(:),x0)
        ph3d(1)=COS(arg)
        ph3d(2)=SIN(arg)
 
-       ! === Loop on [(jl,jm,jn),(il,im,in)] channels. packed storage mode ===
+       ! Loop over [(jl,jm,jn), (il,im,in)] channels in packed storage mode.
        do jlmn=1,nlmn
          k0lmn=jlmn*(jlmn-1)/2
          do ilmn=1,jlmn
            re_psp =  Cprj_kmqb1(iat,isp1)%cp(1,ilmn) * Cprj_kb2(iat,isp2)%cp(1,jlmn) &
-&                   +Cprj_kmqb1(iat,isp1)%cp(2,ilmn) * Cprj_kb2(iat,isp2)%cp(2,jlmn) &
-&                   +Cprj_kmqb1(iat,isp1)%cp(1,jlmn) * Cprj_kb2(iat,isp2)%cp(1,ilmn) &
-&                   +Cprj_kmqb1(iat,isp1)%cp(2,jlmn) * Cprj_kb2(iat,isp2)%cp(2,ilmn)
+                    +Cprj_kmqb1(iat,isp1)%cp(2,ilmn) * Cprj_kb2(iat,isp2)%cp(2,jlmn) &
+                    +Cprj_kmqb1(iat,isp1)%cp(1,jlmn) * Cprj_kb2(iat,isp2)%cp(1,ilmn) &
+                    +Cprj_kmqb1(iat,isp1)%cp(2,jlmn) * Cprj_kb2(iat,isp2)%cp(2,ilmn)
 
            im_psp =  Cprj_kmqb1(iat,isp1)%cp(1,ilmn) * Cprj_kb2(iat,isp2)%cp(2,jlmn) &
-&                   -Cprj_kmqb1(iat,isp1)%cp(2,ilmn) * Cprj_kb2(iat,isp2)%cp(1,jlmn) &
-&                   +Cprj_kmqb1(iat,isp1)%cp(1,jlmn) * Cprj_kb2(iat,isp2)%cp(2,ilmn) &
-&                   -Cprj_kmqb1(iat,isp1)%cp(2,jlmn) * Cprj_kb2(iat,isp2)%cp(1,ilmn)
+                    -Cprj_kmqb1(iat,isp1)%cp(2,ilmn) * Cprj_kb2(iat,isp2)%cp(1,jlmn) &
+                    +Cprj_kmqb1(iat,isp1)%cp(1,jlmn) * Cprj_kb2(iat,isp2)%cp(2,ilmn) &
+                    -Cprj_kmqb1(iat,isp1)%cp(2,jlmn) * Cprj_kb2(iat,isp2)%cp(1,ilmn)
 
            klmn=k0lmn+ilmn; fij=one; if (jlmn==ilmn) fij=half
 
@@ -1090,7 +1088,7 @@ pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,C
          end do !ilmn
        end do !jlmn
      end do !iat
-     !
+
      !if(ig==1) write(std_out,*) " TOTAL PW     osc str = ",rhotwg(ig+spad)
      !if(ig==1) write(std_out,*) " TOTAL PAW    osc str = ",tmp(1),tmp(2)
      ! Update input data using the appropriate index.
@@ -1098,7 +1096,7 @@ pure subroutine paw_rho_tw_g(npw,dim_rtwg,nspinor,natom,ntypat,typat,xred,gvec,C
      !if(ig==1) write(std_out,*) " TOTAL PW+PAW osc str = ",rhotwg(ig+spad)
    end do !ig
 
- end do !dim_rtwg
+ end do ! dim_rtwg
 
 end subroutine paw_rho_tw_g
 !!***

@@ -119,7 +119,7 @@ module m_ksdiago
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
    ! (natom, nspinor * my_nband))
-   ! PAW projections.
+   ! PAW projections ordered according to natom and NOT according to typat.
 
  contains
 
@@ -346,7 +346,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ndat1 = 1, ncomp1 = 1
+ integer,parameter :: mkmem1 = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ndat1 = 1, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,spin,npw_k
  integer :: ikg,istwf_k,exchn2n3d,prtvol
  integer :: jj,n1,n2,n3,n4,n5,n6,negv,nkpg,nproc,npw_k_test,my_rank,optder
@@ -485,7 +485,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  call kpgsph(ecut, exchn2n3d, gmet, ikg, 0, istwf_k, kg_k, kpoint, 0, mpi_enreg_seq, 0, npw_k_test)
  ABI_CHECK(npw_k_test == npw_k, "npw_k_test/=npw_k")
- call kpgsph(ecut,exchn2n3d,gmet,ikg,0,istwf_k,kg_k,kpoint,mkmem_,mpi_enreg_seq,npw_k,npw_k_test)
+ call kpgsph(ecut,exchn2n3d,gmet,ikg,0,istwf_k,kg_k,kpoint,mkmem1,mpi_enreg_seq,npw_k,npw_k_test)
 
  !========================
  !==== Kinetic energy ====
@@ -504,7 +504,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
    kptns_(:,1) = kpoint
 
    ! Here mband is not used if paral_compil_kpt=0
-   call initylmg(gprimd, kg_k, kptns_, mkmem_, mpi_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
+   call initylmg(gprimd, kg_k, kptns_, mkmem1, mpi_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
      [npw_k], 1, optder, rprimd, ylm_k, dum_ylm_gr_k)
 
    ABI_FREE(dum_ylm_gr_k)
@@ -904,10 +904,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: mkmem_ = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
+ integer,parameter :: mkmem1 = 1, tim_getghc = 4, paral_kgb0 = 0, master = 0, ncomp1 = 1
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
  integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
- integer :: type_calc,sij_opt,igsp2,ig, my_ib,ibs1 !,ibs2
+ integer :: type_calc,sij_opt,igsp2_start,ig, my_ib,ibs1
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2, ierr, min_my_nband
  integer :: idat, ndat, batch_size, h_size !, mene_found
  real(dp),parameter :: lambda0 = zero
@@ -923,8 +923,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 !arrays
  real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2)
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:)
- real(dp),target,allocatable :: bras(:,:), ghc(:,:), gvnlxc(:,:), gsc(:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:)
+ real(dp),target,allocatable :: bras(:,:)
+ !real(dp),contiguous,pointer :: bras2d_ptr(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
@@ -1033,7 +1034,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    kptns_(:,1) = kpoint
 
    ! NB: Here mband is not used if paral_compil_kpt=0
-   call initylmg(cryst%gprimd, ugb%kg_k, kptns_, mkmem_, mpi_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
+   call initylmg(cryst%gprimd, ugb%kg_k, kptns_, mkmem1, mpi_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
      [npw_k], 1, optder, cryst%rprimd, ylm_k, dum_ylm_gr_k)
 
    ABI_FREE(dum_ylm_gr_k)
@@ -1069,19 +1070,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    cpopt = 0  ! <p_lmn|in> are computed here and saved
  end if
 
- ! Define batch size for the application of the Hamiltonian
- ! This is useful if OpenMP is activated thus we use multiple of omp_nt.
- omp_nt = xomp_get_num_threads(open_parallel=.True.)
- batch_size = 8 * omp_nt !; batch_size = 1
-
- if (psps%usepaw == 1) batch_size = 1  ! FIXME
- if (istwf_k == 2) batch_size = 1      ! FIXME
- call wrtout(std_out, sjoin(" Using batch_size:", itoa(batch_size)))
-
- ABI_MALLOC(ghc, (2, npwsp * batch_size))
- ABI_MALLOC(gvnlxc, (2, npwsp * batch_size))
- ABI_MALLOC(gsc, (2, npwsp * batch_size*(sij_opt+1)/2))
-
  ! Init 1D PBLAS grid to block-distribute H along columns.
  call proc_1d%init(comm, grid_dims=[1, nproc])
  h_size = npwsp; if (istwf_k == 2) h_size = 2*npwsp - 1
@@ -1095,50 +1083,61 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  mem_mb = two * (psps%usepaw + 1) * mem_mb + mem_mb  ! last term for eigvec matrix
  call wrtout(std_out, sjoin(" Local memory for scalapack matrices:", ftoa(mem_mb, fmt="(f8.1)"), ' [Mb] <<< MEM'))
 
+ ! Define batch size for the application of the Hamiltonian
+ ! This is useful if OpenMP is activated thus we use multiple of omp_nt.
+ omp_nt = xomp_get_num_threads(open_parallel=.True.)
+ batch_size = 8 * omp_nt
+ if (istwf_k == 2) batch_size = 1      ! FIXME
+ if (psps%usepaw == 1) batch_size = 1  ! FIXME
+ !batch_size = 1
+ call wrtout(std_out, sjoin(" Using batch_size:", itoa(batch_size)))
+
+ ABI_MALLOC(bras, (2, npwsp * batch_size))
  ! cwaveprj is ordered, see nonlop_ylm.
  ABI_MALLOC(cwaveprj, (cryst%natom, nspinor*(1+cpopt)*gs_hamk%usepaw*batch_size))
  if (cpopt == 0) call pawcprj_alloc(cwaveprj, 0, gs_hamk%dimcprj)
-
- ! Initialize plane-wave array with zeros
- ABI_CALLOC(bras, (2, npwsp * batch_size))
+ ABI_MALLOC(ghc, (2, npwsp * batch_size))
+ ABI_MALLOC(gvnlxc, (2, npwsp * batch_size))
+ ABI_MALLOC(gsc, (2, npwsp * batch_size*(sij_opt+1)/2))
 
  ! Loop over the |beta,G''> component.
  call cwtime(cpu, wall, gflops, "start")
  loc2_size = ghg_mat%sizeb_local(2)
 
- do il_g2=1, ghg_mat%sizeb_local(2), batch_size
-   ! Operate of ndat g-vectores starting at the igsp2 global index.
-   igsp2 = ghg_mat%loc2gcol(il_g2)
+ do il_g2=1, loc2_size, batch_size
+   ! Operate on ndat g-vectors starting at the igsp2_start global index.
+   igsp2_start = ghg_mat%loc2gcol(il_g2)
    ndat = blocked_loop(il_g2, loc2_size, batch_size)
 
    bras = zero
    if (istwf_k == 1) then
      do idat=0,ndat-1
-       bras(1, igsp2 + idat * npwsp + idat) = one
+       bras(1, igsp2_start + idat * npwsp + idat) = one
      end do
    else
      ! only istwf_k == 2 is coded here. There's a check at the beginning of this routine.
      do idat=0,ndat-1
-       if (igsp2 + idat <= npwsp) then
+       if (igsp2_start + idat <= npwsp) then
          ! Cosine
-         bras(1, igsp2 + idat*npwsp + idat) = half
-         if (igsp2 == 1) bras(1, igsp2 + idat * npwsp + idat) = one
+         bras(1, igsp2_start + idat*npwsp + idat) = half
+         if (igsp2_start == 1) bras(1, igsp2_start + idat*npwsp + idat) = one
        else
          ! Sine
-         ig = igsp2 - npwsp + 1 + 1
+         ig = igsp2_start - npwsp + 1 + 1
          bras(2, ig + idat*npwsp + idat) = half
        end if
      end do
    end if
 
    ! Get <:|H|beta,G''> and <:|S_{PAW}|beta,G''>
+   !call c_f_pointer(c_loc(bras), bras2d_ptr, shape=[2, npwsp * batch_size)]
    call multithreaded_getghc(cpopt, bras, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, mpi_enreg_seq, ndat, &
                              dtset%prtvol, sij_opt, tim_getghc, type_calc)
 
-   ! Fill my local buffer of ghg
+   ! Now fill my local buffer of ghg/gsg
    if (istwf_k == 1) then
-     ! Complex wavefunctions.
      do idat=0,ndat-1
+       ! Complex wavefunctions.
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
        ghg_mat%buffer_cplx(:, il_g2+idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
      end do
@@ -1150,14 +1149,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      end if
 
    else
-     ! Real wavefunctions.
      do idat=0,ndat-1
+       ! Real wavefunctions.
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
-       !if (igsp2 == 1 .or. igsp2 == npwsp + 1 .and. idat == 0) then
+       !if (igsp2_start == 1 .or. igsp2_start == npwsp + 1 .and. idat == 0) then
        !  ghc(:, igs:ige) = tol3 !; print *, ghc(:, igs:ige)
        !end if
-       ghg_mat%buffer_real(1:npwsp,  il_g2+ idat) = ghc(1, igs:ige)     ! CC or CS
-       ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. note igs+1
+       ghg_mat%buffer_real(1:npwsp,  il_g2+idat) =  ghc(1, igs:ige)     ! CC or CS
+       ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. Note igs+1
      end do
      if (psps%usepaw == 1) then
        NOT_IMPLEMENTED_ERROR()
@@ -1187,8 +1186,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call ghg_mat%change_size_blocs(ghg_4diag, processor=proc_4diag, free=.True.)
  if (psps%usepaw == 1) call gsg_mat%change_size_blocs(gsg_4diag, processor=proc_4diag, free=.True.)
 
- ! global H shape is (h_size, h_size) even for partial diago.
- ! then one extracts the (hsize, nband_k) sub-matrix before returning
+ ! NB: global H shape is (h_size, h_size) even for partial diago.
+ ! then one extracts the (hsize, nband_k) sub-matrix before returning.
  call ghg_4diag%copy(eigvec)
 
  if (do_full_diago) then
@@ -1239,9 +1238,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if
  end if
 
- call ghg_4diag%free()
- call gsg_4diag%free()
- call proc_1d%free()
+ call ghg_4diag%free(); call gsg_4diag%free(); call proc_1d%free()
 
  ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution)
  call wrtout(std_out, " Moving to PBLAS block column distribution...")

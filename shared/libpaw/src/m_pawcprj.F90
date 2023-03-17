@@ -211,7 +211,6 @@ end subroutine pawcprj_free
 
 !----------------------------------------------------------------------
 
-!!      m_scf_history,suscep_stat
 !!****f* m_pawcprj/pawcprj_set_zero
 !! NAME
 !! pawcprj_set_zero
@@ -913,7 +912,6 @@ end subroutine pawcprj_projbd
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,kk,n1dim,n2dim,ncpgr,nlmn
-!arrays
 
 ! *************************************************************************
 

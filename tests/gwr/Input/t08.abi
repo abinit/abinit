@@ -27,8 +27,6 @@ xred   0.00    0.00    0.00   # Reduced coordinates of atom 1
 ecut 15.0                     # Kinetic energy cut-off, in Hartree
 pawecutdg 30.0
 
-gw_icutcoul 3      # For legacy reasons
-
 ####################
 # Dataset 1: SCF run
 ####################
