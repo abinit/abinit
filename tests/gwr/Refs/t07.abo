@@ -1,5 +1,5 @@
 
-.Version 9.9.2 of ABINIT 
+.Version 9.9.3 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 14 Mar 2023.
-- ( at 16h50 )
+.Starting date : Fri 17 Mar 2023.
+- ( at 01h21 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t07/t07.abi
 - output file    -> t07.abo
@@ -75,7 +75,6 @@ _ WF disk file :      0.204 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -          fftalg         312
            getden1          0
            getden2          1
-      gw_icutcoul           3
            istwfk        1
               ixc       -1012
            jdtset        1    2
@@ -397,7 +396,6 @@ meta: {optdriver: 6, }
 -          fftalg         312
            getden1          0
            getden2          1
-      gw_icutcoul           3
            istwfk        1
               ixc       -1012
            jdtset        1    2

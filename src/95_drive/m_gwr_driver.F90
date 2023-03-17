@@ -593,7 +593,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ABI_MALLOC(vpsp, (nfftf))
  ABI_MALLOC(ks_vxc, (nfftf, Dtset%nspden))
 
- ! I don't think direct diago can be used with mega-GGA due to the functional derivative wrt KS states.
+ ! TODO: I don't think direct diago can be used with mega-GGA due to the functional derivative wrt KS states.
  ! TB-BK should be OK though.
 
  !ABI_MALLOC(ks_vxctau, (nfftf, dtset%nspden * dtset%usekden))
@@ -629,9 +629,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
                nucdipmom=Dtset%nucdipmom)
 
    ! Symmetrize KS Dij
-   !call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
-   !                Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,KS_paw_ij,Pawang,&
-   !                Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec)
+   call symdij_all(Cryst%gprimd,Cryst%indsym,ipert0,&
+                   Cryst%natom,Cryst%natom,Cryst%nsym,Cryst%ntypat,KS_paw_ij,Pawang,&
+                   Dtset%pawprtvol,Pawtab,Cryst%rprimd,Cryst%symafm,Cryst%symrec)
 
    ! Output the pseudopotential strengths Dij and the augmentation occupancies Rhoij.
    call pawprt(Dtset,Cryst%natom,KS_paw_ij,KS_Pawrhoij,Pawtab)
@@ -647,8 +647,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_MALLOC(nband_iks, (dtset%nkpt, dtset%nsppol))
    ABI_MALLOC(npwarr_ik, (dtset%nkpt))
    ABI_MALLOC(istwfk_ik, (dtset%nkpt))
-   ! TODO: istwkf 2 is not yet supported.
-   istwfk_ik = 1
+   istwfk_ik = 1 ! TODO: istwkf 2 is not yet supported.
 
    ! Compute npw_k from ecut so that we can update the header.
    do ik_ibz=1,dtset%nkpt
@@ -665,7 +664,8 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    if (string_in(dtset%gwr_task, "HDIAGO_FULL, CC4S_FULL")) nband_iks(:,:) = minval(npwarr_ik)
    cc4s_task = string_in(dtset%gwr_task, "CC4S, CC4S_FULL")
    if (cc4s_task) then
-     ABI_CHECK(dtset%nkpt == 1 .and. all(abs(dtset%kptns(:,1)) < tol12), "CC4S requires Gamm-only sampling")
+     ABI_CHECK_IEQ(dtset%nkpt, 1, "CC4S interface does not support more than one k-point.")
+     !ABI_CHECK(dtset%nkpt == 1 .and. all(abs(dtset%kptns(:,1)) < tol12), "CC4S requires Gamma-only sampling")
    end if
 
    ! Build header with new npwarr and nband.
@@ -748,7 +748,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
        if (diago_pool%comm%me == 0) diago_info(2:3, ik_ibz, spin) = [diago_wall, dble(diago_pool%comm%nproc)]
 
-       if (cc4s_task) call cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, owfk_ebands, paw_pwff, ugb)
+       if (cc4s_task) call cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, owfk_ebands, psps, pawtab, paw_pwff, ugb)
 
        ABI_FREE(eig_k)
        call ugb%free()
@@ -789,14 +789,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
 
-   call owfk_hdr%free()
-   call ebands_free(owfk_ebands)
-   call diago_pool%free()
-
- !else if (dtset%gwr_task == "CC4CS") then
-   ! Diagonalize Hamiltonian at k = Gamma
-   ! Compute oscillator matrix elements and save results to disk
-   !call cc4cs()
+   call owfk_hdr%free(); call ebands_free(owfk_ebands); call diago_pool%free()
 
  else
    ABI_CHECK(dtset%usepaw == 0, "PAW in GWR not yet implemented.")
@@ -931,10 +924,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  ABI_SFREE(pawfgrtab)
  ABI_SFREE(ks_paw_an)
 
- call cryst%free()
- call wfk_hdr%free()
- call ebands_free(ks_ebands)
- call destroy_mpi_enreg(mpi_enreg_seq)
+ call cryst%free(); call wfk_hdr%free(); call ebands_free(ks_ebands); call destroy_mpi_enreg(mpi_enreg_seq)
  call gwr%free()
 
 end subroutine gwr_driver
@@ -1015,15 +1005,16 @@ end subroutine cc4s_write_eigens
 !!
 !! INPUTS
 
-subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
+subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, paw_pwff, ugb)
 
  use m_numeric_tools, only : blocked_loop
  use m_gwdefs,        only : GW_Q0_DEFAULT
  use m_fftcore,       only : sphereboundary !, getng
  use m_fft_mesh,      only : setmesh
- use m_fft,           only : fft_ug, fft_ur, uplan_t
+ use m_fft,           only : uplan_t ! fft_ug, fft_ur,
  use m_vcoul,         only : vcgen_t
  use m_pstat,         only : pstat_t
+ use m_pawpwij,       only : pawpwij_t, pawpwij_init, pawpwij_free
 
 !Arguments ------------------------------------
  integer,intent(in) :: spin, ik_ibz
@@ -1031,8 +1022,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
  type(datafiles_type),intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(pawpwff_t),intent(in) :: Paw_pwff(dtset%ntypat*dtset%usepaw)
- type(ugb_t), target,intent(in) :: ugb
+ type(Pseudopotential_type),intent(in) :: psps
+ type(pawpwff_t),intent(in) :: paw_pwff(dtset%ntypat*dtset%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ type(ugb_t),target,intent(in) :: ugb
 
 !Local variables-------------------------------
 !scalars
@@ -1054,8 +1047,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
  integer,allocatable,target :: m_gvec(:,:)
  complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
  complex(gwpc),allocatable :: sqrt_vc(:)
- !type(pawpwij_t),allocatable :: Pwij(:)
- !type(pawcprj_type),allocatable :: Cprj1_bz(:,:),Cprj2_bz(:,:), Cprj1_ibz(:,:),Cprj2_ibz(:,:)
+ type(pawpwij_t),allocatable :: pwij(:)
+ type(pawcprj_type),allocatable :: cprj1(:,:),cprj2(:,:)
 
 ! *************************************************************************
 
@@ -1092,23 +1085,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
  end if
  call setmesh(cryst%gmet, gvec_max, u_ngfft, npwvec, m_npw, npw_k, u_nfft, method, mG0, cryst, enforce_sym, unit=std_out)
  u_mgfft = maxval(u_ngfft(1:3))
-
- ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
- !if (psps%usepaw == 1) then
- !  ABI_MALLOC(Pwij, (Psps%ntypat))
- !  call pawpwij_init(Pwij,Ep%npwepG0, [zero, zero, zero],Gsph_epsG0%gvec,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
- !  ABI_MALLOC(Cprj1_bz,(Cryst%natom,nspinor))
- !  call pawcprj_alloc(Cprj1_bz, 0, Wfd%nlmn_atm)
- !  ABI_MALLOC(Cprj2_bz,(Cryst%natom,nspinor))
- !  call pawcprj_alloc(Cprj2_bz, 0, Wfd%nlmn_atm)
-
- !  call pawcprj_free(Cprj1_bz)
- !  ABI_FREE(Cprj1_bz)
- !  call pawcprj_free(Cprj2_bz)
- !  ABI_FREE(Cprj2_bz)
- !  call pawpwij_free(Pwij)
- !  ABI_FREE(Pwij)
- !end if
+ qpt = zero
 
  ! Get full BZ associated to ebands
  !call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
@@ -1121,7 +1098,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
 
  ! NB: npweps = m_npw
  ABI_CALLOC(sqrt_vc, (m_npw))
- qpt = zero
+
  my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
  call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, my_gw_qlwl, cryst, sqrt_vc, comm)
  call vcgen%free()
@@ -1282,6 +1259,16 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
  ABI_MALLOC(ur12_batch, (u_nfft * nspinor, batch2_size))
  ABI_MALLOC(ug12_batch, (m_npw * nspinor, batch2_size))
 
+ if (psps%usepaw == 1) then
+   ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
+   ABI_MALLOC(pwij, (psps%ntypat))
+   call pawpwij_init(pwij, m_npw, qpt, m_gvec, cryst%rprimd, psps, pawtab, paw_pwff)
+   ABI_MALLOC(cprj1,  (cryst%natom, nspinor*batch1_size))
+   !call pawcprj_alloc(cprj1, 0, Wfd%nlmn_atm)
+   ABI_MALLOC(cprj2, (cryst%natom, nspinor*batch2_size))
+   !call pawcprj_alloc(cprj2, 0, Wfd%nlmn_atm)
+ end if
+
  ! TODO:
  ! 1) take advantage of M_{b1,b2}(g) = <b1|e^{-ig.r}|b2> => M_{b1,b2}(g) = M_{b2,b1}(-g)^*
  !   once I have a better understanding of the fileformat expected by CC4S.
@@ -1302,14 +1289,15 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
    band1_stop = band1_start + n1dat - 1
    call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1, band1_start], ug1_batch)
 
+   !if (psps%usepaw == 1) call ugb%collect_cprj(n1dat, band1_start, cprj1)
+
    ! FFT: ug1_batch --> ur1_batch
    !call fft_ug(ugb%npw_k, u_nfft, nspinor, n1dat, u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, ug1_batch, ur1_batch)
    call uplan_1%execute_gr(n1dat, ug1_batch(:,1), ur1_batch(:,1))
-
    if (ugb%istwf_k /= 2) ur1_batch = conjg(ur1_batch)  ! Not needed if k == Gamma as ur1 is real.
    ABI_FREE(ug1_batch)
 
-   ! Blocked loop over MY group of b2 indices (again contiguous blocks)
+   ! Blocked loop over MY group of b2 indices (contiguous blocks)
    do band2_start=ugb%my_bstart, ugb%my_bstop, batch2_size
      n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
      my_ib2 = band2_start - ugb%my_bstart + 1
@@ -1320,6 +1308,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
      !            ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
 
      call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
+
+     !if (psps%usepaw == 1) call ugb%collect_cprj(n2dat, band2_start, cprj2)
 
      ! For each row of the submatrix, build n2dat products (band1, idat2) in r-space, then r --> g.
      do idat1=1,n1dat
@@ -1332,8 +1322,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
        !call fft_ur(m_npw, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
 
        ! Add PAW on-site contribution, projectors are already in the BZ.
-       !call paw_rho_tw_g(Ep%npwepG0,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
-       !                  Cprj1_kmq,Cprj2_k,Pwij,rhotwg)
+       if (psps%usepaw == 1) then
+       !do idat2=1,n2dat
+       !associate (cprj_kmq => cprj1(:,:,1+(idat1-1)*nspinor) cprj2_k => cprj2(:,:,1+(idat1-1)*nspinor) )
+       !call paw_rho_tw_g(m_npw, dim_rtwg, nspinor, cryst%natom, cryst%ntypat, cryst%typat, cryst%xred, m_gvec, &
+       !                  cprj1_kmq, cprj2_k, pwij, rhotwg)
+       !end associate
+       !end do
+       end if
 
        if (nspinor == 2) then
          ! Sum over spinor components and repack data in the first n2dat positions.
@@ -1354,8 +1350,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
 #ifdef HAVE_MPI_IO
        ! Write ug12_batch using Stream-IO
        buf_size = m_npw * n2dat
-       offset = (band2_start-1) * m_npw + (band1-1) * m_npw * ugb%nband_k
-       offset = offset * xmpi_bsize_dpc
+       offset = ((band2_start-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
        call MPI_FILE_WRITE_AT(fh, offset, ug12_batch, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
        ABI_HANDLE_MPIERR(mpierr)
 
@@ -1393,10 +1388,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
    max_abs_err = zero
    do ig=1, ugb%nband_k**2
      read(test_unt,*) band1, band2, ug12_batch(1:M_,1)
-     !read(unt) work
-
-     offset = (band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k
-     offset = offset * xmpi_bsize_dpc
+     offset = ((band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
      call MPI_FILE_READ_AT(fh, offset, work, m_npw, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_HANDLE_MPIERR(mpierr)
 
@@ -1427,6 +1419,15 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, paw_pwff, ugb)
  ABI_FREE(ur12_batch)
  ABI_FREE(ug12_batch)
  ABI_FREE(sqrt_vc)
+
+ if (psps%usepaw == 1) then
+   call pawpwij_free(Pwij)
+   ABI_FREE(Pwij)
+   call pawcprj_free(cprj1)
+   ABI_FREE(cprj1)
+   call pawcprj_free(cprj2)
+   ABI_FREE(cprj2)
+ end if
 
  call cwtime_report(" cc4s_gamma", cpu, wall, gflops)
 

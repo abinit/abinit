@@ -26,8 +26,6 @@ xred   0.00    0.00    0.00   # Reduced coordinates of atom 1
 # Definition of the plane-wave basis set
 ecut 15.0                     # Kinetic energy cut-off, in Hartree
 
-gw_icutcoul 3      # For legacy reasons
-
 ####################
 # Dataset 1: SCF run
 ####################
