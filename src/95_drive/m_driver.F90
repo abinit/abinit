@@ -790,7 +790,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
 
    case (RUNL_GWR)
-     call gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
+     call gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
    case (RUNL_BSE)
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)

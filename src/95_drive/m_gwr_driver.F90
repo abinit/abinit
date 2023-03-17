@@ -121,7 +121,6 @@ contains
 !!   and the arrays dimensioned to npsp. All the remaining components of Psps are to be initialized in
 !!   the call to pspini. The next time the code enters bethe_salpeter, Psps might be identical to the
 !!   one of the previous Dtset, in which case, no reinitialisation is scheduled in pspini.F90.
-!! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
 !! NOTES
@@ -143,7 +142,7 @@ contains
 !!
 !! SOURCE
 
-subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
+subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -153,7 +152,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
 !arrays
- real(dp),intent(in) :: acell(3),rprim(3,3),xred(3,dtset%natom)
+ real(dp),intent(in) :: xred(3,dtset%natom)
  type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
@@ -187,7 +186,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: optcut, optgr0, optgr1, optgr2, optrad, psp_gencond, option
  integer :: rhoxsp_method, usexcnhat !, use_umklp
  real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
- real(dp) :: drude_plsmf !,my_plsmf,ecut_eff,ecutdg_eff,ehartree
+ !real(dp) :: drude_plsmf !,my_plsmf,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
  real(dp) :: vxcavg !,vxcavg_qp ucvol,
  real(dp) :: gw_gsq !, gsqcut, gwc_gsq, gwx_gsq,
@@ -233,7 +232,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  !     performed in the subdriver that will employ different MPI distribution schemes optimized for that particular task.
 
  ! abirules!
- if (.False.) write(std_out,*)acell,codvsn,rprim,xred
+ if (.False.) write(std_out,*)xred
 
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units(:) = [std_out, ab_out]
@@ -1045,7 +1044,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer,pointer :: gvec_max(:,:)
  !integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
  integer,allocatable,target :: m_gvec(:,:)
- complex(dpc),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
+ complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
  complex(gwpc),allocatable :: sqrt_vc(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:),cprj2(:,:)
@@ -1059,7 +1058,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
 
  debug_this = merge(.False., .True., nproc > 1)
- !debug_this = .False.
+ debug_this = .False.
 
  if (dtset%prtvol > 10) call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
 
