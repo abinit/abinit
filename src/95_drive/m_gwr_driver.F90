@@ -64,7 +64,7 @@ module m_gwr_driver
  use m_pawdij,          only : pawdij, symdij_all
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
- use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free
+ use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free, paw_rho_tw_g
  use m_kg,              only : getph !, getcut
  use m_wfd,             only : test_charge
  use m_pspini,          only : pspini
@@ -76,7 +76,7 @@ module m_gwr_driver
  use m_paw_tools,       only : chkpawovlp, pawprt
  use m_paw_denpot,      only : pawdenpot
  use m_paw_init,        only : pawinit, paw_gencond
- use m_pawcprj,         only : pawcprj_type, pawcprj_free !, pawcprj_alloc, paw_overlap
+ use m_pawcprj,         only : pawcprj_type, pawcprj_free, pawcprj_alloc ! , paw_overlap
  use m_ksdiago,         only : ugb_t
  use m_mkrho,           only : prtrhomxmn
  use m_melemts,         only : melflags_t
@@ -194,7 +194,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
- type(ugb_t), target :: ugb
+ type(ugb_t) :: ugb
  type(xmpi_pool2d_t) :: diago_pool
 !arrays
  integer :: ngfftc(18),ngfftf(18),units(2) ! gwc_ngfft(18),gwx_ngfft(18),
@@ -300,9 +300,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  usexcnhat = 0
  call energies_init(KS_energies)
 
- den_path = dtfil%fildensin
- wfk_path = dtfil%fnamewffk
- kden_path = dtfil%filkdensin
+ den_path = dtfil%fildensin; wfk_path = dtfil%fnamewffk; kden_path = dtfil%filkdensin
 
  if (my_rank == master) then
    ! Initialize filenames. Accept files in Fortran or in netcdf format.
@@ -427,7 +425,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call pawfgrtab_init(pawfgrtab, cplex, l_size_atm, dtset%nspden, dtset%typat)
    ABI_FREE(l_size_atm)
    compch_fft=greatest_real
-   usexcnhat = MAXVAL(Pawtab(:)%usexcnhat)
+   usexcnhat = maxval(Pawtab(:)%usexcnhat)
    ! * 0 if Vloc in atomic data is Vbare    (Blochl's formulation)
    ! * 1 if Vloc in atomic data is VH(tnzc) (Kresse's formulation)
    call wrtout(std_out, sjoin(' using usexcnhat: ', itoa(usexcnhat)))
@@ -448,12 +446,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  end if ! End of PAW Initialization
 
  ! Allocate these arrays anyway, since they are passed to subroutines.
- if (.not.allocated(ks_nhat)) then
-   ABI_MALLOC(ks_nhat, (nfftf, 0))
- end if
- if (.not.allocated(dijexc_core)) then
-   ABI_MALLOC(dijexc_core, (1, 1, 0))
- end if
+ ABI_MALLOC_IFNOT(ks_nhat, (nfftf, 0))
+ ABI_MALLOC_IFNOT(dijexc_core, (1, 1, 0))
 
  !=============================================
  ! Read density and compare crystal structures
@@ -461,7 +455,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_MALLOC(ks_rhor, (nfftf, dtset%nspden))
 
  call read_rhor(den_path, cplex1, dtset%nspden, nfftf, ngfftf, dtset%usepaw, mpi_enreg_seq, ks_rhor, &
-                den_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
+                den_hdr, ks_pawrhoij, comm, allow_interp=.False.)
 
  den_cryst = den_hdr%get_crystal()
  if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
@@ -472,7 +466,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_MALLOC(ks_taur, (nfftf, dtset%nspden * dtset%usekden))
  if (dtset%usekden == 1) then
    call read_rhor(kden_path, cplex1, dtset%nspden, nfftf, ngfftf, 0, mpi_enreg_seq, ks_taur, &
-                  kden_hdr, ks_pawrhoij, comm) !, allow_interp=.True.)
+                  kden_hdr, ks_pawrhoij, comm, allow_interp=.False.)
    call kden_hdr%free()
    call prtrhomxmn(std_out, mpi_enreg_seq, nfftf, ngfftf, dtset%nspden, 1, ks_taur, optrhor=1, ucvol=cryst%ucvol)
  end if
@@ -543,7 +537,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  if (Dtset%usekden==1) then
    call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=cryst%ucvol)
    call prtrhomxmn(ab_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=cryst%ucvol)
- endif
+ end if
 
  ! FFT n(r) --> n(g)
  ABI_MALLOC(ks_rhog, (2, nfftf))
@@ -646,11 +640,11 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_MALLOC(nband_iks, (dtset%nkpt, dtset%nsppol))
    ABI_MALLOC(npwarr_ik, (dtset%nkpt))
    ABI_MALLOC(istwfk_ik, (dtset%nkpt))
-   istwfk_ik = 1 ! TODO: istwkf 2 is not yet supported.
+   istwfk_ik = 1
 
    ! Compute npw_k from ecut so that we can update the header.
    do ik_ibz=1,dtset%nkpt
-     !if (dtset%istwfk(ik_ibz) == 2) istwfk_ik(ik_ibz) = 2
+     !if (dtset%istwfk(ik_ibz) == 2) istwfk_ik(ik_ibz) = 2  ! TODO: istwkf 2 is not yet supported.
      call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
      ABI_FREE(gvec_)
    end do
@@ -690,8 +684,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      iomode__ = iomode_from_fname(out_path)
      call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
      if (my_rank == master) then
-       call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, &
-                            write_hdr=.True., write_frm=.True.)
+       call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), xmpi_comm_self, write_hdr=.True., write_frm=.True.)
        call owfk%close()
      end if
      call xmpi_barrier(comm)
@@ -713,35 +706,29 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 
        if (write_wfk) then
-        ! occupancies are set to zero.
-        ! Client code is responsible for recomputing occ and fermie when reading this WFK.
-        !ABI_CALLOC(occ_k, (owfk%mband))
-        ABI_CALLOC(occ_k, (nband_k))
-        !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
-        !print *, "About to write with ugb%my_nband", ugb%my_nband, "has_idle_procs:", ugb%has_idle_procs
-        !call xmpi_barrier(comm)
+         ! occupancies are set to zero. Client code is responsible for recomputing occ and fermie when reading this WFK.
+         ABI_CALLOC(occ_k, (nband_k))
+         color = merge(1, 0, ugb%my_nband > 0)
+         call xmpi_comm_split(diago_pool%comm%value, color, diago_pool%comm%me, io_comm, ierr)
 
-        color = merge(1, 0, ugb%my_nband > 0)
-        call xmpi_comm_split(diago_pool%comm%value, color, diago_pool%comm%me, io_comm, ierr)
+         if (ugb%my_nband > 0) then
+           ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
+           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
+           call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
-        if (ugb%my_nband > 0) then
-          ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
-          ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
-          call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
+           ! Reopen file inside io_comm.
+           call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, &
+                                write_hdr=.False., write_frm=.False.)
 
-          ! Reopen file inside io_comm.
-          call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, &
-                               write_hdr=.False., write_frm=.False.)
-
-          !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
-          sc_mode = xmpio_collective
-          call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
-                                      kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
-                                      eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
-          call owfk%close()
-        end if
-        call xmpi_comm_free(io_comm)
-        ABI_FREE(occ_k)
+           !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
+           sc_mode = xmpio_collective
+           call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
+                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
+                                       eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+           call owfk%close()
+         end if
+         call xmpi_comm_free(io_comm)
+         ABI_FREE(occ_k)
        end if
 
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
@@ -787,7 +774,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
-
    call owfk_hdr%free(); call ebands_free(owfk_ebands); call diago_pool%free()
 
  else
@@ -842,8 +828,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    KS_mflags%has_vhartree=1
    KS_mflags%has_vxc     =1
    KS_mflags%has_vxcval  =1
-   if (Dtset%usepawu /= 0  )  KS_mflags%has_vu      = 1
-   if (Dtset%useexexch /= 0)  KS_mflags%has_lexexch = 1
+   if (Dtset%usepawu /= 0  ) KS_mflags%has_vu      = 1
+   if (Dtset%useexexch /= 0) KS_mflags%has_lexexch = 1
    if (Dtset%usepaw==1 .and. Dtset%gw_sigxcore == 1) KS_mflags%has_sxcore = 1
    !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
    KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
@@ -878,8 +864,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      call gwr%build_sigxme()
    case ("EGEW", "EGW0", "G0EW")
      call gwr%run_energy_scf()
-   !case ("CHI0")
-   !  call compute_chi0_head_wings(wfk_path)
    case default
      ABI_ERROR(sjoin("Invalid gwr_task:", dtset%gwr_task))
    end select
@@ -968,6 +952,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  write(unt,'(A)')    'metaData:'
  write(unt,'(A,E22.15)')    '  fermiEnergy: ',ebands%fermie
  write(unt,'(A)')    '  energies:'
+
  do spin=1,ebands%nsppol
    do ik_ibz=1,ebands%nkpt
      do band=1,ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
@@ -982,6 +967,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
+
  do spin=1,ebands%nsppol
    do ik_ibz=1,ebands%nkpt
      do band=1,ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
@@ -989,6 +975,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
      end do
    end do
  end do
+
  close(unt)
 
 end subroutine cc4s_write_eigens
@@ -1030,8 +1017,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 !scalars
  integer,parameter :: mG0(3) = 0, master = 0
  integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, buf_size ! ierr,
- integer :: band1, band1_start, band1_stop, batch1_size, n1dat, idat1, m_istwfk, cnt
- integer :: band2, band2_start, band2_stop, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
+ integer :: band1, band1_start, batch1_size, n1dat, idat1, m_istwfk, cnt, iatom, dim_rtwg
+ integer :: band2, band2_start, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
  integer(XMPI_OFFSET_KIND) :: offset
  real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3)
  character(len=500) :: msg
@@ -1040,14 +1027,14 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
  type(vcgen_t) :: vcgen
  !type(pstat_t) :: pstat
- integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method
+ integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method, nlmn_atm(cryst%natom)
  integer,pointer :: gvec_max(:,:)
  !integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
  integer,allocatable,target :: m_gvec(:,:)
  complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
- complex(gwpc),allocatable :: sqrt_vc(:)
+ complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
- type(pawcprj_type),allocatable :: cprj1(:,:),cprj2(:,:)
+ type(pawcprj_type),allocatable :: cprj1(:,:)
 
 ! *************************************************************************
 
@@ -1096,8 +1083,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
                  dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, comm)
 
  ! NB: npweps = m_npw
- ABI_CALLOC(sqrt_vc, (m_npw))
-
+ ABI_MALLOC(sqrt_vc, (m_npw))
  my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
  call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, my_gw_qlwl, cryst, sqrt_vc, comm)
  call vcgen%free()
@@ -1131,12 +1117,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      write(unt,'(a)')    'unit: 1.0  # Bohr^-1'
      ! The last three lines correspond to the reciprocal lattice vectors (including the factor 2pi)
      write(unt,'(a)')    'metaData:'
-     write(unt,'("  Gi: [",E22.15,",",E22.15,",",E22.15,"]")')  &
-        two_pi*cryst%gprimd(1, 1),two_pi*cryst%gprimd(2,1),two_pi*cryst%gprimd(3, 1)
-     write(unt,'("  Gj: [",E22.15,",",E22.15,",",E22.15,"]")')  &
-        two_pi*cryst%gprimd(1, 2),two_pi*cryst%gprimd(2,2),two_pi*cryst%gprimd(3, 2)
-     write(unt,'("  Gk: [",E22.15,",",E22.15,",",E22.15,"]")')  &
-       two_pi*cryst%gprimd(1, 3),two_pi*cryst%gprimd(2,3),two_pi*cryst%gprimd(3, 3)
+     write(unt,'("  Gi: [",E22.15,",",E22.15,",",E22.15,"]")') &
+        two_pi*cryst%gprimd(1,1), two_pi*cryst%gprimd(2,1), two_pi*cryst%gprimd(3,1)
+     write(unt,'("  Gj: [",E22.15,",",E22.15,",",E22.15,"]")') &
+        two_pi*cryst%gprimd(1,2), two_pi*cryst%gprimd(2,2), two_pi*cryst%gprimd(3,2)
+     write(unt,'("  Gk: [",E22.15,",",E22.15,",",E22.15,"]")') &
+       two_pi*cryst%gprimd(1,3), two_pi*cryst%gprimd(2,3), two_pi*cryst%gprimd(3, 3)
      close(unt)
 
      ! Write g-vectors
@@ -1262,15 +1248,18 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    ! Evaluate oscillator matrix elements btw partial waves. Note q=Gamma
    ABI_MALLOC(pwij, (psps%ntypat))
    call pawpwij_init(pwij, m_npw, qpt, m_gvec, cryst%rprimd, psps, pawtab, paw_pwff)
+   do iatom=1,cryst%natom
+     nlmn_atm(iatom) = pawtab(cryst%typat(iatom))%lmn_size
+   end do
    ABI_MALLOC(cprj1,  (cryst%natom, nspinor*batch1_size))
-   !call pawcprj_alloc(cprj1, 0, Wfd%nlmn_atm)
-   ABI_MALLOC(cprj2, (cryst%natom, nspinor*batch2_size))
-   !call pawcprj_alloc(cprj2, 0, Wfd%nlmn_atm)
+   call pawcprj_alloc(cprj1, 0, nlmn_atm)
+   dim_rtwg = nspinor
+   ABI_MALLOC(paw_rhotwg, (m_npw*dim_rtwg))
  end if
 
  ! TODO:
  ! 1) take advantage of M_{b1,b2}(g) = <b1|e^{-ig.r}|b2> => M_{b1,b2}(g) = M_{b2,b1}(-g)^*
- !   once I have a better understanding of the fileformat expected by CC4S.
+ !    once I have a better understanding of the fileformat expected by CC4S.
  ! 2) Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
  ! 3) Clarify ordering of CoulombVertex and eigenvalues
  ! 4) See other TODOs below.
@@ -1285,10 +1274,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  do band1_start=1, ugb%nband_k, batch1_size
    ! Collect n1dat bands starting from band1_start on each proc.
    n1dat = blocked_loop(band1_start, ugb%nband_k, batch1_size)
-   band1_stop = band1_start + n1dat - 1
-   call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1, band1_start], ug1_batch)
+   !band1_stop = band1_start + n1dat - 1
 
-   !if (psps%usepaw == 1) call ugb%collect_cprj(n1dat, band1_start, cprj1)
+   call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1, band1_start], ug1_batch)
+   if (psps%usepaw == 1) call ugb%collect_cprj(nspinor, n1dat, band1_start, cprj1)
 
    ! FFT: ug1_batch --> ur1_batch
    !call fft_ug(ugb%npw_k, u_nfft, nspinor, n1dat, u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, ug1_batch, ur1_batch)
@@ -1300,19 +1289,18 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    do band2_start=ugb%my_bstart, ugb%my_bstop, batch2_size
      n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
      my_ib2 = band2_start - ugb%my_bstart + 1
-     band2_stop = band2_start + n2dat - 1
+     !band2_stop = band2_start + n2dat - 1
 
-     ! FFT: ugb%mat --> ur2_batch for nd2dat states.
+     ! FFT: ugb%mat --> ur2_batch for n2dat states.
      !call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
      !            ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
 
      call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
 
-     !if (psps%usepaw == 1) call ugb%collect_cprj(n2dat, band2_start, cprj2)
-
      ! For each row of the submatrix, build n2dat products (band1, idat2) in r-space, then r --> g.
      do idat1=1,n1dat
        band1 = band1_start + idat1 - 1
+
        do idat2=1,n2dat
          ur12_batch(:,idat2) = ur1_batch(:,idat1) * ur2_batch(:,idat2)
        end do
@@ -1320,18 +1308,20 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
        !call fft_ur(m_npw, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
 
-       ! Add PAW on-site contribution, projectors are already in the BZ.
+       ! Add PAW on-site contributions
        if (psps%usepaw == 1) then
-       !do idat2=1,n2dat
-       !associate (cprj_kmq => cprj1(:,:,1+(idat1-1)*nspinor) cprj2_k => cprj2(:,:,1+(idat1-1)*nspinor) )
-       !call paw_rho_tw_g(m_npw, dim_rtwg, nspinor, cryst%natom, cryst%ntypat, cryst%typat, cryst%xred, m_gvec, &
-       !                  cprj1_kmq, cprj2_k, pwij, rhotwg)
-       !end associate
-       !end do
+         do idat2=1,n2dat
+           associate (cprj1_kmq => cprj1(:, 1 + (idat1-1)*nspinor), &
+                      cprj2_k => ugb%cprj_k(:, 1 + (band2_start+idat2-2)*nspinor))  !NB: ugb%cprj_k(2, nspinor*my_nband)
+           paw_rhotwg = zero
+           call paw_rho_tw_g(cryst, pwij, m_npw, dim_rtwg, nspinor, m_gvec, cprj1_kmq, cprj2_k, paw_rhotwg)
+           ug12_batch(:,idat2) = ug12_batch(:,idat2) + paw_rhotwg
+           end associate
+         end do
        end if
 
        if (nspinor == 2) then
-         ! Sum over spinor components and repack data in the first n2dat positions.
+         ! Sum over spinors and repack data in the first n2dat positions to prepare IO operation.
          do idat2=1,n2dat
            ug12_batch(1:m_npw,idat2) = ug12_batch(1:m_npw,idat2) + ug12_batch(m_npw+1:,idat2)
          end do
@@ -1424,8 +1414,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    ABI_FREE(Pwij)
    call pawcprj_free(cprj1)
    ABI_FREE(cprj1)
-   call pawcprj_free(cprj2)
-   ABI_FREE(cprj2)
+   ABI_FREE(paw_rhotwg)
  end if
 
  call cwtime_report(" cc4s_gamma", cpu, wall, gflops)

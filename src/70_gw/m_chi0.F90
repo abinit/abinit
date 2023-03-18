@@ -656,8 +656,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
                call calc_wfwfg(tabr_k,itim_k,spinrot_kbz,nfft,nspinor,ngfft_gw,ur2_kibz,ur2_kibz,wfwfg)
 
                if (Psps%usepaw==1) then
-                 call paw_rho_tw_g(nfft,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,gw_gfft,&
-                   Cprj2_bz,Cprj2_bz,Pwij_fft,wfwfg)
+                 call paw_rho_tw_g(cryst, Pwij_fft, nfft,dim_rtwg,nspinor,gw_gfft,Cprj2_bz,Cprj2_bz,wfwfg)
 
                 ! Add PAW cross term
                 if (Dtset%pawcross==1) then
@@ -693,8 +692,7 @@ subroutine cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,qp_ebands,ks_ebands,Gsph_eps
 
          else
            ! 1) Add PAW onsite contribution, projectors are already in the BZ.
-           call paw_rho_tw_g(Ep%npwe,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
-             Cprj1_bz,Cprj2_bz,Pwij,rhotwg)
+           call paw_rho_tw_g(cryst, Pwij, Ep%npwe,dim_rtwg,nspinor,Gsph_epsG0%gvec,Cprj1_bz,Cprj2_bz,rhotwg)
 
            ! 2) Matrix elements of i[H,r] for PAW.
            rhotwx = paw_ihr(spin,nspinor,npw_k,istwf_k,Kmesh%ibz(:,ik_ibz),Cryst,Pawtab,ug1,ug2,kg_k,Cprj1_ibz,Cprj2_ibz,HUr)
@@ -1635,8 +1633,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
                call calc_wfwfg(tabr_k,itim_k,spinrot_k,nfft,nspinor,ngfft_gw,ur2_k_ibz,ur2_k_ibz,wfwfg)
 
                if (Psps%usepaw==1) then
-                 call paw_rho_tw_g(nfft,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,gw_gfft,&
-&                  Cprj2_k,Cprj2_k,Pwij_fft,wfwfg)
+                 call paw_rho_tw_g(cryst,Pwij_fft, nfft,dim_rtwg,nspinor,gw_gfft,Cprj2_k,Cprj2_k,wfwfg)
 
                  ! Add PAW cross term
                  if (Dtset%pawcross==1) then
@@ -1666,8 +1663,7 @@ subroutine cchi0(use_tr,Dtset,Cryst,qpoint,Ep,Psps,Kmesh,qp_ebands,Gsph_epsG0,&
 
          if (Psps%usepaw==1) then
            ! Add PAW on-site contribution, projectors are already in the BZ.
-           call paw_rho_tw_g(Ep%npwepG0,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
-&           Cprj1_kmq,Cprj2_k,Pwij,rhotwg)
+           call paw_rho_tw_g(cryst, Pwij, Ep%npwepG0,dim_rtwg,nspinor,Gsph_epsG0%gvec,Cprj1_kmq,Cprj2_k,rhotwg)
 
            ! Add PAW cross term
            if (Dtset%pawcross==1) then
@@ -2376,8 +2372,7 @@ subroutine chi0q0_intraband(Wfd,Cryst,Ep,Psps,BSt,Gsph_epsG0,Pawang,Pawrad,Pawta
 
        if (Psps%usepaw==1) then
          ! Add PAW onsite contribution, projectors are already in the BZ.
-         call paw_rho_tw_g(Ep%npwe,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_epsG0%gvec,&
-&          Cprj1_bz,Cprj1_bz,Pwij,rhotwg)
+         call paw_rho_tw_g(cryst,Pwij,Ep%npwe,dim_rtwg,nspinor,Gsph_epsG0%gvec,Cprj1_bz,Cprj1_bz,rhotwg)
        end if
 
        ! ==== Adler-Wiser expression, to be consistent here we use the KS eigenvalues (?) ====

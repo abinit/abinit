@@ -34,6 +34,7 @@ MODULE m_pawpwij
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : arth
  use m_geometry,       only : metric
+ use m_crystal,        only : crystal_t
  use m_paw_numeric,    only : paw_jbessel_4spline, paw_spline
  use m_splines,        only : splfit
  use m_pawang,         only : pawang_type
@@ -1009,7 +1010,6 @@ end subroutine paw_mkrhox
 !!    dim_rtwg=4 for <up|up>, <dwn|dwn>, <up|dwn> and <dwn|up>.
 !!  nspinor=number of spinorial components.
 !!  npw=number of plane waves for oscillator matrix elements
-!!  natom=number of atoms
 !!  Cprj_kmqb1(natom,nspinor),Cprj_kb2(natom,nspinor) <type(pawcprj_type)>=
 !!   projected input wave functions <Proj_i|Cnk> with all NL projectors corresponding to
 !!   wavefunctions (k-q,b1,s) and (k,b2,s), respectively.
@@ -1019,16 +1019,16 @@ end subroutine paw_mkrhox
 !!
 !! SOURCE
 
-pure subroutine paw_rho_tw_g(npw, dim_rtwg, nspinor, natom, ntypat, typat, xred, gvec, Cprj_kmqb1, Cprj_kb2, Pwij, rhotwg)
+pure subroutine paw_rho_tw_g(cryst, pwij, npw, dim_rtwg, nspinor, gvec, Cprj_kmqb1, Cprj_kb2, rhotwg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,ntypat,npw,nspinor,dim_rtwg
+ type(crystal_t),intent(in) :: cryst
+ integer,intent(in) :: npw,nspinor,dim_rtwg
 !arrays
- integer,intent(in) :: gvec(3,npw),typat(natom)
- real(dp),intent(in) :: xred(3,natom)
- type(pawcprj_type),intent(in) :: Cprj_kmqb1(natom,nspinor),Cprj_kb2(natom,nspinor)
- type(pawpwij_t),intent(in) :: Pwij(ntypat)
+ integer,intent(in) :: gvec(3,npw)
+ type(pawcprj_type),intent(in) :: Cprj_kmqb1(cryst%natom,nspinor), Cprj_kb2(cryst%natom,nspinor)
+ type(pawpwij_t),intent(in) :: Pwij(cryst%ntypat)
  complex(gwpc),intent(inout) :: rhotwg(npw*dim_rtwg)
 
 !Local variables-------------------------------
@@ -1036,7 +1036,7 @@ pure subroutine paw_rho_tw_g(npw, dim_rtwg, nspinor, natom, ntypat, typat, xred,
  integer :: ig,iat,nlmn,ilmn,jlmn,k0lmn,klmn,iab,isp1,isp2,spad,itypat
  real(dp) :: fij,re_psp,im_psp,re_pw,im_pw,arg
 !arrays
- integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
+ integer,parameter :: spinor_idxs(2,4) = RESHAPE([1,1,2,2,1,2,2,1], [2, 4])
  real(dp) :: tmp(2),qpg(3),x0(3),ph3d(2)
 
 ! *************************************************************************
@@ -1049,10 +1049,10 @@ pure subroutine paw_rho_tw_g(npw, dim_rtwg, nspinor, natom, ntypat, typat, xred,
 
    do ig=1,npw
      tmp(:)=zero
-     do iat=1,natom
-       itypat = typat(iat)
+     do iat=1,cryst%natom
+       itypat = cryst%typat(iat)
        nlmn   = Pwij(itypat)%lmn_size
-       x0(:) = xred(:,iat)
+       x0(:) = cryst%xred(:,iat)
 
        ! Structure factor e^{-i(q+G)*xred}
        qpg(:)= Pwij(itypat)%qpt(:) + gvec(:,ig)

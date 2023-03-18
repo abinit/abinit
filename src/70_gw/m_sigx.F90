@@ -506,8 +506,8 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
              ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)
              spad = nspinor - 1
-             call paw_rho_tw_g(npwx,nspinor,nspinor,cryst%natom,cryst%ntypat,cryst%typat,cryst%xred,Gsph_x%gvec,&
-                               Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+             call paw_rho_tw_g(cryst,Pwij_qg,npwx,nspinor,nspinor,Gsph_x%gvec,&
+                               Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),rhotwg_ki(:,jb))
            end if
            if (psps%usepaw==1.and.pawcross==1) then ! Add paw cross term
              call paw_cross_rho_tw_g(nspinor,npwx,nfftf,ngfftf,1,use_padfftf,igfftfxg0,gboundf,&
