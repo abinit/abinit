@@ -532,7 +532,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
  end if
  if(cpopt>=0) then
-   if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
+   if (size(cprjin)<hamk%natom*my_nspinor*ndat) then
      ABI_BUG('Incorrect size for cprjin!')
    end if
  end if
