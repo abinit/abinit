@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_crystal
+module m_crystal
 
  use defs_basis
  use m_errors
@@ -1794,5 +1794,5 @@ subroutine get_redcart_qdirs(cryst, nq, qdirs, qlen)
 end subroutine get_redcart_qdirs
 !!***
 
-END MODULE m_crystal
+end module m_crystal
 !!***

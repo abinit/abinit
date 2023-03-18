@@ -3,10 +3,10 @@
 !!  m_mkrho
 !!
 !! FUNCTION
-!!
+!!  Procedures for computing densities from KS orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,10 +30,10 @@ module m_mkrho
  use m_extfpmd
 
  use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, zerosym, fourwf, fourdp
- use m_hamiltonian,  only : gs_hamiltonian_type
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type
  use m_spacepar,     only : symrhg
@@ -42,7 +42,7 @@ module m_mkrho
  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
  use m_pawtab,       only : pawtab_type
  use m_io_tools,     only : open_file
- use m_splines,      only : spline,splint
+ use m_splines,      only : spline, splint
  use m_sort,         only : sort_dp
  use m_prep_kgb,     only : prep_fourwf
  use m_wvl_rho,      only : wvl_mkrho
@@ -1249,8 +1249,6 @@ end subroutine initro
 !!                          (If optrhor==4, rhor is expected to be the ELF (elfr))
 !!  rhor(nfft,nspden)=electron density (electrons/bohr^3)
 !!
-!! OUTPUT
-!!
 !! NOTES
 !!  The tolerance tol12 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
@@ -1262,9 +1260,9 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,nfft,nspden,option
+ type(MPI_type),intent(in) :: mpi_enreg
  integer,intent(in),optional :: optrhor
  real(dp),intent(in),optional :: ucvol
- type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rhor(nfft,nspden)
@@ -1868,12 +1866,6 @@ end subroutine prtrhomxmn
 !!
 !! FUNCTION
 !!
-!! COPYRIGHT
-!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !! natom : number of atoms in cell
 !! nfft=(effective) number of FFT grid points (for this processor) - fine grid
@@ -1884,10 +1876,6 @@ end subroutine prtrhomxmn
 !!
 !! OUTPUT
 !! rhor_atm(nfft,nspden) : full electron density on the (fine) grid
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -1961,10 +1949,8 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 !first check how many datapoints are in each file
  do itypat=1,ntypat
    filename='';io_err=0;
-   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
-   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
    if (open_file(filename, message, newunit=unt, status='old',action='read') /= 0) then
      write(std_out,*) 'ERROR in read_atomden: Could not open file: ',filename
      write(std_out,*) ' Current implementation requires this file to be present'
@@ -1989,10 +1975,8 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  atomrgrid = zero ; density = zero
  do itypat=1,ntypat
    filename='';io_err=0;
-   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
-   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
    if (open_file(filename,message,newunit=unt,status='old',action='read') /= 0) then
      ABI_ERROR(message)
    end if
@@ -2036,20 +2020,10 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 
  rhor_atm(:,1) = rho
 
- if (allocated(atomrgrid))  then
-   ABI_FREE(atomrgrid)
- end if
- if (allocated(density))  then
-   ABI_FREE(density)
- end if
- if (allocated(r_vec_grid))  then
-   ABI_FREE(r_vec_grid)
- end if
- if (allocated(rho))  then
-   ABI_FREE(rho)
- end if
-
- return
+ ABI_SFREE(atomrgrid)
+ ABI_SFREE(density)
+ ABI_SFREE(r_vec_grid)
+ ABI_SFREE(rho)
 
 end subroutine read_atomden
 !!***
@@ -2072,12 +2046,6 @@ end subroutine read_atomden
 !! rho^{atm}_{\alpha}(r-R_{\alpha}) on a grid.
 !!
 !! Units are atomic.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! calctype : type of calculation
@@ -2277,7 +2245,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    end do
    call sort_dp(n,dp_1d_dummy,new_index,tol14)
    do i=1,n
-!    write(std_out,*) i,' -> ',new_index(i)
+     !write(std_out,*) i,' -> ',new_index(i)
      equiv_atom_pos(1:3,n+1-i,itypat) = dp_2d_dummy(1:3,new_index(i))
      equiv_atom_dist(1:n,itypat) = dp_1d_dummy
    end do
@@ -2400,7 +2368,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      grid_distances(1:n_grid_p) = dp_1d_dummy
      i_1d_dummy = grid_index(1:n_grid_p)
      do i=1,n_grid_p
-!      write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
+       !write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
        grid_index(i) = i_1d_dummy(new_index(i))
      end do
      ABI_FREE(dp_1d_dummy)
@@ -2432,8 +2400,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    end do ! n equiv atoms
  end do ! type of atom
 
-!Collect all contributions to rho_temp if
-!we are running in parallel
+ ! Collect all contributions to rho_temp if we are running in parallel
  if (nprocs>1) then
    call xmpi_barrier(spaceComm)
    call xmpi_sum_master(rho_temp,master,spaceComm,ierr)
@@ -2452,19 +2419,10 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    rho(:) = rho(:) + rho_temp(:,itypat)
  end do
 
-!deallocations
- if (allocated(rho_temp))  then
-   ABI_FREE(rho_temp)
- end if
- if (allocated(equiv_atom_pos))  then
-   ABI_FREE(equiv_atom_pos)
- end if
- if (allocated(equiv_atom_dist))  then
-   ABI_FREE(equiv_atom_dist)
- end if
-!if (allocated()) deallocate()
-
- return
+ ! deallocations
+ ABI_SFREE(rho_temp)
+ ABI_SFREE(equiv_atom_pos)
+ ABI_SFREE(equiv_atom_dist)
 
  end subroutine atomden
 !!***

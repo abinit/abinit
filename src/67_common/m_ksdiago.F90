@@ -51,12 +51,14 @@ module m_ksdiago
  use m_mpinfo,            only : destroy_mpi_enreg, initmpi_seq
  use m_pawtab,            only : pawtab_type
  use m_paw_ij,            only : paw_ij_type
- use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder
+ use m_pawcprj,           only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_reorder, &
+                                 pawcprj_set_zero, pawcprj_mpi_sum, pawcprj_copy
+ use m_cgprj,             only : getcprj
  use m_pawfgr,            only : pawfgr_type
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc, multithreaded_getghc
- use m_cgprj,             only : getcprj
+
 
  implicit none
 
@@ -118,8 +120,9 @@ module m_ksdiago
    ! pointer to mat%buffer_cplx
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
-   ! (natom, nspinor * my_nband))
+   ! (natom, nspinor*my_nband))
    ! PAW projections ordered according to natom and NOT according to typat.
+   ! Note my_nband
 
  contains
 
@@ -134,6 +137,10 @@ module m_ksdiago
 
    procedure :: print => ugb_print
     ! Print info on object.
+
+   procedure :: collect_cprj => ugb_collect_cprj
+    ! Collect a subset of PAW cprj on all processors.
+
  end type ugb_t
 !!***
 
@@ -1115,15 +1122,16 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
        bras(1, igsp2_start + idat * npwsp + idat) = one
      end do
    else
-     ! only istwf_k == 2 is coded here. There's a check at the beginning of this routine.
+     ! only istwf_k == 2 is coded here. NB: there's a check at the beginning of this routine.
      do idat=0,ndat-1
        if (igsp2_start + idat <= npwsp) then
-         ! Cosine
+         ! Cosine term
          bras(1, igsp2_start + idat*npwsp + idat) = half
          if (igsp2_start == 1) bras(1, igsp2_start + idat*npwsp + idat) = one
        else
-         ! Sine
-         ig = igsp2_start - npwsp + 1 + 1
+         ! Sine term
+         !ig = igsp2_start - npwsp + 1
+         ig = igsp2_start - npwsp + 1 + 1  ! This should be OK
          bras(2, ig + idat*npwsp + idat) = half
        end if
      end do
@@ -1151,7 +1159,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    else
      do idat=0,ndat-1
        ! Real wavefunctions.
-       igs = 1 + idat * npwsp; ige = igs + npwsp - 1
+       igs = 1 + idat*npwsp; ige = igs + npwsp - 1
        !if (igsp2_start == 1 .or. igsp2_start == npwsp + 1 .and. idat == 0) then
        !  ghc(:, igs:ige) = tol3 !; print *, ghc(:, igs:ige)
        !end if
@@ -1160,6 +1168,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      end do
      if (psps%usepaw == 1) then
        NOT_IMPLEMENTED_ERROR()
+       !gsg_mat%buffer_real(...)
+       !gsg_mat%buffer_real(...)
      end if
    end if
 
@@ -1378,6 +1388,48 @@ subroutine ugb_print(ugb, units, prtvol, header)
  call ydoc%write_units_and_free(units)
 
 end subroutine ugb_print
+!!***
+!----------------------------------------------------------------------
+
+!!****f* m_slk/ugb_collect_cprj
+!! NAME
+!!  ugb_collect_cprj
+!!
+!! FUNCTION
+!!  This is a collective routine that returns in `out_cprj` the PAW projecton for `nb` bands starting at `band_start`
+!!  NB: `out_cprj` is supposed to be allocated in the parent
+!!
+!! SOURCE
+
+subroutine ugb_collect_cprj(ugb, nspinor, nb, band_start, out_cprj)
+
+!Arguments ------------------------------------
+ class(ugb_t),intent(in) :: ugb
+ integer,intent(in) :: nspinor, nb, band_start
+ type(pawcprj_type),intent(inout) :: out_cprj(:,:)
+
+!Local variables-------------------------------
+ integer :: ierr, my_ibs, out_ibs, ii, band
+
+! *************************************************************************
+
+ ABI_CHECK_IEQ(size(ugb%cprj_k, dim=1), size(out_cprj, dim=1), "size1 should be the same")
+ ABI_CHECK_IGEQ(size(out_cprj, dim=2), nb*nspinor, "size2 too small!")
+
+ ! TODO: Numb algorithm based on xmpi_summ. Might be optimized.
+ call pawcprj_set_zero(out_cprj)
+
+ do band=band_start, band_start+nb-1
+   if (band >= ugb%my_bstart .and. band <= ugb%my_bstop) then
+     my_ibs = 1 + (band - ugb%my_bstart) * nspinor
+     out_ibs = 1 + (band - band_start) * nspinor
+     call pawcprj_copy(ugb%cprj_k(:,my_ibs:my_ibs+nspinor), out_cprj(:,out_ibs:out_ibs+nspinor))
+   end if
+ end do
+
+ call pawcprj_mpi_sum(out_cprj, ugb%comm, ierr)
+
+end subroutine ugb_collect_cprj
 !!***
 
 end module m_ksdiago
