@@ -644,7 +644,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
    ! Compute npw_k from ecut so that we can update the header.
    do ik_ibz=1,dtset%nkpt
-     !if (dtset%istwfk(ik_ibz) == 2) istwfk_ik(ik_ibz) = 2  ! TODO: istwkf 2 is not yet supported.
+     if (dtset%istwfk(ik_ibz) == 2) istwfk_ik(ik_ibz) = 2  ! TODO: istwkf 2 is not yet supported.
      call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
      ABI_FREE(gvec_)
    end do
@@ -1016,7 +1016,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mG0(3) = 0, master = 0
- integer :: nproc, my_rank, my_ib2, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, buf_size ! ierr,
+ integer :: nproc, my_rank, my_ib2st, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, buf_size ! ierr,
  integer :: band1, band1_start, batch1_size, n1dat, idat1, m_istwfk, cnt, iatom, dim_rtwg
  integer :: band2, band2_start, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
  integer(XMPI_OFFSET_KIND) :: offset
@@ -1236,7 +1236,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  !batch1_size = 3; batch2_size = 1
  !batch1_size = 3; batch2_size = 3
  !batch1_size = 1; batch2_size = 1
- call wrtout(std_out, sjoin("Using batch1_size:", itoa(batch1_size), ", batch2_size:",  itoa(batch2_size)))
+ call wrtout(std_out, sjoin(" Using batch1_size:", itoa(batch1_size), ", batch2_size:",  itoa(batch2_size)))
 
  !ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S interface")
  ABI_MALLOC(ur1_batch, (u_nfft * nspinor, batch1_size))
@@ -1288,14 +1288,13 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    ! Blocked loop over MY group of b2 indices (contiguous blocks)
    do band2_start=ugb%my_bstart, ugb%my_bstop, batch2_size
      n2dat = blocked_loop(band2_start, ugb%my_bstop, batch2_size)
-     my_ib2 = band2_start - ugb%my_bstart + 1
-     !band2_stop = band2_start + n2dat - 1
+     my_ib2st = band2_start - ugb%my_bstart + 1
 
      ! FFT: ugb%mat --> ur2_batch for n2dat states.
      !call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
-     !            ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
+     !            ugb%mat%buffer_cplx(:,my_ib2st), ur2_batch(:,1))
 
-     call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2), ur2_batch(:,1))
+     call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2st), ur2_batch(:,1))
 
      ! For each row of the submatrix, build n2dat products (band1, idat2) in r-space, then r --> g.
      do idat1=1,n1dat
@@ -1308,11 +1307,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
        !call fft_ur(m_npw, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
 
-       ! Add PAW on-site contributions
        if (psps%usepaw == 1) then
+         ! Add PAW on-site contributions
          do idat2=1,n2dat
            associate (cprj1_kmq => cprj1(:, 1 + (idat1-1)*nspinor), &
-                      cprj2_k => ugb%cprj_k(:, 1 + (band2_start+idat2-2)*nspinor))  !NB: ugb%cprj_k(2, nspinor*my_nband)
+                      cprj2_k => ugb%cprj_k(:, 1 + (my_ib2st+idat2-2)*nspinor))  ! NB: ugb%cprj_k(2, nspinor*my_nband)
            paw_rhotwg = zero
            call paw_rho_tw_g(cryst, pwij, m_npw, dim_rtwg, nspinor, m_gvec, cprj1_kmq, cprj2_k, paw_rhotwg)
            ug12_batch(:,idat2) = ug12_batch(:,idat2) + paw_rhotwg
@@ -1352,7 +1351,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 #endif
      end do ! idat1
 
-   end do ! my_ib2
+   end do ! band2_start
  end do ! band1_start
 
 #ifdef HAVE_MPI_IO

@@ -120,7 +120,7 @@ module m_ksdiago
    ! pointer to mat%buffer_cplx
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
-   ! (natom, nspinor*my_nband))
+   ! (natom, nspinor * my_nband))
    ! PAW projections ordered according to natom and NOT according to typat.
    ! Note my_nband
 
@@ -1095,12 +1095,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  batch_size = 8 * omp_nt
  if (istwf_k == 2) batch_size = 1      ! FIXME
- if (psps%usepaw == 1) batch_size = 1  ! FIXME
  !batch_size = 1
  call wrtout(std_out, sjoin(" Using batch_size:", itoa(batch_size)))
 
  ABI_MALLOC(bras, (2, npwsp * batch_size))
- ! cwaveprj is ordered, see nonlop_ylm.
+ ! cwaveprj is ordered by atom type, see nonlop_ylm.
  ABI_MALLOC(cwaveprj, (cryst%natom, nspinor*(1+cpopt)*gs_hamk%usepaw*batch_size))
  if (cpopt == 0) call pawcprj_alloc(cwaveprj, 0, gs_hamk%dimcprj)
  ABI_MALLOC(ghc, (2, npwsp * batch_size))
@@ -1190,6 +1189,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  !=== Diagonalization of <G|H|G''> matrix ===
  !===========================================
  ABI_MALLOC(eig_ene, (h_size))
+
+ !print *, "ghg_trace:", ghg_mat%get_trace()
 
  ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
  call proc_4diag%init(comm)
@@ -1409,7 +1410,7 @@ subroutine ugb_collect_cprj(ugb, nspinor, nb, band_start, out_cprj)
  type(pawcprj_type),intent(inout) :: out_cprj(:,:)
 
 !Local variables-------------------------------
- integer :: ierr, my_ibs, out_ibs, ii, band
+ integer :: ierr, my_ibs, out_ibs, ii, band, cnt
 
 ! *************************************************************************
 
@@ -1419,11 +1420,12 @@ subroutine ugb_collect_cprj(ugb, nspinor, nb, band_start, out_cprj)
  ! TODO: Numb algorithm based on xmpi_summ. Might be optimized.
  call pawcprj_set_zero(out_cprj)
 
+ cnt = nspinor - 1
  do band=band_start, band_start+nb-1
    if (band >= ugb%my_bstart .and. band <= ugb%my_bstop) then
      my_ibs = 1 + (band - ugb%my_bstart) * nspinor
      out_ibs = 1 + (band - band_start) * nspinor
-     call pawcprj_copy(ugb%cprj_k(:,my_ibs:my_ibs+nspinor), out_cprj(:,out_ibs:out_ibs+nspinor))
+     call pawcprj_copy(ugb%cprj_k(:,my_ibs:my_ibs+cnt), out_cprj(:,out_ibs:out_ibs+cnt))
    end if
  end do
 
