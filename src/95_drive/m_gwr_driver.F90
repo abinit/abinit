@@ -78,6 +78,8 @@ module m_gwr_driver
  use m_paw_init,        only : pawinit, paw_gencond
  use m_pawcprj,         only : pawcprj_type, pawcprj_free, pawcprj_alloc ! , paw_overlap
  use m_ksdiago,         only : ugb_t
+ !use m_fock,            only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
+ !                              fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
  use m_mkrho,           only : prtrhomxmn
  use m_melemts,         only : melflags_t
  use m_setvtr,          only : setvtr
@@ -196,6 +198,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(paw_dmft_type) :: Paw_dmft
  type(ugb_t) :: ugb
  type(xmpi_pool2d_t) :: diago_pool
+ !type(fock_type),pointer :: fock => null()
 !arrays
  integer :: ngfftc(18),ngfftf(18),units(2) ! gwc_ngfft(18),gwx_ngfft(18),
  integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:)
@@ -319,7 +322,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call wrtout(ab_out, ch10//ch10)
  end if ! master
 
- ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
+ ! Broadcast filenames (needed if we are using netcdf files)
  call xmpi_bcast(den_path, master, comm, ierr)
  call xmpi_bcast(kden_path, master, comm, ierr)
 
@@ -501,13 +504,14 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call paw_ij_init(KS_paw_ij,cplex,Dtset%nspinor,Dtset%nsppol,&
      Dtset%nspden,Dtset%pawspnorb,Cryst%natom,Cryst%ntypat,Cryst%typat,Pawtab,&
      has_dij=1,has_dijhartree=1,has_dijhat=1,has_dijxc=1,has_dijxc_hat=1,has_dijxc_val=1,&
-     has_dijso=has_dijso,has_dijU=has_dijU,has_exexch_pot=1,has_pawu_occ=1)
+     has_dijso=has_dijso,has_dijU=has_dijU,has_exexch_pot=1,has_pawu_occ=1, &
+     has_dijfock=dtset%usefock)
 
    nkxc1 = 0
    ABI_MALLOC(KS_paw_an, (Cryst%natom))
    call paw_an_nullify(KS_paw_an)
    call paw_an_init(KS_paw_an,Cryst%natom,Cryst%ntypat,nkxc1,0,Dtset%nspden,&
-     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1)
+     cplex,Dtset%pawxcdev,Cryst%typat,Pawang,Pawtab,has_vxc=1,has_vxcval=1,has_vxctau=dtset%usekden)
 
    !  Calculate onsite vxc with and without core charge.
    nzlmopt=-1; option=0; compch_sph=greatest_real
@@ -642,12 +646,13 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_MALLOC(istwfk_ik, (dtset%nkpt))
    istwfk_ik = 1
 
-   ! Compute npw_k from ecut so that we can update the header.
+   ! Compute npw_k from ecut so that we can update the header and redefine %mpw
    do ik_ibz=1,dtset%nkpt
-     if (dtset%istwfk(ik_ibz) == 2) istwfk_ik(ik_ibz) = 2  ! TODO: istwkf 2 is not yet supported.
+     !if (dtset%istwfk(ik_ibz) == 2) istwfk_ik(ik_ibz) = 2  ! TODO: istwkf 2 is not yet supported.
      call get_kg(dtset%kptns(:,ik_ibz), istwfk_ik(ik_ibz), dtset%ecut, cryst%gmet, npwarr_ik(ik_ibz), gvec_)
      ABI_FREE(gvec_)
    end do
+   dtset%mpw = maxval(npwarr_ik)
 
    ! CC4S does not need to output the WFK file.
    write_wfk = string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL")
@@ -670,16 +675,19 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
-   ! Build pools to distribute (kpt, spin)
-   ! Try to have rectangular grids in each pool to improve efficiency in scalapack diago.
+   ! Build pools to distribute (kpt, spin). Try to get rectangular grids in each pool to improve efficiency in slk diago.
    rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
+   !if (dtset%usefock == 1) then
+   !  ! Initialize data_type fock for the calculation. See also m_scfcv_core.
+   !  ABI_CHECK(dtset%usepaw == 0, "FOCK with PAW not coded")
+   !  !call fock_from_wfk(fock, dtset, cryst, pawang, pawfgr, pawtab)
+   !end if
+
    if (write_wfk) then
-     ! ===============================================
      ! Master writes header and Fortran record markers
-     ! ===============================================
      out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
      iomode__ = iomode_from_fname(out_path)
      call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
@@ -775,6 +783,15 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
    call owfk_hdr%free(); call ebands_free(owfk_ebands); call diago_pool%free()
+
+   ! Deallocate exact exchange data at the end of the calculation
+   !if (dtset%usefock == 1) then
+   !  if (fock%fock_common%use_ACE/=0) call fock_ACE_destroy(fock%fockACE)
+   !  !call fock_common_destroy(fock%fock_common)
+   !  call fock_BZ_destroy(fock%fock_BZ)
+   !  call fock_destroy(fock)
+   !  nullify(fock)
+   !end if
 
  else
    ABI_CHECK(dtset%usepaw == 0, "PAW in GWR not yet implemented.")
@@ -936,7 +953,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
 
  ! See https://manuals.cc4s.org/user-manual/objects/EigenEnergies.html
  filepath = trim(dtfil%filnam_ds(4))//'_EigenEnergies.yaml'
- write(ab_out, "(3a)")ch10," Writing Eigenenergies info to file: ", trim(filepath)
+ write(ab_out, "(3a)")ch10," Writing Eigenenergies metadata to file: ", trim(filepath)
  if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
@@ -1016,20 +1033,19 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mG0(3) = 0, master = 0
- integer :: nproc, my_rank, my_ib2st, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, buf_size ! ierr,
- integer :: band1, band1_start, batch1_size, n1dat, idat1, m_istwfk, cnt, iatom, dim_rtwg
+ integer :: nproc, my_rank, my_ib2st, npw_k, nspinor, m_npw, npwvec, ig, mpierr, fh, comm, buf_size, ierr
+ integer :: band1, band1_start, batch1_size, n1dat, idat1, m_istwfk, iatom, dim_rtwg
  integer :: band2, band2_start, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
  integer(XMPI_OFFSET_KIND) :: offset
- real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3)
+ real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3), mem_mb
  character(len=500) :: msg
- character(len=fnlen) :: filepath
+ character(len=fnlen) :: filepath, cvx_filepath
  logical :: k_is_gamma,  debug_this
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
  type(vcgen_t) :: vcgen
  !type(pstat_t) :: pstat
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method, nlmn_atm(cryst%natom)
  integer,pointer :: gvec_max(:,:)
- !integer,allocatable :: gbound_k(:,:), m_gbound(:,:)
  integer,allocatable,target :: m_gvec(:,:)
  complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
  complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
@@ -1100,7 +1116,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    if (ik_ibz == 1 .and. spin == 1) then
      ! Write g-vector files, see https://manuals.cc4s.org/user-manual/objects/GridVectors.html
      filepath = trim(dtfil%filnam_ds(4))//'_GridVectors.yaml'
-     write(ab_out, "(3a)")ch10," Writing Gridvectors info to file: ", trim(filepath)
+     write(ab_out, "(3a)")ch10," Writing Gridvectors metadata to file: ", trim(filepath)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
@@ -1122,7 +1138,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      write(unt,'("  Gj: [",E22.15,",",E22.15,",",E22.15,"]")') &
         two_pi*cryst%gprimd(1,2), two_pi*cryst%gprimd(2,2), two_pi*cryst%gprimd(3,2)
      write(unt,'("  Gk: [",E22.15,",",E22.15,",",E22.15,"]")') &
-       two_pi*cryst%gprimd(1,3), two_pi*cryst%gprimd(2,3), two_pi*cryst%gprimd(3, 3)
+       two_pi*cryst%gprimd(1,3), two_pi*cryst%gprimd(2,3), two_pi*cryst%gprimd(3,3)
      close(unt)
 
      ! Write g-vectors
@@ -1144,7 +1160,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
      ! https://manuals.cc4s.org/user-manual/objects/CoulombVertex.html
      filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.yaml'
-     write(ab_out, "(3a)")ch10, ' Writing CoulombVertex info to file: ', trim(filepath)
+     write(ab_out, "(3a)")ch10, ' Writing CoulombVertex metadata to file: ', trim(filepath)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
@@ -1152,11 +1168,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      write(unt,'(a)')    'type: Tensor'
      write(unt,'(a)')    'scalarType: Complex64'
      write(unt,'(a)')    'dimensions:'
-     !write(unt,'(a,i0)') '- length: ',NOPTAUX
+     write(unt,'(a,i0)') '- length: ',m_npw
      write(unt,'(a)')    '  type: AuxiliaryField'
      !write(unt,'(a,i0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+     write(unt,'(a,i0)') '- length: ',ugb%nband_k
      write(unt,'(a)')    '  type: State'
-     !write(unt,'(a,I0)') '- length: ',(NBANDSDUMP)*WDES%ISPIN
+     write(unt,'(a,i0)') '- length: ',ugb%nband_k
      write(unt,'(a)')    '  type: State'
      write(unt,'(a)')    'elements:'
      write(unt,'(a)')    '  type: IeeeBinaryFile'
@@ -1172,7 +1189,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
      ! https://manuals.cc4s.org/user-manual/objects/CoulombPotential.html
      filepath = trim(dtfil%filnam_ds(4))//'_CoulombPotential.yaml'
-     write(ab_out, "(3a)")ch10, ' Writing CoulombPotential info to file: ', trim(filepath)
+     write(ab_out, "(3a)")ch10, ' Writing CoulombPotential metadata to file: ', trim(filepath)
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
@@ -1206,10 +1223,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  end if ! my_rank == master
 
  ! Open binary file to store CoulombVertex
- filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
- if (my_rank == master) write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(filepath)
+ cvx_filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
+ if (my_rank == master) write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(cvx_filepath)
 #ifdef HAVE_MPI_IO
- call MPI_FILE_OPEN(comm, filepath, MPI_MODE_CREATE + MPI_MODE_WRONLY, xmpio_info, fh, mpierr)
+ call MPI_FILE_OPEN(comm, cvx_filepath, MPI_MODE_CREATE + MPI_MODE_WRONLY, xmpio_info, fh, mpierr)
  ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
 #else
  ABI_ERROR("CC4S interface requires MPI-IO!")
@@ -1221,24 +1238,18 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    end if
  end if
 
- !ABI_MALLOC(gbound_k, (2 * u_mgfft + 8, 2))
- !call sphereboundary(gbound_k, ugb%istwf_k, ugb%kg_k, u_mgfft, npw_k)
- !ABI_MALLOC(m_gbound, (2 * u_mgfft + 8, 2))
- !call sphereboundary(m_gbound, m_istwfk, m_gvec, u_mgfft, m_npw)
-
- ! FIXME: IO with batch1_size > 1 is buggy
  ! Define batch sizes and allocate workspace arrays.
  ! Increasing this value improves efficiency (less communication) at the price of more memory.
  !call pstat%from_pid(); call pstat%print([std_out], reload=.True.)
+
  batch1_size = min(48, ugb%nband_k); batch2_size = min(48, ugb%nband_k)
- !batch1_size = 1; batch2_size = 7
- !batch1_size = 7; batch2_size = 1
- !batch1_size = 3; batch2_size = 1
- !batch1_size = 3; batch2_size = 3
  !batch1_size = 1; batch2_size = 1
  call wrtout(std_out, sjoin(" Using batch1_size:", itoa(batch1_size), ", batch2_size:",  itoa(batch2_size)))
+ mem_mb = (two * u_nfft * nspinor * batch1_size + &
+          two * u_nfft * nspinor * batch2_size * two + &
+          two * m_npw * nspinor * batch2_size) *  dp * b2Mb
+ call wrtout(std_out, sjoin(" Memory for workspace arrays ", ftoa(mem_mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
- !ABI_CHECK(nspinor == 1, "nspinor == 2 not implemented in CC4S interface")
  ABI_MALLOC(ur1_batch, (u_nfft * nspinor, batch1_size))
  ABI_MALLOC(ur2_batch, (u_nfft * nspinor, batch2_size))
  ABI_MALLOC(ur12_batch, (u_nfft * nspinor, batch2_size))
@@ -1261,20 +1272,19 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! 1) take advantage of M_{b1,b2}(g) = <b1|e^{-ig.r}|b2> => M_{b1,b2}(g) = M_{b2,b1}(-g)^*
  !    once I have a better understanding of the fileformat expected by CC4S.
  ! 2) Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
- ! 3) Clarify ordering of CoulombVertex and eigenvalues
+ ! 3) Clarify ordering of CoulombVertex (b1,b2 vs b2,b1) and eigenvalues (spin?)
  ! 4) See other TODOs below.
 
  call uplan_1%init(npw_k, nspinor, batch1_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
  call uplan_2%init(npw_k, nspinor, batch2_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
  call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, m_istwfk, m_gvec, dp, dtset%use_gpu_cuda)
 
- cnt = 0; M_ = m_npw
+ M_ = m_npw
 
  ! Blocked loop over group of b1 indices. NB: Assuming bands distributed in contiguous blocks.
  do band1_start=1, ugb%nband_k, batch1_size
    ! Collect n1dat bands starting from band1_start on each proc.
    n1dat = blocked_loop(band1_start, ugb%nband_k, batch1_size)
-   !band1_stop = band1_start + n1dat - 1
 
    call ugb%mat%collect_cplx(ugb%npwsp, n1dat, [1, band1_start], ug1_batch)
    if (psps%usepaw == 1) call ugb%collect_cprj(nspinor, n1dat, band1_start, cprj1)
@@ -1345,7 +1355,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
        if (my_rank == 0 .and. debug_this) then
          do idat2=1,n2dat
            band2 = band2_start + idat2 - 1
-           cnt = cnt + 1; write(test_unt,*)band1, band2, ug12_batch(1:M_,idat2)
+           write(test_unt,*)band1, band2, ug12_batch(1:M_,idat2)
          end do
       end if
 #endif
@@ -1357,6 +1367,29 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 #ifdef HAVE_MPI_IO
  call MPI_FILE_CLOSE(fh, mpierr)
  ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
+ call xmpi_barrier(comm)
+
+ if (my_rank == 0) then
+   buf_size = 4
+   call wrtout(units, sjoin(" Writing Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
+   ABI_MALLOC(work, (buf_size))
+   call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
+   ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
+   ierr = 0
+   band1_loop: do band1=1, ugb%nband_k
+   do band2=1, ugb%nband_k
+     ierr = ierr + 1; if (ierr == 6) exit band1_loop
+     !if (ig == 1) work(1) = zero
+     offset = ((band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
+     call MPI_FILE_READ_AT(fh, offset, work, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     ABI_HANDLE_MPIERR(mpierr)
+     call wrtout(units, sjoin(" For band1:", itoa(band1), ", band2:", itoa(band2)))
+     write(msg, "(*(1x, es12.5))")work(1:buf_size)
+     call wrtout(units, msg)
+   end do
+   end do band1_loop
+   ABI_FREE(work)
+ end if
 #endif
 
  ! =============
@@ -1369,7 +1402,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      ABI_ERROR(msg)
    end if
 
-   call MPI_FILE_OPEN(xmpi_comm_self, filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
+   call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
    ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
 
    ABI_MALLOC(work, (m_npw))
@@ -1399,8 +1432,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  call uplan_1%free(); call uplan_2%free(); call uplan_m%free()
 
- !ABI_FREE(gbound_k)
- !ABI_FREE(m_gbound)
  ABI_FREE(m_gvec)
  ABI_FREE(ur1_batch)
  ABI_FREE(ur2_batch)
@@ -1409,8 +1440,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ABI_FREE(sqrt_vc)
 
  if (psps%usepaw == 1) then
-   call pawpwij_free(Pwij)
-   ABI_FREE(Pwij)
+   call pawpwij_free(pwij)
+   ABI_FREE(pwij)
    call pawcprj_free(cprj1)
    ABI_FREE(cprj1)
    ABI_FREE(paw_rhotwg)
