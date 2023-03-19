@@ -469,12 +469,12 @@ end subroutine nctk_fort_or_ncfile
 
 integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
 
+!Arguments ------------------------------------
  character(len=*),intent(inout) :: filename
  character(len=*),intent(out) :: errmsg
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
-!scalars
  integer :: unt
 
 ! *********************************************************************

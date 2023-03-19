@@ -319,7 +319,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  integer :: afford,bantot,choice
  integer :: computed_forces,cplex,cplex_hf,ctocprj_choice,dbl_nnsclo,dielop,dielstrt,dimdmat
  integer :: forces_needed,errid,has_vxctau,has_dijhat,has_dijnd,has_dijU,has_vhartree,has_dijfock
- integer :: history_size,usefock
+ integer :: history_size
  integer :: iatom,ider,idir,ierr,ii,ikpt,impose_dmat,denpot
  integer :: initialized0,iorder_cprj,ipert,ipositron,isave_den,isave_kden,iscf10,ispden
  integer :: ispmix,istep,istep_fock_outer,istep_mix,istep_updatedfock,itypat,izero,lmax_diel,lpawumax,mband_cprj
@@ -403,10 +403,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
 ! *********************************************************************
 
-!DEBUG
-!write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
-!ENDDEBUG
-
+ !write(std_out,'(a,5i4)')' scfcv_core, enter : itimes(1:2)=',itimes(1:2)
  DBG_ENTER("COLL")
 
  call timab(238,1,tsec)
@@ -476,7 +473,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !Fock: be sure that the pointer is initialized to Null.
- usefock=dtset%usefock
  nullify(fock)
 
 !Special care in case of WVL
@@ -683,7 +679,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    call paw_ij_nullify(paw_ij)
    has_dijhat=0;if (dtset%iscf==22) has_dijhat=1
    has_vhartree=0; if (dtset%prtvha > 0 .or. dtset%prtvclmb > 0) has_vhartree=1
-   has_dijfock=0; if (usefock==1) has_dijfock=1
+   has_dijfock=0; if (dtset%usefock == 1) has_dijfock=1
    has_dijnd=0;if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_dijU=merge(0,1,dtset%usepawu>0) !Be careful on this!
    has_vxctau=dtset%usekden
@@ -716,7 +712,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  Allocation of projected WF (optional)
    if (usecprj==1) then
      iorder_cprj=0
-     if (usefock==1) then
+     if (dtset%usefock==1) then
        ctocprj_choice = 1
        if (dtset%optforces == 1) then
         ctocprj_choice = 2; ! ncpgr = 3
@@ -1036,7 +1032,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
          if (quitsum_async > 0) then
            write(msg,"(3a)")"Approaching time limit ",trim(sec2str(get_timelimit())),". Will exit istep loop in scfcv_core."
            ABI_COMMENT(msg)
-           call wrtout(ab_out, msg, "COLL")
+           call wrtout(ab_out, msg)
            timelimit_exit = 1
            exit
          end if
@@ -1059,9 +1055,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
      if (dtset%usewvl == 0) then
 !      Get cut-off for g-vectors
-       if (psps%usepaw==1) then
-         call wrtout(std_out,' FFT (fine) grid used in SCF cycle:','COLL')
-       end if
+       if (psps%usepaw==1) call wrtout(std_out,' FFT (fine) grid used in SCF cycle:')
        call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
 
 !      Compute structure factor phases and large sphere cut-off (gsqcut):
@@ -1175,12 +1169,12 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    !Initialize/Update data in the case of an Exact-exchange (Hartree-Fock) or hybrid XC calculation
    hyb_mixing=zero;hyb_mixing_sr=zero
-   if (usefock==1) then
+   if (dtset%usefock==1) then
      if (istep==1) then
        ! Initialize data_type fock for the calculation
-       cplex_hf=cplex
-       if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
+       cplex_hf=cplex; if (psps%usepaw==1) cplex_hf=dtset%pawcpxocc
        call fock_init(atindx,cplex_hf,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,pawang,pawfgr,pawtab,rprimd)
+
        if (fock%fock_common%usepaw==1) then
          optcut_hf = 0 ! use rpaw to construct local_pawfgrtab
          optgr0_hf = 0; optgr1_hf = 0; optgr2_hf = 0 ! dont need gY terms locally
@@ -1431,7 +1425,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !    vpotzero(2) = -1/ucvol sum_ij rho_ij gamma_ij
      write(msg,'(a,f14.6,2x,f14.6)') &
 &     ' average electrostatic smooth potential [Ha] , [eV]',SUM(vpotzero(:)),SUM(vpotzero(:))*Ha_eV
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out, msg)
      vtrial(:,:)=vtrial(:,:)+SUM(vpotzero(:))
      if(option/=1)then
 !      Fix the direct total energy (non-zero only for charged systems)
@@ -1511,7 +1505,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    if(dtset%iscf>=0)then
      write(msg, '(a,a,i4)' )ch10,' ITER STEP NUMBER  ',istep
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end if
 
 !  The next flag says whether the xred have to be changed in the current iteration
@@ -1571,7 +1565,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    call timab(242,1,tsec)
 !  Compute the density from the trial potential
    if (dtset%tfkinfunc==0) then
-     if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)',"COLL")
+     if(VERBOSE) call wrtout(std_out,'*. Compute the density from the trial potential (vtorho)')
 
      ABI_NVTX_START_RANGE(NVTX_VTORHO)
 
@@ -1642,7 +1636,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if (dtset%iscf==22) optene = -1
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
-     if (usefock==1) then
+     if (dtset%usefock==1) then
        energies%e_fockdc=two*energies%e_fock
      end if
 
@@ -1770,7 +1764,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  ----------------------------------------------------------------------
 
    call timab(243,1,tsec)
-   if(VERBOSE) call wrtout(std_out,'*. Compute the new potential from the trial density',"COLL")
+   if(VERBOSE) call wrtout(std_out,'*. Compute the new potential from the trial density')
 
 !  Set XC computation flag
    optxc=1
@@ -1837,7 +1831,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 
    if (dtset%iscf<10) then
 
-     if(VERBOSE) call wrtout(std_out,'Check exit criteria in case of potential mixing',"COLL")
+     if(VERBOSE) call wrtout(std_out,'Check exit criteria in case of potential mixing')
 
 !    If the potential mixing is required, compute the total energy here
 !    PAW: has to compute here spherical terms
@@ -1857,7 +1851,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
 
 !    Add the Fock contribution to E_xc and E_xcdc if required
-     if (usefock==1) energies%e_fockdc=two*energies%e_fock
+     if (dtset%usefock==1) energies%e_fockdc=two*energies%e_fock
 
      if (.not.wvlbigdft) then
 ! TODO: add nvtauresid if needed (for forces?)
@@ -1924,7 +1918,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    call timab(245,1,tsec)
    if (dtset%iscf<10 .and. dtset%iscf>0 .and. .not. wvlbigdft) then
 
-     if(VERBOSE) call wrtout(std_out,'*. Mix the potential (if required) - Check exit criteria',"COLL")
+     if(VERBOSE) call wrtout(std_out,'*. Mix the potential (if required) - Check exit criteria')
 
 !    Precondition the residual and forces, then determine the new vtrial
 !    (Warning: the (H)xc potential may have been subtracted from vtrial)
@@ -1947,7 +1941,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  END MINIMIZATION ITERATIONS
 !  ######################################################################
 
-   if(VERBOSE) call wrtout(std_out,'*. END MINIMIZATION ITERATIONS',"COLL")
+   if(VERBOSE) call wrtout(std_out,'*. END MINIMIZATION ITERATIONS')
 
 !  The initialisation of the gstate run should be done when this point is reached
    initialized=1
@@ -2023,7 +2017,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    if (dtset%usekden/=0) call ab7_mixing_deallocate(mix_mgga)
  end if
 
- if (usefock==1)then
+ if (dtset%usefock==1)then
    if(wfmixalg/=0) call scf_history_free(scf_history_wf)
  end if
 
@@ -2308,8 +2302,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  ABI_FREE(dimcprj)
 
 
-! Deallocate exact exchange data at the end of the calculation
- if (usefock==1) then
+ ! Deallocate exact exchange data at the end of the calculation
+ if (dtset%usefock==1) then
    if (fock%fock_common%use_ACE/=0) call fock_ACE_destroy(fock%fockACE)
    call fock_common_destroy(fock%fock_common)
    call fock_BZ_destroy(fock%fock_BZ)

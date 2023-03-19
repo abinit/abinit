@@ -58,7 +58,7 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc, multithreaded_getghc
-
+ !use m_fock,              only : fock_type
 
  implicit none
 
@@ -885,8 +885,7 @@ end subroutine init_ddiago_ctl
 !! SOURCE
 
 subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nfftf, &
-                          dtset, pawtab, pawfgr, paw_ij, cryst, psps, vtrial, eig_k, &
-                          comm, &
+                          dtset, pawtab, pawfgr, paw_ij, cryst, psps, vtrial, eig_k, comm, &
                           electronpositron) ! Optional arguments
 
 !Arguments ------------------------------------
@@ -899,6 +898,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer,intent(inout) :: nband_k
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
+ !type(fock_type),intent(in) :: fock
  type(pawfgr_type),intent(in) :: pawfgr
 !arrays
  integer,intent(in) :: ngfftc(18)
@@ -944,10 +944,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Check that usekden is not 0 if want to use vxctau
  !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
 
+ ABI_CHECK_IEQ(dtset%usefock, 0, "direct diagonalization does not support usefock")
  ! Check that fock is present if want to use fock option
  !usefock = (dtset%usefock==1 .and. associated(fock))
- !usefock_ACE=0
- !if (usefock) usefock_ACE=fock%fock_common%use_ACE
 
  !====================
  !=== Check input ====
@@ -966,8 +965,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ABI_ERROR("meta-gga functionals are not compatible with direct diagonalization!")
    end if
  end if
-
- ABI_CHECK_IEQ(dtset%usefock, 0, "direct diagonalization does not support usefock")
 
  ! MPI_type for sequential part.
  call initmpi_seq(mpi_enreg_seq)

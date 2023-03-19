@@ -356,15 +356,28 @@ meta: {optdriver: 6, }
   FFT algorithm .............................   312
   FFT cache size ............................    16
 
- Writing Gridvectors info to file: t07o_DS2_GridVectors.yaml
+ Writing Gridvectors metadata to file: t07o_DS2_GridVectors.yaml
 
- Writing CoulombVertex info to file: t07o_DS2_CoulombVertex.yaml
+ Writing CoulombVertex metadata to file: t07o_DS2_CoulombVertex.yaml
 
- Writing CoulombPotential info to file: t07o_DS2_CoulombPotential.yaml
+ Writing CoulombPotential metadata to file: t07o_DS2_CoulombPotential.yaml
 
  Writing CoulombPotential data to file: t07o_DS2_CoulombPotential.elements
 
  Writing CoulombVertex data to file: t07o_DS2_CoulombVertex.elements
+
+ Writing Coulomb vertex for testing purposes with ng: 4
+
+ For band1: 1 , band2: 1
+  9.71844E+04  0.00000E+00  2.08243E+00 -4.63603E-17  6.49918E-01 -8.71678E-18  6.49918E-01  8.71678E-18
+ For band1: 1 , band2: 2
+  3.36061E-11 -6.29126E-13  2.55516E-01 -1.98798E-16  7.46745E-02 -1.29165E-16  7.46745E-02 -1.01385E-16
+ For band1: 1 , band2: 3
+ -1.74777E-11  1.81275E-13 -5.50367E-02 -1.21324E-08 -6.96829E-03 -1.53611E-09  6.96829E-03  1.53611E-09
+ For band1: 1 , band2: 4
+ -3.64682E-12  5.11158E-13 -7.33231E-02  2.25460E-08 -9.28358E-03  2.85458E-09  9.28358E-03 -2.85459E-09
+ For band1: 1 , band2: 5
+  1.05062E-11 -1.53178E-13 -2.17494E-01  8.58318E-10 -2.75373E-02  1.08673E-10  2.75373E-02 -1.08673E-10
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
@@ -374,7 +387,7 @@ meta: {optdriver: 6, }
  Direct gap:         6.335 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
- Writing Eigenenergies info to file: t07o_DS2_EigenEnergies.yaml
+ Writing Eigenenergies metadata to file: t07o_DS2_EigenEnergies.yaml
 
  Writing Eigenenergies to file: t07o_DS2_EigenEnergies.elements
 
