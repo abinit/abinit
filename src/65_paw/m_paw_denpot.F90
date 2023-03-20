@@ -45,7 +45,7 @@ MODULE m_paw_denpot
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
 
  implicit none

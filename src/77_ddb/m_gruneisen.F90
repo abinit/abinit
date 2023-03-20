@@ -171,7 +171,7 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
      call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
    end if
 
-   call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
+   call new%ifc_vol(ivol)%init(new%cryst_vol(ivol), new%ddb_vol(ivol),&
      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
      qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    ABI_FREE(zeff)

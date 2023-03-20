@@ -226,6 +226,9 @@ module defs_datatypes
    ! Number of points in the reciprocal space grid on which
    ! the radial functions are specified (same grid as the one used for the local part).
 
+   ! TODO
+   !integer :: mqgrid_ff = 0
+
    logical :: has_tvale = .False.
     ! True if the norm-conserving pseudopotential provides the atomic pseudized valence density.
     ! If alchemy, has_tvale is True only if all the mixed pseudos
@@ -260,6 +263,25 @@ module defs_datatypes
     ! tcorespl is **always** allocated and initialized with zeros if not has_tcore
     ! A similar approach is used in PAW.
 
+   integer :: num_tphi = 0
+   ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
+
+   logical :: has_jtot = .False.
+   ! True if tpsi are given in terms of j (relativistic pseudo with SOC)
+
+   real(dp), allocatable :: tphi_qspl(:,:,:)
+    ! (mqgrid_ff, 2, num_tphi)
+    ! Form factors for thepseudo wavefunctions.
+
+   integer,allocatable :: tphi_n(:), tphi_l(:)
+    ! (num_tphi) arrays giving n, l
+
+   real(dp),allocatable :: tphi_jtot(:)
+    ! (num_tphi) array with jtot.
+
+   real(dp),allocatable :: tphi_occ(:)
+    ! (num_tphi) array with atomic occupancies taken from pseudo.
+
  end type nctab_t
 !!***
 
@@ -272,8 +294,7 @@ module defs_datatypes
 !! FUNCTION
 !! This structured datatype contains all the information about one
 !! norm-conserving pseudopotential, including the description of the local
-!! and non-local parts, the different projectors, the non-linear core
-!! correction ...
+!! and non-local parts, the different projectors, the non-linear core correction ...
 !!
 !! SOURCE
 
@@ -498,7 +519,8 @@ module defs_datatypes
 
    type(nctab_t),allocatable :: nctab(:)
    ! nctab(ntypat)
-   ! Tables storing data for NC pseudopotentials.
+   ! Tables storing additional data for NC pseudopotentials that are not always avaiable if every psp format.
+   ! We try to mimim pawtab as much as possible so that we can reuse PAW routines in the NC context.
 
    integer :: nc_xccc_gspace = 0
    ! NC pseudos only. Set to 1 if the non-linear core correction should
@@ -614,4 +636,3 @@ module defs_datatypes
 
 end module defs_datatypes
 !!***
-

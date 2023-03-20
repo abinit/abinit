@@ -1,9 +1,9 @@
+block
  integer,parameter :: nt1=1
  integer :: cnt,dat,line,zplane,jj,kk,sidx,nthreads
  integer(KIND_FFTW_PLAN) :: bw_plan1,bw_plan2,bw_plan3
  integer(KIND_FFTW_PLAN) :: fw_plan1,fw_plan2,fw_plan3
  type(zpad_t) :: zpad
-!arrays
 
 ! *************************************************************************
 
@@ -11,9 +11,8 @@
 
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
- SELECT CASE (isign)
-
- CASE (ABI_FFTW_BACKWARD) ! G --> R
+ select case (isign)
+ case (ABI_FFTW_BACKWARD) ! G --> R
    !
    ! The prototype of sfftw_plan_many_dft is:
    ! sfftw_plan_many_dft(rank, n, howmany,
@@ -23,8 +22,8 @@
    ! 1) Transform along x.
    !$omp critical
    bw_plan1 = fftw3_plan_many_dft(1, (/nx/), 1, &
-&       ff, (/ldx, ldy, ldz/), 1, ldx,     &
-&       ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+       ff, (/ldx, ldy, ldz/), 1, ldx,     &
+       ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
 !$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
@@ -45,8 +44,8 @@
    ! 2) Transform along y.
    !$omp critical
    bw_plan2 = fftw3_plan_many_dft(1, (/ny/), nx,&
-&       ff, (/ldx, ldy, ldz/), ldx, 1,          &
-&       ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+       ff, (/ldx, ldy, ldz/), ldx, 1,          &
+       ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
 !$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
@@ -67,8 +66,8 @@
    if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
       !$omp critical
      bw_plan3 = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
-&         ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
-&         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+         ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
+         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads) 
      !$omp end critical
 
      do dat=1,ndat
@@ -84,13 +83,13 @@
      ! Split ndat transforms among the threads.
      !$omp critical
      bw_plan3  = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! ldx*ldy 1D transforms of f(x,y,Gz) along Gz.
-&           ff, (/ldx, ldy, ldz/), ldx*ldy, 1,           & ! Note that we have to visit the entire augmented x-y plane!
-&           ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+           ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            & ! Note that we have to visit the entire augmented x-y plane!
+           ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
      !$omp end critical
 
 !$OMP PARALLEL DO PRIVATE(sidx)
      do dat=1,ndat
-       sidx = 1 + dst*(dat-1) *ldx*ldy*ldz
+       sidx = 1 + dst*(dat-1)*ldx*ldy*ldz
        call fftw3_execute_dft(bw_plan3, ff(sidx:), ff(sidx:))
      end do
 
@@ -99,7 +98,12 @@
      !$omp end critical
    end if
 
- CASE (ABI_FFTW_FORWARD) ! R --> G
+   if (iscale__ /= 0) then
+     fact = one/(nx*ny*nz)
+     call xscal(dst*ldx*ldy*ldz*ndat, fact, ff, 1)
+   end if
+ 
+ case (ABI_FFTW_FORWARD) ! R --> G
    !
    ! The prototype for sfftw_plan_many_dft is:
    ! sfftw_plan_many_dft(n, howmany,
@@ -110,8 +114,8 @@
    if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
      !$omp critical
      fw_plan3 = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
-&         ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
-&         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+         ff, (/ldx, ldy, ldz/), ldx*ldy, 1,             &
+         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
      !$omp end critical
 
      do dat=1,ndat
@@ -127,8 +131,8 @@
      ! Split ndat transforms among the threads.
      !$omp critical
      fw_plan3 = fftw3_plan_many_dft(1, (/nz/), ldx*ldy, & ! We have to visit the entire augmented x-y plane!
-&         ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
-&         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+         ff, (/ldx, ldy, ldz/), ldx*ldy, 1,            &
+         ff, (/ldx, ldy, ldz/), ldx*ldy, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
      !$omp end critical
 
 !$OMP PARALLEL DO PRIVATE(sidx)
@@ -145,8 +149,8 @@
    ! 2) Transform along y.
    !$omp critical
    fw_plan2 = fftw3_plan_many_dft(1, (/ny/), nx, &
-&       ff, (/ldx, ldy, ldz/), ldx, 1,           &
-&       ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+       ff, (/ldx, ldy, ldz/), ldx, 1,           &
+       ff, (/ldx, ldy, ldz/), ldx, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
 !$OMP PARALLEL DO PRIVATE(dat,zplane,kk,sidx)
@@ -166,8 +170,8 @@
    ! 3) Transform along x.
    !$omp critical
    fw_plan1 = fftw3_plan_many_dft(1, (/nx/), 1, &
-&       ff, (/ldx, ldy, ldz/), 1, ldx,          &
-&       ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+       ff, (/ldx, ldy, ldz/), 1, ldx,           &
+       ff, (/ldx, ldy, ldz/), 1, ldx, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
    !$omp end critical
 
 !$OMP PARALLEL DO PRIVATE(dat,line,jj,kk,sidx)
@@ -184,13 +188,15 @@
    call fftw3_destroy_plan(fw_plan1)
    !$omp end critical
 
-   !
    ! 4) Normalize the transform.
-   fact = one/(nx*ny*nz)
-   call xscal(dst*ldx*ldy*ldz*ndat, fact, ff, 1)
-
- CASE DEFAULT
+   if (iscale__ /= 0) then
+     fact = one/(nx*ny*nz)
+     call xscal(dst*ldx*ldy*ldz*ndat, fact, ff, 1)
+   end if
+ 
+ case default
    ABI_BUG("Wrong isign")
- END SELECT
+ end select
 
  call zpad_free(zpad)
+end block

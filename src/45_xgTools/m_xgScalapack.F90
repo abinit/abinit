@@ -201,7 +201,7 @@ module m_xgScalapack
     end if
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      call build_grid_scalapack(xgScalapack%grid, xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
+      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
       call BLACS_GridInfo(xgScalapack%grid%ictxt, &
         xgScalapack%grid%dims(M__ROW), xgScalapack%grid%dims(M__COL),&
         xgScalapack%coords(M__ROW), xgScalapack%coords(M__COL))
@@ -263,7 +263,7 @@ module m_xgScalapack
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: eigenvalues
@@ -336,7 +336,7 @@ module m_xgScalapack
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: matrixB
