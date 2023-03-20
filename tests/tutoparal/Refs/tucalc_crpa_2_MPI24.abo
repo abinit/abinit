@@ -1,5 +1,5 @@
 
-.Version 9.8.2 of ABINIT 
+.Version 9.9.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,20 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 20 Jan 2023.
-- ( at 11h52 )
+.Starting date : Thu  2 Mar 2023.
+- ( at 18h02 )
   
-- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/TestBot_MPI24/tutoparal_tucalc_crpa_2_MPI24/tucalc_crpa_2.abi
+- input  file    -> /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/TestBot_MPI24/tutoparal_tucalc_crpa_2_MPI24/tucalc_crpa_2.abi
 - output file    -> tucalc_crpa_2_MPI24.abo
 - root for input  files -> tucalc_crpa_2_MPI24i
 - root for output files -> tucalc_crpa_2_MPI24o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -736,9 +736,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05246
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -756,9 +756,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -776,9 +776,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -11773,6 +11773,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   1/q d(tNvale(q))/dq for q=0 ..................... -5.81436255E+02
   Core-core Fock energy  .......................... -3.47490679E+01
   XC energy for the core density .................. -3.29033210E+01
+  Lamb shielding due to core density ..............  0.00000000E+00
   Radius of the PAW sphere ........................  2.20000000E+00
   Compensation charge radius (if >rshp, g(r)=0) ...  2.02290427E+00
   Value of the U parameter [eV] ...................  0.00000000E+00
@@ -11821,6 +11822,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   1/q d(tNvale(q))/dq for q=0 ..................... -8.44725503E+02
   Core-core Fock energy  .......................... -9.79515177E+01
   XC energy for the core density .................. -9.52281397E+01
+  Lamb shielding due to core density ..............  0.00000000E+00
   Radius of the PAW sphere ........................  2.20669967E+00
   Compensation charge radius (if >rshp, g(r)=0) ...  1.81361893E+00
   Sigma parameter in gaussian shape function ......  1.81361893E+00
@@ -11868,6 +11870,7 @@ meta: {optdriver: 3, gwcalctyp: 2, }
   1/q d(tNvale(q))/dq for q=0 ..................... -1.54482914E+02
   Core-core Fock energy  .......................... -4.69825338E+00
   XC energy for the core density .................. -4.22468657E+00
+  Lamb shielding due to core density ..............  0.00000000E+00
   Radius of the PAW sphere ........................  1.41465230E+00
   Compensation charge radius (if >rshp, g(r)=0) ...  1.20231231E+00
   Sigma parameter in gaussian shape function ......  1.20231231E+00
@@ -12553,9 +12556,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/V.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20000000
@@ -12573,9 +12576,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Sr.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.20669967
@@ -12593,9 +12596,9 @@ meta: {optdriver: 4, gwcalctyp: 2, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/baguetl_hotfix-usepawu/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/scope_gnu_10.2_paral/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -12784,6 +12787,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   1/q d(tNvale(q))/dq for q=0 ..................... -5.81436255E+02
   Core-core Fock energy  .......................... -3.47490679E+01
   XC energy for the core density .................. -3.29033210E+01
+  Lamb shielding due to core density ..............  0.00000000E+00
   Radius of the PAW sphere ........................  2.20000000E+00
   Compensation charge radius (if >rshp, g(r)=0) ...  2.02290427E+00
   Value of the U parameter [eV] ...................  0.00000000E+00
@@ -12832,6 +12836,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   1/q d(tNvale(q))/dq for q=0 ..................... -8.44725503E+02
   Core-core Fock energy  .......................... -9.79515177E+01
   XC energy for the core density .................. -9.52281397E+01
+  Lamb shielding due to core density ..............  0.00000000E+00
   Radius of the PAW sphere ........................  2.20669967E+00
   Compensation charge radius (if >rshp, g(r)=0) ...  1.81361893E+00
   Sigma parameter in gaussian shape function ......  1.81361893E+00
@@ -12879,6 +12884,7 @@ meta: {optdriver: 4, gwcalctyp: 2, }
   1/q d(tNvale(q))/dq for q=0 ..................... -1.54482914E+02
   Core-core Fock energy  .......................... -4.69825338E+00
   XC energy for the core density .................. -4.22468657E+00
+  Lamb shielding due to core density ..............  0.00000000E+00
   Radius of the PAW sphere ........................  1.41465230E+00
   Compensation charge radius (if >rshp, g(r)=0) ...  1.20231231E+00
   Sigma parameter in gaussian shape function ......  1.20231231E+00
@@ -14326,10 +14332,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        160.9  wall=        161.1
+- Proc.   0 individual time (sec): cpu=        215.4  wall=        215.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       3862.5  wall=       3863.9
++Overall time at end (sec) : cpu=       5170.3  wall=       5171.5

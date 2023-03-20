@@ -684,6 +684,7 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
 
 !Local variables-------------------------------
  integer :: f90line,ierr,unit_
+ logical :: is_open_unit
  character(len=10) :: lnum
  character(len=500) :: f90name
  character(len=LEN(message)) :: my_msg
@@ -745,6 +746,10 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "message: |",ch10,TRIM(indent(my_msg)),ch10,&
      "...",ch10
    call wrtout(unit_, sbuf, mode_paral)
+
+   ! Write error message to ab_out is unit is connected.
+   inquire(unit=ab_out, opened=is_open_unit)
+   if (is_open_unit) call wrtout(ab_out, sbuf) !, mode_paral="PERS")
 
    if (.not.present(NOSTOP)) then
      ! The first MPI proc that gets here, writes the ABI_MPIABORTFILE with the message!
@@ -1273,7 +1278,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
        '   There were ',nalloc,' allocations and ',nfree,' deallocations in Fortran',ch10, &
        '   Remaining memory at the end of the calculation: ',memtot * b2Mb, " (Mb)", ch10, &
        '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
-       '   or use the command line option `abinit --abimem-level 2`', ch10, &
+       '   or use the command line option `abinit run.abi --abimem-level 2`', ch10, &
        '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created,',ch10, &
        '   e.g. from tests/Scripts issue the command: ./abimem.py leaks ../<dir>/<subdir>/abimem_rank0.mocc',ch10, &
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'

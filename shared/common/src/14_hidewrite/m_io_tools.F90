@@ -47,6 +47,7 @@ MODULE m_io_tools
  public :: lock_and_write     ! Write a string to a file with locking mechanism.
  public :: num_opened_units   ! Return the number of opened units.
  public :: show_units         ! Print info on the logical units.
+ public :: write_units        ! Write `string` to a list of Fortran `units`.
 
  interface get_unit
    module procedure get_free_unit
@@ -176,20 +177,16 @@ end function get_unit_from_fname
 !!  file_exists
 !!
 !! FUNCTION
-!!  Return .TRUE. if file existent (function version of inquire).
-!!
-!! INPUTS
-!!  fname=The name of the file.
+!!  Return .TRUE. if file `filepath` exists (function version of inquire).
 !!
 !! SOURCE
 
-logical function file_exists(fname)
+logical function file_exists(filepath)
 
- character(len=*),intent(in) :: fname
-
+ character(len=*),intent(in) :: filepath
 ! *********************************************************************
 
- inquire(file=fname, exist=file_exists)
+ inquire(file=filepath, exist=file_exists)
 
 end function file_exists
 !!***
@@ -1312,6 +1309,49 @@ subroutine show_units(ount)
  end do
 
 end subroutine show_units
+!!***
+
+!!****f* m_io_tools/write_units
+!! NAME
+!!  write_units
+!!
+!! FUNCTION
+!!  Write `string` to a list of Fortran `units`.
+!!  This function is supposed to be faster than wrtout as there's no check on the MPI rank.
+!!  This also means that this procedure should be called by a single MPI proc.
+!!
+!! INPUTS
+!!  [newlines]: Number of newlines added after string. Default 0
+!!  [pre_newlines]: Number of newlines added before string. Default 0
+!!
+!! SOURCE
+
+subroutine write_units(units, string, newlines, pre_newlines)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: newlines, pre_newlines
+
+!Local variables-------------------------------
+ integer :: ii, unt
+! *************************************************************************
+
+ do unt=1,size(units)
+   if (present(pre_newlines)) then
+     do ii=1,pre_newlines
+       write(units(unt), "(a)") " "
+     end do
+   end if
+   write(units(unt), "(a)") trim(string)
+   if (present(newlines)) then
+     do ii=1,newlines
+       write(units(unt), "(a)") " "
+     end do
+   end if
+ end do
+
+end subroutine write_units
 !!***
 
 !----------------------------------------------------------------------

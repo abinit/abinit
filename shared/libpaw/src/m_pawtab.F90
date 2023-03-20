@@ -229,7 +229,7 @@ MODULE m_pawtab
 
   integer :: option_interaction_pawu
    ! Option for interaction energy (PAW+U) in case of non-collinear magnetism:
-   ! 1: E_int=-J/4.N.(N-2)                      
+   ! 1: E_int=-J/4.N.(N-2)
    ! 2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1))    (Nup and Ndn are ill-defined)
    ! 3: E_int=-J/4.( N.(N-2) + mx^2 + my^2 + mz^2 )
 
@@ -345,6 +345,9 @@ MODULE m_pawtab
   real(dp) :: jpawu
    ! jpawu
    ! Value of J parameter for paw+u for a given type.
+  
+   real(dp) :: lamb_shielding=0.0D0
+   ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
 
   real(dp) :: rpaw
    ! Radius of PAW sphere
@@ -399,6 +402,7 @@ MODULE m_pawtab
    ! Also used for local exact-exchange
 
   integer, allocatable :: orbitals(:)
+   ! (basis_size)
    ! gives the l quantum number per basis element
 
 !Real (real(dp)) arrays
@@ -1291,6 +1295,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   end if
   write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
+  call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Compensation charge radius (if >rshp, g(r)=0) ...',Pawtab(ityp)%rshp !(if r>rshp, g(r)=zero)
@@ -1485,8 +1491,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+12
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,lamb_shielding,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+13
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -2238,6 +2244,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%dtaucdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%lamb_shielding  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
    list_dpr(ii)=pawtab%rshp  ;ii=ii+1
    list_dpr(ii)=pawtab%rcore  ;ii=ii+1
@@ -2486,6 +2493,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%dtaucdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%lamb_shielding=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
    pawtab%rshp=list_dpr(ii)  ;ii=ii+1
    pawtab%rcore=list_dpr(ii)  ;ii=ii+1

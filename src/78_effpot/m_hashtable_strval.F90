@@ -46,8 +46,8 @@ MODULE m_hashtable_strval
   use defs_basis
   use m_errors
   use m_abicore
-  use iso_c_binding
-  !use iso_c_binding, only: c_double, c_int64_t
+  use, intrinsic :: iso_c_binding
+  !use, intrinsic :: iso_c_binding, only: c_double, c_int64_t
   !USE, INTRINSIC :: IEEE_ARITHMETIC
 
   !use, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_QUIET_NAN
