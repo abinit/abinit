@@ -99,15 +99,9 @@ MODULE m_numeric_tools
  public :: kramerskronig         ! check or apply the Kramers Kronig relation
  public :: invcb                 ! Compute a set of inverse cubic roots as fast as possible.
  public :: safe_div              ! Performs 'save division' that is to prevent overflow, underflow, NaN or infinity errors
-<<<<<<< HEAD
  public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
  public :: polynomial_regression ! Perform a polynomial regression on incoming data points
-||||||| merged common ancestors
- public :: bool2index            ! Allocate and return array with the indices in the input boolean array that evaluates to .True.
-=======
- public :: bool2index            ! Allocate and return array with the indices in a boolean array that evaluates to .True.
  public :: blocked_loop          ! Helper function to implement blocked algorithms inside do loops.
->>>>>>> 48b5183824cb0029e4299aa1ec2ee71866ebab99
 
  !MG FIXME: deprecated: just to avoid updating refs while refactoring.
  public :: dotproduct
