@@ -9829,10 +9829,10 @@ Variable(
     requires="[[usepawu]] == 1 or 2",
     added_in_version="before_v9",
     text=r"""
-Give for each species the value of the angular momentum (only values 2 or 3
-are allowed)  on which to apply the DFT+U correction.
+Give for each species the value of the angular momentum
+ on which to apply the DFT+U correction.
 
-  * If equal to 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
+  * If equal to 1 (p-orbitals), 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
   * If equal to -1: do not apply DFT+U correction on the species.
 """,
 ),
