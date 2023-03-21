@@ -2002,7 +2002,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp) :: cutoff,gs,rcut,divgq0,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3
- character(len=500) :: msg
+ !character(len=500) :: msg
  logical  :: shortrange
 !arrays
  integer :: id(3)
