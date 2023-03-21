@@ -343,9 +343,8 @@ MODULE m_pawtab
    ! Ratio of Slater Integrals F6 and F4
 
   real(dp) :: jpawu
-   ! jpawu
    ! Value of J parameter for paw+u for a given type.
-  
+
    real(dp) :: lamb_shielding=0.0D0
    ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
 
@@ -365,7 +364,6 @@ MODULE m_pawtab
    ! Sigma parameter in gaussian shapefunction (shape_type=2)
 
   real(dp) :: upawu
-   ! upawu
    ! Value of U parameter for paw+u for a given type.
 
 !Objects

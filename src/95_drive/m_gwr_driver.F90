@@ -1245,6 +1245,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  batch1_size = min(48, ugb%nband_k); batch2_size = min(48, ugb%nband_k)
  !batch1_size = 1; batch2_size = 1
  call wrtout(std_out, sjoin(" Using batch1_size:", itoa(batch1_size), ", batch2_size:",  itoa(batch2_size)))
+
  mem_mb = (two * u_nfft * nspinor * batch1_size + &
           two * u_nfft * nspinor * batch2_size * two + &
           two * m_npw * nspinor * batch2_size) *  dp * b2Mb

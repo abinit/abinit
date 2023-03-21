@@ -559,7 +559,7 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
  ABI_STAT_MALLOC(gsg_mat, (cplex_ghg, npw_k*nspinor, npw_k*nspinor*psps%usepaw), ierr)
  ABI_CHECK(ierr == 0, msg)
 
- ! cwaveprj is ordered, see nonlop_ylm.
+ ! cwaveprj is ordered by atom type, see nonlop_ylm.
  ABI_MALLOC(cwaveprj, (natom, nspinor*(1+cpopt)*gs_hamk%usepaw))
  if (cpopt == 0) call pawcprj_alloc(cwaveprj, 0, gs_hamk%dimcprj)
 
@@ -1037,7 +1037,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_MALLOC(dum_ylm_gr_k, (npw_k, 3+6*(optder/2),psps%mpsang**2))
    kptns_(:,1) = kpoint
 
-   ! NB: Here mband is not used if paral_compil_kpt=0
+   ! NB: Here mband is not used if paral_compil_kpt = 0
    call initylmg(cryst%gprimd, ugb%kg_k, kptns_, mkmem1, mpi_enreg_seq, psps%mpsang, npw_k, [nband_k], 1, &
      [npw_k], 1, optder, cryst%rprimd, ylm_k, dum_ylm_gr_k)
 
@@ -1068,11 +1068,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type_calc = 0                                ! For applying the whole Hamiltonian
  sij_opt = 0; if (psps%usepaw==1) sij_opt = 1 ! For PAW, <k+G|S|k+G"> is also needed.
 
- cpopt = -1    ! If cpopt=-1, <p_lmn|in> (and derivatives) are computed here (and not saved)
- !if (psps%usepaw == 1 .and. .FALSE.) then ! TODO Calculate <p_lmn|k+G>.
- if (psps%usepaw == 1) then ! TODO Calculate <p_lmn|k+G>.
-   cpopt = 0  ! <p_lmn|in> are computed here and saved
- end if
+ cpopt = -1
+ if (psps%usepaw == 1) cpopt = 0  ! <p_lmn|in> are computed here and saved
 
  ! Init 1D PBLAS grid to block-distribute H along columns.
  call proc_1d%init(comm, grid_dims=[1, nproc])
@@ -1179,7 +1176,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_FREE(ghc)
  ABI_FREE(gvnlxc)
  ABI_FREE(gsc)
- if (psps%usepaw == 1 .and. cpopt == 0) call pawcprj_free(Cwaveprj)
+ if (psps%usepaw == 1 .and. cpopt == 0) call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
 
  !===========================================
@@ -1251,8 +1248,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Now transfer eigvec to the ugb datastructure using 1d grid (block column distribution)
  call wrtout(std_out, " Moving to PBLAS block column distribution...")
  call cwtime(cpu, wall, gflops, "start")
- call ugb%processor%init(comm, grid_dims=[1, nproc])
 
+ call ugb%processor%init(comm, grid_dims=[1, nproc])
  ABI_CHECK(block_dist_1d(nband_k, nproc, col_bsize, msg), msg)
  call eigvec%cut(h_size, nband_k, ugb%mat, size_blocs=[h_size, col_bsize], processor=ugb%processor, free=.True.)
  call proc_4diag%free()
@@ -1394,8 +1391,8 @@ end subroutine ugb_print
 !!  ugb_collect_cprj
 !!
 !! FUNCTION
-!!  This is a collective routine that returns in `out_cprj` the PAW projecton for `nb` bands starting at `band_start`
-!!  NB: `out_cprj` is supposed to be allocated in the parent
+!!  This is a collective routine that returns in `out_cprj` the PAW projections
+!!  for `nb` bands starting at `band_start` NB: `out_cprj` is supposed to be allocated in the parent
 !!
 !! SOURCE
 
@@ -1407,14 +1404,14 @@ subroutine ugb_collect_cprj(ugb, nspinor, nb, band_start, out_cprj)
  type(pawcprj_type),intent(inout) :: out_cprj(:,:)
 
 !Local variables-------------------------------
- integer :: ierr, my_ibs, out_ibs, ii, band, cnt
+ integer :: ierr, my_ibs, out_ibs, band, cnt
 
 ! *************************************************************************
 
  ABI_CHECK_IEQ(size(ugb%cprj_k, dim=1), size(out_cprj, dim=1), "size1 should be the same")
  ABI_CHECK_IGEQ(size(out_cprj, dim=2), nb*nspinor, "size2 too small!")
 
- ! TODO: Numb algorithm based on xmpi_summ. Might be optimized.
+ ! TODO: Numb algorithm based on xmpi_sum. Might be optimized.
  call pawcprj_set_zero(out_cprj)
 
  cnt = nspinor - 1
