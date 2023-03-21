@@ -1178,6 +1178,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,bands_treated_now,berryopt,cgq,cwav
  ! Check that final cwavef (Psi^(1)) satisfies the orthogonality condition
  if (prtvol==-level.or.prtvol==-19) then
    sij_opt=0 ; usevnl=1 ; optlocal=1 ; optnl=2 ; if (gen_eigenpb)  sij_opt=1
+   ABI_MALLOC(work1,(2,npw1*nspinor))
    ABI_MALLOC(work2,(2,npw1*nspinor*sij_opt))
    iband_me = 0
    do iband=1,nband
