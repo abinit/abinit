@@ -21,7 +21,7 @@
 
 MODULE m_fstrings
 
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use defs_basis, only : dp, std_out, ch10
 
@@ -63,6 +63,7 @@ MODULE m_fstrings
  public :: startswith      ! Returns .TRUE. is the string starts with the specified prefix.
  public :: endswith        ! Returns .True if the string ends with the specified suffix.
  public :: indent          ! Indent text
+ public :: string_in       ! Compare input str with a list of comma-separated strings
  public :: prep_char       ! Prepend `char` to each line in a string.
  public :: int2char4       ! Convert a positive integer number (zero included) to a character(len=*)
                            ! with trailing zeros if the number is <=9999
@@ -71,6 +72,7 @@ MODULE m_fstrings
  public :: char_count      ! Count the occurrences of a character in a string.
  public :: next_token      ! Tokenize a string made of whitespace-separated tokens.
  public :: inupper         ! Maps all characters in string to uppercase except for tokens between quotation marks.
+ public :: find_and_select ! Find substring and select value in list depending on substring
 
  !TODO method to center a string
  interface itoa
@@ -1147,6 +1149,7 @@ end function atof
 !! FUNCTION
 !!  Convert an integer into a string
 !!
+
 pure function itoa_1b(value)
 
  integer(c_int8_t),intent(in) :: value
@@ -1192,7 +1195,7 @@ end function itoa_4b
 !!  Convert an float into a string using format fmt  (es16.6 if fmt is not given).
 !!
 
-pure function ftoa(value,fmt)
+pure function ftoa(value, fmt)
 
  real(dp),intent(in) :: value
  character(len=*),optional,intent(in) :: fmt
@@ -1589,6 +1592,10 @@ end function endswith
 !! INPUTS
 !!   istr=Input string
 !!
+!! PARENTS
+!!
+!! CHILDREN
+!!
 !! SOURCE
 
 pure function indent(istr) result(ostr)
@@ -1621,6 +1628,50 @@ pure function indent(istr) result(ostr)
  !ostr(jj+1:) = "H"
 
 end function indent
+!!***
+
+!!****f* m_fstrings/string_in
+!! NAME
+!!  string_in
+!!
+!! FUNCTION
+!! Compare input str with a list of comma-separated strings
+!! Example: string_in("foo", "foo, bar") --> True
+!!
+!! INPUTS
+!!   string=Input string
+!!
+!! SOURCE
+
+pure logical function string_in(string, tokens) result(ans)
+
+ character(len=*),intent(in) :: string, tokens
+
+!Local variables-------------------------------
+ integer :: ii, prev, cnt
+
+! *********************************************************************
+
+ ans = .False.
+ prev = 0; cnt = 0
+ do ii=1,len_trim(tokens)
+   if (tokens(ii:ii) == ",") then
+     cnt = cnt + 1
+     if (trim(lstrip(string)) == lstrip(tokens(prev+1:ii-1))) then
+       ans = .True.; return
+     end if
+     prev = ii
+   end if
+ end do
+
+ if (cnt == 0) then
+   ans = trim(lstrip(string)) == trim(lstrip(tokens)); return
+ end if
+
+ ! Handle last item if "foo, bar"
+ ans = trim(lstrip(string)) == lstrip(tokens(prev+1:ii-1))
+
+end function string_in
 !!***
 
 !----------------------------------------------------------------------
@@ -1848,7 +1899,7 @@ integer function next_token(string, start, ostr) result(ierr)
  integer :: ii,beg
 
 ! *************************************************************************
- !print *, "string:", trim(string(start:))
+ !print *, "string:", trim(string(start:)), ", start:", start
 
  ierr = 1; beg = 0
  ! Find first non-empty char.
@@ -1870,6 +1921,7 @@ integer function next_token(string, start, ostr) result(ierr)
  if (start == 0) start = len_trim(string) + 1
 
  ierr = 0
+ !print *, "string(beg:):", trim(string(beg:))
  ostr = string(beg:start-1)
 
 end function next_token
@@ -1955,6 +2007,69 @@ subroutine inupper(string)
  end do
 
 end subroutine inupper
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fstrings/find_and_select
+!! NAME
+!!  find_and_select
+!!
+!! FUNCTION
+!! Find substring and select value in list depending on substring.
+!!
+!! Usage example:
+!!
+!!   istop = find_and_select(arg, &
+!!                           ["K", "M", "G", "T"], &
+!!                           [one/1024._dp, one, 1024._dp, 1024._dp ** 2], fact, err_msg, default=one)
+!!
+!!   ABI_CHECK(istop /= -1, err_msg)
+!!
+!! SOURCE
+
+integer function find_and_select(string, choices, values, out_val, err_msg, default, back) result(iend)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+ character(len=*),intent(in) :: choices(:)
+ real(dp),intent(in) :: values(:)
+ real(dp),optional,intent(in) :: default
+ real(dp),intent(out) :: out_val
+ character(len=*),intent(out) :: err_msg
+ logical,optional,intent(in) :: back
+
+!Local variables-------------------------------
+ integer :: ic
+ logical :: back__
+! *************************************************************************
+
+ if (size(values) /= size(choices)) then
+   err_msg = "BUG in API call: size(values) /= size(choices))"
+   iend = -1; return
+ end if
+
+ back__ = .True.; if (present(back)) back__ = back
+ do ic=1,size(choices)
+   iend = index(string, trim(choices(ic)), back=back__)
+   if (iend /= 0) then
+     if (trim(string(iend:)) /= choices(ic)) then
+       err_msg = sjoin("Invalid token:", trim(string(iend:)))
+       iend = -1; return
+     end if
+     out_val = values(ic); return
+   end if
+ end do
+
+ if (present(default)) then
+   iend = 0
+   out_val = default
+ else
+   iend = -1
+   err_msg = "Cannot find `choices` in string and `default` optional argument is not set!"
+ end if
+
+end function find_and_select
 !!***
 
 end module m_fstrings

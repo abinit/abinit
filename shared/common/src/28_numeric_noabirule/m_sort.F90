@@ -34,9 +34,8 @@ module m_sort
  public :: sort_int      ! Sort integer array
 
  ! Helper functions to perform common operations.
- !
  public :: sort_rpts     ! Sort list of real points by |r|
- public :: sort_weights  ! Sort list of weights.
+ public :: sort_rvals    ! Out-of-place sort of real values
 
 CONTAINS  !====================================================================================================
 !!***
@@ -318,9 +317,9 @@ end subroutine sort_rpts
 
 !----------------------------------------------------------------------
 
-!!****f* m_sort/sort_weights
+!!****f* m_sort/sort_rvals
 !! NAME
-!!  sort_weights
+!!  sort_rvals
 !!
 !! FUNCTION
 !!  Sort list of real values (ascending order)
@@ -328,51 +327,42 @@ end subroutine sort_rpts
 !!
 !! INPUTS
 !!  n: dimension of the list
-!!  weights(n): input weigts.
-!!  [tol]: numbers within tolerance are equal.
+!!  in_vals(n): input weigts.
+!!  [tol]: tolerance for comparison
 !!
 !! OUTPUT
 !!  iperm(n) index of permutation giving the right ascending order:
-!!      the i-th element of the ordered list had index iperm(i) in weights.
-!!  [sorted_weights(n)]= list of sorted weigts.
+!!      the i-th element of the ordered list had index iperm(i) in in_vals.
+!!  [sorted_in_vals(n)]= list of sorted weigts.
 !!
 !! SOURCE
 
-subroutine sort_weights(n, weights, iperm, tol, sorted_weights)
+subroutine sort_rvals(n, in_vals, iperm, sorted_vals, tol)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: n
+ real(dp),intent(in) :: in_vals(n)
  integer,allocatable,intent(out) :: iperm(:)
- real(dp),optional,allocatable,intent(out) :: sorted_weights(:)
+ real(dp),allocatable,intent(out) :: sorted_vals(:)
  real(dp),optional,intent(in) :: tol
-!arrays
- real(dp),intent(in) :: weights(n)
 
 !Local variables-------------------------------
 !scalars
  integer :: ii
  real(dp) :: my_tol
-!arrays
- real(dp),allocatable :: my_weights(:)
 
 !************************************************************************
 
  my_tol = tol12; if (present(tol)) my_tol = tol
 
- ABI_MALLOC(my_weights, (n))
- my_weights = weights
+ ABI_MALLOC(sorted_vals, (n))
+ sorted_vals = in_vals
  ABI_MALLOC(iperm, (n))
  iperm = [(ii, ii=1,n)]
- call sort_dp(n, my_weights, iperm, my_tol)
+ call sort_dp(n, sorted_vals, iperm, my_tol)
 
- if (present(sorted_weights)) then
-   call move_alloc(my_weights, sorted_weights)
- else
-   ABI_FREE(my_weights)
- end if
-
-end subroutine sort_weights
+end subroutine sort_rvals
 !!***
 
 end module m_sort

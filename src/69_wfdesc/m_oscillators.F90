@@ -107,6 +107,7 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
 
 !Local variables-------------------------------
 !scalars
+ integer :: fftcache0 = 0, use_gpu0 = 0
  integer :: ig,igfft,iab,spad1,spad2,spad0,nx,ny,nz,ldx,ldy,ldz,mgfft
  type(fftbox_plan3_t) :: plan
 !arrays
@@ -148,8 +149,9 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
      SELECT CASE (map2sphere)
      CASE (0)
        ! Need results on the full FFT box thus cannot use zero-padded FFT.
-       call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
-       call plan%execute(u12prod)
+       call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0)
+       call plan%execute(u12prod, -1)
+       call plan%free()
        if (dim_rtwg == 1) then
          rhotwg(1:npwvec) = rhotwg(1:npwvec) + u12prod
        else
@@ -163,8 +165,9 @@ subroutine rho_tw_g(nspinor, npwvec, nr, ndat, ngfft, map2sphere, use_padfft, ig
          ldx = nx; ldy = ny; ldz = nz
          call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
        else
-         call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
-         call plan%execute(u12prod)
+         call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0)
+         call plan%execute(u12prod, -1)
+         call plan%free()
        end if
 
        ! Have to map FFT to G-sphere.
@@ -248,6 +251,7 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
 
 !Local variables-------------------------------
 !scalars
+ integer :: fftcache0 = 0, use_gpu0 = 0
  integer :: nx,ny,nz,ldx,ldy,ldz,mgfft
  type(fftbox_plan3_t) :: plan
 !arrays
@@ -255,9 +259,10 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
 
 ! *************************************************************************
 
- ! Form rho-twiddle(r)=u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
- ! u(r,b,kbz)=e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t),b,kibz)
- !           =e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t),b,kibz) for time-reversal
+ ! Form rho-twiddle(r) = u_1^*(r,b1,kbz1) u_2(r,b2,kbz2), to account for symmetries:
+ !
+ ! u(r,b,kbz) = e^{-2i\pi kibz.(R^{-1}t} u (R{^-1}(r-t), b, kibz)
+ !            = e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t), b, kibz) for time-reversal symmetry.
  !
  ABI_MALLOC(u12prod,(nr*ndat))
  call usur_kkp_bz(nr,ndat,time1,ktabr1,ktabp1,u1,time2,ktabr2,ktabp2,u2,u12prod)
@@ -268,8 +273,9 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
  SELECT CASE (map2sphere)
  CASE (0)
    ! Need results on the full FFT box thus cannot use zero-padded FFT.
-   call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
-   call plan%execute(u12prod)
+   call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0)
+   call plan%execute(u12prod, -1)
+   call plan%free()
    call xcopy(nr*ndat,u12prod,1,usug,1)
 
  CASE (1)
@@ -279,8 +285,9 @@ subroutine ts_usug_kkp_bz(npw, nr, ndat, ngfft, map2sphere, use_padfft, igfftg0,
      ldx=nx; ldy=ny; ldz=nz
      call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
    else
-     call plan%many(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
-     call plan%execute(u12prod)
+     call plan%init(ndat, ngfft(1:3), ngfft(1:3), ngfft(7), fftcache0, use_gpu0)
+     call plan%execute(u12prod, -1)
+     call plan%free()
    end if
 
    ! From the FFT to the G-sphere.
@@ -308,7 +315,7 @@ end subroutine ts_usug_kkp_bz
 !! INPUTS
 !! nr=number of FFT grid points
 !! ndat=Number of wavefunctions to transform.
-!! u1(nr*ndat),u2(nr*ndat)=the two wavefunctions iin the IBZ (periodic part)
+!! u1(nr*ndat),u2(nr*ndat)=the two wavefunctions in the IBZ (periodic part)
 !! time1=1 if kbz1 = Sk1, 2 if kbz1 = -Sk_1 (k_1 is in the IBZ)
 !! time2=1 if kbz2 = Sk2, 2 if kbz2 = -Sk_2 (k_2 is in the IBZ)
 !! ktabr1(nr),ktabr2(nr)= tables R^-1(r-t) for the two k-points
@@ -499,7 +506,7 @@ subroutine gw_box2gsph(nr, ndat, npw, igfftg0, iarrbox, oarrsph)
    do ig=1,npw
      igfft=igfftg0(ig)
      if (igfft/=0) then
-       ! G-G0 belong to the FFT mesh.
+       ! G-G0 belongs to the FFT mesh.
        oarrsph(ig) = iarrbox(igfft)
      else
        ! Set this component to zero.
@@ -514,7 +521,7 @@ subroutine gw_box2gsph(nr, ndat, npw, igfftg0, iarrbox, oarrsph)
      do ig=1,npw
        igfft=igfftg0(ig)
        if (igfft/=0) then
-         ! G-G0 belong to the FFT mesh.
+         ! G-G0 belongs to the FFT mesh.
          oarrsph(ig+pgsp) = iarrbox(igfft+pfft)
        else
          ! Set this component to zero.
@@ -557,7 +564,7 @@ subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, 
  complex(gwpc),intent(out) :: wfg2_jk(nr*nspinor)
 
 !Local variables-------------------------------
- integer,parameter :: ndat1=1
+ integer,parameter :: ndat1 = 1, fftcache0 = 0, use_gpu0 = 0
  type(fftbox_plan3_t) :: plan
 !arrays
  complex(gwpc),allocatable :: wfr2_dpcplx(:),ujb_bz(:),ukb_bz(:)
@@ -594,8 +601,9 @@ subroutine calc_wfwfg(ktabr_k, ktabi_k, spinrot, nr, nspinor, ngfft_gw, wfr_jb, 
  end if
 
  ! Transform to Fourier space (result in wfg2_jk)
- call plan%many(nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), -1)
- call plan%execute(wfr2_dpcplx, wfg2_jk)
+ call plan%init(nspinor, ngfft_gw(1:3), ngfft_gw(1:3), ngfft_gw(7), fftcache0, use_gpu0)
+ call plan%execute(wfr2_dpcplx, wfg2_jk, -1)
+ call plan%free()
  ABI_FREE(wfr2_dpcplx)
 
 end subroutine calc_wfwfg

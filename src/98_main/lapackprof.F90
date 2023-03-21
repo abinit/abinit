@@ -87,7 +87,7 @@ program lapackprof
  call herald("LAPACKPROF", abinit_version, std_out)
 
  ! Command line options.
- do ii=2,command_argument_count()
+ do ii=1,command_argument_count()
    call get_command_argument(ii, arg)
    if (arg == "-v" .or. arg == "--version") then
      write(std_out,"(a)") trim(abinit_version); goto 100
@@ -145,7 +145,7 @@ program lapackprof
      ABI_MALLOC(gsc, (2, mgsc))
      gsc = cg
      ABI_CALLOC(direc, (2, npw*nspinor))
-     ABI_MALLOC(scprod, (2,nband))
+     ABI_MALLOC(scprod, (2, nband))
 
      call cwtime(ctime,wtime,gflops,"start")
      call projbd(cg, direc, 0, 0, 0, istwfk, mcg, mgsc, nband, npw, nspinor, gsc, scprod, 0, 0, usepaw, &
