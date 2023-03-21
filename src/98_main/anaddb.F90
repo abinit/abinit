@@ -41,7 +41,7 @@ program anaddb
  use m_phonons
  use m_gruneisen
  use m_supercell
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -105,7 +105,7 @@ program anaddb
  character(len = 500):: msg
  type(args_t):: args
  type(anaddb_dataset_type):: inp
- type(phonon_dos_type):: Phdos
+ type(phdos_t):: Phdos
  type(ifc_type):: Ifc, Ifc_coarse
  type(ddb_type):: ddb
  type(ddb_type):: ddb_lw
@@ -431,7 +431,7 @@ program anaddb
  end if
 
 !***************************************************************************
-! Compute non-linear optical susceptibilities and, if inp%nlflag < 3, 
+! Compute non-linear optical susceptibilities and, if inp%nlflag < 3,
 ! First-order change in the linear dielectric susceptibility induced by an atomic displacement
 !***************************************************************************
  if (inp%nlflag > 0) then
@@ -484,31 +484,30 @@ program anaddb
      do ii = 1, 3
        ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
-     call ifc_init(Ifc_coarse, Crystal, ddb, &
+     call Ifc_coarse%init(Crystal, ddb, &
        inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, ngqpt_coarse, inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
        inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, dipquad = inp%dipquad, quadquad = inp%quadquad)
 
      ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
-     call ifc_init(Ifc, Crystal, ddb, &
+     call ifc%init(Crystal, ddb, &
       inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, &
-      & inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
+      inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
       inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, &
-      & Ifc_coarse = Ifc_coarse, dipquad = inp%dipquad, quadquad = inp%quadquad)
+      Ifc_coarse = Ifc_coarse, dipquad = inp%dipquad, quadquad = inp%quadquad)
      call Ifc_coarse%free()
 
    else
-     call ifc_init(Ifc, Crystal, ddb, &
-       inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
+     call ifc%init(Crystal, ddb, &
+       inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, &
+       inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
        inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, dipquad = inp%dipquad, quadquad = inp%quadquad)
    end if
 
    call ifc%print(unit = std_out)
 
    ! Compute speed of sound.
-   if (inp%vs_qrad_tolkms(1) > zero) then
-     call ifc%speedofsound(crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
-   end if
+   if (inp%vs_qrad_tolkms(1) > zero) call ifc%speedofsound(crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
 
    ! Print analysis of the real-space interatomic force constants
    ! TODO: ifc_out should not have side effects
@@ -544,11 +543,10 @@ program anaddb
    phibz_prefix = ""
    !phibz_prefix = "freq_displ" ! Uncomment this line to activate output of PHIBZ
    do
-     call mkphdos(Phdos, Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
-         phibz_prefix, wminmax, count_wminmax, comm, dos_maxmode = inp%dos_maxmode)
+     call Phdos%init(Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
+                     phibz_prefix, wminmax, count_wminmax, comm, dos_maxmode = inp%dos_maxmode)
      if (all(count_wminmax == 0)) exit
-     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
-     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05; wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos%free()
      write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)

@@ -374,7 +374,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
-   
+
    ! Read extfpmd calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
@@ -2247,7 +2247,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftqmc_seed=jdtset
    dtsets(idtset)%dmftqmc_therm=1000
    dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
-   dtsets(idtset)%dosdeltae=zero
+   dtsets(idtset)%dosdeltae=0.0
    dtsets(idtset)%dtion=100.0_dp
    dtsets(idtset)%dtele=0.1_dp
    dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
@@ -2317,8 +2317,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
    dtsets(idtset)%gw_sigxcore=0
-   dtsets(idtset)%gw_sctype = GWSC_one_shot
-   dtsets(idtset)%gw_toldfeig=0.1/Ha_eV
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10

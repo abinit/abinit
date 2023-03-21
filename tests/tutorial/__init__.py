@@ -77,6 +77,7 @@ inp_files = [
 "tnuc_1.abi",
 "tnuc_2.abi",
 "tnuc_3.abi",
+"tnuc_4.abi",
 "tpaw1_1.abi",
 "tpaw1_2.abi",
 "tpaw1_3.abi",

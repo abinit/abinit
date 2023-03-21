@@ -1,34 +1,33 @@
-# GWR calculations for crystalline alpha-quartz.  
+# GWR calculations for crystalline alpha-quartz. Test g/tau parallelism
 # Dataset 1: ground state calculation to get the density
-# Dataset 2: NSCF run to produce the WFK file with empty states.
+# Dataset 2: Direct diagonalization to produce the WFK file with empty states.
 # Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
 
 ndtset 3
+timopt 1
 #ndtset 1; jdtset 3
+#nsym 1 kptopt 3
 
-ecut      12 #35
-istwfk *1
-
-# Parallel settings for dataset 1 and 2
-# These variables are not used in the GWR code.
-paral_kgb 1
-npband 2
-npkpt  4
+#ecut      12 # 35
+ecut      8 # 35
 
 ####################
 # Dataset 1: SCF run
 ####################
 nband1      32       # number of (occ and empty) bands to be computed
 tolvrs1     1.0d-8
+# Parallel settings for dataset 1. NB: These variables are not used in the GWR code.
+paral_kgb1 1
+npband1 2
+npkpt1  4
 
-#######################################
-# Dataset 2: NSCF run with empty states
-#######################################
-iscf2       -2       # NSCF run
-getden2  1
-tolwfr2  1.0e-12     # Will stop when this tolerance is achieved
+###########################################
+# Dataset 2: Direct diago with empty states
+###########################################
+optdriver2  6        # Activate GWR code
+gwr_task2 "HDIAGO"   # Direct diagonalization
+getden2    1
 nband2     100       # Number of (occ + empty) bands
-nbdbuf2     20       # Do not apply the tolwfr criterium to the last 20 bands (faster)
 
 ################################
 # Dataset 3: G0W0 with GWR code
@@ -42,23 +41,30 @@ prtsuscep3 1         # Write TCHI file.
 
 getden3 1
 getwfk3 2
-gwr_ntau3   2        # Number of imaginary-time points
-gwr_np_gtks 2 2 2 1
+gwr_ntau3   6         # Number of imaginary-time points
+gwr_sigma_algo3  1    # Use supercell for Sigma 
+#gwr_sigma_algo3  2   # Use convolutions for Sigma
+                      # (this is faster but there are small diffs wrt supercell version to be investigated)
+gwr_np_kgts 1 2 2 1   # k/G/tau/spin parallelism
 
-gwr_boxcutmin3  1.1
+gwr_boxcutmin3  1.0  # This should be subject to convergence studies
+#mixprec3    1
 
 nband3      80       # Bands to be used in the screening calculation
-ecuteps3    8        # Cut-off energy of the planewave set to represent the dielectric matrix.
+ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
 ecutsigx3   12       # Dimension of the G sum in Sigma_x.
                      # ecutsigx = ecut is usually a wise choice
                      # (the dimension in Sigma_c is controlled by ecuteps)
 
-#gw_qprange3 0
 nkptgw3  2
-kptgw3   0.0  0.0  0.0    
+kptgw3   0.0  0.0  0.0
          0.5  0.0  0.0
 bdgw3    24  25
          24  25
+
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp3 50
+freqspmax3 5 eV
 
 #################### COMMON PART #########################
 
@@ -99,21 +105,21 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
         5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
         0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
 
- pp_dirpath "$ABI_PSPDIR"
- pseudos "Si-GGA.psp8, O-GGA.psp8"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Si-GGA.psp8, O-GGA.psp8"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
 #%% [paral_info]
-#%% nprocs_to_test = 8
-#%% max_nprocs = 8
-#%% [NCPU_8]
-#%% files_to_test = t78_MPI8.abo, tolnlines = 25, tolabs = 1.010e-03, tolrel = 6.000e-03, fld_options = -medium
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t78_MPI4.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = GWR, NC
-#%% description = 
-#%%   GWR calculations for crystalline alpha-quartz 
+#%% description =
+#%%   GWR calculations for crystalline alpha-quartz.Test g/tau parallelism.
 #%%<END TEST_INFO>

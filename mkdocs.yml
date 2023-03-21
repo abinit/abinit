@@ -199,6 +199,7 @@ nav:
         - GW1: tutorial/gw1.md
         - GW2: tutorial/gw2.md
         - Bethe-Salpeter: tutorial/bse.md
+        #- GWR1: tutorial/gwr1.md
         - DMFT: tutorial/dmft.md
         - TDDFT (Casida): tutorial/tddft.md
     - DFPT & electron-phonon:
@@ -346,7 +347,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.9.2
+    version: 9.9.3
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github

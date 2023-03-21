@@ -52,7 +52,7 @@ module libxc_functionals
 
 !ISO C bindings are mandatory
 #ifdef HAVE_FC_ISO_C_BINDING
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #endif
 
  implicit none
@@ -68,6 +68,7 @@ module libxc_functionals
  public :: libxc_functionals_ixc                ! The value of ixc used to initialize the XC functional(s)
  public :: libxc_functionals_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libxc_functionals_ismgga             ! Return TRUE if the set of XC functional(s) set is meta-GGA
+ public :: libxc_functionals_istb09             ! Return TRUE if the XC functional is Tran-Blaha 2009.
  public :: libxc_functionals_needs_laplacian    ! Return TRUE if the set of XC functional(s) uses LAPLACIAN
  public :: libxc_functionals_needs_temperature  ! Return TRUE if the set of XC functional(s) uses the elec. temperature
  public :: libxc_functionals_set_temperature    ! Set electronic temperature in a set of XC functional(s)
@@ -164,7 +165,7 @@ module libxc_functionals
 #ifdef HAVE_FC_ISO_C_BINDING
  interface
    integer(C_INT) function xc_func_init(xc_func,functional,nspin) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: functional,nspin
      type(C_PTR) :: xc_func
    end function xc_func_init
@@ -172,28 +173,28 @@ module libxc_functionals
 !
  interface
    subroutine xc_func_end(xc_func) bind(C)
-     use iso_c_binding, only : C_PTR
+     use, intrinsic :: iso_c_binding, only : C_PTR
      type(C_PTR) :: xc_func
    end subroutine xc_func_end
  end interface
 !
  interface
    integer(C_INT) function xc_functional_get_number(name) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      type(C_PTR),value :: name
    end function xc_functional_get_number
  end interface
 !
  interface
    type(C_PTR) function xc_functional_get_name(number) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: number
    end function xc_functional_get_name
  end interface
 !
  interface
    integer(C_INT) function xc_family_from_id(id,family,number) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: id
      type(C_PTR),value :: family,number
    end function xc_family_from_id
@@ -201,7 +202,7 @@ module libxc_functionals
 !
  interface
    subroutine xc_hyb_cam_coef(xc_func,omega,alpha,beta) bind(C)
-     use iso_c_binding, only : C_DOUBLE,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_DOUBLE,C_PTR
      real(C_DOUBLE) :: omega,alpha,beta
      type(C_PTR) :: xc_func
    end subroutine xc_hyb_cam_coef
@@ -209,7 +210,7 @@ module libxc_functionals
 !
  interface
    subroutine xc_get_lda(xc_func,np,rho,zk,vrho,v2rho2,v3rho3) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,zk,vrho,v2rho2,v3rho3
      type(C_PTR) :: xc_func
@@ -219,7 +220,7 @@ module libxc_functionals
  interface
    subroutine xc_get_gga(xc_func,np,rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
 &                    v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,zk,vrho,vsigma,v2rho2,v2rhosigma,v2sigma2, &
 &                         v3rho3,v3rho2sigma,v3rhosigma2,v3sigma3
@@ -231,7 +232,7 @@ module libxc_functionals
    subroutine xc_get_mgga(xc_func,np,rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
 &                    v2rho2,v2rhosigma,v2rholapl,v2rhotau,v2sigma2,v2sigmalapl, &
 &                    v2sigmatau,v2lapl2,v2lapltau,v2tau2) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      integer(C_INT),value :: np
      type(C_PTR),value :: rho,sigma,lapl,tau,zk,vrho,vsigma,vlapl,vtau, &
 &                         v2rho2,v2sigma2,v2lapl2,v2tau2,v2rhosigma,v2rholapl,v2rhotau, &
@@ -242,7 +243,7 @@ module libxc_functionals
 !
  interface
    subroutine xc_func_set_params(xc_func,params,n_params) bind(C)
-     use iso_c_binding, only : C_INT,C_DOUBLE,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_DOUBLE,C_PTR
      integer(C_INT),value :: n_params
      real(C_DOUBLE) :: params(*)
      type(C_PTR) :: xc_func
@@ -251,7 +252,7 @@ module libxc_functionals
 !
  interface
    integer(C_INT) function xc_func_set_params_name(xc_func,name,param) bind(C)
-     use iso_c_binding, only : C_INT,C_DOUBLE,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_DOUBLE,C_PTR
      real(C_DOUBLE) :: param
      type(C_PTR) :: xc_func
      type(C_PTR),value :: name
@@ -260,7 +261,7 @@ module libxc_functionals
 !
  interface
    type(C_PTR) function xc_func_get_params_name(xc_func,ipar) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      type(C_PTR) :: xc_func
      integer(C_INT) :: ipar
    end function xc_func_get_params_name
@@ -268,7 +269,7 @@ module libxc_functionals
 !
  interface
    type(C_PTR) function xc_func_get_params_description(xc_func,ipar) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      type(C_PTR) :: xc_func
      integer(C_INT) :: ipar
    end function xc_func_get_params_description
@@ -276,7 +277,7 @@ module libxc_functionals
 !
  interface
    subroutine xc_func_set_density_threshold(xc_func,dens_threshold) bind(C)
-     use iso_c_binding, only : C_DOUBLE,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_DOUBLE,C_PTR
      real(C_DOUBLE) :: dens_threshold
      type(C_PTR) :: xc_func
    end subroutine xc_func_set_density_threshold
@@ -284,7 +285,7 @@ module libxc_functionals
 !
  interface
    subroutine xc_func_set_sig_threshold(xc_func,sigma_threshold) bind(C)
-     use iso_c_binding, only : C_DOUBLE,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_DOUBLE,C_PTR
      real(C_DOUBLE) :: sigma_threshold
      type(C_PTR) :: xc_func
    end subroutine xc_func_set_sig_threshold
@@ -292,14 +293,14 @@ module libxc_functionals
 !
  interface
    integer(C_INT) function xc_func_is_hybrid_from_id(func_id) bind(C)
-     use iso_c_binding, only : C_INT
+     use, intrinsic :: iso_c_binding, only : C_INT
      integer(C_INT),value :: func_id
    end function xc_func_is_hybrid_from_id
  end interface
 !
  interface
    subroutine xc_get_singleprecision_constant(xc_cst_singleprecision) bind(C)
-     use iso_c_binding, only : C_INT
+     use, intrinsic :: iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_singleprecision
    end subroutine xc_get_singleprecision_constant
  end interface
@@ -308,7 +309,7 @@ module libxc_functionals
    subroutine xc_get_family_constants(xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
 &                                     xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga, &
 &                                     xc_cst_hyb_mgga,xc_cst_hyb_lda) bind(C)
-     use iso_c_binding, only : C_INT
+     use, intrinsic :: iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_unknown,xc_cst_lda,xc_cst_gga,xc_cst_mgga, &
 &                      xc_cst_lca,xc_cst_oep,xc_cst_hyb_gga,xc_cst_hyb_mgga, &
 &                      xc_cst_hyb_lda
@@ -319,7 +320,7 @@ module libxc_functionals
    subroutine xc_get_flags_constants(xc_cst_flags_have_exc,xc_cst_flags_have_vxc, &
               xc_cst_flags_have_fxc,xc_cst_flags_have_kxc,xc_cst_flags_have_lxc,&
 &             xc_cxt_flags_needs_lapl) bind(C)
-     use iso_c_binding, only : C_INT
+     use, intrinsic :: iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_flags_have_exc,xc_cst_flags_have_vxc,xc_cst_flags_have_fxc, &
 &                      xc_cst_flags_have_kxc,xc_cst_flags_have_lxc,xc_cxt_flags_needs_lapl
    end subroutine xc_get_flags_constants
@@ -328,7 +329,7 @@ module libxc_functionals
  interface
    subroutine xc_get_kind_constants(xc_cst_exchange,xc_cst_correlation, &
 &                                   xc_cst_exchange_correlation,xc_cst_kinetic) bind(C)
-     use iso_c_binding, only : C_INT
+     use, intrinsic :: iso_c_binding, only : C_INT
      integer(C_INT) :: xc_cst_exchange,xc_cst_correlation, &
 &                      xc_cst_exchange_correlation,xc_cst_kinetic
    end subroutine xc_get_kind_constants
@@ -336,27 +337,27 @@ module libxc_functionals
 !
  interface
    type(C_PTR) function xc_func_type_malloc() bind(C)
-     use iso_c_binding, only : C_PTR
+     use, intrinsic :: iso_c_binding, only : C_PTR
    end function xc_func_type_malloc
  end interface
 !
  interface
    subroutine xc_func_type_free(xc_func) bind(C)
-     use iso_c_binding, only : C_PTR
+     use, intrinsic :: iso_c_binding, only : C_PTR
      type(C_PTR) :: xc_func
    end subroutine xc_func_type_free
  end interface
 !
  interface
    type(C_PTR) function xc_get_info_name(xc_func) bind(C)
-     use iso_c_binding, only : C_PTR
+     use, intrinsic :: iso_c_binding, only : C_PTR
      type(C_PTR) :: xc_func
    end function xc_get_info_name
  end interface
 !
  interface
    type(C_PTR) function xc_get_info_refs(xc_func,iref) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      type(C_PTR) :: xc_func
      integer(C_INT) :: iref
    end function xc_get_info_refs
@@ -364,14 +365,14 @@ module libxc_functionals
 !
  interface
    integer(C_INT) function xc_get_info_flags(xc_func) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      type(C_PTR) :: xc_func
    end function xc_get_info_flags
  end interface
 !
  interface
    integer(C_INT) function xc_get_info_kind(xc_func) bind(C)
-     use iso_c_binding, only : C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
      type(C_PTR) :: xc_func
    end function xc_get_info_kind
  end interface
@@ -971,6 +972,41 @@ function libxc_functionals_ismgga(xc_functionals)
  end if
 
 end function libxc_functionals_ismgga
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_istb09
+!! NAME
+!!  libxc_functionals_istb09
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  is Tran-Blaha 2009 or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+logical function libxc_functionals_istb09(xc_functionals) result(ans)
+
+!Arguments ------------------------------------
+ type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ ans  = .false.
+ if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
+
+ if (present(xc_functionals)) then
+   ans = any(xc_functionals%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
+ else
+   ans = any(xc_global%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
+ end if
+
+end function libxc_functionals_istb09
 !!***
 
 !----------------------------------------------------------------------
