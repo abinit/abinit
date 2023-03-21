@@ -973,7 +973,7 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  do spin=1,ebands%nsppol
    do ik_ibz=1,ebands%nkpt
      do band=1,ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
-       write(unt,*) '  - ',ebands%eig(band,ik_ibz,spin)
+       write(unt,"(a,e22.15)") '  - ',ebands%eig(band,ik_ibz,spin)
      end do
    end do
  end do
@@ -988,7 +988,8 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  do spin=1,ebands%nsppol
    do ik_ibz=1,ebands%nkpt
      do band=1,ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
-       write(unt,*) '  - ',ebands%eig(band,ik_ibz,spin)
+       !write(unt,"(a,e22.15)") '  - ',ebands%eig(band,ik_ibz,spin)
+       write(unt,"(e22.15)") ebands%eig(band,ik_ibz,spin)
      end do
    end do
  end do
