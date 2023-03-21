@@ -1037,7 +1037,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer :: band1, band1_start, batch1_size, n1dat, idat1, m_istwfk, iatom, dim_rtwg
  integer :: band2, band2_start, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
  integer(XMPI_OFFSET_KIND) :: offset
- real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3), mem_mb
+ real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3), mem_mb, bz_vol
  character(len=500) :: msg
  character(len=fnlen) :: filepath, cvx_filepath
  logical :: k_is_gamma,  debug_this
@@ -1059,6 +1059,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  comm = ugb%comm; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
+ bz_vol = two_pi**3/cryst%ucvol
 
  debug_this = merge(.False., .True., nproc > 1)
  debug_this = .False.
@@ -1344,8 +1345,9 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
        ! Multiply by sqrt(vc(g))
        do idat2=1,n2dat
          !if (band1 == band2_start + idat2 -1) write(std_out,*) "ug12_batch(1,idat2), idat", ug12_batch(1,idat2), idat2
-         ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) ! * sqrt(cryst%ucvol) FIXME
+         ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) * sqrt(cryst%ucvol) ! * sqrt(bz_vol) ! * FIXME
        end do
+       print *, "max(abs(ug12_batch)):", maxval(abs(ug12_batch(:,1:n2dat)))
 
 #ifdef HAVE_MPI_IO
        ! Write ug12_batch using Stream-IO
