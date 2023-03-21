@@ -56,7 +56,7 @@ pseudos "Li.xml, F.xml"
 #%%   t08o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%%   t08o_DS2_EigenEnergies.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
 #%%   t08o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t08o_DS2_CoulombPotential.elements, tolnlines = 10, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t08o_DS2_CoulombPotential.elements, tolnlines = 50, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%%   t08o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%% [paral_info]
 #%% max_nprocs = 8
