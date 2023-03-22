@@ -2,8 +2,11 @@ version: 100
 type: Tensor
 scalarType: Complex64
 dimensions:
+- length: 59
   type: AuxiliaryField
+- length: 40
   type: State
+- length: 40
   type: State
 elements:
   type: IeeeBinaryFile
