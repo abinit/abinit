@@ -597,9 +597,11 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    chebfi%xgTransposerAX%gpu_num_openmp_threads = chebfi%gpu_num_openmp_threads
    chebfi%xgTransposerBX%gpu_num_openmp_threads = chebfi%gpu_num_openmp_threads
 
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
    call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
    call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS)
    call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS)
+   ABI_NVTX_END_RANGE()
  else
    call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, 1, spacedim, neigenpairs)   !use xXColsRows instead of X notion
    call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
@@ -706,6 +708,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)
  call timab(tim_amp_f,2,tsec)
 
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
  if (chebfi%paral_kgb == 1) then
    call xmpi_barrier(chebfi%spacecom)
 
@@ -723,6 +726,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
    call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
  end if
+ ABI_NVTX_END_RANGE()
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
  call timab(tim_RR, 1, tsec)
@@ -881,7 +885,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
 
  if (chebfi%paw) then
    call timab(tim_invovl, 1, tsec)
-   ABI_NVTX_START_RANGE(NVTX_INVOVL)
+   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
    call getBm1X(chebfi%xAXColsRows, chebfi%X_next, chebfi%xgTransposerX)
    ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)

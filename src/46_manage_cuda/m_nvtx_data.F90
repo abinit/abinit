@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 52
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 55
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -83,7 +83,10 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2_RR_HEGV = 49
   integer, parameter :: NVTX_CHEBFI2_RR_XNP = 50
   integer, parameter :: NVTX_CHEBFI2_RR_GEMM = 51
-  integer, parameter :: NVTX_FORSTR_NONLOP = 52
+  integer, parameter :: NVTX_INVOVL_INNER_GEMM = 52
+  integer, parameter :: NVTX_CHEBFI2_TRANSPOSE = 53
+  integer, parameter :: NVTX_CHEBFI2_GET_BM1X = 54
+  integer, parameter :: NVTX_FORSTR_NONLOP = 55
 
 contains
 
@@ -150,6 +153,9 @@ contains
          & "CHEBFI2_RR_HEGV", &
          & "CHEBFI2_RR_XNP", &
          & "CHEBFI2_RR_GEMM", &
+         & "INVOVL_INNER_GEMM", &
+         & "CHEBFI2_TRANSPOSE", &
+         & "CHEBFI2_GET_BM1X", &
          & "FORSTR_NONLOP" &
          ]
 
@@ -204,7 +210,10 @@ contains
     nvtx_ids(49)= NVTX_CHEBFI2_RR_HEGV
     nvtx_ids(50)= NVTX_CHEBFI2_RR_XNP
     nvtx_ids(51)= NVTX_CHEBFI2_RR_GEMM
-    nvtx_ids(52)= NVTX_FORSTR_NONLOP
+    nvtx_ids(52)= NVTX_INVOVL_INNER_GEMM
+    nvtx_ids(53)= NVTX_CHEBFI2_TRANSPOSE
+    nvtx_ids(54)= NVTX_CHEBFI2_GET_BM1X
+    nvtx_ids(55)= NVTX_FORSTR_NONLOP
 
   end subroutine nvtx_init
 

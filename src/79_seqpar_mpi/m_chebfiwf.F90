@@ -419,7 +419,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
 ! *********************************************************************
 
- ABI_NVTX_START_RANGE(NVTX_GETGHC)
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
 
  call xgBlock_getSize(X,spacedim,blockdim)
 
@@ -668,8 +668,10 @@ subroutine getBm1X(X,Bm1X,transposer)
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
    end if
+   ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
        spacedim, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
+   ABI_NVTX_END_RANGE()
  else
    gsm1hc_filter(:,:) = ghc_filter(:,:)
  end if
