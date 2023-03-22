@@ -300,7 +300,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 !Local variables-------------------------------
 !scalars
-
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
  integer :: idir,iatom,unpaw,mcgbz
  integer,allocatable :: dimcprj(:)
