@@ -1496,7 +1496,6 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
 ! *************************************************************************
 
-  ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_APPLY_BLOCK)
   if (block_sliced == 1) then
 
      do idat = 1, ndat
@@ -1548,7 +1547,6 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
     call gpu_device_synchronize()
   end if
-  ABI_NVTX_END_RANGE()
 
 end subroutine apply_block_ompgpu
 !!***
