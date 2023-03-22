@@ -988,7 +988,6 @@ subroutine cc4s_write_eigens(ebands, dtfil)
  do spin=1,ebands%nsppol
    do ik_ibz=1,ebands%nkpt
      do band=1,ebands%nband(ik_ibz + (spin-1)*ebands%nkpt)
-       !write(unt,"(a,e22.15)") '  - ',ebands%eig(band,ik_ibz,spin)
        write(unt,"(e22.15)") ebands%eig(band,ik_ibz,spin)
      end do
    end do
@@ -1277,6 +1276,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  !    once I have a better understanding of the fileformat expected by CC4S.
  ! 2) Handle parallel IO if nsppol 2 (we are inside the spin loop that is already MPI distributed!)
  ! 3) Clarify ordering of CoulombVertex (b1,b2 vs b2,b1) and eigenvalues (spin?)
+ ! 4) Treatment of q--> 0 in vc_coul
  ! 4) See other TODOs below.
 
  call uplan_1%init(npw_k, nspinor, batch1_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
@@ -1345,10 +1345,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
        ! Multiply by sqrt(vc(g))
        do idat2=1,n2dat
-         !if (band1 == band2_start + idat2 -1) write(std_out,*) "ug12_batch(1,idat2), idat", ug12_batch(1,idat2), idat2
+         if (band1 == band2_start + idat2 -1) write(std_out,*) " diag ug12_batch(1,band), band", ug12_batch(1,idat2), band1
          ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) * sqrt(cryst%ucvol) ! * sqrt(bz_vol) ! * FIXME
        end do
-       print *, "max(abs(ug12_batch)):", maxval(abs(ug12_batch(:,1:n2dat)))
+       !write(std_out,*)" max(abs(ug12_batch)):", maxval(abs(ug12_batch(:,1:n2dat)))
 
 #ifdef HAVE_MPI_IO
        ! Write ug12_batch using Stream-IO
