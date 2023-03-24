@@ -679,10 +679,19 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
  end if
 
- use_gemm_nonlop_gpu = ( gemm_nonlop_use_gemm_gpu .and. &
-   & signs == 2 .and. paw_opt /= 2 .and. &
-   & cpopt < 3 .and. hamk%useylm /= 0 .and. &
-   & (choice < 2 .or. choice == 7) )
+ ! TODO : check if we can refactor the following, to avoid code duplication
+ ! since use_gemm_nonlop and use_gemm_nonlop_gpu can be controlled completely separatedly
+ if (gemm_nonlop_use_gemm_gpu) then
+   !use_gemm_nonlop_gpu = use_gemm_nonlop
+   use_gemm_nonlop_gpu = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
+   use_gemm_nonlop_gpu = ( use_gemm_nonlop_gpu .or. &
+     &      ( signs == 2 .and. paw_opt /= 2 .and. &
+     &        cpopt < 3 .and. hamk%useylm /= 0 .and. &
+     &        (choice < 2 .or. choice == 7) ) )
+   use_gemm_nonlop_gpu = ( use_gemm_nonlop_gpu .or. &
+     &      ( choice==2 .and. signs==1 .and. hamk%useylm/=0 .and. &
+     &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
+ end if
 
  ! if(gemm_nonlop_use_gemm_gpu) then
  !   call wrtout(std_out, "Calling gemm_nonlop with GPU activated")

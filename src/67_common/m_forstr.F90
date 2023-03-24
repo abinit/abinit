@@ -72,7 +72,12 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
- use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer
+ use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer,c_double,c_size_t
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ use gator_mod
+ use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
+#endif
 
  implicit none
 
@@ -646,7 +651,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
- real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
+#else
+ real(dp),allocatable :: cwavef(:,:)
+#endif
+ real(dp),allocatable :: enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
  real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
@@ -789,7 +799,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*my_nspinor*blocksize/))
+#else
      ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+#endif
+
      if (psps%usepaw==1.and.usecprj_local==1) then
        ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
@@ -934,7 +949,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
 &            use_gemm_nonlop_gpu, &
 &            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
-       end if
+     end if
 
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
@@ -1016,6 +1031,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          end if
 
          call timab(924,2,tsec)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ! the following is done on CPU, so prefetch wave functions from device to host (for efficiency)
+         call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*my_nspinor*blocksize, CPU_DEVICE_ID)
+         call gpu_device_synchronize()
+#endif
 
 !        Accumulate stress tensor kinetic contributions
          if (stress_needed==1) then
@@ -1108,7 +1129,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        call pawcprj_free(cwaveprj)
      end if
      ABI_FREE(cwaveprj)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_FREE_MANAGED(cwavef)
+#else
      ABI_FREE(cwavef)
+#endif
 
      ABI_FREE(lambda)
      ABI_FREE(occblock)
