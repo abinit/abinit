@@ -20,11 +20,11 @@ Since ABINIT v9.0.2, the calculation of several spatial dispersion quantities is
 via the longwave driver. The implementation, detailed in [[cite:Romero2020]], follows the formalism developed in 
 [[cite:Royo2019]] that adapts the classic longwave method of Born and Huang [[cite:Born1954]] with the modern tools of 
 the DFPT. Technically, the driver computes analytical third-order energy derivatives (readily converted to physical 
-spatial dispersion quantities) with respect to two of the *standard* 
+spatial dispersion quantities) with respect to three of the *standard* 
 perturbations (atomic displacements, electric field and strain) and to the wavevector **q**. 
 
 At present ( |today| ), ABINIT enables the calculation of four spatial dispersion tensors required 
-in order to build all the contributions to the bulk flexoelectric tensor following the prescriptions exposed in [[cite:Stengel2013]]. 
+in order to build all the contributions to the bulk flexoelectric tensor following the prescriptions exposed in [[cite:Stengel2013]] and [[cite:Royo2022]]. 
 These include, the clamped-ion flexoelectric tensor (a purely electronic contribution) and the first real-space moment of three other 
 tensors (entering the mixed and lattice mediated contributions): the polarization 
 response to an atomic displacement, the interatomic force constants and the piezoelectric force-response
@@ -63,7 +63,14 @@ when the surface-specific part is accounted for, as done e.g. in [[cite:Stengel2
 
 The longwave implementation is still under heavy development. To date it requires the use of norm-conserving 
 pseudopotentials without XC nonlinear core corrections and it can be used with LDA and GGA XC functionals. 
-The use of spherical harmonics for the nonlocal projectors is mandatory through the option [[useylm]]=1.   
+The use of spherical harmonics for the nonlocal projectors is mandatory through the option [[useylm]]=1. 
+
+Since ABINIT v9.x the longwave driver has been thoroughly modified. These changes, while being mostly devoted
+at optimizing the internal structure of the driver, do not entail big differences to the end user in terms of 
+execution when compared with the previous version. Nonetheless, it is strongly recommended to take a look at the input 
+files for the longwave tests indicated below. Particularly, in what refers to the new usage of the variables
+[[rf2_dkdk]], [[prepalw]] and [[rfstrs_ref]].
+  
 
 The following steps are required to perform a longwave DFPT calculation of the bulk flexoelectric tensor
 (see, e.g., tests [[test:lw_1]] to [[test:lw_3]]):
@@ -71,7 +78,7 @@ The following steps are required to perform a longwave DFPT calculation of the b
 * Perform ground-state calculation.
 * Perform ddk and d2_dkdk ([[rf2_dkdk]]=3 is mandatory) response function calculations.
 * Perform response function calculations at **q** =Γ to atomic displacements, electric field and strain perturbations, 
-including the option [[prepalw]]=1.
+including the option [[prepalw]]=1 and [[rfstrs_ref]]=1.
 * Perform a longwave DFTP calculation of third-order energy derivatives ([[optdriver]]=10 and [[lw_flexo]]=1).
 * Use MRGDDB to merge 1st, 2nd and 3rd order DDB files.
 * Run ANADDB with [[anaddb:flexoflag]]=1.  
@@ -82,12 +89,19 @@ nonanalytical part of the dynamical matrix (see, e.g., tests [[test:lw_4]] to [[
 * Perform ground-state calculation.
 * Perform ddk and d2_dkdk ([[rf2_dkdk]]=3 is mandatory) response function calculations.
 * Perform response function calculations at **q** =Γ to atomic displacements and electric field, 
-including the option [[prepalw]]=1.
+including the option [[prepalw]]=2.
 * Perform a longwave DFTP calculation of third-order energy derivatives ([[optdriver]]=10 and [[lw_qdrpl]]=1).
 * Perform response function calculations to atomic displacements at finite **q** (coarse grid). 
 * Use MRGDDB to merge 2nd and 3rd order DDB files.
 * Run a phonon dispersion calculation of ANADDB including [[anaddb:dipquad]]=1 and/or [[anaddb:quadquad]]=1.  
 
+The following steps are required to perform a longwave DFPT calculation of the natural optical activity tensor
+(see, e.g., test [[test:lw_8]]):
+
+* Perform ground-state calculation.
+* Perform ddk and d2_dkdk ([[rf2_dkdk]]=3 is mandatory) response function calculations.
+* Perform response function calculations to electric field perturbation including the option [[prepalw]]=4.
+* Perform a longwave DFTP calculation of third-order energy derivatives ([[optdriver]]=10 and [[lw_natopt]]=1).
 
 ## Related Input Variables
 
