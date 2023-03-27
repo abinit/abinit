@@ -354,22 +354,27 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 
 !Local variables -------------------------
  integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, iwfc !, iq
- integer :: atmwfc_lmax
+ integer :: atmwfc_lmax, mmax_cut
+ !real(dp),parameter :: rcut = 10.0_dp  ! QE Value
+ real(dp),parameter :: rcut = 6.0_dp   ! PSP8 value
+ !real(dp),parameter :: rcut = 1000.0_dp  ! No cufoff
  real(dp) :: yp1, ypn, amesh, damesh, intg
  character(len=500) :: msg
- logical :: linear_mesh
+ logical :: linear_mesh, debug
  type(pseudo_upf) :: upf
  type(atomdata_t) :: atom
  type(pawrad_type) :: mesh
- integer :: my_nproj_l(0:3), my_nprojso_l(1:3)
+ integer :: my_nproj_l(0:3), my_nprojso_l(1:3), units(2)
  !integer :: nproj_tmp(psps%mpssoang)
  integer,allocatable :: awfc_indlmn(:,:)
  logical,allocatable :: found_l(:)
  real(dp),allocatable :: work_space(:), work_spl(:)
- real(dp),allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
+ real(dp),allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:), chi_tmp(:)
  real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
 
 ! *********************************************************************
+
+ units = [std_out, ab_out]
 
  ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
  ! and https://github.com/QEF/qeschemas/files/9497267/pp.md
@@ -380,10 +385,10 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  znucl = atom%znucl
  zion = upf%zp
  mmax = upf%mesh
+ maxrad = upf%rmax
  ! FIXME Temporary hack
  !mmax = 300  ! H
  !mmax = 600  ! Si
- maxrad = upf%rmax
  !maxrad = upf%r(mmax)
 
  ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
@@ -391,11 +396,11 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 
  ! Write some description of file
  write(msg, '(3(a,1x))' ) '-',trim(upf%psd), trim(upf%generated)
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,f9.5,f10.5,2x,a,t47,a)')'-',znucl,zion,trim(upf%date),'znucl, zion, pspdat'
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg, '(5(i0,1x),t47,a)' ) 12, pspxc, lmax, upf%lloc, mmax,'pspcod,pspxc,lmax,lloc,mmax'
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
 
  ! Check that rad grid is linear starting at zero
  linear_mesh = .True.
@@ -436,12 +441,35 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ! convert vloc from Rydberg to Ha
  upf%vloc = half * upf%vloc
 
+ ! =================================================
+ ! This comment is from q-e/Modules/read_pseudo.F90
+ ! =================================================
+
+ ! the radial grid is defined up to r(mesh) but we introduce
+ ! an auxiliary variable msh to limit the grid up to rcut=10 a.u.
+ ! This is used to cut off the numerical noise arising from the
+ ! large-r tail in cases like the integration of V_loc-Z/r
+ !
+ ! msh is forced to be odd for simpson integration (maybe obsolete?)
+ !
+ do ir=1,upf%mesh
+   if (upf%r(ir) > rcut) then
+     mmax_cut = ir; goto 5
+   end if
+ end do
+ mmax_cut = mmax
+5 mmax_cut = 2 * ( (mmax_cut + 1) / 2) - 1
+
+ write(std_out,*)" UPF file with mmax: ", mmax, " with r_max:", upf%r(mmax)
+ write(std_out,*)" Using mmax_cut: ", mmax_cut, " with r_cut:", upf%r(mmax_cut)
+
+ ! Note mmax_cut
  if (linear_mesh) then
-   call psp8lo(amesh, epsatm, mmax, psps%mqgrid_vl, psps%qgrid_vl, &
-               vlspl(:,1), upf%r(1:mmax), upf%vloc(1:mmax), yp1, ypn, zion)
+   call psp8lo(amesh, epsatm, mmax_cut, psps%mqgrid_vl, psps%qgrid_vl, &
+               vlspl(:,1), upf%r, upf%vloc, yp1, ypn, zion)
  else
-   call psp11lo(upf%rab(1:mmax), epsatm, mmax, psps%mqgrid_vl, psps%qgrid_vl,&
-                vlspl(:,1), upf%r(1:mmax), upf%vloc(1:mmax), yp1, ypn, zion)
+   call psp11lo(upf%rab, epsatm, mmax_cut, psps%mqgrid_vl, psps%qgrid_vl,&
+                vlspl(:,1), upf%r, upf%vloc, yp1, ypn, zion)
  end if
 
  ! Fit spline to q^2 V(q) (Numerical Recipes subroutine)
@@ -454,6 +482,30 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ABI_FREE(work_space)
  ABI_FREE(work_spl)
 
+ debug = .False.!; debug = .True.
+ if (debug) then
+   write(std_out,*)'# Vlocal upf = '
+   write(std_out,*)' amesh  = ', amesh
+   write(std_out,*)' epsatm = ', epsatm
+   write(std_out,*)' mmax   = ', mmax
+   write(std_out,*)' mqgrid = ', psps%mqgrid_vl
+   do ir = 1, psps%mqgrid_vl
+     write(std_out,*)'   qgrid = ', ir, psps%qgrid_vl(ir)
+   enddo
+   do ir = 1, psps%mqgrid_vl
+     write(std_out,'(a,i5,2f20.12)')'   iq, vlspl = ', ir, vlspl(ir,1), vlspl(ir,2)
+   enddo
+   write(std_out,*)
+   do ir = 1, mmax
+     write(std_out,*)'   rad   = ', upf%r(ir), upf%vloc(ir)
+   enddo
+   write(std_out,*)
+   write(std_out,*)' yp1    = ', yp1
+   write(std_out,*)' ypn    = ', ypn
+   write(std_out,*)' zion   = ', zion
+   !stop
+ end  if
+
  nproj_l = 0
 
  if (.not. upf%has_so) then
@@ -462,7 +514,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
      nproj_l(ll+1) = nproj_l(ll+1) + 1
    end do
    write(msg, '(a,*(i6))' ) '     nproj',nproj_l
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! shape = dimekb  vs. shape = n_proj
    ! convert from Rydberg to Ha
@@ -490,11 +542,11 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    call upf2_jl2srso(upf, my_nproj_l, my_nprojso_l, vsr, esr, vso, eso)
 
    write(msg, '(a,*(i6))' ) '     nproj',my_nproj_l
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg, '(5x,a)' ) "spin-orbit psp"
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg, '(5x,a,*(i6))' ) '   nprojso',my_nprojso_l
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ABI_CALLOC(proj, (mmax, psps%lnmax))
    pspindex = 0; iln=0; indlmn(:,:)=0
@@ -580,7 +632,8 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    ABI_MALLOC(ff, (mmax))
    ABI_MALLOC(ff1, (mmax))
    ABI_MALLOC(ff2, (mmax))
-   ff(1:mmax) = upf%rho_atc(1:mmax) ! model core charge without derivative factor
+   ! model core charge without derivative factor
+   ff(1:mmax) = upf%rho_atc(1:mmax)
    !smooth_niter = 15 ! run 15 iterations of smoothing?
    smooth_niter = 0   ! Don't smooth core charges to be consistent with the treatment done in psp8in
 
@@ -596,10 +649,9 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 
    ! determine a good rchrg = xcccrc
    do ir = mmax, 1, -1
-     !if (abs(ff(ir)) > 1.e-6) then
+     !if (abs(ff(ir)) > tol6) then
      if (abs(ff(ir)) > tol20) then
-       xcccrc = upf%r(ir)
-       exit
+       xcccrc = upf%r(ir); exit
      end if
    end do
    !xcccrc = upf%r(mmax)
@@ -621,9 +673,9 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ! and transform it to reciprocal space on a regular grid
  ! TODO: Spline input data on linear mesh if not linear
  ABI_MALLOC(ff, (mmax))
- ff = upf%rho_at / four_pi
+ ff = upf%rho_at(1:mmax) / four_pi
  where (abs(upf%r) > tol16)
-   ff = ff / upf%r ** 2
+   ff = ff / upf%r(1:mmax) ** 2
  else where
    ff = zero
  end where
@@ -634,11 +686,13 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 
  nctab%num_tphi = upf%nwfc
  if (upf%nwfc > 0) then
+ !if (.False.) then
    ! Store atomic wavefunctions and metadata in nctab, then compute form factors for spline.
    ! NB: lchi is the radial part of the KS equation, multiplied by r.
    ABI_MALLOC(awfc_indlmn, (6, upf%nwfc))
    awfc_indlmn = huge(1)
    atmwfc_lmax = -1
+   ABI_MALLOC(chi_tmp, (upf%mesh))
 
    do iwfc=1, upf%nwfc
      !print *, "label: ", upf%els(iwfc)
@@ -648,16 +702,17 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
      !print *, "l", upf%lchi(iwfc)
      !print *, "occ:", upf%oc(iwfc)
      atmwfc_lmax = max(atmwfc_lmax, upf%lchi(iwfc))
-     ff = upf%chi(:, iwfc) ** 2; call simp_gen(intg, ff, mesh)
+     chi_tmp = upf%chi(:, iwfc) ** 2; call simp_gen(intg, chi_tmp, mesh)
      write(std_out, *)" wavefunction (before rescaling) integrates to: ",intg
      upf%chi(:, iwfc) = upf%chi(:, iwfc) / sqrt(intg)
-     ff = upf%chi(:, iwfc) ** 2; call simp_gen(intg, ff, mesh)
+     chi_tmp = upf%chi(:, iwfc) ** 2; call simp_gen(intg, chi_tmp, mesh)
      write(std_out, *)" wavefunction (after rescaling) integrates to: ",intg
 
      ! NB: we only need ll (1), and iln (5) in psp8nl
      awfc_indlmn(1, iwfc) = upf%lchi(iwfc)
      awfc_indlmn(5, iwfc) = iwfc
    end do
+   ABI_FREE(chi_tmp)
 
    ! All this sfree/remalloc stuff is for handling memory in multi dataset mode!
    ABI_REMALLOC(nctab%tphi_qspl, (psps%mqgrid_ff, 2, upf%nwfc))

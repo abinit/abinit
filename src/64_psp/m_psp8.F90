@@ -115,9 +115,9 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !Local variables-------------------------------
 !scalars
  integer :: extension_switch,iln,iln0,pspindex,ipsang,irad,jj,kk,ll,ll_err,llin
- integer :: mm,nn,nso
+ integer :: mm,nn,nso,ir
  real(dp) :: amesh,damesh,fchrg,rchrg,yp1,ypn
- logical :: has_tvale
+ logical :: has_tvale, debug
  character(len=500) :: msg,errmsg
  type(pawrad_type) :: mesh
 !arrays
@@ -156,7 +156,10 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 !   for  irad=1,mmax  : irad, r(irad), xccc(irad),
 !       xccc'(irac), xccc''(irad), xccc'''(irad), xccc''''(irad)
 !
-!Model core charge for nonlinear core xc correction, and 4 derivatives
+
+ debug = .False.!; debug = .True.
+
+ ! Model core charge for nonlinear core xc correction, and 4 derivatives
 
  read (tmp_unit,*, err=10, iomsg=errmsg) rchrg,fchrg,qchrg
  write(msg, '(3f20.14,t64,a)' ) rchrg,fchrg,qchrg,'rchrg,fchrg,qchrg'
@@ -373,28 +376,28 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
  vlspl(:,2)=work_spl(:)
  ABI_FREE(work_spl)
 
-!!  DEBUG
-! write(std_out,*)'# Vlocal = '
-! write(std_out,*)' amesh  = ', amesh
-! write(std_out,*)' epsatm = ', epsatm
-! write(std_out,*)' mmax   = ', mmax
-! write(std_out,*)' mqgrid = ', mqgrid
-! do ir = 1, mqgrid
-!   write(std_out,*)'   qgrid = ', ir, qgrid(ir)
-! enddo
-! do ir = 1, mqgrid
-!   write(std_out,'(a,i5,2f20.12)')'   iq, vlspl = ', ir, vlspl(ir,1), vlspl(ir,2)
-! enddo
-! write(std_out,*)
-! do ir = 1, mmax
-!   write(std_out,*)'   rad   = ', rad(ir), vloc(ir)
-! enddo
-! write(std_out,*)
-! write(std_out,*)' yp1    = ', yp1
-! write(std_out,*)' ypn    = ', ypn
-! write(std_out,*)' zion   = ', zion
-! stop
-!!  ENDDEBUG
+ if (debug) then
+   write(std_out,*)'# Vlocal psp8 = '
+   write(std_out,*)' amesh  = ', amesh
+   write(std_out,*)' epsatm = ', epsatm
+   write(std_out,*)' mmax   = ', mmax
+   write(std_out,*)' mqgrid = ', mqgrid
+   do ir = 1, mqgrid
+     write(std_out,*)'   qgrid = ', ir, qgrid(ir)
+   enddo
+   do ir = 1, mqgrid
+     write(std_out,'(a,i5,2f20.12)')'   iq, vlspl = ', ir, vlspl(ir,1), vlspl(ir,2)
+   enddo
+   write(std_out,*)
+   do ir = 1, mmax
+     write(std_out,*)'   rad   = ', rad(ir), vloc(ir)
+   enddo
+   write(std_out,*)
+   write(std_out,*)' yp1    = ', yp1
+   write(std_out,*)' ypn    = ', ypn
+   write(std_out,*)' zion   = ', zion
+   stop
+ end if
 
 
 !--------------------------------------------------------------------
