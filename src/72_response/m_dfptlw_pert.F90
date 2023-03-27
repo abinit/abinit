@@ -798,7 +798,7 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
      end if
    end if
 
-   if (dimffnl==4) then
+   if (dimffnl==2.or.dimffnl==4) then
      ABI_MALLOC(ylmgr_k_part,(npw_k,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
      ylmgr_k_part(:,:,:)=ylmgr_k(:,1:3,:)
    else if (dimffnl==10) then
@@ -808,6 +808,7 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
      msg='wrong size for ffnl via dimffnl!'
      ABI_BUG(msg)
    end if
+
 
    nkpg=0
    ABI_MALLOC(kpg_k,(npw_k,nkpg))
