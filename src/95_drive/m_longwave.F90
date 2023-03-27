@@ -140,14 +140,14 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
- integer :: ask_accurate,bantot,coredens_method,dimffnl,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
- integer :: ider,idir0
+ integer :: ask_accurate,bantot,coredens_method,dimffnl,dimffnl_i
+ integer :: gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
+ integer :: ider,idir0,idir
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
  integer :: isym,mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
-! integer :: idir,ipert,
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
  logical :: has_strain,non_magnetic_xc
@@ -176,7 +176,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: cg(:,:)
  real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_car(:,:,:,:,:,:,:)
  real(dp),allocatable :: d3etot_nv(:,:,:,:,:,:,:),doccde(:)
- real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:)
+ real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:),ffnl_i(:,:,:,:,:)
  real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
  real(dp),allocatable :: symrel_cart(:,:,:),work(:),xccc3d(:)
@@ -199,8 +199,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Only usable with spherical harmonics
- if (dtset%useylm/=1) then
-   msg='This routine cannot be used for useylm/=1'
+ if (dtset%useylm/=1.and.(dtset%lw_qdrpl/=0.or.dtset%lw_flexo/=0)) then
+   msg='This routine can only be used with useylm/=1 for lw_natopt=1'
    ABI_BUG(msg)
  end if
 
@@ -546,26 +546,46 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
 
 !Set up the spherical harmonics (Ylm) and gradients at each k point 
- useylmgr=1; option=2 ; nylmgr=9
- ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))               
- ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
- call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
-& psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
-& rprimd,ylm,ylmgr)                                   
+ if (psps%useylm==1) then
+   useylmgr=1; option=2 ; nylmgr=9
+   ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))               
+   ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
+&  psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+&  rprimd,ylm,ylmgr)                                   
+ end if
 
 !Compute nonlocal form factors ffnl1, for all atoms and all k-points.
  if (dtset%ffnl_lw == 0) then 
-   if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3.or.dtset%lw_natopt==1) ider=1; idir0=4; dimffnl=4
-   if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
-     ider=2; idir0=4; dimffnl=10
+   if (dtset%lw_natopt==1) then
+     ider=1;dimffnl=4;dimffnl_i=2
+     ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
+     ABI_MALLOC(ffnl_i,(dtset%mkmem,dtset%mpw,dimffnl_i,psps%lmnmax,psps%ntypat))
+     do idir=1, 3
+       idir0=idir
+       call preca_ffnl(dimffnl_i,ffnl_i,gmet,gprimd,ider,idir0,kg, &
+     & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+     & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+       ffnl(:,:,1,:,:)=ffnl_i(:,:,1,:,:)
+       ffnl(:,:,1+idir,:,:)=ffnl_i(:,:,2,:,:)
+     end do
+     ABI_FREE(ffnl_i)
+     if (psps%useylm==1) then
+       useylmgr=0
+       ABI_FREE(ylmgr)
+       ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     end if
+   else        
+     if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3) ider=1; idir0=4; dimffnl=4
+     if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) ider=2; idir0=4; dimffnl=10
+     ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
+     call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
+   & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+   & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+     useylmgr=0
+     ABI_FREE(ylmgr)
+     ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    end if
-   ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
-   call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
- & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
- & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
-   useylmgr=0
-   ABI_FREE(ylmgr)
-   ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
  else if (dtset%ffnl_lw == 1) then 
    dimffnl=0
    ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
@@ -751,8 +771,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(d3e_pert1)
  ABI_FREE(d3e_pert2)
  ABI_FREE(d3e_pert3)
- ABI_FREE(ylm)
- ABI_FREE(ylmgr)
+ if (psps%useylm==1) then
+   ABI_FREE(ylm)
+   ABI_FREE(ylmgr)
+ end if
 
  ! Clean the header
  call hdr%free()
