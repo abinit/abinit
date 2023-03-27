@@ -1343,9 +1343,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
          end do
        end if
 
-       ! Multiply by sqrt(vc(g))
        do idat2=1,n2dat
-         if (band1 == band2_start + idat2 -1) write(std_out,*) " diag ug12_batch(1,band), band", ug12_batch(1,idat2), band1
+         !if (band1 == band2_start + idat2 -1)  then
+           write(std_out,*) " ug12_batch(g=0,band1,band2), band", ug12_batch(1,idat2), band1, band2_start + idat2 -1
+         !end if
+         ! Multiply by sqrt(vc(g))
          ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) * sqrt(cryst%ucvol) ! * sqrt(bz_vol) ! * FIXME
        end do
        !write(std_out,*)" max(abs(ug12_batch)):", maxval(abs(ug12_batch(:,1:n2dat)))
