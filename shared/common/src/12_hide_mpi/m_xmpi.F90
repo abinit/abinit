@@ -5175,6 +5175,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
   call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
  end select
 
+#if 0
 #ifdef HAVE_MPI
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
@@ -5189,6 +5190,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+#endif
 #endif
 
 end subroutine xcomm_allocate_shared_master
