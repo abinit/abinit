@@ -1,5 +1,5 @@
 
-.Version 9.7.5 of ANADDB 
+.Version 9.9.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu10.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  3 Aug 2022.
-- ( at 11h05 )
+.Starting date : Mon 27 Mar 2023.
+- ( at 11h55 )
   
 
 ================================================================================
@@ -180,7 +180,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.052  and twall      0.053 sec
+-begin at tcpu      0.053  and twall      0.054 sec
 
  Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians
  in ewald9 has been set to eta=    1.0453 1/bohr and the real-space sums have been neglected.
@@ -975,6 +975,6 @@
 
 ================================================================================
 
-+Total cpu time      0.181  and wall time      0.188 sec
++Total cpu time      0.184  and wall time      0.193 sec
 
  anaddb : the run completed succesfully.

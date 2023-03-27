@@ -666,6 +666,30 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Merge stationay and nonvariational contributions
  d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
 
+!Real (imaginary) part of d3etot is zero for first (second) momentum derivatives
+ if (dtset%kptopt /= 3) then
+   do i3pert = 1, mpert
+     do i3dir = 1, 3
+       do i2pert = 1, mpert
+         do i2dir = 1,3
+           do i1pert = 1, mpert
+             do i1dir = 1, 3
+               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1) then
+                 if (i2pert /= natom+3 .and. i2pert /= natom+4) then
+                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
+                 else
+                   d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
+                 end if
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+ end if
+
+
 !Complete missing elements using symmetry operations
  has_strain=.false.
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
@@ -695,7 +719,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    close(dtfil%unddb)
 
    !Calculate spatial-dispersion quantities in Cartesian coordinates and write
-   !them in abi_out
+  !them in abi_out
    ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
    ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
    call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
