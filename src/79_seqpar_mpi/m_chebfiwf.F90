@@ -661,10 +661,15 @@ subroutine getBm1X(X,Bm1X,transposer)
  end if
 
  if(l_paw) then
-   ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
-   call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
+   if(l_gs_hamk%use_gpu_impl==666) then
+     ABI_MALLOC(cwaveprj_next, (1,1))
+     call pawcprj_alloc(cwaveprj_next,0,(/1/))
+   else
+     ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
+     call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
+   end if
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
-&       spacedim, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
+       spacedim, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
  else
    gsm1hc_filter(:,:) = ghc_filter(:,:)
  end if
