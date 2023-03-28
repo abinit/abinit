@@ -86,7 +86,6 @@ contains
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = array for planewave
 !!                                          coefficients of wavefunctions
 !!  cg1 = first derivative of cg with respect the perturbation i1pert
@@ -115,7 +114,6 @@ contains
 !!  mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  mpw   = maximum number of planewaves in basis sphere (large number)
 !!  natom = number of atoms in unit cell
-!!  nattyp(ntypat)= # atoms of each type.
 !!  n1dq= third dimension of vlocal1_i1pertdq
 !!  n2dq= third dimension of vlocal1_i2pertdq
 !!  nfft= number of FFT grid points (for this proc) 
@@ -129,11 +127,8 @@ contains
 !!  nylmgr=second dimension of ylmgr_k
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!!  ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
-!!  rhog(2,nfft)=array for Fourier transform of GS electron density
 !!  rho1g1(2,nfft)=G-space RF electron density in electrons/bohr**3 (i1pert)
-!!  rhor(nfft,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rho1r1(cplex*nfft,nspden)=RF electron density in electrons/bohr**3 (i1pert)
 !!  rho2r1(cplex*nfft,nspden)=RF electron density in electrons/bohr**3 (i2pert)
 !!  rmet(3,3)=real space metric tensor in bohr**2
@@ -151,7 +146,6 @@ contains
 !!          gradient Hamiltonian for i2pert
 !!  ddk_f = wf files
 !!  d2_dkdk_f = wf files
-!!  xred(3,natom) = reduced atomic coordinates
 !!  ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics
 !!  ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical harmonics
 !!
@@ -172,12 +166,12 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,&
+subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,&
 & dimffnl,dtset,eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
-& i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
+& i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
-& nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
-& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,d2_dkdk_f2,xred,ylm,ylmgr)
+& nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,psps,rho1g1,rho1r1,rho2r1,rmet,rprimd,samepert,&
+& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,d2_dkdk_f2,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
@@ -194,7 +188,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot
  type(wfk_t),intent(inout) :: ddk_f,d2_dkdk_f, d2_dkdk_f2
 
 !arrays
- integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem_rbz),nattyp(psps%ntypat),ngfft(18),npwarr(nkpt)
+ integer,intent(in) :: kg(3,mpw*mkmem_rbz),ngfft(18),npwarr(nkpt)
  real(dp),intent(in) :: eigen1(2*mband*mband*nkpt*nsppol)
  real(dp),intent(in) :: eigen2(2*mband*mband*nkpt*nsppol)
  real(dp),intent(in) :: ffnl(mkmem_rbz,mpw,dimffnl,psps%lmnmax,psps%ntypat)
@@ -202,12 +196,10 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: gmet(3,3),kxc(nfft,nkxc)
- real(dp),intent(in) :: occ(mband*nkpt*nsppol),ph1d(2,3*(2*mgfft+1)*natom)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
+ real(dp),intent(in) :: occ(mband*nkpt*nsppol)
  real(dp),intent(in) :: rho1g1(2,nfft),rho1r1(cplex*nfft,dtset%nspden)
  real(dp),intent(in) :: rho2r1(cplex*nfft,dtset%nspden)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
- real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
  real(dp),intent(in) :: vpsp1_i1pertdqdq(2*nfft,nspden,n2dq)
  real(dp),intent(in) :: vpsp1_i1pertdq_geom(2*nfft,nspden,3)

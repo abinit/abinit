@@ -2972,7 +2972,6 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 !scalars
  integer,parameter :: im=2,nng=10,nnr=6,re=1
  integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq1,iq2,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
- integer :: alpha,beta,gamma,delta
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: arg,arga,argb,c1i,c1r,delad,delag,delbd,delbg,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
