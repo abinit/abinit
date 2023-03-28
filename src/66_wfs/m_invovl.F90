@@ -769,7 +769,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   integer :: choice, cpopt, paw_opt , cplx
   character :: blas_transpose
-  type(pawcprj_type) :: cwaveprj_in(ham%natom,nspinor*ndat)
+  type(pawcprj_type),allocatable :: cwaveprj_in(:,:)
 
   integer :: ikpt_this_proc
   ! dummies
@@ -801,6 +801,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     blas_transpose = 't'
   end if
 
+  ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
   ABI_MALLOC(proj,       (cplx,invovl%nprojs,nspinor*ndat))
   ABI_MALLOC(sm1proj,    (cplx,invovl%nprojs,nspinor*ndat))
   ABI_MALLOC(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
@@ -954,6 +955,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
   call pawcprj_free(cwaveprj_in)
+  ABI_FREE(cwaveprj_in)
   ABI_NVTX_END_RANGE()
 
   ABI_FREE(proj)
@@ -1186,7 +1188,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
   type(mpi_type) :: mpi_enreg
   real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
-  type(pawcprj_type), intent(inout) :: cwaveprj(ham%natom,nspinor*ndat)
+  type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
   logical :: transfer_omp_args
 
   real(dp),pointer :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
@@ -1195,7 +1197,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   real(dp) :: tsec(2)
 
   integer :: choice, cpopt, paw_opt , cplx, old_me_g0
-  type(pawcprj_type) :: cwaveprj_in(ham%natom,nspinor*ndat)
+  type(pawcprj_type),allocatable :: cwaveprj_in(:,:)
 
   integer :: ikpt_this_proc
   ! dummies
@@ -1284,6 +1286,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   if (ham%istwf_k==2) mpi_enreg%me_g0=old_me_g0
 
   if(cwaveprj(1,1)%ncpgr/=0) then
+    ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
     call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
     !$OMP TARGET UPDATE FROM(PtPsm1proj,proj)
     ! copy PtPsm1proj to cwaveprj(:,:)
@@ -1305,6 +1308,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
     end do
     call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
     call pawcprj_free(cwaveprj_in)
+    ABI_FREE(cwaveprj_in)
   end if
 
   !$OMP TARGET PARALLEL DO PRIVATE(iproj) MAP(to:cwavef,sm1cwavef)
