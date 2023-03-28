@@ -63,7 +63,8 @@ when the surface-specific part is accounted for, as done e.g. in [[cite:Stengel2
 
 The longwave implementation is still under heavy development. To date it requires the use of norm-conserving 
 pseudopotentials without XC nonlinear core corrections and it can be used with LDA and GGA XC functionals. 
-The use of spherical harmonics for the nonlocal projectors is mandatory through the option [[useylm]]=1. 
+The use of spherical harmonics for the nonlocal projectors is mandatory through the option [[useylm]]=1,
+although [[useylm]]=0 can be exceptionally used in the calculation of the natural optical activity tensor [[lw_natopt]]=1.
 
 Since ABINIT v9.x the longwave driver has been thoroughly modified. These changes, while being mostly devoted
 at optimizing the internal structure of the driver, do not entail big differences to the end user in terms of 
