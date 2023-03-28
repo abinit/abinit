@@ -1675,7 +1675,6 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp),allocatable :: ffnl1_tmp(:,:,:,:)
- real(dp) :: rprim(3,3)
 
 
 ! *************************************************************************

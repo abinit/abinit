@@ -144,13 +144,15 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
  integer :: ider,idir0,idir
  integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
- integer :: isym,mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+ integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
+! integer :: isym
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
- logical :: has_strain,non_magnetic_xc
+ logical :: non_magnetic_xc
+! logical :: has_strain,non_magnetic_xc
  character(len=fnlen) :: dscrpt
  character(len=500) :: msg
  type(ebands_t) :: bstruct
