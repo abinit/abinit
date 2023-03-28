@@ -579,7 +579,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      end if
    else        
      if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3) ider=1; idir0=4; dimffnl=4
-     if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) ider=2; idir0=4; dimffnl=10
+     if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
+       ider=2; idir0=4; dimffnl=10
+     end if
      ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
      call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
    & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
