@@ -2513,17 +2513,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end do
    end if
-   !Longwave calculation function only for LDA
-!   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
-!   if(allow)then
-!     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-!     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
-!   end if
    !Longwave calculation function only for useylm=1
-   if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
-    write(msg, '(3a,i0,2a)' )&
-     'A longwave calculation requires the input variable "useylm" to be 1,',ch10 ,&
-     'while in your input useylm: ',dt%useylm,ch10,&
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1.and.(dt%lw_qdrpl/=0.or.dt%lw_flexo/=0))then
+    write(msg, '(3a,2a,2a)' )&
+     'A longwave calculation can only be run with the input variable useylm/=1',ch10 ,&
+     'for lw_natopt=1, while this seems not to be the case in your input,',ch10,&
+     'where lw_qdrpl/= and/or lw_flexo/=0.',ch10,&
      'Action: change "useylm" value in your input file.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
