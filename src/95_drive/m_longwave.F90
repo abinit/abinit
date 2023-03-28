@@ -179,7 +179,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:)
  real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
- real(dp),allocatable :: symrel_cart(:,:,:),work(:),xccc3d(:)
+! real(dp),allocatable :: symrel_cart(:,:,:)
+ real(dp),allocatable :: work(:),xccc3d(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
@@ -312,16 +313,17 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
 ! Get symmetries in cartesian coordinates
- ABI_MALLOC(symrel_cart, (3, 3, dtset%nsym))
- do isym =1,dtset%nsym
-   call symredcart(rprimd, gprimd, symrel_cart(:,:,isym), dtset%symrel(:,:,isym))
-   ! purify operations in cartesian coordinates.
-   where (abs(symrel_cart(:,:,isym)) < tol14)
-     symrel_cart(:,:,isym) = zero
-   end where
- end do
+! ABI_MALLOC(symrel_cart, (3, 3, dtset%nsym))
+! do isym =1,dtset%nsym
+!   call symredcart(rprimd, gprimd, symrel_cart(:,:,isym), dtset%symrel(:,:,isym))
+!   ! purify operations in cartesian coordinates.
+!   where (abs(symrel_cart(:,:,isym)) < tol14)
+!     symrel_cart(:,:,isym) = zero
+!   end where
+! end do
 
- call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
+! call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
+ call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
  write(msg,'(a,a,a,a,a)') ch10, &
 & ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,& 
@@ -656,12 +658,12 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Main loop over the perturbations to calculate the stationary part
  call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
-& eigen0,ffnl,gmet,gprimd,&
-& hdr,kg,kxc,dtset%mband,dtset%mgfft,mgfftf,&
-& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,nhat,&
+& ffnl,gmet,gprimd,&
+& hdr,kg,kxc,dtset%mband,dtset%mgfft,&
+& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
-& pawfgr,pawrad,pawrhoij,pawtab,&
-& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,vxc,xred,ylm,ylmgr)
+& pawfgr,pawtab,&
+& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
 
 !Merge stationay and nonvariational contributions
  d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
@@ -691,9 +693,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 
 !Complete missing elements using symmetry operations
- has_strain=.false.
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
- call d3lwsym(blkflg,d3etot,has_strain,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel,symrel_cart)
+! has_strain=.false.
+! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
+! call d3lwsym(blkflg,d3etot,has_strain,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel,symrel_cart)
+ call d3lwsym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
 !Deallocate global proc_distrib
  if(xmpi_paral==1) then
@@ -743,7 +746,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(rhog)
  ABI_FREE(rhor)
  ABI_FREE(symrec)
- ABI_FREE(symrel_cart)
+! ABI_FREE(symrel_cart)
  ABI_FREE(vxc)
  ABI_FREE(d3etot)
  ABI_FREE(pertsy)

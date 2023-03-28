@@ -4461,31 +4461,31 @@ end subroutine d3sym
 !!
 !! SOURCE
 
-subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
+!subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
+subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,natom,nsym
- logical,intent(in) :: has_strain
+! logical,intent(in) :: has_strain
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
  real(dp),intent(inout) :: d3(2,3,mpert,3,mpert,3,mpert)
- real(dp),intent(in) :: symrel_cart(3,3,nsym)
+! real(dp),intent(in) :: symrel_cart(3,3,nsym)
 
 !Local variables -------------------------
 !scalars
  integer :: found,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idisy1,idisy2,idisy3
- integer :: ipesy1,ipesy2,ipesy3,istr,isym,ithree
- integer :: i2dir_a,i2dir_b
- integer :: idisy2_a,idisy2_b
+ integer :: ipesy1,ipesy2,ipesy3,isym,ithree
+!integer :: istr,i2dir_a,i2dir_b,disy2_a,idisy2_b
  real(dp) :: sumi,sumr
  logical :: is_strain
 !arrays
- integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  integer :: sym1(3,3),sym2(3,3),sym3(3,3)
- integer :: strflg(3,mpert,3,3,3,mpert),strflg_car(3,mpert,3,3,3,mpert)
- real(dp) :: d3str(2,3,mpert,3,3,3,mpert)
+! integer :: strflg(3,mpert,3,3,3,mpert),strflg_car(3,mpert,3,3,3,mpert)
+! real(dp) :: d3str(2,3,mpert,3,3,3,mpert)
 
 ! *********************************************************************
 
@@ -4975,7 +4975,8 @@ end subroutine sytens
 !!
 !! SOURCE
 
-subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
+!subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
+subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 
 !Arguments -------------------------------
 !scalars
@@ -4983,24 +4984,21 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: rfpert(3,mpert,3,mpert,3,mpert)
- real(dp),intent(in) :: symrel_cart(3,3,nsym)
+! real(dp),intent(in) :: symrel_cart(3,3,nsym)
 
 !Local variables -------------------------
 !scalars
  integer :: flag,found,i1dir,i1dir_,i1pert,i1pert_,i2dir,i2dir_,i2pert,i2pert_
- integer :: i2dir_a,i2dir_b
+! integer :: i2dir_a,i2dir_b
  integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
- integer :: ipesy3,istr,isym
- integer :: idisy2_a,idisy2_b
+ integer :: ipesy3,isym
+! integer :: istr,idisy2_a,idisy2_b
  logical :: is_strain
- real(dp) :: flag_dp
+! real(dp) :: flag_dp
 !arrays
- integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
- integer :: sym2_dp(3,3),sym1(3,3),sym2(3,3),sym3(3,3)
+! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3)
  integer,allocatable :: pertsy(:,:,:,:,:,:)
- integer :: strflg(3,mpert,3,3,3,mpert)
- integer :: flg1(3),flg2(3)
- real(dp) :: vec1(3),vec2(3)
 
 !***********************************************************************
 
