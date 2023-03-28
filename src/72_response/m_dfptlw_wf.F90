@@ -69,7 +69,6 @@ contains
 !!  that depend on first-order response functions.
 !!
 !! INPUTS
-!!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
 !!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
 !!  ddk_f = wf files
@@ -82,7 +81,6 @@ contains
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
 !!  cg1 = first derivative of cg with respect the perturbation i1pert
 !!  cg2 = first derivative of cg with respect the perturbation i2pert
-!!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
 !!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
 !!  i1pert,i2pert,i3pert = type of perturbation that has to be computed
@@ -91,38 +89,30 @@ contains
 !!  istwf_k=parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kpt(3)=reduced coordinates of k point
-!!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mkmem =number of k points treated by this node
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  natom= number of atoms in the unit cell
 !!  natpert=number of atomic displacement perturbations
-!!  nattyp(ntypat)= # atoms of each type.
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  nfft=(effective) number of FFT grid points (for this proc)
 !!  ngfft(1:18)=integer array with FFT box dimensions and other
-!!  nkxc=second dimension of the kxc array. If /=0, the XC kernel must be computed.
 !!  npw_k=number of plane waves at this k point
 !!  nspden=number of spin-density components
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  nylmgr=second dimension of ylmgr_k
 !!  occ_k(nband_k)=occupation number for each band (usually 2) for each k.
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!!  ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)=1-dimensional phases
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  rhog(2,nfftf)=array for Fourier transform of GS electron density
-!!  rhor(nfftf,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
 !!  samepert= .true. if i1pert=i2pert and i1dir=i2dir
-!!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
 !!  vpsp1_i1pertdq(cplex*nfft,nspden,n1dq)= local potential of first-order
 !!          gradient Hamiltonian for i1pert
 !!  vpsp1_i2pertdq(cplex*nfft,nspden,n2dq)= local potential of first-order
 !!          gradient Hamiltonian for i2pert
 !!  wtk_k=weight assigned to the k point.
-!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics for the k point
 !!  ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical
 !!                                                                      harmonics for the k point
@@ -141,15 +131,15 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
+subroutine dfpt_1wf(cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
      & d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,&
-     & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
-     & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
-     & kg_k,kpt,kxc,mkmem,mpi_enreg,mpw,natom,nattyp,nband_k,&
-     & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
-     & pawfgr,ph1d,psps,rhog,rhor,rmet,rprimd,samepert,ucvol,useylmgr,&
+     & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,icg,&
+     & i1dir,i2dir,i3dir,i1pert,i2pert,ikpt,isppol,istwf_k,&
+     & kg_k,kpt,mkmem,mpi_enreg,mpw,natom,nband_k,&
+     & n1dq,n2dq,nfft,ngfft,npw_k,nspden,nsppol,nylmgr,occ_k,&
+     & pawfgr,psps,rmet,rprimd,samepert,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,&
-     & wtk_k,xred,ylm_k,ylmgr_k)
+     & wtk_k,ylm_k,ylmgr_k)
     
  use defs_basis
 
@@ -157,12 +147,12 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,dimffnl,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer,intent(in) :: cplex,dimffnl,i1dir,i1pert,i2dir,i2pert,i3dir
  integer,intent(in) :: icg,ikpt,isppol,istwf_k
  integer,intent(in) :: mkmem,mpw,natom,nband_k,n1dq,n2dq,nfft
- integer,intent(in) :: nkxc,npw_k,nspden,nsppol,nylmgr
+ integer,intent(in) :: npw_k,nspden,nsppol,nylmgr
  integer,intent(in) :: useylmgr
- real(dp),intent(in) :: gsqcut,ucvol,wtk_k
+ real(dp),intent(in) :: wtk_k
  logical,intent(in) :: samepert
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
@@ -172,8 +162,7 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
  type(pawfgr_type),intent(in) :: pawfgr
 
 !arrays
- integer,intent(in) :: atindx(natom)
- integer,intent(in) :: kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
+ integer,intent(in) :: kg_k(3,npw_k),ngfft(18)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(in) :: cg1(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
@@ -184,19 +173,17 @@ subroutine dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,&
  real(dp),intent(out) :: d3etot_t5_k(2,n1dq)
  real(dp),intent(in) :: eig1_k(2*nband_k**2),eig2_k(2*nband_k**2)
  real(dp),intent(in) :: ffnl_k(npw_k,dimffnl,psps%lmnmax,psps%ntypat)
- real(dp),intent(in) :: kpt(3),occ_k(nband_k),kxc(nfft,nkxc)
- real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
- real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,nspden),rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: kpt(3),occ_k(nband_k)
+ real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
  real(dp),intent(in) :: vpsp1_i2pertdq(2*nfft,nspden,n2dq)
- real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
 
 !Local variables-------------------------------
 !scalars
  integer :: berryopt,dimffnlk,dimffnl1,iband,idir,idq,ii,jband,nkpg,nkpg1,nylmgrtmp
- integer :: offset_cgi,offset_cgj,opt_gvnl1,optlocal,optnl,reuse_ffnlk,reuse_ffnl1,sij_opt
+ integer :: offset_cgi,opt_gvnl1,optlocal,optnl,reuse_ffnlk,reuse_ffnl1,sij_opt
  integer :: size_wf,tim_getgh1c,usepaw,usevnl,useylmgr1
  real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda,fac,tmpim,tmpre
  real(dp) :: cpu,wall,gflops

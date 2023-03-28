@@ -346,14 +346,12 @@ end subroutine dfptlw_nv
 !!  third-order energy derivative of the flexoelectric force-response tensor.
 !!
 !! INPUTS
-!!  atindx(natom)=index table for atoms (see gstate.f)
 !!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
 !!  cplex: if 1, several magnitudes are REAL, if 2, COMPLEX
 !!  dimffnl= third dimension of ffnl_k
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  ffnl_k(dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat)= Nonlocal projectors and their derivatives for this k point
 !!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
-!!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
 !!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
 !!  i1pert,i2pert = type of perturbation that has to be computed
@@ -367,7 +365,6 @@ end subroutine dfptlw_nv
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw or wfs at k
 !!  natpert=number of atomic displacement perturbations
-!!  nattyp(ntypat)= # atoms of each type.
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  n2dq= second dimension of d3etot_tgeom_k
 !!  nfft=(effective) number of FFT grid points (for this proc)
@@ -377,11 +374,9 @@ end subroutine dfptlw_nv
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  nylmgr=second dimension of ylmgr_k
 !!  occ_k(nband_k)=occupation number for each band (usually 2) for each k.
-!!  ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)=1-dimensional phases
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3) = dimensional primitive translations (bohr)
-!!  ucvol=unit cell volume in bohr**3.
 !!  vpsp1_i1pertdqdq(cplex*nfft,nspden,n2dq)= local potential of second-order
 !!          gradient Hamiltonian for i1pert 
 !!  vpsp1_i1pertdq_geom(cplex*nfft,nspden,3)= local potential of first-order
@@ -410,12 +405,12 @@ end subroutine dfptlw_nv
 !!
 !! SOURCE
 
-subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
-       &  gs_hamkq,gsqcut,icg, &
+subroutine dfptlw_geom(cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
+       &  gs_hamkq,icg, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
-       &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
+       &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,natom,mpw,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
-       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,wtk_k,ylm_k,ylmgr_k)
+       &  psps,rmet,rprimd,useylmgr,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,wtk_k,ylm_k,ylmgr_k)
 
 !Arguments ------------------------------------
 !scalars
@@ -424,19 +419,17 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
  integer,intent(in) :: natom,mkmem,mpw,nband_k,nfft
  integer,intent(in) :: npw_k,n2dq,nspden,nsppol,nylmgr
  integer,intent(in) :: useylmgr
- real(dp),intent(in) :: gsqcut,ucvol,wtk_k
+ real(dp),intent(in) :: wtk_k
  type(dataset_type),intent(in) :: dtset
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 
 !arrays
- integer,intent(in) :: atindx(dtset%natom)
- integer,intent(in) :: kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
+ integer,intent(in) :: kg_k(3,npw_k),ngfft(18)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(in) :: ffnl_k(npw_k,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
- real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: vpsp1_i1pertdqdq(2*nfft,nspden,n2dq)
  real(dp),intent(in) :: vpsp1_i1pertdq_geom(2*nfft,nspden,3)
@@ -446,7 +439,7 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
 
 !Local variables-------------------------------
 !scalars
- integer :: beta,delta,dimffnlk,dimffnl1,gamma,iband,idq,ii,ipw,istr,ka,nkpg,nkpg1,nylmgrpart
+ integer :: beta,delta,dimffnlk,dimffnl1,gamma,iband,idq,ii,ipw,istr,nkpg,nkpg1,nylmgrpart
  integer :: optlocal,optnl,q1dir,q2dir,reuse_ffnlk,reuse_ffnl1,tim_getgh1c,useylmgr1
  real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
@@ -549,7 +542,8 @@ subroutine dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset,ffnl_k, &
        end if
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,i1dir,i1pert,q1dir, &
      & dtset%natom,rmet,rprimd,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
-     & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,reuse_ffnlk=reuse_ffnlk,reuse_ffnl1=reuse_ffnl1)
+     & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,&
+     & ph3d,ph3d1,reuse_ffnlk=reuse_ffnlk,reuse_ffnl1=reuse_ffnl1)
 
        !LOOP OVER BANDS
        do iband=1,nband_k

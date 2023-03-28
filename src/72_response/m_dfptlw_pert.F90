@@ -94,9 +94,6 @@ contains
 !!  cplex= if 1, real space 1-order functions on FFT grid are REAL,
 !!          if 2, COMPLEX
 !!  dimffnl= third dimension of ffnl
-!!  d3e_pert1(mpert)=array with the i1pert cases to calculate
-!!  d3e_pert2(mpert)=array with the i2pert cases to calculate
-!!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  eigen1(2*mband*mband*nkpt*nsppol)=1st-order eigenvalues for i1pert,i1dir (hartree)
 !!  eigen2(2*mband*mband*nkpt*nsppol)=1st-order eigenvalues for i2pert,i2dir (hartree)
@@ -154,7 +151,6 @@ contains
 !!          gradient Hamiltonian for i2pert
 !!  ddk_f = wf files
 !!  d2_dkdk_f = wf files
-!!  xccc3d1(cplex*n3xccc)=3D change in core charge density (dummy) 
 !!  xred(3,natom) = reduced atomic coordinates
 !!  ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics
 !!  ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical harmonics
@@ -176,12 +172,12 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,&
-& dimffnl,dtfil,dtset,eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
+subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,&
+& dimffnl,dtset,eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
 & i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,&
-& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,d2_dkdk_f2,xccc3d1,xred,ylm,ylmgr)
+& ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,d2_dkdk_f2,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
@@ -191,7 +187,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),intent(in) :: gsqcut,ucvol
  logical,intent(in) :: samepert
  type(MPI_type),intent(inout) :: mpi_enreg
- type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
@@ -200,7 +195,6 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 
 !arrays
  integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem_rbz),nattyp(psps%ntypat),ngfft(18),npwarr(nkpt)
- integer,intent(in) :: d3e_pert1(mpert),d3e_pert2(mpert)
  real(dp),intent(in) :: eigen1(2*mband*mband*nkpt*nsppol)
  real(dp),intent(in) :: eigen2(2*mband*mband*nkpt*nsppol)
  real(dp),intent(in) :: ffnl(mkmem_rbz,mpw,dimffnl,psps%lmnmax,psps%ntypat)
@@ -213,7 +207,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
  real(dp),intent(in) :: rho1g1(2,nfft),rho1r1(cplex*nfft,dtset%nspden)
  real(dp),intent(in) :: rho2r1(cplex*nfft,dtset%nspden)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
- real(dp),intent(in) :: xccc3d1(cplex*nfft),xred(3,natom)
+ real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(in) :: vpsp1_i1pertdq(2*nfft,nspden,n1dq)
  real(dp),intent(in) :: vpsp1_i1pertdqdq(2*nfft,nspden,n2dq)
  real(dp),intent(in) :: vpsp1_i1pertdq_geom(2*nfft,nspden,3)
@@ -292,8 +286,7 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
 
 !Calculate the electrostatic contribution 
  call lw_elecstic(cplex,d3etot_telec,gmet,gs_hamkq%gprimd,gsqcut,&
-& i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
-& kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
+& i3dir,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
  
 !Loop over spins
  bandtot = 0
@@ -353,14 +346,14 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      eig2_k(:)=eigen2(1+bd2tot:2*nband_k**2+bd2tot)
 
      !Compute the stationary terms of d3etot depending on response functions
-     call dfpt_1wf(atindx,cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
-     & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,gsqcut,icg,&
-     & i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,ikpt,isppol,istwf_k,&
-     & kg_k,kpt,kxc,mkmem_rbz,mpi_enreg,mpw,natom,nattyp,nband_k,&
-     & n1dq,n2dq,nfft,ngfft,nkxc,npw_k,nspden,nsppol,nylmgr,occ_k,&
-     & pawfgr,ph1d,psps,rhog,rhor,rmet,rprimd,samepert,ucvol,useylmgr,&
+     call dfpt_1wf(cg,cg1,cg2,cplex,ddk_f,d2_dkdk_f,d2_dkdk_f2,d3etot_t1_k,d3etot_t2_k,d3etot_t3_k,& 
+     & d3etot_t4_k,d3etot_t5_k,dimffnl,dtset,eig1_k,eig2_k,ffnl_k,gs_hamkq,icg,&
+     & i1dir,i2dir,i3dir,i1pert,i2pert,ikpt,isppol,istwf_k,&
+     & kg_k,kpt,mkmem_rbz,mpi_enreg,mpw,natom,nband_k,&
+     & n1dq,n2dq,nfft,ngfft,npw_k,nspden,nsppol,nylmgr,occ_k,&
+     & pawfgr,psps,rmet,rprimd,samepert,useylmgr,&
      & vpsp1_i1pertdq,vpsp1_i2pertdq,&
-     & wtk_k,xred,ylm_k,ylmgr_k)
+     & wtk_k,ylm_k,ylmgr_k)
 
 !    Add the contribution from each k-point. 
      d3etot_t1=d3etot_t1 + d3etot_t1_k
@@ -372,12 +365,12 @@ subroutine dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot
      !Compute the nonvariational geometric term
      call cwtime(cpu, wall, gflops, "start")
      if (i1pert<=natom.and.(i2pert==natom+3.or.i2pert==natom+4)) then
-       call dfptlw_geom(atindx,cg,d3etot_tgeom_k,dimffnl,dtset, &
-       &  ffnl_k,gs_hamkq,gsqcut,icg, &
+       call dfptlw_geom(cg,d3etot_tgeom_k,dimffnl,dtset, &
+       &  ffnl_k,gs_hamkq,icg, &
        &  i1dir,i2dir,i3dir,i1pert,i2pert,ikpt, &
-       &  isppol,istwf_k,kg_k,kpt,mkmem_rbz,mpi_enreg,natom,mpw,nattyp,nband_k,n2dq,nfft, &
+       &  isppol,istwf_k,kg_k,kpt,mkmem_rbz,mpi_enreg,natom,mpw,nband_k,n2dq,nfft, &
        &  ngfft,npw_k,nspden,nsppol,nylmgr,occ_k, &
-       &  ph1d,psps,rmet,rprimd,ucvol,useylmgr,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,wtk_k,ylm_k,ylmgr_k)
+       &  psps,rmet,rprimd,useylmgr,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,wtk_k,ylm_k,ylmgr_k)
 
        !Add the contribution from each k-point
        d3etot_tgeom=d3etot_tgeom + d3etot_tgeom_k
@@ -555,8 +548,7 @@ end subroutine dfptlw_pert
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=reciprocal space dimensional primitive translations
 !!  gsqcut=large sphere cut-off
-!!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
-!!  i1pert,i2pert,i3pert = type of perturbation that has to be computed
+!!  i3dir= directions of the 3th perturbations
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft= number of FFT grid points (for this proc) 
@@ -589,8 +581,7 @@ end subroutine dfptlw_pert
 
 
 subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
-& i1dir,i2dir,i3dir,i1pert,i2pert,i3pert,&
-& kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
+& i3dir,kxc,mpi_enreg,nfft,ngfft,nkxc,nspden,rho1g1,rho1r1,rho2r1,ucvol)
     
  use defs_basis
  use m_errors
@@ -599,7 +590,7 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
  implicit none
 
 !Arguments ------------------------------------
- integer,intent(in) :: cplex,i1dir,i2dir,i3dir,i1pert,i2pert,i3pert
+ integer,intent(in) :: cplex,i3dir
  integer,intent(in) :: nfft,nkxc,nspden
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -663,7 +654,7 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
  d3etot_telec(2)=doti
 
 !Deallocations
- if (nkxc == 7) ABI_FREE(vxc1dq)
+ ABI_SFREE(vxc1dq)
  ABI_FREE(vqgradhart)
  ABI_FREE(rhor1_cplx)
 

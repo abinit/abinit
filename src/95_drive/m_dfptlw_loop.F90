@@ -96,7 +96,6 @@ contains
 !!  dimffnl= third dimension of ffnl
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  eigen0(mband*nkpt_rbz*nsppol)=GS eigenvalues at k (hartree)
 !!  ffnl(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat)= Nonlocal projectors and their derivatives
 !!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space(bohr^-1)
@@ -113,7 +112,6 @@ contains
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid (see NOTES in respfn.F90)
 !!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid (see NOTES in respfn.F90)
-!!  nhat=compensation charge density on fine rectangular grid
 !!  nkpt  = number of k points
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  nspinor = number of spinorial components of the wavefunctions
@@ -122,8 +120,6 @@ contains
 !!  nylmgr=second dimension of ylmgr_k
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
-!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
-!!  pawrhoij(natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data for the GS
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
 !!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
@@ -136,7 +132,6 @@ contains
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
 !!  ucvol = unit cell volume (bohr^3)
 !!  useylmgr= if 1 use the derivative of spherical harmonics
-!!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
 !!  xred(3,natom) = reduced atomic coordinates
 !!  ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics
 !!  ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical harmonics
@@ -158,18 +153,18 @@ contains
 
     
 subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
-& eigen0,ffnl,gmet,gprimd,&
-& hdr,kg,kxc,mband,mgfft,mgfftf,mkmem,mk1mem,&
-& mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nhat,nkpt,nkxc,nspinor,nsppol,&
+& ffnl,gmet,gprimd,&
+& hdr,kg,kxc,mband,mgfft,mkmem,mk1mem,&
+& mpert,mpi_enreg,mpw,natom,nattyp,ngfftf,nfftf,nkpt,nkxc,nspinor,nsppol,&
 & npwarr,nylmgr,occ,&
-& pawfgr,pawrad,pawrhoij,pawtab,&
-& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,vxc,xred,ylm,ylmgr)
+& pawfgr,pawtab,&
+& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: dimffnl,mband,mgfft,mgfftf,mk1mem,mkmem,mpert,mpw,natom,nfftf
+ integer,intent(in) :: dimffnl,mband,mgfft,mk1mem,mkmem,mpert,mpw,natom,nfftf
  integer,intent(in) :: nkpt,nkxc,nspinor,nsppol,nylmgr,useylmgr
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -186,42 +181,36 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  integer,intent(in) :: rfpert(3,mpert,3,mpert,3,mpert)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert) 
  real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),gmet(3,3)
- real(dp),intent(in) :: eigen0(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ffnl(mkmem,mpw,dimffnl,psps%lmnmax,psps%ntypat)
  real(dp),intent(in) :: gprimd(3,3),kxc(nfftf,nkxc)
- real(dp),intent(in) :: nhat(nfftf,dtset%nspden)
  real(dp),intent(in) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
- real(dp),intent(in) :: vxc(nfftf,dtset%nspden)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert) 
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(mpw*mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
- type(pawrhoij_type),intent(in) :: pawrhoij(natom*psps%usepaw)
- type(pawrad_type),intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma,g0term
+ integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
  integer :: idq,ierr,ii,ireadwf,istr,itypat,mcg,me,mpsang
- integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc,optene
- integer :: optgeom,opthartdqdq,optorth,optres,pawread
+ integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
+ integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
- real(dp) :: boxcut,delad,delag,delbd,delbg,dum_scl,ecut,ecut_eff,fac,gsqcut   
+ real(dp) :: boxcut,delad,delag,delbd,delbg,ecut,ecut_eff,gsqcut   
  logical :: samepert
  character(len=500) :: message
- character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwf3i,fiwfddk,fiwfdkdk
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwfddk,fiwfdkdk
  type(gs_hamiltonian_type) :: gs_hamkq
- type(wffile_type) :: wff1,wff2,wff3,wfft1,wfft2,wfft3
+ type(wffile_type) :: wff1,wff2,wfft1,wfft2
  type(wfk_t) :: ddk_f,d2_dkdk_f,d2_dkdk_f2
  type(wvl_data) :: wvl
  type(hdr_type) :: hdr_den
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
- integer :: flg1(3),flg2(3)
- real(dp),allocatable :: cg1(:,:),cg2(:,:),cg3(:,:)
+ real(dp),allocatable :: cg1(:,:),cg2(:,:)
  real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:),eigen1(:),eigen2(:)
  real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
@@ -233,7 +222,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
  real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:),xccc3d1(:)
- real(dp) :: vec1(3),vec2(3)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
  
@@ -615,13 +603,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    end if
 
                    !Perform the longwave DFPT part of the 3dte calculation
-                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3e_pert1,d3e_pert2,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtfil,dtset, &
+                   call dfptlw_pert(atindx,cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtset, &
                    & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
                    & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,nattyp,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
                    & pawfgr,ph1d,psps,rhog,rho1g1,rhor,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
                    & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
-                   & ddk_f,d2_dkdk_f,d2_dkdk_f2,xccc3d1,xred,ylm,ylmgr)
+                   & ddk_f,d2_dkdk_f,d2_dkdk_f2,xred,ylm,ylmgr)
 
                    !close ddk file
                    call ddk_f%close()
@@ -700,7 +688,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                end do    ! ir3dir
              end do     ! ir3pert
              
-             if (i2pert/=natom+2) ABI_FREE(vpsp1_i2pertdq)
+             ABI_SFREE(vpsp1_i2pertdq)
              ABI_FREE(vpsp1_i1pertdq_geom)
              ABI_FREE(vpsp1_i1pertdqdq)
              ABI_FREE(d3etot_t4)
