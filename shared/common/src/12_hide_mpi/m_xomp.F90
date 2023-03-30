@@ -38,15 +38,15 @@ MODULE m_xomp
  public :: xomp_set_num_threads
  public :: xomp_in_parallel
  public :: xomp_get_num_cores_node
+ ! OpenMP 5.0 GPU device routines
  public :: xomp_set_default_device
  public :: xomp_get_default_device
  public :: xomp_get_initial_device
  public :: xomp_get_num_devices
  public :: xomp_is_initial_device
  public :: xomp_target_is_present
+ ! OpenMP 5.1 GPU device routine
  public :: xomp_get_mapped_ptr
- public :: xomp_target_disassociate_ptr
- public :: xomp_target_associate_ptr
 
 
 !----------------------------------------------------------------------
@@ -562,91 +562,6 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
 #endif
 
 end function xomp_get_mapped_ptr
-!!***
-
-!----------------------------------------------------------------------
-
-!****f* m_xomp/xomp_disassociate_ptr
-! NAME
-!  xomp_disassociate_ptr
-!
-! FUNCTION
-!  Wrapper for omp_disassociate_ptr
-!
-! INPUTS
-!  ptr = C pointer, likely matching a Fortran array wrapped in c_loc
-!
-! OUTPUT
-!  (c_ptr) Pointer to device memory matching given input ptr
-!
-! SOURCE
-
-subroutine xomp_target_disassociate_ptr(ptr)
-
-!Arguments ------------------------------------
- type(c_ptr),intent(in) :: ptr
-
- integer :: device_id, rc
-
-! *************************************************************************
-
-#ifdef HAVE_OPENMP_OFFLOAD
- device_id = xomp_get_default_device()
- if(xomp_target_is_present(ptr)) then
-   rc = omp_target_disassociate_ptr(ptr, device_id)
-   if(rc/=0) then
-     !ABI_BUG("Something went wrong when disassociating pointer from device memory !")
-   end if
- end if
-#else
- ABI_UNUSED((/device_id,rc/))
- ABI_UNUSED_A(ptr)
-#endif
-
-end subroutine xomp_target_disassociate_ptr
-!!***
-
-!----------------------------------------------------------------------
-
-!****f* m_xomp/xomp_associate_ptr
-! NAME
-!  xomp_associate_ptr
-!
-! FUNCTION
-!  Wrapper for omp_associate_ptr
-!
-! INPUTS
-!  ptr = C pointer, likely matching a Fortran array wrapped in c_loc
-!
-! SOURCE
-
-subroutine xomp_target_associate_ptr(ptr, device_ptr, size_in_bytes)
-!Arguments ------------------------------------
- type(c_ptr),intent(in) :: ptr, device_ptr
- integer(kind=c_size_t),intent(in) ::  size_in_bytes
-
- integer(kind=c_size_t) ::  device_offset
- integer :: device_id, rc
-
-! *************************************************************************
-
-#ifdef HAVE_OPENMP_OFFLOAD
- device_offset = 0
- device_id = xomp_get_default_device()
- if(xomp_target_is_present(ptr)) then
-   !ABI_BUG("Pointer already mapped to device memory, aborting!")
- else
-   rc = omp_target_associate_ptr(ptr, device_ptr, size_in_bytes, device_offset, device_id)
-   !if(rc/=0) ABI_BUG("Something went wrong when associating host memory pointer with device memory !")
- end if
-#else
- ABI_UNUSED((/device_id,rc/))
- ABI_UNUSED((/size_in_bytes,device_offset/))
- ABI_UNUSED_A(ptr)
- ABI_UNUSED_A(device_ptr)
-#endif
-
-end subroutine xomp_target_associate_ptr
 !!***
 
 !----------------------------------------------------------------------
