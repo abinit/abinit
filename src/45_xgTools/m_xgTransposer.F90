@@ -47,6 +47,10 @@ module m_xgTransposer
   use mpi
 #endif
 
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+  use m_nvtx
+#endif
+
   implicit none
 
 #ifdef HAVE_MPI1
@@ -597,10 +601,13 @@ module m_xgTransposer
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxStartRange("MPI_AllToAllV", 8)
+#endif
+
      if( xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
-
        call timab(tim_all2allv,1,tsec)
        call xmpi_alltoallv(sendbuf,     sendcounts, sdispls, &
                            recvbuf_mpi, recvcounts, rdispls, &
@@ -629,6 +636,10 @@ module m_xgTransposer
        !                    comm, request(myrequest))
 
      end if
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxEndRange()
+#endif
 
    case (TRANS_GATHER)
      !ABI_MALLOC(request,(ncpu))
@@ -768,6 +779,9 @@ module m_xgTransposer
      end if
      !write(*,*) "Before ialltoall"
 
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxStartRange("MPI_AllToAllV", 8)
+#endif
     ! if gpu is enabled, data are located in GPU memory, so we copy them on a host buffer
     if( xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
@@ -804,6 +818,9 @@ module m_xgTransposer
       !                    comm, request(myrequest))
       !write(*,*) "After ialltoall"
     end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxEndRange()
+#endif
 
    case (TRANS_GATHER)
      !ABI_MALLOC(request,(ncpu))
