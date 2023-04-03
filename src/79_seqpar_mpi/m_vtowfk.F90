@@ -264,7 +264,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
- newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
+ newlobpcg = (dtset%wfoptalg == 114)
  newchebfi = (dtset%wfoptalg == 111)
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
