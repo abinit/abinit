@@ -415,6 +415,7 @@ contains
     ! Scalars
     integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
+    real(dp) :: e_kinetic_hybrid_tf
     ! Arrays
     real(dp),allocatable :: gamma_hybrid_tf(:,:)
     real(dp),allocatable :: xcut_hybrid_tf(:,:)
@@ -450,14 +451,18 @@ contains
       ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
       gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
       xcut_hybrid_tf(:,:)=(this%e_bcut-this%vtrial(:,:))/tsmear
+      e_kinetic_hybrid_tf=zero
 
+      !$OMP PARALLEL DO REDUCTION (+:e_kinetic_hybrid_tf)
       do ifft=1,this%nfft
         do ispden=1,this%nspden
-          this%e_kinetic=this%e_kinetic+factor*djp32(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))/&
+          e_kinetic_hybrid_tf=e_kinetic_hybrid_tf+factor*djp32(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))/&
           & (this%nfft*this%nspden)
         end do
       end do
+      !$OMP END PARALLEL DO
 
+      this%e_kinetic=e_kinetic_hybrid_tf
       gamma_hybrid_tf(:,:)=zero
       xcut_hybrid_tf(:,:)=zero
       ABI_FREE(gamma_hybrid_tf)
@@ -471,14 +476,7 @@ contains
     if(this%version==1.or.this%version==2.or.this%version==3.or.this%version==4) then
       this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
     else if(this%version==10) then
-      this%edc_kinetic=zero
-      ! this%edc_kinetic=sum((this%e_kinetic+this%nelectarr(:,:)*this%vtrial(:,:))/(this%nfft*this%nspden))
-      do ifft=1,this%nfft
-        do ispden=1,this%nspden
-          this%edc_kinetic=this%edc_kinetic+(this%e_kinetic+this%nelectarr(ifft,ispden)*&
-          & this%vtrial(ifft,ispden))/(this%nfft*this%nspden)
-        end do
-      end do
+      this%edc_kinetic=this%e_kinetic+sum(this%nelectarr(:,:)*this%vtrial(:,:)/(this%nfft*this%nspden))
     end if
   end subroutine compute_e_kinetic
   !!***
@@ -513,6 +511,8 @@ contains
     real(dp) :: ix,step,factor,fn,gamma
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
+    real(dp),dimension(:,:),allocatable :: gamma_hybrid_tf
+    real(dp),dimension(:,:),allocatable :: step_hybrid_tf
 
     ! *********************************************************************
 
@@ -582,24 +582,23 @@ contains
     ! as we do for version=1 and version=2.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==10) then
+      ABI_MALLOC(valuesent,(this%bcut+1))
+      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
+      ABI_MALLOC(step_hybrid_tf,(this%nfft,this%nspden))
+      gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
+      step_hybrid_tf(:,:)=(this%e_bcut-this%vtrial(:,:))/(this%bcut)
       this%entropy=zero
+      factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
+
       do ifft=1,this%nfft
         do ispden=1,this%nspden
-          factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
-          ABI_MALLOC(valuesent,(this%bcut+1))
-
-          step=(this%e_bcut-this%vtrial(ifft,ispden))/(this%bcut)
-          !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
+          !$OMP PARALLEL DO PRIVATE(ix,fn) SHARED(valuesent)
           do ii=1,this%bcut+1
-            ix=this%vtrial(ifft,ispden)+(dble(ii)-one)*step
+            ix=this%vtrial(ifft,ispden)+(dble(ii)-one)*step_hybrid_tf(ifft,ispden)
             fn=fermi_dirac(ix,fermie,tsmear)
-            ! ix=dble(ii)-one
-            ! fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%vtrial(ifft,ispden),fermie,tsmear)
             if(fn>tol16.and.(one-fn)>tol16) then
               valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
               & extfpmd_dos(ix,this%vtrial(ifft,ispden),this%ucvol)
-              ! valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
             else
               valuesent(ii)=zero
             end if
@@ -608,16 +607,18 @@ contains
 
           ! We need at least 6 elements in valuesent to call simpson function.
           if(size(valuesent)>=6) then
-            this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
-            & gamma*factor*dip12(gamma)/tsmear-simpson(step,valuesent))/&
-            & (this%nfft*this%nspden)
-            ! this%entropy=this%entropy+(5./3.*factor*dip32(gamma)/tsmear-&
-            ! & gamma*factor*dip12(gamma)/tsmear-simpson(one,valuesent))/&
-            ! & (this%nfft*this%nspden)
+            this%entropy=this%entropy+(5./3.*factor*dip32(gamma_hybrid_tf(ifft,ispden))/tsmear-&
+            & gamma_hybrid_tf(ifft,ispden)*factor*dip12(gamma_hybrid_tf(ifft,ispden))/tsmear-&
+            & simpson(step_hybrid_tf(ifft,ispden),valuesent))/(this%nfft*this%nspden)
           end if
-          ABI_FREE(valuesent)
         end do
       end do
+
+      gamma_hybrid_tf(:,:)=zero
+      step_hybrid_tf(:,:)=zero
+      ABI_FREE(step_hybrid_tf)
+      ABI_FREE(gamma_hybrid_tf)
+      ABI_FREE(valuesent)
     end if
   end subroutine compute_entropy
   !!***
