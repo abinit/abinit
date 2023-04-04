@@ -55,7 +55,7 @@ contains
 !!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
 !!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
-!!  DDB_VERSION = 6 digit integer giving date. To mantain compatibility with old DDB files.
+!!  ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  filnamddb = name of the ddb file
 !!  flexoflg=  1 -> Computes all contributions to FxE
@@ -73,13 +73,13 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,DDB_VERSION,crystal,filnamddb,flexoflg,prtvol,zeff)
+subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg,prtvol,zeff)
     
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: DDB_VERSION
+ integer,intent(in) :: ddb_version
  integer , intent(in)  :: asr,flexoflg,prtvol
  class(ddb_type),intent(in) :: ddb,ddb_lw
  type(crystal_t),intent(in) :: crystal
@@ -139,7 +139,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,DDB_VERSION,crystal,filnamddb,flexoflg
      call wrtout(std_out, sjoin("- Cannot find clamped ion FxE tensor in DDB file:", filnamddb))
      call wrtout(std_out, "  flexoflag=1 or 2 requires the DDB file to include the corresponding long wave 3rd derivatives")
    else
-     call dtciflexo(ddb_lw%val(:,:,iblok),ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
+     call dtciflexo(ddb_lw%val(:,:,iblok),ddb_version,ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
    end if
 
  end if
@@ -153,7 +153,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,DDB_VERSION,crystal,filnamddb,flexoflg
    ! Extract the P^(1) tensor from the DDB
    if (.not.intstrn_only) then
      lwsym=0
-     iblok = ddb_lw%get_quadrupoles(DDB_VERSION,lwsym,33,pol1)
+     iblok = ddb_lw%get_quadrupoles(ddb_version,lwsym,33,pol1)
    end if
 
    rfphon(:)=0
@@ -338,6 +338,7 @@ end subroutine ddb_flexo
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !! ucvol= unit cell volume
 !!
 !! OUTPUT
@@ -345,11 +346,11 @@ end subroutine ddb_flexo
 !!
 !! SOURCE
 
-subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
+subroutine dtciflexo(blkval,ddb_version,mpert,natom,ciflexo,ucvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom
+ integer,intent(in) :: ddb_version,mpert,natom
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
@@ -357,7 +358,8 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,istrs,ivarA,strsd,strsd1,strsd2,strst,qvecd
+ integer,parameter :: cvrsio8=20100401
+ integer :: elfd,istrs,ivarA,ri,strsd,strsd1,strsd2,strst,qvecd
  logical :: iwrite
  real(dp) :: fac
  character(len=500) :: msg
@@ -374,8 +376,18 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two/ucvol
+   ri=2
+ else
+   fac=one/ucvol
+   ri=1
+ end if
+
+
 !Extraction of the clamped-ion flexoelectric coeficients 
- fac=one/ucvol
  do qvecd=1,3
    do istrs=1,6
      strsd1=alpha(istrs)
@@ -383,7 +395,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
      strst=natom+3; if (istrs>3) strst=natom+4
      strsd=istrs; if (istrs>3) strsd=istrs-3
      do elfd=1,3
-       ciflexo(elfd,qvecd,strsd1,strsd2)=fac*d3cart(1,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
+       ciflexo(elfd,qvecd,strsd1,strsd2)=fac*d3cart(ri,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
        if (istrs>3) ciflexo(elfd,qvecd,strsd2,strsd1)=ciflexo(elfd,qvecd,strsd1,strsd2)
      end do
    end do

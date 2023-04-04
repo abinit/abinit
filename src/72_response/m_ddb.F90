@@ -4577,7 +4577,7 @@ end subroutine lwcart
 !!
 !! INPUTS
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
-!! ddb_version = 6 digit integer giving date. To mantain compatibility with olderDDB files.
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with olderDDB files.
 !! lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative
 !!             |-> 1st gradient of polarization response to atomic displacement
 !!        = 1 symmetrize the tensor wrt efield and qvec derivative
