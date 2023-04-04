@@ -2112,8 +2112,10 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  character(len=12) :: string
  character(len=32) :: blkname
  character(len=500) :: message
- character(len=6) :: name_old
+ character(len=6) :: name_old, ddbvrs6
  character(len=80) :: rdstring
+ character(len=8) :: ddbvrs8
+ character(len=2) :: prefix
 !arrays
  integer,allocatable :: nband(:)
  character(len=12) :: name(9)
