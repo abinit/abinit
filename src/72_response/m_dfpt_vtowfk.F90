@@ -428,7 +428,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        
        if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
          eig1_k = zero 
-         resid_k(iband) = zero
+         resid = zero
        else
          call dfpt_cgwf(iband,iband_me,rank_band,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &         rf2,dcwavef,&
@@ -436,8 +436,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &         idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
 &         npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
 &         dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
-         resid_k(iband)=resid
        end if
+       resid_k(iband)=resid
        
      else
        resid_k(iband)=zero
