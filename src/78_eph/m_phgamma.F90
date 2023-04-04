@@ -43,7 +43,7 @@ module m_phgamma
  use m_ifc
  use m_ebands
  use m_fstab
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
  use netcdf
  use m_wfk

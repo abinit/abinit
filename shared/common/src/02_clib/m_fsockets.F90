@@ -33,7 +33,7 @@
 
 MODULE m_fsockets
 
-  USE ISO_C_BINDING
+  use, intrinsic :: iso_c_binding
 
   IMPLICIT NONE
 
@@ -47,20 +47,20 @@ MODULE m_fsockets
 
   INTERFACE
     SUBROUTINE open_csocket(psockfd, inet, port, host) BIND(C, name="open_socket")
-      USE ISO_C_BINDING
+      use, intrinsic :: iso_c_binding
       INTEGER(KIND=C_INT)                      :: psockfd, inet, port
       CHARACTER(KIND=C_CHAR), DIMENSION(*)     :: host
     END SUBROUTINE open_csocket
 
     SUBROUTINE writebuffer_csocket(psockfd, pdata, plen) BIND(C, name="writebuffer")
-      USE ISO_C_BINDING
+      use, intrinsic :: iso_c_binding
       INTEGER(KIND=C_INT)                      :: psockfd
       TYPE(C_PTR), VALUE                       :: pdata
       INTEGER(KIND=C_INT)                      :: plen
     END SUBROUTINE writebuffer_csocket
 
     SUBROUTINE readbuffer_csocket(psockfd, pdata, plen) BIND(C, name="readbuffer")
-      USE ISO_C_BINDING
+      use, intrinsic :: iso_c_binding
       INTEGER(KIND=C_INT)                      :: psockfd
       TYPE(C_PTR), VALUE                       :: pdata
       INTEGER(KIND=C_INT)                      :: plen
@@ -100,7 +100,7 @@ CONTAINS
    END SUBROUTINE fstr2cstr
 
   SUBROUTINE writebuffer_d (psockfd, fdata)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                      :: psockfd
     REAL(KIND=8), INTENT(IN)                :: fdata
 
@@ -111,7 +111,7 @@ CONTAINS
   END SUBROUTINE writebuffer_d
 
   SUBROUTINE writebuffer_i (psockfd, fdata)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                      :: psockfd, fdata
 
     INTEGER(KIND=C_INT), TARGET              :: cdata
@@ -121,7 +121,7 @@ CONTAINS
   END SUBROUTINE writebuffer_i
 
   SUBROUTINE writebuffer_s (psockfd, fstring, plen)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                      :: psockfd
     CHARACTER(LEN=*), INTENT(IN)             :: fstring
     INTEGER, INTENT(IN)                      :: plen
@@ -136,7 +136,7 @@ CONTAINS
   END SUBROUTINE writebuffer_s
 
   SUBROUTINE writebuffer_dv(psockfd, fdata, plen)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                      :: psockfd, plen
     REAL(KIND=8), INTENT(IN), TARGET        :: fdata(plen)
 
@@ -144,7 +144,7 @@ CONTAINS
   END SUBROUTINE writebuffer_dv
 
   SUBROUTINE readbuffer_d (psockfd, fdata)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                     :: psockfd
     REAL(KIND=8), INTENT(OUT)               :: fdata
 
@@ -155,7 +155,7 @@ CONTAINS
   END SUBROUTINE readbuffer_d
 
   SUBROUTINE readbuffer_i (psockfd, fdata)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                      :: psockfd
     INTEGER, INTENT(OUT)                     :: fdata
 
@@ -166,7 +166,7 @@ CONTAINS
   END SUBROUTINE readbuffer_i
 
   SUBROUTINE readbuffer_s (psockfd, fstring, plen)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                      :: psockfd
     CHARACTER(LEN=*), INTENT(OUT)            :: fstring
     INTEGER, INTENT(IN)                      :: plen
@@ -182,7 +182,7 @@ CONTAINS
   END SUBROUTINE readbuffer_s
 
   SUBROUTINE readbuffer_dv(psockfd, fdata, plen)
-    USE ISO_C_BINDING
+    use, intrinsic :: iso_c_binding
     INTEGER, INTENT(IN)                      :: psockfd, plen
     REAL(KIND=8), INTENT(OUT), TARGET       :: fdata(plen)
 
