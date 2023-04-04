@@ -359,7 +359,6 @@ contains
     if(this%version==10) then
       ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
       ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
-
       gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
       xcut_hybrid_tf(:,:)=(this%e_bcut-this%vtrial(:,:))/tsmear
 
@@ -372,7 +371,6 @@ contains
       !$OMP END PARALLEL DO
 
       nelect=nelect+sum(this%nelectarr)/(this%nfft*this%nspden)
-      
       gamma_hybrid_tf(:,:)=zero
       xcut_hybrid_tf(:,:)=zero
       ABI_FREE(gamma_hybrid_tf)
@@ -417,6 +415,9 @@ contains
     ! Scalars
     integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
+    ! Arrays
+    real(dp),allocatable :: gamma_hybrid_tf(:,:)
+    real(dp),allocatable :: xcut_hybrid_tf(:,:)
 
     ! *********************************************************************
 
@@ -445,16 +446,24 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==10) then
+      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
+      ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
+      gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
+      xcut_hybrid_tf(:,:)=(this%e_bcut-this%vtrial(:,:))/tsmear
+
       do ifft=1,this%nfft
         do ispden=1,this%nspden
-          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
-          xcut=(this%e_bcut-this%vtrial(ifft,ispden))/tsmear
-          ! xcut=(extfpmd_e_fg(dble(this%bcut),this%ucvol)+this%shiftfactor-this%vtrial(ifft,ispden))/tsmear
-          this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)/&
+          this%e_kinetic=this%e_kinetic+factor*djp32(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))/&
           & (this%nfft*this%nspden)
         end do
       end do
+
+      gamma_hybrid_tf(:,:)=zero
+      xcut_hybrid_tf(:,:)=zero
+      ABI_FREE(gamma_hybrid_tf)
+      ABI_FREE(xcut_hybrid_tf)
     end if
+
 
     ! Computes the double counting term from the shiftfactor, and
     ! from the contributions to the kinetic energy and
@@ -463,6 +472,7 @@ contains
       this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
     else if(this%version==10) then
       this%edc_kinetic=zero
+      ! this%edc_kinetic=sum((this%e_kinetic+this%nelectarr(:,:)*this%vtrial(:,:))/(this%nfft*this%nspden))
       do ifft=1,this%nfft
         do ispden=1,this%nspden
           this%edc_kinetic=this%edc_kinetic+(this%e_kinetic+this%nelectarr(ifft,ispden)*&
