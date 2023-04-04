@@ -356,7 +356,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
        ABI_FREE(work)
 
        !Allocate the first-order gradient local potential
-       if (i1pert <= natom .or. i1pert == natom+2 .or. i1pert == natom+3) then
+       if (i1pert <= natom+3) then
          n1dq=1
          ABI_MALLOC(vpsp1_i1pertdq,(2*nfftf,dtset%nspden,n1dq))
        else if (i1pert == natom+4) then
@@ -413,7 +413,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end if !samepert  
 
              !Allocate the first-order gradient local potential
-             if (i2pert <= natom .or. i2pert == natom+3) then
+             if (i2pert <= natom+3) then
                n2dq=1
                ABI_MALLOC(vpsp1_i2pertdq,(2*nfftf,dtset%nspden,n2dq))
              else if (i2pert == natom+4) then
@@ -610,7 +610,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    !Perform the longwave DFPT part of the 3dte calculation
                    call dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtset, &
                    & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
-                   & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,&
+                   & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mkmem,mk1mem,mpert,mpi_enreg,&
                    & mpsang,mpw,natom,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
                    & pawfgr,psps,rho1g1,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
                    & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&

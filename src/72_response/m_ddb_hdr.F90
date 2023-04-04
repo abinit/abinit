@@ -1448,12 +1448,12 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
- integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,usepaw0
+ integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,ndig,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
  character(len=6) :: name_old, ddbvrs6
  character(len=8) :: ddbvrs8
- character(len=2) :: prefix
+ character(len=3) :: prefix
 !arrays
  character(len=12) :: name(9)
 
@@ -1479,17 +1479,25 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
    ABI_BUG(message)
  end if
 
-!Convert older version to 8 integer format
+!Convert older version to 8 digit format
  if (ddbvrs /= cvrsio9) then
-   write(ddbvrs6,'(i6)') ddbvrs
+   ndig= int(log10(real(ddbvrs))) + 1
+   write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
-     write(prefix,'(i2)') 20 
+     if (ndig==6) then
+       write(prefix,'(i2)') 20 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 200 
+     end if
    else if (ddbvrs==vrsio8_old_old) then
-     write(prefix,'(i2)') 19
+     if (ndig==6) then
+       write(prefix,'(i2)') 19 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 199 
+     end if
    end if
    ddbvrs8= prefix // ddbvrs6
    read(ddbvrs8,'(i8)') ddbvrs
-   ddb_version=ddbvrs
  end if
 
 !Read the 4 n-integers, also testing the names of data, and checking that their value is acceptable.
@@ -2106,7 +2114,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
  integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
- integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts
+ integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,ndig,nelmts
  integer :: occopt,pspso0,nsym
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=12) :: string
@@ -2115,7 +2123,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  character(len=6) :: name_old, ddbvrs6
  character(len=80) :: rdstring
  character(len=8) :: ddbvrs8
- character(len=2) :: prefix
+ character(len=3) :: prefix
 !arrays
  integer,allocatable :: nband(:)
  character(len=12) :: name(9)
@@ -2139,13 +2147,22 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
    ABI_ERROR(message)
  end if
 
-!Convert older version to 8 integer format
+!Convert older version to 8 digit format
  if (ddbvrs /= cvrsio9) then
-   write(ddbvrs6,'(i6)') ddbvrs
+   ndig= int(log10(real(ddbvrs))) + 1
+   write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
-     write(prefix,'(i2)') 20 
+     if (ndig==6) then
+       write(prefix,'(i2)') 20 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 200 
+     end if
    else if (ddbvrs==vrsio8_old_old) then
-     write(prefix,'(i2)') 19
+     if (ndig==6) then
+       write(prefix,'(i2)') 19 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 199 
+     end if
    end if
    ddbvrs8= prefix // ddbvrs6
    read(ddbvrs8,'(i8)') ddbvrs

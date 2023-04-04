@@ -105,7 +105,6 @@ contains
 !!  kg(3,mpw*mkmem_rbz)=reduced planewave coordinates
 !!  kxc(nfft,nkxc)=exchange and correlation kernel
 !!  mband = maximum number of bands
-!!  mgfft=maximum size of 1D FFTs
 !!  mkmem_rbz = maximum number of k points which can fit in core memory
 !!  mk1mem = maximum number of k points for first-order WF
 !!           which can fit in core memory
@@ -168,14 +167,14 @@ contains
 
 subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,&
 & dimffnl,dtset,eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,i2dir,i3dir,&
-& i1pert,i2pert,i3pert,kg,kxc,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,&
+& i1pert,i2pert,i3pert,kg,kxc,mband,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,&
 & n1dq,n2dq,nfft,ngfft,nkpt,nkxc,&
 & nspden,nspinor,nsppol,npwarr,nylmgr,occ,pawfgr,psps,rho1g1,rho1r1,rho2r1,rmet,rprimd,samepert,&
 & ucvol,useylmgr,vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,ddk_f,d2_dkdk_f,d2_dkdk_f2,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,dimffnl,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
+ integer,intent(in) :: cplex,dimffnl,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband
  integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,n1dq,n2dq,nfft,nkpt,nkxc,nspden
  integer,intent(in) :: nspinor,nsppol,nylmgr,useylmgr
  real(dp),intent(in) :: gsqcut,ucvol
