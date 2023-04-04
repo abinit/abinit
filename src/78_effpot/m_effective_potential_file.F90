@@ -83,7 +83,7 @@ module m_effective_potential_file
 &     energy,epsilon_inf,ewald_atmfrc,&
 &     phfrq,rprimd,qph1l,short_atmfrc,typat,xcart,zeff)&
 &                          bind(C,name="effpot_xml_readSystem")
-     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
+     use, intrinsic :: iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      integer(C_INT) :: natom,ntypat,nrpt,nqpt
      integer(C_INT) :: typat(natom)
      integer(C_INT) :: cell(3,nrpt)
@@ -105,7 +105,7 @@ module m_effective_potential_file
 &     nrpt,voigt,elastic3rd,elastic_displacement,&
 &     strain_coupling,phonon_strain_atmfrc,phonon_straincell)&
 &                          bind(C,name="effpot_xml_readStrainCoupling")
-     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
+     use, intrinsic :: iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      integer(C_INT) :: natom
      integer(C_INT) :: nrpt,voigt
      integer(c_INT) :: phonon_straincell(3,nrpt)
@@ -121,7 +121,7 @@ module m_effective_potential_file
 &                                 coefficient,atindx,cell,direction,power_disp,&
 &                                 power_strain,strain,weight)&
 &                          bind(C,name="effpot_xml_readCoeff")
-     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
+     use, intrinsic :: iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT
      character(kind=C_CHAR) :: filename(*)
      integer(C_INT) :: ncoeff,ndisp,nterm
      integer(C_INT) :: atindx(ncoeff,nterm,2,ndisp)
@@ -138,7 +138,7 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_getDimSystem(filename,natom,ntypat,nqpt,nrpt1,nrpt2)&
 &                          bind(C,name="effpot_xml_getDimSystem")
-     use iso_c_binding, only : C_CHAR,C_INT
+     use, intrinsic :: iso_c_binding, only : C_CHAR,C_INT
      integer(C_INT) :: natom,ntypat,nqpt,nrpt1,nrpt2
      character(kind=C_CHAR) :: filename(*)
    end subroutine effpot_xml_getDimSystem
@@ -147,7 +147,7 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_getDimStrainCoupling(filename,nrpt,voigt)&
 &                          bind(C,name="effpot_xml_getDimStrainCoupling")
-     use iso_c_binding, only : C_CHAR,C_INT
+     use, intrinsic :: iso_c_binding, only : C_CHAR,C_INT
      integer(C_INT) :: voigt
      integer(C_INT) :: nrpt
      character(kind=C_CHAR) :: filename(*)
@@ -157,7 +157,7 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_getDimCoeff(filename,ncoeff,nterm_max,ndisp_max)&
 &                          bind(C,name="effpot_xml_getDimCoeff")
-     use iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT,C_PTR
+     use, intrinsic :: iso_c_binding, only : C_CHAR,C_DOUBLE,C_INT,C_PTR
      character(kind=C_CHAR) :: filename(*)
 !     character(kind=C_CHAR) :: name(*)
      type(C_PTR) :: name
@@ -169,7 +169,7 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_checkXML(filename,name_root) &
 &                          bind(C,name="effpot_xml_checkXML")
-     use iso_c_binding, only : C_CHAR
+     use, intrinsic :: iso_c_binding, only : C_CHAR
      character(kind=C_CHAR) :: filename(*),name_root(*)
    end subroutine effpot_xml_checkXML
  end interface
@@ -177,7 +177,7 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_getValue(filename,name_value,value_result) &
  &                          bind(C,name="effpot_xml_getValue")
-      use iso_c_binding, only : C_CHAR
+      use, intrinsic :: iso_c_binding, only : C_CHAR
       implicit none
       character(kind=C_CHAR) :: filename(*),name_value(*)
       character(kind=C_CHAR) :: value_result
@@ -187,7 +187,7 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_getAttribute(filename,name_value,name_attribute) &
 &                          bind(C,name="effpot_xml_getAttribute")
-     use iso_c_binding, only : C_CHAR
+     use, intrinsic :: iso_c_binding, only : C_CHAR
      character(kind=C_CHAR) :: filename(*),name_value(*),name_attribute(*)
    end subroutine effpot_xml_getAttribute
  end interface
@@ -195,7 +195,7 @@ module m_effective_potential_file
  interface
    subroutine effpot_xml_getNumberKey(filename,name_value,number) &
 &                          bind(C,name="effpot_xml_getNumberKey")
-     use iso_c_binding, only : C_CHAR,C_INT
+     use, intrinsic :: iso_c_binding, only : C_CHAR,C_INT
      character(kind=C_CHAR) :: filename(*),name_value(*)
      integer(C_INT) :: number
    end subroutine effpot_xml_getNumberKey
@@ -2508,7 +2508,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  call ifc_init(ifc,crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
+  call ifc%init(crystal,ddb,inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,&
 &   inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,effective_potential%harmonics_terms%zeff,qdrp_cart,&
 &   inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
 
@@ -2827,7 +2827,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
  use m_polynomial_term
  use m_crystal, only : symbols_crystal
 #if defined HAVE_XML
- use iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
+ use, intrinsic :: iso_c_binding, only : C_CHAR,C_PTR,c_f_pointer
 #endif
 
  !Arguments ------------------------------------
@@ -2868,7 +2868,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 
 ! *************************************************************************
 
- filename_tmp = trim(filename)  
+ filename_tmp = trim(filename)
  !Open the atomicdata XML file for reading
  write(message,'(a,a)')'-Opening the file ',filename_tmp
 
@@ -3395,9 +3395,9 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
- if(present(sc_size))then 
-    ncell(:) = sc_size 
- else 
+ if(present(sc_size))then
+    ncell(:) = sc_size
+ else
     do ia=1,3
       scale_cell(:) = 0
       do ii=1,3
@@ -3424,8 +3424,8 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
         ncell(ia) = int(factor)
       end if
     end do
- end if 
- 
+ end if
+
  ncells = product(ncell)
 
 !Check if the energy stored in the hist is revelant, sometimes some MD files gives
@@ -3471,7 +3471,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  ABI_MALLOC(list_absdist,(3,natom_hist))
  ABI_MALLOC(list_dist,(natom_hist))
  ABI_MALLOC(xred_ref,(3,natom_hist))
- 
+
  !Putting maping list to zero
  list_map = 0
 
@@ -3581,7 +3581,7 @@ end do  ! ia
      hist_tmp%fcart(:,ia,:) = hist%fcart(:,list_map(ia),:)
      hist_tmp%vel(:,ia,:)   = hist%vel(:,list_map(ia),:)
    end do
-  
+
 ! free the old hist and reinit
    call abihist_free(hist)
    call abihist_init(hist,natom_hist,nstep_hist,.false.,.false.)
@@ -3595,13 +3595,13 @@ end do  ! ia
    call abihist_free(hist_tmp)
 
    !map also fixes if present
-   if(need_fixmap)then  
+   if(need_fixmap)then
      ABI_MALLOC(iatfix_tmp,(3,natom_hist))
      do ia=1,natom_hist
         iatfix_tmp(:,ia) = iatfix(:,list_map(ia))
      end do
-     iatfix = iatfix_tmp 
-     ABI_FREE(iatfix_tmp)  
+     iatfix = iatfix_tmp
+     ABI_FREE(iatfix_tmp)
    end if
  end if !need map
 
@@ -3868,7 +3868,7 @@ end subroutine rdfromline_value
 
 function char_f2c(f_string) result(c_string)
 
- use iso_c_binding, only : C_CHAR,C_NULL_CHAR
+ use, intrinsic :: iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
  character(len=*),intent(in) :: f_string
  character(kind=C_CHAR,len=1) :: c_string(len_trim(f_string)+1)
@@ -3903,7 +3903,7 @@ end function char_f2c
 
 subroutine char_c2f(c_string,f_string)
 
- use iso_c_binding, only : C_CHAR,C_NULL_CHAR
+ use, intrinsic :: iso_c_binding, only : C_CHAR,C_NULL_CHAR
 !Arguments ------------------------------------
  character(kind=C_CHAR,len=1),intent(in) :: c_string(*)
  character(len=*),intent(out) :: f_string

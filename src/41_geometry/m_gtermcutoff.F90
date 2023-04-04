@@ -312,11 +312,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      hcyl_    =hcyl     ! Lenght of cylinder along z, only if method==2
 
      write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
-&      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
-&      '  Quadrature scheme      = ',qopt_,ch10,&
-&      '  Max number of attempts = ',ntrial_,ch10,&
-&      '  Fractional accuracy    = ',accuracy_
-     call wrtout(std_out,msg,'COLL')
+      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
+      '  Quadrature scheme      = ',qopt_,ch10,&
+      '  Max number of attempts = ',ntrial_,ch10,&
+      '  Fractional accuracy    = ',accuracy_
+     call wrtout(std_out,msg)
 
      SELECT CASE (opt_cylinder)
 
@@ -325,7 +325,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      ! === Infinite cylinder, interaction is zeroed outside the Wigner-Seitz cell ===
      ! * Beigi"s expression holds only if the BZ is sampled only along z.
      write(msg,'(2(a,f8.4))')' cutoff_cylinder: Using Beigi''s Infinite cylinder '
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
      ! * Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
      !   In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
      if ( (ANY(ABS(rprimd(2:3,  1))>tol6)).or.&
@@ -386,7 +386,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      if (ABS(hcyl_)>tol12) then
 
        write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut_loc
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        hcyl_=hcyl
        hcyl2=hcyl**2.0_dp
        rcut2=rcut_loc**2.0_dp

@@ -24,6 +24,7 @@
 
 module m_dynmat
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
@@ -96,6 +97,7 @@ module m_dynmat
  public :: phdispl_from_eigvec  ! Phonon displacements from eigenvectors
  public :: dfpt_prtph           ! Print phonon frequencies
  public :: massmult_and_breaksym  ! Multiply IFC(q) by atomic masses.
+ public :: massmult_and_breaksym_cplx  ! Version for complex array
 
  ! TODO: Change name,
  public :: ftgam
@@ -6193,7 +6195,6 @@ end subroutine dfpt_prtph
 !!***
 
 !!****f* m_dynmat/massmult_and_breaksym
-!!
 !! NAME
 !!  mult_masses_and_break_symms
 !!
@@ -6206,17 +6207,21 @@ end subroutine dfpt_prtph
 !!  natom=number of atoms in unit cell
 !!  ntypat=number of atom types
 !!  typat(natom)=integer label of each type of atom (1,2,...)
+!!  [herm_opt]= 1 to hermitianize mat (default)
+!!          0 if no symmetrization should be performed
 !!
 !! SIDE EFFECTS
 !!  mat(2*3*natom*3*natom)=Multiplies by atomic masses in output.
 !!
 !! SOURCE
 
-subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
+subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat, &
+                                 herm_opt) ! optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,ntypat
+ integer,optional,intent(in) :: herm_opt
 !arrays
  integer,intent(in) :: typat(natom)
  real(dp),intent(in) :: amu(ntypat)
@@ -6224,7 +6229,7 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
 
 !Local variables -------------------------
 !scalars
- integer :: i1,i2,idir1,idir2,index,ipert1,ipert2
+ integer :: i1,i2,idir1,idir2,index,ipert1,ipert2, herm_opt__
  real(dp),parameter :: break_symm=1.0d-12
  !real(dp),parameter :: break_symm=zero
  real(dp) :: fac
@@ -6232,6 +6237,8 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
  real(dp) :: nearidentity(3,3)
 
 ! *********************************************************************
+
+ herm_opt__ = 1; if (present(herm_opt)) herm_opt__ = herm_opt
 
  ! This slight breaking of the symmetry allows the results to be more portable between machines
  nearidentity(:,:)=one
@@ -6259,13 +6266,43 @@ subroutine massmult_and_breaksym(natom, ntypat, typat, amu, mat)
  end do
 
  ! Make the dynamical matrix hermitian
- call mkherm(mat,3*natom)
+ if (herm_opt__ == 1) call mkherm(mat,3*natom)
 
 end subroutine massmult_and_breaksym
 !!***
 
-!!****f* m_dynmat/ftgam
+!!****f* m_dynmat/massmult_and_breaksym_cplx
+!! NAME
+!!  mult_masses_and_break_symms_cplx
 !!
+!! FUNCTION
+!!  Similar to massmult_and_breaksym, the only difference is that it receives complex array.
+
+subroutine massmult_and_breaksym_cplx(natom, ntypat, typat, amu, cmat, &
+                                      herm_opt) ! optional
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom,ntypat
+ integer,optional,intent(in) :: herm_opt
+!arrays
+ integer,intent(in) :: typat(natom)
+ real(dp),intent(in) :: amu(ntypat)
+ complex(dp),target,intent(inout) :: cmat(2*3*natom*3*natom)
+
+!Local variables -------------------------
+ integer :: herm_opt__
+ real(dp),pointer :: rmat_ptr(:)
+! *************************************************************************
+
+ call C_F_pointer(c_loc(cmat), rmat_ptr, shape=[3*natom*3*natom])
+ herm_opt__ = 1; if (present(herm_opt)) herm_opt__ = herm_opt
+ call massmult_and_breaksym(natom, ntypat, typat, amu, rmat_ptr, herm_opt=herm_opt__)
+
+end subroutine massmult_and_breaksym_cplx
+!!***
+
+!!****f* m_dynmat/ftgam
 !! NAME
 !! ftgam
 !!

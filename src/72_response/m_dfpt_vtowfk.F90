@@ -31,7 +31,6 @@ module m_dfpt_vtowfk
  use m_dtset
  use m_dtfil
 
-
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,  only : MPI_type
  use m_rf2_init,     only : rf2_init
@@ -221,7 +220,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,parameter :: level=14,tim_fourwf=5
  integer,save :: nskip=0
  integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
- integer :: iband_me,nband_me, unit_me
+ integer :: iband_me,nband_me !, unit_me
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
@@ -230,8 +229,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  type(rf2_t) :: rf2
 !arrays
  logical,allocatable :: cycle_bands(:)
- integer :: band_procs(nband_k)
- integer :: bands_treated_now(nband_k)
+ integer :: rank_band(nband_k), bands_treated_now(nband_k)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:),ghc_vectornd(:,:)
@@ -249,9 +247,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  nkpt_max=50; if (xmpi_paral==1) nkpt_max=-1
 
  if(prtvol>2 .or. ikpt<=nkpt_max)then
-   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',&
-&   gs_hamkq%kpt_k(:),'band residuals:'
-   call wrtout(std_out,message,'PERS')
+   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',gs_hamkq%kpt_k(:),'band residuals:'
+   call wrtout(std_out,message)
  end if
 
 !Initializations and allocations
@@ -332,7 +329,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  LOOP OVER BANDS ==================================
 !======================================================================
 
- call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
+ call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
  iband_me = 0
@@ -342,9 +339,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    if( (mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me)) cycle
    iband_me = iband_me + 1
 
-!unit_me = 300+iband
-unit_me = 6
-!  Get ground-state wavefunctions
+   !unit_me = 300+iband
+   !Get ground-state wavefunctions
    ptr = 1+(iband_me-1)*npw_k*nspinor+icg
    call cg_zcopy(npw_k*nspinor,cg(1,ptr),cwave0)
 
@@ -434,12 +430,12 @@ unit_me = 6
          eig1_k = zero 
          resid_k(iband) = zero
        else
-         call dfpt_cgwf(iband,iband_me,band_procs,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
- &       rf2,dcwavef,&
- &       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
- &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
- &       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
- &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+         call dfpt_cgwf(iband,iband_me,rank_band,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+&         rf2,dcwavef,&
+&         eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
+&         idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
+&         npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+&         dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
          resid_k(iband)=resid
        end if
        
@@ -573,7 +569,7 @@ unit_me = 6
 
      end if ! End of non-zero occupation
 
-!    Exit loop over inonsc if converged and if non-self-consistent
+!    Exit loop over inonsc if converged and non-self-consistent
      if (iscf_mod<0 .and. resid<dtset%tolwfr) exit
 
    end do ! End loop over inonsc
@@ -619,18 +615,15 @@ unit_me = 6
 ! NB: no need to sum eXX_k over band communicator here, as it is a sub-comm of kpt,
 !   and full mpi_sum will be done higher up.
 
-
-
 !For rf2 perturbation
  if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
-
 
 !Find largest resid over bands at this k point
  residk=maxval(resid_k(:))
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    do ii=0,(nband_k-1)/8
      write(message,'(1p,8e10.2)')(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-     call wrtout(std_out,message,'PERS')
+     call wrtout(std_out,message)
    end do
  end if
 
@@ -666,12 +659,12 @@ unit_me = 6
  call xmpi_sum(nskip,mpi_enreg%comm_band,ierr)
  if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
    write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,message)
  end if
 
  if (prtvol<=2 .and. ikpt==nkpt_max+1) then
    write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,message)
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then

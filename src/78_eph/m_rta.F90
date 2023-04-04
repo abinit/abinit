@@ -893,7 +893,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
          self%pi(:,:,iw,spin,itemp,irta) = - volt_SI * matmul(work_33, l0inv_33nw(:, :, iw))
        end do
 
-       ! ZT:  S^T sigma S k^-1 T (tensor form with k=k_electronic only):
+       ! ZT: S^T sigma S k^-1 T (tensor form with k=k_electronic only):
        do iw=1,self%nw
          S_33 = self%seebeck(:,:,iw,spin,itemp,irta)
          S_33 = matmul(matmul(transpose(S_33), self%sigma(:,:,iw,spin,itemp,irta)), S_33)

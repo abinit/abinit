@@ -32,7 +32,7 @@ MODULE m_nctk
  use m_abicore
  use m_build_info
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_xmpi
 #ifdef HAVE_NETCDF
  use netcdf
@@ -2537,10 +2537,10 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
-   nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
-   nctkarr_t('non_analytical_phdispl_cart', "dp", &
-   "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
+     nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
+     nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
+     nctkarr_t('non_analytical_phdispl_cart', "dp", &
+               "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
@@ -2611,7 +2611,6 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
    NCF_CHECK(nctk_set_datamode(ncid))
 
  case ("write")
-
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
    ncerr = nf90_put_var(ncid,raman_sus_varid,rsus,&
      start=[iphl2,1,1,1], count=[1,3*natom,3,3])

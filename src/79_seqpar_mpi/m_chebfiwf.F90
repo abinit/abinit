@@ -57,7 +57,7 @@ module m_chebfiwf
  use m_nvtx_data
 #endif
 
- use iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer
+ use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer
 
  use m_xmpi
  use m_xomp
