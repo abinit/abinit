@@ -327,6 +327,9 @@ contains
     integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
     character(len=500) :: msg
+    ! Arrays
+    real(dp),allocatable :: gamma_hybrid_tf(:,:)
+    real(dp),allocatable :: xcut_hybrid_tf(:,:)
 
     ! *********************************************************************
 
@@ -354,15 +357,26 @@ contains
     ! of Fermi gas contributions for each point of the fftf grid.
     ! Warning: This is not yet operational. Work in progress.
     if(this%version==10) then
+      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
+      ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
+
+      gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
+      xcut_hybrid_tf(:,:)=(this%e_bcut-this%vtrial(:,:))/tsmear
+
+      !$OMP PARALLEL DO
       do ifft=1,this%nfft
         do ispden=1,this%nspden
-          gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
-          xcut=(this%e_bcut-this%vtrial(ifft,ispden))/tsmear
-          ! xcut=(extfpmd_e_fg(dble(this%bcut),this%ucvol)+this%shiftfactor-this%vtrial(ifft,ispden))/tsmear
-          this%nelectarr(ifft,ispden)=factor*djp12(xcut,gamma)
+          this%nelectarr(ifft,ispden)=factor*djp12(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))
         end do
       end do
+      !$OMP END PARALLEL DO
+
       nelect=nelect+sum(this%nelectarr)/(this%nfft*this%nspden)
+      
+      gamma_hybrid_tf(:,:)=zero
+      xcut_hybrid_tf(:,:)=zero
+      ABI_FREE(gamma_hybrid_tf)
+      ABI_FREE(xcut_hybrid_tf)
     end if
 
     if (xcut.lt.zero) then
@@ -435,7 +449,7 @@ contains
         do ispden=1,this%nspden
           gamma=(fermie-this%vtrial(ifft,ispden))/tsmear
           xcut=(this%e_bcut-this%vtrial(ifft,ispden))/tsmear
-          !xcut=(extfpmd_e_fg(dble(this%bcut),this%ucvol)+this%shiftfactor-this%vtrial(ifft,ispden))/tsmear
+          ! xcut=(extfpmd_e_fg(dble(this%bcut),this%ucvol)+this%shiftfactor-this%vtrial(ifft,ispden))/tsmear
           this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)/&
           & (this%nfft*this%nspden)
         end do
