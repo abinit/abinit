@@ -55,6 +55,7 @@ contains
 !!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
 !!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
+!!  DDB_VERSION = 6 digit integer giving date. To mantain compatibility with old DDB files.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  filnamddb = name of the ddb file
 !!  flexoflg=  1 -> Computes all contributions to FxE
@@ -72,12 +73,13 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff)
+subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,DDB_VERSION,crystal,filnamddb,flexoflg,prtvol,zeff)
     
  implicit none
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: DDB_VERSION
  integer , intent(in)  :: asr,flexoflg,prtvol
  class(ddb_type),intent(in) :: ddb,ddb_lw
  type(crystal_t),intent(in) :: crystal
@@ -151,7 +153,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
    ! Extract the P^(1) tensor from the DDB
    if (.not.intstrn_only) then
      lwsym=0
-     iblok = ddb_lw%get_quadrupoles(lwsym,33,pol1)
+     iblok = ddb_lw%get_quadrupoles(DDB_VERSION,lwsym,33,pol1)
    end if
 
    rfphon(:)=0
