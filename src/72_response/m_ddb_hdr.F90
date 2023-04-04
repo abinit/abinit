@@ -1446,9 +1446,8 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !Local variables -------------------------
 !Set routine version number here:
 !scalars
- integer,parameter :: vrsio9=20230401
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer,parameter :: cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
  integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
@@ -1473,23 +1472,25 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  read (unddb, '(20x,i10)' )ddbvrs
 
  !write(std_out,'(a,i10)')' ddbvrs=',ddbvrs
- if(ddbvrs/=vrsio9 .and. ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
+ if(ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
    write(message, '(a,i10,2a,4(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&
-    'with the allowed code DDB version numbers,',vrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
+    'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
    ABI_BUG(message)
  end if
 
 !Convert older version to 8 integer format
- write(ddbvrs6,'(i6)') ddbvrs
- if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
-   write(prefix,'(i2)') 20 
- else if (ddbvrs==vrsio8_old_old) then
-   write(prefix,'(i2)') 19
+ if (ddbvrs /= cvrsio9) then
+   write(ddbvrs6,'(i6)') ddbvrs
+   if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
+     write(prefix,'(i2)') 20 
+   else if (ddbvrs==vrsio8_old_old) then
+     write(prefix,'(i2)') 19
+   end if
+   ddbvrs8= prefix // ddbvrs6
+   read(ddbvrs8,'(i8)') ddbvrs
+   ddb_version=ddbvrs
  end if
- ddbvrs8= prefix // ddbvrs6
- read(ddbvrs8,'(i8)') ddbvrs
- ddb_version=ddbvrs
 
 !Read the 4 n-integers, also testing the names of data, and checking that their value is acceptable.
 !This is important to insure that any array has a sufficient dimension.
@@ -2102,9 +2103,8 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 !Local variables -------------------------
 !scalars
 !Set routine version number here:
- integer,parameter :: vrsio9=20230401
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer,parameter :: cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
  integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts
  integer :: occopt,pspso0,nsym
@@ -2132,22 +2132,24 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  read (unddb,*)
  read (unddb, '(20x,i10)' )ddbvrs
 
- if (all(ddbvrs/= [vrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
+ if (all(ddbvrs/= [cvrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
    write(message, '(a,i10,2a,4(a,i10))' )&
 &   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
-&   'with the allowed code DDB version numbers,',vrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
+&   'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
    ABI_ERROR(message)
  end if
 
 !Convert older version to 8 integer format
- write(ddbvrs6,'(i6)') ddbvrs
- if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
-   write(prefix,'(i2)') 20 
- else if (ddbvrs==vrsio8_old_old) then
-   write(prefix,'(i2)') 19
+ if (ddbvrs /= cvrsio9) then
+   write(ddbvrs6,'(i6)') ddbvrs
+   if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
+     write(prefix,'(i2)') 20 
+   else if (ddbvrs==vrsio8_old_old) then
+     write(prefix,'(i2)') 19
+   end if
+   ddbvrs8= prefix // ddbvrs6
+   read(ddbvrs8,'(i8)') ddbvrs
  end if
- ddbvrs8= prefix // ddbvrs6
- read(ddbvrs8,'(i8)') ddbvrs
 
 !Read the 4 n-integers, also testing the names of data,
 !and checking that their value is acceptable.
