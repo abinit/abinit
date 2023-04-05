@@ -624,7 +624,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                    if (i1pert==natom+2) call d2_dkdk_f%close()
 
                    ! Close d2_dkdk file (i2pert)
-                   if (i2pert==natom+2) call d2_dkdk_f2%close()
+                   if (i2pert==natom+2.and..not.samepert) call d2_dkdk_f2%close()
 
                    !Save the type-I terms
                    if (i2pert==natom+3.or.i2pert==natom+4) then
