@@ -229,13 +229,8 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
  real(dp) :: d3etot_telec(2)
  real(dp) :: e3tot(2),kpt(3)
  real(dp),allocatable :: eig1_k(:),eig2_k(:),occ_k(:)
- real(dp),allocatable :: dum_vlocal(:,:,:,:),dum_vpsp(:)
- real(dp),allocatable :: vlocal1dq(:,:,:,:)
- real(dp),allocatable :: vlocal1(:,:,:,:)
- real(dp),allocatable :: vpsp1(:)
  real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
  real(dp),allocatable :: ffnl_k(:,:,:,:)
- type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
  
 ! *************************************************************************
 
@@ -257,14 +252,6 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
  n4=ngfft(4) ; n5=ngfft(5) ; n6=ngfft(6)
  with_nonlocal_i1pert=.true. ; if (i1pert==natom+2) with_nonlocal_i1pert=.false.
  with_nonlocal_i2pert=.true. ; if (i2pert==natom+2) with_nonlocal_i2pert=.false.
-
-!Additional allocations
- ABI_MALLOC(dum_vpsp,(nfft))
- ABI_MALLOC(dum_vlocal,(n4,n5,n6,gs_hamkq%nvloc))
- ABI_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
- ABI_MALLOC(vlocal1dq,(2*n4,n5,n6,gs_hamkq%nvloc))
- ABI_MALLOC(vpsp1,(cplex*nfft))
- ABI_MALLOC(dum_cwaveprj,(0,0))
 
 !Initialize d3etot parts
  d3etot_t1=zero
@@ -512,6 +499,8 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
  end if
 
  d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=e3tot(:)
+
+!Deallocations
 
  DBG_EXIT("COLL")
 
@@ -762,7 +751,6 @@ subroutine preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg,kptns,mband,mkmem,m
    ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(ylmgr_k,(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
 
- 
    kpt(:)= kptns(:,ikpt)
 
    !Get plane-wave vectors and related data at k

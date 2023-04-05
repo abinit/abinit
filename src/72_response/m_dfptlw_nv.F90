@@ -257,6 +257,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
        end do
      end do
    end do
+   ABI_FREE(dyewdqdq)
 
    !Transform back the first q-gradient direction to reduced coordinates
    !(treat it as an electric field)
@@ -296,6 +297,7 @@ subroutine dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rpri
        end do
      end do
    end do 
+   ABI_FREE(dyewdqdq_tII)
 
  end if
 
