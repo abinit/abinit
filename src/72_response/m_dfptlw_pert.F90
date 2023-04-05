@@ -576,10 +576,10 @@ subroutine lw_elecstic(cplex,d3etot_telec,gmet,gprimd,gsqcut,&
  type(MPI_type),intent(inout) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: gmet(3,3)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3)
  real(dp),intent(in) :: rho1g1(2,nfft),rho1r1(cplex*nfft,nspden)
  real(dp),intent(in) :: rho2r1(cplex*nfft,nspden),kxc(nfft,nkxc)
- real(dp),intent(out) :: d3etot_telec(2),gprimd(3,3)
+ real(dp),intent(out) :: d3etot_telec(2)
 
 !Local variables-------------------------------
 !scalars
