@@ -1253,6 +1253,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end do
    write(message,'(a,a)') ch10,ch10
    call wrtout(std_out,message,'COLL')
+   ABI_FREE(rfpert_lw)
  end if
 
 !Contribution to the dynamical matrix from ion-ion energy
