@@ -1498,6 +1498,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
    ddbvrs8= trim(prefix) // trim(ddbvrs6)
    read(ddbvrs8,'(i8)') ddbvrs
  end if
+ ddb_version=ddbvrs
 
 !Read the 4 n-integers, also testing the names of data, and checking that their value is acceptable.
 !This is important to insure that any array has a sufficient dimension.

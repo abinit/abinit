@@ -281,7 +281,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  call getcut(boxcut,ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,dtset%ngfft)
 
 !Generate the 1-dimensional phases
- ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+ ABI_MALLOC(ph1d,(2,3*(2*mgfft+1)*dtset%natom))
  call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
 
 !==== Initialize most of the Hamiltonian (and derivative) ====
@@ -289,7 +289,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !2) Perform the setup needed for the non-local factors:
 !3) Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
  call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,nspden,dtset%natom,&
-& dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
+& dtset%typat,xred,dtset%nfft,mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & use_gpu_cuda=dtset%use_gpu_cuda)
 
  ABI_MALLOC(xccc3d1,(cplex*nfftf))
