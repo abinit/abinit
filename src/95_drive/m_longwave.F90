@@ -759,7 +759,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(blkflg)
  ABI_FREE(doccde)
  ABI_FREE(eigen0)
- ABI_FREE(ffnl)
+ ABI_SFREE(ffnl)
  ABI_FREE(indsym)
  ABI_FREE(irrzon)
  ABI_FREE(nattyp)
@@ -773,15 +773,20 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 ! ABI_FREE(symrel_cart)
  ABI_FREE(vxc)
  ABI_FREE(d3etot)
+ ABI_FREE(d3etot_nv)
  ABI_FREE(pertsy)
  ABI_FREE(rfpert)
  ABI_FREE(d3e_pert1)
  ABI_FREE(d3e_pert2)
  ABI_FREE(d3e_pert3)
- if (psps%useylm==1) then
-   ABI_FREE(ylm)
-   ABI_FREE(ylmgr)
- end if
+ ABI_FREE(pawrhoij)
+ ABI_FREE(xccc3d)
+ ABI_FREE(nhat)
+ ABI_FREE(nhatgr)
+ ABI_SFREE(ylm)
+ ABI_SFREE(ylmgr)
+ ABI_SFREE(blkflg_car)
+ ABI_SFREE(d3etot_car)
 
  ! Clean the header
  call hdr%free()

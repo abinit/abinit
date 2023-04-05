@@ -704,7 +704,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
          end do    ! i2dir
        end do     ! i2pert
 
-       ABI_FREE(vpsp1_i1pertdq)
+       ABI_SFREE(vpsp1_i1pertdq)
        ABI_FREE(d3etot_t5)
 
      end if   ! rfpert
@@ -767,6 +767,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  
+!Deallocations
+ ABI_FREE(t4_typeII)
+ ABI_FREE(t5_typeII)
+ ABI_FREE(tgeom_typeII)
+ ABI_SFREE(t4_typeI)
+ ABI_SFREE(t5_typeI)
+ ABI_SFREE(tgeom_typeI)
 
  DBG_EXIT("COLL")
 
