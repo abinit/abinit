@@ -1495,7 +1495,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
        write(prefix,'(i3)') 199 
      end if
    end if
-   ddbvrs8= prefix // ddbvrs6
+   ddbvrs8= trim(prefix) // trim(ddbvrs6)
    read(ddbvrs8,'(i8)') ddbvrs
  end if
 
@@ -2163,7 +2163,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
        write(prefix,'(i3)') 199 
      end if
    end if
-   ddbvrs8= prefix // ddbvrs6
+   ddbvrs8= trim(prefix) // trim(ddbvrs6)
    read(ddbvrs8,'(i8)') ddbvrs
  end if
 
