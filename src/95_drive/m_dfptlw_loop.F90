@@ -212,16 +212,16 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  real(dp),allocatable :: cg1(:,:),cg2(:,:)
  real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:),eigen1(:),eigen2(:)
- real(dp),allocatable :: nhat1(:,:),nhat1gr(:,:,:),ph1d(:,:)
+ real(dp),allocatable :: nhat1(:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
  real(dp),allocatable :: t4_typeI(:,:,:,:,:,:),t4_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: t5_typeI(:,:,:,:,:,:),t5_typeII(:,:,:,:,:,:,:)
  real(dp),allocatable :: tgeom_typeI(:,:,:,:,:,:),tgeom_typeII(:,:,:,:,:,:,:)
- real(dp),allocatable :: vhart1dqdq(:),vpsp1dqdq(:),vresid_dum(:,:)
+ real(dp),allocatable :: vhart1dqdq(:),vpsp1dqdq(:)
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
  real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
- real(dp),allocatable :: vxc1dqdq(:),work(:),xccc3d1(:)
+ real(dp),allocatable :: vxc1dqdq(:),work(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
  
@@ -292,10 +292,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 & dtset%typat,xred,dtset%nfft,mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & use_gpu_cuda=dtset%use_gpu_cuda)
 
- ABI_MALLOC(xccc3d1,(cplex*nfftf))
- ABI_MALLOC(vresid_dum,(0,0))
- xccc3d1(:)=zero
-
 !Specific allocations for strain-gradient perturbation
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
   ABI_MALLOC(vhart1dqdq,(2*nfftf))
@@ -309,8 +305,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  n3xccc=0
  pawread=0
  nhat1grdim=0
- ABI_MALLOC(nhat1gr,(0,0,0))
- nhat1gr(:,:,:) = zero
  ABI_MALLOC(nhat1,(cplex*dtset%nfft,nspden))
  nhat1=zero
 
@@ -722,10 +716,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  ABI_FREE(rho2r1)
  ABI_FREE(rho1g1)
  ABI_FREE(rho2g1)
- ABI_FREE(nhat1gr)
  ABI_FREE(nhat1)
- ABI_FREE(vresid_dum)
- ABI_FREE(xccc3d1)
  ABI_FREE(pawrhoij_read)
  ABI_FREE(ph1d)
 
