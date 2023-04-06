@@ -216,7 +216,7 @@ contains
       this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
 
       ! Computes the relative error of the model vs last eigenvalues
-      if(me==0) then
+      if(me==0.and.this%version==4) then
         band_index=0
         rel_err=zero
         abs_err=zero
@@ -326,7 +326,6 @@ contains
     ! Scalars
     integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
-    character(len=500) :: msg
     ! Arrays
     real(dp),allocatable :: gamma_hybrid_tf(:,:)
     real(dp),allocatable :: xcut_hybrid_tf(:,:)
@@ -350,6 +349,7 @@ contains
     if(this%version==1.or.this%version==3) then
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
+      if(this%e_bcut.lt.this%shiftfactor) xcut=zero
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
 
@@ -361,6 +361,7 @@ contains
       ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
       gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
       xcut_hybrid_tf(:,:)=(this%e_bcut-this%vtrial(:,:))/tsmear
+      if(ANY(this%e_bcut.lt.this%vtrial(:,:))) xcut_hybrid_tf(:,:)=zero
 
       !$OMP PARALLEL DO
       do ifft=1,this%nfft
@@ -375,14 +376,6 @@ contains
       xcut_hybrid_tf(:,:)=zero
       ABI_FREE(gamma_hybrid_tf)
       ABI_FREE(xcut_hybrid_tf)
-    end if
-
-    if (xcut.lt.zero) then
-      write(msg,'(5a)')&
-      & 'Extended FPMD could not compute the contribution to the number of electrons.',ch10,&
-      & 'This can be due to a too low number of bands in the calculation.',ch10,&
-      & 'Action: slightly increase nband.'
-      ABI_ERROR(msg)
     end if
   end subroutine compute_nelect
   !!***
@@ -416,6 +409,7 @@ contains
     integer :: ifft,ispden
     real(dp) :: factor,gamma,xcut
     real(dp) :: e_kinetic_hybrid_tf
+    character(len=500) :: msg
     ! Arrays
     real(dp),allocatable :: gamma_hybrid_tf(:,:)
     real(dp),allocatable :: xcut_hybrid_tf(:,:)
@@ -477,6 +471,18 @@ contains
       this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
     else if(this%version==10) then
       this%edc_kinetic=this%e_kinetic+sum(this%nelectarr(:,:)*this%vtrial(:,:)/(this%nfft*this%nspden))
+    end if
+
+    if((this%e_bcut.lt.this%shiftfactor).and.&
+    & (this%version==1.or.this%version==3.or.this%version==10)) then
+      write(msg,'(11a)')&
+      & 'Extended FPMD could not properly compute the contribution to the energy.',ch10,&
+      & 'This can be due to a too low number of bands in the calculation.',ch10,&
+      & 'This can also happen when restarting from a previous calculation.',ch10,&
+      & 'Poor prediction of the electron density based on forces may results in this error.',ch10,&
+      & 'Action: slightly increase nband if the electron density is supposed to be converged.',ch10,&
+      & 'Otherwise: wait for the density to be converged.'
+      ABI_WARNING(msg)
     end if
   end subroutine compute_e_kinetic
   !!***
