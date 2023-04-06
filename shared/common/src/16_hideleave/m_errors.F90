@@ -38,7 +38,7 @@ MODULE m_errors
  use ifcore
 #endif
 
- use iso_c_binding,     only : c_ptr, c_size_t
+ use iso_c_binding,     only : c_ptr, c_size_t, c_associated
 
  use m_io_tools,        only : flush_unit, lock_and_write, file_exists, num_opened_units, show_units, open_file
  use m_fstrings,        only : toupper, basename, indent, lstrip, atoi, strcat, itoa
@@ -1146,10 +1146,18 @@ elemental subroutine unused_c_ptr(var)
 type(c_ptr), intent(IN) :: var
 
 !Local variables-------------------------------
+#ifdef FC_NAG
+logical :: dummy
+#else
 type(c_ptr) :: dummy
+#endif
 ! *********************************************************************
 
- dummy = var
+#ifdef FC_NAG
+if (.false.) dummy = c_associated(var)
+#else
+dummy = var
+#endif
 
 end subroutine unused_c_ptr
 !!***
