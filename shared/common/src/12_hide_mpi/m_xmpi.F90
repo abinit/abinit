@@ -727,6 +727,18 @@ interface xmpi_lor
 end interface xmpi_lor
 !!!***
 
+! This to bypass missing interface for MPI_WIN_ALLOCATE etc
+! See https://github.com/pmodels/mpich/issues/2659
+!INTERFACE MPI_WIN_ALLOCATE_SHARED
+!SUBROUTINE MPI_WIN_ALLOCATE_SHARED_CPTR(SIZE, DISP_UNIT, INFO, COMM, &
+!BASEPTR, WIN, IERROR)
+!USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+!INTEGER :: DISP_UNIT, INFO, COMM, WIN, IERROR
+!INTEGER(KIND=XMPI_ADDRESS_KIND) :: SIZE
+!TYPE(C_PTR) :: BASEPTR
+!END SUBROUTINE
+!END INTERFACE MPI_WIN_ALLOCATE_SHARED
+
 
 !----------------------------------------------------------------------
 
@@ -5175,7 +5187,11 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
   call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
  end select
 
-#if 0
+ ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08
+ ! else the gcc with mpicc complains with
+ ! Error: Type mismatch in argument ‘baseptr’ at (1); passed TYPE(c_ptr) to INTEGER(8)
+ ! See https://github.com/pmodels/mpich/issues/2659
+
 #ifdef HAVE_MPI
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
@@ -5190,7 +5206,6 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
-#endif
 #endif
 
 end subroutine xcomm_allocate_shared_master

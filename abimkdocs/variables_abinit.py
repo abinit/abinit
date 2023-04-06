@@ -9655,7 +9655,7 @@ input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
 will be included. If a PAW dataset is used where this quantity is included, then a non-zero
-value in [[lambsig]] will override the PAW value. 
+value in [[lambsig]] will override the PAW value.
 The value to be used here can be obtained from the PAW core wavefunctions and the
 Lamb formula [[cite:Abragam1961]].
 """,
@@ -20840,6 +20840,29 @@ In the case of Path-Integral Molecular Dynamics using the Langevin Thermostat
 Typical value range is 0.00001-0.001.
 """,
 ),
+
+Variable(
+    abivarname="vloc_rcut",
+    varset="dev",
+    vartype="real",
+    topics=['Planewaves_expert'],
+    dimensions="scalar",
+    defaultval=6.0,
+    mnemonics="V LOCal Radial CUToff",
+    characteristics=['[[LENGTH]]'],
+    added_in_version="9.8.0",
+    text=r"""
+This variable defines the cutoff for the radial mesh used to compute `epsatm`
+(the alpha term in the total energy due to the pseudos) and the Bessel transform
+for the local part in the case of NC pseudos given in UPF2 format.
+
+This parameter can be used to cut off the numerical noise arising from the large-r tail when integrating V_loc(r) - Z_v/r.
+In QE, vloc_rcut is harcoded to 10 Bohr but numerical experiments showed that such value leads to oscillations
+in the second order derivatives of the vloc form factors.
+For this reason, the default value in Abinit is set to 6.0.
+""",
+),
+
 
 Variable(
     abivarname="vprtrb",

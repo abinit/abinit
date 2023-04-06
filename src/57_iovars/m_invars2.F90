@@ -888,6 +888,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vis',tread,'DPR')
  if(tread==1) dtset%vis=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vloc_rcut',tread,'LEN')
+ if(tread==1) dtset%vloc_rcut=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsm',tread,'ENE')
  if(tread==1) dtset%ecutsm=dprarr(1)
 

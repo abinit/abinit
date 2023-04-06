@@ -107,8 +107,6 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lloc,lmax,lmnmax,lnmax,mpsang,mpssoang,mqgrid,mqgrid_vl
@@ -682,8 +680,6 @@ end subroutine psp9in
 #if defined HAVE_LIBPSML
 
 subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
