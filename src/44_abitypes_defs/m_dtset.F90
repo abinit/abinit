@@ -873,6 +873,7 @@ type, public :: dataset_type
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
+ real(dp) :: vloc_rcut = 6.0_dp
  real(dp) :: wfmix
  real(dp) :: wtq
  real(dp) :: wvl_hgrid
@@ -2144,6 +2145,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%vdw_tol            = dtin%vdw_tol
  dtout%vdw_tol_3bt        = dtin%vdw_tol_3bt
  dtout%vis                = dtin%vis
+ dtout%vloc_rcut          = dtin%vloc_rcut
  dtout%wfmix              = dtin%wfmix
  dtout%wfk_task           = dtin%wfk_task
  dtout%wtq                = dtin%wtq
@@ -3511,7 +3513,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' vdw_df_qratio vdw_df_rcut vdw_df_rsoft'
  list_vars=trim(list_vars)//' vdw_df_threshold vdw_df_tolerance'
  list_vars=trim(list_vars)//' vdw_df_tweaks vdw_df_zab'
- list_vars=trim(list_vars)//' vel vel_cell vis vprtrb'
+ list_vars=trim(list_vars)//' vel vel_cell vis vloc_rcut vprtrb'
 !W
  list_vars=trim(list_vars)//' wfinit wfmix wfoptalg wtatcon wtk wtq'
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'

@@ -122,8 +122,7 @@ subroutine upf1_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  character(len=500) :: msg
  type(atomdata_t) :: atom
  logical, allocatable :: found_l(:)
- real(dp), allocatable :: work_space(:),work_spl(:)
- real(dp), allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
+ real(dp), allocatable :: work_spl(:), ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:)
 
 ! *********************************************************************
 
@@ -207,13 +206,11 @@ subroutine upf1_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
 
 
  ! Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_MALLOC(work_space, (psps%mqgrid_vl))
  ABI_MALLOC(work_spl, (psps%mqgrid_vl))
 
  call spline (psps%qgrid_vl,vlspl(:,1),psps%mqgrid_vl,yp1,ypn,work_spl)
 
  vlspl(:,2) = work_spl(:)
- ABI_FREE(work_space)
  ABI_FREE(work_spl)
 
  ! this has to do the FT of the projectors to reciprocal space
@@ -292,6 +289,7 @@ end subroutine upf1_to_abinit
 !!
 !! INPUTS
 !!  filpsp = name of file with UPF2 data
+!!  vloc_rcut= Real-space cutoff for local part
 !!  psps = sturcture with global dimension data for pseudopotentials, header info ...
 !!    used contents:
 !!       psps%lmnmax
@@ -328,7 +326,7 @@ end subroutine upf1_to_abinit
 !!
 !! SOURCE
 
-subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
+subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, lloc, mmax, &
                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, nctab, maxrad)
 
  use pseudo_types,        only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
@@ -340,11 +338,11 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 !Arguments -------------------------------
  integer,intent(in) :: ipsp
  character(len=fnlen), intent(in) :: filpsp
+ real(dp),intent(in) :: vloc_rcut
  type(pseudopotential_type),intent(in) :: psps
  type(nctab_t),intent(inout) :: nctab
  integer, intent(out) :: pspxc, lmax, lloc, mmax
- real(dp), intent(out) :: znucl, zion
- real(dp), intent(out) :: epsatm, xcccrc, maxrad
+ real(dp), intent(out) :: znucl, zion, epsatm, xcccrc, maxrad
  !arrays
  integer, intent(out)  :: indlmn(6,psps%lmnmax), nproj_l(psps%mpssoang)
  real(dp), intent(inout) :: ekb(psps%dimekb)
@@ -355,9 +353,8 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 !Local variables -------------------------
  integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, iwfc !, iq
  integer :: atmwfc_lmax, mmax_cut
- !real(dp),parameter :: rcut = 10.0_dp  ! QE Value
- real(dp),parameter :: rcut = 6.0_dp   ! PSP8 value
- !real(dp),parameter :: rcut = 1000.0_dp  ! No cufoff
+ !real(dp),parameter :: vloc_rcut = 10.0_dp  ! QE Value
+ !real(dp),parameter :: vloc_rcut = 6.0_dp   ! PseudoDojo value used to generate psp8 files
  real(dp) :: yp1, ypn, amesh, damesh, intg
  character(len=500) :: msg
  logical :: linear_mesh, debug
@@ -368,8 +365,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  !integer :: nproj_tmp(psps%mpssoang)
  integer,allocatable :: awfc_indlmn(:,:)
  logical,allocatable :: found_l(:)
- real(dp),allocatable :: work_space(:), work_spl(:)
- real(dp),allocatable :: ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:), chi_tmp(:)
+ real(dp),allocatable :: work_spl(:), ff(:), ff1(:), ff2(:), rad_cc(:), proj(:,:), chi_tmp(:)
  real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
 
 ! *********************************************************************
@@ -386,10 +382,6 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  zion = upf%zp
  mmax = upf%mesh
  maxrad = upf%rmax
- ! FIXME Temporary hack
- !mmax = 300  ! H
- !mmax = 600  ! Si
- !maxrad = upf%r(mmax)
 
  ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
  lmax = upf%lmax
@@ -450,20 +442,22 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ! This is used to cut off the numerical noise arising from the
  ! large-r tail in cases like the integration of V_loc-Z/r
  !
- ! msh is forced to be odd for simpson integration (maybe obsolete?)
- !
+ ! NB: In QE, the default value for vloc_rcut is 10 Bohr.
+ call wrtout(std_out, sjoin(" Cutting radial-mesh for vloc using vloc_rcut:", ftoa(vloc_rcut), "(Bohr)"))
+ mmax_cut = mmax
  do ir=1,upf%mesh
-   if (upf%r(ir) > rcut) then
-     mmax_cut = ir; goto 5
+   if (upf%r(ir) > vloc_rcut) then
+     mmax_cut = ir
+     ! msh is forced to be odd for simpson integration (maybe obsolete?)
+     mmax_cut = 2 * ( (mmax_cut + 1) / 2) - 1
+     exit
    end if
  end do
- mmax_cut = mmax
-5 mmax_cut = 2 * ( (mmax_cut + 1) / 2) - 1
 
- write(std_out,*)" UPF file with mmax: ", mmax, " with r_max:", upf%r(mmax)
- write(std_out,*)" Using mmax_cut: ", mmax_cut, " with r_cut:", upf%r(mmax_cut)
+ !write(std_out,*)" UPF file with mmax: ", mmax, " with r_max:", upf%r(mmax)
+ !write(std_out,*)" Using mmax_cut: ", mmax_cut, " with r_cut:", upf%r(mmax_cut)
 
- ! Note mmax_cut
+ ! Note mmax_cut here.
  if (linear_mesh) then
    call psp8lo(amesh, epsatm, mmax_cut, psps%mqgrid_vl, psps%qgrid_vl, &
                vlspl(:,1), upf%r, upf%vloc, yp1, ypn, zion)
@@ -473,13 +467,11 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  end if
 
  ! Fit spline to q^2 V(q) (Numerical Recipes subroutine)
- ABI_MALLOC(work_space, (psps%mqgrid_vl))
  ABI_MALLOC(work_spl, (psps%mqgrid_vl))
 
  call spline(psps%qgrid_vl, vlspl(:,1), psps%mqgrid_vl, yp1, ypn, work_spl)
 
  vlspl(:,2) = work_spl(:)
- ABI_FREE(work_space)
  ABI_FREE(work_spl)
 
  debug = .False.!; debug = .True.
@@ -504,7 +496,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
    write(std_out,*)' ypn    = ', ypn
    write(std_out,*)' zion   = ', zion
    !stop
- end  if
+ end if
 
  nproj_l = 0
 
@@ -626,6 +618,14 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ! if we find a core density, do something about it
  ! rho_atc contains the nlcc density
  ! rho_at contains the total density
+
+ ! In Abinit, at least for the Troullier-Martins pseudopotential,
+ ! the pseudocore charge density and its derivatives (xccc1d)
+ ! are introduced in a linear grid.
+ ! This grid is normalized, so the radial coordinates run between
+ ! from 0 and 1 (from 0 to xcccrc, where xcccrc is the radius
+ ! where the pseudo-core becomes zero).
+
  xcccrc = zero; xccc1d = zero
 
  if (upf%nlcc) then

@@ -1350,6 +1350,9 @@ contains
  dprarr(1,:)=dtsets(:)%vis
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vis','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%vloc_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vloc_rcut','LEN',0)
+
  dprarr(1,:)=dtsets(:)%vprtrb(1)
  dprarr(2,:)=dtsets(:)%vprtrb(2)
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,2,narrm,ncid,ndtset_alloc,'vprtrb','ENE',0)

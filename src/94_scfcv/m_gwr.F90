@@ -3372,7 +3372,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
                    desc_qbz%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
- ! FFT Wc(g,g') -> Wc(r,g') and stored results in rgp
+ ! FFT Wc(g,g') -> Wc(r,g') and store results in rgp
  do ig2=1,wc_ggp%sizeb_local(2), gwr%uc_batch_size
    ndat = blocked_loop(ig2, wc_ggp%sizeb_local(2), gwr%uc_batch_size)
    call uplan_k%execute_gr(ndat, wc_ggp%buffer_cplx(:,ig2), rgp%buffer_cplx(:,ig2))
@@ -5122,7 +5122,7 @@ if (gwr%use_supercell_for_sigma) then
  !
  ! 1) Compute the matrix elements of Sigma_c in the KS basis set by integrating over the real-space supercell.
  !
- ! 2) Compute and store Sigma_c^k(g,g', i omega) and then compute the matrix elements in g-space.
+ ! 2) Compute and store Sigma_c^k(g,g',iomega) and then compute the matrix elements in g-space.
  !
  ! The first option requires less memory provided we are interested in a small set of KS states.
  ! The second option is interesting if we need to compute several matrix elements, including off-diagonal terms.

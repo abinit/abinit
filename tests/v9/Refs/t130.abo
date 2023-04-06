@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 24 Jan 2023.
-- ( at 22h52 )
+.Starting date : Mon  3 Apr 2023.
+- ( at 23h28 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_quick_prs/_build/tests/UPF2/SiO2/Test_suite/v9_t130/t130.abi
 - output file    -> t130.abo
@@ -119,6 +119,7 @@ P           mkmem           4
             typat      1  1  1  2  2  2  2  2  2
            useylm1          0
            useylm2          1
+        vloc_rcut      1.00000000E+02 Bohr
            wfinit1       2
            wfinit2       0
               wtk        0.12500    0.37500    0.12500    0.37500
@@ -704,6 +705,7 @@ P           mkmem           4
             typat      1  1  1  2  2  2  2  2  2
            useylm1          0
            useylm2          1
+        vloc_rcut      1.00000000E+02 Bohr
            wfinit1       2
            wfinit2       0
               wtk        0.12500    0.37500    0.12500    0.37500
