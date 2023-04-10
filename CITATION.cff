@@ -9,6 +9,6 @@ preferred-citation:
   - doi: 10.1016/J.cpc.2019.107042
 license: 
   - GPL-3.0
-message: "If you use this software, please cite the article from preferred-citation DOI containt in this CITATION.cff file and also consult https://docs.abinit.org/theory/acknowledgments for further acknowledgments to the ABINIT group."
+message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file and also consult https://docs.abinit.org/theory/acknowledgments for further acknowledgments of the ABINIT group efforts."
 repository-code: "https://github.com/abinit"
 title: "ABINIT"
