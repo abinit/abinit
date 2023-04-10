@@ -190,8 +190,8 @@ nav:
     - DFT beyond basics:
         - properties at the nucleus: tutorial/nuc.md
         - DFT+U : tutorial/dftu.md
-        - U_calc_RPA: tutorial/ucalc_crpa.md 
-        - U_calc_LR: tutorial/ucalc_lr.md
+        - cRPA U(J): tutorial/ucalc_crpa.md 
+        - Linear Response U(J): tutorial/lruj.md
         - PAW2: tutorial/paw2.md
         - PAW3: tutorial/paw3.md
         - positron : tutorial/positron.md
