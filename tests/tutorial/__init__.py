@@ -23,7 +23,8 @@ subsuites = [
 "positron",
 "spin",
 "tddft",
-"ucalc_lr",
+"udet",
+"lruj",
 "fold2bloch",
 ]
 
@@ -98,9 +99,9 @@ inp_files = [
 "tspin_5.abi",
 "tspin_6.abi",
 "ttddft_1.abi",
-"tucalc_lr_1.abi",
-"tucalc_lr_2.abi",
-"tucalc_lr_3.abi",
+"tlruj_1.abi",
+"tlruj_2.abi",
+"tlruj_3.abi",
 "tfold2bloch_1.abi",
 "tfold2bloch_2.abi",
 ]

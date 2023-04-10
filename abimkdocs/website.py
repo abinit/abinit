@@ -296,7 +296,7 @@ class Website(object):
             "atompaw", "cut3d",
             #"multibinit",
             "mrgddb", "mrggkk", "band2eps",
-            #"ujdet",
+            #"lruj",
             "fold2Bloch", "fftprof",
             #"conducti",
             "mrgscr",
