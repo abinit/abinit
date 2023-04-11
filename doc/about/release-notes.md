@@ -1475,7 +1475,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 
@@ -2208,7 +2208,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 
