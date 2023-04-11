@@ -20848,7 +20848,7 @@ Variable(
     topics=['Planewaves_expert'],
     dimensions="scalar",
     defaultval=6.0,
-    mnemonics="V LOCal Radial CUToff",
+    mnemonics="VLOCal Radial CUToff",
     characteristics=['[[LENGTH]]'],
     added_in_version="9.8.0",
     text=r"""
