@@ -133,6 +133,13 @@ inp_files = [
     # Optcell test
     "t104.abi", # Testing optcell 6 to relax 3rd vector not orthogonal to 1st and 2nd vectors
 
+    # PAW+U and lruj/ujdet utilities
+    "t105.abi", # Preliminary step for tests 106-109; generate WFK and DEN
+    "t106.abi", # Hubbard U (macro_uj=1) test of ujdet subroutines
+    "t107.abi", # Hund's J (macro_uj=4); preliminary step for t109
+    "t108.abi", # Test of irdden and prtdosm input keywords
+    "t109.abi", # Test of lruj post-processing w/ four LRUJ.nc files from t107
+
     # Lattice Wannier function
     # scdm-k method for lattice wannier function in anaddb (disentangle option 2)
     "t110.abi",

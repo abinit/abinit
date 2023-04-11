@@ -717,7 +717,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  else if (Cryst%timrev==2) then
    msg = ' Time-reversal symmetry is present '
  else
-   ABI_BUG('Wrong value for timrev')
+   ABI_BUG(sjoin('Wrong value for timrev:', itoa(cryst%timrev)))
  end if
  call wrtout(my_unt,msg,my_mode)
  if (my_prtvol == -1) return
