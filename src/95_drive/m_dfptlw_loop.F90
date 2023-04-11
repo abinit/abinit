@@ -576,6 +576,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      if (samepert) then
                        write(message,'(2a)')'-dfptlw_loop : read the d2_dkdk wavefunctions from file: ',trim(fiwfdkdk)
                        d2_dkdk_f2=d2_dkdk_f
+                       d2_dkdk_f2%fh=d2_dkdk_f%fh+1
                      else
                        call rf2_getidir(i2dir,i3dir,idir_dkdk)
                        !if (idir_dkdk>6) idir_dkdk=idir_dkdk-3
