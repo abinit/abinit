@@ -1046,9 +1046,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
 
-   gqk%spin = spin
-   gqk%natom3 = 3 * gstore%cryst%natom
-   gqk%cplex = gstore_cplex
+   gqk%spin = spin; gqk%natom3 = 3 * gstore%cryst%natom; gqk%cplex = gstore_cplex
    ABI_CHECK_IRANGE(gqk%cplex, 1, 2, "gstore_cplex")
 
    ! Compute bstart and band size for this spin.

@@ -9,8 +9,8 @@
 !!   Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
 !!
 !!   Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W
-!!   using a 1D processor grid with block distribution along columns.
-!!   A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs.
+!!   using a 1D processor grid and block distribution along columns.
+!!   A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs along columns.
 !!
 !!   Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
 !!   Matrices in (g,g') space are distributed along columns so that the g-index is local
@@ -41,13 +41,13 @@
 !!                |         |         |
 !!                |--------------------
 !!
-!!   Differences with respect to the GW code in frequency-domain:
+!!   Differences with respect to the quartic GW code formulated in frequency-domain (real axis)
 !!
 !!    - in GWR, the k-mesh must be Gamma-centered.
 !!    - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
 !!    - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
 !!
-!!   Technical proplems:
+!!   Technical problems:
 !!
 !!     - it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
 !!       the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
@@ -57,7 +57,7 @@
 !!       we use a finite small q when computing Wc for q --> 0. This breaks the symmetry of the system
 !!       and QP degeneracies. The equations needed to express the angular dependency of W(q) for q --> 0
 !!       are well known but one has to pass through the Adler-Wiser expression.
-!!       Solution: Compute heads and wings using a WFK_fine wavefunction file with dense k-mesh and less bands.
+!!       Possible solution: Compute heads and wings using a WFK_fine wavefunction file with dense k-mesh and less bands.
 !!       The dipole matrix elements are computed with the DFPT routines, still we need to
 !!       recode a lot of stuff that is already done in cchi0q0, especially symmetries.
 !!       Note, however, that tchi is Hermitian along the imaginary axis, expect for omega = 0 in metals
@@ -74,7 +74,8 @@
 !!
 !!    - Decide whether we should use VASP conventions for G and the analytic continuation or the "standard" ones by Godby.
 !!      The standard ones are consistent with Hedin's notations and correspond to the ones used in the legacy GW code.
-!!      On the other hand, VASP notations make life easier if one has to implement PAW.
+!!      On the other hand, VASP notations make life easier if one has to implement PAW as all the equations
+!!      have been already derived.
 !!
 !!    - Address nspinor = 2 and PBLAS distribution as MPI proc can have both spinors in memory
 !!      In other words, we should store the first/last index in gvec for each spinor
@@ -292,7 +293,7 @@ module m_gwr
 !! gwr_t
 !!
 !! FUNCTION
-!!  This object provides the high-level API to perform the different steps of the GWR algorithm.
+!!  This object provides the high-level API used to perform the different steps of the GWR algorithm.
 !!
 !! SOURCE
 
@@ -799,7 +800,7 @@ contains
 !! gwr_init
 !!
 !! FUNCTION
-!!  Initialize the object.
+!!  Initialize the gwr object.
 !!
 !! INPUTS
 !!
@@ -866,6 +867,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%nspinor = dtset%nspinor; gwr%nsppol = dtset%nsppol; gwr%nspden = dtset%nspden
  gwr%natom = dtset%natom; gwr%usepaw = dtset%usepaw
 
+ ! Decide whether one should use supercells or convolutions in the BZ.
  gwr%use_supercell_for_tchi = .True.
  if (gwr%dtset%gwr_chi_algo == 0) then
    ! Automatic selection
@@ -881,6 +883,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    gwr%use_supercell_for_sigma = gwr%dtset%gwr_sigma_algo == 1
  end if
 
+ ! Set q0
  if (dtset%gw_nqlwl /= 0) gwr%q0 = dtset%gw_qlwl(:, 1)
 
  mband = ks_ebands%mband; nbsum = dtset%nband(1)
@@ -892,7 +895,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Note that in GWR computing quantities on the real-axis is really cheap
  ! so we can use very dense meshes without affecting performance.
  ! The default for nfresp and freqspmax is zero.
- ! TODO: Perhaps we can make it optional as in legacy-GW
+ ! TODO: Perhaps we can make it optional as in legacy-GW.
  wmax = dtset%freqspmax; if (abs(wmax) < tol6) wmax = 100 * eV_Ha
  gwr%nwr = dtset%nfreqsp
  if (gwr%nwr ==  0) gwr%nwr = nint(wmax / (0.05 * eV_Ha))
@@ -910,7 +913,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
                              !bz2ibz=new%ind_qbz2ibz)  # FIXME
  ABI_FREE(wtk)
 
- ! In principle kibz should be equal to ks_ebands%kptns
+ ! In principle kibz should be equal to ks_ebands%kptns.
  ABI_CHECK_IEQ(gwr%nkibz, ks_ebands%nkpt, "nkibz != ks_ebands%nkpt")
  ABI_CHECK(all(abs(ks_ebands%kptns - kibz) < tol12), "ks_ebands%kibz != kibz")
 
@@ -919,7 +922,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
  gwr%ngkpt = get_diag(ks_ebands%kptrlatt)
 
- ! Note symrec convention
+ ! Note symrec convention.
  ebands_timrev = kpts_timrev_from_kptopt(ks_ebands%kptopt)
  krank_ibz = krank_from_kptrlatt(gwr%nkibz, kibz, ks_ebands%kptrlatt, compute_invrank=.False.)
 
@@ -1023,7 +1026,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  end if ! nkptgw /= 0
 
- ! Include all degenerate states and map kcalc to the ibz.
+ ! Include all degenerate states and map kcalc to the IBZ.
  ! NB: This part is copied from sigmaph.
 
  ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
@@ -1180,9 +1183,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  ! Find FFT mesh and max number of g-vectors
  ! =========================================
  ! Note the usage of gwr_boxcutmin and the loops over the full BZ. All the procs execute this part.
-
- gwr%g_ngfft = gwr%dtset%ngfft ! Allow user to specify fftalg
- gwr%g_ngfft(1:6) = 0
+ gwr%g_ngfft = gwr%dtset%ngfft; gwr%g_ngfft(1:6) = 0  ! Allow user to specify fftalg
 
  gwr%green_mpw = -1
  do ik_bz=1,gwr%nkbz
@@ -1518,7 +1519,9 @@ end block
  ABI_MALLOC(gwr%tchi_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
  ABI_MALLOC(gwr%sigc_kibz, (2, gwr%nkibz, gwr%ntau, gwr%nsppol))
 
- ! Create netcdf file to store results.
+ ! ====================================
+ ! Create netcdf file to store results
+ ! ====================================
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
 
  if (my_rank == master) then
@@ -2136,7 +2139,7 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
 
  ! Init set of (npwsp, nbsum) PBLAS matrix distributed within the g_comm communicator.
  ! and distribute it over bands so that each proc reads a subset of bands in read_band_block
- ! Note size_blocs below that corresponds to round-robin distribution along band axis.
+ ! Note size_blocs below that corresponds to a round-robin distribution along the band axis.
 
  ABI_MALLOC(gwr%ugb, (gwr%nkibz, gwr%nsppol))
  gwr%ugb_nband = nbsum
@@ -2637,17 +2640,17 @@ end subroutine gwr_wcq_to_scbox
 !!  gwr_rotate_gpm
 !!
 !! FUNCTION
-!!  Reconstruct the Green's functions in the kBZ from the IBZ.
+!!  Reconstruct the Green's functions in the BZ from the IBZ.
 !!
 !! INPUTS
 !!   ik_bz = Index of the k-point in the BZ
 !!   itau = tau index (global index)
-!!   spin = spin index
-!!   [ipm_list]=Optional list of ipm indices to be condired, e.g. ipm_list=[2] to compute the -tau component.
+!!   spin = spin index (global index)
+!!   [ipm_list]=Optional list of ipm indices to be considered, e.g. ipm_list=[2] to compute the -tau component.
 !!
 !! OUTPUT
-!!  desc_kbz =
-!!  gt_pm(2) =
+!!  desc_kbz = Descriptor in the BZ
+!!  gt_pm(2) = Gk(+/-tau)
 !!
 !! NOTES
 !!
@@ -2679,8 +2682,7 @@ subroutine gwr_rotate_gpm(gwr, ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig1, ig2, il_g1, il_g2, ipm, ik_ibz, isym_k, trev_k, g0_k(3), tsign_k
- integer :: ii, num_pm, ipm_list__(2)
+ integer :: ig1, ig2, il_g1, il_g2, ipm, ik_ibz, isym_k, trev_k, g0_k(3), tsign_k, ii, num_pm, ipm_list__(2)
  logical :: isirr_k
 !arrays
  integer :: g1(3), g2(3)
@@ -2786,8 +2788,7 @@ end subroutine gwr_rotate_gpm
 !!  gwr_get_myk_green_gpr
 !!
 !! FUNCTION
-!!  Use FFTs to compute G_k(g,g') --> G_k(g',r)
-!!  for each k in the BZ treated by this MPI proc for given spin and tau.
+!!  Use FFTs to compute G_k(g,g') --> G_k(g',r) for each k in the BZ treated by this MPI proc for given spin and tau.
 !!
 !!  1) FFT Transform the first index and multiply by e^{ik.r}:
 !!
@@ -2946,7 +2947,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
                    desc_kbz%gvec, gwpc, gwr%dtset%use_gpu_cuda)
 
- ! For each tau
+ ! For each tau in imp_list__
  do ii=1,num_pm
    ipm = ipm_list__(ii)
    ! Allocate temporary rgp PBLAS matrix to store G(r,g')
@@ -3136,7 +3137,7 @@ end subroutine gwr_rpr_to_ggp
 !!  gwr_rotate_wc
 !!
 !! FUNCTION
-!!  Reconstruct Wc(q) in the BZ from the IBZ.
+!!  Reconstruct Wc(q,g,g') in the BZ from the IBZ.
 !!
 !! INPUTS
 !!
@@ -3608,6 +3609,7 @@ end subroutine gwr_cos_transform
 !!  desc_init
 !!
 !! FUNCTION
+!! Initialize the descriptor.
 !!
 !! INPUTS
 !!
@@ -3655,7 +3657,7 @@ end subroutine desc_init
 !!  desc_get_vc_sqrt
 !!
 !! FUNCTION
-!!  Compute square root of Coulomb interaction vc(q,g).
+!!  Compute square root of the Coulomb interaction vc(q,g).
 !!
 !! SOURCE
 
@@ -3965,7 +3967,7 @@ end subroutine gwr_print_mem
 !!  gwr_build_tchi
 !!
 !! FUNCTION
-!!  Compute the irreducible polarizability.
+!!  High-level routine to compute the irreducible polarizability.
 !!
 !! SOURCE
 
@@ -4025,7 +4027,7 @@ subroutine gwr_build_tchi(gwr)
 
  if (gwr%use_supercell_for_tchi) then
    ! ============================
-   ! GWR algorithm with supercell
+   ! Chi algorithm with supercell
    ! ============================
    call print_chi_header()
 
@@ -4810,7 +4812,7 @@ end subroutine gwr_print_trace
 !!  gwr_build_wc
 !!
 !! FUNCTION
-!!  Compute Wc(i tau) from tchi(i omega)
+!!  Compute Wc(i tau,g,g') from tchi(i omega,g,g')
 !!
 !! INPUTS
 !!
@@ -4858,8 +4860,8 @@ subroutine gwr_build_wc(gwr)
  ! Allocate PBLAS arrays for wc_qibz(g,g')
  ! =======================================
  ! Note that we have already summed tchi over spin.
- ! Also, G=0 corresponds to iglob = 1 as only q-points in the IBZ are treated.
- ! This is not true for the other q-points in the full BZ as we may have a non-zero umklapp g0_q
+ ! Also, G=0 corresponds to iglob = 1 as only q-points in the IBZ are treated here.
+ ! This is not true for the other q-points in the full BZ as we may have a non-zero umklapp g0_q.
  ABI_MALLOC(gwr%wc_qibz, (gwr%nqibz, gwr%ntau, gwr%nsppol))
 
  free_tchi = .True.; if (free_tchi) gwr%tchi_space = "none"
@@ -4915,7 +4917,7 @@ subroutine gwr_build_wc(gwr)
 
        call wc%change_size_blocs(em1) ! processor=slkproc_4diag
        !call em1%invert()
-       call em1%hpd_invert("U") ! TODO: Can call hpd_invert
+       call em1%hpd_invert("U") ! TODO: Can use hpd_invert
        call wc%take_from(em1, free=.True.)  ! processor=wc%processor)
 
        !call wrtout(std_out, sjoin(" e-1 at q:", ktoa(qq_ibz), "i omega:", ftoa(gwr%iw_mesh(itau) * Ha_eV), "eV"))
@@ -4973,6 +4975,7 @@ subroutine gwr_build_wc(gwr)
  call xmpi_sum_master(eps_wq, master, gwr%kgt_comm%value, ierr)
 
  if (gwr%comm%me == master) then
+   ! Print results to ab_out for testing purposes.
    ydoc = yamldoc_open('EMACRO_WITHOUT_LOCAL_FIELDS') !, width=11, real_fmt='(3f8.3)')
    call ydoc%open_tabular("epsilon_{iw, q -> Gamma}(0,0)") ! comment="(iomega, iq_ibz)")
    do iw=1,gwr%ntau
@@ -5341,7 +5344,7 @@ else
    call ltg_kcalc(ikcalc)%print(unit=std_out, prtvol=gwr%dtset%prtvol)
  end do
 
- ! Allocate PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell
+ ! Allocate PBLAS matrices to store Wc_q(r',r,tau), and Sigma_kcalc(r',r,+/-tau) in the unit cell.
  nrsp = gwr%g_nfft * gwr%nspinor
  col_bsize = nrsp / gwr%g_comm%nproc; if (mod(nrsp, gwr%g_comm%nproc) /= 0) col_bsize = col_bsize + 1
 
@@ -5534,8 +5537,7 @@ end if
  ! Store matrix elements of Sigma_c(it), separate even and odd part
  ! then use sine/cosine transform to get Sigma_c(i omega).
  ! Finally, perform analytic continuation with Pade' to go to the real-axis
- ! and compute QP corrections and spectral functions.
- ! All procs execute this part as it's very cheap.
+ ! and compute QP corrections and spectral functions. All procs execute this part as it's very cheap.
 
  imag_zmesh(:) = j_dpc * gwr%iw_mesh; sigc_iw_diag_kcalc = zero; qp_solver_ierr = 0
 
@@ -6035,7 +6037,7 @@ subroutine gwr_rpa_energy(gwr)
          ! and Harl's PhD thesis available at: https://utheses.univie.ac.at/detail/2259
          ecut_soft = 0.8_dp * ecut_chi(icut)
 
-         ! TODO: Contribution due to head for q --> 0 is ignored.
+         ! TODO: Contribution due to the head for q --> 0 is ignored.
          ! This is not optimal but consistent with calc_rpa_functional
          do il_g2=1,tchi%sizeb_local(2)
            !ig2 = mod(tchi%loc2gcol(il_g2) - 1, desc_q%npw) + 1
@@ -6144,7 +6146,7 @@ end subroutine gwr_rpa_energy
 !!  gwr_run_g0w0
 !!
 !! FUNCTION
-!!  Compute QP energies within the G0W0 approximation and minimax meshes along the imaginary axis.
+!!  Driver to compute QP energies within the G0W0 approximation and minimax meshes along the imaginary axis.
 !!
 !! INPUTS
 !!  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
@@ -6215,9 +6217,7 @@ subroutine gwr_run_energy_scf(gwr)
  units = [std_out, ab_out]
  gwr_nstep = gwr%dtset%gwr_nstep
 
- if (gwr%nkcalc /= gwr%nkibz) then
-   ABI_ERROR("For energy-only GW, one should include all k-points in the IBZ")
- end if
+ ABI_CHECK_IEQ(gwr%nkcalc, gwr%nkibz, "For energy-only GW, one should include all k-points in the IBZ")
 
  select case (gwr%dtset%gwr_task)
  case ("EGEW")
@@ -7656,7 +7656,7 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
    ! TODO: g0 umklapp here can enter into play gmax may not be large enough!
    do ig=1,npw_
      do ii=1,3
-      gmax(ii) = max(gmax(ii), abs(gvec_(ii, ig)))
+       gmax(ii) = max(gmax(ii), abs(gvec_(ii, ig)))
      end do
    end do
    ABI_FREE(gvec_)
@@ -7756,8 +7756,6 @@ subroutine sc_sum(sc_shape, uc_ngfft, nspinor, ph1d, k_is_gamma, alpha, sc_data,
  call c_f_pointer(c_loc(sc_data), sc_data_ptr, &
                   shape=[uc_n1, sc_shape(1), uc_n2, sc_shape(2), uc_n3, sc_shape(3), nspinor])
 
- !do spinor=1,nspinor
- !end do
  ABI_CHECK(nspinor == 1, "nspinor 2 not coded")
  spinor = 1
  cout = zero

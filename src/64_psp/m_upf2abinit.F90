@@ -686,7 +686,6 @@ subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, llo
 
  nctab%num_tphi = upf%nwfc
  if (upf%nwfc > 0) then
- !if (.False.) then
    ! Store atomic wavefunctions and metadata in nctab, then compute form factors for spline.
    ! NB: lchi is the radial part of the KS equation, multiplied by r.
    ABI_MALLOC(awfc_indlmn, (6, upf%nwfc))
@@ -695,18 +694,15 @@ subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, llo
    ABI_MALLOC(chi_tmp, (upf%mesh))
 
    do iwfc=1, upf%nwfc
-     !print *, "label: ", upf%els(iwfc)
-     !print *, "n", upf%nchi(iwfc)
-     !print *, "nn", upf%nn(iwfc)
-     !print *, "j", upf%jchi(iwfc)
-     !print *, "l", upf%lchi(iwfc)
-     !print *, "occ:", upf%oc(iwfc)
+     !print *, "label: ", upf%els(iwfc); print *, "n", upf%nchi(iwfc)
+     !print *, "nn", upf%nn(iwfc); print *, "j", upf%jchi(iwfc)
+     !print *, "l", upf%lchi(iwfc); print *, "occ:", upf%oc(iwfc)
      atmwfc_lmax = max(atmwfc_lmax, upf%lchi(iwfc))
      chi_tmp = upf%chi(:, iwfc) ** 2; call simp_gen(intg, chi_tmp, mesh)
-     write(std_out, *)" wavefunction (before rescaling) integrates to: ",intg
+     !write(std_out, *)" wavefunction (before rescaling) integrates to: ",intg
      upf%chi(:, iwfc) = upf%chi(:, iwfc) / sqrt(intg)
      chi_tmp = upf%chi(:, iwfc) ** 2; call simp_gen(intg, chi_tmp, mesh)
-     write(std_out, *)" wavefunction (after rescaling) integrates to: ",intg
+     !write(std_out, *)" wavefunction (after rescaling) integrates to: ",intg
 
      ! NB: we only need ll (1), and iln (5) in psp8nl
      awfc_indlmn(1, iwfc) = upf%lchi(iwfc)
