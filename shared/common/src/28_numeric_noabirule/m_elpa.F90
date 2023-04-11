@@ -195,6 +195,10 @@ end subroutine elpa_func_uninit
 !!  mpi_comm_parent=Global communicator for the calculations
 !!  process_row=Row coordinate of the calling process in the process grid
 !!  process_col=Column coordinate of the calling process in the process grid
+!!  na=Order of matrix A
+!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
+!!  local_nrows=Leading dimension of A
+!!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
 !!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
 !!
 !! SIDE EFFECTS
@@ -202,10 +206,11 @@ end subroutine elpa_func_uninit
 !!
 !! SOURCE
 
-subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,gpu)
+subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,na,nblk,local_nrows,local_ncols,gpu)
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpi_comm_parent,process_row,process_col
+ integer,intent(in) :: na,nblk,local_nrows,local_ncols
  integer,intent(in),optional :: gpu
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 
@@ -217,8 +222,10 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,g
  err=0
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
- elpa_hdl%elpa => elpa_allocate()
+ elpa_hdl%elpa => elpa_allocate(err)
+ call elpa_func_error_handler(err_code=err,err_msg='Error in initialization')
  if (err==ELPA_OK.and.present(gpu)) call elpa_hdl%elpa%set("gpu",gpu,err)
+ call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
 #else
  if (err==0.and.present(gpu)) elpa_hdl%gpu=gpu
 #endif
@@ -227,7 +234,15 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,g
 
  elpa_hdl%is_allocated=.true.
 
+ ! Setting communicators
  call elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
+
+ ! Setting matrix size
+ call elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
+
+ ! Proper ELPA setup
+ err = elpa_hdl%elpa%setup()
+ call elpa_func_error_handler(err_code=err,err_msg='Error during ELPA setup')
 
 end subroutine elpa_func_allocate
 !!***
@@ -378,10 +393,6 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
    varname='process_col'
    call elpa_hdl%elpa%set(trim(varname),process_col,err)
  end if
- if (err==ELPA_OK) then
-   varname=''
-   if (elpa_hdl%elpa%setup()/=ELPA_OK) err=ELPA_ERROR
- endif
 #else
  elpa_hdl%mpi_comm_parent=mpi_comm_parent
  elpa_hdl%process_row=process_row
