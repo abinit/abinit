@@ -15,13 +15,13 @@ is_multi_parallel = True
 subsuites = [
 "dfpt",
 "dmft",
-"gspw",
+"paral_bandpw",
 "gswvl",
 "images",
 "mbt",
 "moldyn",
 "psic",
-"ucrpa",
+"ucalc_crpa",
 ]
 
 #: List of input files
@@ -34,11 +34,11 @@ inp_files = [
 #"tdfpt_04PAW.abi",
 "tdmft_1.abi",
 "tdmft_2.abi",
-"tgspw_01.abi",
-"tgspw_02.abi",    # OK
-"tgspw_03.abi",    # OK
-"tgspw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
-#"tgspw_05.abi",
+"tparal_bandpw_01.abi",
+"tparal_bandpw_02.abi",    # OK
+"tparal_bandpw_03.abi",    # OK
+"tparal_bandpw_04.abi",   # Unstable because nstep=5 and bandpp: 2d iteration oscillates and fldiff does not handle it!
+#"tparal_bandpw_05.abi",
 "tgswvl_1.abi",
 "tgswvl_2.abi",
 "timages_01.abi",
@@ -60,9 +60,9 @@ inp_files = [
 "tpsic_01.abi", 
 "tpsic_02.abi",   
 "tpsic_03.abi", 
-"tucrpa_1.abi",
-"tucrpa_2.abi",
-#"tucrpa_3.abi",
-#"tucrpa_4.abi",
-#"tucrpa_5.abi",
+"tucalc_crpa_1.abi",
+"tucalc_crpa_2.abi",
+#"tucalc_crpa_3.abi",
+#"tucalc_crpa_4.abi",
+#"tucalc_crpa_5.abi",
 ]

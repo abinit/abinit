@@ -1,21 +1,21 @@
-# Dynamic quadrupoles calculation for AlAs 
+# Dynamic quadrupoles calculation for AlAs
 # (conflictive Al PSP for useylm=1 due to all KB energies being negative)
-# (M. Royo, 22.11.2021) 
+# (M. Royo, 22.11.2021)
 
 ndtset 5
 
 #Set 1 : ground state self-consistency
 #*************************************
-getwfk1   0            
-kptopt1   1           
-nqpt1   0           
-tolvrs1   1.0d-4  
+getwfk1   0
+kptopt1   1
+nqpt1   0
+tolvrs1   1.0d-4
 
 
 #Set 2: Response function calculation of d/dk wave function
 #**********************************************************
-iscf2    -3     
-rfelfd2   2    
+iscf2    -3
+rfelfd2   2
 tolwfr2   1.0d-4
 
 #Set 3: Response function calculation of d2/dkdk wave function
@@ -45,46 +45,46 @@ lw_qdrpl5 1
 #######################################################################
 #Common input variables
 
-getwfk  1            
+getwfk  1
 useylm  1
 kptopt 2
 
 #Definition of the unit cell
-acell 3*10.61          
-rprim  0.0  0.5  0.5   
-       0.5  0.0  0.5   
-       0.5  0.5  0.0   
+acell 3*10.61
+rprim  0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
 
 #Definition of the atom types
-ntypat 2               
-znucl 13 33            
-                       
+ntypat 2
+znucl 13 33
+
 #Definition of the atoms
-natom 2               
-typat 1 2            
-xred                
-                    
-   0.0  0.0  0.0    
-   0.25 0.25 0.25   
+natom 2
+typat 1 2
+xred
+
+   0.0  0.0  0.0
+   0.25 0.25 0.25
 
 #Gives the number of bands
-nband  4  
+nband  4
 
 #Definition of the planewave basis set
 ecut    5.0           # Maximal kinetic energy cut-off, in Hartree
 
 #Definition of the k-point grid
 ngkpt 2 2 2
-nshiftk 4 
+nshiftk 4
 shiftk 0.5 0.5 0.5
        0.5 0.0 0.0
        0.0 0.5 0.0
        0.0 0.0 0.5
 
 #Definition of the SCF procedure
-nstep 30       
-diemac 9.0    
-             
+nstep 30
+diemac 9.0
+
  pp_dirpath "$ABI_PSPDIR"
  pseudos "13al.981214.fhi, As.fhi"
 
@@ -96,7 +96,7 @@ diemac 9.0
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t70.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
 #%% [paral_info]
 #%% max_nprocs = 4

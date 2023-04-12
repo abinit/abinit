@@ -752,7 +752,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  has_nd1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vectornd) )
 
  if (has_nd1) then
-   ABI_MALLOC(gh1ndc,(2,npw))
+   ABI_MALLOC(gh1ndc,(2,npw*my_nspinor))
+   ! this is hard coded for ndat = 1
    call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
      & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
      & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
@@ -760,8 +761,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    do ispinor=1,my_nspinor
      do ipw=1,npw
        ipws=ipw+npw*(ispinor-1)
-       gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+gh1ndc(1,ipw)
-       gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+gh1ndc(2,ipw)
+       gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+gh1ndc(1,ipws)
+       gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+gh1ndc(2,ipws)
      end do
    end do
    ABI_FREE(gh1ndc)
@@ -871,8 +872,6 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
 
 ! *************************************************************************
 
- !call timab(1904, 1, tsec)
-
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
  paral_kgb = mpi_enreg%paral_kgb
@@ -922,8 +921,6 @@ subroutine rf_transgrid_and_pack(isppol,nspden,usepaw,cplex,nfftf,nfft,ngfft,nvl
    ABI_FREE(vlocal_tmp)
    ABI_FREE(vlocal1_tmp)
  end if !nspden
-
- !call timab(1904, 2, tsec)
 
 end subroutine rf_transgrid_and_pack
 !!***

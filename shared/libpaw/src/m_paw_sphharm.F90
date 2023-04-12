@@ -104,6 +104,7 @@ function ylmc(il,im,kcart)
  real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi
  !complex(dpc) :: new_ylmc
  character(len=500) :: msg
+ complex(dpc) :: ctmp
 
 ! *************************************************************************
 
@@ -191,7 +192,10 @@ function ylmc(il,im,kcart)
  end select
 !
 !=== Treat the case im < 0 ===
- if (im < 0) ylmc=(-one)**(im)*CONJG(ylmc)
+ if (im < 0) then
+   ctmp = (-one)**(im)*CONJG(ylmc)
+   ylmc = ctmp
+ end if
 
  ! FIXME: Use the piece of code below as it works for arbitrary (l,m)
  ! the implementation above is buggy when the vector is along z!
@@ -257,6 +261,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  real(dp),parameter :: PPAD=tol8
  real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi,c
  character(len=500) :: msg
+ complex(dpc) :: ctmp 
 
 ! *************************************************************************
 
@@ -347,8 +352,10 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 !
 !=== Treat the case im < 0 ===
  if (im<0) then
-   dth = (-one)**(im)*CONJG(dth)
-   dphi= (-one)**(im)*CONJG(dphi)
+   ctmp = (-one)**(im)*CONJG(dth)
+   dth = ctmp
+   ctmp= (-one)**(im)*CONJG(dphi)
+   dphi= ctmp
  end if
 
 end subroutine ylmcd

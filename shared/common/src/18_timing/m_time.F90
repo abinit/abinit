@@ -24,7 +24,7 @@ module m_time
  use defs_basis
  use m_abicore
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -569,8 +569,9 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, com
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
 
- call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
-     do_flush=.True.)
+ call wrtout(std_out, sjoin(tag, ", wall:", sec2str(wall), ", cpu:", sec2str(cpu), avg_type), do_flush=.True.)
+
+ !if (present(end_str)) call wrtout(std_out, " ...")
  if (present(end_str)) call wrtout(std_out, end_str)
  if (present(out_wall)) out_wall = wall
 
