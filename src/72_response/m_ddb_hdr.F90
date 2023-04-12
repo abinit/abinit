@@ -34,7 +34,6 @@ MODULE m_ddb_hdr
  use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free, pawtab_bcast !, pawtab_copy
  use m_psps,      only : psps_copy, psps_free
  use m_io_tools,  only : open_file, get_unit
- use m_copy,      only : alloc_copy
  use m_fstrings,  only : sjoin
  use m_geometry,  only : mkrdim
 
@@ -665,12 +664,12 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
 
    ! Allocate the memory
    call ddb_hdr%malloc()
-  
+
    ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
    ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
    ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
-  
-  
+
+
    ! This is needed to read the DDBs in the old format
    ! GA : Not sure if we really need this.
    ddb_hdr%symafm(:)=1
@@ -682,8 +681,8 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
    if(ddb_hdr%matom>=1)then
      ddb_hdr%spinat(:,:)=zero
    end if
-  
-  
+
+
    ! Note: the maximum parameters (matom, mkpt, etc.) are inputs to ioddb8_in
    !       wile the actual parameters (natom, nkpt, etc.) are outputs
    call ioddb8_in(filename,ddb_hdr%matom,ddb_hdr%mband,&
@@ -697,8 +696,8 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
   &       ddb_hdr%tnons,ddb_hdr%tolwfr,ddb_hdr%tphysel,ddb_hdr%tsmear,&
   &       ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,ddb_hdr%xred,ddb_hdr%zion,&
   &       ddb_hdr%znucl)
-  
-  
+
+
   !  Read the psp information of the input DDB
    choice=1  ! Read
    call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
@@ -718,7 +717,7 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
  ! ===============================
 
  spgroup = 1  ! GA: One would need to recover the space group from the list
-              !     of symmetries. No easy way to do this. 
+              !     of symmetries. No easy way to do this.
               !     spgroup should really be written in the ddb.
               !     Not really an issue for now.
 
@@ -873,7 +872,7 @@ subroutine ddb_hdr_bcast(ddb_hdr, comm)
  call xmpi_bcast(ddb_hdr%psps%lmnmax, master, comm, ierr)
  call xmpi_bcast(ddb_hdr%psps%usepaw, master, comm, ierr)
  call xmpi_bcast(ddb_hdr%psps%useylm, master, comm, ierr)
- 
+
  ! Allocate arrays on the other nodes.
  if (xmpi_comm_rank(comm) /= master) then
 
@@ -883,7 +882,7 @@ subroutine ddb_hdr_bcast(ddb_hdr, comm)
     ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
     ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
     ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
-    
+
  end if
 
  ! Floats

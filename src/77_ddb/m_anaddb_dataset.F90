@@ -420,12 +420,12 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
    ABI_ERROR(message)
  end if
 
- anaddb_dtset%dosdeltae = one/Ha_cmm1
+ anaddb_dtset%dosdeltae = 0.2_dp/Ha_cmm1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dosdeltae',tread, 'DPR')
  if(tread == 1) anaddb_dtset%dosdeltae = dprarr(1)
 
 !FIXME : should probably be smaller
- anaddb_dtset%dossmear = 5.0/Ha_cmm1
+ anaddb_dtset%dossmear = one/Ha_cmm1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dossmear',tread, 'DPR')
  if(tread == 1) anaddb_dtset%dossmear = dprarr(1)
  if(anaddb_dtset%dossmear <= zero)then
