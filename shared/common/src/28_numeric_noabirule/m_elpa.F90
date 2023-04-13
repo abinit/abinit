@@ -215,22 +215,40 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,n
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 
 !Local variables-------------------------------
- integer :: err
+ integer :: err,l_gpu
+ character(len=10) :: varname
 
 ! *********************************************************************
 
  err=0
+ ! if optional parameter is present, use it
+ ! else use default value, i.e. don't use GPU
+ l_gpu = 0
+ if (present(gpu)) then
+   if(gpu/=0) l_gpu = 1
+ end if
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  elpa_hdl%elpa => elpa_allocate(err)
  call elpa_func_error_handler(err_code=err,err_msg='Error in initialization')
- if (err==ELPA_OK.and.present(gpu)) call elpa_hdl%elpa%set("gpu",gpu,err)
- call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
+
+ if(l_gpu==1) then
+#ifdef HAVE_LINALG_ELPA_OLD_GPU_SUPPORT
+   varname="gpu" ! Implies targeting NVIDIA GPUs (ELPA v2020.11 and previous versions)
 #else
- if (err==0.and.present(gpu)) elpa_hdl%gpu=gpu
+   varname="nvidia-gpu"
 #endif
 
- call elpa_func_error_handler(err_code=err,err_varname="gpu")
+   if (err==ELPA_OK) call elpa_hdl%elpa%set(varname,l_gpu,err)
+   call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
+   if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err)
+   call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
+ end if
+#else
+ if (err==0.and.l_gpu==1) elpa_hdl%gpu=l_gpu
+#endif
+
+ call elpa_func_error_handler(err_code=err,err_varname=varname)
 
  elpa_hdl%is_allocated=.true.
 
