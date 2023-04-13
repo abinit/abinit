@@ -2647,7 +2647,7 @@ end subroutine slk_pgemm_sp
 !!
 !! SOURCE
 
-subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, nev)
+subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, nev, use_gpu)
 
 #ifdef HAVE_LINALG_ELPA
   !Arguments ------------------------------------
@@ -2657,6 +2657,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
+  integer,optional,intent(in) :: use_gpu
 
   !Local variables ------------------------------
   type(elpa_hdl_t) :: elpa_hdl
@@ -2668,7 +2669,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   call elpa_func_allocate(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2), &
 &                           matrix%sizeb_global(1),matrix%sizeb_blocs(1),&
-&                           matrix%sizeb_local(1),matrix%sizeb_local(2))
+&                           matrix%sizeb_local(1),matrix%sizeb_local(2),gpu=use_gpu)
 
   if (istwf_k/=2) then
     call elpa_func_solve_evp_1stage(elpa_hdl,matrix%buffer_cplx,results%buffer_cplx,eigen,nev__)
@@ -2686,6 +2687,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
+  integer,optional,intent(in) :: use_gpu
 
 #ifdef HAVE_LINALG_SCALAPACK
   !Local variables-------------------------------
@@ -2715,6 +2717,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
 ! *************************************************************************
 
+  ABI_UNUSED(use_gpu) ! No GPU implementation is using scaLAPACK
   nev__ = matrix%sizeb_global(1); range = "A"; il = 0; iu = 0
   if (present(nev)) then
     nev__ = nev; range = "I"; il = 1; iu = nev
@@ -2860,7 +2863,7 @@ end subroutine compute_eigen_problem
 #ifdef HAVE_LINALG_ELPA
 
 subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-                              my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
+                              my_prow,my_pcol,np_rows,np_cols,sc_desc,comm,use_gpu)
 
   !-Arguments
   integer,intent(in) :: na
@@ -2871,6 +2874,7 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,intent(in) :: np_cols,np_rows
   integer,intent(in) :: sc_desc(9)
   integer,intent(in) :: comm
+  integer,optional,intent(in) :: use_gpu
   real*8 :: ev(na)
   complex*16 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   complex*16 :: tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
@@ -2883,7 +2887,7 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 ! *************************************************************************
 
   ! 0. Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols)
+  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols,gpu=use_gpu)
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
@@ -2921,7 +2925,7 @@ end subroutine solve_gevp_complex
 !----------------------------------------------------------------------
 
 subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-                           my_prow,my_pcol,np_rows,np_cols,sc_desc,comm)
+                           my_prow,my_pcol,np_rows,np_cols,sc_desc,comm,use_gpu)
 
   !-Arguments
   integer,intent(in) :: na
@@ -2932,6 +2936,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,intent(in) :: np_cols,np_rows
   integer,intent(in) :: sc_desc(9)
   integer,intent(in) :: comm
+  integer,optional,intent(in) :: use_gpu
   real*8 :: ev(na)
   real*8 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   real*8::tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
@@ -2943,7 +2948,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 ! *************************************************************************
 
   ! 0. Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols)
+  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols,gpu=use_gpu)
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
@@ -3006,7 +3011,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 !!
 !! SOURCE
 
-subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k,nev)
+subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k,nev,use_gpu)
 
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
@@ -3016,6 +3021,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
+  integer,optional,intent(in) :: use_gpu
 !Local
   type(matrix_scalapack) :: tmp1, tmp2
   integer :: i,n_col, n_row, nev__
@@ -3033,7 +3039,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 &          tmp1%buffer_cplx,tmp2%buffer_cplx, &
 &          processor%coords(1),processor%coords(2), &
 &          processor%grid%dims(1),processor%grid%dims(2), &
-&          matrix1%descript%tab,processor%comm)
+&          matrix1%descript%tab,processor%comm,use_gpu=use_gpu)
   else
      call solve_gevp_real(matrix1%sizeb_global(1), nev__, &
 &          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
@@ -3041,7 +3047,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 &          tmp1%buffer_real,tmp2%buffer_real, &
 &          processor%coords(1),processor%coords(2), &
 &          processor%grid%dims(1),processor%grid%dims(2), &
-&          matrix1%descript%tab,processor%comm)
+&          matrix1%descript%tab,processor%comm,use_gpu=use_gpu)
   end if
   call tmp1%free()
   call tmp2%free()
@@ -3054,6 +3060,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
+  integer,optional,intent(in) :: use_gpu
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
@@ -3078,6 +3085,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
 ! *************************************************************************
 
+  ABI_UNUSED(use_gpu) ! No GPU implementation is using scaLAPACK
   nev__ = matrix1%sizeb_global(2); range = "A"; il = 0; iu = 0
   if (present(nev)) then
     nev__ = nev; range = "I"; il = 1; iu = nev
@@ -3222,7 +3230,7 @@ end subroutine compute_generalized_eigen_problem
 !!
 !! SOURCE
 
-subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k)
+subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k,use_gpu)
 
 !Arguments ------------------------------------
 !scalaras
@@ -3230,6 +3238,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  integer,intent(in) :: cplex,nbli_global,nbco_global
  integer,intent(in) :: istwf_k
  class(processor_scalapack),intent(in) :: processor
+ integer,intent(in),optional :: use_gpu
 !arrays
  real(dp),intent(inout) :: matrix(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: vector(:)
@@ -3287,7 +3296,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ================================
  ! COMPUTE EIGEN VALUES AND VECTORS : A * X = lambda  * X
  ! ================================
- call compute_eigen_problem(processor,sca_matrix1, sca_matrix2,vector, comm,istwf_k)
+ call compute_eigen_problem(processor,sca_matrix1, sca_matrix2,vector, comm,istwf_k, use_gpu=use_gpu)
 
  ! ==============================
  ! CONCATENATE EIGEN VECTORS
@@ -3340,7 +3349,7 @@ end subroutine compute_eigen1
 !!
 !! SOURCE
 
-subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k)
+subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k,use_gpu)
 
 !Arguments ------------------------------------
 !scalars
@@ -3348,6 +3357,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  integer,intent(in) :: comm
  integer,intent(in) :: istwf_k
  class(processor_scalapack),intent(in) :: processor
+ integer,optional,intent(in) :: use_gpu
 !arrays
  real(dp),intent(inout) :: matrix1(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: matrix2(cplex*nbli_global,nbco_global)
@@ -3413,7 +3423,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ! ===============================
  call compute_generalized_eigen_problem(processor,sca_matrix1,sca_matrix2,&
 &                     sca_matrix3,vector,&
-&                     comm,istwf_k)
+&                     comm,istwf_k,use_gpu=use_gpu)
 
  ! ==============================
  ! CONCATENATE EIGEN VECTORS
