@@ -199,6 +199,7 @@ end subroutine elpa_func_uninit
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
 !!  local_nrows=Leading dimension of A
 !!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
+!!  nev=Number of eigenvalues needed.
 !!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
 !!
 !! SIDE EFFECTS
@@ -206,11 +207,11 @@ end subroutine elpa_func_uninit
 !!
 !! SOURCE
 
-subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,na,nblk,local_nrows,local_ncols,gpu)
+subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,na,nblk,local_nrows,local_ncols,nev,gpu)
 
 !Arguments ------------------------------------
  integer,intent(in) :: mpi_comm_parent,process_row,process_col
- integer,intent(in) :: na,nblk,local_nrows,local_ncols
+ integer,intent(in) :: na,nblk,local_nrows,local_ncols,nev
  integer,intent(in),optional :: gpu
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 
@@ -256,7 +257,7 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,n
  call elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
 
  ! Setting matrix size
- call elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
+ call elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols,nev)
 
  ! Proper ELPA setup
  err = elpa_hdl%elpa%setup()
@@ -447,17 +448,18 @@ end subroutine elpa_func_get_communicators
 !!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
 !!  local_nrows=Leading dimension of A
 !!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
+!!  nev=Number of eigenvalues needed.
 !!
 !! SIDE EFFECTS
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! SOURCE
 
-subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
+subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols,nev)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: na,nblk,local_nrows,local_ncols
+ integer,intent(in) :: na,nblk,local_nrows,local_ncols,nev
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
 
@@ -489,6 +491,10 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
  if (err==ELPA_OK) then
    varname="local_ncols"
    call elpa_hdl%elpa%set(trim(varname),local_ncols,err)
+ end if
+ if (err==ELPA_OK) then
+   varname="nev"
+   call elpa_hdl%elpa%set(trim(varname),nev,err)
  end if
 #else
  elpa_hdl%na=na
@@ -567,7 +573,6 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 #endif
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
- if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
  success=(err==ELPA_OK)
@@ -658,7 +663,6 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 #endif
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
- if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
  success=(err==ELPA_OK)
