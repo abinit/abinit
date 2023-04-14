@@ -32,6 +32,10 @@ module m_slk
  use mpi
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  use m_nvtx, only : nvtxStartRange, nvtxEndRange
+#endif
+
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
  use m_time,          only : cwtime, cwtime_report
  use m_numeric_tools, only : blocked_loop !, print_arr
@@ -2888,12 +2892,18 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 
 ! *************************************************************************
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+  call nvtxStartRange("solve_gevp_complex",12)
+#endif
   ! 0. Allocate ELPA handle
   call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols,nev,gpu=use_gpu,blacs_ctx=sc_desc(CTXT_))
 
   call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,z,ev,nev)
 
   call elpa_func_deallocate(elpa_hdl)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+  call nvtxEndRange()
+#endif
 
 end subroutine solve_gevp_complex
 
@@ -2975,6 +2985,9 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   integer :: i,n_col, n_row, nev__
   integer,external :: indxl2g,numroc
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  call nvtxStartRange("slk_compute_generalized_eigen", 10)
+#endif
   nev__ = matrix1%sizeb_global(2); if (present(nev)) nev__ = nev
 
   call tmp1%init(matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
@@ -3000,6 +3013,9 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   call tmp1%free()
   call tmp2%free()
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  call nvtxEndRange()
+#endif
 #else
 !Arguments ------------------------------------
   class(processor_scalapack),intent(in)       :: processor
@@ -3322,6 +3338,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
 
 ! *************************************************************************
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxStartRange("slk_compute_eigen2", 7)
+#endif
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
@@ -3395,6 +3414,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  call sca_matrix2%free()
  call sca_matrix3%free()
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
 end subroutine compute_eigen2
 !!***
 
