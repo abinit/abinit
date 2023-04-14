@@ -33,12 +33,13 @@ MODULE m_paw_correlations
  use m_io_tools,    only : open_file
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
  use m_pawrad,      only : pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
- use m_pawtab,      only : pawtab_type
+  use m_pawtab,      only : pawtab_type,pawtab_nullify,pawtab_free,pawtab_set_flags
  use m_pawrhoij,    only : pawrhoij_type,pawrhoij_gather, pawrhoij_nullify, pawrhoij_free
  use m_paw_ij,      only : paw_ij_type,paw_ij_gather, paw_ij_free, paw_ij_nullify
  use m_paw_sphharm, only : mat_mlms2jmj,mat_slm2ylm,slxyzs
  use m_paw_io,      only : pawio_print_ij
  use m_paral_atom,  only : get_my_atmtab,free_my_atmtab
+  use m_copy,        only : alloc_copy
 
  implicit none
 
@@ -114,7 +115,7 @@ CONTAINS  !=====================================================================
  subroutine pawpuxinit(dmatpuopt,exchmix,f4of2_sla,f6of2_sla,is_dfpt,jpawu,llexexch,llpawu,&
 &           nspinor,ntypat,option_interaction,pawang,pawprtvol,pawrad,pawtab,upawu,use_dmft,&
 &           useexexch,usepawu,&
-&           ucrpa,prt_lorbmag) ! optional argument
+       &           ucrpa,lmagCalc) ! optional argument
 
 !Arguments ---------------------------------------------
 !scalars
@@ -129,7 +130,6 @@ CONTAINS  !=====================================================================
  real(dp),intent(in) :: exchmix
  type(pawang_type), intent(in) :: pawang
  integer,optional, intent(in) :: ucrpa
- integer,optional, intent(in) :: prt_lorbmag
 !arrays
  integer,intent(in) :: llexexch(ntypat),llpawu(ntypat)
  real(dp),intent(in) :: jpawu(ntypat),upawu(ntypat)
@@ -144,11 +144,13 @@ CONTAINS  !=====================================================================
  integer :: lmexexch,lmkyc,lmn_size,lmn2_size,lpawu
  integer :: m1,m11,m2,m21,m3,m31,m4,m41
  integer :: mesh_size,int_meshsz,mkyc,sz1
- integer :: option_interaction_
+    integer :: option_interaction_, Loc_prtvol
  logical :: compute_euijkl,compute_euij_fll
  real(dp) :: ak,f4of2,f6of2,int1,intg,phiint_ij,phiint_ipjp,vee1,vee2
  character(len=500) :: message
 
+    logical,optional,intent(in) :: lmagCalc
+    logical :: lmagCalc_
 !arrays
  integer,ABI_CONTIGUOUS pointer :: indlmn(:,:)
  real(dp) :: euijkl_temp(3),euijkl_temp2(3),euijkl_dc(3)
@@ -157,6 +159,12 @@ CONTAINS  !=====================================================================
 ! *************************************************************************
 
  DBG_ENTER("COLL")
+    Loc_prtvol = 3 
+    lmagCalc_ = .False.
+    if (present(lmagCalc)) then
+       if (lmagCalc .eqv. .True.) lmagCalc_ = .True.
+       Loc_prtvol = 0
+    end if
 
 !No correlations= nothing to do
  if(useexexch==0.and.usepawu==0.and.use_dmft==0) then
@@ -181,7 +189,7 @@ CONTAINS  !=====================================================================
  end if
 
 !Print title
- if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) &
+    if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0.and.(.not.lmagCalc_)) &
 &  write(message, '(3a)' ) ch10,ch10," ******************************************"
  if(usepawu==1) then
    write(message, '(3a)' ) trim(message),ch10," DFT+U Method used: FLL"
@@ -200,13 +208,13 @@ CONTAINS  !=====================================================================
      & (no use of occupation matrix) - experimental"
  end if
  if(useexexch/=0) write(message, '(3a)' ) trim(message),ch10," PAW Local Exact exchange: PBE0"
- if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0) then
+    if((abs(usepawu)>=1.and.abs(usepawu)<=4).or.useexexch/=0 .and.(.not.lmagCalc_)) then
    if (nspinor==2) then
      write(message, '(3a,i1)' ) trim(message),ch10," Magnetic DC : option_interaction = ",option_interaction
    end if
    write(message, '(3a)' ) trim(message),ch10," ******************************************"
  end if
- if(use_dmft==0 .and. abs(usepawu)<=4) then
+    if(use_dmft==0 .and. abs(usepawu)<=4 .and.(.not.lmagCalc_)) then
    call wrtout(ab_out,message,'COLL')
    call wrtout(std_out,  message,'COLL')
  end if
@@ -215,12 +223,12 @@ CONTAINS  !=====================================================================
 !call wrtout(ab_out,message,'COLL')
 !endif
  option_interaction_ = option_interaction
- if(abs(usepawu)>=10.and.nspinor==2.and.option_interaction/=1) then
+    if(abs(usepawu)>=10.and.nspinor==2.and.option_interaction/=1 .and.(.not.lmagCalc_)) then
    option_interaction_ = 1
    write(message, '(a)' ) "When usepawu>=10, option_interaction for DC is set to 1"
    call wrtout(std_out,message,'COLL')
  end if
- if(usepawu<0.and.nspinor==2.and.option_interaction_==2) then
+    if(usepawu<0.and.nspinor==2.and.option_interaction_==2 .and.(.not.lmagCalc_)) then
    write(message, '(a)' ) "option_interaction=2 is not implemented for usepawu<0. Change 'usepawu' or 'optdcmagpawu' in the input."
    ABI_ERROR(message)
  end if
@@ -245,12 +253,6 @@ CONTAINS  !=====================================================================
        pawtab(itypat)%f4of2_sla=f4of2_sla(itypat)
        pawtab(itypat)%f6of2_sla=f6of2_sla(itypat)
        pawtab(itypat)%option_interaction_pawu=option_interaction_
-     else if (present(prt_lorbmag).and.(prt_lorbmag==1).and.lcur==-1) then
-          lcur=1
-          pawtab(itypat)%upawu=zero
-          pawtab(itypat)%jpawu=zero
-          pawtab(itypat)%f4of2_sla=zero
-          pawtab(itypat)%f6of2_sla=zero
      else
        pawtab(itypat)%usepawu=0
        pawtab(itypat)%upawu=zero
@@ -286,11 +288,13 @@ CONTAINS  !=====================================================================
        message = 'pawpuxinit: Error on the number of projectors '
        ABI_BUG(message)
      end if
+          if ((.not.lmagCalc_)) then
      write(message, '(a,a,i4,a,a,i4)' ) ch10,&
 &     ' pawpuxinit : for species ',itypat,ch10,&
 &     '   number of projectors is',pawtab(itypat)%nproju
      call wrtout(std_out,message,'COLL')
 
+          end if
      pawtab(itypat)%ij_proj=pawtab(itypat)%nproju*(pawtab(itypat)%nproju+1)/2
 
 !    ==================================================
@@ -331,7 +335,7 @@ CONTAINS  !=====================================================================
 !    ==================================================
 !    B-PAW+U: overlap between atomic wavefunctions
 !    --------------------------------------------------
-     if(dmatpuopt==1) then
+          if(dmatpuopt==1 .and.(.not.lmagCalc_)) then
        write(message, '(4a)' ) ch10,&
 &       ' pawpuxinit : dmatpuopt=1 ',ch10,&
 &       '   PAW+U: dens. mat. constructed by projection on atomic wfn inside PAW augm. region(s)'
@@ -342,13 +346,13 @@ CONTAINS  !=====================================================================
 &       '                      - Is normalized ',ch10, &
 &       '                      In other cases, choose dmatpuopt=2'
        call wrtout(std_out,message,'COLL')
-     else if(dmatpuopt==2) then
+          else if(dmatpuopt==2 .and.(.not.lmagCalc_)) then
        write(message, '(6a)' ) ch10,&
 &       ' pawpuxinit : dmatpuopt=2 ',ch10,&
 &       '   PAW+U: dens. mat. constructed by selecting contribution',ch10,&
 &       '          for each angular momentum to the density (inside PAW augm. region(s))'
        call wrtout(std_out,message,'COLL')
-     else if(dmatpuopt==3) then
+          else if(dmatpuopt==3 .and.(.not.lmagCalc_)) then
        write(message, '(a,a,a,a,a,a)' ) ch10,&
 &       ' pawpuxinit : dmatpuopt=3 ',ch10,&
 &       '    PAW+U: dens. mat. constructed by projection on atomic wfn inside PAW augm. region(s)',ch10,&
@@ -464,7 +468,7 @@ CONTAINS  !=====================================================================
        sz1=2*lpawu+1
        ABI_MALLOC(pawtab(itypat)%vee,(sz1,sz1,sz1,sz1))
        call calc_vee(pawtab(itypat)%f4of2_sla,pawtab(itypat)%f6of2_sla,pawtab(itypat)%jpawu,&
-&       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee)
+                  &       pawtab(itypat)%lpawu,pawang,pawtab(itypat)%upawu,pawtab(itypat)%vee,Loc_prtvol)
 
       ! testu=0
       ! write(std_out,*) " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -474,6 +478,7 @@ CONTAINS  !=====================================================================
       !     testu=testu+ pawtab(itypat)%vee(m1,m2,m1,m2)
       !  enddo
       ! enddo
+             if (.not.lmagCalc_) then 
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
        write(message,'(a)') " Matrix of interaction vee(m1,m2,m1,m2)"
@@ -487,6 +492,7 @@ CONTAINS  !=====================================================================
        enddo
        write(message,'(a)') ch10
        call wrtout(std_out,message,'COLL')
+             end if
 
      !  testu=testu/((two*lpawu+one)**2)
      !  write(std_out,*) "------------------------"
@@ -826,11 +832,12 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine calc_vee(f4of2_sla,f6of2_sla,jpawu,lpawu,pawang,upawu,vee)
+  subroutine calc_vee(f4of2_sla,f6of2_sla,jpawu,lpawu,pawang,upawu,vee,prtvol)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: lpawu
+    integer,optional,intent(in) :: prtvol
  real(dp),intent(in) :: upawu,jpawu
  real(dp),intent(inout) :: f4of2_sla,f6of2_sla
  type(pawang_type), intent(in) :: pawang
@@ -842,7 +849,7 @@ CONTAINS  !=====================================================================
  integer :: isela,iselb
  integer :: klm0u,klma,klmb,kyc,lkyc
  integer :: lmkyc,lmpawu
- integer :: m1,m11,m2,m21,m3,m31,m4,m41
+    integer :: m1,m11,m2,m21,m3,m31,m4,m41,prtvol_
  integer :: mkyc,sz1
  real(dp) :: ak,f4of2,f6of2
  character(len=500) :: message
@@ -854,6 +861,10 @@ CONTAINS  !=====================================================================
  DBG_ENTER("COLL")
 
 
+    prtvol_ = 3
+    if (present(prtvol)) then
+       prtvol_ = prtvol
+    end if
 !  Select only atoms with +U
    if(lpawu/=-1) then
 
@@ -881,11 +892,11 @@ CONTAINS  !=====================================================================
          end if
          fk(2)=jpawu*14._dp/(One+f4of2)
          fk(3)=fk(2)*f4of2
-!        if(abs(pawprtvol)>=2) then
+          if(abs(prtvol_)>=2) then
          write(message,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
 &         "Slater parameters F^0, F^2, F^4 are",fk(1),fk(2),fk(3)
          call wrtout(std_out,message,'COLL')
-!        end if
+          end if
        else if(lpawu==3) then
          f4of2=0.6681_dp
          f6of2=0.4943_dp
@@ -904,8 +915,10 @@ CONTAINS  !=====================================================================
          fk(2)=jpawu*6435._dp/(286._dp+195._dp*f4of2+250._dp*f6of2)
          fk(3)=fk(2)*f4of2
          fk(4)=fk(2)*f6of2
+          if(abs(prtvol_)>=2) then
          write(std_out,'(a,3x,a,f9.4,f9.4,f9.4,f9.4)') ch10,&
 &         "Slater parameters F^0, F^2, F^4, F^6 are",fk(1),fk(2),fk(3),fk(4)
+          end if
        else
          write(message, '(a,i0,2a)' )&
 &         ' lpawu=',lpawu,ch10,&
@@ -1991,6 +2004,9 @@ end if
            ABI_FREE(my_l_occmat)
          end if
 
+                if(allocated(nocctot2)) then
+                  ABI_FREE(nocctot2)
+                end if 
          ABI_MALLOC(my_l_occmat,(cplex_dij,2*lcur+1,2*lcur+1,ndij))
          my_l_occmat(:,:,:,:)=zero
          my_l_occmat=l_noccmmp_tmp(:,:,:,:)
@@ -2931,7 +2947,7 @@ end subroutine setrhoijpbe0
 !! SOURCE
 
 subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
-&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawprtvol,pawrhoij,pawtab,&
+       &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
@@ -2948,7 +2964,7 @@ subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,in
  real(dp),intent(in) :: dmatpawu(dimdmat,dimdmat,nspinor*nsppol,natpawu*impose_dmat)
  !real(dp),intent(in) :: dmatpawu(:,:,:,:)
  real(dp),intent(in) :: spinat(3,natom)
- type(paw_ij_type),intent(inout) :: paw_ij(my_natom)
+ type(paw_ij_type),intent(in) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
  integer,pointer :: my_atmtab(:)
@@ -2966,6 +2982,11 @@ character(len=5) :: orb_char
  character(len=500) :: message
  type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
  type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
+ !!****************************************************************
+    type(pawtab_type),allocatable :: pawtab_tmp(:) 
+    type(pawrad_type) :: pawrad(ntypat)
+    real(dp) :: f6of2_sla(ntypat),f4of2_sla(ntypat),upawu(ntypat),jpawu(ntypat)
+    integer :: llexexch(ntypat),llpawu(ntypat),nn,ii
 !*********************************************************************
 orb_char='pdfgh'
    write(message,*) '  '
@@ -3019,15 +3040,15 @@ orb_char='pdfgh'
  if (paral_atom) then
    if (me_atom==0) then
      ABI_MALLOC(pawrhoij_all,(natom))
+          call pawrhoij_nullify(pawrhoij_all)
    else
      ABI_MALLOC(pawrhoij_all,(0))
    end if
-   call pawrhoij_nullify(pawrhoij_all)
    call pawrhoij_gather(pawrhoij,pawrhoij_all,0,my_comm_atom,&
 &   with_grhoij=.false.,with_lmnmix=.false.,&
 &   with_rhoij_=.false.,with_rhoijres=.false.)
- else
 
+    else
    ABI_MALLOC(pawrhoij_all,(natom))
    call pawrhoij_nullify(pawrhoij_all)
    pawrhoij_all = pawrhoij
@@ -3035,19 +3056,109 @@ orb_char='pdfgh'
 
 
 if (me_atom==0) then   !!!!!!!!
+      nn=size(pawtab)
+      ABI_MALLOC(pawtab_tmp,(nn))   
+      call pawtab_nullify(pawtab_tmp)
+      
+      ! ABI_MALLOC(pawtab_tmp,(nn))          
+      
+      if (nn.gt.0) then
+         do ii=1,nn
+            pawtab_tmp(ii)%basis_size = pawtab(ii)%basis_size
+            pawtab_tmp(ii)%lmn_size = pawtab(ii)%lmn_size
+            pawtab_tmp(ii)%lmn2_size = pawtab(ii)%lmn2_size
+            pawtab_tmp(ii)%rpaw = pawtab(ii)%rpaw
+            pawtab_tmp(ii)%rshp = pawtab(ii)%rshp
+            pawtab_tmp(ii)%shape_type = pawtab(ii)%shape_type
+            if (allocated(pawtab(ii)%dij0)) then
+               ! ABI_MALLOC(pawtab_tmp(ii)%dij0,())
+               call alloc_copy(pawtab(ii)%dij0, pawtab_tmp(ii)%dij0)
+            end if
+
+            if (allocated(Pawtab(ii)%indlmn))  then
+               call alloc_copy(pawtab(ii)%indlmn, pawtab_tmp(ii)%indlmn)
+            end if  
+
+            if (allocated(Pawtab(ii)%phi))  then
+               call alloc_copy(pawtab(ii)%phi, pawtab_tmp(ii)%phi)
+            end if 
+
+             if (allocated(Pawtab(ii)%indklmn))  then
+               call alloc_copy(pawtab(ii)%indklmn, pawtab_tmp(ii)%indklmn)
+            end if             
+         end do
+
+         ! pawtab_tmp%has_fock = Pawtab%has_fock   ! 
+         ! pawtab_tmp%has_kij = Pawtab%has_kij !
+         ! pawtab_tmp%has_tproj = Pawtab%has_tproj !
+         ! pawtab_tmp%has_tvale = Pawtab%has_tvale
+         ! pawtab_tmp%has_coretau = Pawtab%has_coretau
+         ! pawtab_tmp%has_vhtnzc = Pawtab%has_vhtnzc
+         ! pawtab_tmp%has_vhnzc = Pawtab%has_vhnzc
+         ! pawtab_tmp%has_vminushalf = Pawtab%has_vminushalf
+         ! pawtab_tmp%has_nabla = Pawtab%has_nabla
+         ! pawtab_tmp%has_nablaphi =Pawtab%has_nablaphi
+         ! pawtab_tmp%has_shapefncg =Pawtab%has_shapefncg
+         ! pawtab_tmp%has_wvl =Pawtab%has_wvl
+
+         ! pawtab_tmp%usetcore =Pawtab%usetcore
+         ! pawtab_tmp%usexcnhat =Pawtab%usexcnhat
+         ! pawtab_tmp%useexexch =Pawtab%useexexch
+         pawtab_tmp%usepawu = Pawtab%usepawu
+         ! pawtab_tmp%usepotzero =Pawtab%usepotzero
+         pawtab_tmp%usespnorb =Pawtab%usespnorb
+         ! pawtab_tmp%mqgrid =Pawtab%mqgrid
+         ! pawtab_tmp%mqgrid_shp =Pawtab%mqgrid_shp
+
+         pawtab_tmp%basis_size =Pawtab%basis_size
+         pawtab_tmp%ij_proj =Pawtab%ij_proj
+         pawtab_tmp%ij_size =Pawtab%ij_size
+         pawtab_tmp%lcut_size =Pawtab%lcut_size
+         pawtab_tmp%l_size =Pawtab%l_size
+         pawtab_tmp%lexexch =Pawtab%lexexch
+         pawtab_tmp%lmn_size =Pawtab%lmn_size
+         pawtab_tmp%lmn2_size =Pawtab%lmn2_size
+         pawtab_tmp%lmnmix_sz =Pawtab%lmnmix_sz
+         pawtab_tmp%lpawu =Pawtab%lpawu
+         pawtab_tmp%nproju =Pawtab%nproju
+         pawtab_tmp%option_interaction_pawu =Pawtab%option_interaction_pawu
+         pawtab_tmp%mesh_size =Pawtab%mesh_size
+         pawtab_tmp%partialwave_mesh_size =Pawtab%partialwave_mesh_size
+         pawtab_tmp%core_mesh_size =Pawtab%core_mesh_size
+         pawtab_tmp%coretau_mesh_size =Pawtab%coretau_mesh_size
+         pawtab_tmp%vminus_mesh_size =Pawtab%vminus_mesh_size
+         pawtab_tmp%tnvale_mesh_size =Pawtab%tnvale_mesh_size
+         pawtab_tmp%shape_type =Pawtab%shape_type
+
+      end if
 
 sum_orb_mom=zero
 
+       f4of2_sla = pawtab(:)%f4of2_sla
+       f6of2_sla = pawtab(:)%f6of2_sla 
+       llexexch= -1*one !(/-1,-1/)   
+
+       lmin=1
 do my_iatom=1,natom
 itypat=pawrhoij_all(my_iatom)%itypat
 lmax=((pawtab(itypat)%l_size)-1)/2
 
-lmin = 1
-if (pawtab(itypat)%lpawu/=-1) then
-    lmin = pawtab(itypat)%lpawu
+          do my_lcur=lmin,lmax
+
+            if (my_lcur == pawtab(itypat)%lpawu) then
+                upawu=  pawtab(:)%upawu 
+                jpawu= pawtab(:)%jpawu 
+                llpawu=  pawtab(:)%lpawu
+            else
+                upawu=  zero 
+                jpawu= zero
+                llpawu=  one
 end if
 
-do my_lcur=lmin,lmax
+             call pawpuxinit(2,pawtab(1)%exchmix ,f4of2_sla,f6of2_sla,.False.,jpawu ,llexexch,llpawu,&
+                  &           nspinor,ntypat,pawtab_tmp(itypat)%option_interaction_pawu,pawang,pawprtvol,pawrad,pawtab_tmp,upawu,0,&
+                  &           useexexch,usepawu,&
+                  &           0,lmagCalc=.True.)   
  cplex_dij=paw_ij_all(my_iatom)%cplex_dij
  ndij=paw_ij_all(my_iatom)%ndij
 
@@ -3057,7 +3168,7 @@ do my_lcur=lmin,lmax
  ABI_MALLOC(cmfoccmat,(2*my_lcur+1,2*my_lcur+1,ndij))
 
 call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,natom,natom,&
-&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab,&
+                  &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab_tmp,& 
 &                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom,l_orbmom=my_lcur,atom_orbmom=my_iatom,my_l_occmat=my_l_occmat)
 
@@ -3089,9 +3200,15 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
    end do
    end do
 
+             if (allocated(op_l)) then
    ABI_FREE(op_l)
+             end if
+             if (allocated(my_l_occmat)) then
    ABI_FREE(my_l_occmat)
+             end if
+             if (allocated(cmfoccmat)) then
    ABI_FREE(cmfoccmat)
+             end if
 
   sum_orb_mom=sum_orb_mom+orb_mom
   if (my_lcur==1) then
@@ -3102,15 +3219,12 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
 
   call wrtout([std_out, ab_out], message)
 
-!!!!!write(222,*)'atom number=',my_iatom,'orbital L=',my_lcur,'orbital moment',orb_mom
 
 end do    !!!!!!!!! END DO lcur
     write(message,*) '--------------------------------------------------'
     call wrtout([std_out, ab_out], message)
 end do   !!!!!!!!! END DO natoms
 
-         ABI_FREE(paw_ij_all)
-        ABI_FREE(pawrhoij_all)
 
     write(message,'(a,3f12.6)') ' Total (sum) ', sum_orb_mom(1),sum_orb_mom(2),sum_orb_mom(3)
     call wrtout([std_out, ab_out], message)
@@ -3121,11 +3235,42 @@ end do   !!!!!!!!! END DO natoms
 
 end if  !!!!!!!!!!
 
+      if (allocated(pawtab_tmp)) then
+          call pawtab_nullify(pawtab_tmp)
+          call pawtab_free(pawtab_tmp)
+         ABI_FREE(pawtab_tmp)
+      end if
 
+   if (paral_atom) then
+      if (me_atom==0) then
 
-end subroutine loc_orbmom_cal
+         do my_iatom=1,natom
+            if (allocated(paw_ij_all(my_iatom)%noccmmp)) then
+               ABI_FREE(paw_ij_all(my_iatom)%noccmmp)
+            end if
+            if (allocated(paw_ij_all(my_iatom)%nocctot)) then
+               ABI_FREE(paw_ij_all(my_iatom)%nocctot)
+            end if
+         end do
+      end if
 
-!----------------------------------------------------------------------
+     call pawrhoij_nullify(pawrhoij_all)
+     call pawrhoij_free(pawrhoij_all)
+     ABI_FREE(pawrhoij_all)
 
+     call paw_ij_nullify(paw_ij_all)
+     call paw_ij_free(paw_ij_all)
+     ABI_FREE(paw_ij_all)
+   else
+
+      call pawrhoij_nullify(pawrhoij_all)
+      ABI_FREE(pawrhoij_all)
+
+      call paw_ij_nullify(paw_ij_all)
+      ABI_FREE(paw_ij_all)
+   end if
+   
+  end subroutine loc_orbmom_cal
+  !----------------------------------------------------------------------
 END MODULE m_paw_correlations
 !!***
