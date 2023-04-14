@@ -1009,7 +1009,7 @@ if (dtset%prt_lorbmag==1) then
     else
         if (dtset%usepawu .ne. 0)then
             call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
-            &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,dtset%pawprtvol,&
+            &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
             &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
             &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
         else
