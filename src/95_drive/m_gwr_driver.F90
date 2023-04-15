@@ -307,7 +307,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  if (my_rank == master) then
    ! Initialize filenames. Accept files in Fortran or in netcdf format.
-   ! Accept DEN file in Fortran or in netcdf format.
    if (nctk_try_fort_or_ncfile(den_path, msg) /= 0) then
      ABI_ERROR(sjoin("Cannot find DEN file:", den_path, ". Error:", msg))
    end if
@@ -538,7 +537,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  call prtrhomxmn(std_out, mpi_enreg_seq, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
  call prtrhomxmn(ab_out, mpi_enreg_seq, nfftf, ngfftf, dtset%nspden, 1, ks_rhor, ucvol=cryst%ucvol)
 
- if (Dtset%usekden==1) then
+ if (dtset%usekden==1) then
    call prtrhomxmn(std_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=cryst%ucvol)
    call prtrhomxmn(ab_out,MPI_enreg_seq,nfftf,ngfftf,Dtset%nspden,1,ks_taur,optrhor=1,ucvol=cryst%ucvol)
  end if
@@ -551,10 +550,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_MALLOC(ph1d, (2, 3 * (2 * Dtset%mgfft + 1) * Cryst%natom))
  ABI_MALLOC(ph1df, (2, 3 * (2 * mgfftf + 1) * Cryst%natom))
 
- call getph(Cryst%atindx, Cryst%natom, ngfftc(1), ngfftc(2), ngfftc(3), ph1d, Cryst%xred)
+ call getph(cryst%atindx, cryst%natom, ngfftc(1), ngfftc(2), ngfftc(3), ph1d, cryst%xred)
 
  if (psps%usepaw == 1 .and. pawfgr%usefinegrid == 1) then
-   call getph(Cryst%atindx, Cryst%natom, ngfftf(1), ngfftf(2), ngfftf(3), ph1df, Cryst%xred)
+   call getph(cryst%atindx, cryst%natom, ngfftf(1), ngfftf(2), ngfftf(3), ph1df, cryst%xred)
  else
    ph1df(:,:)=ph1d(:,:)
  end if
@@ -572,23 +571,23 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ngrvdw = 0
  ABI_MALLOC(grvdw, (3, ngrvdw))
- ABI_MALLOC(grchempottn, (3, Cryst%natom))
- ABI_MALLOC(grewtn, (3, Cryst%natom))
+ ABI_MALLOC(grchempottn, (3, cryst%natom))
+ ABI_MALLOC(grewtn, (3, cryst%natom))
  nkxc = 0
- if (Dtset%nspden == 1) nkxc = 2
- if (Dtset%nspden >= 2) nkxc = 3 ! check GGA and spinor, quite a messy part!!!
+ if (dtset%nspden == 1) nkxc = 2
+ if (dtset%nspden >= 2) nkxc = 3 ! check GGA and spinor, quite a messy part!!!
  ! In case of MGGA, fxc and kxc are not available and we dont need them (for now ...)
- if (Dtset%ixc < 0 .and. libxc_functionals_ismgga()) nkxc = 0
+ if (dtset%ixc < 0 .and. libxc_functionals_ismgga()) nkxc = 0
  if (nkxc /= 0) then
    ABI_MALLOC(kxc, (nfftf, nkxc))
  end if
 
- n3xccc = 0; if (Psps%n1xccc /= 0) n3xccc = nfftf
+ n3xccc = 0; if (psps%n1xccc /= 0) n3xccc = nfftf
  ABI_MALLOC(xccc3d, (n3xccc))
  ABI_MALLOC(ks_vhartr, (nfftf))
- ABI_MALLOC(ks_vtrial, (nfftf, Dtset%nspden))
+ ABI_MALLOC(ks_vtrial, (nfftf, dtset%nspden))
  ABI_MALLOC(vpsp, (nfftf))
- ABI_MALLOC(ks_vxc, (nfftf, Dtset%nspden))
+ ABI_MALLOC(ks_vxc, (nfftf, dtset%nspden))
 
  ! TODO: I don't think direct diago can be used with mega-GGA due to the functional derivative wrt KS states.
  ! TB-BK should be OK though.
@@ -614,7 +613,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  !============================
  !==== Compute KS PAW Dij ====
  !============================
- if (Dtset%usepaw == 1) then
+ if (dtset%usepaw == 1) then
    call timab(561,1,tsec)
 
    ! Calculate the unsymmetrized Dij.
@@ -763,7 +762,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      end do
    end if
 
-   ! Collect eigenvalues
+   ! Collect eigenvalues for the different k-points/spins
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(:, ik_ibz, spin) = zero
@@ -794,11 +793,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    !end if
 
  else
-   ABI_CHECK(dtset%usepaw == 0, "PAW in GWR not yet implemented.")
-
    ! ====================================================
    ! === This is the real GWR stuff once all is ready ===
    ! ====================================================
+   ABI_CHECK(dtset%usepaw == 0, "PAW in GWR not yet implemented.")
    read_wfk = .True.
    if (read_wfk) then
      if (my_rank == master) then
@@ -872,6 +870,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      !call gwr%get_ugb_from_vtrial(ngfftf, ks_vtrial)
    end if
 
+   ! Now call high-level routines depending on gwr_task.
    select case (dtset%gwr_task)
    case ("RPA_ENERGY")
      call gwr%rpa_energy()

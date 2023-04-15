@@ -278,9 +278,12 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  ! XG20200720: Why not saving string ? string_raw is less processed than string ...
  ! MG: Because we don't want a processed string without comments.
  ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
- INPUT_STRING = string_with_comments
+ INPUT_STRING = trim(string_with_comments)
 
+ !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
+ !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10
  !write(std_out,'(a)')string(:lenstr)
+ !stop
 
 end subroutine parsefile
 !!***
@@ -484,7 +487,7 @@ end subroutine inread
 !! OUTPUT
 !!  lenstr=actual number of character in string
 !!  string*(strln)=preprocessed string of character
-!!  raw_string=string without any preprocessine (comments are included.
+!!  raw_string=string without any preprocessing (comments are included)
 !!
 !! SOURCE
 

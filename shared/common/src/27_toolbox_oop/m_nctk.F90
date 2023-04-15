@@ -741,7 +741,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
- integer :: input_len, cmode
+ integer :: input_len, cmode, ii, ich
  character(len=strlen) :: my_string
 
 ! *********************************************************************
@@ -786,10 +786,23 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
      my_string = "jdtset " // trim(itoa(DTSET_IDX)) // "  " // trim(INPUT_STRING)
    end if
 
+   ! Since INPUT_STRING contains many control characters at the end (likely because it's a global var)
+   ! and we want to save space on disk, we cannot use trim_len and we have to find the last alphanum char in my_string.
    input_len = len_trim(my_string)
+   do ii=len(my_string), 1, -1
+     ich = iachar(my_string(ii:ii))
+     select case(ich)
+     case(0:32)  ! space, tab, or control character
+       !write(std_out, *)"space/tab/control at: ",ii, "iachar: ",iachar(my_string(ii:ii)), "char:", my_string(ii:ii)
+       cycle
+     case default
+       input_len = ii !; write(std_out, *)"Exiting at ii: ",ii, "with: ",my_string(ii:ii)
+       exit
+     end select
+   end do
+
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))
-   !print *, trim(INPUT_STRING)
 
    if (xmpi_comm_rank(comm) == 0) then
      NCF_CHECK(nctk_set_datamode(ncid))
