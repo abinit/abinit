@@ -3,7 +3,7 @@
 !!  m_gwr
 !!
 !! FUNCTION
-!!  Objects and procedures implementing GW in real-space and imaginary time.
+!!  Objects and procedures implementing the GW method in real-space and imaginary time.
 !!
 !! NOTES
 !!   Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
@@ -7021,8 +7021,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
      ABI_FREE(ug2)
      if (print_time) then
        write(msg,'(4x,3(a,i0),a)')"my_ikf [", my_ikf, "/", gwr%my_nkbz, "] (tot: ", gwr%nkbz, ")"
-       call cwtime_report(msg, cpu_k, wall_k, gflops_k)
-       if (my_ikf == LOG_MODK) call wrtout(std_out, " ...")
+       call cwtime_report(msg, cpu_k, wall_k, gflops_k); if (my_ikf == LOG_MODK) call wrtout(std_out, " ...")
      end if
    end do ! my_ikf
  end do ! my_is
