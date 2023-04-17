@@ -829,9 +829,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      !Compute vtrial1 at (+q,+omega) and (-q,-omega) with specific local part if q/=0
      if (.not.kramers_deg) then
-!       call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
-       nvresid1_mq=nvresid1
-       vtrial1_mq=vtrial1
+       call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
+!       nvresid1_mq=nvresid1
+!       vtrial1_mq=vtrial1
      end if
 
 !    For Q=0 and metallic occupation, initialize quantities needed to
@@ -936,9 +936,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !  Update vtrial1_mq
    if (nstep>1.and..not.kramers_deg) then
-!     call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
-      nvresid1_mq=nvresid1
-      vtrial1_mq=vtrial1
+     call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
+!      nvresid1_mq=nvresid1
+!      vtrial1_mq=vtrial1
    end if
 
 !  For Q=0 and metallic occupation, calculate the first-order Fermi energy
@@ -999,11 +999,21 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      do ifft=1,nfftf
        rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
-!       rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
-       rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)+rhor1_mq(2*ifft  ,:))
+       rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
+       rhog1(1,ifft) = half*(rhog1_pq(1,ifft)+rhog1_mq(1,ifft))
+       rhog1(2,ifft) = half*(rhog1_pq(2,ifft)-rhog1_mq(2,ifft))
+!       rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)+rhor1_mq(2*ifft  ,:))
      end do
-     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+!     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
    end if
+
+!TMP
+   do ifft=1,nfftf
+     write(201,*) rhor1(2*ifft-1,1), rhor1(2*ifft ,1)
+     write(202,*) rhor1(2*ifft-1,2), rhor1(2*ifft ,2)
+     write(203,*) rhor1(2*ifft-1,3), rhor1(2*ifft ,3)
+     write(204,*) rhor1(2*ifft-1,4), rhor1(2*ifft ,4)
+   end do
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &   dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
@@ -1464,14 +1474,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
        !Mix up (q,w) and (-q,-w) second-order derivatives
        d2bbb(1,:,idir,ipert,:,:)=half*(d2bbb_pq(1,:,idir,ipert,:,:)+d2bbb_mq(1,:,idir,ipert,:,:))
-       d2bbb(2,:,idir,ipert,:,:)=half*(d2bbb_pq(2,:,idir,ipert,:,:)+d2bbb_mq(2,:,idir,ipert,:,:))
-!       d2bbb(2,:,idir,ipert,:,:)=half*(d2bbb_pq(2,:,idir,ipert,:,:)-d2bbb_mq(2,:,idir,ipert,:,:))
+!       d2bbb(2,:,idir,ipert,:,:)=half*(d2bbb_pq(2,:,idir,ipert,:,:)+d2bbb_mq(2,:,idir,ipert,:,:))
+       d2bbb(2,:,idir,ipert,:,:)=half*(d2bbb_pq(2,:,idir,ipert,:,:)-d2bbb_mq(2,:,idir,ipert,:,:))
        d2lo(1,:,:,idir,ipert)=half*(d2lo_pq(1,:,:,idir,ipert)+d2lo_mq(1,:,:,idir,ipert))
-       d2lo(2,:,:,idir,ipert)=half*(d2lo_pq(2,:,:,idir,ipert)+d2lo_mq(2,:,:,idir,ipert))
-!       d2lo(2,:,:,idir,ipert)=half*(d2lo_pq(2,:,:,idir,ipert)-d2lo_mq(2,:,:,idir,ipert))
+!       d2lo(2,:,:,idir,ipert)=half*(d2lo_pq(2,:,:,idir,ipert)+d2lo_mq(2,:,:,idir,ipert))
+       d2lo(2,:,:,idir,ipert)=half*(d2lo_pq(2,:,:,idir,ipert)-d2lo_mq(2,:,:,idir,ipert))
        d2nl(1,:,:,idir,ipert)=half*(d2nl_pq(1,:,:,idir,ipert)+d2nl_mq(1,:,:,idir,ipert))
-       d2nl(2,:,:,idir,ipert)=half*(d2nl_pq(2,:,:,idir,ipert)+d2nl_mq(2,:,:,idir,ipert))
-!       d2nl(2,:,:,idir,ipert)=half*(d2nl_pq(2,:,:,idir,ipert)-d2nl_mq(2,:,:,idir,ipert))
+!       d2nl(2,:,:,idir,ipert)=half*(d2nl_pq(2,:,:,idir,ipert)+d2nl_mq(2,:,:,idir,ipert))
+       d2nl(2,:,:,idir,ipert)=half*(d2nl_pq(2,:,:,idir,ipert)-d2nl_mq(2,:,:,idir,ipert))
 
      end if
    end if
