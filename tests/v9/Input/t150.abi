@@ -1,0 +1,73 @@
+#######################################################
+# Automatic test for ABINIT:                          #
+#    GS calculation in the PAW case, Nickel 4 atoms,  # 
+#    FCC, nonmagnetic  GGA, PAW                       #
+#    Needed to create intial wavefunctions for the    #
+#    next RT-TDDFT test                               #
+#######################################################
+
+# Unit cell
+acell   3*3.5 angstrom
+ntypat 1  
+natom  4  
+typat *1
+znucl 28
+rprim  
+   1.0  0.0  0.0
+   0.0  1.0  0.0
+   0.0  0.0  1.0
+xred
+   0.0  0.0  0.0
+   0.5  0.5  0.0
+   0.5  0.0  0.5
+   0.0  0.5  0.5
+chkprim 0
+
+# K-points and occupations
+kptopt 1
+ngkpt 2 2 2 # Not converged
+nshiftk 1
+shiftk 0 0 0
+istwfk *1   # For consistency with following RT-TDDFT test
+occopt 3
+tsmear 300 K
+nband 48
+
+# Convergence parameters
+ecut 10       # Not converged
+pawecutdg 10  # Not converged
+tolvrs 1.d-4  # Not sufficient
+nstep 50
+
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pseudos "Ni.xml"
+  
+# Printing parameters
+prtwf 1  # Wavefunctions needed for next test    
+prtden 0     
+prteig 0    
+prtebands 0  
+prtdos 0     
+pawprtdos 0  
+pawprtvol 0 
+prtgsr 0     
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t150.abi, t151.abi, t152.abi
+#%% [files]
+#%% files_to_test =
+#%%   t150.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%% [shell]
+#%% post_commands = ww_mv t150o_WFK t151i_WFK
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = F. Brieuc
+#%% keywords = RTTDDFT
+#%% description =
+#%%   FCC Nickel, nonmagnetic, GGA, PAW.
+#%%   Generate initial WFK for next RT-TDDFT test.
+#%% topics = RTTDDFT
+#%%<END TEST_INFO>

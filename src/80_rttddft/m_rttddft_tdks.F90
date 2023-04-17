@@ -1089,7 +1089,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
 
  !Actually read the intial KS orbitals here
  if (dtset%td_restart /= 1) then
-   write(msg,'(3a)') ch10,'-------------   Reading initial wavefunctions   -------------',ch10
+   write(msg,'(3a)') ch10,'-------------    Reading initial wavefunctions     -------------',ch10
  else
    write(msg,'(3a)') ch10,'-------------   Reading wavefunctions for restart  -------------',ch10
  end if

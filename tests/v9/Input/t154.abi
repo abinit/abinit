@@ -1,0 +1,79 @@
+#######################################################
+# Automatic test for ABINIT:                          #
+#    Test of RT-TDDFT in the PAW case, ER propagator  #
+#    Al 4 atoms, FCC, GGA, NC                         #
+#######################################################
+
+# RT-TDDFT calculation
+optdriver 9      # RT-TDDFT
+dtele 0.001      # Electronic timestep
+getwfk_filepath "t154i_WFK" # Initial wavefunctions
+ntime 5          # Number of steps
+td_exp_order 4   # Order of the Taylor expansion used to approximate the exponential
+td_propagator 0  # Propagator (0: ER, 1: EMR)
+td_prtstr 1      # Print striding 
+td_restart 0     # restart (1: restart 0: from scratch)
+
+# Unit cell
+acell  3*3.5 angstrom
+ntypat 1  
+natom  4  
+typat *1
+znucl 13
+rprim  
+   1.0  0.0  0.0
+   0.0  1.0  0.0
+   0.0  0.0  1.0
+xred
+   0.0  0.0  0.0
+   0.5  0.5  0.0
+   0.5  0.0  0.5
+   0.0  0.5  0.5
+chkprim 0
+
+# K-points and occupations
+kptopt 1
+ngkpt 2 2 2 # Not converged
+nshiftk 1
+shiftk 0 0 0
+istwfk *1   # For consistency with following RT-TDDFT test
+occopt 3
+tsmear 300 K
+nband 24
+
+# Convergence parameters
+ecut 10       # Not converged
+
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8/"
+pseudos "Al.psp8"
+  
+# Printing parameters
+prtwf 0  # Wavefunctions needed for next test    
+prtden 0     
+prteig 0    
+prtebands 0  
+prtdos 0     
+pawprtdos 0  
+pawprtvol 0 
+prtgsr 0     
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t153.abi, t154.abi, t155.abi
+#%% [files]
+#%% files_to_test =
+#%%   t154.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t154o_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%% [shell]
+#%% post_commands = ww_mv t154i_WFK t155i_WFK
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = F. Brieuc
+#%% keywords = RTTDDFT
+#%% description =
+#%%   FCC Al, GGA, NC.
+#%%   RT-TDDFT test, ER propagator.
+#%% topics = RTTDDFT
+#%%<END TEST_INFO>

@@ -156,4 +156,13 @@ inp_files = [
     "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
     "t142.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nsppol 2
     "t143.abi",  # test orbital magnetism with DDK wavefunctions and metallic sodium
+    "t150.abi",  # GS, Ni 4 atoms, PAW to generate initial WFK for next RT-TDDFT tests
+    "t151.abi",  # RT-TDDFT, Ni 4 atoms, PAW, ER propagator
+    "t152.abi",  # RT-TDDFT, Ni 4 atoms, PAW, EMR propagator
+    "t153.abi",  # GS, Al 4 atoms, NC PSP to generate initial WFK for next RT-TDDFT tests
+    "t154.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator
+    "t155.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, EMR propagator
+    "t156.abi",  # GS, Al 4 atoms, NC PSP to generate initial WFK for next RT-TDDFT tests
+    "t157.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator to test restart
+    "t158.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator - restart from last test
 ]
