@@ -468,7 +468,7 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
      write(msg,'(2(a,f18.8))') &
      '             d3etot_t4 = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1)
    else if (n2dq==2) then
-     write(msg,'(2(2(a,f18.8)a))') &
+     write(msg,'(2(2(a,f18.8),a))') &
      '   d3etot_t4(dw shear) = ',d3etot_t4(1,1),  ',',d3etot_t4(2,1),ch10,&
      '   d3etot_t4(up shear) = ',d3etot_t4(1,2),  ',',d3etot_t4(2,2)
    end if
@@ -478,7 +478,7 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
      write(msg,'(2(a,f18.8))') &
      '             d3etot_t5 = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1)
    else if (n1dq==2) then
-     write(msg,'(2(2(a,f18.8)a))') &
+     write(msg,'(2(2(a,f18.8),a))') &
      '   d3etot_t5(dw shear) = ',d3etot_t5(1,1),  ',',d3etot_t5(2,1),ch10,&
      '   d3etot_t5(up shear) = ',d3etot_t5(1,2),  ',',d3etot_t5(2,2)
    end if
@@ -489,7 +489,7 @@ subroutine dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,
        write(msg,'(2(a,f18.8))') &
        '          d3etot_tgeom = ',d3etot_tgeom(1,1),  ',',d3etot_tgeom(2,1)
      else if (n2dq==2) then
-       write(msg,'(2(2(a,f18.8)a))') &
+       write(msg,'(2(2(a,f18.8),a))') &
        'd3etot_tgeom(dw shear) = ',d3etot_tgeom(1,1),  ',',d3etot_tgeom(2,1),ch10,&
        'd3etot_tgeom(up shear) = ',d3etot_tgeom(1,2),  ',',d3etot_tgeom(2,2)
      end if
