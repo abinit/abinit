@@ -234,13 +234,24 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,n
  call elpa_func_error_handler(err_code=err,err_msg='Error in initialization')
 
  if(l_gpu==1) then
-#ifdef HAVE_LINALG_ELPA_OLD_GPU_SUPPORT
-   varname="gpu" ! Implies targeting NVIDIA GPUs (ELPA v2020.11 and previous versions)
-#else
+#if defined HAVE_GPU_CUDA
    varname="nvidia-gpu"
+#else
+   ABI_BUG("Requested unsupported GPU model with ELPA!")
 #endif
-
    if (err==ELPA_OK) call elpa_hdl%elpa%set(varname,l_gpu,err)
+
+   ! Handling GPU-support on older ELPA versions (2020.11 and previous)
+   ! Only NVIDIA CUDA GPUs were supported with 'gpu' setting
+   if (err==ELPA_ERROR_ENTRY_NOT_FOUND) then
+#if defined HAVE_GPU_CUDA
+     varname="gpu"
+     call elpa_hdl%elpa%set(varname,l_gpu,err)
+#else
+     ABI_ERROR("You seem to use an old version of ELPA ( < 2021.x ) which only supports NVIDIA GPUs.")
+#endif
+   end if
+
    call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
    if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err)
    call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
