@@ -1000,20 +1000,19 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      do ifft=1,nfftf
        rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
        rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)-rhor1_mq(2*ifft  ,:))
-       rhog1(1,ifft) = half*(rhog1_pq(1,ifft)+rhog1_mq(1,ifft))
-       rhog1(2,ifft) = half*(rhog1_pq(2,ifft)-rhog1_mq(2,ifft))
-!       rhor1(2*ifft  ,:) = half*(rhor1_pq(2*ifft  ,:)+rhor1_mq(2*ifft  ,:))
      end do
-!     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+     call fourdp(cplex,rhog1,rhor1(:,1),-1,mpi_enreg,nfftf,1, ngfftf, 0)
+
    end if
 
 !TMP
-   do ifft=1,nfftf
-     write(201,*) rhor1(2*ifft-1,1), rhor1(2*ifft ,1)
-     write(202,*) rhor1(2*ifft-1,2), rhor1(2*ifft ,2)
-     write(203,*) rhor1(2*ifft-1,3), rhor1(2*ifft ,3)
-     write(204,*) rhor1(2*ifft-1,4), rhor1(2*ifft ,4)
-   end do
+!   do ifft=1,nfftf
+!     write(201,*) rhor1(2*ifft-1,1), rhor1(2*ifft ,1)
+!     write(202,*) rhor1(2*ifft-1,2), rhor1(2*ifft ,2)
+!     write(203,*) rhor1(2*ifft-1,3), rhor1(2*ifft ,3)
+!     write(204,*) rhor1(2*ifft-1,4), rhor1(2*ifft ,4)
+!     write(205,*) rhog1(1,ifft),  rhog1(2,ifft)
+!   end do
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &   dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
@@ -1070,6 +1069,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
+!TMP
+!   do ifft=1,nfftf
+!     write(301,*) nvresid1(2*ifft-1,1), nvresid1(2*ifft ,1)
+!     write(302,*) nvresid1(2*ifft-1,2), nvresid1(2*ifft ,2)
+!     write(303,*) nvresid1(2*ifft-1,3), nvresid1(2*ifft ,3)
+!     write(304,*) nvresid1(2*ifft-1,4), nvresid1(2*ifft ,4)
+!     write(305,*) vhartr1(2*ifft-1),vhartr1(2*ifft)
+!     write(306,*) vxc1(2*ifft-1,1),vxc1(2*ifft,1)
+!     write(307,*) vxc1(2*ifft-1,2),vxc1(2*ifft,2)
+!   end do
 
    end if
 
