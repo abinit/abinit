@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 17 Apr 2023.
-- ( at 14h25 )
+.Starting date : Tue 18 Apr 2023.
+- ( at 09h51 )
   
 - input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t153-t154-t155/t154.abi
 - output file    -> t154.abo
@@ -366,7 +366,7 @@ meta: {optdriver: 9, }
 --------------------------------------------------------------------------------
 
 
--------------   Reading initial wavefunctions   -------------
+-------------    Reading initial wavefunctions     -------------
 
 -inwffil : will read wavefunctions from disk file t154i_WFK
 
@@ -386,7 +386,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-Time - cpu, wall (sec):    0.92    0.93
+- Time - cpu, wall (sec):    0.92    0.93
 
 
 --- Iteration 2
@@ -402,7 +402,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.10    0.10
 
 
 --- Iteration 3
@@ -418,7 +418,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.10    0.10
 
 
 --- Iteration 4
@@ -434,7 +434,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.10    0.10
 
 
 --- Iteration 5
@@ -450,7 +450,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-Time - cpu, wall (sec):    0.11    0.17
+- Time - cpu, wall (sec):    0.10    0.17
 
 
 ---------------------------------------------------------------------------
@@ -817,10 +817,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.6
++Overall time at end (sec) : cpu=          2.1  wall=          2.6

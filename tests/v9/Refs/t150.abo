@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 13 Apr 2023.
-- ( at 13h03 )
+.Starting date : Tue 18 Apr 2023.
+- ( at 09h51 )
   
-- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t150/t150.abi
+- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t150-t151-t152/t150.abi
 - output file    -> t150.abo
 - root for input  files -> t150i
 - root for output files -> t150o
@@ -985,10 +985,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.7  wall=          6.8
++Overall time at end (sec) : cpu=          6.7  wall=          6.9
