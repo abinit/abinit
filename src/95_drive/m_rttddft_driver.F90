@@ -155,7 +155,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    call cwtime(cpu,wall,gflops,"stop")
-   write(msg,'(a,2f8.2,a)') 'Time - cpu, wall (sec):', cpu, wall, ch10
+   write(msg,'(a,2f8.2,a)') '- Time - cpu, wall (sec):', cpu, wall, ch10
    call wrtout(ab_out,msg)
    if (do_write_log) call wrtout(std_out,msg)
 
