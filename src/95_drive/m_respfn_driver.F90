@@ -520,9 +520,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(symq,(4,2,dtset%nsym))
  timrev=1
 
-!Deactivate time-reversal symmetry for finite-omega calculations
- if (abs(dtset%rfomega)>tol10) timrev=0
-
 ! By default use symmetries.
  use_sym = 1
  if (dtset%prtgkk == 1)then
@@ -531,6 +528,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  else
    call littlegroup_q(dtset%nsym,dtset%qptn,symq,symrec,dtset%symafm,timrev,prtvol=dtset%prtvol)
  end if
+
+!Deactivate time-reversal symmetry for finite-omega calculations
+ if (abs(dtset%rfomega)>tol10) timrev=0
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
