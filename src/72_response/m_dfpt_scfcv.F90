@@ -1483,13 +1483,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
        !Mix up (q,w) and (-q,-w) second-order derivatives
        d2bbb(1,:,idir,ipert,:,:)=half*(d2bbb_pq(1,:,idir,ipert,:,:)+d2bbb_mq(1,:,idir,ipert,:,:))
-!       d2bbb(2,:,idir,ipert,:,:)=half*(d2bbb_pq(2,:,idir,ipert,:,:)+d2bbb_mq(2,:,idir,ipert,:,:))
        d2bbb(2,:,idir,ipert,:,:)=half*(d2bbb_pq(2,:,idir,ipert,:,:)-d2bbb_mq(2,:,idir,ipert,:,:))
        d2lo(1,:,:,idir,ipert)=half*(d2lo_pq(1,:,:,idir,ipert)+d2lo_mq(1,:,:,idir,ipert))
-!       d2lo(2,:,:,idir,ipert)=half*(d2lo_pq(2,:,:,idir,ipert)+d2lo_mq(2,:,:,idir,ipert))
        d2lo(2,:,:,idir,ipert)=half*(d2lo_pq(2,:,:,idir,ipert)-d2lo_mq(2,:,:,idir,ipert))
        d2nl(1,:,:,idir,ipert)=half*(d2nl_pq(1,:,:,idir,ipert)+d2nl_mq(1,:,:,idir,ipert))
-!       d2nl(2,:,:,idir,ipert)=half*(d2nl_pq(2,:,:,idir,ipert)+d2nl_mq(2,:,:,idir,ipert))
        d2nl(2,:,:,idir,ipert)=half*(d2nl_pq(2,:,:,idir,ipert)-d2nl_mq(2,:,:,idir,ipert))
 
      end if
@@ -1555,8 +1552,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
- if (nspden==4.and.dtset%prtvol>0) then
-   prtopt=1
+ if (nspden==4.and.abs(omega)>tol10.and.dtset%prtvol>0) then
+   prtopt=idir+1
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
