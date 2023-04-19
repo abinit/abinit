@@ -55,7 +55,7 @@ Change of the tests v9/76,77 and 78 for better precision. Add the tests v9/88 an
 By L. Baguet (MR898)
 
 **A.6**
-Some users have reported that with the new [[optcell]] 4/5/6 option, the calculation
+Some users have reported that with the new [[optcell]]=4,5 or 6 option, the calculation
 continues when the criterion should be already reached. For example, with [[optcell]]=5 (relaxing b only), the
 xx component of the stress could still be large but shouldn't be checked. This has been fixed.
 
@@ -1475,7 +1475,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 
@@ -2208,7 +2208,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 
