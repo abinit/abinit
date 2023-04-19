@@ -108,12 +108,14 @@ contains
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           non_magnetic_xc,optene,optres,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
-&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
+&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,&
+&           icutcoul)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
  integer,intent(in) :: optene,optres,usepaw,usexcnhat,ixcrot
+ integer,intent(in),optional :: icutcoul
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: ehart01
