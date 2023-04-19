@@ -1649,6 +1649,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
         ' and macro_uj=',dt%macro_uj,'.',ch10,&
         'Action: increase nstep in input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
+     else if ((dt%pawujv==0.0d0).or.(sum(abs(dt%atvshift(1:dt%natvshift,1:dt%nsppol,dt%pawujat)))<1.0d-9)) then
+       write(msg,'(5a)')&
+       'pawujv and/or atvshift found to be 0.0d0.',ch10,&
+       'When engaging the linear response procedure, the perturbation strength',ch10,&
+       'must be non-zero. Action: change pawujv and/or atvshift to a non-zero value.'
+       call flush_unit(std_out)
+       ABI_ERROR(msg)
      end if
    end if
 

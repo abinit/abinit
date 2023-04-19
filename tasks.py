@@ -53,7 +53,7 @@ ALL_BINARIES = [
     "optic",
     "tdep",
     "testtransposer",
-    "ujdet",
+    "lruj",
 ]
 
 
