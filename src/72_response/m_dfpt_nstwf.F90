@@ -637,9 +637,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 &             nattyp,nfftf,ngfftf,dtset%ntypat,ph1df,psps%qgrid_vl,ucvol,&
 &             psps%vlspl,vpsp1_idir1,g0term=g0term)
            else
-             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
+             call dfpt_vlocal(gs_hamkq%atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_vl,&
 &             dtset%natom,nattyp,nfftf,ngfftf,dtset%ntypat,ngfftf(1),ngfftf(2),ngfftf(3),&
-&             ph1df,psps%qgrid_vl,dtset%qptn,ucvol,psps%vlspl,vpsp1_idir1,xred)
+&             ph1df,psps%qgrid_vl,dtset%qptn,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1_idir1,xred)
            end if
            if(psps%n1xccc/=0)then
              call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,ngfftf(1),psps%n1xccc,&

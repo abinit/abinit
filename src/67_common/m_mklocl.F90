@@ -757,6 +757,7 @@ end subroutine mklocl_recipspace
 !!    are REAL, if 2, COMPLEX
 !!  gmet(3,3)=reciprocal space metric (Bohr**-2)
 !!  gsqcut=cutoff G**2 for included G s in fft box.
+!!  icutcoul= type of Coulomb cutoff to apply
 !!  idir=direction of atomic displacement (=1,2 or 3 : displacement of
 !!    atom ipert along the 1st, 2nd or 3rd axis).
 !!  ipert=number of the atom being displaced in the frozen-phonon
@@ -772,6 +773,7 @@ end subroutine mklocl_recipspace
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
 !!  ucvol=unit cell volume (Bohr**3).
+!!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
 !!  xred(3,natom)=reduced atomic coordinates
 !!
@@ -781,19 +783,19 @@ end subroutine mklocl_recipspace
 !!
 !! SOURCE
 
-subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
+subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vcutgeo,vlspl,vpsp1,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
+ integer,intent(in) :: cplex,icutcoul,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vcutgeo(3),vlspl(mqgrid,2,ntypat)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out) :: vpsp1(cplex*nfft)
 

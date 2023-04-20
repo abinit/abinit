@@ -599,9 +599,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 &                       n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
                      end if ! psps%n1xccc/=0
 
-                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
+                     call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,dtset%natom,&
 &                     nattyp,nfftf,ngfftf,psps%ntypat,n1,n2,n3,ph1df,psps%qgrid_vl,&
-&                     dtset%qptn,ucvol,psps%vlspl,vpsp1,xred)
+&                     dtset%qptn,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
 
                    end if ! usepaw
 
