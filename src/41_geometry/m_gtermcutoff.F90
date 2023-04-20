@@ -140,7 +140,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
  real(dp)           :: gcart_para,gcart_perp,gcart_x,gcart_y,gcart_z
  real(dp)           :: j0,j1,k0,k1
- real(dp)           :: quad,ucvol
+ real(dp)           :: odd2,quad,ucvol
  real(dp)           :: hcyl,hcyl2
  real(dp),parameter :: tolfix=1.0000001_dp,tol999=999.0
  character(len=50)  :: mode
@@ -193,6 +193,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  if (icutcoul==3) mode='CRYSTAL'
  if (icutcoul==4) mode='ERF'
  if (icutcoul==5) mode='ERFC'
+ if (icutcoul==22) mode='SLAB_SR'
 
  !Print in log info about the cut-off method at every call:
  enough = enough + 1
@@ -576,6 +577,22 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
          write(msg,'(a,i3)')' Wrong value of slab method: ',opt_slab
          ABI_BUG(msg)
        END SELECT
+
+   CASE('SLAB_SR')
+
+     test=COUNT(vcutgeo/=zero)
+     ABI_CHECK(test==2,"Wrong vcutgeo")
+
+     do i3=1,n3
+      odd2=1-(-1)**(i3-1)
+      do i2=1,n2
+       i23=n1*(i2-1 + n2*(i3-1))
+       do i1=1,n1
+         ii=i1+i23
+         gcutoff(ii)=odd2
+       end do
+      end do
+     end do
 
    CASE('ERF')
 
