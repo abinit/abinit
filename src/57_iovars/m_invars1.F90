@@ -2623,6 +2623,12 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%td_restart=0
    dtsets(idtset)%td_propagator=1
    dtsets(idtset)%td_scthr=1e-7_dp
+   dtsets(idtset)%td_ef_type=0
+   dtsets(idtset)%td_ef_tzero=zero
+   dtsets(idtset)%td_ef_tau=1000.0_dp
+   dtsets(idtset)%td_ef_pol=[1.0_dp,0.0_dp,0.0_dp]
+   dtsets(idtset)%td_ef_lambda=10000.0_dp
+   dtsets(idtset)%td_ef_ezero=1.0_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30

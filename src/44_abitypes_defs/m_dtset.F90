@@ -598,6 +598,7 @@ type, public :: dataset_type
  integer :: td_scnmax
  integer :: td_prtstr
  integer :: td_propagator
+ integer :: td_ef_type
  integer :: td_restart
  integer :: tfkinfunc
  integer :: tim1rev
@@ -833,6 +834,10 @@ type, public :: dataset_type
  real(dp) :: strprecon
  real(dp) :: td_maxene
  real(dp) :: td_scthr
+ real(dp) :: td_ef_tzero
+ real(dp) :: td_ef_tau
+ real(dp) :: td_ef_lambda
+ real(dp) :: td_ef_ezero
  real(dp) :: tfw_toldfe
  real(dp) :: tl_radius
  real(dp) :: tolcum = zero
@@ -907,6 +912,7 @@ type, public :: dataset_type
  real(dp) :: sigma_erange(2) = zero
  real(dp) :: strtarget(6)
  real(dp) :: tmesh(3) = [5._dp, 59._dp, 6._dp]  ! [start, stop, num]
+ real(dp) :: td_ef_pol(3)
  real(dp) :: ucrpa_window(2)
  real(dp) :: vcutgeo(3) = [0.0_dp,0.0_dp,0.0_dp]
  real(dp) :: vprtrb(2)
@@ -1951,7 +1957,13 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%td_prtstr          = dtin%td_prtstr
  dtout%td_restart         = dtin%td_restart
  dtout%td_propagator      = dtin%td_propagator
+ dtout%td_ef_type         = dtin%td_ef_type
  dtout%td_scthr           = dtin%td_scthr
+ dtout%td_ef_tzero        = dtin%td_ef_tzero
+ dtout%td_ef_tau          = dtin%td_ef_tau
+ dtout%td_ef_ezero        = dtin%td_ef_ezero
+ dtout%td_ef_lambda       = dtin%td_ef_lambda
+ dtout%td_ef_pol          = dtin%td_ef_pol
  dtout%tfkinfunc          = dtin%tfkinfunc
  dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
@@ -3495,6 +3507,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' structure '
 !T
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'
+ list_vars=trim(list_vars)//' td_ef_type td_ef_tzero td_ef_tau td_ef_lambda td_ef_pol td_ef_ezero'
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
@@ -3543,7 +3556,7 @@ subroutine chkvars(string)
 !Extra token, also admitted:
 !<ABINIT_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second fs as T Tesla'
 !</ABINIT_UNITS>
 
 !<ABINIT_OPERATORS>

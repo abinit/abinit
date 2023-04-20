@@ -92,7 +92,6 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  !arrays
  
  !Local variables-------------------------------
- integer :: me
  !scalars
  character            :: tmp
  character(len=500)   :: msg
@@ -123,6 +122,25 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
          call wrtout(tdks%tdener_unit,msg)
       end if
    end if
+   ! Open elec field file and writes header if needed
+   if (open_file(tdks%fname_tdef, msg, newunit=tdks%tdef_unit, status='unknown', form='formatted') /= 0) then
+      write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_tdef
+      ABI_ERROR(msg)
+   end if 
+   if (mpi_enreg%me == 0) then
+      if (dtset%td_restart>0) then
+         do
+            read(tdks%tdef_unit,*,iostat=stat) tmp
+            if (stat /= 0) exit
+         end do
+         backspace(tdks%tdef_unit)
+      else
+         write(msg,'(a)') "# RT-TDDFT -- Electric field file. All quantities are in Hartree atomic units."
+         call wrtout(tdks%tdef_unit,msg)
+         write(msg,'(a)') "# step  time  E_x  E_y  E_z  A_x  A_y  A_z"
+         call wrtout(tdks%tdef_unit,msg)
+      end if
+   end if
  end if
 
 !!FB: This is most probably not needed
@@ -149,6 +167,12 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
                                     & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
+ !** Writes TD elec. field and associated vector potential if needed
+ if (dtset%td_ef_type /= 0) then
+   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%ef(:), tdks%vec_pot(:)
+   call wrtout(tdks%tdef_unit,msg)
+ end if
+
  !** Writes additional optional properties
  !Computed at actual step
  if (mod(istep,dtset%td_prtstr) == 0) then
@@ -168,7 +192,6 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  end if
 
  !** Special case of last step
- me = xmpi_comm_rank(mpi_enreg%comm_world)
  if (istep == tdks%first_step+tdks%ntime-1) then
     if (mod(istep,dtset%td_prtstr) /= 0 .or. dtset%prtwf <= 0) then 
       call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks,force_write=.TRUE.)
@@ -714,6 +737,8 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
    call wrtout(tdks%tdrestart_unit,msg)
    fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_WFK'
    write(msg,'(a)') fname
+   call wrtout(tdks%tdrestart_unit,msg)
+   write(msg,'(a)') tdks%fname_tdef
    call wrtout(tdks%tdrestart_unit,msg)
  end if
 
