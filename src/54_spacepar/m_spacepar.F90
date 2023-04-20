@@ -539,6 +539,7 @@ end subroutine mkunitpawspherepot
 !!  [qpt(3)=reduced coordinates for a wavevector to be combined with the G vectors (needed if cplex==2).]
 !!  rhog(2,nfft)=electron density in G space
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
