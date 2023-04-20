@@ -2094,7 +2094,13 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        else if(typevarphys=='BFI' .and. b2>=2)then
          if(string(b1+1:b1+2)=='T ' .or. string(b1+1:b1+2)=='TE') factor=BField_Tesla
        else if (typevarphys=='TIM' .and. b2>=2) then
-         if( string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') factor=one/Time_Sec
+         if(string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
+            factor=one/Time_Sec
+         else if(string(b1+1:b1+3)=='FS ') then
+            factor=tol15/Time_Sec
+         else if(string(b1+1:b1+3)=='AS ') then
+            factor=tol17/Time_Sec
+         endif
        endif
 
        dprarr(1:narr)=dprarr(1:narr)*factor

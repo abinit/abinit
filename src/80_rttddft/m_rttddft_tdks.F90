@@ -98,6 +98,7 @@ module m_rttddft_tdks
    integer                          :: ngrvdw      !dimension of grvdw array
    integer                          :: ntime       !max nb of time steps
    integer                          :: tdener_unit !unit nb of the energy file
+   integer                          :: tdef_unit   !unit nb of the efield file
    integer                          :: tdrestart_unit !unit nb of the restart file
    integer                          :: unpaw       !paw data tmp file unit
    integer                          :: usexcnhat   !use nhat in the computation of the XC term
@@ -105,6 +106,11 @@ module m_rttddft_tdks
    real(dp)                         :: dt          !propagation time step
    real(dp)                         :: ecore       !core energy
    real(dp)                         :: etot        !total energy
+   real(dp)                         :: ef_tzero    !time at which elec field is switched on (Elec. field perturbation)
+   real(dp)                         :: ef_omega    !angular freq. of TD elec field (Elec. field perturbation)
+   real(dp)                         :: ef_tau      !time width of the pulse (Elec. field perturbation)
+   real(dp)                         :: ef_sin_a    !useful constant for sin^2 pulse (Elec. field perturbation)
+   real(dp)                         :: ef_sin_b    !useful constant for sin^2 pulse (Elec. field perturbation)
    real(dp)                         :: gsqcut      !cut-off on G^2
    real(dp)                         :: ucvol       !primitive cell volume
    real(dp)                         :: zion        !total ionic charge
@@ -119,6 +125,7 @@ module m_rttddft_tdks
    type(wvl_data)                   :: wvl         !wavelets ojects (unused but
                                                    !required by various routines)
    character(len=fnlen)             :: fname_tdener!Name of the TDENER file
+   character(len=fnlen)             :: fname_tdef  !Name of the TDEFIELD file
    character(len=fnlen)             :: fname_wfk0  !Name of the input WFK file containing
                                                    !the intial (t=0) wfs
    !arrays
@@ -131,20 +138,23 @@ module m_rttddft_tdks
    integer,allocatable              :: nattyp(:)   !nb of atoms of different types
    integer,allocatable              :: npwarr(:)   !number of PW at each k-point
    integer,allocatable              :: symrec(:,:,:) !sym. operations in recip space
+   real(dp)                         :: ef(3)       ! TD external elec. field perturbation
+   real(dp)                         :: ef_zero(3)  !E_0 = |E_0|*polarization (Elec. field perturbation)
    real(dp)                         :: gprimd(3,3) !prim cell vectors in recip space
    real(dp)                         :: gmet(3,3)   !metric tensor in recip space
    real(dp)                         :: rprimd(3,3) !prim cell vectors in direct space
    real(dp)                         :: rmet(3,3)   !metric tensor in direct space
+   real(dp)                         :: vec_pot(3)  !external vector potential (Elec. field perturbation)
    real(dp),allocatable             :: cg(:,:)     !WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: cg0(:,:)    !Initial WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: eigen(:)    !eigen-energies
    real(dp),allocatable             :: eigen0(:)   !Initial eigen-energies (at t=0)
    real(dp),allocatable             :: grvdw(:,:)  !Gradient of the total energy coming
                                                    !from VDW dispersion correction             !FB: Needed?
-   real(dp),allocatable             :: occ(:)      !occupation numbers
-   real(dp),allocatable             :: occ0(:)     !Initial occupation numbers
    real(dp),allocatable             :: nhat(:,:)   !compensation charge density
    real(dp),allocatable             :: nhatgr(:,:,:) !gradient of nhat
+   real(dp),allocatable             :: occ(:)      !occupation numbers
+   real(dp),allocatable             :: occ0(:)     !Initial occupation numbers
    real(dp),allocatable             :: phnons(:,:,:) !For symmetries (nonsymmorphic translation phases)
    real(dp),allocatable             :: ph1d(:,:)   !Structure factor phase: exp(2Pi i G.xred)
                                                    !on coarse grid
@@ -253,6 +263,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%fname_tdener = dtfil%fnameabo_td_ener
  tdks%fname_wfk0 = dtfil%fnamewffk
  fname_wfk = dtfil%fnamewffk
+ tdks%fname_tdef = dtfil%fnameabo_td_ef
  if (dtset%td_restart > 0) then
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='old', form='formatted') /= 0) then
@@ -264,12 +275,14 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
       read(tdks%tdrestart_unit,*) tdks%fname_tdener
       read(tdks%tdrestart_unit,*) tdks%fname_wfk0
       read(tdks%tdrestart_unit,*) fname_wfk
+      read(tdks%tdrestart_unit,*) tdks%fname_tdef
    end if
    !Send to all procs
    call xmpi_bcast(tdks%first_step,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(tdks%fname_tdener,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(tdks%fname_wfk0,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(fname_wfk,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(tdks%fname_tdef,0,mpi_enreg%comm_world,ierr)
  else
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
@@ -319,6 +332,16 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  end if
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
+ !TD external elec. field perturbation
+ !Init vector potential and associated constants
+ tdks%ef(:) = 0.0_dp
+ tdks%vec_pot(:) = 0.0_dp
+ tdks%ef_zero(:) = dtset%td_ef_pol(:)*dtset%td_ef_ezero
+ tdks%ef_tau     = dtset%td_ef_tau
+ tdks%ef_omega   = 2.0_dp*pi*Sp_Lt/dtset%td_ef_lambda !2*pi*f=2*pi*c/lambda
+ tdks%ef_tzero   = dtset%td_ef_tzero
+ tdks%ef_sin_a   = 2.0_dp*pi/dtset%td_ef_tau+tdks%ef_omega
+ tdks%ef_sin_b   = 2.0_dp*pi/dtset%td_ef_tau-tdks%ef_omega
  !FB: That should be all for now but there were few more initializations in
  !g_state.F90 in particular related to electric field, might want to check it out
  !once we reach the point of including external electric field
