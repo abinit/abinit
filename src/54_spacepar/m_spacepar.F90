@@ -531,6 +531,7 @@ end subroutine mkunitpawspherepot
 !!  cplex= if 1, vhartr is REAL, if 2, vhartr is COMPLEX
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box.
 !!         (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!  icutcoul= type of Coulomb cutoff to apply
 !!  izero=if 1, unbalanced components of Vhartree(g) are set to zero
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft=(effective) number of FFT grid points (for this processor)
