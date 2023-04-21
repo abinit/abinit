@@ -39,7 +39,7 @@ module m_ompgpu_utils
  ! pointer to GPU buffers
  integer, pointer, save :: cur_kg_k(:,:) => null()
  integer, pointer, save :: cur_kg_kp(:,:) => null()
- integer, pointer, save :: cur_kg_k_gather_sym(:,:) => null()
+ integer, pointer, save :: cur_kg_k_gather(:,:) => null()
 #endif
 
  public :: ompgpu_load_hamilt_buffers
@@ -47,18 +47,19 @@ module m_ompgpu_utils
 
 contains
 
- subroutine ompgpu_load_hamilt_buffers(kg_k,kg_kp,kg_k_gather_sym)
-   integer,intent(in),target :: kg_k(:,:), kg_kp(:,:), kg_k_gather_sym(:,:)
+ subroutine ompgpu_load_hamilt_buffers(kg_k,kg_kp,kg_k_gather)
+   integer,intent(in),target :: kg_k(:,:), kg_kp(:,:)
+   integer,intent(in),target,optional :: kg_k_gather(:,:)
 
 #ifdef HAVE_OPENMP_OFFLOAD
    if(associated(cur_kg_k)) call ompgpu_free_hamilt_buffers()
 
    cur_kg_k            => kg_k
    cur_kg_kp           => kg_kp
-   cur_kg_k_gather_sym => kg_k_gather_sym
-   !$OMP TARGET ENTER DATA MAP(to:cur_kg_k,cur_kg_kp,cur_kg_k_gather_sym)
+   if(present(kg_k_gather))  cur_kg_k_gather     => kg_k_gather
+   !$OMP TARGET ENTER DATA MAP(to:cur_kg_k,cur_kg_kp,cur_kg_k_gather)
 #else
-   ABI_UNUSED((/kg_k,kg_kp,kg_k_gather_sym/))
+   ABI_UNUSED((/kg_k,kg_kp,kg_k_gather/))
    ABI_BUG("ABINIT wasn't compiled with OpenMP GPU offloading, aborting.")
 #endif
  end subroutine ompgpu_load_hamilt_buffers
@@ -66,10 +67,10 @@ contains
  subroutine ompgpu_free_hamilt_buffers()
 #ifdef HAVE_OPENMP_OFFLOAD
 
-   !$OMP TARGET EXIT DATA MAP(release:cur_kg_k,cur_kg_kp,cur_kg_k_gather_sym)
+   !$OMP TARGET EXIT DATA MAP(release:cur_kg_k,cur_kg_kp,cur_kg_k_gather)
    cur_kg_k            => null()
    cur_kg_kp           => null()
-   cur_kg_k_gather_sym => null()
+   cur_kg_k_gather     => null()
 #else
    ABI_BUG("ABINIT wasn't compiled with OpenMP GPU offloading, aborting.")
 #endif
