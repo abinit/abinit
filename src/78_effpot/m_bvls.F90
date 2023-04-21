@@ -25,7 +25,7 @@ CONTAINS
 
 !=======================================================================
 
-SUBROUTINE bvls(key, m, n, a, b, bl, bu, x, istate, loopa)
+SUBROUTINE bvls(key, m, n, a, b, bl, bu, x, istate, loopa, w)
 !=======================================================================
 
 ! N.B. Arguments W, ACT & ZZ have been removed.
@@ -38,6 +38,7 @@ REAL (dp), INTENT(IN OUT)  :: b(m)
 REAL (dp), INTENT(IN)      :: bl(n)
 REAL (dp), INTENT(IN)      :: bu(n)
 REAL (dp), INTENT(OUT)     :: x(n)
+REAL (dp), INTENT(IN OUT)     :: w(n)
 INTEGER, INTENT(IN OUT)    :: istate(n+1)
 INTEGER, INTENT(OUT)       :: loopa
 
@@ -195,7 +196,7 @@ REAL (dp), PARAMETER  :: eps = 1.0E-11_dp
 INTEGER               :: i, iact, ifrom5, it, j, jj, k, k1, kk, ks, mm, mm1, &
                          nact, nbound, noldb
 REAL (dp)             :: act(m,m+2), alf, alpha, bad, bdiff, bnorm, bound, &
-                         bsq, obj, resq, ri, sj, w(n), worst, zz(m)
+                         bsq, obj, resq, ri, sj,  worst, zz(m)
 
 !----------------------First Executable Statement-----------------------
 
@@ -550,10 +551,10 @@ USE BoundedLeastSquares
 IMPLICIT NONE
 INTEGER, PARAMETER  :: dp = SELECTED_REAL_KIND(12, 60)
 
-INTEGER, PARAMETER  :: ncases = 100, ncols = 10
+INTEGER, PARAMETER  :: ncases = 400, ncols = 400
 REAL (dp)           :: a(ncases,ncols), y(ncases), bl(ncols), bu(ncols),  &
-                       beta(ncols), x(ncols), e
-INTEGER             :: case, istate(ncols+1), j, key, loopa
+                       beta(ncols), x(ncols), e, w(ncols)
+INTEGER             :: i, istate(ncols+1), j, key, loopa
 
 ! Generate artificial data satisfying
 !   Y = A.beta + noise
@@ -561,14 +562,14 @@ INTEGER             :: case, istate(ncols+1), j, key, loopa
 CALL RANDOM_NUMBER(beta)
 beta = 4.0*(beta - 0.5)
 CALL RANDOM_NUMBER(a)
-DO case = 1, ncases
+DO i = 1, ncases
   CALL RANDOM_NUMBER(e)
-  y(case) = DOT_PRODUCT( a(case, :), beta ) + 0.1*(e - 0.5)
+  y(i) = DOT_PRODUCT( a(i, :), beta ) + 0.001*(e - 0.5)
 END DO
 key = 0
-bl = 0.0_dp
+bl = -1.0_dp
 bu = 1.0_dp
-CALL bvls(key, ncases, ncols, a, y, bl, bu, x, istate, loopa)
+CALL bvls(key, ncases, ncols, a, y, bl, bu, x, istate, loopa, w)
 
 WRITE(*, *) ' Column   Original beta   Solution'
 DO j = 1, ncols
@@ -576,6 +577,7 @@ DO j = 1, ncols
 END DO
 WRITE(*, '(a, i4)') ' No. of iterations = ', loopa
 WRITE(*, *)
+WRITE(*, *) "The error:", w(1)
 
 STOP
 END PROGRAM Test_BVLS
