@@ -772,6 +772,7 @@ end subroutine mklocl_recipspace
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
@@ -784,18 +785,18 @@ end subroutine mklocl_recipspace
 !! SOURCE
 
 subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
-& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vcutgeo,vlspl,vpsp1,xred)
+& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,&
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,rcut,rprimd,ucvol,vcutgeo,vlspl,vpsp1,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,icutcoul,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- real(dp),intent(in) :: gsqcut,ucvol
+ integer,intent(in) :: cplex,icutcoul,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,nkpt,ntypat
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vcutgeo(3),vlspl(mqgrid,2,ntypat)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rprimd(3,3),vcutgeo(3),vlspl(mqgrid,2,ntypat)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out) :: vpsp1(cplex*nfft)
 
@@ -812,6 +813,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
 
 ! *********************************************************************
@@ -861,6 +863,9 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
    phqim=sin(qxred2pi)
    ii=0
 
+!  Initialize Gcut-off array from m_gtermcutoff
+   call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
      gq3=dble(ig3)+qphon(3)
@@ -902,7 +907,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
              dd = bb*(bb**2-1.0_dp)*dq2div6
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) + &
 &             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) &
-&             / gsquar
+&             / gsquar*gcutoff(ii)
 
 !            Phase   G*xred  (complex conjugate) * -i *2pi*(g+q)*vion
              sfr=-phimag_vl3(ig1,ig2,ig3,iatom)*2.0_dp*pi*gq(idir)*vion1

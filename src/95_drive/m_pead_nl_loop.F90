@@ -421,8 +421,8 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
                    if (i2pert <= natom) then
 
                      call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,i2dir,i2pert,mpi_enreg,psps%mqgrid_vl,natom,&
-&                     nattyp,nfft,dtset%ngfft,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
-&                     dtset%qptn,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
+&                     nattyp,nfft,dtset%ngfft,nkpt,psps%ntypat,n1,n2,n3,ph1d,psps%qgrid_vl,&
+&                     dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
 
                      if (psps%n1xccc/=0) then
                        call dfpt_mkcore(cplex,i2dir,i2pert,natom,psps%ntypat,n1,psps%n1xccc,&
