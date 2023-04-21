@@ -982,7 +982,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Compute Ewald (q=0) contribution
    sumg0=0;qphon(:)=zero
-   call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
+   call dfpt_ewald(dyew,gmet,dtset%icutcoul,my_natom,natom,dtset%nkpt,qphon,dtset%rcut,rmet,&
+&   rprimd,sumg0,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    option=1
    call q0dy3_calc(natom,dyewq0,dyew,option)
@@ -1258,7 +1259,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Contribution to the dynamical matrix from ion-ion energy
  if(rfphon==1)then
-   call dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat, &
+   call dfpt_ewald(dyew,gmet,dtset%icutcoul,my_natom,natom,dtset%nkpt,qphon,dtset%rcut,rmet,&
+&   rprimd,sumg0,dtset%typat,ucvol,dtset%vcutgeo,xred,psps%ziontypat, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call q0dy3_apply(natom,dyewq0,dyew)
  end if

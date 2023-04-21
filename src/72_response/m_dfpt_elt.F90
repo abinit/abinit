@@ -2316,6 +2316,7 @@ end subroutine elt_ewald
 !! gmet(3,3)=metric tensor in reciprocal space (length units **-2)
 !! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !! comm_atom=--optional-- MPI communicator over atoms
+!! icutcoul= type of Coulomb cutoff to apply
 !! my_natom=number of atoms treated by current processor
 !! natom=number of atoms in unit cell
 !! qphon(3)=phonon wavevector (same system of coordinates as the
@@ -2325,6 +2326,7 @@ end subroutine elt_ewald
 !!   if=0, this contribution must be skipped (q=0 singularity)
 !! typat(natom)=integer label of each type of atom (1,2,...)
 !! ucvol=unit cell volume in (whatever length scale units)**3
+!! vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
 !! zion(ntypat)=charge on each type of atom (real number)
 !!
@@ -2334,18 +2336,19 @@ end subroutine elt_ewald
 !!
 !! SOURCE
 
-subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
+subroutine dfpt_ewald(dyew,gmet,icutcoul,my_natom,natom,nkpt,qphon,rcut, &
+&                 rmet,rprimd,sumg0,typat,ucvol,vcutgeo,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: my_natom,natom,sumg0
- real(dp),intent(in) :: ucvol
+ integer,intent(in) :: icutcoul,my_natom,natom,nkpt,sumg0
+ real(dp),intent(in) :: rcut,ucvol
 !arrays
  integer,intent(in) :: typat(natom)
  integer,optional,intent(in) :: comm_atom
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),xred(3,natom),zion(*)
+ real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),rprimd(3,3),vcutgeo(3),xred(3,natom),zion(*)
  real(dp),intent(out) :: dyew(2,3,natom,3,natom)
 
 !Local variables -------------------------
