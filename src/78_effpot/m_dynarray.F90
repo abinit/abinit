@@ -73,8 +73,10 @@ module m_dynamic_array
     integer, allocatable :: data(:)
   CONTAINS
     procedure :: push => int_array_type_push
+    procedure :: concate => int_array_type_concate
     procedure :: finalize => int_array_type_finalize
     procedure :: sort => int_array_type_sort
+    procedure :: tostatic => int_array_type_tostatic
   end type int_array_type
 !!***
 
@@ -290,6 +292,33 @@ subroutine int_array_type_sort(self, order)
 end subroutine int_array_type_sort
 
 
+!****f* m_dynarray/int_array_type_concate
+!!
+!! NAME
+!! int_array_type_concate
+!!
+!! FUNCTION
+!! concate int_array to a int_array_type
+!!
+!! INPUTS
+!! self = int_array_type object
+!! array= array to be concateed
+!! OUTPUT
+!! int_array<type(real_array_type)()> = int_array_type data
+!! SOURCE
+subroutine int_array_type_concate(self, array)
+  class(int_array_type), intent(inout):: self
+  class(int_array_type), intent(in):: array
+  integer :: i
+  do i=1, array%size
+    call self%push(array%data(i))
+  end do
+end subroutine int_array_type_concate
+!!***
+
+
+
+
 
 !****f* m_dynarray/int_array_type_finalize
 !!
@@ -377,6 +406,19 @@ subroutine int2d_array_type_concate(self, array)
   end do
 end subroutine int2d_array_type_concate
 !!***
+
+subroutine int_array_type_tostatic(self, a)
+  class(int_array_type), intent(inout):: self
+  integer, allocatable :: a(:)
+  if(self%size>0) then
+    ABI_MALLOC(a, (self%size))
+    a(:) = self%data(:self%size)
+  else
+    ABI_BUG("the size of the int_array is unkown.")
+  end if
+end subroutine int_array_type_tostatic
+!!***
+
 
 
 subroutine int2d_array_type_tostatic(self, a, size1)
