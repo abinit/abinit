@@ -975,10 +975,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &             gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,dtset%use_gemm_nonlop_gpu,&
 &             compute_grad_atom=(optforces>0))
            else if ( dtset%use_gpu_cuda == 666) then
-             if(istwf_k==1) then
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,bandfft_kpt(my_ikpt)%kg_k_gather)
+             if(dtset%paral_kgb==0) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+             else if(istwf_k==1) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
              else if(istwf_k==2) then
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
              else
                ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
              end if
