@@ -54,6 +54,10 @@ module m_mkrho
  use gator_mod
 #endif
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ use m_ompgpu_fourwf
+#endif
+
  implicit none
 
  private
@@ -414,8 +418,13 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
          if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
 
+#ifdef HAVE_OPENMP_OFFLOAD
+           ! With OpenMP GPU, uploading kg_k when paral_kgb==0
+           !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(dtset%use_gpu_cuda==666)
+#endif
+
            ! treat all bands at once on GPU
-           if (dtset%use_gpu_cuda == 1) then
+           if (dtset%use_gpu_cuda /= 0) then
 
              ABI_MALLOC(weight_t,(nband_k))
 
@@ -461,35 +470,61 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
              end do ! end iband=1,nband_k
 
+             if (dtset%use_gpu_cuda == 1) then
 #if defined HAVE_GPU_CUDA
-             call gpu_fourwf(1,&     ! cplex
-               &     rhoaug,&        ! denpot
-               &     cwavef(:,:,1),& ! fofgin
-               &     dummy,&         ! fofgout
-               &     wfraug,&        ! fofr
-               &     gbound,&        ! gboundin
-               &     gbound,&        ! gboundout
-               &     istwf_k,&       ! istwf_k
-               &     kg_k,&          ! kg_kin
-               &     kg_k,&          ! kg_kout
-               &     dtset%mgfft,&   ! mgfft
-               &     mpi_enreg,&     ! mpi_enreg
-               &     nband_k,&       ! ndat
-               &     dtset%ngfft,&   ! ngfft
-               &     npw_k,&         ! npwin
-               &     1,&             ! npwout
-               &     n4,&            ! n4
-               &     n5,&            ! n5
-               &     n6,&            ! n6
-               &     1,&             ! option
-               &     mpi_enreg%paral_kgb,& ! paral_kgb
-               &     tim_fourwf,&          ! tim_fourwf
-               &     weight_t,&            ! weight_r
-               &     weight_t)             ! weight_i
+               call gpu_fourwf(1,&     ! cplex
+                 &     rhoaug,&        ! denpot
+                 &     cwavef(:,:,1),& ! fofgin
+                 &     dummy,&         ! fofgout
+                 &     wfraug,&        ! fofr
+                 &     gbound,&        ! gboundin
+                 &     gbound,&        ! gboundout
+                 &     istwf_k,&       ! istwf_k
+                 &     kg_k,&          ! kg_kin
+                 &     kg_k,&          ! kg_kout
+                 &     dtset%mgfft,&   ! mgfft
+                 &     mpi_enreg,&     ! mpi_enreg
+                 &     nband_k,&       ! ndat
+                 &     dtset%ngfft,&   ! ngfft
+                 &     npw_k,&         ! npwin
+                 &     1,&             ! npwout
+                 &     n4,&            ! n4
+                 &     n5,&            ! n5
+                 &     n6,&            ! n6
+                 &     1,&             ! option
+                 &     mpi_enreg%paral_kgb,& ! paral_kgb
+                 &     tim_fourwf,&          ! tim_fourwf
+                 &     weight_t,&            ! weight_r
+                 &     weight_t)             ! weight_i
 #else
-             call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support.")
-             call abi_abort('COLL')
+               call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support.")
+               call abi_abort('COLL')
 #endif
+             else if (dtset%use_gpu_cuda == 666) then
+#ifdef HAVE_OPENMP_OFFLOAD
+               call ompgpu_fourwf(1,&     ! cplex
+                 &     rhoaug,&        ! denpot
+                 &     cwavef(:,:,1),& ! fofgin
+                 &     dummy,&         ! fofgout
+                 &     wfraug,&        ! fofr
+                 &     gbound,&        ! gboundin
+                 &     gbound,&        ! gboundout
+                 &     istwf_k,&       ! istwf_k
+                 &     kg_k,&          ! kg_kin
+                 &     kg_k,&          ! kg_kout
+                 &     dtset%mgfft,&   ! mgfft
+                 &     nband_k,&       ! ndat
+                 &     dtset%ngfft,&   ! ngfft
+                 &     npw_k,&         ! npwin
+                 &     1,&             ! npwout
+                 &     n4,&            ! n4
+                 &     n5,&            ! n5
+                 &     n6,&            ! n6
+                 &     1,&             ! option
+                 &     weight_t,&            ! weight_r
+                 &     weight_t)             ! weight_i
+#endif
+             end if
 
              ABI_FREE(weight_t)
 
@@ -666,6 +701,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
            end if ! use_gpu_cuda
 
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET EXIT DATA MAP(release:kg_k) IF(dtset%use_gpu_cuda==666)
+#endif
          else !paral_kgb==1
 
            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
