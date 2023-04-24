@@ -45,6 +45,7 @@ module m_dfpt_elt
  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle, proc_distrb_nband
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fourdp
+ use m_gtermcutoff,  only : termcutoff
 
  implicit none
 
@@ -2336,16 +2337,16 @@ end subroutine elt_ewald
 !!
 !! SOURCE
 
-subroutine dfpt_ewald(dyew,gmet,icutcoul,my_natom,natom,nkpt,qphon,rcut, &
+subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,rcut, &
 &                 rmet,rprimd,sumg0,typat,ucvol,vcutgeo,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: icutcoul,my_natom,natom,nkpt,sumg0
- real(dp),intent(in) :: rcut,ucvol
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
 !arrays
- integer,intent(in) :: typat(natom)
+ integer,intent(in) :: ngfft(18),typat(natom)
  integer,optional,intent(in) :: comm_atom
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),rprimd(3,3),vcutgeo(3),xred(3,natom),zion(*)
@@ -2368,6 +2369,7 @@ subroutine dfpt_ewald(dyew,gmet,icutcoul,my_natom,natom,nkpt,qphon,rcut, &
  real(dp) :: tsec(2)
  integer,pointer :: my_atmtab(:)
  real(dp) :: gpq(3),rq(3)
+ real(dp),allocatable :: gcutoff(:)
 
 ! *************************************************************************
 
@@ -2387,6 +2389,10 @@ subroutine dfpt_ewald(dyew,gmet,icutcoul,my_natom,natom,nkpt,qphon,rcut, &
 !Test Ewald s summation
 !eta=1.2_dp*eta
 
+!Initialize Gcut-off array from m_gtermcutoff
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,&
+&                optewald=1,ng=ng)
+
 !Sum terms over g space:
  fac=pi**2/eta
  gsum=zero
@@ -2394,9 +2400,11 @@ subroutine dfpt_ewald(dyew,gmet,icutcoul,my_natom,natom,nkpt,qphon,rcut, &
  da2=zero
  da3=zero
  dyew(:,:,:,:,:)=zero
+ ii=0
  do ig3=-ng,ng
    do ig2=-ng,ng
      do ig1=-ng,ng
+       ii=ii+1
        gpq(1)=dble(ig1)+qphon(1)
        gpq(2)=dble(ig2)+qphon(2)
        gpq(3)=dble(ig3)+qphon(3)
@@ -2420,7 +2428,7 @@ subroutine dfpt_ewald(dyew,gmet,icutcoul,my_natom,natom,nkpt,qphon,rcut, &
          arg=fac*gsq
 !        Larger arg gives 0 contribution:
          if (arg <= 80._dp) then
-           term=exp(-arg)/gsq
+           term=exp(-arg)/gsq * gcutoff(ii)
            do ia0=1,my_natom
              ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
              arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
@@ -2446,6 +2454,8 @@ subroutine dfpt_ewald(dyew,gmet,icutcoul,my_natom,natom,nkpt,qphon,rcut, &
      end do
    end do
  end do
+
+ ABI_FREE(gcutoff) 
 
 !End G summation by accounting for some common factors.
 !(for the charges:see end of routine)
