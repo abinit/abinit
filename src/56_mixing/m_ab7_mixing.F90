@@ -788,13 +788,13 @@ subroutine ab7_mixing_deallocate(mix)
  character(len = *), parameter :: subname = "ab7_mixing_deallocate"
 ! *************************************************************************
 
- ABI_SFREE(mix%i_rhor)
- ABI_SFREE(mix%i_vtrial)
- ABI_SFREE(mix%i_vresid)
- ABI_SFREE(mix%i_vrespc)
- ABI_SFREE(mix%f_fftgr)
- ABI_SFREE(mix%f_paw)
- ABI_SFREE(mix%f_atm)
+ ABI_SFREE_PTR(mix%i_rhor)
+ ABI_SFREE_PTR(mix%i_vtrial)
+ ABI_SFREE_PTR(mix%i_vresid)
+ ABI_SFREE_PTR(mix%i_vrespc)
+ ABI_SFREE_PTR(mix%f_fftgr)
+ ABI_SFREE_PTR(mix%f_paw)
+ ABI_SFREE_PTR(mix%f_atm)
 
  call nullify_(mix)
 

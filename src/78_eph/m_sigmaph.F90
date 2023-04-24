@@ -1103,8 +1103,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
      ABI_ERROR("Crystal structure from WFK and POT do not agree! Check messages above!")
    end if
-   call pot_cryst%free()
-   call pot_hdr%free()
+   call pot_cryst%free(); call pot_hdr%free()
  end if
 
  if (sigma%nwr > 0) then

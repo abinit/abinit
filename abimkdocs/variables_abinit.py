@@ -6261,7 +6261,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.9.0",
     text=r"""
-Maximum number of self-consistent iterations in which G and/or W will be updated
+Maximum number of self-consistent iterations in which G and/or W are be updated
 until the quasi-particle energies are converged within [[gwr_tolqpe]].
 [[gwr_task]] defines the self-consistency type.
 """,
@@ -23341,8 +23341,8 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This variable defines the maximum number of FFTs performed in the unit cell/super cell.
-If not specified in the input, the code will automatically define these values to find a good compromise
-betweeen memory and performance.
+If not specified in the input, the code will automatically define these values in order
+to find a good compromise betweeen memory and performance.
 """,
 ),
 
@@ -23360,13 +23360,20 @@ Variable(
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 The choice is among:
 
-* HDIAG --> direct diagonalization of the KS Hamiltonian.
-* G0W0 -->  one-shot GW.
+* HDIAGO --> direct diagonalization of the KS Hamiltonian to produce [[nband]] eigenvectors
+* HDIAGO_FULL --> direct diagonalization of the KS Hamiltonian for maximum number of eigenvectors defined by [[ecut]]
+* G0W0 -->  one-shot with GWR method
+* G0V -->
+* EGEW -->
+* EGW0 -->
+* G0EW -->
 * RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
+* CC4S -->
+* CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]]
 
 !!! important
 
-    At the time of writing ( |today| ), PAW is not supported by the GWR code.
+    At the time of writing, PAW is not supported by the GWR code.
 """,
 ),
 
@@ -23382,10 +23389,6 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This variable defines the number of imaginary-time points in the minimax mesh.
-
-!!! important
-
-    To avoid load imbalance the total number of MPI processes should be a divisor/multiple of [[gwr_ntau]] * [[nsppol]]
 """,
 ),
 
@@ -23400,7 +23403,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This input variable selects the algorithm to be used to compute the polarizability in the GWR code.
+This input variable selects the algorithm used to compute the polarizability in the GWR code.
 Possible values are
 
 * 0 --> Automatic selection.
@@ -23435,7 +23438,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This input variable selects the algorithm to be used to compute the self-energy in the GWR code.
+This input variable selects the algorithm used to compute the self-energy in the GWR code.
 Possible values are
 
 * 0 --> Automatic selection.
