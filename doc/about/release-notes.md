@@ -5,9 +5,9 @@ List of changes with respect to version 9.6.
 <!-- Release notes updated on March 15, 2023. -->
 
 Many thanks to the contributors to the ABINIT project between
-October 2021 and August 2022, and some late contributions up to March 2023 ! These release notes
+October 2021 and August 2022, and some late contributions up to April 2023 ! These release notes
 are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
-<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, are taken into account. -->
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, 911, are taken into account. -->
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet, 
@@ -364,7 +364,15 @@ From X. Gonze
 
 From X. Gonze
 
-**D.28** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.28** Updated the tarball for the fallbacks
+
+From JM Beuken (MR911)
+
+**D.29** Improve the procedure to examine the convergence with respect to ecut and pawecutdg in tutorial PAW1.
+
+From X. Gonze (20230424)
+
+**D.30** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
 By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
