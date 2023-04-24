@@ -2391,7 +2391,7 @@ subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,
 
 !Initialize Gcut-off array from m_gtermcutoff
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,&
-&                optewald=1,ng=ng)
+&                optewald=1,ng=ng,qpt=qphon)
 
 !Sum terms over g space:
  fac=pi**2/eta
