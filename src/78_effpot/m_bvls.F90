@@ -1,7 +1,6 @@
 MODULE BoundedLeastSquares
 
 ! Summary:
- 
 ! BVLS solves linear least-squares problems with upper and lower bounds on the
 ! variables, using an active set strategy.  It is documented in the J. of
 ! Computational Statistics, and can be used iteratively to solve minimum
@@ -264,12 +263,12 @@ bnorm = SQRT(bsq)
 
 !  Initialization complete.  Begin major loop (Loop A).
 DO  loopa = 1, 3 * n
-  
+
 !  Step 2.
 !  Initialize the negative gradient vector w(*).
   obj = 0.0_dp
   w(1:n) = 0.0_dp
-  
+
 !  Compute the residual vector b-a.x , the negative gradient vector
 !   w(*), and the current objective value obj = || a.x - b ||.
 !   The residual vector is stored in the mm+1'st column of act(*,*).
@@ -279,7 +278,7 @@ DO  loopa = 1, 3 * n
     w(1:n) = w(1:n) + a(i,1:n) * ri
     act(i,mm1) = ri
   END DO
-  
+
 !  Converged?  Stop if the misfit << || b ||, or if all components are
 !   active (unless this is the first iteration from a warm start).
   IF (SQRT(obj) <= bnorm*eps.OR.(loopa > 1.AND.nbound == 0)) THEN
@@ -287,16 +286,16 @@ DO  loopa = 1, 3 * n
     w(1) = SQRT(obj)
     RETURN
   END IF
-  
+
 !  Add the contribution of the active components back into the residual.
   DO  k = nbound + 1, n
     j = istate(k)
     act(1:m,mm1) = act(1:m,mm1) + a(1:m,j) * x(j)
   END DO
-  
+
 !  The first iteration in a warm start requires immediate qr.
   IF (loopa == 1 .AND. key /= 0) GO TO 150
-  
+
 !  Steps 3, 4.
 !  Find the bound element that most wants to be active.
   120 worst = 0.0_dp
@@ -310,14 +309,14 @@ DO  loopa = 1, 3 * n
       iact = ks
     END IF
   END DO
-  
+
 !  Test whether the Kuhn-Tucker condition is met.
   IF (worst >= 0.0_dp) THEN
     istate(n+1) = nbound
     w(1) = SQRT(obj)
     RETURN
   END IF
-  
+
 !  The component  x(iact)  is the one that most wants to become active.
 !   If the last successful change in the active set was to move x(iact)
 !   to a bound, don't let x(iact) in now: set the derivative of the misfit
@@ -326,33 +325,33 @@ DO  loopa = 1, 3 * n
     w(jj) = 0.0_dp
     GO TO 120
   END IF
-  
+
 !  Step 5.
 !  Undo the effect of the new (potentially) active variable on the
 !   residual vector.
   IF (istate(it) > 0) bound = bu(iact)
   IF (istate(it) < 0) bound = bl(iact)
   act(1:m,mm1) = act(1:m,mm1) + bound * a(1:m,iact)
-  
+
 !  Set flag ifrom5, indicating that Step 6 was entered from Step 5.
 !   This forms the basis of a test for instability: the gradient calculation
 !   shows that x(iact) wants to join the active set; if qr puts x(iact) beyond
 !   the bound from which it came, the gradient calculation was in error and
 !   the variable should not have been introduced.
   ifrom5 = istate(it)
-  
+
 !  Swap the indices (in istate) of the new active variable and the
 !   rightmost bound variable; `unbind' that location by decrementing nbound.
   istate(it) = istate(nbound)
   nbound = nbound - 1
   nact = nact + 1
   istate(nbound+1) = iact
-  
+
   IF (mm < nact) THEN
     WRITE(*, *) ' Too many free variables in BVLS!'
     STOP
   END IF
-  
+
 !  Step 6.
 !  Load array  act  with the appropriate columns of  a  for qr.  For added
 !   stability, reverse the column ordering so that the most recent addition to
@@ -365,9 +364,9 @@ DO  loopa = 1, 3 * n
       act(i, nact+1-k+nbound) = a(i,j)
     END DO
   END DO
-  
+
   CALL qr(m, nact, act, act(:,mm1+1), zz, resq)
-  
+
 !  Test for linear dependence in qr, and for an instability that moves the
 !   variable just introduced away from the feasible region (rather than into
 !   the region or all the way through it).
@@ -385,13 +384,13 @@ DO  loopa = 1, 3 * n
     w(iact) = 0.0_dp
     GO TO 120
   END IF
-  
+
 !  If Step 6 was entered from Step 5 and we are here, a new variable
 !   has been successfully introduced into the active set; the last
 !   variable that was fixed at a bound is again permitted to become active.
   IF (ifrom5 /= 0) jj = 0
   ifrom5 = 0
-  
+
 !   Step 7.  Check for strict feasibility of the new qr solution.
   DO  k = 1, nact
     k1 = k
@@ -405,7 +404,7 @@ DO  loopa = 1, 3 * n
   END DO
 !  New iterate is feasible; back to the top.
   CYCLE
-  
+
 !  Steps 8, 9.
   210 alpha = 2.0_dp
   alf = alpha
@@ -419,13 +418,13 @@ DO  loopa = 1, 3 * n
       sj = SIGN(1.0_dp, zz(nact+1-k)-bl(j))
     END IF
   END DO
-  
+
 !  Step 10
   DO  k = 1, nact
     j = istate(k+nbound)
     x(j) = x(j) + alpha * (zz(nact+1-k)-x(j))
   END DO
-  
+
 !  Step 11.
 !  Move the variable that determined alpha to the appropriate bound.
 !   (jj is its index; sj is + if zz(jj)> bu(jj), - if zz(jj)<bl(jj) ).
@@ -457,11 +456,11 @@ DO  loopa = 1, 3 * n
     END IF
   END DO
   nact = n - nbound
-  
+
 !  If there are still active variables left repeat the qr; if not,
 !    go back to the top.
   IF (nact > 0) GO TO 150
-  
+
 END DO
 
 WRITE(*, *) ' BVLS fails to converge! '
@@ -545,39 +544,39 @@ END MODULE BoundedLeastSquares
 
 
 
-PROGRAM Test_BVLS
-USE BoundedLeastSquares
+! PROGRAM Test_BVLS
+! USE BoundedLeastSquares
 
-IMPLICIT NONE
-INTEGER, PARAMETER  :: dp = SELECTED_REAL_KIND(12, 60)
+! IMPLICIT NONE
+! INTEGER, PARAMETER  :: dp = SELECTED_REAL_KIND(12, 60)
 
-INTEGER, PARAMETER  :: ncases = 400, ncols = 400
-REAL (dp)           :: a(ncases,ncols), y(ncases), bl(ncols), bu(ncols),  &
-                       beta(ncols), x(ncols), e, w(ncols)
-INTEGER             :: i, istate(ncols+1), j, key, loopa
+! INTEGER, PARAMETER  :: ncases = 400, ncols = 400
+! REAL (dp)           :: a(ncases,ncols), y(ncases), bl(ncols), bu(ncols),  &
+!                        beta(ncols), x(ncols), e, w(ncols)
+! INTEGER             :: i, istate(ncols+1), j, key, loopa
 
-! Generate artificial data satisfying
-!   Y = A.beta + noise
+! ! Generate artificial data satisfying
+! !   Y = A.beta + noise
 
-CALL RANDOM_NUMBER(beta)
-beta = 4.0*(beta - 0.5)
-CALL RANDOM_NUMBER(a)
-DO i = 1, ncases
-  CALL RANDOM_NUMBER(e)
-  y(i) = DOT_PRODUCT( a(i, :), beta ) + 0.001*(e - 0.5)
-END DO
-key = 0
-bl = -1.0_dp
-bu = 1.0_dp
-CALL bvls(key, ncases, ncols, a, y, bl, bu, x, istate, loopa, w)
+! CALL RANDOM_NUMBER(beta)
+! beta = 4.0*(beta - 0.5)
+! CALL RANDOM_NUMBER(a)
+! DO i = 1, ncases
+!   CALL RANDOM_NUMBER(e)
+!   y(i) = DOT_PRODUCT( a(i, :), beta ) + 0.001*(e - 0.5)
+! END DO
+! key = 0
+! bl = -1.0_dp
+! bu = 1.0_dp
+! CALL bvls(key, ncases, ncols, a, y, bl, bu, x, istate, loopa, w)
 
-WRITE(*, *) ' Column   Original beta   Solution'
-DO j = 1, ncols
-  WRITE(*, '(i5, 2f14.3)') j, beta(j), x(j)
-END DO
-WRITE(*, '(a, i4)') ' No. of iterations = ', loopa
-WRITE(*, *)
-WRITE(*, *) "The error:", w(1)
+! WRITE(*, *) ' Column   Original beta   Solution'
+! DO j = 1, ncols
+!   WRITE(*, '(i5, 2f14.3)') j, beta(j), x(j)
+! END DO
+! WRITE(*, '(a, i4)') ' No. of iterations = ', loopa
+! WRITE(*, *)
+! WRITE(*, *) "The error:", w(1)
 
-STOP
-END PROGRAM Test_BVLS
+! STOP
+! END PROGRAM Test_BVLS

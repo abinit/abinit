@@ -414,7 +414,7 @@ subroutine int_array_type_tostatic(self, a)
     ABI_MALLOC(a, (self%size))
     a(:) = self%data(:self%size)
   else
-    ABI_BUG("the size of the int_array is unkown.")
+    ABI_MALLOC(a, (self%size))
   end if
 end subroutine int_array_type_tostatic
 !!***

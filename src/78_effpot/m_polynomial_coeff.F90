@@ -2528,7 +2528,6 @@ if(need_compute_symmetric)then
       offsets(i) = sum(irank_ncombi(:i-1))
     enddo
     list_isbound_tmp = 0
-    ABI_MALLOC(buffsize,(nproc))
     do i = 1,nproc
       buffsize(i) = irank_ncombi(i)
     enddo
@@ -2643,14 +2642,17 @@ endif
      reverse=.False.
      call generateTermsFromList(cell,list_combination(:,ii),list_symcoeff,list_symstr,ncoeff_symsym,&
 &                             ndisp_max,nrpt,nstr_sym,nsym,nterm,terms, reverse=reverse)
-     block
+     block ! check if the term is a bounding term.
        integer :: nbody, totpower, isbound
        call get_totpower_and_nbody(list_combination(:,ii), ndisp_max,nbody, totpower)
+       print *, "list_combination: ", ii, ":", list_combination(:, ii)
+       print *, "totpower:", totpower
        if(max_nbody(totpower)==-1) then
          isbound= 1
        else
          isbound = 0
        end if
+       print *, "isbound:", isbound
        call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm),isbound=isbound, check=.true.)
      end block
    end block
