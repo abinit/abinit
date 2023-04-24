@@ -1481,6 +1481,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
 
 !      Since the matrix is hermitian, the diagonal elements are real
 !      (unles dissipation is allowed at finite omega)
+!MR:   Is this also true for broken TRS crystals???
        if (abs(eta_)<tol10) d2(2,idir1,ipert1,idir1,ipert1)=zero
 
 !      do ipert2=1,mpert See notes
