@@ -784,12 +784,11 @@ module m_gwr
 !!***
 
  ! Handy named costants (private stuff)
- integer,private,parameter :: LOG_MODR = 500
- integer,private,parameter :: LOG_MODK = 5
+ integer,private,parameter :: LOG_MODR = 500, LOG_MODK = 5
+ integer,private,parameter :: istwfk1 = 1, ndat1 = 1, me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
- integer,private,parameter :: istwfk1 = 1, ndat1 = 1, me_fft0 = 0, paral_fft0 = 0, nproc_fft1 = 1
 contains
 !!***
 
@@ -1026,8 +1025,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
 
  end if ! nkptgw /= 0
 
- ! Include all degenerate states and map kcalc to the IBZ.
- ! NB: This part is copied from sigmaph.
+ ! Include all degenerate states and map kcalc to the IBZ. NB: This part is copied from sigmaph.
 
  ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
  ABI_MALLOC(gwr%kcalc2ibz, (gwr%nkcalc, 6))
@@ -1341,7 +1339,7 @@ block
  keepdim = .False.; keepdim(g) = .True.; keepdim(t) = .True.; call gwr%gtau_comm%from_cart_sub(comm_cart, keepdim)
  ! Communicator for the k-g 2D grid.
  keepdim = .False.; keepdim(k) = .True.; keepdim(g) = .True.; call gwr%kg_comm%from_cart_sub(comm_cart, keepdim)
- ! Communicator for the (k-g-tau 3D subgrid.
+ ! Communicator for the k-g-tau 3D subgrid.
  keepdim = .True.; keepdim(s) = .False.; call gwr%kgt_comm%from_cart_sub(comm_cart, keepdim)
  ! Communicator for the k-tau-spin 3D subgrid.
  keepdim = .True.; keepdim(g) = .False.; call gwr%kts_comm%from_cart_sub(comm_cart, keepdim)
@@ -1527,10 +1525,11 @@ end block
  if (my_rank == master) then
    call gwr%print(units)
    NCF_CHECK(nctk_open_create(ncid, gwr%gwrnc_path, xmpi_comm_self))
+   ! Write structure and ebands
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
 
-   ! Add dimensions.
+   ! Add GWR dimensions.
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("ntau", gwr%ntau), nctkdim_t("nwr", gwr%nwr), &
      nctkdim_t("nkcalc", gwr%nkcalc), nctkdim_t("max_nbcalc", gwr%max_nbcalc) &
@@ -1626,7 +1625,7 @@ type(est_t) pure function estimate(gwr, np_kgts) result(est)
 
 ! *************************************************************************
 
-! Use real quantities to avoid integer division
+ ! Use real quantities to avoid integer division
  np_k = np_kgts(1); np_g = np_kgts(2); np_t = np_kgts(3); np_s = np_kgts(4)
  np_tot = product(real(np_kgts))
 
@@ -1916,15 +1915,9 @@ subroutine gwr_free(gwr)
  end if
 
  ! Free MPI communicators
- call gwr%spin_comm%free()
- call gwr%g_comm%free()
- call gwr%tau_comm%free()
- call gwr%kpt_comm%free()
- call gwr%gtau_comm%free()
- call gwr%kg_comm%free()
- call gwr%kgt_comm%free()
- call gwr%kts_comm%free()
- call gwr%comm%free()
+ call gwr%spin_comm%free(); call gwr%g_comm%free(); call gwr%tau_comm%free()
+ call gwr%kpt_comm%free(); call gwr%gtau_comm%free(); call gwr%kg_comm%free()
+ call gwr%kgt_comm%free(); call gwr%kts_comm%free(); call gwr%comm%free()
 
 end subroutine gwr_free
 !!***
@@ -3402,10 +3395,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
    end if
  end do ! ir1
 
- call uplan_k%free()
- call gpr%free()
- call desc_qbz%free()
- call wc_ggp%free()
+ call uplan_k%free(); call gpr%free(); call desc_qbz%free(); call wc_ggp%free()
 
  ABI_SFREE(ceig0r)
 

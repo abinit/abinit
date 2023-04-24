@@ -1248,8 +1248,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  call wrtout(std_out, sjoin(" Using batch1_size:", itoa(batch1_size), ", batch2_size:",  itoa(batch2_size)))
 
  mem_mb = (two * u_nfft * nspinor * batch1_size + &
-          two * u_nfft * nspinor * batch2_size * two + &
-          two * m_npw * nspinor * batch2_size) *  dp * b2Mb
+           two * u_nfft * nspinor * batch2_size * two + &
+           two * m_npw * nspinor * batch2_size) *  dp * b2Mb
  call wrtout(std_out, sjoin(" Memory for workspace arrays ", ftoa(mem_mb, fmt="f8.1"), "[Mb] <<< MEM"))
 
  ABI_MALLOC(ur1_batch, (u_nfft * nspinor, batch1_size))
