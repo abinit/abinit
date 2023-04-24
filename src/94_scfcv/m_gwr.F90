@@ -180,9 +180,9 @@ module m_gwr
  use m_chi0tk,        only : chi0_bbp_mask, accumulate_head_wings_imagw, symmetrize_afm_chi0
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
-#ifdef __HAVE_GREENX
- use gx_minimax,      only : gx_minimax_grid, gx_get_error_message
-#endif
+!#ifdef __HAVE_GREENX
+ use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
+!#endif
 
  implicit none
 
@@ -1138,22 +1138,23 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
  gwr%ntau = dtset%gwr_ntau
 
-#ifdef __HAVE_GREENX
+!#ifdef __HAVE_GREENX
  call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
                       gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
                       gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
                       gwr%ft_max_error, gwr%cosft_duality_error, ierr)
 
- if (ierr /= 0) then
-   call gx_get_error_message(msg)
-   ABI_ERROR(msg)
- end if
+ ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+ !if (ierr /= 0) then
+ !  call gx_get_error_message(msg)
+ !  ABI_ERROR(msg)
+ !end if
 
  ! FIXME: Here we need to rescale the weights because greenx convention is not what we expect!
- gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
-#else
- ABI_ERROR("GWR code requires Green-X library!")
-#endif
+ !gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
+!#else
+! ABI_ERROR("GWR code requires Green-X library!")
+!#endif
 
  if (gwr%comm%me == 0) then
    write(std_out, "(3a)")ch10, " Computing F(delta) = \int_0^{\infty} dw / (w^2 + delta^2) = pi/2/delta ", ch10
