@@ -864,7 +864,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
    ii=0
 
 !  Initialize Gcut-off array from m_gtermcutoff
-   call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+   call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt=qphon)
 
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1

@@ -631,7 +631,7 @@ subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
 
  !Initialize Gcut-off array from m_gtermcutoff
  !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
- call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt=qpt_)
 
  ! In order to speed the routine, precompute the components of g+q
  ! Also check if the booked space was large enough...

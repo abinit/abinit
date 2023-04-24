@@ -117,7 +117,7 @@ contains
 !! SOURCE
 
 subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
-&                     ng,optewald)
+&                     ng,optewald,qpt)
 
 !Arguments ------------------------------------
 !scalars
@@ -128,6 +128,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
 !arrays
  integer,intent(in)    :: ngfft(18)
  real(dp),intent(in)   :: rprimd(3,3),vcutgeo(3)
+ real(dp),optional,intent(in) :: qpt(3)
 
 !Local variables-------------------------------
 !scalars
@@ -153,7 +154,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
  integer              :: periodic_dir(3)
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
- real(dp)             :: alpha(3)
+ real(dp)             :: alpha(3),qpt_(3)
  real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
  real(dp),allocatable,intent(inout) :: gcutoff(:)
 
@@ -176,12 +177,15 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
  ABI_MALLOC(gcutoff,(nfft))
  gcart(:) = zero ; gpq = zero ; gpq2 = zero ; gcutoff = zero
 
+ !Set the q point for calls from linear-response routines
+ qpt_=zero; if (present(qpt)) qpt_=qpt
+
  !In order to speed the routine, precompute the components of gvectors
  !Also check if the booked space was large enough...
  do ii=1,3
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
-     gvec(ii,ing)=ing-(ing/id(ii))*ngfft(ii)-1
+     gvec(ii,ing)=ing-(ing/id(ii))*ngfft(ii)-1 + qpt_(ii)
    end do
  end do
 
@@ -549,7 +553,9 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo, &
          do i2=-ng_,ng_
           do i1=-ng_,ng_
             ii=ii+1
-            gcart(:)=b1(:)*dble(i1)+b2(:)*dble(i2)+b3(:)*dble(i3)
+            gcart(:)=b1(:)*(dble(i1)+qpt_(1)) + &
+                   & b2(:)*(dble(i2)+qpt_(2)) + &
+                   & b3(:)*(dble(i3)+qpt_(3))
             gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
             if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
             !if(gcart_para<tol12.and.ABS(gcart_perp)<tol12) then
