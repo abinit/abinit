@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 17 Mar 2023.
-- ( at 01h21 )
+.Starting date : Mon 24 Apr 2023.
+- ( at 22h17 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t07/t07.abi
 - output file    -> t07.abo
@@ -189,14 +189,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 -  9.00000   7.00000  201202                  znucl, zion, pspdat
 12 -1012 2 -1 824                             pspcod,pspxc,lmax,lloc,mmax
      nproj     2     2     1
-  pspatm : epsatm=    4.94516181
+  pspatm : epsatm=    4.94580260
          --- l  ekb(1:nproj) -->
              0    6.487052    1.061847
              1   -4.029087   -1.312559
              2   -2.364936
  pspatm: atomic psp has been read  and splines computed
 
-   6.72147241E+01                                ecore*ucvol(ha*bohr**3)
+   6.72211320E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
 _setup2: Arith. and geom. avg. npw (full set) are     331.000     331.000
@@ -210,19 +210,19 @@ tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -30.879954571612    -3.088E+01 2.604E-03 2.575E+01
- ETOT  2  -30.889654066872    -9.699E-03 2.816E-04 1.419E+00
- ETOT  3  -30.890987149637    -1.333E-03 2.034E-04 4.139E-01
- ETOT  4  -30.891412677615    -4.255E-04 2.283E-05 1.249E-03
- ETOT  5  -30.891413046790    -3.692E-07 3.633E-07 2.898E-06
- ETOT  6  -30.891413047681    -8.911E-10 4.293E-08 7.312E-09
+ ETOT  1  -30.879911984472    -3.088E+01 2.604E-03 2.575E+01
+ ETOT  2  -30.889611666833    -9.700E-03 2.816E-04 1.419E+00
+ ETOT  3  -30.890944821017    -1.333E-03 2.034E-04 4.139E-01
+ ETOT  4  -30.891370355960    -4.255E-04 2.284E-05 1.249E-03
+ ETOT  5  -30.891370725126    -3.692E-07 3.633E-07 2.898E-06
+ ETOT  6  -30.891370726017    -8.911E-10 4.293E-08 7.313E-09
 
  At SCF step    6       vres2   =  7.31E-09 < tolvrs=  1.00E-08 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.22217703E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.22217703E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.22217703E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.22215748E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.22215748E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.22215748E-02  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -235,15 +235,15 @@ lattice_vectors:
 lattice_lengths: [   5.44718,    5.44718,    5.44718, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1428787E+02
-convergence: {deltae: -8.911E-10, res2:  7.312E-09, residm:  4.293E-08, diffor: null, }
-etotal    :  -3.08914130E+01
+convergence: {deltae: -8.911E-10, res2:  7.313E-09, residm:  4.293E-08, diffor: null, }
+etotal    :  -3.08913707E+01
 entropy   :   0.00000000E+00
-fermie    :   6.49024945E-02
+fermie    :   6.49017473E-02
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.22217703E-02,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   1.22217703E-02,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   1.22217703E-02, ]
-pressure_GPa:  -3.5958E+02
+- [  1.22215748E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.22215748E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.22215748E-02, ]
+pressure_GPa:  -3.5957E+02
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Li]
 - [  5.0000E-01,  -5.0000E-01,  -5.0000E-01,  F]
@@ -256,13 +256,13 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          2.25001225
-    2        2.00000          7.32046971
+    1        2.00000          2.25001177
+    2        2.00000          7.32047093
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   43.806E-10; max=  42.926E-09
+ Mean square residual over all n,k,spin=   43.807E-10; max=  42.928E-09
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000     -0.500000000000     -0.500000000000
@@ -295,28 +295,28 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.07182885221898E+01
-hartree             :  8.46610123094687E+00
-xc                  : -7.04588802935636E+00
+kinetic             :  2.07182978317724E+01
+hartree             :  8.46610847061922E+00
+xc                  : -7.04588978214417E+00
 Ewald energy        : -2.02305295457931E+01
-psp_core            :  5.88117737177978E-01
-local_psp           : -2.77438876320919E+01
-non_local_psp       : -5.64361533075440E+00
-total_energy        : -3.08914130476812E+01
-total_energy_eV     : -8.40598098418266E+02
-band_energy         : -4.06072465102914E+00
+psp_core            :  5.88173805351175E-01
+local_psp           : -2.77439144220041E+01
+non_local_psp       : -5.64361708381828E+00
+total_energy        : -3.08913707260168E+01
+total_energy_eV     : -8.40596946787210E+02
+band_energy         : -4.06073161977043E+00
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.22217703E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.22217703E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.22217703E-02  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.22215748E-02  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.22215748E-02  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.22215748E-02  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -3.5958E+02 GPa]
-- sigma(1 1)=  3.59576835E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.59576835E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.59576835E+02  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -3.5957E+02 GPa]
+- sigma(1 1)=  3.59571085E+02  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  3.59571085E+02  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  3.59571085E+02  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -369,15 +369,15 @@ meta: {optdriver: 6, }
  Writing Coulomb vertex for testing purposes with ng: 4
 
  For band1: 1 , band2: 1
-  0.00000E+00  0.00000E+00  2.22623E+01 -4.95617E-16  6.94798E+00 -9.31871E-17  6.94798E+00  9.31871E-17
+  0.00000E+00  0.00000E+00  2.22623E+01 -4.12984E-16  6.94798E+00 -2.56130E-16  6.94798E+00  2.56130E-16
  For band1: 1 , band2: 2
-  0.00000E+00  0.00000E+00  2.73161E+00 -2.12526E-15  7.98311E-01 -1.38084E-15  7.98311E-01 -1.08386E-15
+  0.00000E+00  0.00000E+00  2.73160E+00 -2.03188E-15  7.98311E-01 -1.30404E-15  7.98311E-01 -1.08209E-15
  For band1: 1 , band2: 3
- -0.00000E+00  0.00000E+00 -5.88372E-01 -1.29702E-07 -7.44949E-02 -1.64219E-08  7.44949E-02  1.64219E-08
+ -0.00000E+00  0.00000E+00 -5.88605E-01  1.51908E-08 -7.45242E-02  1.92333E-09  7.45242E-02 -1.92333E-09
  For band1: 1 , band2: 4
- -0.00000E+00  0.00000E+00 -7.83865E-01  2.41029E-07 -9.92466E-02  3.05171E-08  9.92466E-02 -3.05171E-08
+  0.00000E+00  0.00000E+00 -7.84017E-01 -2.12028E-07 -9.92657E-02 -2.68453E-08  9.92657E-02  2.68453E-08
  For band1: 1 , band2: 5
-  0.00000E+00  0.00000E+00 -2.32513E+00  9.17589E-09 -2.94388E-01  1.16178E-09  2.94388E-01 -1.16178E-09
+  0.00000E+00  0.00000E+00 -2.32501E+00 -1.07013E-07 -2.94374E-01 -1.35491E-08  2.94374E-01  1.35491E-08
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
@@ -400,7 +400,7 @@ meta: {optdriver: 6, }
              ecut      1.50000000E+01 Hartree
           ecuteps1     0.00000000E+00 Hartree
           ecuteps2     4.00000000E+00 Hartree
-           etotal1    -3.0891413048E+01
+           etotal1    -3.0891370726E+01
            etotal2     0.0000000000E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -438,7 +438,7 @@ P           mkmem           1
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         225
-           strten1     1.2221770259E-02  1.2221770259E-02  1.2221770259E-02
+           strten1     1.2221574828E-02  1.2221574828E-02  1.2221574828E-02
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -562,15 +562,15 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.4
++Overall time at end (sec) : cpu=          1.4  wall=          1.5
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 98 allocations and 98 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 897224 allocations and 897224 deallocations in Fortran
+-   There were 896937 allocations and 896937 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0
