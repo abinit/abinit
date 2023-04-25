@@ -133,14 +133,16 @@ inp_files = [
     # Optcell test
     "t104.abi", # Testing optcell 6 to relax 3rd vector not orthogonal to 1st and 2nd vectors
 
-    # local orbital magnetic moments calculation.
-    "t109.abi", # test prt_lorbmag   printing local orbital magnetic moments in atomic spheres
 
     # Lattice Wannier function
     # scdm-k method for lattice wannier function in anaddb (disentangle option 2)
     "t110.abi",
     # projWF method for lattice wannier function in anaddb (disentangle option 2)
     "t111.abi",
+    
+    # local orbital magnetic moments calculation.
+    "t112.abi", # test prt_lorbmag   printing local orbital magnetic moments in atomic spheres
+
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
     # UPF2 format for norm-conserving pseudopotentials
