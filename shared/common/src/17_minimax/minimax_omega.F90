@@ -2209,7 +2209,10 @@ contains
     end if
 
     ! Find location of grid size
-    kloc = findloc(omega_npoints_supported, grid_size, 1)
+    !kloc = findloc(omega_npoints_supported, grid_size, 1)
+    do kloc=1,size(omega_npoints_supported)
+      if (omega_npoints_supported(kloc) == grid_size) exit
+    end do
     bup = energy_ranges_grids(kloc)
 
     ! Allocate and set type elements

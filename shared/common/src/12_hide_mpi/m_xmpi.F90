@@ -5189,7 +5189,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08
  ! else the gcc with mpicc complains with
- ! Error: Type mismatch in argument ‘baseptr’ at (1); passed TYPE(c_ptr) to INTEGER(8)
+ ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
  ! See https://github.com/pmodels/mpich/issues/2659
 
 #ifdef HAVE_MPI
