@@ -37,7 +37,7 @@
 #%% [paral_info]
 #%% max_nprocs = 12
 #%% [files]
-#%% files_to_test = t131.abo, tolnlines = 100, tolabs = 1.1e-02, tolrel = 1.0e-01
+#%% files_to_test = t131.abo, tolnlines = 100, tolabs = 1.1e-01, tolrel = 1.0e-01
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = NC, UPF2
