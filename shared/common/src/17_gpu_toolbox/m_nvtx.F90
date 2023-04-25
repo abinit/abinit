@@ -17,7 +17,7 @@
 !! SOURCE
 module m_nvtx
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   implicit none
 
   integer,private,parameter :: nbcol=14
@@ -54,13 +54,13 @@ module m_nvtx
   interface nvtxRangePush
      ! push range with custom label and standard color
      subroutine nvtxRangePushA(name) bind(C, name='nvtxRangePushA')
-       use iso_c_binding
+       use, intrinsic :: iso_c_binding
        character(kind=C_CHAR) :: name(256)
      end subroutine nvtxRangePushA
 
      ! push range with custom label and custom color
      subroutine nvtxRangePushEx(event) bind(C, name='nvtxRangePushEx')
-       use iso_c_binding
+       use, intrinsic :: iso_c_binding
        import:: nvtxEventAttributes
        type(nvtxEventAttributes):: event
      end subroutine nvtxRangePushEx

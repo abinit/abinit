@@ -388,14 +388,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwmem',tread,'INT')
  if(tread==1) dtset%gwmem=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_sctype',tread,'INT')
- if(tread==1) dtset%gw_sctype=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_nstep',tread,'INT')
+ if(tread==1) dtset%gwr_nstep=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_nstep',tread,'INT')
- if(tread==1) dtset%gw_nstep=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_toldfeig',tread,'ENE')
- if(tread==1) dtset%gw_toldfeig=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_tolqpe',tread,'ENE')
+ if(tread==1) dtset%gwr_tolqpe=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_stern_kmax',tread,'INT')
  if(tread==1) dtset%gwls_stern_kmax=intarr(1)
@@ -583,17 +580,31 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgmcorr',tread,'INT')
  if(tread==1) dtset%gwgmcorr=intarr(1)
 
- narr = size(dtset%gwr_np_gtks)
- call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_gtks', tread, 'INT')
- if (tread == 1) dtset%gwr_np_gtks = intarr(1:narr)
+ narr = size(dtset%gwr_np_kgts)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_kgts', tread, 'INT')
+ if (tread == 1) dtset%gwr_np_kgts = intarr(1:narr)
+
+ narr = size(dtset%gwr_ucsc_batch)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_ucsc_batch', tread, 'INT')
+ if (tread == 1) dtset%gwr_ucsc_batch = intarr(1:narr)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_ntau', tread,'INT')
  if (tread == 1) dtset%gwr_ntau = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_chi_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_chi_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_sigma_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_sigma_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_rpa_ncut', tread,'INT')
+ if (tread == 1) dtset%gwr_rpa_ncut = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_boxcutmin', tread, 'DPR')
  if (tread == 1) dtset%gwr_boxcutmin = dprarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_max_hwtene', tread, 'ENE')
+ if (tread == 1) dtset%gwr_max_hwtene = dprarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gwr_task", tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
 
  ! RESPFN integer input variables (needed here to get the value of response)
@@ -974,8 +985,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_qdrpl',tread,'INT')
    if(tread==1) dtset%lw_qdrpl=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_natopt',tread,'INT')
+   if(tread==1) dtset%lw_natopt=intarr(1)
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
    if(tread==1) dtset%prepalw=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ffnl_lw',tread,'INT')
+   if(tread==1) dtset%ffnl_lw=intarr(1)
 ! end if
 
  ! Recursion input variables
@@ -1431,6 +1448,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf',tread,'INT')
  if(tread==1) dtset%get1wf=intarr(1)
+ ! TODO
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf_filepath',tread,'KEY', key_value=key_value)
+ !if(tread==1) dtset%get1wf_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddk',tread,'INT')
  if(tread==1) dtset%getddk=intarr(1)
@@ -2497,7 +2517,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%use_gemm_nonlop == 1) dtset%useylm = 1
  if (usepaw==1) dtset%useylm=1
  if (usepaw==1 .and. dtset%usewvl==1) dtset%useylm=0
- if (dtset%efmas==1.or.dtset%use_gpu_cuda==1.or.dtset%rf2_dkdk/=0.or.dtset%rf2_dkde/=0) dtset%useylm=1
+ if (dtset%efmas==1 .or. dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0) dtset%useylm=1
+ if (dtset%use_gpu_cuda /= 0 .and. dtset%optdriver /= RUNL_GWR) dtset%useylm=1
  if(dtset%tfkinfunc==2 .and. dtset%usewvl==0 ) then
    dtset%useylm=1
    dtset%userec=1
@@ -2818,6 +2839,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3*dtset%natsph_extra,string(1:lenstr),'xredsph_extra',tread,'DPR')
  if(tread==1) dtset%xredsph_extra=reshape(dprarr(1:3*dtset%natsph_extra), (/3,dtset%natsph_extra/))
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfinit',tread,'INT')
+ if(tread==1) dtset%wfinit=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfmix',tread,'DPR')
  if(tread==1) dtset%wfmix=dprarr(1)
 
@@ -3027,6 +3051,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%tolmxde=tolmxde_
    dtset%tolmxf=tolmxf_
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolcum',tread,'DPR',ds_input)
+ if(tread==1) dtset%tolcum=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%focktoldfe=dprarr(1)
@@ -3339,12 +3366,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
-#ifdef HAVE_NETCDF
    if (my_rank == 0) then
      ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
      NCF_CHECK(ncerr)
    end if
-#endif
    call xmpi_barrier(comm)
    ABI_ERROR_NODUMP("kpts.nc file written. Aborting now")
  end if
@@ -3667,7 +3692,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')
    if (tread == 1) dtset%sigma_nshiftk = intarr(1)
    if (dtset%sigma_nshiftk < 1 .or. dtset%sigma_nshiftk > MAX_NSHIFTK ) then
-     write(msg,  '(a,i0,2a,i0,3a)' )&
+     write(msg, '(a,i0,2a,i0,3a)' ) &
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
      'while it is found to be ',dtset%sigma_nshiftk,'.',ch10,&
      'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
@@ -3724,12 +3749,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    Kmesh%nshift        =Dtset%nshiftk
    ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
    Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
-   !call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0, "COLL")
+   !call Kmesh%print("K-mesh for the wavefunctions",ab_out, dtset%prtvol)
    call find_qmesh(Qmesh, Cryst, Kmesh)
 #ifdef HAVE_NETCDF
    if (my_rank == master) then
-      ncerr = nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt)
-      NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt))
    end if
 #endif
    call xmpi_barrier(comm)

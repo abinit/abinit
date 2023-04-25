@@ -49,7 +49,7 @@ module m_gsphere
  public :: table_gbig2kg       ! Associate the kg_k set of G-vectors with Gamma-centered G-sphere.
  public :: get_irredg          ! Given a set of G vectors, find the set of G"s generating the others by symmetry.
  public :: merge_kgirr         ! Merge a list of irreducible G vectors (see routine for more info)
- public :: setshells           ! Set consistently the number of shells, the number of plane-waves,  and the energy cut-off
+ public :: setshells           ! Set consistently the number of shells, the number of plane-waves, and the energy cut-off
  public :: kg_map              ! Compute the mapping between two lists of g-vectors.
  public :: make_istwfk_table
  public :: getkpgnorm          ! Compute the norms of the k+G vectors
@@ -77,6 +77,7 @@ module m_gsphere
 !! Note that, unlike the GS part, the basis set does not depend on the k-point.
 !!
 !! NOTES
+!!
 !! To indicate the indices in the arrays grottb, grottbm1 we use the following notation:
 !!
 !!  g defines the index of the reciprocal lattice vector in the array gvec
@@ -355,11 +356,11 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
    ABI_FREE(gvec_ptr)
  end if
  !
- ! === Calculate phase exp{-i2\pi G.\tau} ===
- ABI_MALLOC(Gsph%phmGt,(Gsph%ng,nsym))
- do ig=1,Gsph%ng
-   do isym=1,nsym
-    Gsph%phmGt(ig,isym)=EXP(-j_dpc*two_pi*DOT_PRODUCT(Gsph%gvec(:,ig),tnons(:,isym)))
+ ! Calculate phase exp{-i2\pi G.\tau}
+ ABI_MALLOC(Gsph%phmGt, (Gsph%ng,nsym))
+ do isym=1,nsym
+   do ig=1,Gsph%ng
+    Gsph%phmGt(ig, isym) = EXP(-j_dpc*two_pi*DOT_PRODUCT(Gsph%gvec(:,ig), tnons(:,isym)))
    end do
  end do
  !
@@ -411,13 +412,13 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
  Gsph%shlen=shlen(1:nsh)
  ABI_FREE(shlim)
  ABI_FREE(shlen)
- !
- ! === Calculate tables for rotated G"s ===
- ABI_MALLOC(Gsph%rottb  ,(Gsph%ng,timrev,nsym))
- ABI_MALLOC(Gsph%rottbm1,(Gsph%ng,timrev,nsym))
 
- call setup_G_rotation(nsym,symrec,timrev,Gsph%ng,Gsph%gvec,&
-&  Gsph%g2sh,Gsph%nsh,Gsph%shlim,Gsph%rottb,Gsph%rottbm1)
+ ! Calculate tables for rotated G"s
+ ABI_MALLOC(Gsph%rottb  , (Gsph%ng,timrev,nsym))
+ ABI_MALLOC(Gsph%rottbm1, (Gsph%ng,timrev,nsym))
+
+ call setup_G_rotation(nsym, symrec, timrev, Gsph%ng, Gsph%gvec,&
+   Gsph%g2sh, Gsph%nsh, Gsph%shlim, Gsph%rottb, Gsph%rottbm1)
 
  ! Store Mapping G --> -G
  ! (we use a specialized table instead of rootb since rottb assumes time-reversal symmetry.
@@ -1801,7 +1802,7 @@ end subroutine setshells
 !!
 !! SOURCE
 
-subroutine kg_map(npw1,kg1,npw2,kg2,g2g1,nmiss)
+subroutine kg_map(npw1, kg1, npw2, kg2, g2g1, nmiss)
 
 !Arguments ------------------------------------
 !scalars

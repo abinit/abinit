@@ -83,6 +83,7 @@ inp_files = [
 "tlw_5.abi",
 "tlw_6.abi",
 "tlw_7.abi",
+"tlw_8.abi",
 #
 "tnlo_1.abi",
 "tnlo_2.abi",

@@ -151,6 +151,9 @@ module m_lobpcg2
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
 #endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+    integer :: openblas_get_num_threads
+#endif
 
     call timab(tim_init,1,tsec)
     lobpcg%neigenpairs = neigenpairs
@@ -164,6 +167,8 @@ module m_lobpcg2
     nthread = 1
 #ifdef HAVE_LINALG_MKL_THREADS
     nthread =  mkl_get_max_threads()
+#elif HAVE_LINALG_OPENBLAS_THREADS
+    nthread =  openblas_get_num_threads()
 #else
 !#elif defined HAVE_FC_GETENV
     !call getenv("OMP_NUM_THREADS",linalg_threads)
@@ -727,6 +732,9 @@ module m_lobpcg2
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
 #endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+    integer :: openblas_get_num_threads
+#endif
 
     call timab(tim_RR, 1, tsec)
 
@@ -734,21 +742,20 @@ module m_lobpcg2
     spacedim = lobpcg%spacedim
 
     select case(var)
+
     case(VAR_X)
       subdim = blockdim
       X = lobpcg%X
       AX = lobpcg%AX
       BX = lobpcg%BX
       !eigenSolver = minloc(eigenSolverTime(7:10), dim=1) + 6
+      eigenSolver = EIGENEV
 #ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) then
-        eigenSolver = EIGENEVD
-      else
+      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
+#elif HAVE_LINALG_OPENBLAS_THREADS
+      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
 #endif
-        eigenSolver = EIGENEV
-#ifdef HAVE_LINALG_MKL_THREADS
-      end if
-#endif
+
     case(VAR_XW)
       subdim = blockdim*2
       X = lobpcg%XW
@@ -758,15 +765,13 @@ module m_lobpcg2
       AWP = lobpcg%AW
       BWP = lobpcg%BW
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
+      eigenSolver = EIGENVX
 #ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) then
-        eigenSolver = EIGENVD
-      else
+      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
+#elif HAVE_LINALG_OPENBLAS_THREADS
+      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENVD
 #endif
-        eigenSolver = EIGENVX
-#ifdef HAVE_LINALG_MKL_THREADS
-      end if
-#endif
+
     case (VAR_XWP)
       subdim = blockdim*3
       X = lobpcg%XWP%self
@@ -776,16 +781,13 @@ module m_lobpcg2
       AWP = lobpcg%AWP
       BWP = lobpcg%BWP
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
-
-#ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) then
-        eigenSolver = EIGENVD
-      else
-#endif
         eigenSolver = EIGENVX
 #ifdef HAVE_LINALG_MKL_THREADS
-      end if
+      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
+#elif HAVE_LINALG_OPENBLAS_THREADS
+      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENVD
 #endif
+
     case default
       ABI_ERROR("RR")
     end select

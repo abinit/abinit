@@ -37,7 +37,6 @@ module m_longwave
  use m_wffile
 
  use m_pspini,      only : pspini
- use m_dfpt_lw,     only : dfpt_qdrpole, dfpt_flexo
  use m_common,      only : setup1
  use m_pawfgr,      only : pawfgr_type, pawfgr_init
  use m_pawrhoij,    only : pawrhoij_type
@@ -53,10 +52,15 @@ module m_longwave
  use m_spacepar,    only : setsym
  use m_mkrho,       only : mkrho
  use m_fft,         only : fourdp
- use m_ddb,         only : ddb_type
+ use m_ddb,         only : ddb_type,lwcart
  use m_ddb_hdr,     only : ddb_hdr_type
- use m_dfpt_elt,    only : dfpt_ewalddq, dfpt_ewalddqdq
  use m_mkcore,      only : mkcore
+ use m_dfptlw_loop, only : dfptlw_loop
+ use m_dfptlw_nv,   only : dfptlw_nv
+ use m_dfptlw_pert, only : preca_ffnl
+ use m_initylmg,    only : initylmg
+ use m_dynmat,      only : d3lwsym, sylwtens
+ use m_geometry,    only : symredcart
 
  implicit none
 
@@ -97,6 +101,16 @@ contains
 !!
 !! NOTES
 !!
+!! PARENTS
+!!      m_driver
+!!
+!! CHILDREN
+!!      check_kxc,ddb_hdr%free,ddb_hdr%open_write,ddb_hdr_init,
+!!      dfpt_lw_doutput,ebands_free
+!!      fourdp,hdr%free,hdr%update,hdr_init,inwffil,kpgio,matr3inv,mkcore,mkrho
+!!      pawfgr_init,pspini,read_rhor,rhotoxc,setsym,setup1,symmetrize_xred
+!!      wffclose,xcdata_init
+!!
 !! SOURCE
 
 subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
@@ -126,14 +140,19 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Local variables-------------------------------
  !scalars
  integer,parameter :: cplex1=1,formeig=0,response=1
- integer :: ask_accurate,bantot,coredens_method,gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
+ integer :: ask_accurate,bantot,coredens_method,dimffnl,dimffnl_i
+ integer :: gscase,iatom,ierr,indx,ireadwf0,iscf_eff,itypat
+ integer :: ider,idir0,idir
+ integer :: i1dir,i1pert,i2dir,ii,i2pert,i3dir,i3pert
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
- integer :: mpert,my_natom,nkxc,nk3xc,ntypat,n3xccc
- integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,sumg0,timrev,tim_mkrho,usexcnhat
-! integer :: idir,ipert,
+! integer :: isym
+ integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
+ integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
+ integer :: usexcnhat,useylmgr
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
+! logical :: has_strain,non_magnetic_xc
  character(len=fnlen) :: dscrpt
  character(len=500) :: msg
  type(ebands_t) :: bstruct
@@ -146,21 +165,25 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  type(wvl_data) :: wvl
  type(wffile_type) :: wffgs,wfftgs
  !arrays
- integer :: ngfft(18),ngfftf(18)
- real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),qphon(3),gprimd_for_kg(3,3)
+ integer :: ngfft(18),ngfftf(18),perm(6)
+ real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
  integer,allocatable :: atindx(:),atindx1(:)
- integer,allocatable :: blkflg(:,:,:,:,:,:)
+ integer,allocatable :: blkflg(:,:,:,:,:,:),blkflg_car(:,:,:,:,:,:)
+ integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),irrzon(:,:,:),kg(:,:)
  integer,allocatable :: nattyp(:),npwarr(:),pertsy(:,:),symrec(:,:,:)
-!integer,allocatable :: rfpert(:)
+ integer,allocatable :: rfpert(:,:,:,:,:,:)
  real(dp),allocatable :: cg(:,:)
- real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),doccde(:)
- real(dp),allocatable :: dyewdq(:,:,:,:,:,:),dyewdqdq(:,:,:,:,:,:)
- real(dp),allocatable :: eigen0(:),grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
+ real(dp),allocatable :: d3etot(:,:,:,:,:,:,:),d3etot_car(:,:,:,:,:,:,:)
+ real(dp),allocatable :: d3etot_nv(:,:,:,:,:,:,:),doccde(:)
+ real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:),ffnl_i(:,:,:,:,:)
+ real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
+! real(dp),allocatable :: symrel_cart(:,:,:)
  real(dp),allocatable :: work(:),xccc3d(:)
+ real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
 
@@ -179,8 +202,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Only usable with spherical harmonics
- if (dtset%useylm/=1) then
-   msg='This routine cannot be used for useylm/=1'
+ if (dtset%useylm/=1.and.(dtset%lw_qdrpl/=0.or.dtset%lw_flexo/=0)) then
+   msg='This routine can only be used with useylm/=1 for lw_natopt=1'
    ABI_BUG(msg)
  end if
 
@@ -195,6 +218,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    msg='This routine cannot be used for n1xccc/=0'
    ABI_BUG(msg)
  end if
+
 
 !Define some data
  ntypat=psps%ntypat
@@ -211,23 +235,150 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  nfftot=product(ngfft(1:3))
  nfftotf=product(ngfftf(1:3))
 
-!Define the set of admitted perturbations taking into account
-!the possible permutations
-!  -> natom+8 refers to ddq perturbation
- mpert=natom+8
- ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
- ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
- blkflg=0
- d3etot=zero
-
 !Set up for iterations
  call setup1(dtset%acell_orig(1:3,1),bantot,dtset,&
 & ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
 & ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
 & response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
 
+!Define the set of admitted perturbations taking into account
+!the possible permutations
+!  -> natom+8 refers to ddq perturbation
+ mpert=natom+8
+ ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(d3etot_nv,(2,3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(rfpert,(3,mpert,3,mpert,3,mpert))
+ ABI_MALLOC(d3e_pert1,(mpert))
+ ABI_MALLOC(d3e_pert2,(mpert))
+ ABI_MALLOC(d3e_pert3,(mpert))
+ blkflg(:,:,:,:,:,:) = 0
+ d3etot(:,:,:,:,:,:,:) = zero
+ d3etot_nv(:,:,:,:,:,:,:) = zero
+ rfpert(:,:,:,:,:,:) = 0
+ d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
+
+ d3e_pert3(natom+8)=1
+ if (dtset%lw_qdrpl==1) then
+   d3e_pert1(natom+2)=1
+   d3e_pert2(1:natom)=1
+ end if
+
+ if (dtset%lw_flexo==2.or.dtset%lw_flexo==1) then
+   d3e_pert1(natom+2)=1
+   d3e_pert2(natom+3:natom+4)=1
+ end if
+
+ if (dtset%lw_flexo==3.or.dtset%lw_flexo==1) then
+   d3e_pert1(natom+2)=1 ; d3e_pert1(1:natom)=1
+   d3e_pert2(1:natom)=1
+ end if
+
+ if (dtset%lw_flexo==4.or.dtset%lw_flexo==1) then
+   d3e_pert1(1:natom)=1
+   d3e_pert2(natom+3:natom+4)=1
+ end if
+
+ if (dtset%lw_natopt==1) then
+   d3e_pert1(natom+2)=1
+   d3e_pert2(natom+2)=1 
+ end if
+
+ perm(:)=0
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+       perm(1)=d3e_pert1(i1pert)*d3e_pert2(i2pert)*d3e_pert3(i3pert)
+!       perm(2)=d3e_pert1(i1pert)*d3e_pert2(i3pert)*d3e_pert3(i2pert)
+!       perm(3)=d3e_pert1(i2pert)*d3e_pert2(i1pert)*d3e_pert3(i3pert)
+!       perm(4)=d3e_pert1(i2pert)*d3e_pert2(i3pert)*d3e_pert3(i1pert)
+!       perm(5)=d3e_pert1(i3pert)*d3e_pert2(i2pert)*d3e_pert3(i1pert)
+!       perm(6)=d3e_pert1(i3pert)*d3e_pert2(i1pert)*d3e_pert3(i2pert)
+       if ( sum(perm(:)) > 0 ) rfpert(:,i1pert,:,i2pert,:,i3pert)=1
+     end do
+   end do
+ end do 
+
+!Do symmetry stuff
+ ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
+ ABI_MALLOC(indsym,(4,dtset%nsym,natom))
+ ABI_MALLOC(symrec,(3,3,dtset%nsym))
+ irrzon=0;indsym=0;symrec=0;phnons=zero
+!If the density is to be computed by mkrho, need irrzon and phnons
+ iscf_eff=0;if(dtset%getden==0)iscf_eff=1
+ call setsym(indsym,irrzon,iscf_eff,natom,&
+& nfftot,ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
+& phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
+
+!Symmetrize atomic coordinates over space group elements:
+ call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
+
+! Get symmetries in cartesian coordinates
+! ABI_MALLOC(symrel_cart, (3, 3, dtset%nsym))
+! do isym =1,dtset%nsym
+!   call symredcart(rprimd, gprimd, symrel_cart(:,:,isym), dtset%symrel(:,:,isym))
+!   ! purify operations in cartesian coordinates.
+!   where (abs(symrel_cart(:,:,isym)) < tol14)
+!     symrel_cart(:,:,isym) = zero
+!   end where
+! end do
+
+! call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
+ call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
+
+ write(msg,'(a,a,a,a,a)') ch10, &
+& ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,& 
+& ' (in reduced coordinates except for strain pert.) ', ch10
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+
+ write(msg,'(12x,a)') 'i1dir   i1pert  i2dir   i2pert  i3dir  i3pert'
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+ n1 = 0
+ do i3pert = 1, mpert
+   do i3dir = 1, 3
+     do i2pert = 1, mpert
+       do i2dir = 1,3
+         do i1pert = 1, mpert
+           do i1dir = 1, 3
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               n1 = n1 + 1
+               write(msg,'(2x,i4,a,6(5x,i3))') n1,')', &
+             & i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+               call wrtout(ab_out,msg,'COLL')
+               call wrtout(std_out,msg,'COLL')
+             else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-2) then
+               blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+               if (dtset%prtvol>=10) then
+                 n1 = n1 + 1
+                 write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+  &               i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,' => must be zero, not computed'
+                 call wrtout(ab_out,msg,'COLL')
+                 call wrtout(std_out,msg,'COLL')
+               end if
+             else if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==-1) then
+               if (dtset%prtvol>=10) then
+                 n1 = n1 + 1
+                 write(msg,'(2x,i4,a,6(5x,i3),a)') n1,')', &
+  &               i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,' => symmetric of another element, not computed'
+                 call wrtout(ab_out,msg,'COLL')
+                 call wrtout(std_out,msg,'COLL')
+               end if
+             end if
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do
+ write(msg,'(a,a)') ch10,ch10
+ call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg,'COLL')
+
 !In some cases (e.g. getcell/=0), the plane wave vectors have
-! to be generated from the original simulation cell
+!to be generated from the original simulation cell
  rprimd_for_kg=rprimd
  if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=dtset%rprimd_orig(:,:,1)
  call matr3inv(rprimd_for_kg,gprimd_for_kg)
@@ -241,7 +392,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & dtset%nsppol)
 
 !Open and read pseudopotential files
-ecore=zero
+ ecore=zero
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,&
 & psps,rprimd,comm_mpi=mpi_enreg%comm_cell)
 
@@ -297,20 +448,6 @@ ecore=zero
    call WffClose(wffgs,ierr)
  end if
 
-!Do symmetry stuff
- ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
- ABI_MALLOC(indsym,(4,dtset%nsym,natom))
- ABI_MALLOC(symrec,(3,3,dtset%nsym))
- irrzon=0;indsym=0;symrec=0;phnons=zero
-!If the density is to be computed by mkrho, need irrzon and phnons
- iscf_eff=0;if(dtset%getden==0)iscf_eff=1
- call setsym(indsym,irrzon,iscf_eff,natom,&
-& nfftot,ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-& phnons,dtset%symafm,symrec,dtset%symrel,dtset%tnons,dtset%typat,xred)
-
-!Symmetrize atomic coordinates over space group elements:
- call symmetrize_xred(natom,dtset%nsym,dtset%symrel,dtset%tnons,xred,indsym=indsym)
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -369,7 +506,7 @@ ecore=zero
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
  end if ! getden
- ABI_FREE(cg)
+! ABI_FREE(cg)
 
 !Pseudo core electron density by method 2
 !TODO: The code is not still adapted to consider n3xccc in the long-wave
@@ -411,6 +548,54 @@ ecore=zero
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
+
+!Set up the spherical harmonics (Ylm) and gradients at each k point 
+ if (psps%useylm==1) then
+   useylmgr=1; option=2 ; nylmgr=9
+   ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))               
+   ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
+&  psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+&  rprimd,ylm,ylmgr)                                   
+ end if
+
+!Compute nonlocal form factors ffnl1, for all atoms and all k-points.
+ if (dtset%ffnl_lw == 0) then 
+   if (dtset%lw_natopt==1) then
+     ider=1;dimffnl=4;dimffnl_i=2
+     ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
+     ABI_MALLOC(ffnl_i,(dtset%mkmem,dtset%mpw,dimffnl_i,psps%lmnmax,psps%ntypat))
+     do idir=1, 3
+       idir0=idir
+       call preca_ffnl(dimffnl_i,ffnl_i,gmet,gprimd,ider,idir0,kg, &
+     & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+     & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+       ffnl(:,:,1,:,:)=ffnl_i(:,:,1,:,:)
+       ffnl(:,:,1+idir,:,:)=ffnl_i(:,:,2,:,:)
+     end do
+     ABI_FREE(ffnl_i)
+     if (psps%useylm==1) then
+       useylmgr=0
+       ABI_FREE(ylmgr)
+       ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+     end if
+   else        
+     if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==3) ider=1; idir0=4; dimffnl=4
+     if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
+       ider=2; idir0=4; dimffnl=10
+     end if
+     ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
+     call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
+   & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+   & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+     useylmgr=0
+     ABI_FREE(ylmgr)
+     ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
+   end if
+ else if (dtset%ffnl_lw == 1) then 
+   dimffnl=0
+   ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
+ end if
 
 !TODO: This part of the implementation does not work properly to select specific directions
 !      for each perturbation. This development is temporarily frozen.
@@ -472,52 +657,74 @@ ecore=zero
  ABI_MALLOC(pertsy,(3,natom+6))
  pertsy(:,:)=1
 
-!Deallocate global proc_distrib
- if(xmpi_paral==1) then
-   ABI_FREE(mpi_enreg%proc_distrb)
- end if
 
 !#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
-!Calculate the nonvariational terms
-!1st q-gradient of Ewald contribution to the dynamical matrix
- if (dtset%lw_flexo/=0) then
-   ABI_MALLOC(dyewdq,(2,3,natom,3,natom,3))
-   dyewdq(:,:,:,:,:,:)=zero
-   if (dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-     sumg0=0;qphon(:)=zero
-     call dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
-   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-   end if
+!Anounce start of spatial-dispersion calculation
+ write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
+&   ' ==> Compute spatial-dispersion 3rd-order energy derivatives <== ',ch10
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+
+ if (dtset%prtvol>=10) then
+   write(msg,'(5a)') ' CAUTION: Individual contributions to the 3rd-order energy derivatives ',ch10, &
+                   & ' are not written in a unified form. Mixed cartesian/reduced coordinates ',ch10, &
+                   & ' and/or type-I/type-II forms are used.'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+ end if 
+ 
+!Calculate the nonvariational Ewald terms
+ if (dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
+   call dfptlw_nv(d3etot_nv,dtset,gmet,gprimd,mpert,my_natom,rfpert,rmet,rprimd,ucvol,xred,psps%ziontypat, & 
+  & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
  end if
 
-!2nd q-gradient of Ewald contribution to the dynamical matrix
- if (dtset%lw_flexo/=0) then
-   ABI_MALLOC(dyewdqdq,(2,3,natom,3,3,3))
-   dyewdqdq(:,:,:,:,:,:)=zero
-   if (dtset%lw_flexo==1.or.dtset%lw_flexo==4) then
-     sumg0=1;qphon(:)=zero
-     call dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,dtset%typat,ucvol,xred,psps%ziontypat,&
-   & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
-   end if
+!Main loop over the perturbations to calculate the stationary part
+ call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
+& ffnl,gmet,gprimd,&
+& hdr,kg,kxc,dtset%mband,dtset%mgfft,&
+& dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
+& dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
+& pawfgr,pawtab,&
+& psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
+
+!Merge stationay and nonvariational contributions
+ d3etot(:,:,:,:,:,:,:)=d3etot(:,:,:,:,:,:,:) + d3etot_nv(:,:,:,:,:,:,:)
+
+!Real (imaginary) part of d3etot is zero for first (second) momentum derivatives
+ if (dtset%kptopt /= 3) then
+   do i3pert = 1, mpert
+     do i3dir = 1, 3
+       do i2pert = 1, mpert
+         do i2dir = 1,3
+           do i1pert = 1, mpert
+             do i1dir = 1, 3
+               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1) then
+                 if (i2pert /= natom+3 .and. i2pert /= natom+4) then
+                   d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
+                 else
+                   d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
+                 end if
+               end if
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
  end if
 
-!Calculate the quadrupole tensor
- if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3) then
-   call dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
-&   gmet,gprimd,kxc,mpert,&
-&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-&   timrev,ucvol,xred)
- end if
 
-!Calculate the flexoelectric tensor
- if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4) then
-   call dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyewdqdq, &
-&   gmet,gprimd,kxc,mpert,&
-&   mpi_enreg,nattyp,dtset%nfft,ngfft,dtset%nkpt,nkxc,&
-&   dtset%nspden,dtset%nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
-&   timrev,ucvol,xred)
+!Complete missing elements using symmetry operations
+! has_strain=.false.
+! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) has_strain=.true.
+! call d3lwsym(blkflg,d3etot,has_strain,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel,symrel_cart)
+ call d3lwsym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+
+!Deallocate global proc_distrib
+ if(xmpi_paral==1) then
+   ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
  if (mpi_enreg%me == 0) then
@@ -535,6 +742,15 @@ ecore=zero
    call ddb_hdr%free()
    call ddb%free()
 
+!  Close DDB
+   close(dtfil%unddb)
+
+   !Calculate spatial-dispersion quantities in Cartesian coordinates and write
+  !them in abi_out
+   ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
+   ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
+   call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
+   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
  end if
 
 !Deallocate arrays
@@ -543,6 +759,8 @@ ecore=zero
  ABI_FREE(blkflg)
  ABI_FREE(doccde)
  ABI_FREE(eigen0)
+ ABI_FREE(cg)
+ ABI_SFREE(ffnl)
  ABI_FREE(indsym)
  ABI_FREE(irrzon)
  ABI_FREE(nattyp)
@@ -553,13 +771,23 @@ ecore=zero
  ABI_FREE(rhog)
  ABI_FREE(rhor)
  ABI_FREE(symrec)
+! ABI_FREE(symrel_cart)
  ABI_FREE(vxc)
  ABI_FREE(d3etot)
+ ABI_FREE(d3etot_nv)
  ABI_FREE(pertsy)
- if (dtset%lw_flexo/=0) then
-   ABI_FREE(dyewdq)
-   ABI_FREE(dyewdqdq)
- end if
+ ABI_FREE(rfpert)
+ ABI_FREE(d3e_pert1)
+ ABI_FREE(d3e_pert2)
+ ABI_FREE(d3e_pert3)
+ ABI_SFREE(pawrhoij)
+ ABI_FREE(xccc3d)
+ ABI_SFREE(nhat)
+ ABI_SFREE(nhatgr)
+ ABI_SFREE(ylm)
+ ABI_SFREE(ylmgr)
+ ABI_SFREE(blkflg_car)
+ ABI_SFREE(d3etot_car)
 
  ! Clean the header
  call hdr%free()
@@ -567,6 +795,314 @@ ecore=zero
  DBG_EXIT("COLL")
 
 end subroutine longwave
+!!***
+
+!!****f* ABINIT/m_dfptlw_loop/dfptlw_out
+!! NAME
+!!  dfptlw_out
+!!
+!! FUNCTION
+!!  Write the relevant spatial-dispersion quantities in Cartesian coordinates
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2022 ABINIT group (MR)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  blkflg_car(3,mpert,3,mpert,3,mpert) =flags for each element of the 3DTE
+!!  d3etot_car(2,3,mpert,3,mpert,3,mpert) =array with the cartesian thir-order derivatives
+!!  lw_qdrpl= flag that activates quadrupoles calculation
+!!  lw_flexo= flag that activates flexoelectric tensor calculation
+!!  mpert =maximum number of ipert
+!!  natom = number of atoms in unit cell
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,ucvol)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: lw_flexo,lw_qdrpl,lw_natopt,mpert,natom
+ real(dp),intent(in) :: ucvol
+!arrays
+ integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert) 
+ real(dp),intent(out) :: d3etot_car(2,3,mpert,3,mpert,3,mpert)
+
+!Local variables-------------------------------
+!scalar 
+ integer :: beta,delta,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,istr
+!arrays
+ integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ real(dp),allocatable :: qdrp(:,:,:,:,:,:,:)
+ real(dp) :: piezoci(2),piezofr(2),celastci(2)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+ i3pert=natom+8
+ if (lw_qdrpl==1.or.lw_flexo==3.or.lw_flexo==1) then
+   write(ab_out,'(a)')' First real-space moment of the polarization response '
+   write(ab_out,'(a)')' to an atomic displacementatom, in cartesian coordinates,'
+   write(ab_out,'(a)')' (1/ucvol factor not included),'
+   write(ab_out,'(a)')' efidir   atom   atdir    qgrdir          real part        imaginary part'
+   i1pert=natom+2
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2pert=1,natom
+         do i2dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i2pert,i2dir,i3dir, &
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+           & -d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+
+   !Calculate cuadrupoles (symmetrize i1dir/i3dir)
+   ABI_MALLOC(qdrp,(2,3,mpert,3,mpert,3,mpert))
+   i1pert=natom+2
+   do i2pert=1,natom
+     do i2dir=1,3
+       do i1dir=1,3
+         do i3dir=1,i1dir-1
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             !real part
+             qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=&
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
+           & d3etot_car(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert) 
+
+             qdrp(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+           & qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+             !imaginary part
+             qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=&
+           & -(d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) + &
+           &   d3etot_car(1,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert) ) 
+
+             qdrp(2,i3dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+           & qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+         if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)==1) then
+           !real part
+           qdrp(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+         & two*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
+
+           !imaginary part
+           qdrp(2,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)=&
+         &-two*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i1dir,i3pert)
+         end if
+       end do
+     end do
+   end do
+
+   write(ab_out,'(a)')' Quadrupole tensor, in cartesian coordinates,'
+   write(ab_out,'(a)')' efidir   atom   atdir    qgrdir          real part        imaginary part'
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2pert=1,natom
+         do i2dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i2pert,i2dir,i3dir, &
+           & qdrp(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+           & qdrp(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+   ABI_FREE(qdrp)
+
+   write(ab_out,'(a)')' Electronic (clamped-ion) contribution to the piezoelectric tensor,'
+   write(ab_out,'(a)')' in cartesian coordinates, (from sum rule of dynamic quadrupoles or P^1 tensor)'
+   write(ab_out,'(a)')' efidir   atdir    qgrdir        real part           imaginary part'
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2dir=1,3
+         piezoci=zero
+         do i2pert=1,natom
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             piezoci(1)=piezoci(1)+d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             piezoci(2)=piezoci(2)-d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+         piezoci(1)=-piezoci(1)/ucvol
+         piezoci(2)=-piezoci(2)/ucvol
+         write(ab_out,'(3(i5,3x),2(1x,f20.10))') i1dir,i2dir,i3dir,piezoci(1),piezoci(2)
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+ end if
+
+ if (lw_flexo==2.or.lw_flexo==1) then
+   write(ab_out,'(a)')' Clamped-ion flexoelectric tensor (type-II), in cartesian coordinates,'
+   write(ab_out,'(a)')' efidir  qgrdir  strdir1  strdir2         real part          imaginary part'
+   i1pert=natom+2
+   do i3dir=1,3
+     do i2pert=natom+3,natom+4
+       do i2dir=1,3
+         istr=(i2pert-natom-3)*3+i2dir
+         beta=idx(2*istr-1); delta=idx(2*istr)
+         do i1dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i3dir,beta,delta, &
+           & d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/ucvol, &
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/ucvol
+           end if
+         end do
+       end do
+       write(ab_out,*)' '
+     end do
+   end do
+ end if
+
+ if (lw_flexo==3.or.lw_flexo==1) then
+   write(ab_out,'(a)')' 1st real-space moment of IFCs, in cartesian coordinates,'
+   write(ab_out,'(a)')' iatdir   iatom    jatdir   jatom    qgrdir           real part          imaginary part'
+   do i3dir=1,3
+     do i1pert=1,natom
+       do i1dir=1,3
+         do i2pert=1,natom
+           do i2dir=1,3
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               write(ab_out,'(5(i5,4x),2(1x,f20.10))') i1dir,i1pert,i2dir,i2pert,i3dir, &
+             & -d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+             &  d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+
+   write(ab_out,'(a)')' Piezoelectric force-response tensor, in cartesian coordinates '
+   write(ab_out,'(a)')' (from sum rule of 1st moment of IFCs),'
+   write(ab_out,'(a)')' (for non-vanishing forces in the cell it lacks an improper contribution),'
+   write(ab_out,'(a)')' iatom   iatddir  jatddir   qgrdir           real part          imaginary part'
+   do i3dir=1,3
+     do i1pert=1,natom
+       do i1dir=1,3
+         do i2dir=1,3
+           piezofr=zero
+           do i2pert=1,natom
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               piezofr(1)=piezofr(1)-d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               piezofr(2)=piezofr(2)+d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+           write(ab_out,'(4(i5,4x),2(1x,f20.10))') i1pert,i1dir,i2dir,i3dir, &
+         & piezofr(1), piezofr(2)
+         end do
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+ end if
+
+ if (lw_flexo==4.or.lw_flexo==1) then
+   write(ab_out,'(a)')' Clamped-ion flexoelectric force-response tensor (type-II),  in cartesian coordinates,'
+   write(ab_out,'(a)')'  atom   atdir   qgrdir  strdir1 strdir2          real part          imaginary part'
+   do i3dir=1,3
+     do i1pert=1,natom
+       do i1dir=1,3
+         do i2pert=natom+3, natom+4
+           do i2dir=1,3
+             istr=(i2pert-natom-3)*3+i2dir
+             beta=idx(2*istr-1); delta=idx(2*istr)
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               write(ab_out,'(5(i5,3x),2(1x,f20.10))') i1pert,i1dir,i3dir,beta,delta, &
+             & d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert),&
+             & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+         end do
+         write(ab_out,*)' '
+       end do
+     end do
+   end do
+
+
+   write(ab_out,'(a)')' Clamped-ion elastic tensor, in cartesian coordinates '
+   write(ab_out,'(a)')' (from sum rule of clamped-ion flexoelectric force-response tensor),'
+   write(ab_out,'(a)')' (for stressed cells it lacks an improper contribution),'
+   write(ab_out,'(a)')' atdir   qgrdir  strdir1  strdir2         real part          imaginary part'
+   do i1dir=1,3
+     do i3dir=1,i1dir
+       do i2pert=natom+3, natom+4
+         do i2dir=1,3
+           istr=(i2pert-natom-3)*3+i2dir
+           beta=idx(2*istr-1); delta=idx(2*istr)
+           celastci=zero
+           do i1pert=1,natom
+             if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+               celastci(1)=celastci(1)+d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               celastci(2)=celastci(2)+d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+             end if
+           end do
+           write(ab_out,'(4(i5,3x),2(1x,f20.10))') i1dir,i3dir,beta,delta, &
+         & celastci(1)/ucvol,celastci(2)/ucvol
+         end do
+       end do
+       write(ab_out,*)' '
+     end do
+   end do
+ end if
+
+ if (lw_natopt==1) then
+   write(ab_out,'(a)')' Natural optical activity tensor, in cartesian coordinates,'
+   write(ab_out,'(a)')' (1/ucvol factor not included),'
+   write(ab_out,'(a)')' efidir1   efidir2   qgrdir          real part          imaginary part'
+   i1pert=natom+2
+   i2pert=natom+2
+   do i3dir=1,3
+     do i1dir=1,3
+       do i2dir=1,3
+         if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+           write(ab_out,'(3(i5,3x),2(1x,f20.10))') i1dir,i2dir,i3dir, &
+         & -four*pi*d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+         &  four*pi*d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+         end if
+       end do
+     end do
+     write(ab_out,*)' '
+   end do
+ end if
+
+ DBG_EXIT("COLL")
+
+end subroutine dfptlw_out
 !!***
 
 end module m_longwave

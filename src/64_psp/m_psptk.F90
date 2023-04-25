@@ -609,8 +609,8 @@ end subroutine psp5lo
 !! psp5nl
 !!
 !! FUNCTION
-!! Make Kleinman-Bylander form factors f_l(q) for each l from
-!! 0 to lmax; Vloc is assumed local potential.
+!! Make Kleinman-Bylander form factors f_l(q) for each l from 0 to lmax.
+!! Vloc is assumed local potential.
 !!
 !! INPUTS
 !!  al=grid spacing in exponent for radial grid
@@ -623,8 +623,7 @@ end subroutine psp5lo
 !!  rad(mmax)=radial grid values
 !!  vloc(mmax)=local pseudopotential on radial grid
 !!  vpspll(mmax,3)=nonlocal pseudopotentials for each l on radial grid
-!!  wfll(mmax,3)=reference state wavefunctions on radial grid
-!!                mmax and mqgrid
+!!  wfll(mmax,3)=reference state wavefunctions on radial grid mmax and mqgrid
 !!
 !! OUTPUT
 !!  ekb(mpsang)=Kleinman-Bylander energy,
@@ -653,8 +652,8 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: lmax,mmax,mpsang,mqgrid
  real(dp),intent(in) :: al
+ integer,intent(in) :: lmax,mmax,mpsang,mqgrid
 !arrays
  real(dp),intent(in) :: qgrid(mqgrid),rad(mmax),vloc(mmax),vpspll(mmax,mpsang)
  real(dp),intent(in) :: wfll(mmax,mpsang)
@@ -1264,30 +1263,23 @@ end subroutine psp8lo
 !!
 !! FUNCTION
 !! Make Kleinman-Bylander/Bloechl form factors f_ln(q) for each
-!!  projector n for each angular momentum l excepting an l corresponding
-!!  to the local potential.
-!! Note that an arbitrary local potential can be used, so all l from
-!!  0 to lmax may be represented.
+!!  projector n for each angular momentum l excepting an l corresponding to the local potential.
+!! Note that an arbitrary local potential can be used, so all l from 0 to lmax may be represented.
 !!
 !! INPUTS
 !!  amesh=grid spacing for uniform (linear) radial grid
-!!  indlmn(6,i)= array giving l,m,n,lm,ln,s for i=ln  (if useylm=0)
-!!                                           or i=lmn (if useylm=1)
-!!  lmax=maximum ang momentum for which nonlocal form factor is desired.
-!!    lmax <= 2 allowed.
+!!  indlmn(6,lmnmax)= array giving l,m,n,lm,ln,s for i=ln  (if useylm=0)
+!!                                                or i=lmn (if useylm=1)
+!!  lmax=maximum ang momentum for which nonlocal form factor is desired. lmax <= 2 allowed.
 !!  lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!        =if useylm=0, max number of (l,n)   comp. over all type of psps
 !!  lnmax=max. number of (l,n) components over all type of psps
 !!  mmax=number of radial grid points for atomic grid
 !!  mqgrid=number of grid points for q grid
-!!  pspso=spin-orbit characteristics, govern the content of ffspl and ekb
-!!   if =0 : this input requires NO spin-orbit characteristics of the psp
-!!   if =2 : this input requires HGH or psp8 characteristics of the psp
-!!   if =3 : this input requires HFN characteristics of the psp
 !!  qgrid(mqgrid)=values at which form factors are returned
 !!  rad(mmax)=radial grid values
-!!  vpspll(mmax,lnmax)=nonlocal projectors for each (l,n) on linear
-!!   radial grid.  Here, these are the  product of the reference
+!!  vpspll(mmax,lnmax)=nonlocal projectors for each (l,n) on linear radial grid.
+!!   Here, these are the  product of the reference
 !!   wave functions and (v(l,n)-vloc), calculated in the psp generation
 !!   program and normalized so that integral(0,rc(l)) vpsll^2 dr = 1,
 !!   which leads to the the usual convention for the energies ekb(l,n)
@@ -1327,18 +1319,17 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
 !scalars
  integer,parameter :: NPT_IN_2PI=200
  integer :: iln,iln0,ilmn,iq,ir,irmu,irn,ll,mesh_mult,mmax_new,mvpspll
- real(dp) :: amesh_new,arg,c1,c2,c3,c4,dri,qmesh,result,tv,xp,xpm1,xpm2,xpp1
- real(dp) :: yp1,ypn
+ real(dp) :: amesh_new,arg,c1,c2,c3,c4,dri,qmesh,result,tv,xp,xpm1,xpm2,xpp1,yp1,ypn
 !arrays
  real(dp) :: sb_out(4)
  real(dp),allocatable :: rad_new(:),vpspll_new(:,:),work(:,:),work2(:)
 
 ! *************************************************************************
 
-!Find r mesh spacing necessary for accurate integration at qmax
+ ! Find r mesh spacing necessary for accurate integration at qmax
  amesh_new=2.d0*pi/(NPT_IN_2PI*qgrid(mqgrid))
 
-!Choose submultiple of input mesh
+ ! Choose submultiple of input mesh
  mesh_mult=int(amesh/amesh_new) + 1
  mmax_new=mesh_mult*(mmax-1)+1
  amesh_new=amesh/dble(mesh_mult)
@@ -1346,10 +1337,10 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
  ABI_MALLOC(rad_new,(mmax_new))
  ABI_MALLOC(vpspll_new,(mmax_new,lnmax))
 
- if(mesh_mult==1) then
+ if (mesh_mult == 1) then
    rad_new(:)=rad(:)
  else
-!  Set up new radial mesh
+   ! Set up new radial mesh
    irn=1
    do ir=1,mmax-1
      do irmu=0,mesh_mult-1
@@ -1360,18 +1351,18 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
    rad_new(mmax_new)=rad(mmax)
  end if
 
-!Interpolate projectors onto new grid if called for
-!Cubic polynomial interpolation is used which is consistent
-!with the original interpolation of these functions from
-!a log grid to the input linear grid.
+ ! Interpolate projectors onto new grid if called for
+ ! Cubic polynomial interpolation is used which is consistent
+ ! with the original interpolation of these functions from
+ ! a log grid to the input linear grid.
  dri = one/amesh
  do irn=1,mmax_new
-!  index to find bracketing input mesh points
+   ! index to find bracketing input mesh points
    if(mesh_mult>1) then
      ir = irn/mesh_mult + 1
      ir = max(ir,2)
      ir = min(ir,mmax-2)
-!    interpolation coefficients
+     ! interpolation coefficients
      xp = dri * (rad_new(irn) - rad(ir))
      xpp1 = xp + one
      xpm1 = xp - one
@@ -1380,8 +1371,8 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
      c2 = xpp1 * xpm1 * xpm2 * half
      c3 = - xp * xpp1 * xpm2 * half
      c4 = xp * xpp1 * xpm1 * sixth
-!    Now do the interpolation on all projectors for this grid point
 
+     ! Now do the interpolation on all projectors for this grid point
      iln0=0
      do ilmn=1,lmnmax
        iln=indlmn(5,ilmn)
@@ -1401,7 +1392,7 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
      end do
 
    else
-!    With no mesh multiplication, just copy projectors
+     ! With no mesh multiplication, just copy projectors
      ir=irn
      iln0=0
      do ilmn=1,lmnmax
@@ -1419,16 +1410,16 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
      end do
 
    end if
- end do !irn
+ end do ! irn
 
- ABI_MALLOC(work,(mvpspll,lnmax))
+ ABI_MALLOC(work, (mvpspll,lnmax))
 
-!Loop over q values
+ ! Loop over q values
  do iq=1,mqgrid
    arg=2.d0*pi*qgrid(iq)
 
-!  Set up integrands
-   do  ir=1,mvpspll
+   ! Set up integrands
+   do ir=1,mvpspll
      call sbf8(lmax+1,arg*rad_new(ir),sb_out)
      iln0=0
      do ilmn=1,lmnmax
@@ -1441,7 +1432,7 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
      end do
    end do !ir
 
-!  Do integral from zero to rad_new(mvpspll)
+   ! Do integral from zero to rad_new(mvpspll)
    iln0=0
    do ilmn=1,lmnmax
      iln=indlmn(5,ilmn)
@@ -1451,11 +1442,9 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
        ffspl(iq,1,iln)=result
      end if
    end do
+ end do ! iq mesh
 
-!  End loop over q mesh
- end do !iq
-
-!Fit splines for form factors
+ ! Fit splines for form factors
  ABI_MALLOC(work2,(mqgrid))
  qmesh=qgrid(2)-qgrid(1)
 
@@ -1464,7 +1453,7 @@ subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid
    iln=indlmn(5,ilmn)
    if (iln>iln0) then
      iln0=iln
-!    Compute derivatives of form factors at ends of interval
+     ! Compute derivatives of form factors at ends of interval
      yp1=(-50.d0*ffspl(1,1,iln)+96.d0*ffspl(2,1,iln)-72.d0*ffspl(3,1,iln)&
 &     +32.d0*ffspl(4,1,iln)- 6.d0*ffspl(5,1,iln))/(24.d0*qmesh)
      ypn=(6.d0*ffspl(mqgrid-4,1,iln)-32.d0*ffspl(mqgrid-3,1,iln)&
