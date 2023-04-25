@@ -1,5 +1,5 @@
 
-.Version 9.9.1 of ABINIT 
+.Version 9.9.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 11 Jan 2023.
-- ( at 15h21 )
+.Starting date : Thu  2 Mar 2023.
+- ( at 15h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/TestBot_MPI1/v9_t44/t44.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -165,9 +165,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -422,9 +422,9 @@ meta: {optdriver: 1, rfddk: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__jzwanzig/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -639,96 +639,92 @@ tolerances: {tolwfr: 1.00E-20, }
  Orbital magnetic moment computed with DFPT derivative wavefunctions 
 
  Orbital magnetic moment, Cartesian directions :
-  3.16442346E-05 -1.54428105E-17  8.81213243E-18
+ -2.69976744E-04 -1.06139747E-16  4.20843445E-17
 
 
  Chern vector, Cartesian directions :
- -2.10238645E-08 -6.32184175E-21  2.31917051E-21
+ -6.60484183E-08 -1.98606516E-20  7.28588903E-21
 
 
  Orbital magnetic moment, term-by-term breakdown :
-     rho(1) CC :  -3.23581011E-04  3.69085826E-18  1.44559559E-17
-    rho(1) VV1 :  -1.64696968E-04 -6.72335924E-17  1.73634717E-17
-    rho(1) VV2 :  -3.95142053E-05  9.53831514E-18 -4.20957369E-17
+     rho(1) CC :  -6.07370136E-04 -1.39238877E-16  5.97759694E-17
+    rho(1) VV1 :  -1.82528822E-04 -1.55704036E-17  3.48245238E-18
+    rho(1) VV2 :  -3.95142053E-05  1.01079259E-17 -4.02625191E-17
      rho(0) NL :   7.22873407E-04 -5.56631660E-19  1.45678820E-17
    <L_R> terms :   2.69678008E-04  3.66496728E-17  1.01984375E-17
  <A0.An> terms :  -9.12549960E-05  2.46856732E-18 -5.67787778E-18
     Lamb terms :  -3.41860000E-04  0.00000000E+00  0.00000000E+00
  Chern vector, term-by-term breakdown :
-  Ch CC :  -1.97809321E-08 -9.96262067E-21  3.15893752E-21
- Ch vv1 :  -1.24293238E-09  3.60107538E-21 -9.67547649E-22
- Ch vv2 :   8.47032947E-22  3.97035344E-23  1.27780642E-22
+  Ch CC :  -6.21436311E-08 -3.12984959E-20  9.92409489E-21
+ Ch vv1 :  -3.90478725E-09  1.13131120E-20 -3.03964059E-21
+ Ch vv2 :   0.00000000E+00  1.24732332E-22  4.01434728E-22
 
 
  Term-by-term breakdowns for each band :
 
 
- band  1 of  4
- Orbital magnetic moment :   5.67250166E-04 -1.76799417E-17  5.00332690E-17
-     rho(1) CC :  -1.40040381E-05  2.69083555E-17 -4.00607655E-17
-    rho(1) VV1 :  -2.78174719E-04 -6.08542937E-17  7.10616175E-17
-    rho(1) VV2 :   1.39432056E-04  1.82250209E-17  2.02247424E-18
+ band   1 of   4
+ Orbital magnetic moment :   6.50505201E-04 -2.19933412E-17  5.46249408E-17
+     rho(1) CC :   1.81220508E-05  6.88537001E-18 -8.53640763E-18
+    rho(1) VV1 :  -1.75662774E-04 -3.84284887E-17  4.48742463E-17
+    rho(1) VV2 :   8.80490571E-05  1.15088019E-17  1.27715933E-18
      rho(0) NL :   7.28880988E-04 -1.95902437E-18  1.70099428E-17
    <L_R> terms :   8.42268575E-26 -4.73202449E-27 -4.80120150E-27
  <A0.An> terms :  -8.88412145E-06  2.18301247E-28  6.52665090E-30
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
 
 
- Chern vector :   5.80311948E-09 -3.00656566E-22  3.20052959E-22
-  Ch CC :   2.23928238E-09 -1.39566066E-21  2.19733996E-21
- Ch VV1 :   7.14538242E-09  1.56314421E-21 -1.82533637E-21
- Ch VV2 :  -3.58154531E-09 -4.68140113E-22 -5.19506299E-23
+ Chern vector :   1.82310375E-08 -9.44540460E-22  1.00547603E-21
+  Ch CC :   7.03491306E-09 -4.38459729E-21  6.90314709E-21
+ Ch VV1 :   2.24478809E-08  4.91076237E-21 -5.73446334E-21
+ Ch VV2 :  -1.12517564E-08 -1.47070554E-21 -1.63207717E-22
 
 
- band  2 of  4
- Orbital magnetic moment :   4.98941686E-01 -5.12898556E-11  9.02690952E-11
-     rho(1) CC :   1.46030864E-01 -1.50306509E-11  2.64517982E-11
-    rho(1) VV1 :  -4.38886408E-03  4.72202884E-13 -8.30353974E-13
-    rho(1) VV2 :  -8.15445015E-02  8.38265750E-12 -1.47550677E-11
+ band   2 of   4
+ Orbital magnetic moment :   8.06456410E-01 -8.28868731E-11  1.45886536E-10
+     rho(1) CC :   3.67746651E-01 -3.77866601E-11  6.65081979E-11
+    rho(1) VV1 :  -6.86567224E-06  7.38685494E-16 -1.29895529E-15
+    rho(1) VV2 :  -1.27563262E-04  1.31133199E-14 -2.30819311E-14
      rho(0) NL :   3.25209617E-02 -3.34170507E-12  5.87952239E-12
    <L_R> terms :   4.06356186E-01 -4.17732071E-11  7.35246872E-11
  <A0.An> terms :  -3.29599392E-05  8.47085560E-16 -1.49097725E-15
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
 
 
- Chern vector :   2.14346759E-05 -2.20240455E-15  3.87669829E-15
-  Ch CC :   1.54542390E-05 -1.58616041E-15  2.79204823E-15
- Ch VV1 :   3.05438108E-07 -3.28624338E-17  5.77875600E-17
- Ch VV2 :   5.67499876E-06 -5.83381712E-16  1.02686250E-15
+ Chern vector :   6.73390202E-05 -6.91905796E-15  1.21790069E-14
+  Ch CC :   4.85509237E-05 -4.98306988E-15  8.77147821E-15
+ Ch VV1 :   9.59562116E-07 -1.03240381E-16  1.81544974E-16
+ Ch VV2 :   1.78285344E-05 -1.83274770E-15  3.22598369E-15
 
 
- band  3 of  4
- Orbital magnetic moment :  -2.34377202E-05  1.02661540E-10 -1.80359314E-10
-     rho(1) CC :  -6.48327450E-06  3.00731583E-11 -5.28335288E-11
-    rho(1) VV1 :  -4.80270022E-07 -9.14641563E-13  1.60683962E-12
-    rho(1) VV2 :   4.28779624E-24 -1.67572079E-11  2.94396378E-11
+ band   3 of   4
+ Orbital magnetic moment :  -2.54628624E-05  1.65963961E-10 -2.91571135E-10
+     rho(1) CC :  -8.98831084E-06  7.57175598E-11 -1.33023170E-10
+    rho(1) VV1 :  -3.75874505E-10 -7.15827408E-16  1.25756350E-15
+    rho(1) VV2 :   3.35576492E-27 -1.31147208E-14  2.30403915E-14
      rho(0) NL :   3.79609430E-25  6.69094652E-12 -1.17548825E-11
    <L_R> terms :  -2.02227997E-23  8.35692823E-11 -1.46817380E-10
  <A0.An> terms :  -1.64741757E-05  2.85921622E-18 -7.89192142E-19
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
 
 
- Chern vector :  -1.41158335E-10  4.41236388E-15 -7.75178922E-15
-  Ch CC :  -1.74608361E-10  3.18154830E-15 -5.58945256E-15
- Ch VV1 :   3.34500259E-11  6.37032972E-17 -1.11913766E-16
- Ch VV2 :  -2.98638034E-28  1.16711228E-15 -2.05042289E-15
+ Chern vector :  -4.43461989E-10  1.38618499E-14 -2.43529641E-14
+  Ch CC :  -5.48548344E-10  9.99512878E-15 -1.75597831E-14
+ Ch VV1 :   1.05086356E-10  2.00129811E-16 -3.51587466E-16
+ Ch VV2 :  -9.38199054E-28  3.66659136E-15 -6.44159349E-15
 
 
- band  4 of  4
- Orbital magnetic moment :  -4.99111994E-01 -5.13716827E-11  9.00901780E-11
-     rho(1) CC :  -1.46333957E-01 -1.50425306E-11  2.63817851E-11
-    rho(1) VV1 :   4.50282211E-03  4.42432299E-13 -7.76539347E-13
-    rho(1) VV2 :   8.13655553E-02  8.37454176E-12 -1.46846143E-11
+ band   4 of   4
+ Orbital magnetic moment :  -8.07009570E-01 -8.30771719E-11  1.45684587E-10
+     rho(1) CC :  -3.68363155E-01 -3.79310458E-11  6.65150403E-11
+    rho(1) VV1 :   0.00000000E+00  0.00000000E+00  0.00000000E+00
+    rho(1) VV2 :   0.00000000E+00  0.00000000E+00  0.00000000E+00
      rho(0) NL :  -3.25269693E-02 -3.34924005E-12  5.87535763E-12
    <L_R> terms :  -4.06086508E-01 -4.17960386E-11  7.32927029E-11
  <A0.An> terms :  -3.29367596E-05 -8.47476209E-16  1.48608856E-15
-    Lamb terms :   0.00000000E+00  0.00000000E+00  0.00000000E+00
 
 
- Chern vector :  -2.14613617E-05 -2.20996535E-15  3.87509293E-15
-  Ch CC :  -1.54760846E-05 -1.59539646E-15  2.79740529E-15
- Ch VV1 :  -3.13859873E-07 -3.08388255E-17  5.41270641E-17
- Ch VV2 :  -5.67141722E-06 -5.83730058E-16  1.02356057E-15
+ Chern vector :  -6.74228562E-05 -6.94281090E-15  1.21739635E-14
+  Ch CC :  -4.86195537E-05 -5.01208581E-15  8.78830791E-15
+ Ch VV1 :  -9.86019870E-07 -9.68830276E-17  1.70045187E-16
+ Ch VV2 :  -1.78172827E-05 -1.83384206E-15  3.21561037E-15
 
 ====================================================
 
@@ -899,10 +895,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         31.7  wall=         32.0
+- Proc.   0 individual time (sec): cpu=         23.1  wall=         23.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  57 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         31.7  wall=         32.0
++Overall time at end (sec) : cpu=         23.1  wall=         23.3
