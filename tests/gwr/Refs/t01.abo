@@ -574,15 +574,9 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 14.1
 - chi_q(r,g): 7.1
-
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 - FFT uc_batch_size: 3
 - FFT sc_batch_size: 5
- ==== Info on the GWR object ====
+ ==== Info on the gwr_t object ====
 
 --- !GWR_params
 iteration_state: {dtset: 3, }
@@ -625,12 +619,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -645,12 +633,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -892,15 +874,9 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 14.1
 - chi_q(r,g): 7.1
-
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 - FFT uc_batch_size: 1
 - FFT sc_batch_size: 1
- ==== Info on the GWR object ====
+ ==== Info on the gwr_t object ====
 
 --- !GWR_params
 iteration_state: {dtset: 4, }
@@ -942,12 +918,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing chi0 head and wings with inclvkb: 2
  Using KS orbitals and KS energies...
 
-
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 19 Feb 2023.
-- ( at 18h18 )
+.Starting date : Tue 25 Apr 2023.
+- ( at 07h23 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t79_MPI8/t79.abi
 - output file    -> t79_MPI8.abo
@@ -624,15 +624,9 @@ meta: {optdriver: 6, }
    CBM:     0.456 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         4.425 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 
-
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................    10   10   10
-  Augmented FFT divisions ...................    10   10   10
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 - FFT uc_batch_size: 2
 - FFT sc_batch_size: 2
- ==== Info on the GWR object ====
+ ==== Info on the gwr_t object ====
 
 --- !GWR_params
 iteration_state: {dtset: 3, }
@@ -675,12 +669,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    18   18   18
-  Augmented FFT divisions ...................    19   19   18
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -695,12 +683,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    18   18   18
-  Augmented FFT divisions ...................    19   19   18
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...

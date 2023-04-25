@@ -1377,7 +1377,7 @@ end block
 
  if (my_rank == master) then
    call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=std_out)
-   call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
+   !call print_ngfft(gwr%g_ngfft, header="FFT mesh for Green's function", unit=ab_out)
    call wrtout(units, sjoin("- FFT uc_batch_size:", itoa(gwr%uc_batch_size)))
    call wrtout(units, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)))
  end if
@@ -6745,7 +6745,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  if (gwr%comm%me == 0) then
    call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=std_out)
-   call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=ab_out)
+   !call print_ngfft(u_ngfft, header="FFT mesh for chi0 head/wings computation", unit=ab_out)
  endif
 
  ! Need to broadcast G-vectors at q = 0 if k/q-point parallelism is activated.
@@ -7220,7 +7220,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
  if (gwr%comm%me == 0) then
    call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=std_out)
-   call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=ab_out)
+   !call print_ngfft(u_ngfft, header="FFT mesh for Sigma_x", unit=ab_out)
  end if
 
  ! Init work_ngfft
