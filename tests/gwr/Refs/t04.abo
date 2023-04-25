@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 19 Feb 2023.
-- ( at 18h11 )
+.Starting date : Tue 25 Apr 2023.
+- ( at 07h09 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/gwr_t04/t04.abi
 - output file    -> t04.abo
@@ -549,15 +549,9 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1.8
 - chi_q(r,g): 0.9
-
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 - FFT uc_batch_size: 1
 - FFT sc_batch_size: 1
- ==== Info on the GWR object ====
+ ==== Info on the gwr_t object ====
 
 --- !GWR_params
 iteration_state: {dtset: 3, }
@@ -601,12 +595,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -621,12 +609,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -762,12 +744,6 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -814,7 +790,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-     max(abs(E_i - E_{i-1})):  1.89620E+02 (meV) for band: 11
+    max(abs(E_i - E_{i-1})):  1.89620E+02 (meV) for band: 11
 
  === QP gaps at iteration: 2 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -846,12 +822,6 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -898,7 +868,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-     max(abs(E_i - E_{i-1})):  3.63453E+01 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  3.63453E+01 (meV) for band: 14
 
  === QP gaps at iteration: 3 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -930,12 +900,6 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 ================================================================================
  QP results (energies in eV)
  Notations:
@@ -982,7 +946,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-     max(abs(E_i - E_{i-1})):  8.36856E+00 (meV) for band: 14
+    max(abs(E_i - E_{i-1})):  8.36856E+00 (meV) for band: 14
 
  === QP gaps at iteration: 4 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -1066,15 +1030,9 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1.8
 - chi_q(r,g): 0.9
-
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 - FFT uc_batch_size: 1
 - FFT sc_batch_size: 1
- ==== Info on the GWR object ====
+ ==== Info on the gwr_t object ====
 
 --- !GWR_params
 iteration_state: {dtset: 4, }
@@ -1118,12 +1076,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1138,12 +1090,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -1259,7 +1205,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-     max(abs(E_i - E_{i-1})):  1.12349E+03 (meV) for band: 11
+    max(abs(E_i - E_{i-1})):  1.12349E+03 (meV) for band: 11
 
  === QP gaps at iteration: 2 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -1273,12 +1219,6 @@ data: !Tabular |
  Computing chi0 head and wings with inclvkb: 2
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
@@ -1294,12 +1234,6 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1415,7 +1349,7 @@ data: !Tabular |
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
-     max(abs(E_i - E_{i-1})):  1.98291E+02 (meV) for band: 11
+    max(abs(E_i - E_{i-1})):  1.98291E+02 (meV) for band: 11
 
  === QP gaps at iteration: 3 (Fermi energy set to zero) ===
  Direct band gap semiconductor
@@ -1429,12 +1363,6 @@ data: !Tabular |
  Computing chi0 head and wings with inclvkb: 2
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
@@ -1450,12 +1378,6 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1586,12 +1508,6 @@ data: !Tabular |
  Using KS orbitals and QP energies...
 
 
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -1606,12 +1522,6 @@ data: !Tabular |
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and QP energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and QP energies...
@@ -1811,15 +1721,9 @@ meta: {optdriver: 6, }
 - Temporary memory allocated inside the tau loops:
 - G_k(r,g): 1.8
 - chi_q(r,g): 0.9
-
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................     8    8    8
-  Augmented FFT divisions ...................     8    8    8
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 - FFT uc_batch_size: 1
 - FFT sc_batch_size: 1
- ==== Info on the GWR object ====
+ ==== Info on the gwr_t object ====
 
 --- !GWR_params
 iteration_state: {dtset: 5, }
@@ -1861,12 +1765,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    15   15   15
-  Augmented FFT divisions ...................    15   15   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 == END DATASET(S) ==============================================================
 ================================================================================
