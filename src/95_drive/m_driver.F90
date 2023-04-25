@@ -39,11 +39,14 @@ module m_driver
  use m_xc_vdw
 #endif
  use m_xgScalapack
+#ifdef HAVE_LINALG_ELPA
+ use m_elpa
+#endif
 
  use defs_datatypes, only : pseudopotential_type, pspheader_type
  use defs_abitypes,  only : MPI_type
  use m_fstrings,     only : sjoin, itoa
- use m_time,         only : timab
+ use m_time,         only : timab, cwtime, cwtime_report
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
  use m_geometry,     only : mkrdim, xcart2xred, xred2xcart, chkdilatmx
@@ -142,8 +145,8 @@ contains
 subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &                 mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
 
- !Arguments ------------------------------------
- !scalars
+!Arguments ------------------------------------
+!scalars
  integer,intent(in) :: ndtset,ndtset_alloc,npsp
  real(dp),intent(in) :: cpui
  character(len=8),intent(in) :: codvsn
@@ -165,9 +168,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer :: idtset,ierr,iexit,iget_cell,iget_occ,iget_vel,iget_xcart,iget_xred
  integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk,linalg_max_size
  integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol, omp_nthreads
- real(dp) :: etotal
+ real(dp) :: el_temp,etotal, cpu, wall, gflops
  character(len=500) :: msg, dilatmx_errmsg
- logical :: converged,results_gathered,test_img,use_results_all
+ logical :: results_gathered,test_img,use_results_all
  type(dataset_type) :: dtset
  type(datafiles_type) :: dtfil
  type(pawang_type) :: pawang
@@ -229,14 +232,17 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
  call timab(641,2,tsec)
 
+#ifdef HAVE_LINALG_ELPA
+ call elpa_func_init()
+#endif
+
 !*********************************************************************
 !Big loop on datasets
-
-!Do loop on idtset (allocate statements are present)
  do idtset=1,ndtset_alloc
 
    if(mpi_enregs(idtset)%me<0) cycle
 
+   call cwtime(cpu, wall, gflops, "start")
    call timab(642,1,tsec)
    call abi_io_redirect(new_io_comm=mpi_enregs(idtset)%comm_world)
    call libpaw_write_comm_set(mpi_enregs(idtset)%comm_world)
@@ -481,7 +487,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
              call mkrdim(acell_img(:,iimage),rprim_img(:,:,iimage),rprimd)
              call chkdilatmx(dtset%chkdilatmx,dtset%dilatmx,rprimd,&
 &             dtset%rprimd_orig(1:3,1:3,iimage), dilatmx_errmsg)
-             _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
              if (LEN_TRIM(dilatmx_errmsg) /= 0) then
                acell_img(1,iimage) = sqrt(sum(rprimd(:,1)**2))
                acell_img(2,iimage) = sqrt(sum(rprimd(:,2)**2))
@@ -681,7 +686,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
-     call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+     el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+     call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
 
 #if defined DEV_YP_VDWXC
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
@@ -742,7 +748,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ! FFTW3 threads initialization
    if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_init_threads()
 
-   ! Set precision for FFT libs.
+   ! Activate mixed-precision for FFT libs.
    ii = fftcore_set_mixprec(dtset%mixprec)
 
 !  linalg initialisation
@@ -771,7 +777,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        filnam,filstat,idtset,jdtset_,ndtset)
 
    case(RUNL_RESPFN)
-
      call respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,mkmems,mpi_enregs(idtset),&
        npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
@@ -779,7 +784,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call screening(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
    case(RUNL_SIGMA)
-     call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,converged)
+     call sigma(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
 
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
@@ -925,12 +930,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call abi_linalg_finalize()
    call xg_finalize()
 
+   call cwtime_report(sjoin(" dataset:", itoa(idtset)), cpu, wall, gflops)
+   call timab(643,2,tsec)
+
    ! Check whether exiting was required by the user.
    ! If found then beat a hasty exit from time steps
    openexit=1; if(dtset%chkexit==0) openexit=0
    call exit_check(zero,dtfil%filnam_ds(1),iexit,ab_out,mpi_enregs(idtset)%comm_cell,openexit)
-
-   call timab(643,2,tsec)
 
    if (iexit/=0) exit
  end do ! idtset (allocate statements are present - an exit statement is present)
@@ -938,6 +944,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !*********************************************************************
 
  call timab(644,1,tsec)
+
+#ifdef HAVE_LINALG_ELPA
+ call elpa_func_uninit()
+#endif
 
  !PSP deallocation
  call psps_free(psps)

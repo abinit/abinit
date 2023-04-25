@@ -239,6 +239,7 @@ mkdocs_plugins/dist
 /src/98_main/tdep
 /src/98_main/dummy_tests
 /src/98_main/optic
+/src/98_main/lruj
 /src/98_main/ujdet
 /src/98_main/fold2Bloch
 /src/98_main/vdw_kernelgen

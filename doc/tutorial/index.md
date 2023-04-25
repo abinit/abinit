@@ -10,12 +10,12 @@ These tutorials are aimed at teaching step-by-step the use of ABINIT, in the
 UNIX/Linux OS and its variants (MacOS, AIX etc.).
 They might be used for other operating systems, but the commands have to be adapted.
 
-At present, more than forty tutorials are available. 
-Each of them is at most two hours of student work. 
+At present, more than forty tutorials are available.
+Each of them is at most two hours of student work.
 The set of tutorials is more structured and gradual than the user guides, but one need to invest more time to read them.
 
 Dependencies between tutorials are present.
-To start with, four tutorials cover the basics of using ABINIT, and one tutorial explains in detail the build of ABINIT 
+To start with, four tutorials cover the basics of using ABINIT, and one tutorial explains in detail the build of ABINIT
 (as a complement to the easier user guide type documentation).
 Six tutorials are intermediate level ones, that might be prerequisite for some more advanced tutorials.
 The following schema should help to understand these dependencies.
@@ -24,11 +24,11 @@ The following schema should help to understand these dependencies.
 <img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v11.png" usemap="#map1"/>
 </center>
 
-The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial. 
+The four basic tutorials are presented at the top, in one orange block. There is also an orange block for the ABINIT_build tutorial.
 Each block in brown represents one intermediate-level tutorial. The blocks in red
-gather by themes -one block per theme- the more advanced tutorials. 
-The following themes are covered: ABINIT postprocessors, static DFT, Many-Body Theory and excitations, 
-Density-Functional Perturbation Theory -DFPT- and electron-phonon interaction, multiscale calculations with MULTIBINIT, 
+gather by themes -one block per theme- the more advanced tutorials.
+The following themes are covered: ABINIT postprocessors, static DFT, Many-Body Theory and excitations,
+Density-Functional Perturbation Theory -DFPT- and electron-phonon interaction, multiscale calculations with MULTIBINIT,
 and parallelism. See the [[theory:acronyms|list of acronyms]].
 
 The basic tutorials are prerequisite for all other tutorials, as represented by the heavy orange arrows.
@@ -36,13 +36,12 @@ Then, some relationships between intermediate-level and advanced-level tutorials
 A heavy brown arrow indicates that the starting intermediate tutorial is mandatory for all the tutorials of the indicated theme,
 while a dashed brown arrow indicates that only some of the tutorials of the indicated theme will need it.
 
-Inside a theme, there are also subsets of tutorials indicated with a light contour. 
+Inside a theme, there are also subsets of tutorials indicated with a light contour.
 They are logically related to each other, and usually to be done
 one after the other. Otherwise, advanced tutorials usually do not have mutual dependencies.
-There are however three exceptions : the [GW1](gw1) tutorial is a prerequisite for the [paral_MBPT](paral_mbt) tutorial, 
-the [parallelism](basepar) tutorial is a prerequisite for the [U_calc_LR](ucalc_lr) tutorial, 
-while the [lattice_wannier](lattice_wannier) tutorial
-is a prerequisite for the [lwf_model](lwf_model) tutorial. 
+There are however three exceptions: the [GW1](gw1) tutorial is a prerequisite for the [paral_MBPT](paral_mbt) tutorial,
+the [parallelism](basepar) tutorial is a prerequisite for the [LRUJ](lruj) tutorial,
+while the [lattice_wannier](lattice_wannier) tutorial is a prerequisite for the [lwf_model](lwf_model) tutorial.
 
 
 Visualisation tools are NOT covered in the ABINIT tutorials.
@@ -87,7 +86,7 @@ should not skip any of these.**
   compiling and linking with the **intel compilers** and the **MKL library** as well as **OpenMP threads**
   are also discussed.
 
-### Intermediate level tutorials 
+### Intermediate level tutorials
 
 **Tutorials in this group are prerequisite for several other tutorials. Whether it is worth to read them depend on what you are trying to compute with ABINIT.**
 
@@ -140,27 +139,27 @@ there are also specific User Guides for several postprocessors..**
 
   * [The tutorial on Wannier90](wannier90) deals with the Wannier90 library to obtain Maximally Localized Wannier Functions.
 
-  * [The tutorial on Z2Pack](z2pack) shows how to use the Z2Pack application with an interface to ABINIT, to compute the Z2 topological invariant 
+  * [The tutorial on Z2Pack](z2pack) shows how to use the Z2Pack application with an interface to ABINIT, to compute the Z2 topological invariant
     and find topologically non-trivial insulators.
 
 
-### DFT beyond basics 
+### DFT beyond basics
 
 ** Prerequisite: [PAW1](paw1).**
 
   * [The tutorial on the properties at nucleus](nuc) shows how to compute the electric field gradient and isomer shift (at the nucleus position).
 
   * [The tutorial on DFT+U](dftu) shows how to perform a DFT+U calculation using ABINIT,
-    and will lead to compute the projected DOS of NiO. 
+    and will lead to compute the projected DOS of NiO.
 
   * [The tutorial U_calc_cRPA](ucalc_crpa)
     shows how to determine the U value for DFT+U with the constrained Random Phase Approximation (cRPA)
     using projected Wannier orbitals. Prerequisite: [DFT+U](dftu). Require at least 8 cores.
 
-  * [The tutorial U_calc_LR](ucalc_lr) shows how to determine the U value for DFT+U
+  * [The tutorial LRUJ](lruj) shows how to determine the U value for DFT+U
     with the linear response method. Prerequisite: [DFT+U](dftu).
 
-  * [The tutorial PAW2](paw2) presents the generation of atomic data for use with the PAW method. 
+  * [The tutorial PAW2](paw2) presents the generation of atomic data for use with the PAW method.
 
   * [The tutorial PAW3](paw3) demonstrates how to test
     a generated PAW dataset using ABINIT, against the ELK all-electron code, for diamond and magnesium.
@@ -196,7 +195,7 @@ Theory (GW approximation, Bethe-Salpeter equation) is to be done sequentially:**
     thanks to the Time-Dependent Density Functional Theory approach, in the Casida formalism.
 
 
-### Advanced tutorials on DFPT &  electron-phonon interaction. 
+### Advanced tutorials on DFPT &  electron-phonon interaction.
 
 **Prerequisite [DFPT1](rf1) for all tutorials in this section. Also [DFPT2](rf2) for all electron-phonon tutorials.**
 
@@ -216,19 +215,19 @@ interaction, elastic response, Raman coefficients, piezoelectricity ...)**
 
 **Electron-phonon interaction has been the subject of major efforts in the last years. Three tutorials are already available to present the new implementations.**
 
-  * [The introductive tutorial on the electron-phonon interaction](eph_intro) presents the electron-phonon driver 
-    integrated with the ABINIT executable, discuss important technical details related to the implementation and the associated input variables. 
+  * [The introductive tutorial on the electron-phonon interaction](eph_intro) presents the electron-phonon driver
+    integrated with the ABINIT executable, discuss important technical details related to the implementation and the associated input variables.
     The drawbacks/advantages with respect to the implementation available in ANADDB are also discussed.
 
-  * [The tutorial on mobility calculations](eph4mob) explains how to compute phonon-limited carrier mobilities 
+  * [The tutorial on mobility calculations](eph4mob) explains how to compute phonon-limited carrier mobilities
     in semiconductors within the relaxation time approximation (RTA)
 
-  * [The tutorial on zero-point renormalization and temperature-dependence of electronic structure](eph4zpr) 
-    explains how to obtain the electron self-energy due to phonons, compute the zero-point renormalization (ZPR) of the band gap 
+  * [The tutorial on zero-point renormalization and temperature-dependence of electronic structure](eph4zpr)
+    explains how to obtain the electron self-energy due to phonons, compute the zero-point renormalization (ZPR) of the band gap
     as well as temperature-dependent band gaps (or the whole electronic structure).
 
 
-**Two legacy tutorials on electron-phonon interaction are still present. 
+**Two legacy tutorials on electron-phonon interaction are still present.
 The implementations are still available at time of writing,
 but have been superseded by the new implementations, described in the above-mentioned tutorials.**
 
@@ -240,17 +239,17 @@ but have been superseded by the new implementations, described in the above-ment
     the zero-point motion effect, the lifetime/broadening of eigenenergies.
 
 
-### MULTIBINIT tutorials 
+### MULTIBINIT tutorials
 
 **Prerequisite [DFPT1](rf1) and [DFPT2](rf2) for all tutorials in this section.**
 
-  * [The introductory tutorial on MULTIBINIT](multibinit) presents the MULTIBINIT project 
+  * [The introductory tutorial on MULTIBINIT](multibinit) presents the MULTIBINIT project
 
   * [The first tutorial on MULTIBINIT](lattice_model) presents the basic use of the MULTIBINIT application,
     how to build a harmonic model by using a second-principles approach for lattice dynamics
     simulations based on atomic potentials fitted on first-principles calculations. Prerequisite [polarization](polarization).
 
-  * [The second tutorial on MULTIBINIT](spin_model) presents how to build a spin model 
+  * [The second tutorial on MULTIBINIT](spin_model) presents how to build a spin model
     and run spin dynamics in MULTIBINIT. Prerequisite [spin](spin).
 
   * [The third tutorial on MULTIBINIT](lwf_model) presents how to run a lattice Wannier function (LWF) dynamics

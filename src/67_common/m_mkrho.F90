@@ -1631,8 +1631,6 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !            if(iitems==5) write(message,'(a)')' Magnetization (spin up - spin down) [el/Bohr^4]'
 !            if(iitems==6) write(message,'(a)')' Relative magnetization (=zeta, between -1 and 1)   '
          end if
-
-
        end select
 
        call wrtout(iout,message,'COLL')
