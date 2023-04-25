@@ -24,13 +24,11 @@ MODULE m_exc_spectra
  use defs_basis
  use m_bs_defs
  use m_abicore
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_xmpi
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_ebands
  use m_hdr
 
@@ -263,7 +261,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
      call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
 
-#ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
      NCF_CHECK_MSG(nctk_open_create(ncid, path, xmpi_comm_self), sjoin("Creating MDF file:", path))
      NCF_CHECK(cryst%ncwrite(ncid))
@@ -271,9 +268,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      ! Write dielectric functions.
      call mdfs_ncwrite(ncid, Bsp, eps_exc,eps_rpanlf,eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_UNUSED(ncid)
-#endif
 
      !TODO
      call ebands_free(EPBSt)
@@ -1188,7 +1182,6 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_NETCDF
  integer :: ncerr
  real(dp), ABI_CONTIGUOUS pointer :: rvals(:,:,:)
 
@@ -1245,10 +1238,6 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
 
  call c_f_pointer(c_loc(eps_gwnlf(1,1)), rvals, shape=[2, bsp%nomega, bsp%nq])
  NCF_CHECK(nf90_put_var(ncid, vid("gwnlf_mdf"), rvals))
-
-#else
- ABI_ERROR("ETSF-IO support is not activated.")
-#endif
 
 contains
  integer function vid(vname)

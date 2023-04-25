@@ -2,12 +2,12 @@
 
 Version 9.8, released on December 23, 2022.
 List of changes with respect to version 9.6.
-<!-- Release notes updated on December 3, 2022. -->
+<!-- Release notes updated on March 15, 2023. -->
 
 Many thanks to the contributors to the ABINIT project between
-October 2021 and August 2022, and some late contributions up to December 2022 ! These release notes
+October 2021 and August 2022, and some late contributions up to March 2023 ! These release notes
 are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
-<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, and 894 are taken into account. -->
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, are taken into account. -->
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet, 
@@ -22,7 +22,7 @@ This might take some time ...
 
 Xavier
 
-### **A.** Important remarks and warnings.
+### **A.** Important remarks and warnings. Also, hotfixes for v9.8.3 (A.4 to A.10).
 
 **A.1** Warning : the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
 
@@ -41,6 +41,45 @@ The default value for [[rfdir]] is now (1 1 1), instead of (0 0 0).
 The one of [[rfatpol]] is now (1 [[natom]]).
 
 By X. Gonze (MR852)
+
+**A.4** The default values of dossmear (@anaddb) and dosdeltae (@anaddb and @atdep) have changed, to smaller values, to improve default accuracy.
+
+By X. Gonze 
+
+**A.5**
+Correction and cleaning of DFT+U with magnetism ([[nspden]]=4), following the merge 881.
+Introduce "optdcmagpawu" input to control different choices of DC term (for tests and code comparisons, not useful for production).
+Versions before 9.8 is equivalent to optdcmagpawu=1 (no magnetism in the DC term). Now the default is 3 (magnetism in the DC term). Some refs are changed accordingly.
+Change of the tests v9/76,77 and 78 for better precision. Add the tests v9/88 and 89 to tests the combination of PAW+U with different [[pawxcdev]].
+
+By L. Baguet (MR898)
+
+**A.6**
+Some users have reported that with the new [[optcell]]=4,5 or 6 option, the calculation
+continues when the criterion should be already reached. For example, with [[optcell]]=5 (relaxing b only), the
+xx component of the stress could still be large but shouldn't be checked. This has been fixed.
+
+By Xu He (MR897)
+
+**A.7**
+More fix on the generation of symmetry-adapted terms in Multibinit. A more complete set of terms are now generated, with improved time and memory performance. 
+
+By Xu He and A. Sasani (MR899)
+
+**A.8**
+m4 detection netcdf(-f) //: AC_RUN_IFELSE hangs with some compilers then switch to AC_LINK_IFELSE
+
+By JM Beuken (MR900)
+
+**A.9**
+Several improvements for external libs: FFTW3 thread safety, openBLAS multithreading, netCDF Fortran parallel
+
+By M. Torrent, with patch from P. Kesteneer (MR902)
+
+**A.10**
+Several fixes, including documentation for icutcoul and related input variables
+
+By. X. Gonze (MR903)
 
 * * *
 
@@ -321,7 +360,11 @@ From P. Kestener (MR843 and 869)
 
 From X. Gonze
 
-**D.27** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.27** A CITATION.cff file has been created. Also, a LICENCE file (pointing toward COPYING).
+
+From X. Gonze
+
+**D.28** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
 By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
@@ -1432,7 +1475,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 
@@ -2165,7 +2208,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 

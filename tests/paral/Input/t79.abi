@@ -1,0 +1,104 @@
+# SiC in zinc-blende structure
+
+ndtset 3
+ecut 12     # Cannot go below 8 else system becomes metallic in HDIAGO!
+
+# This to compute QP without symmetries for debugging purposes
+#nsym 1
+#kptopt 3
+#kptopt 2
+
+ngkpt      4 4 4   # This mesh has BZ points requiring time-rev and non-zero g0
+nshiftk    1
+shiftk     0 0 0
+
+####################
+# Dataset 1: SCF run
+####################
+nband1      15
+tolvrs1 1.e-8
+paral_kgb1  1
+rmm_diis1   1
+autoparal1  1
+npfft1  1      # Direct diago and GWR do not support MPI-FFT and expect an FFT mesh 
+               # computed from ecut and boxcutmin without the extra contraint on the last 
+               # two dimensions that should be divisible by npfft .
+               # Actually, HDIAGO and GWR will stop if the mesh found in the DEN file differs from
+               # the one computed from the input file without MPI-FFT.
+               # As a consequence, we use autoparal 1 but enforce npfft 1.
+
+###########################################
+# Dataset 2: Direct diago with empty states
+###########################################
+optdriver2  6             # Activate GWR code
+gwr_task2 "HDIAGO_FULL"   # Direct diagonalization with nband == npw
+getden2     1
+#nband2     30        # Number of (occ + empty) bands
+
+################################
+# Dataset 3: G0W0 with GWR code
+################################
+optdriver3  6        # Activate GWR code
+gwr_task3 "G0W0"     # One-shot calculation
+#gwr_chi_algo3  1    # Compute Chi with supercell.
+gwr_sigma_algo3  2   # Compute Sigma with convolutions in the BZ.
+gwr_np_kgts3 2 2 2 1 # k/G/tau/spin parallelism.
+gwr_ucsc_batch3 2 2
+
+getden3 1
+getwfk3 2            # WFK file with empty states
+
+prtvol3 1            # Write additional stuff to abo file for testing purposes.
+                     # DO NOT USE this option for production runs!
+prtsuscep3 1         # Write TCHI file.
+                     # DO NOT USE this option for production runs unless you really need a TCHI file.
+
+gwr_ntau3   6        # Number of imaginary-time points
+gwr_boxcutmin3  1.0  # This should be subject to convergence studies
+#gw_icutcoul3   16   # Monte-Carlo integration in the mini-Brillouin zone for Full Coulomb interaction.
+#gw_icutcoul3   0    # Spherical cutoff
+
+nband3      30       # Bands to be used in the screening calculation
+ecuteps3    6        # Cut-off energy of the planewave set to represent the dielectric matrix.
+                     # It is important to adjust this parameter.
+ecutsigx3   8.0      # Dimension of the G sum in Sigma_x.
+                     # ecutsigx = ecut is usually a wise choice
+                     # (the dimension in Sigma_c is controlled by ecuteps)
+                     
+gw_qprange3 0        # Compute Fundamental and direct gap only
+
+# Spectral function (very coarse grid to reduce txt file size)
+#nfreqsp3 50
+#freqspmax3 5 eV
+
+# Definition of the unit cell
+ acell 3*7.87
+ rprim   0 .5 .5  .5 0 .5  .5 .5 0
+ natom   2
+ ntypat  2
+ typat  1 2
+ xred   0.000  0.000  0.000
+        0.250  0.250  0.250
+ znucl 6.0 14.0
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/6c.pspnc, PseudosTM_pwteter/14si.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% [paral_info]
+#%% nprocs_to_test = 8
+#%% max_nprocs = 8
+#%% [NCPU_8]
+#%% files_to_test = t79_MPI8.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = NC, GWR
+#%% description =
+#%%  SiC in zinc-blende structure
+#%%  Calculation of the GW corrections with GWR code.
+#%%  Test symmetrization with time-reversal and umklapp g0 vectors
+#%%  as well as parallelization over k/g/tau.
+#%%<END TEST_INFO>

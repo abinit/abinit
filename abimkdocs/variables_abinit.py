@@ -4297,6 +4297,7 @@ The choice is among:
 * 7 --> Compute phonon limited transport in semiconductors using lifetimes taken from SIGEPH.nc file. See [[cite:Brunin2020b]].
 * 8 --> Compute phonon limited transport by solving the (linearized) IBTE using collision terms taken from SIGEPH.nc file.
         Requires [[ibte_prep]] = 1 when computing the imaginary part of the e-ph self-energy with [[eph_task]] == -4.
+* 9 --> Compute cumulant from SIGEPH.nc file specifcy via [[getsigeph_filepath]].
 * 10 --> Compute polaron effective mass, using the generalized Frohlich model, in the triply-degenerate VB or CB cubic case.
          Polaron effective masses are computed along the 3 crystallographic directions: (100), (110) and (111). Same requirements as for [[eph_task]] = 6. Reference: [[cite:Guster2021]]
 * 11 --> Compute e-ph matrix elements on homogeneous k- and q-meshes.
@@ -4536,6 +4537,31 @@ This input variable is only effective when [[prtnest]] = 1.
 The energy is relative to the calculated Fermi energy.
 """,
 ),
+
+Variable(
+    abivarname="ffnl_lw",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NonLocal Form Factors in LongWave calculation",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+In a longwave calculation, the nonlocal form factors and their derivatives are
+by default computed for all k points and atom types at an initial step and then 
+specifically used for each type of perturbation. Depending on the calculation 
+parameters --in particular for dense k-point grids, large ecut and pseudopotentials
+with large l and n values-- such approach might lead to high virtual memory usage.
+
+With [[ffnl_lw]] = 1 the form factors and derivatives are instead calculated 
+on-the-fly for each type of perturbation and k point when they are required. 
+This option saves virtual memory but makes the computation of spatial-dispersion 
+tensors slower. 
+""",
+),
+
 
 Variable(
     abivarname="fftalg",
@@ -6250,20 +6276,19 @@ vectors of the reciprocal lattice and the three Cartesian axis).
 ),
 
 Variable(
-    abivarname="gw_nstep",
+    abivarname="gwr_nstep",
     varset="gw",
     vartype="integer",
     topics=['GW_basic'],
     dimensions="scalar",
-    defaultval=30,
-    mnemonics="GW Number of self-consistent STEPs",
-    requires="[[optdriver]] == 8",
-    added_in_version="before_v9",
+    defaultval=50,
+    mnemonics="GWR Number of self-consistent STEPs",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.9.0",
     text=r"""
-Gives the maximum number of self-consistent GW cycles (or "iterations") in
-which G and/or W will be updated until the quasi-particle energies are
-converged within [[gw_toldfeig]]. [[gwcalctyp]] and [[gw_sctype]] are used to
-define the type of self-consistency.
+Maximum number of self-consistent iterations in which G and/or W will be updated
+until the quasi-particle energies are converged within [[gwr_tolqpe]].
+[[gwr_task]] defines the self-consistency type.
 """,
 ),
 
@@ -6324,40 +6349,6 @@ have to provide the three variables [[nkptgw]], [[kptgw]], and [[bdgw]].
 ),
 
 Variable(
-    abivarname="gw_sctype",
-    varset="gw",
-    vartype="integer",
-    topics=['GW_basic'],
-    dimensions="scalar",
-    defaultval=1,
-    mnemonics="GW, Self-Consistency TYPE",
-    requires="[[optdriver]] in [3,4]",
-    added_in_version="before_v9",
-    text=r"""
-This variable is used to partially define the kind of self-consistency for GW
-calculations. The other piece of information is given by [[gwcalctyp]] that
-defines the particular approximation for the self-energy operator as well as
-whether the wavefunctions have to replaced by quasi-particle amplitudes.
-
-If [[gw_sctype]] is specified in the input file, the code will perform an
-iterative update of the quantities entering the GW equations until the quasi-
-particle energies are converged within [[gw_toldfeig]]. The maximum number of
-iterations is specified by [[gw_nstep]]. Possible values are:
-
-  * 1 --> standard one-shot method (one screening calculation followed by a single sigma run)
-  * 2 --> self-consistency only on W (iterative update of W followed by a sigma run in which G is approximated with the Kohn-Sham independent-particle Green's function G0)
-  * 3 --> self-consistency only of G (a single screening calculation to obtain the Kohn-Sham polarizability followed by an iterative update of the Green's functions in the self-energy)
-  * 4 --> fully self-consistent algorithm (iterative update of both G and W)
-
-It is possible to initialize the self-consistent procedure by reading a
-previously calculated SCR or SUSC file via the variables [[getscr]] or
-[[getsuscep]], respectively. [[getqps]] can be used to read a previous QPS
-file thus initializing the Green functions to be used in the first self-
-consistent iteration.
-""",
-),
-
-Variable(
     abivarname="gw_sigxcore",
     varset="gw",
     vartype="integer",
@@ -6395,19 +6386,19 @@ contribution to sigma.
 ),
 
 Variable(
-    abivarname="gw_toldfeig",
+    abivarname="gwr_tolqpe",
     varset="gw",
     vartype="real",
     topics=['GW_basic'],
     dimensions="scalar",
-    defaultval=ValueWithUnit(units='eV', value=0.1),
-    mnemonics="GW TOLerance on the DiFference of the EIGenvalues",
+    defaultval=ValueWithUnit(units='eV', value=0.01),
+    mnemonics="GWR TOLerance on the difference of the QP Energies",
     characteristics=['[[ENERGY]]'],
-    requires="[[optdriver]] == 8",
-    added_in_version="before_v9",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
     text=r"""
-Sets a tolerance for absolute differences of QP energies that will cause one
-self-consistent GW cycle to stop.
+Sets a tolerance for absolute differences of QP energies between to consecutive iterations
+that will cause the self-consistent GWR cycle to stop.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
 """,
@@ -7341,11 +7332,14 @@ case, a cut-off Coulomb interaction might prove useful.
 [[icutcoul]] defines the particular expression to be used for the Coulomb-like terms
 in reciprocal space in ground-state calculations. See [[gw_icutcoul]] for GW calculationts,
 and [[fock_icutcoul]] for the Fock-like terms in ground-state calculations -e.g. using hybrid functionals-.
-.
+
 The choice of [[icutcoul]] depends on the dimensionality
 of the system. Possible values of [[icutcoul]] are from 0 to 5.
-For 1-dimensional and 2-dimensional systems, the geometry of the system has to be specified explicitly.
-This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length has to be provided, thanks to [[rcut]].
+For 1-dimensional and 2-dimensional systems, the geometry of the system (along which directions the cell is to be periodically repeated,
+along which ones the system is finite)
+has to be specified explicitly.
+This is done thanks to [[vcutgeo]]. For 0-, 1- and 2-dimensional systems, a cut-off length might be provided, depending
+on the methodology, thanks to [[rcut]].
 
   * 0 --> Sphere (molecules, but also 3D-crystals, see below). See [[rcut]].
   * 1 --> (W.I.P.) cylinder (nanowires, nanotubes). See [[vcutgeo]] and [[rcut]].
@@ -8420,8 +8414,12 @@ convergence, all values are OK)
 compromise between speed and reliability. The value **iscf** =  2 is safer but slower.
 - In the PAW case, default option is **iscf** = 17. In PAW you have the
 possibility to mix density/potential on the fine or coarse FFT grid (see [[pawmixdg]]).
-- Note that a Pulay mixing (**iscf** = 7 or 17) with [[npulayit]] = 1 (resp. 2)
+- Note 1: a Pulay mixing (**iscf** = 7 or 17) with [[npulayit]] = 1 (resp. 2)
 is equivalent to an Anderson mixing with **iscf** = 3 or 13 (resp. 4 or 14).
+- Note 2: when a mixing of the density is activated ([[iscf]]>=10) the density residual
+correction added to forces (see [[densfor_pred]]) needs the second derivative of the
+exchange-correlation functionnal (namely Kxc). When the latter is not provided, [[iscf]]
+is automatically switched to select the coresponding mixing of the potential ([[iscf]]<10).
 - Also note that:
 * when mixing is done on potential (iscf < 10), total energy is computed by "direct" decomposition.
 * when mixing is done on density (iscf >= 10), total energy is computed by "double counting" decomposition.
@@ -8689,6 +8687,7 @@ The value [[ixc]] = 10 is used internally: gives the difference between
   * 40 --> Hartree-Fock
   * 41 --> PBE0, [[cite:Adamo1999]].
   * 42 --> PBE0-1/3, [[cite:Guido2013]].
+  * 50 --> IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]] (designed for warm dense matter). The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
 
 **ETSF Lib XC functionals**
 
@@ -8737,6 +8736,16 @@ This means having [[usekden]] = 1.
   * 029 --> XC_LDA_C_VWN_2  Vosko, Wilk, & Nussair (2) [[cite:Vosko1980]]
   * 030 --> XC_LDA_C_VWN_3  Vosko, Wilk, & Nussair (3) [[cite:Vosko1980]]
   * 031 --> XC_LDA_C_VWN_4  Vosko, Wilk, & Nussair (4) [[cite:Vosko1980]]
+
+==LDA temperature-dependent functionals== (do not forget to add a minus sign, as discussed above)
+  The electronic temperature is taken from the [[tsmear]] if [[occopt]]=3 or 9 (Fermi-Dirac), from [[tphysel]] otherwise.
+  Use of [[occopt]]=3 is recommended to have a physical meaning of the temperature.
+  As these functionals do not provide Kxc (2nd derivative of Exc), a SCF mixing
+  of the potential is automatically selected ([[iscf]]<10).
+
+  * 259 --> XC_LDA_XC_KSDT, LDA T-dependent functional: Karasiev, Sjostrom, Dufty, & Trickey [[cite:Karasiev2014]]
+  * 318 --> XC_LDA_XC_CORRKSDT, corrected KSDT by Karasiev, Dufty, & Trickey [[cite:Karasiev2018]]
+  * 577 --> XC_LDA_XC_GDSMFB, LDA T-dependent functional: Groth, Dornheim, Sjostrom, Malone, Foulkes, & Bonitz [[cite:Groth2017]]
 
 ==GGA functionals== (do not forget to add a minus sign, as discussed above)
 
@@ -9670,9 +9679,10 @@ Chemical shielding at each nucleus due to the core electrons. This quantity is
 input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
-will be included. Because the PAW input files do not include the core orbitals,
-the user must compute this value separately, from the Lamb formula [[cite:Abragam1961]],
-and input it here.
+will be included. If a PAW dataset is used where this quantity is included, then a non-zero
+value in [[lambsig]] will override the PAW value. 
+The value to be used here can be obtained from the PAW core wavefunctions and the
+Lamb formula [[cite:Abragam1961]].
 """,
 ),
 
@@ -9811,10 +9821,10 @@ Variable(
     requires="[[usepawu]] == 1 or 2",
     added_in_version="before_v9",
     text=r"""
-Give for each species the value of the angular momentum (only values 2 or 3
-are allowed)  on which to apply the DFT+U correction.
+Give for each species the value of the angular momentum
+ on which to apply the DFT+U correction.
 
-  * If equal to 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
+  * If equal to 1 (p-orbitals), 2 (d-orbitals)  or 3 (f-orbitals), values of [[upawu]] and  [[jpawu]] are used in the calculation.
   * If equal to -1: do not apply DFT+U correction on the species.
 """,
 ),
@@ -9832,15 +9842,14 @@ Variable(
     added_in_version="v9",
     text=r"""
 Used to run the calculation of spatial dispersion tensorial quantities needed to
-build the bulk flexoelectric tensor (the clamped-ion contribution is alread calculated by
+build the bulk flexoelectric tensor (the clamped-ion flexoelectric tensor is directly calculated by
 abinit whereas the mixed and lattice-mediated ones are obtained through a postprocessing anaddb calculation,
 see [[flexoflag@anaddb]]).
 
-At present ( |today| ), all the elements of the spatial dispersion tensors are necessarily
-calculated. This **requires** the precalculation of the ground-state wave-functions and
-density as well as response functions and densities to a set of perturbations as specified below.
-All perturbations and directions need to be explicitly computed, and the linear response calculations
-have to be performed with [[prepalw]] = 1.
+This **requires** the precalculation of the ground-state wave-functions and
+density, as well as response functions and densities to a set of perturbations as specified below.
+The number of linear-response calculations to be explicitly precomputed can be reduced via symmetry arguments
+selecting the appropiate value of the [[prepalw]] variable.
 
   * 0 --> No flexoelectric spatial dispersion tensors are calculated.
   * 1 --> Four tensors required to build all the contributions to the bulk flexoelectric tensor
@@ -9860,6 +9869,31 @@ have to be performed with [[prepalw]] = 1.
           are also printed: piezoelectric force response tensor and clamped-ion elastic tensor.
           Requires precomputed linear response functions and densities:
           ddk, atomic displacement and strain.
+""",
+),
+
+Variable(
+    abivarname="lw_natopt",
+    varset="dfpt",
+    vartype="integer",
+    topics=['longwave_compulsory'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="LongWave calculation of NATural OPTical activity tensor",
+    requires="[[optdriver]] = 10",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="v9",
+    text=r"""
+Used to run natural optical activity tensor calculation. 
+
+  * 0 --> No natural optical activity tensor is calculated.
+  * 1 --> Natural optical activity tensor is calculated.
+
+This **requires** the precalculation of the ground-state wave functions and
+density as well as response functions and densities to the following perturbations:
+ddk, d2_dkdk, electric fields. The number of linear-response calculations 
+to be explicitly precomputed can be reduced via symmetry arguments  
+selecting the appropiate value of the [[prepalw]] variable.
 """,
 ),
 
@@ -9884,11 +9918,11 @@ phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
           the dynamical quadrupoles are also printed: the first moment of the polarization
           response to an atomic displacement and the clamped-ion piezoelectric tensor.
 
-At present ( |today| ), all the elements of the dynamical quadrupoles tensor are necessarily
-calculated. This **requires** the precalculation of the ground-state wave functions and
+This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
-ddk, d2_dkdk, atomic displacements and electric fields. All perturbations and directions need
-to be explicitly computed, and the linear response calculations have to be performed with [[prepalw]] = 1.
+ddk, d2_dkdk, atomic displacements and electric fields. The number of linear-response calculations 
+to be explicitly precomputed can be reduced via symmetry arguments  
+selecting the appropiate value of the [[prepalw]] variable.
 """,
 ),
 
@@ -12688,15 +12722,16 @@ Variable(
     dimensions=[3, '[[natom]]'],
     defaultval=0.0,
     mnemonics="NUClear DIPole MOMents",
-    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] = 3",
+    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] = 0 or 3",
     added_in_version="before_v9",
     text=r"""
 Places an array of nuclear magnetic dipole moments on the atomic
 positions, useful for computing the magnetization in the presence of
-nuclear dipoles and thus the chemical shielding by the converse method
-[[cite:Thonhauser2009]]. The presence of these dipoles breaks time
+nuclear dipoles and thus the chemical shielding by the converse method (see [[orbmag]] and
+[[cite:Thonhauser2009]]). The presence of these dipoles breaks time
 reversal symmetry and lowers the overall spatial symmetry.  The dipole
-moment values are entered in atomic units. For reference, note that
+moment values are entered in atomic units, as vectors in the Cartesian (not crystallographic)
+coordinate frame. For reference, note that
 one Bohr magneton has value $1/2$ in atomic units, while one nuclear
 Bohr magneton has value $2.7321\times 10^{-4}$ in atomic units.
 """,
@@ -12715,7 +12750,7 @@ Variable(
     text=r"""
 If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
 Using this option requires [[quadmom]] to be set as well.
-Values will be written to main output file (search for Electric Field Gradient).
+Values will be written to the main output file (search for Electric Field Gradient).
 If nucefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
 If nucefg=2, the full electric field gradient tensors in atomic units are also given,
 showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
@@ -13326,8 +13361,8 @@ The choice is among:
   * 4 --> self-energy calculation (SIG), routine *sigma*.
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
-  * 8 --> post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
-  * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]] or [[lw_qdrpl]] input variables.
+  * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
+  * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
   * 66 --> GW using Lanczos-Sternheimer, see input variables whose name start with `gwls_*`.
   * 99 --> Bethe-Salpeter calculation (BSE), routine *bethe_salpeter*
 
@@ -13398,7 +13433,7 @@ for some PAW calculations.
 
 Variable(
     abivarname="orbmag",
-    varset="gstate",
+    varset="dfpt",
     vartype="integer",
     topics=['MagField_expert'],
     dimensions="scalar",
@@ -13407,22 +13442,19 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="""[[usepaw]] == 1;
 [[usexcnhat]] == 0;
-[[nspinor]] == 1;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
     added_in_version="before_v9",
     text=r"""
-Compute quantities related to orbital magnetic moment. The
-    implementation assumes an insulator, so no empty or partially
-    filled bands, and currently restricted to [[nspinor]] 1. Such
-    insulators have orbital magnetization zero, except in the presence
-    of nonzero nuclear dipole moments, see [[nucdipmom]].  [[orbmag]]
+Compute quantities related to orbital magnetic moment. Typically used in the
+presence of a nonzero nuclear magnetic dipole moment, see [[nucdipmom]], to compute
+the nuclear magnetic shielding as measured in NMR. [[orbmag]]
     is parallelized over k points only. The implementation follows the
     theory outlined in [[cite:Gonze2011a]] extended to the PAW case.
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
-    both the ground state and DDK wavefunctions, and is triggered at the end of a
+    both the ground state and DDK wavefunctions (see [[rfddk]]), and is triggered at the end of a
     DDK calculation.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern number
@@ -15052,49 +15084,44 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
-The computation of spatial dispersion quantities from the longwave DFPT
+The computation of spatial-dispersion quantities from the longwave DFPT
 approach requires the first-order wavefunctions and densities obtained from
 a linear response calculation. The standard approach in a linear response calculation is:
 
   * compute only the irreducible perturbations;
   * use symmetries to reduce the number of k-points for the k-point integration.
 
-This approach cannot be applied, presently (v9.0), if the first-order
+This approach cannot be applied, presently (v9.x), if the first-order
 wavefunctions are to be used to compute spatial dispersion properties.
 During the linear response calculation, in order to prepare a longwave
-calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
-compute all the perturbations explicitly, and to keep the full number of k-points
-in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+calculation, one should use [[prepalw]] /= 0 in order to force ABINIT to keep 
+the full number of k-points in half the BZ (kptopt=2), or the full BZ (kptopt=3).
+Different options can then be used to set the reducible perturbations that 
+are enforced to be explicitly calculated:
+
+  * 1 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which depend on strain. It is therefore the option
+          to choose if one intends to run subsequent longwave calculations with 
+          [[lw_flexo]] = 1, 2, or 4.
+
+  * 2 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which combine electric field and atomic displacement
+          perturbations. It is therefore the option to choose if one intends to 
+          run subsequent longwave calculations with [[lw_qdrpl]] = 1.
+
+  * 3 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which combine electric field and atomic displacement
+          perturbations as well as two atomic displacements. It is therefore the 
+          option to choose if one intends to run subsequent longwave calculations 
+          with [[lw_flexo]] = 3.
+
+  * 4 --> Activates the calculation of perturbations required to build spatial-
+          dispersion tensors which combine two electric field perturbations. 
+          It is therefore the option to choose if one intends to run subsequent 
+          longwave calculations with [[lw_natopt]] = 1.
 """,
 ),
 
-
-Variable(
-    abivarname="prepalw",
-    varset="dfpt",
-    vartype="integer",
-    topics=['longwave_compulsory'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="PREPAre LongWave calculation",
-    characteristics=['[[DEVELOP]]'],
-    added_in_version="9.2.0",
-    text=r"""
-The computation of spatial dispersion quantities from the longwave DFPT
-approach requires the first-order wavefunctions and densities obtained from
-a linear response calculation. The standard approach in a linear response calculation is:
-
-  * compute only the irreducible perturbations;
-  * use symmetries to reduce the number of k-points for the k-point integration.
-
-This approach cannot be applied, presently (v9.0), if the first-order
-wavefunctions are to be used to compute spatial dispersion properties.
-During the linear response calculation, in order to prepare a longwave
-calculation, one should put [[prepalw]] to 1 in order to force ABINIT to
-compute all the perturbations explicitly, and to keep the full number of k-points
-in half the BZ (kptopt=2), or the full BZ (kptopt=3).
-""",
-),
 
 Variable(
     abivarname="prepanl",
@@ -15685,7 +15712,7 @@ If set to 1, provide output of electron-phonon "gkk" matrix elements, for
 further treatment by mrggkk utility or anaddb utility. Note that symmetry will
 be disabled for the calculation of the perturbation, forcing the inclusion of
 all k-points and all perturbation directions. Additional information on
-electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]] 
+electron-phonon treatment in ABINIT is given in the tutorial [[tutorial:eph_intro]] and subsequent ones, [[tutorial:eph4mob]]
 and [[tutorial:eph4zpr]].
 """,
 ),
@@ -16000,7 +16027,7 @@ range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
 Specifying a non-zero negative value is also allowed, and will produce also
 the output of an electron density in real space, like the above, but moreover
-will additionally filter it to have the contribution of one band only, 
+will additionally filter it to have the contribution of one band only,
 whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
 must be smaller or equal to [[nband]].
 
@@ -16930,6 +16957,20 @@ Variable(
     text=r"""
 Truncation of the Coulomb interaction in real space. The meaning of [[rcut]]
 is governed by the cutoff shape options [[icutcoul]], [[gw_icutcoul]] and/or [[fock_icutcoul]].
+See complementary information in [[vcutgeo]].
+
+In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
+Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
+thus automatically defined by the unit cell and there is no need to specify
+the value of [[rcut]]. For two-dimensional systems, Ismail-Beigi [[cite:Ismail-Beigi2006]] also fixes the cutoff region,
+at half the replication length perpendicular to the (truly) periodic plane.
+
+Thus, when the Beigi methods in 1D or 2D are expected, [[rcut]] must be 0.0.
+Using another value of [[rcut]] will prevent the Beigi method to be used.
+See complementary information in [[vcutgeo]].
+
+On the other hand, when the Rozzi methods in 1D or 2D are expected, which is the case when one component of [[vcutgeo]] is negative,
+[[rcut]] mut be defined.
 
 If [[rcut]] is negative, the cutoff is automatically calculated so to enclose
 the same volume inside the cutoff as the volume of the primitive cell.
@@ -17213,6 +17254,19 @@ if rf2_pert1_dir[idir1] AND rf2_pert2_dir[idir2] are equal to 1, where "idir1" (
 the perturbation "lambda_1" ("lambda_2").
 If ALL directions are activated (default behavior) AND [[prepanl]] == 1, then the code automatically selects
 only the directions that will be used by the non-linear routine ([[optdriver]] == 5) using crystal symmetries.
+
+Since v9.x this variable also activates the computation of the response to a vector potential
+in the long-wavelength limit. At first order in the momentum, the perturbation and response can be split 
+into symmetric plus antisymmetric parts, see Refs. [[cite:Royo2019]] and [[cite:Zabalo2022]].
+The symmetric part, activated with [[rf2_dkdk]] == 1, corresponds to the aforementioned second derivatives 
+of wavefunctions with respect to wavevectors. The antisymmetric part, activated with [[rf2_dkdk]] == 2, 
+gives the response to a uniform orbital magnetic field, as defined in Ref. [[cite:Essin2010]]. The total, 
+symmetric plus antisymmetric, response is activated with [[rf2_dkdk]] == 3.
+
+The response function to a long-wavelength vector potential is a crucial ingredient to compute some of the 
+spatial-dispersion quantities available in the longwave driver. In particular, those that involve the gradient of an
+electric field: the clamped-ion flexoelectric tensor, the first moment of the polarization
+response to an atomic displacement and the natural optical activity tensor.
 """,
 ),
 
@@ -17349,7 +17403,8 @@ Variable(
     text=r"""
 Activates computation of derivatives of ground state wavefunctions with
 respect to wavevectors. This is not strictly a response function but is a
-needed auxiliary quantity in the electric field calculations (see [[rfelfd]]).
+needed auxiliary quantity in the electric field calculations (see [[rfelfd]]) and orbital magnetism calculations
+(see [[orbmag]]).
 The directions for the derivatives are determined by [[rfdir]].
 
   * 0 --> no derivative calculation
@@ -17496,7 +17551,13 @@ Variable(
     mnemonics="Response Function with respect to STRainS with the energy REFerence at the average electrostatic potential",
     added_in_version="v9",
     text=r"""
-If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the reference energy placed at the average electrostatic potential. The later is the reference adopted in the longwave driver. First-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, in the calculation of absolute deformation potentials [[cite:Stengel2015]].
+If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the 
+reference energy placed at the average electrostatic potential. The later is the reference adopted 
+in the longwave driver. Since v9.x, [[rfstrs_ref]] = 1 is warned if [[prepalw]]/=0 because first-order 
+energies are no longer recomputed by the longwave driver but read from the precalculated 1WF files. 
+
+Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, 
+in the calculation of absolute deformation potentials [[cite:Stengel2015]].
 """,
 ),
 
@@ -18680,6 +18741,20 @@ See [[td_mexcit]] for an alternative way to decrease N.
 ),
 
 Variable(
+    abivarname="tolcum",
+    varset="eph",
+    vartype="real",
+    topics=['ElPhonInt_expert'],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="TOLerance on CUMulant",
+    added_in_version="9.8.0",
+    text=r"""
+This variable is active when computing the cumulant with [[eph_task]] = 9.
+""",
+),
+
+Variable(
     abivarname="td_mexcit",
     varset="dfpt",
     vartype="real",
@@ -19224,6 +19299,7 @@ two parameters [[tphysel]] and [[tsmear]] is described in [[cite:Verstraete2002]
 Note that the signification of the entropy is modified with respect to the usual entropy.
 The choice has been made to use [[tsmear]] as a prefactor of the entropy, to
 define the entropy contribution to the free energy.
+Note that [[tphysel]] might be used as parameter for Free Energy exchange-correlation functionals (see [[ixc]]).
 """,
 ),
 
@@ -20190,15 +20266,19 @@ to be used. It has a meaning either for a periodic one-dimensional system, typic
 a nanowire, nanotube or polymer surrounded by vacuum separating the system
 from images in neighbouring cells
 ([[icutcoul]] = 1) or in the case of periodic two-dimensional system,
-typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2). For each
+typically a slab with vacuum separating it from images in neighbouring cells ([[icutcoul]] = 2).
+
+When a non-zero component of this three-dimensional vector is non-zero, this indicate that the system is
+periodic along this dimension. Note that the components of this vector are real numbers, which is
+useful in the current implementation of the Rozzi methods [[cite:Rozzi2006]]. Of course, just specifying 0 or 1 is allowed,
+but will be read as 0.0 or 1.0.
+
+For each
 geometry, two different definitions of the cutoff region are available (see
 [[cite:Ismail-Beigi2006]] and [[cite:Rozzi2006]] for a complete description
-of the methods)
-
-In the method of Ismail-Beigi [[cite:Ismail-Beigi2006]] for one-dimensional systems, the cutoff region is given by the
-Wigner-Seitz cell centered on the axis of the cylinder. The cutoff region is
-thus automatically defined by the unit cell and there is no need to specify
-the value of [[rcut]].
+of the methods).
+The Beigi method is used by default. The Rozzi method is used if [[rcut]] is not at its default value (0.0), or if
+one component of [[vcutgeo]] is negative.
 
 To define a cylinder along the z-axis use the following lines:
 ```
@@ -20231,8 +20311,8 @@ For two-dimensional systems ([[icutcoul]] = 2), [[vcutgeo]] is used to define th
 two periodic directions. Also in this case two different
 techniques are available. In the method of Ismail-Beigi, the (positive) non-zero
 components of vcutgeo define the periodic directions of the infinite surface.
-The interaction is truncated within a slab of width L where L is the length of
-the primitive vector of the lattice along the non-periodic dimension. For
+The interaction is truncated within a slab of width L where L is the projection of
+the primitive vector of the lattice along the direction perpendicular to the periodic plane. For
 example:
 ```
 icutcoul 2
@@ -20948,6 +21028,26 @@ produce an acceptable plot, [[w90prtunk]] can be set to 1 to output every grid p
 ),
 
 Variable(
+    abivarname="wfinit",
+    varset="gstate",
+    vartype="integer",
+    topics=['TuningSpeedMem_useful','SCFAlgorithms_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="WaveFunctions INITialization",
+    added_in_version="9.9.0",
+    text=r"""
+This option specifies how to initialize the wavefunctions in the case of GS calculations.
+It requires pseudos with pseudized wavefunctions e.g. UPF2.
+Possible values are:
+
+    * 0: Start from random wavefunctions (default)
+    * 1: Use atomic orbitals + random numbers.
+    * 2: Use atomic orbitals without random numbers.
+""",
+),
+
+Variable(
     abivarname="wfmix",
     varset="gstate",
     vartype="real",
@@ -21601,8 +21701,8 @@ Possible values are:
 
   * "wfk_fullbz" --> Read input WFK file and produce new WFK file with $\kk$-points in the full BZ.
      Wavefunctions with [[istwfk]] > 2 are automatically converted into the full G-sphere representation.
-     This option can be used to interface Abinit with external tools (e.g. lobster)
-     requiring $\kk$-points in the full BZ.
+     This option can be used to interface Abinit with external tools (e.g. lobster) requiring $\kk$-points in the full BZ.
+     Use [[iomode]] = 3 and [[prtkbff]] = 1 to produce a WFK file in netcdf format with Kleynmann-Bylander form factors.
 
   * "wfk_einterp" --> Read energies from WFK file and interpolate the band structure with the modified SKW method [[cite:Pickett1988]],
      using the parameters specified by [[einterp]].
@@ -23261,13 +23361,13 @@ Note that [[gstore_erange]] is not compatible with [[gstore_brange]].
 ),
 
 Variable(
-    abivarname="gwr_np_gtks",
+    abivarname="gwr_np_kgts",
     varset="gw",
     vartype="integer",
     topics=['GWR_expert'],
     dimensions=[4],
     defaultval=0,
-    mnemonics="GWR Number of Processors for G-vectors, Tau-points, K-points, Spin.",
+    mnemonics="GWR Number of Processors for K-vectors, G-vectors, Tau-points, Spin.",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
@@ -23279,10 +23379,27 @@ and the basic dimensions of the job computed at runtime.
 
     The total number of MPI processes must be equal to the product of the different entries.
 
-    Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_gtks]] is
+    Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_kgts]] is
     the **only variable** that should be used to change the default behaviour.
     Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
     are **not used** in the GWR subdriver.
+""",
+),
+
+Variable(
+    abivarname="gwr_ucsc_batch",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_expert'],
+    dimensions=[2],
+    defaultval=-1,
+    mnemonics="GWR Unit Cell, Supercell BATCH SIZE.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This variable defines the maximum number of FFTs performed in the unit cell/super cell.
+If not specified in the input, the code will automatically define these values to find a good compromise
+betweeen memory and performance.
 """,
 ),
 
@@ -23292,12 +23409,21 @@ Variable(
     vartype="string",
     topics=['GWR_basic'],
     dimensions=[1],
-    defaultval="G0W0",
+    defaultval="None",
     mnemonics="GWR TASK",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines ...
+Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
+The choice is among:
+
+* HDIAG --> direct diagonalization of the KS Hamiltonian.
+* G0W0 -->  one-shot GW.
+* RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
+
+!!! important
+
+    At the time of writing ( |today| ), PAW is not supported by the GWR code.
 """,
 ),
 
@@ -23312,12 +23438,66 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This variable defines the number of imaginary-time points
+This variable defines the number of imaginary-time points in the minimax mesh.
 
 !!! important
 
-    To avoid load imbalance the the total number of MPI processes should be a divisor/multiple of
-    [[gwr_ntau]] * [[nsppol]]
+    To avoid load imbalance the total number of MPI processes should be a divisor/multiple of [[gwr_ntau]] * [[nsppol]]
+""",
+),
+
+Variable(
+    abivarname="gwr_chi_algo",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=1,
+    mnemonics="GWR CHI ALGOrithm.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable selects the algorithm to be used to compute the polarizability in the GWR code.
+Possible values are
+
+* 0 --> Automatic selection.
+* 1 --> Use supercell.
+* 2 --> Use convolutions in the BZ.
+""",
+),
+
+Variable(
+    abivarname="gwr_rpa_ncut",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=5,
+    mnemonics="GWR RPA Number of CUToff",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+Number of cutoff energies for extrapolating RPA correlation energy.
+""",
+),
+
+Variable(
+    abivarname="gwr_sigma_algo",
+    varset="gw",
+    vartype="integer",
+    topics=['GWR_basic'],
+    dimensions=[1],
+    defaultval=12,
+    mnemonics="GWR SIGMA ALGOrithm.",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.6.2",
+    text=r"""
+This input variable selects the algorithm to be used to compute the self-energy in the GWR code.
+Possible values are
+
+* 0 --> Automatic selection.
+* 1 --> Use supercell.
+* 2 --> Use convolutions in the BZ.
 """,
 ),
 
@@ -23327,12 +23507,27 @@ Variable(
     vartype="real",
     topics=['GWR_useful'],
     dimensions=[1],
-    defaultval=2.0,
+    defaultval=1.0,
     mnemonics="GWR BOX CUT-off MINimum",
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
 See the corresponding input variable for the usual GS grid [[boxcutmin]].
+""",
+),
+
+Variable(
+    abivarname="gwr_max_hwtene",
+    varset="gw",
+    vartype="real",
+    topics=['GWR_useful'],
+    dimensions=[1],
+    defaultval=-1.0,
+    mnemonics="GWR MAX Head Wings Transition ENErgy",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.8.0",
+    text=r"""
+Energy window in Hartree for the empty states used in the computation of the head/wings of the polarizability.
 """,
 ),
 

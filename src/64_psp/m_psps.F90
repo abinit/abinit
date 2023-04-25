@@ -1112,7 +1112,7 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
 !Arguments ------------------------------------
  class(nctab_t),intent(inout) :: nctab
  integer,intent(in) :: mqgrid_vl
- logical,intent(in) :: has_tcore,has_tvale
+ logical,intent(in) :: has_tcore, has_tvale
 
 ! *************************************************************************
 
@@ -1151,11 +1151,13 @@ subroutine nctab_free(nctab)
 
 ! *************************************************************************
 
- nctab%mqgrid_vl = 0
- nctab%has_tvale = .False.
  ABI_SFREE(nctab%tvalespl)
- nctab%has_tcore = .False.
  ABI_SFREE(nctab%tcorespl)
+ ABI_SFREE(nctab%tphi_qspl)
+ ABI_SFREE(nctab%tphi_n)
+ ABI_SFREE(nctab%tphi_l)
+ ABI_SFREE(nctab%tphi_jtot)
+ ABI_SFREE(nctab%tphi_occ)
 
 end subroutine nctab_free
 !!***
@@ -1233,7 +1235,7 @@ subroutine nctab_eval_tvalespl(nctab, zion, mesh, valr, mqgrid_vl, qgrid_vl)
  end if
 
  call pawpsp_cg(nctab%dnvdq0, d2nvdq0, mqgrid_vl, qgrid_vl, nctab%tvalespl(:,1), mesh, valr, yp1, ypn)
- call simp_gen(yp1,mesh%rad**2 * valr, mesh)
+ call simp_gen(yp1, mesh%rad**2 * valr, mesh)
  write(std_out,*)" valence charge (before rescaling) integrates to: ",four_pi*yp1
 
  ! Rescale the integral to have the correct number of valence electrons.
