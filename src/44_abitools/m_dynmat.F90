@@ -1419,7 +1419,7 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,omega)
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta)
 
 !Arguments -------------------------------
 !scalars
@@ -1430,7 +1430,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(inout) :: d2(2,3,mpert,3,mpert)
- real(dp),optional,intent(in) :: omega
+ real(dp),optional,intent(in) :: eta
 
 !Local variables -------------------------
 !scalars
@@ -1438,7 +1438,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  logical :: qzero
  integer :: exch12,found,idir1,idir2,idisy1,idisy2,ipert1,ipert2
  integer :: ipesy1,ipesy2,isgn,isym,ithree,itirev,nblkflg_is_one,noccur,nsym_used,quit,quit1
- real(dp) :: arg1,arg2,im,norm,omega_,re,sumi,sumr,xi,xr
+ real(dp) :: arg1,arg2,im,norm,eta_,re,sumi,sumr,xi,xr
 !arrays
  integer,pointer :: sym1_(:,:,:),sym2_(:,:,:)
  real(dp),allocatable :: d2tmp1(:,:,:),d2tmp2(:,:,:),d2work(:,:,:,:,:)
@@ -1467,7 +1467,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
    end do
  end if
 
- omega_=zero; if(present(omega)) omega_=omega
+ eta_=zero; if(present(eta)) eta_=eta
 
 !Exchange of perturbations
 
@@ -1480,8 +1480,8 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
      do idir1=1,3
 
 !      Since the matrix is hermitian, the diagonal elements are real
-!      (unles dissipation is allowed at finite omega)
-       if (abs(omega_)<tol8) d2(2,idir1,ipert1,idir1,ipert1)=zero
+!      (unles dissipation is allowed at finite eta)
+       if (abs(eta_)<tol8) d2(2,idir1,ipert1,idir1,ipert1)=zero
 
 !      do ipert2=1,mpert See notes
        do ipert2=1,min(natom+2,mpert)
