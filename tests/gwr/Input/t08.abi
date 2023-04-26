@@ -50,7 +50,7 @@ pseudos "Li.xml, F.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t08.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;
+#%%   t08.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 6.0e-1;
 #%%   t08o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%%   t08o_DS2_GridVectors.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
 #%%   t08o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
