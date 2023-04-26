@@ -1,5 +1,15 @@
-MODULE BoundedLeastSquares
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+MODULE m_bvls
+  use defs_basis
+  use m_errors
+  use m_abicore
 ! Summary:
 ! BVLS solves linear least-squares problems with upper and lower bounds on the
 ! variables, using an active set strategy.  It is documented in the J. of
@@ -17,7 +27,7 @@ MODULE BoundedLeastSquares
 
 
 IMPLICIT NONE
-INTEGER, PARAMETER, PRIVATE  :: dp = SELECTED_REAL_KIND(12, 60)
+!INTEGER, PARAMETER, PRIVATE  :: dp = SELECTED_REAL_KIND(12, 60)
 
 
 CONTAINS
@@ -191,7 +201,7 @@ INTEGER, INTENT(OUT)       :: loopa
 
 ! Local variables
 
-REAL (dp), PARAMETER  :: eps = 1.0E-11_dp
+REAL (dp), PARAMETER  :: eps = 1.0E-1_dp
 INTEGER               :: i, iact, ifrom5, it, j, jj, k, k1, kk, ks, mm, mm1, &
                          nact, nbound, noldb
 REAL (dp)             :: act(m,m+2), alf, alpha, bad, bdiff, bnorm, bound, &
@@ -540,7 +550,7 @@ RETURN
 END SUBROUTINE qr
 !______________________________________________________________________
 
-END MODULE BoundedLeastSquares
+END MODULE m_bvls
 
 
 

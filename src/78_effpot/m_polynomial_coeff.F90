@@ -41,7 +41,7 @@ module m_polynomial_coeff
  !use m_geometry,  only : xcart2xred,metric
  use m_dtfil,     only : isfile
  use m_hashtable_strval, only: hash_table_t
- use m_dynamic_array, only: int2d_array_type, int_array_type
+ use m_dynamic_array, only: int2d_array_type
 
 
  implicit none
@@ -81,7 +81,6 @@ module m_polynomial_coeff
    ! use the hash table to see if the term is already there. And the values of the table is -1 if the term is not bounding term.
    type(hash_table_t) :: table
    type(int2d_array_type) :: array
-   type(int_array_type) :: isbound
  contains
    procedure :: init => IrreducibleCombinations_init
    procedure :: free => IrreducibleCombinations_free
@@ -227,7 +226,7 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
  integer, intent(in) :: nterm
  real(dp),intent(in) :: coefficient
  logical,optional,intent(in) :: check
- integer,optional,intent(in) :: isbound
+ integer,intent(in) :: isbound
 !arrays
  character(len=200),optional,intent(in) :: name
  type(polynomial_term_type),intent(in) :: terms(nterm)
@@ -299,11 +298,11 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
    name_tmp = ""
  end if
 
- if(present(isbound)) then
+ !if(present(isbound)) then
    polynomial_coeff%isbound=isbound
- else
-   polynomial_coeff%isbound=0
- end if
+ !else
+ !  polynomial_coeff%isbound=0
+ !end if
 
 
 !Initilisation
@@ -2177,12 +2176,10 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  integer,allocatable :: offsets(:)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:),list_coeff(:),list_combination(:,:)
- integer,allocatable :: list_combination_tmp(:,:), list_isbound_tmp(:)
+ integer,allocatable :: list_combination_tmp(:,:)
  integer,allocatable :: irank_ncombi(:),my_index_irredcomb(:)
  integer,allocatable :: my_coefflist(:),my_coeffindexes(:),my_newcoeffindexes(:),my_list_combination(:,:)
- integer,allocatable :: my_list_isbound(:)
  type(int2d_array_type) :: my_array_combination
- type(int_array_type) :: my_array_isbound
  integer,allocatable :: my_list_combination_tmp(:,:)
  real(dp) :: rprimd(3,3),range_ifc(3)
  real(dp),allocatable :: dist(:,:,:,:)
@@ -2474,7 +2471,7 @@ if(need_compute_symmetric)then
         enddo
        compute_sym = .true.
        iterm = my_index_irredcomb(i)-1
-       call computeSymmetricCombinations(my_array_combination, my_array_isbound, list_symcoeff,list_symstr,ndisp,nsym,&
+       call computeSymmetricCombinations(my_array_combination,list_symcoeff,list_symstr,ndisp,nsym,&
 &                                        comb(:ndisp+nstrain),power_disps(2),&
 &                                        ncoeff_symsym,nstr_sym,nstrain, &
 &                                        compatibleCoeffs,compute_sym,comm, &
@@ -2492,7 +2489,6 @@ if(need_compute_symmetric)then
   endif
   !call reduce_zero_combinations(my_list_combination)
   call my_array_combination%tostatic(my_list_combination, size1=power_disps(2))
-  call my_array_isbound%tostatic(my_list_isbound)
   call my_array_combination%finalize()
 
 
@@ -2520,26 +2516,11 @@ if(need_compute_symmetric)then
   enddo
   call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
-  block
-
-    ABI_MALLOC(list_isbound_tmp,(sum(irank_ncombi)))
-    offsets(1) = 0
-    do i=1,nproc
-      offsets(i) = sum(irank_ncombi(:i-1))
-    enddo
-    list_isbound_tmp = 0
-    do i = 1,nproc
-      buffsize(i) = irank_ncombi(i)
-    enddo
-    call xmpi_gatherv(my_list_isbound,size(my_list_isbound),list_isbound_tmp,buffsize,offsets,master,comm,ierr)
-  end block
-
-
 
   !Deallocation of variables inside need_symmetric
   ABI_FREE(buffsize)
   ABI_FREE(my_list_combination)
-  ABI_FREE(my_list_isbound)
+
   ABI_FREE(my_index_irredcomb)
   ABI_FREE(irank_ncombi)
   ABI_FREE(offsets)
@@ -2645,14 +2626,11 @@ endif
      block ! check if the term is a bounding term.
        integer :: nbody, totpower, isbound
        call get_totpower_and_nbody(list_combination(:,ii), ndisp_max,nbody, totpower)
-       print *, "list_combination: ", ii, ":", list_combination(:, ii)
-       print *, "totpower:", totpower
        if(max_nbody(totpower)==-1) then
          isbound= 1
        else
          isbound = 0
        end if
-       print *, "isbound:", isbound
        call polynomial_coeff_init(one,nterm,coeffs_tmp(ii),terms(1:nterm),isbound=isbound, check=.true.)
      end block
    end block
@@ -2811,7 +2789,8 @@ endif
 !        Get the name of this coefficient
          call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
          call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
-&                                  coeffs_tmp(my_icoeff)%terms,name=name,check=.false.)
+           &                                  coeffs_tmp(my_icoeff)%terms,name=name, &
+           &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
        else
          call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
        end if
@@ -2831,7 +2810,8 @@ endif
      if(my_rank==rank_to_send)then
        call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
        call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
-&                                 coeffs_tmp(my_icoeff)%terms,name=name,check=.false.)
+         &                                 coeffs_tmp(my_icoeff)%terms,name=name,   &
+         &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
 !      Free the coefficient
        call polynomial_coeff_free(coeffs_tmp(my_icoeff))
      end if
@@ -3054,7 +3034,7 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
            icoeff_tmp = icoeff_tmp + 1
            icoeff_tot = icoeff_tot + 1
            call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),&
-&                                     terms(1:iterm),check=.true.)
+&                                     terms(1:iterm),isbound=0, check=.true.)
 
          end if
        end if
@@ -3088,7 +3068,8 @@ recursive subroutine computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,l
 !        Get the name of this coefficient
          call polynomial_coeff_getName(name,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
          call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
-&                                   coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
+           &                                   coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
+           &                                   isbound=coeffs_tmp(icoeff_tmp)%isbound, &
 &                                   name=name)
        end if
      end if
@@ -3413,7 +3394,7 @@ subroutine symlist_free(self)
 end subroutine symlist_free
 
 
-subroutine computeSymmetricCombinations(array_combination, array_isbound,&
+subroutine computeSymmetricCombinations(array_combination, &
   & list_symcoeff, list_symstr, ndisp, nsym, index_coeff_in,  &
   & ndisp_max,  ncoeff, nsym_str, nstrain, &
   &  compatibleCoeffs,  compute, comm, only_even, max_nbody  )
@@ -3426,7 +3407,6 @@ subroutine computeSymmetricCombinations(array_combination, array_isbound,&
   !arrays
   !integer,intent(inout) ::
   type(int2d_array_type), intent(inout) :: array_combination ! list_combination(ndisp_max, nirred*nsym**(ndisp-1))
-  type(int_array_type), intent(inout) :: array_isbound
   integer,intent(in)    :: list_symcoeff(6,ncoeff,nsym),index_coeff_in(ndisp+nstrain)
   integer,intent(in)    :: list_symstr(6,nsym,2),compatibleCoeffs(ncoeff+nsym_str,ncoeff+nsym_str)
   integer, intent(in)   :: max_nbody(:)
@@ -3446,7 +3426,6 @@ subroutine computeSymmetricCombinations(array_combination, array_isbound,&
   !integer, pointer :: symlist_i(:)
   integer :: nbody, totpower, nbody_strain, totpower_strain, nbody_disp, totpower_disp
   type(polyform_t) :: polyform
-integer :: isbound
 integer ::   max_nbody_copy(size(max_nbody))
   !Source
 
@@ -3479,13 +3458,12 @@ integer ::   max_nbody_copy(size(max_nbody))
 
   max_nbody_copy(:)=max_nbody(:)
   if(max_nbody(totpower)==-1) then
-    isbound=1
     max_nbody_copy(totpower)=1
-  else
-    isbound=0
+  else if(max_nbody(totpower)>=0) then
     max_nbody_copy(totpower)=max_nbody(totpower)
+  else
+    ABI_ERROR("max_nbody should be -1, 0, or positive.")
   end if
-
 
   if(max_nbody_copy(totpower)/=0 .and. nbody> max_nbody_copy(totpower)) then
     call irred_combinations%free()
@@ -3527,7 +3505,7 @@ integer ::   max_nbody_copy(size(max_nbody))
         nbody=count(powers/=0)+nbody_strain
         totpower=sum(powers) + totpower_strain
         if(totpower==0) cycle
-        if(nbody> max_nbody(totpower)) cycle
+        if(nbody> max_nbody_copy(totpower)) cycle
       end if
       if(any(mod(powers(1:ndisp),2) /=0) .and. need_only_even) then
         index_coeff_tmp(:) = 0
@@ -3564,7 +3542,7 @@ integer ::   max_nbody_copy(size(max_nbody))
       end if
 
        if(.not. (all(index_coeff_tmp == 0) .and. nstrain==0)) then
-          irreducible=irred_combinations%add_irr(comb_to_test, list_symcoeff, list_symstr, ncoeff, nsym, ndisp_max, isbound)
+          irreducible=irred_combinations%add_irr(comb_to_test, list_symcoeff, list_symstr, ncoeff, nsym, ndisp_max)
        endif
     end if ! need compute
   end do
@@ -3574,7 +3552,6 @@ integer ::   max_nbody_copy(size(max_nbody))
   end block
 
   call array_combination%concate(irred_combinations%array)
-  !call array_isbound%concate(irred_combination%isbound)
   call symlist%free()
   call irred_combinations%free()
   !ABI_FREE(index_isym)
@@ -3874,7 +3851,8 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
    if(iterm > 0)then
 !  increase coefficients and set it
      icoeff_tmp = icoeff_tmp + 1
-     call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),terms(1:iterm),check=.true.)
+     call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp), &
+       &                       terms(1:iterm),isbound=0 ,check=.true.)
    end if
 
 !  Deallocate the terms
@@ -3908,8 +3886,10 @@ subroutine polynomial_coeff_getOrder1(cell,coeffs_out,list_symcoeff,&
      call polynomial_coeff_getName(name,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
 !    Increase icoeff and fill the coeffs_out array
      icoeff = icoeff + 1
-      call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
- &                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,name=name)
+     call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+       &                               coeffs_out(icoeff),coeffs_tmp(icoeff_tmp)%terms,&
+       &                               isbound=coeffs_tmp(icoeff_tmp)%isbound, &
+       &                               name=name)
 
      write(message,'(2a)')' ',trim(name)
      call wrtout(std_out,message,'COLL')
@@ -4028,7 +4008,8 @@ do icoeff1=1,ncoeff_out
         if(.not.same(icoeff1))then
                 icoeff2=icoeff2 + 1
                 call polynomial_coeff_init(coeff_ini,strain_terms_tmp(icoeff1)%nterm,strain_terms(icoeff2),&
-&               strain_terms_tmp(icoeff1)%terms,strain_terms_tmp(icoeff1)%name,check=.TRUE.)
+                  &               strain_terms_tmp(icoeff1)%terms,strain_terms_tmp(icoeff1)%name, &
+                  &               isbound=strain_terms_tmp(icoeff1)%isbound,check=.TRUE.)
         endif
 enddo
 
@@ -4124,12 +4105,12 @@ function coeffs_list_conc(coeff_list1,coeff_list2) result (coeff_list_out)
 ! ABI_MALLOC(coeff_list_out,(ncoeff_out))
  do i=1,ncoeff_out
     if(i<=ncoeff1)then
-       call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,&
-&                                 coeff_list1(i)%name,check=.TRUE.)
+      call polynomial_coeff_init(coeff_list1(i)%coefficient,coeff_list1(i)%nterm,coeff_list_out(i),coeff_list1(i)%terms,&
+        &                                 coeff_list1(i)%name,coeff_list1(i)%isbound, check=.TRUE.)
     else
        j=i-ncoeff1
        call polynomial_coeff_init(coeff_list2(j)%coefficient,coeff_list2(j)%nterm,coeff_list_out(i),coeff_list2(j)%terms,&
-&                                 coeff_list2(j)%name,check=.TRUE.)
+         &                                 coeff_list2(j)%name,coeff_list2(j)%isbound,check=.TRUE.)
     endif
  enddo
 
@@ -4222,7 +4203,7 @@ subroutine coeffs_list_append(coeff_list,coeff, check)
 
  call coeffs_list_copy(coeff_list, tmp)
  call polynomial_coeff_init(coeff%coefficient,coeff%nterm,coeff_list(n2),coeff%terms,&
-   &                                 coeff%name,check=check)
+   &                                 coeff%name,coeff%isbound, check=check)
 end subroutine coeffs_list_append
 !!***
 
@@ -4502,17 +4483,15 @@ subroutine IrreducibleCombinations_free(self)
   class(IrreducibleCombinations_t), intent(inout) :: self
   call self%table%free()
   call self%array%finalize()
-  call self%isbound%finalize()
 end subroutine IrreducibleCombinations_free
 
 function IrreducibleCombinations_add_irr(self, combination, list_symcoeff, &
-  & list_symstr, ncoeff_sym, nsym, ndisp, isbound) result(irreducible)
+  & list_symstr, ncoeff_sym, nsym, ndisp ) result(irreducible)
   class(IrreducibleCombinations_t), intent(inout) :: self
   integer, intent(inout) :: combination(:)
   integer,intent(in) :: ncoeff_sym,ndisp,nsym
   integer,intent(in) :: list_symcoeff(6,ncoeff_sym,nsym)
   integer,intent(in) :: list_symstr(6,nsym,2)
-  integer, optional,  intent(in) :: isbound
 
   integer :: combination_cmp_tmp(ndisp), combination_sorted(ndisp)
   logical :: irreducible
@@ -4542,11 +4521,7 @@ function IrreducibleCombinations_add_irr(self, combination, list_symcoeff, &
   !if (self%array%size==0) irreducible=.False.
   call self%table%put_intn(combination_sorted, 0.0_dp, n)
   call self%array%push(combination)
-  if(present(isbound)) then
-    call self%isbound%push(isbound)
-  else
-    call self%isbound%push(0)
-  endif
+
 
 contains
   subroutine symcomb(combination, combination_cmp_tmp, isym)
