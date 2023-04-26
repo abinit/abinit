@@ -6737,7 +6737,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  call gwr%get_u_ngfft(gwr_boxcutmin_c, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax)
 
  ! Init work_ngfft
- gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
+ gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk
  gmax = 2 * gmax + 1
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
@@ -7224,7 +7224,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
  end if
 
  ! Init work_ngfft
- gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
+ gmax = gmax + 4 ! FIXME: this is to account for umklapp, should also consider Gamma-only and istwfk
  gmax = 2 * gmax + 1
  call ngfft_seq(work_ngfft, gmax)
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
