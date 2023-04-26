@@ -2156,7 +2156,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !    Finalize linalg parameters for this np_slk value
 !    For the last np_slk value, everything is finalized
 !    For the previous np_slk values, only Scalapack parameters are updated
-     call abi_linalg_finalize()
+     call abi_linalg_finalize(use_lapack_gpu)
 
      time_xortho= time_xortho*mband/blocksize
      time_xeigen= time_xeigen*mband/blocksize
