@@ -181,9 +181,7 @@ program abinit
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
-#ifdef HAVE_GPU_CUDA
  integer :: gpu_devices(5)
-#endif
 
 !******************************************************************
 
@@ -367,7 +365,6 @@ program abinit
 !Activate GPU is required
  use_gpu_cuda=0
  use_nvtx=.false.
-#if defined HAVE_GPU_CUDA
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
    if (dtsets(ii)%use_gpu_cuda/=0) then
@@ -378,11 +375,17 @@ program abinit
       use_nvtx=.true.
    end if
  end do
+#ifdef HAVE_GPU
  call setdevice_cuda(gpu_devices,use_gpu_cuda)
+#else
+ if (use_gpu_cuda==1) then
+   write(msg,'(a)'), 'Use of GPU is requested but ABINIT was not built with GPU support.'
+   ABI_ERROR(msg)
+ end if
+#endif
 
 #ifdef HAVE_GPU_NVTX_V3
     NVTX_INIT(use_nvtx)
-#endif
 #endif
 
 !------------------------------------------------------------------------------
