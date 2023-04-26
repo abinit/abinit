@@ -500,7 +500,7 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_GPU_CUDA
 !Cublas initialization
- call gpu_linalg_init()
+ if (use_gpu_cuda/=0) call gpu_linalg_init()
 #endif
 
  if (need_work_space) call abi_linalg_work_allocate()
@@ -715,10 +715,10 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 !!
- subroutine abi_linalg_finalize()
+ subroutine abi_linalg_finalize(use_gpu_cuda)
 
 !Arguments ------------------------------------
-
+ integer, intent(in) :: use_gpu_cuda
 !Local variables ------------------------------
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
@@ -776,7 +776,9 @@ CONTAINS  !===========================================================
 #endif
 
 #ifdef HAVE_GPU_CUDA
- call gpu_linalg_shutdown()
+ if (use_gpu_cuda/=0) call gpu_linalg_shutdown()
+#else
+ if (use_gpu_cuda/=0) ABI_BUG("GPU linalg shutdown was requested but ABINIT wasn't built with GPU support!")
 #endif
 
 !Memory freeing
