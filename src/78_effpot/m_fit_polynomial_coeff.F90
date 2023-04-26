@@ -2231,13 +2231,13 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 ! end if
 
 
- if(.True.)  then
+ if(nbound>0)  then
    block
      real(dp) :: bl(N), bu(N), w(N)
      integer :: istate(N+1), loopa
      bl=-10.0_dp
      bu=1.0_dp
-     bl(:nbound) = 1e-7
+     bl(:nbound) = 1e-8
      call RANDOM_NUMBER(coefficients)
      CALL bvls(key=0, m=N, n=N, a=A, b=B, bl=bl, bu=bu, x=coefficients, istate=istate, loopa=loopa, w=w)
      info=0
