@@ -7,7 +7,7 @@ release are NOT described here...
 NOTE that problems are presently (for about three years) most often reported on the issue manager of the internal ABINIT Gitlab .
 Still, the list of platforms and corresponding failing tests is maintained in the present document.
 
-The present release ABINITv9.8.3 is for production
+The present release ABINITv9.8.4 is for production
 
 0. List of platforms
 1. Batteries of tests
@@ -16,7 +16,7 @@ The present release ABINITv9.8.3 is for production
 ================================================================
 0. Platforms
 
-For ABINITv9.8.3, list closed on 2023 03 15
+For ABINITv9.8.4, list closed on 2023 04 24
 after installation and successful tests for the standard set of platforms,
 as mentioned on
 https://bbportal.abinit.org/#/status
@@ -36,7 +36,7 @@ All are mostly OK
 gnu 8.2, 8.3, 9.1 + openmpi : the reading of WFK files using MPIIO is not correct for test mpiio#26
 all gnu : bigdft#14 is disactivated
 GNU 11.2 with MacPorts, and the new version of the fallbacks, had to disactivate v9#17, v9#19, tutorial#paw2_1, tutorial#paw2_2.
-GNU 8.2 on the Buda maxhine : had to disactivate libxc#71 .
+GNU 8.2 on the Buda machine : had to disactivate libxc#71 .
 
 Intel ifort compiler (presently tested : 16.0, 17.0, 18.0, 19.0, 19.1, 21.4)
 Ifort 15.0 is mostly OK, except for one test paral#30 (on ubu). Paral KGB.
