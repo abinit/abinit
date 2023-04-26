@@ -352,8 +352,9 @@ subroutine anharmonics_terms_setCoeffs(coeffs,anharmonics_terms,ncoeff)
   ABI_MALLOC(anharmonics_terms%coefficients,(ncoeff))
   do ii=1,anharmonics_terms%ncoeff
     call polynomial_coeff_init(coeffs(ii)%coefficient,coeffs(ii)%nterm,&
-&                              anharmonics_terms%coefficients(ii),&
-&                              coeffs(ii)%terms,name=coeffs(ii)%name)
+      &                              anharmonics_terms%coefficients(ii),&
+      &                              coeffs(ii)%terms,isbound=coeffs(ii)%isbound, &
+      &                              name=coeffs(ii)%name)
   end do
 
 end subroutine anharmonics_terms_setCoeffs

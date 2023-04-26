@@ -30,13 +30,12 @@
 #include "abi_common.h"
 
 module m_dynamic_array
-
   use defs_basis
   use m_abicore
   use m_errors
   use m_mathfuncs, only: array_morethan, binsearch_left_integerlist,binsearch_left_integer
   use m_mergesort, only: MergeSort, MergeSort2D
-
+  use m_xmpi, only: xmpi_sum, xmpi_allgather, xmpi_allgatherv
   implicit none
   private
 !!***
@@ -77,6 +76,7 @@ module m_dynamic_array
     procedure :: finalize => int_array_type_finalize
     procedure :: sort => int_array_type_sort
     procedure :: tostatic => int_array_type_tostatic
+    procedure :: allgatherv => int_array_type_allgatherv
   end type int_array_type
 !!***
 
@@ -342,6 +342,22 @@ subroutine int_array_type_finalize(self)
 
 end subroutine int_array_type_finalize
 
+subroutine int_array_type_allgatherv(self,buff, comm, nproc)
+  class(int_array_type), intent(inout):: self
+  integer, intent(in) :: comm, nproc
+  integer, allocatable, intent(out) :: buff(:)
+  integer :: disps(nproc), sizes(nproc)
+  integer :: totsize, ierr, i
+  totsize=self%size
+  call xmpi_sum(totsize, comm, ierr)
+  ABI_MALLOC(buff, (totsize))
+  call xmpi_allgather(self%size, sizes, comm, ierr)
+  disps(1)=0
+  do i=2, nproc
+    disps(i)=disps(i-1)+sizes(i-1)
+  end do
+  call xmpi_allgatherv(self%data(:self%size), self%size, buff, sizes, disps, comm, ierr  )
+end subroutine int_array_type_allgatherv
 
 !==================================================================
 
