@@ -1107,9 +1107,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  if (my_rank == master) then
    call wrtout(units, " Computing oscilator matrix elements for CC4S.")
-   do ii=1,size(units)
-     call print_ngfft(u_ngfft, header='FFT mesh for wavefunctions', unit=units(ii))
-   end do
+   call print_ngfft(u_ngfft, header='FFT mesh for wavefunctions', unit=std_out)
 
    ! =====================
    ! Write files for CC4S

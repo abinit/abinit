@@ -350,12 +350,6 @@ meta: {optdriver: 6, }
 
  Computing oscilator matrix elements for CC4S.
 
- ==== FFT mesh for wavefunctions ====
-  FFT mesh divisions ........................    20   20   15
-  Augmented FFT divisions ...................    21   21   15
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-
  Writing Gridvectors metadata to file: t07o_DS2_GridVectors.yaml
 
  Writing CoulombVertex metadata to file: t07o_DS2_CoulombVertex.yaml
