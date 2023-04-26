@@ -927,7 +927,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ABI_FREE(xred)
    ABI_FREE(npwtot)
 
-   call abi_linalg_finalize()
+   call abi_linalg_finalize(dtset%use_gpu_cuda)
    call xg_finalize()
 
    call cwtime_report(sjoin(" dataset:", itoa(idtset)), cpu, wall, gflops)
