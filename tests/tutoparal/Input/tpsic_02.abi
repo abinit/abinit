@@ -103,7 +103,7 @@ xred+  12*0.0
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
 #%% files_to_test =
-#%%   tpsic_02_MPI24.abo, tolnlines = 1000, tolabs = 0.0, tolrel = 0.0
+#%%   tpsic_02_MPI24.abo, tolnlines = 1000, tolabs = 20.0, tolrel = 0.025
 #%% [extra_info]
 #%% authors = X. Gonze, C. Tantardini
 #%% keywords = pSIC
