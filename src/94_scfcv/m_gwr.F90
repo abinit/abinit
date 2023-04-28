@@ -2402,8 +2402,7 @@ subroutine gwr_build_green(gwr, free_ugb)
        end do ! ipm
      end do ! itau
 
-     call work_gb%free()
-     call green%free()
+     call work_gb%free(); call green%free()
      ! Free wavefunctions if asked for.
      if (free_ugb) call ugb_ks%free()
 

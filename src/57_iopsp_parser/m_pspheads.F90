@@ -1187,7 +1187,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  integer,intent(out) :: ixc
 
 !Local variables-------------------------------
- integer :: start !, ii
+ integer :: start, ii
  character(len=500) :: x_name, c_name, gcx_name, gcc_name
 
 !*************************************************************************
@@ -1231,13 +1231,24 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ABI_CHECK(next_token(dft, start, c_name) == 0 , "Error reading c_name")
    ABI_CHECK(next_token(dft, start, gcx_name) == 0 , "Error reading gcx_name")
    ABI_CHECK(next_token(dft, start, gcc_name) == 0 , "Error reading gcc_name")
-   !print *, "dft: `", trim(dft), "`"; print *, trim(x_name), ", " trim(c_name), ", ", trim(gcx_name), ", ", trim(gcc_name)
+   !call remove_non_ascii(gcc_name)
+   !print *, "dft: `", trim(dft), "`"
+   !print *, "x_name: `", trim(x_name), "`, c_name: `", trim(c_name), &
+   !         "`, gcx_name: `", trim(gcx_name), "`, gcc_name: `", trim(gcc_name), "`"
+
+   msg = "NOGC"
+   do ii=1,len_trim(gcc_name)
+     print *, iachar(gcc_name(ii:ii)), iachar(msg(ii:ii))
+   end do
 
    if (x_name == "SLA" .and. c_name == "PW") then
-     if (gcx_name == "NOGX" .and. gcc_name == "NOGV") then
+     !print *, "in first if", gcx_name == "NOGX", trim(gcc_name) == "NOGC"
+     !print *, "len_trim(gcc_name)", len_trim(gcc_name)
+     if (gcx_name == "NOGX" .and. gcc_name == "NOGC") then
        ixc = -1012
      else
        ierr = 1
+       !print *, "in second ierr"
      end if
    else
      ierr = 1
