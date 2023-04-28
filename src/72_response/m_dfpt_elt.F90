@@ -45,6 +45,7 @@ module m_dfpt_elt
  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle, proc_distrb_nband
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fourdp
+ use m_gtermcutoff,  only : termcutoff
 
  implicit none
 
@@ -2316,6 +2317,7 @@ end subroutine elt_ewald
 !! gmet(3,3)=metric tensor in reciprocal space (length units **-2)
 !! mpi_atmtab(:)=--optional-- indexes of the atoms treated by current proc
 !! comm_atom=--optional-- MPI communicator over atoms
+!! icutcoul= type of Coulomb cutoff to apply
 !! my_natom=number of atoms treated by current processor
 !! natom=number of atoms in unit cell
 !! qphon(3)=phonon wavevector (same system of coordinates as the
@@ -2325,6 +2327,7 @@ end subroutine elt_ewald
 !!   if=0, this contribution must be skipped (q=0 singularity)
 !! typat(natom)=integer label of each type of atom (1,2,...)
 !! ucvol=unit cell volume in (whatever length scale units)**3
+!! vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !! xred(3,natom)=relative coords of atoms in unit cell (dimensionless)
 !! zion(ntypat)=charge on each type of atom (real number)
 !!
@@ -2334,18 +2337,19 @@ end subroutine elt_ewald
 !!
 !! SOURCE
 
-subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred,zion, &
+subroutine dfpt_ewald(dyew,gmet,gsqcut,icutcoul,my_natom,natom,ngfft,nkpt,qphon,rcut, &
+&                 rmet,rprimd,sumg0,typat,ucvol,vcutgeo,xred,zion, &
 &                 mpi_atmtab,comm_atom ) ! optional arguments (parallelism))
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: my_natom,natom,sumg0
- real(dp),intent(in) :: ucvol
+ integer,intent(in) :: icutcoul,my_natom,natom,nkpt,sumg0
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
 !arrays
- integer,intent(in) :: typat(natom)
+ integer,intent(in) :: ngfft(18),typat(natom)
  integer,optional,intent(in) :: comm_atom
  integer,optional,target,intent(in) :: mpi_atmtab(:)
- real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),xred(3,natom),zion(*)
+ real(dp),intent(in) :: gmet(3,3),qphon(3),rmet(3,3),rprimd(3,3),vcutgeo(3),xred(3,natom),zion(*)
  real(dp),intent(out) :: dyew(2,3,natom,3,natom)
 
 !Local variables -------------------------
@@ -2365,6 +2369,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
  real(dp) :: tsec(2)
  integer,pointer :: my_atmtab(:)
  real(dp) :: gpq(3),rq(3)
+ real(dp),allocatable :: gcutoff(:)
 
 ! *************************************************************************
 
@@ -2384,6 +2389,10 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
 !Test Ewald s summation
 !eta=1.2_dp*eta
 
+!Initialize Gcut-off array from m_gtermcutoff
+ call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,&
+&                optewald=1,ng=ng,qpt=qphon)
+
 !Sum terms over g space:
  fac=pi**2/eta
  gsum=zero
@@ -2391,9 +2400,11 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
  da2=zero
  da3=zero
  dyew(:,:,:,:,:)=zero
+ ii=0
  do ig3=-ng,ng
    do ig2=-ng,ng
      do ig1=-ng,ng
+       ii=ii+1
        gpq(1)=dble(ig1)+qphon(1)
        gpq(2)=dble(ig2)+qphon(2)
        gpq(3)=dble(ig3)+qphon(3)
@@ -2417,7 +2428,7 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
          arg=fac*gsq
 !        Larger arg gives 0 contribution:
          if (arg <= 80._dp) then
-           term=exp(-arg)/gsq
+           term=exp(-arg)/gsq * gcutoff(ii)
            do ia0=1,my_natom
              ia=ia0;if(paral_atom)ia=my_atmtab(ia0)
              arga=two_pi*(gpq(1)*xred(1,ia)+gpq(2)*xred(2,ia)+gpq(3)*xred(3,ia))
@@ -2443,6 +2454,8 @@ subroutine dfpt_ewald(dyew,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,xred
      end do
    end do
  end do
+
+ ABI_FREE(gcutoff) 
 
 !End G summation by accounting for some common factors.
 !(for the charges:see end of routine)
@@ -2972,7 +2985,6 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 !scalars
  integer,parameter :: im=2,nng=10,nnr=6,re=1
  integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq1,iq2,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
- integer :: alpha,beta,gamma,delta
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: arg,arga,argb,c1i,c1r,delad,delag,delbd,delbg,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3

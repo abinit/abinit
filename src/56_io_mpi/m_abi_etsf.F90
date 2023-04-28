@@ -31,7 +31,7 @@ module m_abi_etsf
  use m_errors
  use m_atomdata
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use m_fstrings,     only : endswith
  use defs_datatypes, only : pseudopotential_type

@@ -94,7 +94,7 @@ module m_yaml
      ! Add a list of real number fields to a document
 
    procedure :: add_paired_real2d => yamldoc_add_paired_real2d
-     !  Add a field containing two 2D array of real numbers with the same shape.
+     ! Add a field containing two 2D array of real numbers with the same shape.
 
    procedure :: add_int => yamldoc_add_int
      ! Add an integer field to a document
@@ -616,7 +616,7 @@ subroutine yamldoc_add_string(self, label, val, tag, newline, width)
  end if
 
  call self%stream%push(' ')
- call yaml_print_string(self%stream, val)
+ call yaml_print_string(self%stream, trim(val))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_string

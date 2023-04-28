@@ -55,6 +55,7 @@ contains
 !! INPUTS
 !!  cplex: if 1, real space 1-order WF on FFT grid are REAL; if 2, COMPLEX
 !!  gsqcut=cutoff on (k+G)^2 (bohr^-2)
+!!  icutcoul= type of Coulomb cutoff to apply 
 !!  idir=direction of atomic displacement (=1,2 or 3 : displacement of atom ipert along the 1st, 2nd or 3rd axis).
 !!  ipert=type of the perturbation
 !!  ixc= choice of exchange-correlation scheme
@@ -84,6 +85,7 @@ contains
 !!  ucvol=unit cell volume in ($\textrm{bohr}^{3}$)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
+!!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!  vpsp1(cplex*nfft)=first-order derivative of the ionic potential
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc
 !!
@@ -105,14 +107,14 @@ contains
 !!
 !! SOURCE
 
- subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
+ subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,icutcoul,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           non_magnetic_xc,optene,optres,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
-&           usepaw,usexcnhat,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
+&           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
+ integer,intent(in) :: cplex,icutcoul,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
  integer,intent(in) :: optene,optres,usepaw,usexcnhat,ixcrot
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: gsqcut,ucvol
@@ -133,6 +135,7 @@ contains
  real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1,elmag1
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
+ real(dp),intent(in) :: vcutgeo(3)
 
 !Local variables-------------------------------
 !scalars
@@ -143,7 +146,6 @@ contains
 !arrays
  integer,intent(in)   :: ngfft(18)
  real(dp)             :: tsec(20)
- real(dp),parameter   :: dummyvgeo(3)=zero
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
 
@@ -190,8 +192,7 @@ contains
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
-
- call hartre(cplex,gsqcut,3,0,mpi_enreg,nfft,ngfft,1,zero,rhog1,rprimd,dummyvgeo,vhartr1_,qpt=qphon)
+ call hartre(cplex,gsqcut,icutcoul,0,mpi_enreg,nfft,ngfft,1,zero,rhog1,rprimd,vcutgeo,vhartr1_,qpt=qphon)
 
  if (optene>0) then
    call dotprod_vn(cplex,rhor1,ehart1,doti,nfft,nfftot,1,1,vhartr1_,ucvol)

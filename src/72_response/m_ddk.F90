@@ -114,10 +114,10 @@ MODULE m_ddk
   type(ham_targets_t), private :: htg(3)
   ! Store arrays targetted by the hamiltonians.
 
-  real(dp), private, allocatable :: gh1c(:,:,:)
+  real(dp), allocatable :: gh1c(:,:,:)
    !gh1c, (2, mpw*nspinor, 3))
 
-  real(dp), private, allocatable :: gs1c(:,:,:)
+  real(dp), allocatable :: gs1c(:,:,:)
    ! gs1c, (2, mpw*nspinor, 3*psps%usepaw))
 
  contains

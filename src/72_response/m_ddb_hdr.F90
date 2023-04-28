@@ -34,7 +34,6 @@ MODULE m_ddb_hdr
  use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free, pawtab_bcast !, pawtab_copy
  use m_psps,      only : psps_copy, psps_free
  use m_io_tools,  only : open_file, get_unit
- use m_copy,      only : alloc_copy
  use m_fstrings,  only : sjoin
  use m_geometry,  only : mkrdim
 
@@ -46,7 +45,7 @@ MODULE m_ddb_hdr
  public :: ioddb8_in        ! Temporary
  public :: psddb8           ! Temporary
 
- integer,public,parameter :: DDB_VERSION=100401
+ integer,public,parameter :: DDB_VERSION=20230401
  ! DDB Version number.
  ! 6 digit integer giving date, in form yymmdd for month=mm(1-12),
  !  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
@@ -665,12 +664,12 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
 
    ! Allocate the memory
    call ddb_hdr%malloc()
-  
+
    ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
    ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
    ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
-  
-  
+
+
    ! This is needed to read the DDBs in the old format
    ! GA : Not sure if we really need this.
    ddb_hdr%symafm(:)=1
@@ -682,13 +681,13 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
    if(ddb_hdr%matom>=1)then
      ddb_hdr%spinat(:,:)=zero
    end if
-  
-  
+
+
    ! Note: the maximum parameters (matom, mkpt, etc.) are inputs to ioddb8_in
    !       wile the actual parameters (natom, nkpt, etc.) are outputs
    call ioddb8_in(filename,ddb_hdr%matom,ddb_hdr%mband,&
   &       ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,&
-  &       ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
+  &       ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%ddb_version,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
   &       ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
   &       ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
   &       ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,&
@@ -697,8 +696,8 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
   &       ddb_hdr%tnons,ddb_hdr%tolwfr,ddb_hdr%tphysel,ddb_hdr%tsmear,&
   &       ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,ddb_hdr%xred,ddb_hdr%zion,&
   &       ddb_hdr%znucl)
-  
-  
+
+
   !  Read the psp information of the input DDB
    choice=1  ! Read
    call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
@@ -718,7 +717,7 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, unddb, comm, &
  ! ===============================
 
  spgroup = 1  ! GA: One would need to recover the space group from the list
-              !     of symmetries. No easy way to do this. 
+              !     of symmetries. No easy way to do this.
               !     spgroup should really be written in the ddb.
               !     Not really an issue for now.
 
@@ -873,7 +872,7 @@ subroutine ddb_hdr_bcast(ddb_hdr, comm)
  call xmpi_bcast(ddb_hdr%psps%lmnmax, master, comm, ierr)
  call xmpi_bcast(ddb_hdr%psps%usepaw, master, comm, ierr)
  call xmpi_bcast(ddb_hdr%psps%useylm, master, comm, ierr)
- 
+
  ! Allocate arrays on the other nodes.
  if (xmpi_comm_rank(comm) /= master) then
 
@@ -883,7 +882,7 @@ subroutine ddb_hdr_bcast(ddb_hdr, comm)
     ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
     ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
     ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
-    
+
  end if
 
  ! Floats
@@ -1386,6 +1385,7 @@ end subroutine psddb8
 !! OUTPUT
 !! acell(3)=length scales of primitive translations (bohr)
 !! amu(mtypat)=mass of the atoms (atomic mass unit)
+!! ddb_version=version of the ddb file
 !! dilatmx=the maximal dilatation factor
 !! ecut=kinetic energy planewave cutoff (hartree)
 !! ecutsm=smearing energy for plane wave kinetic energy (Ha)
@@ -1425,7 +1425,7 @@ end subroutine psddb8
 !! SOURCE
 
 subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
-&  acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
+&  acell,amu,ddb_version,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 &  typat,usepaw,wtk,xred,zion,znucl)
@@ -1433,7 +1433,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,usepaw
- integer,intent(out) :: intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occopt
+ integer,intent(out) :: ddb_version,intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occopt
  real(dp),intent(out) :: dilatmx,ecut,ecutsm,pawecutdg,kptnrm,dfpt_sciss,tolwfr,tphysel,tsmear
  character(len=*),intent(in) :: filename
 !arrays
@@ -1446,10 +1446,13 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,usepaw0
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,ndig,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
- character(len=6) :: name_old
+ character(len=6) :: name_old, ddbvrs6
+ character(len=8) :: ddbvrs8
+ character(len=3) :: prefix
 !arrays
  character(len=12) :: name(9)
 
@@ -1468,12 +1471,34 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  read (unddb, '(20x,i10)' )ddbvrs
 
  !write(std_out,'(a,i10)')' ddbvrs=',ddbvrs
- if(ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
-   write(message, '(a,i10,2a,3(a,i10),a)' )&
+ if(ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
+   write(message, '(a,i10,2a,4(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&
-    'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
+    'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
    ABI_BUG(message)
  end if
+
+!Convert older version to 8 digit format
+ if (ddbvrs /= cvrsio9) then
+   ndig= int(log10(real(ddbvrs))) + 1
+   write(ddbvrs6,'(i0)') ddbvrs
+   if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 20 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 200 
+     end if
+   else if (ddbvrs==vrsio8_old_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 19 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 199 
+     end if
+   end if
+   ddbvrs8= trim(prefix) // trim(ddbvrs6)
+   read(ddbvrs8,'(i8)') ddbvrs
+ end if
+ ddb_version=ddbvrs
 
 !Read the 4 n-integers, also testing the names of data, and checking that their value is acceptable.
 !This is important to insure that any array has a sufficient dimension.
@@ -1481,10 +1506,11 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  read (unddb,*)
  read (unddb,*)
  testn=.true.; testv=.true.
- ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+! ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+ ddbvrs_is_current_or_old=(ddbvrs>=cvrsio8_old)
 
 !1. usepaw
- if(ddbvrs==vrsio8)then
+ if(ddbvrs>=cvrsio8)then
    read (unddb, '(1x,a9,i10)' )name(1),usepaw0
  else
    usepaw0=0;name(1)='   usepaw'
@@ -1666,7 +1692,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  end if
  call ddb_chkname(name(1),'     ecut')
 !12b. pawecutdg (PAW only)
- if(ddbvrs==vrsio8.and.usepaw==1) then
+ if(ddbvrs>=cvrsio8.and.usepaw==1) then
    read (unddb, '(1x,a9,d22.14)' )name(1),pawecutdg
  else
    pawecutdg=ecut;name(1)='pawecutdg'
@@ -2086,15 +2112,18 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 !scalars
 !Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
- integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts
+ integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,ndig,nelmts
  integer :: occopt,pspso0,nsym
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=12) :: string
  character(len=32) :: blkname
  character(len=500) :: message
- character(len=6) :: name_old
+ character(len=6) :: name_old, ddbvrs6
  character(len=80) :: rdstring
+ character(len=8) :: ddbvrs8
+ character(len=3) :: prefix
 !arrays
  integer,allocatable :: nband(:)
  character(len=12) :: name(9)
@@ -2111,11 +2140,32 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  read (unddb,*)
  read (unddb, '(20x,i10)' )ddbvrs
 
- if (all(ddbvrs/= [vrsio8, vrsio8_old, vrsio8_old_old]) )then
-   write(message, '(a,i10,2a,3(a,i10))' )&
+ if (all(ddbvrs/= [cvrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
+   write(message, '(a,i10,2a,4(a,i10))' )&
 &   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
-&   'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
+&   'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
    ABI_ERROR(message)
+ end if
+
+!Convert older version to 8 digit format
+ if (ddbvrs /= cvrsio9) then
+   ndig= int(log10(real(ddbvrs))) + 1
+   write(ddbvrs6,'(i0)') ddbvrs
+   if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 20 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 200 
+     end if
+   else if (ddbvrs==vrsio8_old_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 19 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 199 
+     end if
+   end if
+   ddbvrs8= trim(prefix) // trim(ddbvrs6)
+   read(ddbvrs8,'(i8)') ddbvrs
  end if
 
 !Read the 4 n-integers, also testing the names of data,
@@ -2126,10 +2176,11 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  read (unddb,*)
  testn=.true.
  testv=.true.
- ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+! ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+ ddbvrs_is_current_or_old=(ddbvrs>=cvrsio8_old)
 
 !1. usepaw
- if(ddbvrs==vrsio8)then
+ if(ddbvrs>=cvrsio8)then
    read (unddb, '(1x,a9,i10)' )name(1),usepaw
  else
    usepaw=0;name(1)='   usepaw'
@@ -2274,7 +2325,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 !12. ecut
  read (unddb,*)
 !12b. pawecutdg (PAW only)
- if(ddbvrs==vrsio8.and.usepaw==1) read (unddb,*)
+ if(ddbvrs>=cvrsio8.and.usepaw==1) read (unddb,*)
 !13. ecutsm
  if(ddbvrs_is_current_or_old) read (unddb,*)
 !14. intxc
@@ -2382,14 +2433,14 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  if(string=='  Descriptio')then
 
    read (unddb,*)
-   if (ddbvrs==vrsio8_old.or.ddbvrs==vrsio8_old_old) then
+   if (ddbvrs==cvrsio8_old.or.ddbvrs==cvrsio8_old_old) then
      read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
      if(ios/=0)then
        backspace(unddb)
        read (unddb, '(10x,i3,14x,i3)')dimekb,lmnmax
        usepaw=0
      end if
-   else if (ddbvrs==vrsio8) then
+   else if (ddbvrs>=cvrsio8) then
      read (unddb, '(10x,i3)') usepaw
      if (usepaw==0) then
        read (unddb, '(10x,i3,14x,i3)' ) dimekb,lmnmax
