@@ -1196,6 +1196,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  ! It should be OK as long as the UPF2 NC pseudos are generated with oncvpsp
  ! but it does not cover all QE possibilities.
  ierr = 0; msg = ""
+ ixc = 0
  select case (dft)
  case ("PZ")
    ixc = -001009
@@ -1230,11 +1231,14 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ABI_CHECK(next_token(dft, start, c_name) == 0 , "Error reading c_name")
    ABI_CHECK(next_token(dft, start, gcx_name) == 0 , "Error reading gcx_name")
    ABI_CHECK(next_token(dft, start, gcc_name) == 0 , "Error reading gcc_name")
-   !print *, "dft: `", trim(dft), "`"
-   !print *, trim(x_name), ", " trim(c_name), ", ", trim(gcx_name), ", ", trim(gcc_name)
+   !print *, "dft: `", trim(dft), "`"; print *, trim(x_name), ", " trim(c_name), ", ", trim(gcx_name), ", ", trim(gcc_name)
 
    if (x_name == "SLA" .and. c_name == "PW") then
-     if (gcx_name == "NOGX" .and. gcc_name == "NOGV") ixc = -1012
+     if (gcx_name == "NOGX" .and. gcc_name == "NOGV") then
+       ixc = -1012
+     else
+       ierr = 1
+     end if
    else
      ierr = 1
    end if

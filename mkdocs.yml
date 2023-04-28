@@ -198,8 +198,9 @@ nav:
     - Many-Body Theory & excitations:
         - GW1: tutorial/gw1.md
         - GW2: tutorial/gw2.md
+        - GWR_intro: tutorial/gwr_intro.md
+        - GWR1: tutorial/gwr1.md
         - Bethe-Salpeter: tutorial/bse.md
-        #- GWR1: tutorial/gwr1.md
         - DMFT: tutorial/dmft.md
         - TDDFT (Casida): tutorial/tddft.md
     - DFPT & electron-phonon:

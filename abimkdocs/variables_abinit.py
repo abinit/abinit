@@ -23362,7 +23362,7 @@ The choice is among:
 
 * HDIAGO --> direct diagonalization of the KS Hamiltonian to produce [[nband]] eigenvectors
 * HDIAGO_FULL --> direct diagonalization of the KS Hamiltonian for maximum number of eigenvectors defined by [[ecut]]
-* G0W0 -->  one-shot with GWR method
+* G0W0 -->  one-shot GW
 * G0V -->
 * EGEW -->
 * EGW0 -->
