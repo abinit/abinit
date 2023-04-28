@@ -421,7 +421,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  ! Read the quadrupoles
- !iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
+ !iblock_quadrupoles = ddb%get_quadrupoles(ddb_hdr%ddb_version,1, 3, qdrp_cart)
 
  iblock_quadrupoles = 0
  qdrp_cart = zero
@@ -470,7 +470,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (mtyp==33) then
      lwsym=1
      call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
-     iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
+     iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version,lwsym, 33, qdrp_cart)
      call ddb_lw%free()
    end if
  endif

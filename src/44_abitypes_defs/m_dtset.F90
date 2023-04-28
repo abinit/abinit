@@ -192,6 +192,7 @@ type, public :: dataset_type
  integer :: extrapwf
  integer :: expert_user
 !F
+ integer :: ffnl_lw = 0
  integer :: fftgw = 21
  integer :: fft_count = 0
  integer :: fockoptmix
@@ -353,6 +354,7 @@ type, public :: dataset_type
  integer :: lotf_version
  integer :: lw_flexo
  integer :: lw_qdrpl
+ integer :: lw_natopt
 !M
  integer :: magconon
  integer :: maxnsym
@@ -1541,6 +1543,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
+ dtout%ffnl_lw            = dtin%ffnl_lw
  dtout%fftgw              = dtin%fftgw
  dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
@@ -1716,6 +1719,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%lotf_version       = dtin%lotf_version
 #endif
  dtout%lw_flexo           = dtin%lw_flexo
+ dtout%lw_natopt          = dtin%lw_natopt
  dtout%lw_qdrpl           = dtin%lw_qdrpl
  dtout%magconon           = dtin%magconon
  dtout%maxnsym            = dtin%maxnsym
@@ -2576,15 +2580,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
 
-!MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
- if (dtset%prepalw==1) then
-   do ipert=1,dtset%natom+6
-     do idir=1,3
-       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-     end do
-   end do
- end if
-
  npert=0
 ! ABI_MALLOC(pert_tmp,(3*mpert))
 
@@ -3320,7 +3315,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extfpmd_nbdbuf extrapwf'
 !F
- list_vars=trim(list_vars)//' fband fermie_nest'
+ list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
  list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_dispterms'
  list_vars=trim(list_vars)//' fit_EFS fit_factors fit_fixcoeff'
@@ -3390,7 +3385,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' latt_var_temperature'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
- list_vars=trim(list_vars)//' lw_qdrpl lw_flexo'
+ list_vars=trim(list_vars)//' lw_flexo lw_natopt lw_qdrpl'
  list_vars=trim(list_vars)//' lwf_constraint'
  list_vars=trim(list_vars)//' lwf_dt lwf_dynamics lwf_init_state lwf_init_hist_fname'
  list_vars=trim(list_vars)//' lwf_mc_avg_amp'

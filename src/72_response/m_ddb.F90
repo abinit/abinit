@@ -2964,6 +2964,7 @@ end function ddb_get_dielt
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
+!!  ddb_version = 6 digit integer giving date. To mantain compatibility with old DDB files.
 !!  lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative
 !!             |-> 1st gradient of polarization response to atomic displacement
 !!         = 1 symmetrize the tensor wrt efield and qvec derivative
@@ -2982,11 +2983,11 @@ end function ddb_get_dielt
 !!
 !! SOURCE
 
-integer function ddb_get_quadrupoles(ddb, lwsym, rftyp, quadrupoles) result(iblok)
+integer function ddb_get_quadrupoles(ddb, ddb_version, lwsym, rftyp, quadrupoles) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: lwsym,rftyp
+ integer,intent(in) :: ddb_version,lwsym,rftyp
  class(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(out) :: quadrupoles(3,3,3,ddb%natom)
@@ -3030,7 +3031,7 @@ integer function ddb_get_quadrupoles(ddb, lwsym, rftyp, quadrupoles) result(iblo
    endif
    call wrtout([std_out, ab_out], msg)
 
-   call dtqdrp(ddb%val(:,:,iblok),lwsym,ddb%mpert,ddb%natom,quadrupoles)
+   call dtqdrp(ddb%val(:,:,iblok),ddb_version,lwsym,ddb%mpert,ddb%natom,quadrupoles)
  end if
 
 end function ddb_get_quadrupoles
@@ -4516,13 +4517,11 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd)
        do i2dir = 1, 3
          do i3dir = 1, 3
            do ii= 1, 2
-
              vec1(:) = d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert)
              flg1(:) = blkflg(:,i1pert,i2dir,i2pert,i3dir,i3pert)
              call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
              d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert) = vec2(:)
              carflg(:,i1pert,i2dir,i2pert,i3dir,i3pert) = flg2(:)
-
            end do
          end do
        end do
@@ -4571,6 +4570,7 @@ end subroutine lwcart
 !!
 !! INPUTS
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with olderDDB files.
 !! lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative
 !!             |-> 1st gradient of polarization response to atomic displacement
 !!        = 1 symmetrize the tensor wrt efield and qvec derivative
@@ -4583,18 +4583,20 @@ end subroutine lwcart
 !!
 !! SOURCE
 
-subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
+subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: lwsym,mpert,natom
+ integer,intent(in) :: ddb_version,lwsym,mpert,natom
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(out) :: lwtens(3,3,3,natom)
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: cvrsio8=20100401
  integer :: elfd,iatd,iatom,qvecd
+ real(dp) :: fac
  logical :: iwrite
  character(len=500) :: msg
 !arrays
@@ -4605,24 +4607,32 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+!Define a factor to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=one
+ end if
+
 !Extraction of quadrupoles (need symmetrization wrt qvecd and elfd)
  do iatom = 1,natom
    do iatd = 1,3
      do elfd = 1,3
        do qvecd = 1,elfd-1
          if (lwsym==1) then
-           lwtens(elfd,qvecd,iatd,iatom) = -two* &
+           lwtens(elfd,qvecd,iatd,iatom) = fac * &
          (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
            lwtens(qvecd,elfd,iatd,iatom) = lwtens(elfd,qvecd,iatd,iatom)
          else if (lwsym==0) then
-           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
-           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
+           lwtens(elfd,qvecd,iatd,iatom) = fac * d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
+           lwtens(qvecd,elfd,iatd,iatom) = fac * d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
          end if
        end do
        if (lwsym==1) then
-         lwtens(elfd,elfd,iatd,iatom) = -four*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+         lwtens(elfd,elfd,iatd,iatom) = fac * two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
        else if (lwsym==0) then
-         lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+         lwtens(elfd,elfd,iatd,iatom) = fac * d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
        end if
      end do
    end do

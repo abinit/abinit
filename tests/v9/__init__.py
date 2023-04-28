@@ -82,7 +82,6 @@ inp_files = [
     "t65.abi",
     "t66.abi",
     "t67.abi",
-    "t70.abi",  # Longwave : test quadrupole calculation with all negative KB energies As PSP
 
     # More ground state
     "t71.abi",  # test cprj_update_lvl and nloc_alg options, istwfk=1
@@ -156,4 +155,7 @@ inp_files = [
     "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
     "t142.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nsppol 2
     "t143.abi",  # test orbital magnetism with DDK wavefunctions and metallic sodium
+    "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
+    "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
+    "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
 ]

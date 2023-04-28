@@ -782,7 +782,7 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
  end if
 
  ABI_MALLOC(qdrp_cart,(3,3,3,natom))
- iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
+ iblok = ddb%get_quadrupoles(ddb_hdr%ddb_version,1,3,qdrp_cart)
 
  ! ifc to be calculated for interpolation
  write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,' Calculation of the interatomic forces ',ch10
