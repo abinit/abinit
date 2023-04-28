@@ -6,103 +6,103 @@
 !!  Objects and procedures implementing the GW method in real-space and imaginary time.
 !!
 !! NOTES
-!!   Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
+!!  Memory and workload are distributed using a 4D cartesian grid: (g/r, tau, k-points, spin).
 !!
-!!   Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W
-!!   using a 1D processor grid and block distribution along columns.
-!!   A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs along columns.
+!!  Inside the g/r communicator, we use PBLAS matrices to store G, tchi and W
+!!  using a 1D processor grid and block distribution along columns.
+!!  A 2D grid, indeed, would require MPI-FFT or some communication before performing the FFTs along columns.
 !!
-!!   Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
-!!   Matrices in (g,g') space are distributed along columns so that the g-index is local
-!!   and we can use sequential zero-padded FFTs to transform from g to r in the unit cell:
+!!  Let's assume for simplicity that we have only two MPI procs in the g/r communicator.
+!!  Matrices in (g,g') space are distributed along columns so that the g-index is local
+!!  and we can use sequential zero-padded FFTs to transform from g to r in the unit cell:
 !!
-!!                       g'-axis
-!!                |--------------------
-!!                |         |         |
-!!       g-axis   |   P0    |   P1    |
-!!                |         |         |
-!!                |--------------------
+!!                      g'-axis
+!!               |--------------------
+!!               |         |         |
+!!      g-axis   |   P0    |   P1    |
+!!               |         |         |
+!!               |--------------------
 !!
-!!   The results of the FFT transform along g are stored in another PBLAS matrix with the same layout:
+!!  The results of the FFT transform along g are stored in another PBLAS matrix with the same layout:
 !!
-!!                       g'-axis
-!!                |--------------------
-!!                |         |         |
-!!       r-axis   |   P0    |   P1    |
-!!                |         |         |
-!!                |--------------------
+!!                      g'-axis
+!!               |--------------------
+!!               |         |         |
+!!      r-axis   |   P0    |   P1    |
+!!               |         |         |
+!!               |--------------------
 !!
-!!   At this point, we call ptrans to MPI transpose the (r, g') matrix, and we end up with:
+!!  At this point, we call ptrans to MPI transpose the (r, g') matrix, and we end up with:
 !!
-!!                       r-axis
-!!                |--------------------
-!!                |         |         |
-!!       g'-axis  |   P0    |   P1    |
-!!                |         |         |
-!!                |--------------------
+!!                      r-axis
+!!               |--------------------
+!!               |         |         |
+!!      g'-axis  |   P0    |   P1    |
+!!               |         |         |
+!!               |--------------------
 !!
-!!   Differences with respect to the quartic GW code formulated in frequency-domain (real axis)
+!!  Differences with respect to the quartic GW code formulated in frequency-domain (real axis)
 !!
-!!    - in GWR, the k-mesh must be Gamma-centered.
-!!    - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
-!!    - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
+!!   - in GWR, the k-mesh must be Gamma-centered.
+!!   - All the two-point functions are defined on k/q-centered g-spheres while GW uses a single Gamma-centered sphere.
+!!   - The frequency/tau meshes are automatically defined by ntau and the KS spectrum (minimax meshes)
 !!
-!!   Technical problems:
+!!  Technical problems:
 !!
-!!     - it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
-!!       the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
-!!       one might have to take into account umklapps. Use cache?
+!!    - it's not clear to me that one can use vc(Sq, SG) when a cutoff is used as the cutoff breaks
+!!      the spherical symmetry of vc(r). Besides, when symmetries are used to reconstruct the term for q in the BZ,
+!!      one might have to take into account umklapps. Use cache?
 !!
-!!     - Treatment of the anisotropic behaviour of Wc. This part is badly coded in GW, in the sense that
-!!       we use a finite small q when computing Wc for q --> 0. This breaks the symmetry of the system
-!!       and QP degeneracies. The equations needed to express the angular dependency of W(q) for q --> 0
-!!       are well known but one has to pass through the Adler-Wiser expression.
-!!       Possible solution: Compute heads and wings using a WFK_fine wavefunction file with dense k-mesh and less bands.
-!!       The dipole matrix elements are computed with the DFPT routines, still we need to
-!!       recode a lot of stuff that is already done in cchi0q0, especially symmetries.
-!!       Note, however, that tchi is Hermitian along the imaginary axis, expect for omega = 0 in metals
-!!       but I don't think the minmax grids contain omega = 0.
+!!    - Treatment of the anisotropic behaviour of Wc. This part is badly coded in GW, in the sense that
+!!      we use a finite small q when computing Wc for q --> 0. This breaks the symmetry of the system
+!!      and QP degeneracies. The equations needed to express the angular dependency of W(q) for q --> 0
+!!      are well known but one has to pass through the Adler-Wiser expression.
+!!      Possible solution: Compute heads and wings using a WFK_fine wavefunction file with dense k-mesh and less bands.
+!!      The dipole matrix elements are computed with the DFPT routines, still we need to
+!!      recode a lot of stuff that is already done in cchi0q0, especially symmetries.
+!!      Note, however, that tchi is Hermitian along the imaginary axis, expect for omega = 0 in metals
+!!      but I don't think the minmax grids contain omega = 0.
 !!
-!!    - In principle, it's possible to compute QP correction along a k-path if a new WFK file is provided.
-!!      The correlated part is evaluated in real-space in the super-cell.
-!!      For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
-!!      but I don't know if this approach will give smooth bands
-!!      as we don't have q --> 0 when k does not belong to the k-mesh.
+!!   - In principle, it's possible to compute QP correction along a k-path if a new WFK file is provided.
+!!     The correlated part is evaluated in real-space in the super-cell.
+!!     For Sigma_x, we need a specialized routine that can handle arbitrary q, especially at the level of v(q, G)
+!!     but I don't know if this approach will give smooth bands
+!!     as we don't have q --> 0 when k does not belong to the k-mesh.
 !!
-!!    - New routine to compute oscillator matrix elements with NC/PAW and PBLAS matrices.
-!!      It can be used to compute tchi head/wings as well as Sigma_x + interface with coupled-cluster codes.
+!!   - New routine to compute oscillator matrix elements with NC/PAW and PBLAS matrices.
+!!     It can be used to compute tchi head/wings as well as Sigma_x + interface with coupled-cluster codes.
 !!
-!!    - Decide whether we should use VASP conventions for G and the analytic continuation or the "standard" ones by Godby.
-!!      The standard ones are consistent with Hedin's notations and correspond to the ones used in the legacy GW code.
-!!      On the other hand, VASP notations make life easier if one has to implement PAW as all the equations
-!!      have been already derived.
+!!   - Decide whether we should use VASP conventions for G and the analytic continuation or the "standard" ones by Godby.
+!!     The standard ones are consistent with Hedin's notations and correspond to the ones used in the legacy GW code.
+!!     On the other hand, VASP notations make life easier if one has to implement PAW as all the equations
+!!     have been already derived.
 !!
-!!    - Address nspinor = 2 and PBLAS distribution as MPI proc can have both spinors in memory
-!!      In other words, we should store the first/last index in gvec for each spinor
+!!   - Address nspinor = 2 and PBLAS distribution as MPI proc can have both spinors in memory
+!!     In other words, we should store the first/last index in gvec for each spinor
 !!
-!!    - Optimization for Gamma-only. Memory and c -> r FFTs
+!!   - Optimization for Gamma-only. Memory and c -> r FFTs
 !!
-!!    - Need to extend FFT API to avoid scaling if isign = -1. Also fft_ug and fft_ur should accept isign
-!!      optional argument. Refactoring of all the FFT routines used in the GW code is needed
-!!      in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
+!!   - Need to extend FFT API to avoid scaling if isign = -1. Also fft_ug and fft_ur should accept isign
+!!     optional argument. Refactoring of all the FFT routines used in the GW code is needed
+!!     in order to exploit R2C, C2R (e.g. chi0(q=0) and GPU version.
 !!
-!!    - Use round-robin distribution instead of blocked-distribution to improve load balance.
+!!   - Use round-robin distribution instead of blocked-distribution to improve load balance?
 !!
-!!    - Memory peaks:
+!!   - Memory peaks:
 !!
-!!        (env3.9) [magianto@uan01 /scratch/project_465000061/magianto/DDIAGO_ZnO]
-!!        $~/git_repos/abinit/tests/Scripts/abimem.py peaks abimem_rank0.mocc
-!!        [0] <var=gt_scbox, A@m_gwr.F90:3395, addr=0x14aa53673010, size_mb=379.688>
-!!        [1] <var=xsum, A@xmpi_sum.finc:2551, addr=0x14aa2fce9010, size_mb=379.688>
-!!        [2] <var=gt_scbox, A@m_gwr.F90:4338, addr=0x14aa4f64f010, size_mb=379.688>
-!!        [3] <var=allcg_k, A@m_wfd.F90:4631, addr=0x14aa56b57010, size_mb=217.865>
-!!        [5] <var=wct_scbox, A@m_gwr.F90:4339, addr=0x14aa43876010, size_mb=189.844>
-!!        [6] <var=xsum, A@xmpi_sum.finc:2476, addr=0x14aa31bb0010, size_mb=189.844>
-!!        [7] <var=cg_k, A@m_wfd.F90:4623, addr=0x14aa64535010, size_mb=108.932>
+!!       (env3.9) [magianto@uan01 /scratch/project_465000061/magianto/DDIAGO_ZnO]
+!!       $~/git_repos/abinit/tests/Scripts/abimem.py peaks abimem_rank0.mocc
+!!       [0] <var=gt_scbox, A@m_gwr.F90:3395, addr=0x14aa53673010, size_mb=379.688>
+!!       [1] <var=xsum, A@xmpi_sum.finc:2551, addr=0x14aa2fce9010, size_mb=379.688>
+!!       [2] <var=gt_scbox, A@m_gwr.F90:4338, addr=0x14aa4f64f010, size_mb=379.688>
+!!       [3] <var=allcg_k, A@m_wfd.F90:4631, addr=0x14aa56b57010, size_mb=217.865>
+!!       [5] <var=wct_scbox, A@m_gwr.F90:4339, addr=0x14aa43876010, size_mb=189.844>
+!!       [6] <var=xsum, A@xmpi_sum.finc:2476, addr=0x14aa31bb0010, size_mb=189.844>
+!!       [7] <var=cg_k, A@m_wfd.F90:4623, addr=0x14aa64535010, size_mb=108.932>
 !!
 !!  TODO
 !!  - Remove cryst%timrev, use kptopt and qptopt
-!!  - Sig_c breaks QP degeneracies due to q0.
+!!  - Sig_c breaks QP degeneracies due to fixed q0.
 !!
 !! NOTES:
 !!

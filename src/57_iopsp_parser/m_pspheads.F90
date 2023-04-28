@@ -1187,7 +1187,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  integer,intent(out) :: ixc
 
 !Local variables-------------------------------
- integer :: start, ii
+ integer :: start !, ii
  character(len=500) :: x_name, c_name, gcx_name, gcc_name
 
 !*************************************************************************
