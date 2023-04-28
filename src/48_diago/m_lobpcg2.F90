@@ -5,6 +5,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_lobpcg2
 
   use m_xg
@@ -15,6 +18,10 @@ module m_lobpcg2
   use m_xomp
 #ifdef HAVE_OPENMP
   use omp_lib
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
 #endif
 
   use m_time, only : timab
@@ -388,6 +395,7 @@ module m_lobpcg2
 
     !! Start big loop over blocks
     do iblock = 1, nblock
+      ABI_NVTX_START_RANGE(NVTX_LOBPCG2_BLOCK)
       if ( prtvol == 4 ) write(std_out,*) "  -- Block ", iblock
       nrestart = 0
 
@@ -413,6 +421,7 @@ module m_lobpcg2
       call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr)
 
       do iline = 1, nline
+        ABI_NVTX_START_RANGE(NVTX_LOBPCG2_LINE)
 
         if ( ierr /= 0 ) then
           !ABI_COMMENT("Consider using more bands and nbdbuf if necessary.")
@@ -504,6 +513,7 @@ module m_lobpcg2
           exit
         end if
 
+        ABI_NVTX_END_RANGE()
       end do
 
       ! Recompute AX-Lambda*BX for the last time
@@ -526,6 +536,7 @@ module m_lobpcg2
         call lobpcg_transferAX_BX(lobpcg,iblock)
       end if
 
+      ABI_NVTX_END_RANGE()
     end do !! End iblock loop
 
     call xgBlock_reshape(eigen,(/ blockdim*nblock, 1 /))
@@ -594,6 +605,7 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_ortho,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_ORTHO_X_WRT)
 
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
@@ -610,6 +622,7 @@ module m_lobpcg2
 
     call xg_free(buffer)
 
+    ABI_NVTX_END_RANGE()
     call timab(tim_ortho,2,tsec)
 
   end subroutine lobpcg_orthoXwrtBlocks
@@ -628,6 +641,7 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_Bortho,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_B_ORTHO)
 
     select case (var)
     case (VAR_X) ! Select X vectors
@@ -695,6 +709,7 @@ module m_lobpcg2
 
     call xg_free(buffer)
 
+    ABI_NVTX_END_RANGE()
     call timab(tim_Bortho,2,tsec)
 
   end subroutine lobpcg_Borthonormalize
@@ -737,6 +752,7 @@ module m_lobpcg2
 #endif
 
     call timab(tim_RR, 1, tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RR)
 
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
@@ -988,6 +1004,7 @@ module m_lobpcg2
     call xg_free(subA)
     call xg_free(subB)
 
+    ABI_NVTX_END_RANGE()
     call timab(tim_RR, 2, tsec)
 
   end subroutine lobpcg_rayleighRitz
@@ -1000,8 +1017,10 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_maxres,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RESIDUE)
       !lobpcg%XWP(1:spacedim,shiftW+iblock) = lobpcg%AXWP(:,shiftX+iblock) - lobpcg%BXWP(:,shiftX+iblock)*eigenvalues(iblock)
     call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
+    ABI_NVTX_END_RANGE()
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
 
