@@ -1018,7 +1018,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              call timab(572,1,tsec) ! 'prep_nonlop%vtowfk'
              call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir, &
 &             eig_k(1+(iblock-1)*blocksize:iblock*blocksize),blocksize,&
-&             mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
+&             mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,already_transposed=.false.)
              call timab(572,2,tsec)
            else
              call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,eig_k(1+(iblock-1)*blocksize:iblock*blocksize),&

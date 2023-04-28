@@ -610,6 +610,7 @@ end subroutine prep_getghc
 !!  signs= if 1, get contracted elements (energy, forces, stress, ...)
 !!         if 2, applies the non-local operator to a function in reciprocal space
 !!  tim_nonlop=timing code of the calling routine (can be set to 0 if not attributed)
+!!  vectproj(2,nprojs,my_nspinor*ndat)=Optional, vector to be used instead of cprjin%cp when provided
 !!
 !! OUTPUT
 !!  ==== if (signs==1) ====
@@ -647,8 +648,7 @@ end subroutine prep_getghc
 
 subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,&
                        blocksize,mpi_enreg,nnlout,paw_opt,signs,gsc, tim_nonlop,cwavef,gvnlc, &
-                       already_transposed,& ! optional
-                       use_gpu_cuda) ! optional
+                       already_transposed,use_gpu_cuda,vectproj) ! optional
 
 !Arguments ------------------------------------
  integer,         intent(in)            :: blocksize,choice,cpopt,idir,signs,nnlout,paw_opt
@@ -657,6 +657,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  real(dp),        intent(in)            :: lambdablock(blocksize)
  real(dp),        intent(out),   target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
  real(dp),        intent(inout), target :: cwavef(:,:)
+ real(dp),optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
  type(mpi_type),intent(inout)           :: mpi_enreg
  type(pawcprj_type),intent(inout)       :: cwaveprj(:,:)
@@ -906,7 +907,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
       lambda_nonlop(1:bandpp) = lambdablock((mpi_enreg%me_band*bandpp)+1:((mpi_enreg%me_band+1)*bandpp))
    end if
    call nonlop(choice,cpopt,cwaveprj,enlout,hamk,idir,lambda_nonlop,mpi_enreg,bandpp,nnlout,paw_opt,&
-&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2)
+&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2,vectproj=vectproj)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    call gpu_device_synchronize()
    !call gpu_data_prefetch_async_f(C_LOC(cwavef_alltoall2), cwavef_alltoall2_size, CPU_DEVICE_ID)
