@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 55
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 62
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -86,7 +86,14 @@ module m_nvtx_data
   integer, parameter :: NVTX_INVOVL_INNER_GEMM = 52
   integer, parameter :: NVTX_CHEBFI2_TRANSPOSE = 53
   integer, parameter :: NVTX_CHEBFI2_GET_BM1X = 54
-  integer, parameter :: NVTX_FORSTR_NONLOP = 55
+  integer, parameter :: NVTX_LOBPCG2_BLOCK = 55
+  integer, parameter :: NVTX_LOBPCG2_LINE = 56
+  integer, parameter :: NVTX_LOBPCG2_ORTHO_X_WRT = 57
+  integer, parameter :: NVTX_LOBPCG2_RESIDUE = 58
+  integer, parameter :: NVTX_LOBPCG2_RR = 59
+  integer, parameter :: NVTX_LOBPCG2_B_ORTHO = 60
+  integer, parameter :: NVTX_LOBPCG2_GET_AX_BX = 61
+  integer, parameter :: NVTX_FORSTR_NONLOP = 62
 
 contains
 
@@ -156,6 +163,13 @@ contains
          & "INVOVL_INNER_GEMM", &
          & "CHEBFI2_TRANSPOSE", &
          & "CHEBFI2_GET_BM1X", &
+         & "LOBPCG2_BLOCK", &
+         & "LOBPCG2_LINE", &
+         & "LOBPCG2_ORTHO_X_WRT", &
+         & "LOBPCG2_RESIDUE", &
+         & "LOBPCG2_RR", &
+         & "LOBPCG2_B_ORTHO", &
+         & "GET_AX_BX", &
          & "FORSTR_NONLOP" &
          ]
 
@@ -213,7 +227,14 @@ contains
     nvtx_ids(52)= NVTX_INVOVL_INNER_GEMM
     nvtx_ids(53)= NVTX_CHEBFI2_TRANSPOSE
     nvtx_ids(54)= NVTX_CHEBFI2_GET_BM1X
-    nvtx_ids(55)= NVTX_FORSTR_NONLOP
+    nvtx_ids(55)= NVTX_LOBPCG2_BLOCK
+    nvtx_ids(56)= NVTX_LOBPCG2_LINE
+    nvtx_ids(57)= NVTX_LOBPCG2_ORTHO_X_WRT
+    nvtx_ids(58)= NVTX_LOBPCG2_RESIDUE
+    nvtx_ids(59)= NVTX_LOBPCG2_RR
+    nvtx_ids(60)= NVTX_LOBPCG2_B_ORTHO
+    nvtx_ids(61)= NVTX_LOBPCG2_GET_AX_BX
+    nvtx_ids(62)= NVTX_FORSTR_NONLOP
 
   end subroutine nvtx_init
 
