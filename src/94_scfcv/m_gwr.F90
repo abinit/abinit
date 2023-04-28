@@ -2865,8 +2865,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
      end associate
    end do ! ipm
 
-   call uplan_k%free()
-   call slk_array_free(gt_pm)
+   call uplan_k%free(); call slk_array_free(gt_pm)
    end associate
  end do ! my_ikf
 
@@ -2985,9 +2984,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
    !gk_rpr_pm(ipm)%buffer_cplx = gk_rpr_pm(ipm)%buffer_cplx * gwr%g_nfft
  end do ! ipm
 
- call slk_array_free(gt_pm)
- call desc_kbz%free()
- call uplan_k%free()
+ call slk_array_free(gt_pm); call desc_kbz%free(); call uplan_k%free()
 
  ABI_SFREE(ceig0r)
  !call cwtime_report(" gwr_get_gkbz_rpr_pm:", cpu, wall, gflops)
@@ -3118,8 +3115,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
    call uplan_k%execute_rg(ndat, r_gp%buffer_cplx(:,ig2), g_gp%buffer_cplx(:,ig2), isign=-isign, iscale=0) ! this should be OK
  end do
 
- call uplan_k%free()
- call r_gp%free()
+ call uplan_k%free(); call r_gp%free()
 
 end subroutine gwr_rpr_to_ggp
 !!***
