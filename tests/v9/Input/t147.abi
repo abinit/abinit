@@ -1,0 +1,125 @@
+# Response to a magnetic vector potential and 
+# dynamic quadrupoles calculation for an HF molecule
+# (A. Zabalo and M. Royo, 15.03.2023)
+
+ndtset 5
+
+#Set 1: Ground state self-consistency
+#*************************************
+getwfk1   0
+kptopt1   1 
+nqpt1     0
+tolvrs1   1.0d-18
+
+#Set 2: Response function calculation of d/dk
+#********************************************
+iscf2     -3
+kptopt2    2
+rfelfd2    2
+tolwfr2    1.0d-20
+rfdir2     1 1 1
+
+#Set 3: Response function calculation of d2/dkdk
+#***********************************************
+getddk3       2
+iscf3        -3
+kptopt3       2
+tolwfr3       1.0d-20
+
+#######################################################
+# rf2_dkdk = 1 --> symmetric contribution dkdk
+# (standard d^2/dkdk wave functions)
+#
+# rf2_dkdk = 2 --> antisymmetric contribution dkdk
+# (this is related to the wave function response 
+# to a uniform orbital magnetic field, see notes)
+#
+# rf2_dkdk = 3 --> total contribution dkdk
+# (wave function response to a long-wavelength
+# magnetic vector potential field)
+#
+rf2_dkdk3     3
+#######################################################
+
+#Set 4 : Response function calculation of Q=0 phonons and electric field 
+#***********************************************************************
+getddk4   2
+kptopt4   2
+rfelfd4   3
+rfphon4   1
+rfatpol4  1 2
+rfdir4    1 1 1
+tolvrs4   1.0d-8 
+prepalw4  2   
+
+#Set 5: Long-wave magnitudes calculation
+#***************************************
+optdriver5     10 
+kptopt5        2
+get1wf5        4
+get1den5       4
+getddk5        2
+getdkdk5       3
+lw_qdrpl5      1 
+
+############################################
+#Common input variables
+
+getwfk 1
+useylm 1
+nqpt   1
+qpt    0.0E+00 0.0E+00 0.0E+00
+
+
+# basis set, bands, k-points, SCF tolerance
+ecut  6 
+nstep 80    
+
+#Definition of the k-point grid
+ngkpt 2 2 2
+nshiftk 1
+shiftk 0.5 0.5 0.5
+
+diemac 2.0
+nband 4 
+
+################################
+# unit cell
+
+acell  3*15.0 
+
+rprim  1.000000  0.000000  0.000000
+       0.000000  1.000000  0.000000
+       0.000000  0.000000  1.000000
+
+natom   2
+ntypat  2
+znucl   1 9
+typat   1 2
+
+####################
+#experimental coordinates
+# d = 1.7328 Bohr
+xcart      -0.86640000000   0.00000000000000E+00  0.00000000000000E+00
+            0.86640000000   0.00000000000000E+00  0.00000000000000E+00
+#####################
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "h.fhi, f.fhi"
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t147.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options= -easy
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = A. Zabalo and M. Royo
+#%% keywords = DFPT, LONGWAVE
+#%% description = Vector potential response and quadrupoles of HF molecule
+#%% topics = longwave
+#%%<END TEST_INFO>
+

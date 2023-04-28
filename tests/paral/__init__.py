@@ -49,6 +49,8 @@ inp_files = [
 "t62.abi",
 "t63.abi",
 "t64.abi",
+"t65.abi",
+"t66.abi",
 "t71.abi",
 "t72.abi",
 "t73.abi",
@@ -56,7 +58,8 @@ inp_files = [
 "t75.abi",
 "t76.abi",
 "t77.abi",
-"t78.abi",
+#"t78.abi", # GWR
+#"t79.abi", # GWR
 "t80.abi",
 "t81.abi",
 "t82.abi",
@@ -72,5 +75,5 @@ inp_files = [
 "t96.abi",
 "t97.abi",
 "t98.abi",
-"t99.abi"
+"t99.abi",
 ]

@@ -256,6 +256,7 @@ type, public :: paw_setup_t
   integer                      :: ngrid
   real(dpxml)                  :: rpaw
   real(dpxml)                  :: ex_cc
+  real(dpxml)                  :: lamb_shielding=0.0D0
   character(len=4)             :: idgrid
   character(len=12)            :: optortho
   type(atom_t)                 :: atom
@@ -1259,6 +1260,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%optortho=paw_setupin%optortho
  paw_setupout%rpaw=paw_setupin%rpaw
  paw_setupout%ex_cc=paw_setupin%ex_cc
+ paw_setupout%lamb_shielding=paw_setupin%lamb_shielding
  paw_setupout%atom%tread=paw_setupin%atom%tread
  paw_setupout%atom%symbol=paw_setupin%atom%symbol
  paw_setupout%atom%znucl=paw_setupin%atom%znucl
@@ -2624,6 +2626,19 @@ end subroutine paw_setup_copy
      end if
      cycle
    end if
+
+   !  --Read Lamb shielding
+   if (line(1:25)=='<lamb_shielding shielding') then
+     call paw_rdfromline(" shielding",line,strg,ierr)
+     if (len(trim(strg))<=30) then
+       strg1=trim(strg)
+       read(unit=strg1,fmt=*) paw_setup%lamb_shielding
+     else
+       read(unit=strg,fmt=*) paw_setup%lamb_shielding
+     end if
+     cycle
+   end if
+
 
 !  --Read orthogonalisation scheme
    if (line(1:18)=='<orthogonalisation') then
