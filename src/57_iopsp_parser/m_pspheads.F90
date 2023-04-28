@@ -1236,11 +1236,6 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    !print *, "x_name: `", trim(x_name), "`, c_name: `", trim(c_name), &
    !         "`, gcx_name: `", trim(gcx_name), "`, gcc_name: `", trim(gcc_name), "`"
 
-   msg = "NOGC"
-   do ii=1,len_trim(gcc_name)
-     print *, iachar(gcc_name(ii:ii)), iachar(msg(ii:ii))
-   end do
-
    if (x_name == "SLA" .and. c_name == "PW") then
      !print *, "in first if", gcx_name == "NOGX", trim(gcc_name) == "NOGC"
      !print *, "len_trim(gcc_name)", len_trim(gcc_name)

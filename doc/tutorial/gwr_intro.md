@@ -22,6 +22,8 @@ while [[gwr_task]] defines the task
 * Scalapack
 * Optmized FFT libraries (FFTW3 or MKL-DFTI)
 
+Discuss single and double precision version. Single-precision is the default
+
 ## Formalism
 
 The zero-temperature Green's function in the imaginary-time domain is given by:
@@ -58,6 +60,11 @@ When computing $G$, the number of bands included in the sum over states is contr
 Clearly, it does not make any sense to ask for more bands than the ones available in the WFK file. 
 
 The imaginary axis is sampled using a minimax mesh with [[gwr_ntau]] points.
+The other piece of information required for the selection of the minimax mesh 
+is the ratio between the fundamental gap and the maximum transition energy i.e. 
+the differerence between the highest KS eigenvalue for empty states that clearly depends on [[nband]] and
+the lowest occupied state.
+
 The k-mesh must be k-centered e.g.
 
 * [[ngkpt]] 4 4 4
@@ -67,8 +74,17 @@ The k-mesh must be k-centered e.g.
 The cutoff energy for the polarizability is given by [[ecuteps]]
 while [[ecutsigx]] defines the number of g-vectors for the exchange part of the self-energy.
 
-[[getden_filepath]] a (or [[getden]] in multi dataset mode)
+Note that GWR needs the GS density produced during the GS run.
+This file can be read via [[getden_filepath]] (recommended) or, alternatively 
+with [[getden]] when using the multi dataset mode.
 
+\begin{equation}
+\chi(\rr,\RR', t) = G(\rr,\RR', i\tau) G^*(\rr,\RR', -i\tau)
+\end{equation}
+
+Treatment of the long-wavelenght limit
+
+[[inclvkb]], [[gw_qlwl]], [[gwr_max_hwtene]]
 
 ## GWR workflow for QP energies
 

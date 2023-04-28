@@ -1388,6 +1388,9 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      call MPI_FILE_READ_AT(fh, offset, work, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_HANDLE_MPIERR(mpierr)
      call wrtout(units, sjoin(" For band1:", itoa(band1), ", band2:", itoa(band2)))
+     where (abs(work) < tol8)
+       work = zero
+     end where
      write(msg, "(*(1x, es12.5))")work(1:buf_size)
      call wrtout(units, msg)
    end do
