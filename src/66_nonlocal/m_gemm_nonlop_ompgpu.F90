@@ -485,7 +485,7 @@ contains
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 use_gpu_cuda)
+&                 vectproj,use_gpu_cuda)
 
   !Arguments ------------------------------------
   !scalars
@@ -511,6 +511,7 @@ contains
   real(dp),intent(inout) :: enlout(nnlout*ndat)
   real(dp),intent(out),target :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
   real(dp),intent(inout),target :: vectout(2,npwout*nspinor*ndat) !vz_i
+  real(dp),intent(inout),optional,target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
 
@@ -525,6 +526,8 @@ contains
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: enlk(:)
+  real(dp),pointer :: projections_ptr(:,:,:)
+  logical :: local_vectproj
   logical :: transfer_vectin,transfer_vectout,transfer_svectout
   character(len=500) :: msg
   integer(C_SIZE_T) :: byte_count
@@ -606,11 +609,23 @@ contains
     call refresh_gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)
   end if
 
-  !$OMP TARGET ENTER DATA MAP(alloc:projections,s_projections,vnl_projections)
+   ! If vectproj is provided, use it for further calculations, use static array otherwise
+   projections_ptr => projections
+   local_vectproj=.false.
+   if(PRESENT(vectproj)) then
+     if(size(vectproj)>1) local_vectproj=.true.
+   end if
+   if (local_vectproj) projections_ptr => vectproj
+
+  !$OMP TARGET ENTER DATA MAP(alloc:s_projections,vnl_projections)
+  if(.not. local_vectproj) then
+    !$OMP TARGET ENTER DATA MAP(alloc:projections_ptr)
+  end if
+
   ! These will store the non-local factors for vectin, svectout and vectout respectively
-  byte_count=sizeof(projections)
-  !$OMP TARGET DATA USE_DEVICE_PTR(projections,s_projections,vnl_projections)
-  call gpu_memset_omp(c_loc(projections),     zero, byte_count)
+  byte_count=sizeof(projections_ptr)
+  !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,s_projections,vnl_projections)
+  if(cpopt < 2) call gpu_memset_omp(c_loc(projections_ptr),     zero, byte_count)
   call gpu_memset_omp(c_loc(s_projections),   zero, byte_count)
   call gpu_memset_omp(c_loc(vnl_projections), zero, byte_count)
   !$OMP END TARGET DATA
@@ -650,20 +665,25 @@ contains
   !$OMP TASKWAIT
   if(cpopt >= 2) then
     ! retrieve from cprjin
-    !FIXME GPU parallelization
-    !$OMP TARGET UPDATE FROM(projections)
-    do idat=1, ndat*nspinor
-      shift = 0
-      do iatom = 1, natom
-        nlmn = cprjin(iatom, idat)%nlmn
-        projections(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
-        shift = shift + nlmn
+    if(.not. local_vectproj .and. cpopt/=3) then
+      !TODO This use-case is extremely painful for GEMM OpenGPU nonlop performance
+      ABI_WARNING("Inefficient call of OpenGPU nonlop. Was vectproj provided with OpenMP mapping?")
+      !$OMP TARGET UPDATE FROM(projections_ptr)
+      !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
+      do idat=1, ndat*nspinor
+        shift = 0
+        do iatom = 1, natom
+          nlmn = cprjin(iatom, idat)%nlmn
+          projections_ptr(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
+          shift = shift + nlmn
+        end do
       end do
-    end do
-    !$OMP TARGET UPDATE TO(projections)
+      !$OMP TARGET UPDATE TO(projections_ptr)
+    end if
     if(cpopt==4.and.allocated(dprojections)) then
       !$OMP TARGET UPDATE FROM(dprojections)
       ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (1)")
+      !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,igrad,nlmn)
       do idat=1, ndat*nspinor
         shift = 0
         do iatom = 1, natom
@@ -682,10 +702,10 @@ contains
     if(cplex == 2) then
 
 #ifdef HAVE_GPU_CUDA
-      !$OMP TARGET DATA USE_DEVICE_PTR(projections,current_ikpt_projs,vectin)
+      !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs,vectin)
       call ompgpu_blas_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                c_loc(current_ikpt_projs), npwin,&
-&                c_loc(vectin), npwin, czero, c_loc(projections), nprojs)
+&                c_loc(vectin), npwin, czero, c_loc(projections_ptr), nprojs)
       !$OMP END TARGET DATA
       if(signs==1.and.ngrads>0) then
         !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs,vectin)
@@ -712,10 +732,10 @@ contains
           temp_realvec_r(1+(idat-1)*npwin) = temp_realvec_r(1+(idat-1)*npwin)/2
         end do
       end if
-      !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_r,projections,current_ikpt_projs_r)
+      !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_r,projections_ptr,current_ikpt_projs_r)
       call ompgpu_blas_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                c_loc(current_ikpt_projs_r), npwin, &
-&                c_loc(temp_realvec_r), npwin, czero, c_loc(projections), nprojs)
+&                c_loc(temp_realvec_r), npwin, czero, c_loc(projections_ptr), nprojs)
       !$OMP END TARGET DATA
       if(signs==1.and.ngrads>0) then
         !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_r,dprojections,current_ikpt_dprojs_r)
@@ -740,18 +760,18 @@ contains
         end do
       end if
 
-      !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_i,projections,current_ikpt_projs_i)
+      !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_i,projections_ptr,current_ikpt_projs_i)
       call ompgpu_blas_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                c_loc(current_ikpt_projs_i), npwin, &
-&                c_loc(temp_realvec_i), npwin, cone , c_loc(projections), nprojs)
+&                c_loc(temp_realvec_i), npwin, cone , c_loc(projections_ptr), nprojs)
       !$OMP END TARGET DATA
 
       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
       !!$OMP TARGET LOOP &
-      !$OMP& MAP(to:projections) PRIVATE(i1,i2)
+      !$OMP& MAP(to:projections_ptr) PRIVATE(i1,i2)
       do i2=1, nspinor*ndat
         do i1=1, nprojs
-          projections(1,i1,i2) = projections(1,i1,i2) * 2
+          projections_ptr(1,i1,i2) = projections_ptr(1,i1,i2) * 2
         end do
       end do
 
@@ -775,43 +795,32 @@ contains
 
     if(cpopt >= 0) then
       ! store in cprjin
-      !FIXME OpenMP-ize this
-      !$OMP TARGET UPDATE FROM(projections)
-      do idat=1, ndat*nspinor
-        shift = 0
-        do iatom = 1, natom
-          nlmn = cprjin(iatom, idat)%nlmn
-          cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections(1:cplex, shift+1:shift+nlmn, idat)
-          shift = shift + nlmn
+      if(.not. local_vectproj .and. cpopt/=3) then
+        !TODO This use-case is extremely painful for GEMM OpenGPU nonlop performance
+        !$OMP TARGET UPDATE FROM(projections_ptr)
+        !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
+        do idat=1, ndat*nspinor
+          shift = 0
+          do iatom = 1, natom
+            nlmn = cprjin(iatom, idat)%nlmn
+            cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections_ptr(1:cplex, shift+1:shift+nlmn, idat)
+            shift = shift + nlmn
+          end do
         end do
-      end do
-      !!$OMP TARGET TEAMS DISTRIBUTE &
-      !!$OMP& MAP(to:projections,cprjin%cp) PRIVATE(idat)
-      !do idat=1, ndat*nspinor
-      !  shift = 0
-      !  !$OMP PARALLEL DO PRIVATE(iatom,shift,i)
-      !  do iatom = 1, natom
-      !    do ilmn = 1, cprjin(iatom, idat)%nlmn
-      !      do i = 1, cplex
-      !        cprjin(iatom, idat)%cp(i, ilmn) = projections(i, shift+ilmn, idat)
-      !      end do
-      !    end do
-      !    shift = shift + cprjin(iatom, idat)%nlmn
-      !  end do
-      !  !$OMP END PARALLEL DO
-      !end do
-      !!$OMP END TARGET TEAMS DISTRIBUTE
+      end if
       if(cpopt==3) then
         ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (2)")
-        !FIXME OpenMP-ize this
         !$OMP TARGET UPDATE FROM(dprojections)
-        shift = 0
-        do iatom = 1, natom
-          nlmn = cprjin(iatom, idat)%nlmn
-          do igrad=1,ngrads
-            cprjin(iatom, idat)%dcp(1:cplex,igrad,1:nlmn) = &
-&              dprojections(1:cplex, shift+1:shift+nlmn, idat)
-            shift = shift + nlmn
+        !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,igrad,nlmn)
+        do idat=1, ndat*nspinor
+          shift = 0
+          do iatom = 1, natom
+            nlmn = cprjin(iatom, idat)%nlmn
+            do igrad=1,ngrads
+              cprjin(iatom, idat)%dcp(1:cplex,igrad,1:nlmn) = &
+  &              dprojections(1:cplex, shift+1:shift+nlmn, idat)
+              shift = shift + nlmn
+            end do
           end do
         end do
       end if
@@ -841,7 +850,7 @@ contains
         call opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
 &         dgxdt_dum_in,dgxdt_dum_out,dgxdt_dum_out2,&
 &         d2gxdt_dum_in,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,dimekbq,enl,&
-&         projections,&
+&         projections_ptr,&
 &         vnl_projections,&
 &         s_projections,&
 &         iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
@@ -853,11 +862,11 @@ contains
     else
       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
       !!$OMP TARGET LOOP &
-      !$OMP& MAP(to:projections,s_projections) PRIVATE(i1,i2)
+      !$OMP& MAP(to:projections_ptr,s_projections) PRIVATE(i1,i2)
       do i2=1, nspinor*ndat
         do i1=1, nprojs
-          s_projections(1,i1,i2) = projections(1,i1,i2)
-          s_projections(2,i1,i2) = projections(2,i1,i2)
+          s_projections(1,i1,i2) = projections_ptr(1,i1,i2)
+          s_projections(2,i1,i2) = projections_ptr(2,i1,i2)
         end do
       end do
     end if
@@ -945,7 +954,7 @@ contains
           iend = shift+nattyp(itypat)*nlmn
           nattyp_i = nattyp(itypat)
           !$OMP TARGET TEAMS DISTRIBUTE &
-          !$OMP& MAP(to:vnl_projections,projections,enlk) &
+          !$OMP& MAP(to:vnl_projections,projections_ptr,enlk) &
           !$OMP& FIRSTPRIVATE(idat,itypat,nlmn,esum)
           do idat=1,ndat*nspinor
             esum=zero
@@ -955,7 +964,7 @@ contains
               do ilmn=1,nlmn
                 do ii=1,cplex
                   esum=esum +vnl_projections(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-&                           *projections    (ii,shift+(ia-1)*nlmn+ilmn,idat)
+&                           *projections_ptr    (ii,shift+(ia-1)*nlmn+ilmn,idat)
                 end do
               end do
             end do
@@ -1078,21 +1087,15 @@ contains
    end do
  end if
 
- !if(signs==2) then
- !  if(paw_opt == 3 .or. paw_opt == 4) then
- !    !$OMP TARGET UPDATE FROM(svectout)  IF(transfer_vectout)
- !  end if
- !  if(paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4) then
- !    !$OMP TARGET UPDATE FROM(vectout) IF(transfer_svectout)
- !  end if
- !end if
-
  ! Retrieve and release allocated buffers
  !$OMP TARGET EXIT DATA MAP(release:vectin) IF(transfer_vectin)
  !$OMP TARGET EXIT DATA MAP(from:vectout)   IF(transfer_vectout)
  !$OMP TARGET EXIT DATA MAP(from:svectout)  IF(transfer_svectout)
 
- !$OMP TARGET EXIT DATA MAP(release:projections,s_projections,vnl_projections)
+ !$OMP TARGET EXIT DATA MAP(release:s_projections,vnl_projections)
+ if(.not. local_vectproj) then
+   !$OMP TARGET EXIT DATA MAP(release:projections_ptr)
+ end if
 
 ! Release memory
   if(signs == 1) then
@@ -1162,7 +1165,7 @@ contains
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 use_gpu_cuda)
+&                 vectproj,use_gpu_cuda)
 
   !Arguments ------------------------------------
   !scalars
@@ -1188,6 +1191,7 @@ contains
   real(dp),intent(inout) :: enlout(nnlout*ndat)
   real(dp),intent(out),target :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
   real(dp),intent(inout),target :: vectout(2,npwout*nspinor*ndat) !vz_i
+  real(dp),intent(inout),optional,target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ABI_UNUSED((/choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir/))
@@ -1196,7 +1200,7 @@ contains
   ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,use_gpu_cuda/))
   ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg/))
   ABI_UNUSED((/enl,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout,phkxredin,phkxredout/))
-  ABI_UNUSED((/ucvol,lambda,sij,ph1d(1,1),ph3din,ph3dout,vectin,enlout,svectout,vectout/))
+  ABI_UNUSED((/ucvol,lambda,sij,ph1d(1,1),ph3din,ph3dout,vectin,enlout,svectout,vectout,vectproj/))
   ABI_UNUSED_A(cprjin)
   ABI_UNUSED_A(mpi_enreg)
   ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")
