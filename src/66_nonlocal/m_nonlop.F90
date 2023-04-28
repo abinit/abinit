@@ -213,6 +213,7 @@ contains
 !!         if 2, applies the non-local operator to a function in reciprocal space
 !!  tim_nonlop=timing code of the calling routine (can be set to 0 if not attributed)
 !!  vectin(2,npwin*my_nspinor*ndat)=input cmplx wavefunction coefficients <G|Cnk>
+!!  vectproj(2,nprojs,my_nspinor*ndat)=Optional, vector to be used instead of cprjin%cp when provided
 !!
 !! OUTPUT
 !! ==== if (signs==1) ====
@@ -325,7 +326,7 @@ contains
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
-&                 cprjin_left,enl,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k) !optional arguments
+&                 cprjin_left,enl,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k,vectproj) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -342,6 +343,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp),intent(inout),target :: vectout(:,:)
  type(pawcprj_type),intent(inout),target :: cprjin(:,:)
  type(pawcprj_type),intent(inout),target,optional :: cprjin_left(:,:)
+ real(dp),intent(inout),optional :: vectproj(:,:,:)
 
 
 !Local variables-------------------------------
@@ -711,7 +713,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &      natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
 &      nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
 &      phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-&      tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_impl)
+&      tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
 
    else if ( .not. use_gemm_nonlop_gpu) then
 
