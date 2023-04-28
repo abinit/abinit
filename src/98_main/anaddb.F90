@@ -306,7 +306,7 @@ program anaddb
    write(msg, '(2a, (80a), 2a)') ch10, ('=',ii = 1, 80)
    call wrtout([ab_out, std_out],msg, 'COLL')
    lwsym = 1
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version,lwsym, 33, qdrp_cart)
  end if
 
  ! The default value is 1. Here we set the flags to zero if Q*is not available.
@@ -927,7 +927,8 @@ end if  ! condition on nlflag
    call wrtout([std_out, ab_out], msg)
 
    ! Compute and print the contributions to the flexoelectric tensor
-   call ddb_flexo(inp%asr, asrq0%d2asr, ddb, ddb_lw, crystal, filnam(3), inp%flexoflag, inp%prtvol, zeff)
+   call ddb_flexo(inp%asr, asrq0%d2asr, ddb, ddb_lw, ddb_hdr%ddb_version, crystal, &
+       & filnam(3), inp%flexoflag, inp%prtvol, zeff)
  end if
 
 !**********************************************************************
