@@ -1007,10 +1007,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    dd = bb*(bb**2-one)*dq2div6
                    if (usepaw == 1) then
                      rhoat=(aa*pawtab(itypat)%tvalespl(jj,1)+bb*pawtab(itypat)%tvalespl(jj+1,1)+&
-                       cc*pawtab(itypat)%tvalespl(jj,2)+dd*pawtab(itypat)%tvalespl(jj+1,2)) *xnorm
-                   else
+&                     cc*pawtab(itypat)%tvalespl(jj,2)+dd*pawtab(itypat)%tvalespl(jj+1,2)) *xnorm
+                   else if (usepaw == 0) then
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
-                       cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
+                     cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
+                   else
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
                    ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
@@ -1111,10 +1113,12 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    dd = bb*(bb**2-one)*dq2div6
                    if (usepaw == 1) then
                      rhoat=(aa*pawtab(itypat)%tvalespl(jj,1)+bb*pawtab(itypat)%tvalespl(jj+1,1)+&
-                      cc*pawtab(itypat)%tvalespl(jj,2)+dd*pawtab(itypat)%tvalespl(jj+1,2)) *xnorm
-                   else
+&                     cc*pawtab(itypat)%tvalespl(jj,2)+dd*pawtab(itypat)%tvalespl(jj+1,2)) *xnorm
+                   else if (usepaw == 0) then
                      rhoat=(aa*psps%nctab(itypat)%tvalespl(jj,1)+bb*psps%nctab(itypat)%tvalespl(jj+1,1)+&
                      cc*psps%nctab(itypat)%tvalespl(jj,2)+dd*psps%nctab(itypat)%tvalespl(jj+1,2))*xnorm
+                   else
+                     ABI_BUG('Initialization of density is non consistent.')
                    end if
                  end if
 

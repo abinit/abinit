@@ -49,7 +49,7 @@ with $\Theta$ the Heaviside step-function and
 \end{equation}
 
 For simplicity we have assumed a spin-unpolarized semiconductor with scalar wavefunctions
-and the Fermi level $\mu$ is set to zero.
+and the Fermi level $\mu$ has been set to zero.
 
 The GWR code constructs the Green's function from the KS wavefunctions and eigenvalues stored 
 in the WFK file specified via [[getwfk_filepath]] ([[getwfk]] in multi-dataset mode).
