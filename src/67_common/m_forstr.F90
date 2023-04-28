@@ -1036,7 +1036,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          else
            ! here we MUST pass option use_gpu_cuda=0, as cwavef here is a host memory buffer
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
-&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,use_gpu_cuda=0)
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
+&           already_transposed=.False.,use_gpu_cuda=0)
          end if
          ABI_NVTX_END_RANGE()
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
