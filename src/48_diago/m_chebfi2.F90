@@ -61,6 +61,7 @@ module m_chebfi2
 
  integer, parameter :: EIGENV = 1
  integer, parameter :: EIGENVD = 2
+ integer, parameter :: EIGENSLK = 3
  integer, parameter :: DEBUG_ROWS = 5
  integer, parameter :: DEBUG_COLUMNS = 5
 
@@ -300,14 +301,14 @@ subroutine chebfi_allocateAll(chebfi)
  call timab(tim_X_NP_init,1,tsec)
  if (chebfi%paral_kgb == 0) then
    chebfi%total_spacedim = spacedim
-   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs, chebfi%spacecom) !regular arrays
+   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda) !regular arrays
    call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1, spacedim, neigenpairs)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1, spacedim, neigenpairs)
  else
    total_spacedim = spacedim
    call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
    chebfi%total_spacedim = total_spacedim
-   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom) !transposed arrays
+   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda) !transposed arrays
    call xg_setBlock(chebfi%X_NP, chebfi%X_next,               1, total_spacedim, chebfi%bandpp)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, chebfi%bandpp+1, total_spacedim, chebfi%bandpp)
  end if
@@ -315,8 +316,8 @@ subroutine chebfi_allocateAll(chebfi)
 
  call timab(tim_AX_BX_init,1,tsec)
  !transposer will handle these arrays automatically
- call xg_init(chebfi%AX, space, spacedim, neigenpairs, chebfi%spacecom)
- call xg_init(chebfi%BX, space, spacedim, neigenpairs, chebfi%spacecom)
+ call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
+ call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
  call timab(tim_AX_BX_init,2,tsec)
 
 end subroutine chebfi_allocateAll
@@ -557,10 +558,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 
  if (chebfi%paral_kgb == 0) then
    ABI_MALLOC(nline_bands,(neigenpairs))
-   call xg_init(DivResults, chebfi%space, neigenpairs, 1)
+   call xg_init(DivResults, chebfi%space, neigenpairs, 1, use_gpu=chebfi%use_gpu_cuda)
  else
    ABI_MALLOC(nline_bands,(chebfi%bandpp))
-   call xg_init(DivResults, chebfi%space, chebfi%bandpp, 1)
+   call xg_init(DivResults, chebfi%space, chebfi%bandpp, 1, use_gpu=chebfi%use_gpu_cuda)
  end if
 
  tolerance = chebfi%tolerance
@@ -572,7 +573,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    nCpuRows = chebfi%nproc_fft
    nCpuCols = chebfi%nproc_band
 
-   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+   call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL,&
+       use_gpu=chebfi%use_gpu_cuda)
 
    !save existing ABinit communicators
    comm_fft_save = mpi_enreg%comm_fft
@@ -804,11 +806,11 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 !Doesnt work with npfft (ncols=1 in the formula below) ???
 
  if (chebfi%paral_kgb == 0) then
-   call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1)
-   call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1)
+   call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1, use_gpu=chebfi%use_gpu_cuda)
+   call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1, use_gpu=chebfi%use_gpu_cuda)
  else
-   call xg_init(Results1, chebfi%space, chebfi%bandpp, 1)
-   call xg_init(Results2, chebfi%space, chebfi%bandpp, 1)
+   call xg_init(Results1, chebfi%space, chebfi%bandpp, 1, use_gpu=chebfi%use_gpu_cuda)
+   call xg_init(Results2, chebfi%space, chebfi%bandpp, 1, use_gpu=chebfi%use_gpu_cuda)
  end if
 
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, &
@@ -988,6 +990,10 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   integer :: space
   integer :: spacedim
   integer :: remainder
+#ifdef HAVE_LINALG_SCALAPACK
+  logical :: use_slk
+#endif
+  type(xgScalapack_t) :: scalapack
   type(xg_t) :: A_und_X !H_UND_PSI
   type(xg_t) :: B_und_X !S_UND_PSI
   type(xgBlock_t) :: X_first_row
@@ -1005,8 +1011,15 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   spacedim     = chebfi%spacedim
   neigenpairs  = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
 
-  call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
-  call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom)
+#ifdef HAVE_LINALG_SCALAPACK
+    call xgScalapack_init(scalapack,chebfi%spacecom,spacedim,0,use_slk)
+    if ( use_slk) then
+      eigenSolver = EIGENSLK
+    end if
+#endif
+
+  call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
+  call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
 
   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_SCALE)
   call timab(tim_RR_gemm_1,1,tsec)
@@ -1024,21 +1037,21 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
 
   call timab(tim_RR_scale,1,tsec)
   if(chebfi%istwf_k == 2) then
-    call xgBlock_scale(chebfi%X, 1/sqrt2, 1)
+    call xgBlock_scale(chebfi%X, 1/sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
     if (me_g0 == 1)  then
       call xgBlock_setBlock(chebfi%X, X_first_row, 1, 2, neigenpairs) !has to be 2 rows in SPACE_CR
-      call xgBlock_scale(X_first_row, sqrt2, 1)
+      call xgBlock_scale(X_first_row, sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
     end if
-    call xgBlock_scale(chebfi%AX%self, 1/sqrt2, 1)
+    call xgBlock_scale(chebfi%AX%self, 1/sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
     if (me_g0 == 1)  then
       call xgBlock_setBlock(chebfi%AX%self, AX_first_row, 1, 2, neigenpairs)
-      call xgBlock_scale(AX_first_row, sqrt2, 1)
+      call xgBlock_scale(AX_first_row, sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
     end if
     if (chebfi%paw) then
-      call xgBlock_scale(chebfi%BX%self, 1/sqrt2, 1)
+      call xgBlock_scale(chebfi%BX%self, 1/sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
       if (me_g0 == 1)  then
         call xgBlock_setBlock(chebfi%BX%self, BX_first_row, 1, 2, neigenpairs)
-        call xgBlock_scale(BX_first_row, sqrt2, 1)
+        call xgBlock_scale(BX_first_row, sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
       end if
     end if
   end if
@@ -1053,6 +1066,9 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
       &              use_gpu_cuda=1*chebfi%use_gpu_cuda)
   case (EIGENV)
     call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
+  case (EIGENSLK)
+    call xgScalapack_hegv(scalapack,A_und_X%self,B_und_X%self,chebfi%eigenvalues,use_gpu=chebfi%use_gpu_cuda)
+    info = 0 ! No error code returned for the moment
   case default
     ABI_ERROR("Error for Eigen Solver HEGV")
   end select
@@ -1060,6 +1076,9 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   ABI_NVTX_END_RANGE()
 
   remainder = mod(nline, 3) !3 buffer swap, keep the info which one contains X_data at the end of loop
+  if ( eigenSolver == EIGENSLK ) then
+    call xgScalapack_free(scalapack)
+  end if
 
   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_XNP)
   call timab(tim_RR_XNP_reset,1,tsec)
@@ -1067,7 +1086,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then
     call xg_free(chebfi%X_NP)
 
-    call xg_init(chebfi%X_NP, space, spacedim, 2*neigenpairs, chebfi%spacecom)
+    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom, use_gpu=chebfi%use_gpu_cuda)
 
     call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1,spacedim,neigenpairs)
     call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1,spacedim,neigenpairs)
