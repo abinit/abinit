@@ -33,21 +33,28 @@
 
 module m_xg
 
-  use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t
+  use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr
 
   use m_errors
   use m_abicore
   use defs_basis
   use m_time, only : timab
   use m_xmpi, only : xmpi_sum
+  use m_xomp
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+#if defined(HAVE_GPU_CUDA)
   use m_gpu_toolbox
+#if defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
   use m_xg_kokkos
+#endif
 #endif
 
 #if defined HAVE_YAKL
  use gator_mod
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx !FIXME For debug purpose, to be removed
 #endif
 
   implicit none
@@ -88,7 +95,7 @@ module m_xg
   real(kind=c_double),            ABI_CONTIGUOUS pointer, save, private :: rwork(:) => null()
   complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, save, private :: cwork(:) => null()
 #else
-  integer, allocatable,  save, private :: iwork(:)
+  integer,                        allocatable, save, private :: iwork(:)
   real(kind=c_double),            allocatable, save, private :: rwork(:)
   complex(kind=c_double_complex), allocatable, save, private :: cwork(:)
 #endif
@@ -101,8 +108,11 @@ module m_xg
     character, public :: trans
     character, public :: normal
     integer, private :: spacedim_comm
+    integer, private :: use_gpu
     real(kind=c_double)           , pointer, private :: vecR(:,:) => null()
     complex(kind=c_double_complex), pointer, private :: vecC(:,:) => null()
+    real(kind=c_double)           , pointer, private :: vecR_gpu(:,:) => null()
+    complex(kind=c_double_complex), pointer, private :: vecC_gpu(:,:) => null()
   end type xgBlock_t
 
   type, public :: xg_t
@@ -112,6 +122,7 @@ module m_xg
     character, public :: trans
     character, public :: normal
     integer, private :: spacedim_comm
+    !FIXME Settle this
 #if defined HAVE_GPU && defined HAVE_YAKL
     real(kind=c_double)            , ABI_CONTIGUOUS pointer, private :: vecR(:,:) => null()
     complex(kind=c_double_complex) , ABI_CONTIGUOUS pointer, private :: vecC(:,:) => null()
@@ -119,6 +130,9 @@ module m_xg
     real(kind=c_double)            , allocatable, private :: vecR(:,:)
     complex(kind=c_double_complex) , allocatable, private :: vecC(:,:)
 #endif
+    integer, private :: use_gpu
+    real(kind=c_double)           , pointer, private :: vecR_gpu(:,:) => null()
+    complex(kind=c_double_complex), pointer, private :: vecC_gpu(:,:) => null()
     type(xgBlock_t), public :: self
   end type xg_t
 
@@ -224,6 +238,8 @@ module m_xg
   public :: xgBlock_reshape
   public :: xgBlock_reshape_spinor
   public :: xgBlock_print
+  public :: xgBlock_copy_from_gpu
+  public :: xgBlock_copy_to_gpu
   public :: xg_finalize
 
 contains
@@ -259,9 +275,15 @@ contains
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
       if ( allocated(array) ) then
+#ifdef HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET EXIT DATA MAP(release:array)
+#endif
         ABI_FREE(array)
       end if
       ABI_MALLOC(array,(asked_dim))
+#ifdef HAVE_OPENMP_OFFLOAD
+      !$OMP TARGET ENTER DATA MAP(alloc:array)
+#endif
     end if
 
 #endif
@@ -299,9 +321,15 @@ contains
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
       if ( allocated(array) ) then
+#ifdef HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET EXIT DATA MAP(release:array)
+#endif
         ABI_FREE(array)
       end if
       ABI_MALLOC(array,(asked_dim))
+#ifdef HAVE_OPENMP_OFFLOAD
+      !$OMP TARGET ENTER DATA MAP(alloc:array)
+#endif
     end if
 
 #endif
@@ -339,9 +367,15 @@ contains
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
       if ( allocated(array) ) then
+#ifdef HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET EXIT DATA MAP(release:array)
+#endif
         ABI_FREE(array)
       end if
       ABI_MALLOC(array,(asked_dim))
+#ifdef HAVE_OPENMP_OFFLOAD
+      !$OMP TARGET ENTER DATA MAP(alloc:array)
+#endif
     end if
 
 #endif
@@ -384,16 +418,18 @@ contains
   !! NAME
   !! xg_init
 
-  subroutine xg_init(xg, space, rows, cols, comm)
+  subroutine xg_init(xg, space, rows, cols, comm, use_gpu)
 
     type(xg_t), intent(inout) :: xg
     integer   , intent(in   ) :: space
     integer   , intent(in   ) :: rows
     integer   , intent(in   ) :: cols
-    integer   , optional, intent(in) :: comm
-
+    integer   , optional, intent(in) :: comm, use_gpu
+    integer                   :: l_use_gpu
+#if defined HAVE_GPU
     integer(kind=c_int32_t), parameter :: izero = 0
     integer(kind=c_size_t)             :: size_bytes
+#endif
 
     if ( rows < 1 ) then
       ABI_ERROR("rows < 1 ")
@@ -402,56 +438,108 @@ contains
       ABI_ERROR("cols < 1 ")
     end if
 
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    l_use_gpu = 0
+    if (present(use_gpu)) then
+      l_use_gpu = use_gpu
+    end if
+
     ! MG: Initialize arrays with zero to avoid SIGFPE in xmpi_sum
+    if (l_use_gpu==1) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-    select case (space)
-    case (SPACE_R,SPACE_CR)
-      if ( associated(xg%vecR) ) then
-        ABI_FREE_MANAGED(xg%vecR)
-      end if
-      ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
-      !xg%vecR(:,:) = zero
-      size_bytes = rows*cols*dp
-      call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
-      xg%trans = 't'
-    case (SPACE_C)
-      if ( associated(xg%vecC) ) then
-        ABI_FREE_MANAGED(xg%vecC)
-      end if
-      ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
-      !xg%vecC(:,:) = zero
-      size_bytes = rows*cols*dpc
-      call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
-      xg%trans = 'c'
-    case default
-      ABI_ERROR("Invalid space")
-    end select
-#else
-    select case (space)
-    case (SPACE_R,SPACE_CR)
-      if ( allocated(xg%vecR) ) then
-        ABI_FREE(xg%vecR)
-      end if
-      ABI_MALLOC(xg%vecR,(1:rows,1:cols))
-      xg%vecR(:,:) = zero
-      xg%trans = 't'
-    case (SPACE_C)
-      if ( allocated(xg%vecC) ) then
-        ABI_FREE(xg%vecC)
-      end if
-      ABI_MALLOC(xg%vecC,(1:rows,1:cols))
-      xg%vecC(:,:) = zero
-      xg%trans = 'c'
-    case default
-      ABI_ERROR("Invalid space")
-    end select
+      select case (space)
+      case (SPACE_R,SPACE_CR)
+        if ( associated(xg%vecR) ) then
+          ABI_FREE_MANAGED(xg%vecR)
+        end if
+        ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
+        !xg%vecR(:,:) = zero
+        size_bytes = rows*cols*dp
+        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
+        xg%trans = 't'
+      case (SPACE_C)
+        if ( associated(xg%vecC) ) then
+          ABI_FREE_MANAGED(xg%vecC)
+        end if
+        ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
+        !xg%vecC(:,:) = zero
+        size_bytes = rows*cols*dpc
+        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
+        xg%trans = 'c'
+      case default
+        ABI_ERROR("Invalid space")
+      end select
 #endif
+
+    else if (l_use_gpu==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case (space)
+      case (SPACE_R,SPACE_CR)
+        if ( allocated(xg%vecR) ) then
+          !$OMP TARGET EXIT DATA MAP(release:xg%vecR)
+          ABI_FREE(xg%vecR)
+        end if
+        ABI_MALLOC(xg%vecR,(1:rows,1:cols))
+        !xg%vecR(:,:) = zero
+        xg%trans = 't'
+        !$OMP TARGET ENTER DATA MAP(alloc:xg%vecR)
+        !FIXME To be wrapped
+        size_bytes = sizeof(xg%vecR)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecR)
+        call gpu_memset_omp(c_loc(xg%vecR), zero, size_bytes)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        if ( allocated(xg%vecC) ) then
+          !$OMP TARGET EXIT DATA MAP(release:xg%vecC)
+          ABI_FREE(xg%vecC)
+        end if
+        ABI_MALLOC(xg%vecC,(1:rows,1:cols))
+        !xg%vecC(:,:) = zero
+        xg%trans = 'c'
+        !$OMP TARGET ENTER DATA MAP(alloc:xg%vecC)
+        !FIXME To be wrapped
+        size_bytes = sizeof(xg%vecC)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecC)
+        call gpu_memset_omp(c_loc(xg%vecC), zero, size_bytes)
+        !$OMP END TARGET DATA
+      case default
+        ABI_ERROR("Invalid space")
+      end select
+#endif
+
+    else
+
+      !FIXME Settle this
+#ifndef HAVE_YAKL
+      select case (space)
+      case (SPACE_R,SPACE_CR)
+        if ( allocated(xg%vecR) ) then
+          ABI_FREE(xg%vecR)
+        end if
+        ABI_MALLOC(xg%vecR,(1:rows,1:cols))
+        xg%vecR(:,:) = zero
+        xg%trans = 't'
+      case (SPACE_C)
+        if ( allocated(xg%vecC) ) then
+          ABI_FREE(xg%vecC)
+        end if
+        ABI_MALLOC(xg%vecC,(1:rows,1:cols))
+        xg%vecC(:,:) = zero
+        xg%trans = 'c'
+      case default
+        ABI_ERROR("Invalid space")
+      end select
+#endif
+    end if
 
     xg%space = space
     xg%normal = 'n'
     xg%cols = cols
     xg%rows = rows
     xg%spacedim_comm = -1
+    xg%use_gpu = l_use_gpu
     if ( present(comm) ) xg%spacedim_comm = comm
 
     call xg_setBlock(xg,xg%self,1,rows,cols)
@@ -485,26 +573,54 @@ contains
       ABI_WARNING("Ignore some columns, input array to large")
     endif
 
-    select case (xg%space)
-    case (SPACE_R)
-      do col = 1, min(cols,xg%cols-shift_col)
-        xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
-      end do
-    case (SPACE_CR)
-      if ( xg%rows /= 2*rows ) then
-        ABI_ERROR("Bad number of rows")
-      end if
+    if(xg%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case (xg%space)
+      case (SPACE_R)
+        do col = 1, min(cols,xg%cols-shift_col)
+          xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+        end do
+        !$OMP TARGET UPDATE TO(xg%vecR)
+      case (SPACE_CR)
+        if ( xg%rows /= 2*rows ) then
+          ABI_ERROR("Bad number of rows")
+        end if
 
-      do col = 1, min(cols,xg%cols-shift_col)
-        xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
-        xg%vecR(rows+1:2*rows,shift_col+col) = array(2,(col-1)*rows+1:col*rows)
-      end do
-    case (SPACE_C)
-      do col = 1, min(cols,xg%cols-shift_col)
-        xg%vecC(1:rows,shift_col+col) = dcmplx(array(1,(col-1)*rows+1:col*rows), &
-          array(2,(col-1)*rows+1:col*rows))
-      end do
-    end select
+        do col = 1, min(cols,xg%cols-shift_col)
+          xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+          xg%vecR(rows+1:2*rows,shift_col+col) = array(2,(col-1)*rows+1:col*rows)
+        end do
+        !$OMP TARGET UPDATE TO(xg%vecR)
+      case (SPACE_C)
+        do col = 1, min(cols,xg%cols-shift_col)
+          xg%vecC(1:rows,shift_col+col) = dcmplx(array(1,(col-1)*rows+1:col*rows), &
+            array(2,(col-1)*rows+1:col*rows))
+        end do
+        !$OMP TARGET UPDATE TO(xg%vecC)
+      end select
+#endif
+    else
+      select case (xg%space)
+      case (SPACE_R)
+        do col = 1, min(cols,xg%cols-shift_col)
+          xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+        end do
+      case (SPACE_CR)
+        if ( xg%rows /= 2*rows ) then
+          ABI_ERROR("Bad number of rows")
+        end if
+
+        do col = 1, min(cols,xg%cols-shift_col)
+          xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+          xg%vecR(rows+1:2*rows,shift_col+col) = array(2,(col-1)*rows+1:col*rows)
+        end do
+      case (SPACE_C)
+        do col = 1, min(cols,xg%cols-shift_col)
+          xg%vecC(1:rows,shift_col+col) = dcmplx(array(1,(col-1)*rows+1:col*rows), &
+            array(2,(col-1)*rows+1:col*rows))
+        end do
+      end select
+    end if
 
     call timab(tim_set,2,tsec)
 
@@ -537,26 +653,57 @@ contains
       ABI_WARNING("Block Ignore some columns, input array to large")
     endif
 
-    select case (xgBlock%space)
-    case (SPACE_R)
-      do col = 1, min(cols,xgBlock%cols-shift_col)
-        xgBlock%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
-      end do
-    case (SPACE_CR)
-      if ( xgBlock%rows /= 2*rows ) then
-        ABI_ERROR("Bad number of rows")
-      end if
+    if(xgBlock%use_gpu==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case (xgBlock%space)
+      case (SPACE_R)
+        call xgBlock_copy_from_gpu(xgBlock)
+        do col = 1, min(cols,xgBlock%cols-shift_col)
+          xgBlock%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+        end do
+        call xgBlock_copy_to_gpu(xgBlock)
+      case (SPACE_CR)
+        if ( xgBlock%rows /= 2*rows ) then
+          ABI_ERROR("Bad number of rows")
+        end if
 
-      do col = 1, min(cols,xgBlock%cols-shift_col)
-        xgBlock%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
-        xgBlock%vecR(rows+1:2*rows,shift_col+col) = array(2,(col-1)*rows+1:col*rows)
-      end do
-    case (SPACE_C)
-      do col = 1, min(cols,xgBlock%cols-shift_col)
-        xgBlock%vecC(1:rows,shift_col+col) = dcmplx(array(1,(col-1)*rows+1:col*rows), &
-          array(2,(col-1)*rows+1:col*rows))
-      end do
-    end select
+        call xgBlock_copy_from_gpu(xgBlock)
+        do col = 1, min(cols,xgBlock%cols-shift_col)
+          xgBlock%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+          xgBlock%vecR(rows+1:2*rows,shift_col+col) = array(2,(col-1)*rows+1:col*rows)
+        end do
+        call xgBlock_copy_to_gpu(xgBlock)
+      case (SPACE_C)
+        call xgBlock_copy_from_gpu(xgBlock)
+        do col = 1, min(cols,xgBlock%cols-shift_col)
+          xgBlock%vecC(1:rows,shift_col+col) = dcmplx(array(1,(col-1)*rows+1:col*rows), &
+            array(2,(col-1)*rows+1:col*rows))
+        end do
+        call xgBlock_copy_to_gpu(xgBlock)
+      end select
+#endif
+    else
+      select case (xgBlock%space)
+      case (SPACE_R)
+        do col = 1, min(cols,xgBlock%cols-shift_col)
+          xgBlock%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+        end do
+      case (SPACE_CR)
+        if ( xgBlock%rows /= 2*rows ) then
+          ABI_ERROR("Bad number of rows")
+        end if
+
+        do col = 1, min(cols,xgBlock%cols-shift_col)
+          xgBlock%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
+          xgBlock%vecR(rows+1:2*rows,shift_col+col) = array(2,(col-1)*rows+1:col*rows)
+        end do
+      case (SPACE_C)
+        do col = 1, min(cols,xgBlock%cols-shift_col)
+          xgBlock%vecC(1:rows,shift_col+col) = dcmplx(array(1,(col-1)*rows+1:col*rows), &
+            array(2,(col-1)*rows+1:col*rows))
+        end do
+      end select
+    end if
 
     call timab(tim_set,2,tsec)
 
@@ -571,7 +718,7 @@ contains
   subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm)
     use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
-    double precision, intent(inout) :: array(:,:)
+    double precision, target, intent(inout) :: array(:,:)
     integer   , intent(in   ) :: space
     integer   , intent(in   ) :: rows
     integer   , intent(in   ) :: cols
@@ -587,6 +734,12 @@ contains
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecR,(/ rows, cols /))
+
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      cptr = xomp_get_mapped_ptr(c_loc(array))
+      call c_f_pointer(cptr, xgBlock%vecR_gpu, (/ rows, cols /))
+#endif
       xgBlock%trans = 't'
     case ( SPACE_C )
       if ( fullsize/2 < cols*rows .or. mod(fullsize/2,rows) /= 0) then
@@ -594,6 +747,12 @@ contains
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecC,(/ rows, cols /))
+
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      cptr = xomp_get_mapped_ptr(c_loc(array))
+      call c_f_pointer(cptr, xgBlock%vecC_gpu, (/ rows, cols /))
+#endif
       xgBlock%trans = 'c'
     end select
 
@@ -603,6 +762,8 @@ contains
     xgBlock%cols = cols
     xgBlock%normal = 'n'
     if ( present(comm) ) xgBlock%spacedim_comm = comm
+    xgBlock%use_gpu = 0
+    if ( xomp_target_is_present(c_loc(array)) ) xgBlock%use_gpu = 666
 
   end subroutine xgBlock_map
   !!***
@@ -655,13 +816,13 @@ contains
     type(xgBlock_t) ,             intent(inout) :: xgBlock
     integer(C_INT32_T), optional, intent(in)    :: deviceId
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+
     real(dp), pointer                           :: array(:,:)
     integer                                     :: blockdim
     integer                                     :: spacedim
     integer                                     :: ldim
     integer(C_SIZE_T)                           :: byte_count
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
 
     ! get the array pointer underneath the xgBlock
     call xgBlock_getSize(xgBlock,spacedim,blockdim,ldim)
@@ -681,6 +842,9 @@ contains
       call gpu_data_prefetch_async(c_loc(array), byte_count)
     end if
 
+#else
+    ABI_UNUSED(deviceId)
+    ABI_UNUSED_A(xgBlock)
 #endif
 
   end subroutine xgBlock_prefetch_async
@@ -714,6 +878,7 @@ contains
 
     select case (xg%space)
     case (SPACE_R)
+      !!$OMP TARGET UPDATE FROM(xg%vecR)
       do col = 1, min(cols,xg%cols-shift_col)
         array(1,(col-1)*rows+1:col*rows) = xg%vecR(1:rows,shift_col+col)
       end do
@@ -722,11 +887,13 @@ contains
         ABI_ERROR("Bad number of rows")
       end if
 
+      !!$OMP TARGET UPDATE FROM(xg%vecR)
       do col = 1, min(cols,xg%cols-shift_col)
         array(1,(col-1)*rows+1:col*rows) = xg%vecR(1:rows,shift_col+col)
         array(2,(col-1)*rows+1:col*rows) = xg%vecR(rows+1:2*rows,shift_col+col)
       end do
     case (SPACE_C)
+      !!$OMP TARGET UPDATE FROM(xg%vecC)
       do col = 1, min(cols,xg%cols-shift_col)
         array(1,(col-1)*rows+1:col*rows) = dble(xg%vecC(1:rows,shift_col+col))
         array(2,(col-1)*rows+1:col*rows) = aimag(xg%vecC(1:rows,shift_col+col))
@@ -818,14 +985,27 @@ contains
     xgBlock%trans = xg%trans
     xgBlock%normal = xg%normal
     xgBlock%spacedim_comm= xg%spacedim_comm
+    xgBlock%use_gpu = xg%use_gpu
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       cptr = getClocR(xg%rows,xg%cols,xg%vecR(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlock%vecR,(/ xgBlock%LDim,cols /))
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if(xg%use_gpu==666) then
+        cptr = xomp_get_mapped_ptr(c_loc(xg%vecR(:,fcol:fcol+cols-1)))
+        call c_f_pointer(cptr, xgBlock%vecR_gpu, (/ xgBlock%LDim,cols /))
+      end if
+#endif
     case(SPACE_C)
       cptr = getClocC(xg%rows,xg%cols,xg%vecC(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlock%vecC,(/ xgBlock%LDim,cols /))
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if(xg%use_gpu==666) then
+        cptr = xomp_get_mapped_ptr(c_loc(xg%vecC(:,fcol:fcol+cols-1)))
+        call c_f_pointer(cptr, xgBlock%vecC_gpu, (/ xgBlock%LDim,cols /))
+      end if
+#endif
     end select
 
   end subroutine xg_setBlock
@@ -859,14 +1039,27 @@ contains
     xgBlockB%trans = xgBlockA%trans
     xgBlockB%normal = xgBlockA%normal
     xgBlockB%spacedim_comm= xgBlockA%spacedim_comm
+    xgBlockB%use_gpu= xgBlockA%use_gpu
 
     select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
       cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecR,(/ xgBlockB%LDim,cols /))
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if(xgBlockB%use_gpu==666) then
+        cptr = xomp_get_mapped_ptr(c_loc(xgBlockA%vecR(:,fcol:fcol+cols-1)))
+        call c_f_pointer(cptr, xgBlockB%vecR_gpu, (/ xgBlockB%LDim,cols /))
+      end if
+#endif
     case(SPACE_C)
       cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecC,(/ xgBlockB%LDim,cols /))
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if(xgBlockB%use_gpu==666) then
+        cptr = xomp_get_mapped_ptr(c_loc(xgBlockA%vecC(:,fcol:fcol+cols-1)))
+        call c_f_pointer(cptr, xgBlockB%vecC_gpu, (/ xgBlockB%LDim,cols /))
+      end if
+#endif
     end select
 
   end subroutine xgBlock_setBlock
@@ -881,27 +1074,45 @@ contains
 
     type(xg_t), intent(inout) :: xg
 
+    if(xg%use_gpu==1) then
 #if defined HAVE_GPU && defined HAVE_YAKL
 
-    if ( associated(xg%vecR) ) then
-      ABI_FREE_MANAGED(xg%vecR)
-    end if
+      if ( associated(xg%vecR) ) then
+        ABI_FREE_MANAGED(xg%vecR)
+      end if
 
-    if ( associated(xg%vecC) ) then
-      ABI_FREE_MANAGED(xg%vecC)
-    end if
-
-#else
-
-    if ( allocated(xg%vecR) ) then
-      ABI_FREE(xg%vecR)
-    end if
-
-    if ( allocated(xg%vecC) ) then
-      ABI_FREE(xg%vecC)
-    end if
+      if ( associated(xg%vecC) ) then
+        ABI_FREE_MANAGED(xg%vecC)
+      end if
 
 #endif
+    else if(xg%use_gpu==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      if ( allocated(xg%vecR) ) then
+        !$OMP TARGET EXIT DATA MAP(release:xg%vecR)
+        ABI_FREE(xg%vecR)
+      end if
+
+      if ( allocated(xg%vecC) ) then
+        !$OMP TARGET EXIT DATA MAP(release:xg%vecC)
+        ABI_FREE(xg%vecC)
+      end if
+
+#endif
+    else
+
+      !FIXME Settle this
+#ifndef HAVE_YAKL
+      if ( allocated(xg%vecR) ) then
+        ABI_FREE(xg%vecR)
+      end if
+
+      if ( allocated(xg%vecC) ) then
+        ABI_FREE(xg%vecC)
+      end if
+#endif
+    end if
 
   end subroutine xg_free
   !!***
@@ -986,7 +1197,7 @@ contains
 
     integer :: incx
     integer :: incy
-    integer :: l_use_gpu_cuda = 0
+    integer :: l_use_gpu_cuda
 
     integer :: size1
     integer :: size2
@@ -996,6 +1207,7 @@ contains
     call timab(tim_copy,1,tsec)
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1019,6 +1231,21 @@ contains
         call gpu_xcopy(1, size, c_loc(xgBlockA%vecR), incx, c_loc(xgBlockB%vecR), incy)
       case(SPACE_C)
         call gpu_xcopy(2, size, c_loc(xgBlockA%vecC), incx, c_loc(xgBlockB%vecC), incy)
+      end select
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecR,xgBlockB%vecR)
+        call gpu_xcopy_omp(1, size, c_loc(xgBlockA%vecR), incx, c_loc(xgBlockB%vecR), incy)
+        !$OMP END TARGET DATA
+      case(SPACE_C)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockB%vecC)
+        call gpu_xcopy_omp(2, size, c_loc(xgBlockA%vecC), incx, c_loc(xgBlockB%vecC), incy)
+        !$OMP END TARGET DATA
       end select
 #endif
 
@@ -1148,12 +1375,13 @@ contains
     complex(kind=8)  :: cbeta
     integer          :: K
     double precision :: tsec(2)
-    integer          :: l_use_gpu_cuda = 0
+    integer          :: l_use_gpu_cuda
 
     call timab(tim_gemm,1,tsec)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1176,6 +1404,7 @@ contains
     case (SPACE_R,SPACE_CR)
       if (l_use_gpu_cuda==1) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+
         call gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           c_loc(xgBlockA%vecR), xgBlockA%LDim, &
@@ -1183,7 +1412,23 @@ contains
           cbeta, &
           c_loc(xgBlockW%vecR), xgBlockW%LDim)
 #endif
+
+      else if (l_use_gpu_cuda==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecR,xgBlockB%vecR,xgBlockW%vecR)
+        call gpu_xgemm_omp(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          calpha, &
+          c_loc(xgBlockA%vecR), xgBlockA%LDim, &
+          c_loc(xgBlockB%vecR), xgBlockB%LDim, &
+          cbeta, &
+          c_loc(xgBlockW%vecR), xgBlockW%LDim)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize() !FIXME For timings only
+
+#endif
       else
+
         call dgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           alpha, &
           xgBlockA%vecR, xgBlockA%LDim, &
@@ -1199,20 +1444,55 @@ contains
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
           call gpu_device_synchronize()
 #endif
+        else if (l_use_gpu_cuda==666) then
+          ! CPU waits for GPU to finish before doing MPI communications
+          !Retrieving data back on host to perform MPI Sum.
+          !FIXME We should avoid that copy using GPU Direct on systems that allow it.
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+          call gpu_device_synchronize()
+          call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+#endif
         end if
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+        call nvtxStartRange("MPI_Sum",8) !FIXME Debug only, to be removed
+#endif
         call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+        call nvtxEndRange() !FIXME Debug only, to be removed
+#endif
+        if (l_use_gpu_cuda==666) then
+          !Putting data back on GPU
+          !FIXME Again, this could be avoided using GPU-direct
+          call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+        end if
       end if
 
     case(SPACE_C)
 
       if (l_use_gpu_cuda==1) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+
         call gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           c_loc(xgBlockA%vecC), xgBlockA%LDim, &
           c_loc(xgBlockB%vecC), xgBlockB%LDim, &
           cbeta, &
           c_loc(xgBlockW%vecC), xgBlockW%LDim)
+
+#endif
+      else if (l_use_gpu_cuda==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockB%vecC,xgBlockW%vecC)
+        call gpu_xgemm_omp(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          calpha, &
+          c_loc(xgBlockA%vecC), xgBlockA%LDim, &
+          c_loc(xgBlockB%vecC), xgBlockB%LDim, &
+          cbeta, &
+          c_loc(xgBlockW%vecC), xgBlockW%LDim)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize() !FIXME For timings only
+
 #endif
       else
         call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
@@ -1229,8 +1509,21 @@ contains
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
           call gpu_device_synchronize()
 #endif
+        else if (l_use_gpu_cuda==666) then
+          ! CPU waits for GPU to finish before doing MPI communications
+          !Retrieving data back on host to perform MPI Sum.
+          !FIXME We should avoid that copy using GPU Direct on systems that allow it.
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+          call gpu_device_synchronize()
+          call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+#endif
         end if
         call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+        if (l_use_gpu_cuda==666) then
+          !Putting data back on GPU
+          !FIXME Again, this could be avoided using GPU-direct
+          call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+        end if
       end if
 
     end select
@@ -1258,12 +1551,13 @@ contains
 
     integer          :: K
     double precision :: tsec(2)
-    integer          :: l_use_gpu_cuda = 0
+    integer          :: l_use_gpu_cuda
 
     call timab(tim_gemm,1,tsec)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1282,6 +1576,7 @@ contains
     end if
 
     if (l_use_gpu_cuda==1) then
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       call gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
         alpha, &
@@ -1289,6 +1584,20 @@ contains
         c_loc(xgBlockB%vecC), xgBlockB%LDim, &
         beta, &
         c_loc(xgBlockW%vecC), xgBlockW%LDim)
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockB%vecC,xgBlockW%vecC)
+      call gpu_xgemm_omp(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+        alpha, &
+        c_loc(xgBlockA%vecC), xgBlockA%LDim, &
+        c_loc(xgBlockB%vecC), xgBlockB%LDim, &
+        beta, &
+        c_loc(xgBlockW%vecC), xgBlockW%LDim)
+        !$OMP END TARGET DATA
+      call gpu_device_synchronize() !FIXME For timings only
 #endif
     else
       call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
@@ -1304,8 +1613,27 @@ contains
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
         call gpu_device_synchronize()
 #endif
+      else if (l_use_gpu_cuda==666) then
+        ! CPU waits for GPU to finish before doing MPI communications
+        !Retrieving data back on host to perform MPI Sum.
+        !FIXME We should avoid that copy using GPU Direct on systems that allow it.
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+        call gpu_device_synchronize()
+        call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+#endif
       end if
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+      call nvtxStartRange("MPI_Sum",8)
+#endif
       call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+      call nvtxEndRange()
+#endif
+      if (l_use_gpu_cuda==666) then
+        !Putting data back on GPU
+        !FIXME Again, this could be avoided using GPU-direct
+        call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+      end if
     end if
 
     call timab(tim_gemm,2,tsec)
@@ -1318,25 +1646,76 @@ contains
   !! NAME
   !! xgBlock_potrf
 
-  subroutine xgBlock_potrf(xgBlock,uplo,info)
+  subroutine xgBlock_potrf(xgBlock,uplo,info,use_gpu_cuda)
 
     type(xgBlock_t), intent(inout) :: xgBlock
     character      , intent(in   ) :: uplo
     integer        , intent(  out) :: info
+    integer, intent(in), optional :: use_gpu_cuda
     double precision :: tsec(2)
+    integer          :: l_use_gpu_cuda
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer          :: bufferSize = -1
+#endif
 
     call timab(tim_potrf,1,tsec)
+
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
 
     if ( xgBlock%rows /= xgBlock%cols ) then
       ABI_ERROR("Matrix should be a square matrixx")
     endif
 
-    select case(xgBlock%space)
-    case (SPACE_R,SPACE_CR)
-      call dpotrf(uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
-    case (SPACE_C)
-      call zpotrf(uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
-    end select
+    !FIXME l_use_gpu_cuda==1
+    if (l_use_gpu_cuda==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
+        call gpu_xpotrf_buffersize_omp(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,bufferSize)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize()
+
+        ! resize rwork if needed
+        call checkResize(rwork,lrwork,bufferSize)
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
+        call gpu_xpotrf_omp(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,rwork,bufferSize,info)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize()
+      case (SPACE_C)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+        call gpu_xpotrf_buffersize_omp(2,uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,bufferSize)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize()
+
+        ! resize cwork if needed
+        call checkResize(cwork,lcwork,bufferSize)
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+        call gpu_xpotrf_omp(2,uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,cwork,bufferSize,info)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize()
+      end select
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
+      call abi_abort('COLL')
+#endif
+    else
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        call dpotrf(uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
+      case (SPACE_C)
+        call zpotrf(uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
+      end select
+    end if
 
     call timab(tim_potrf,2,tsec)
 
@@ -1404,7 +1783,7 @@ contains
   !! NAME
   !! xgBlock_heevd
 
-  subroutine xgBlock_heevd(jobz,uplo,xgBlockA,xgBlockW, info)
+  subroutine xgBlock_heevd(jobz, uplo, xgBlockA, xgBlockW, info, use_gpu_cuda)
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1412,6 +1791,12 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
     double precision :: tsec(2)
+    integer         , intent(in   ), optional :: use_gpu_cuda
+    integer          :: l_use_gpu_cuda
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer          :: bufferSize = -1
+#endif
 
     call timab(tim_heevd,1,tsec)
 
@@ -1419,42 +1804,108 @@ contains
       ABI_ERROR("Block3 must be real")
     end if
 
-    call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
 
-    select case(xgBlockA%space)
+    !FIXME l_use_gpu_cuda==1 ?
+    if (l_use_gpu_cuda==666) then
 
-    case (SPACE_R,SPACE_CR)
-      call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case(xgBlockA%space)
 
-      call dsyevd(jobz,uplo,xgBlockA%cols, &
-        xgBlockA%vecR,xgBlockA%LDim, &
+      case (SPACE_R,SPACE_CR)
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecR,xgBlockW%vecR)
+        call gpu_xsyevd_buffersize_omp(1,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA%vecR),xgBlockA%LDim, &
+            c_loc(xgBlockW%vecR),bufferSize)
+        !$OMP END TARGET DATA
+
+        ! resize rwork if needed
+        call checkResize(rwork,lrwork,bufferSize)
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecR,xgBlockW%vecR,rwork)
+        call gpu_xsyevd_omp(1,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA%vecR),xgBlockA%LDim, &
+            c_loc(xgBlockW%vecR),c_loc(rwork),lrwork,  &
+            info)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize()
+
+      case (SPACE_C)
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockW%vecR)
+        call gpu_xsyevd_buffersize_omp(2,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA%vecC),xgBlockA%LDim, &
+            c_loc(xgBlockW%vecR),bufferSize)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize()
+
+        ! resize cwork if needed
+        call checkResize(cwork,lcwork,bufferSize)
+        call gpu_device_synchronize()
+
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockW%vecR,cwork)
+        call gpu_xsyevd_omp(2,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA%vecC),xgBlockA%LDim, &
+            c_loc(xgBlockW%vecR),c_loc(cwork),lcwork,  &
+            info)
+        !$OMP END TARGET DATA
+        call gpu_device_synchronize()
+
+      end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
+      call abi_abort('COLL')
+#endif
+
+    else
+
+      call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+
+      select case(xgBlockA%space)
+
+      case (SPACE_R,SPACE_CR)
+        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+
+        call dsyevd(jobz,uplo,xgBlockA%cols, &
+          xgBlockA%vecR,xgBlockA%LDim, &
         xgBlockW%vecR, rwork, lrwork, &
         iwork, liwork,info)
 
-    case (SPACE_C)
-      call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
-      call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+5*xgBlockA%rows+1)
+      case (SPACE_C)
+        call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
+        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+5*xgBlockA%rows+1)
 
-      call zheevd(jobz,uplo,xgBlockA%cols, &
-        xgBlockA%vecC,xgBlockA%LDim, &
+        call zheevd(jobz,uplo,xgBlockA%cols, &
+          xgBlockA%vecC,xgBlockA%LDim, &
         xgBlockW%vecR, &
         cwork, lcwork, rwork, lrwork, iwork, liwork, info)
 
-      if ( int(cwork(1)) > lcwork ) then
-        !write(std_out,*) "Allocate work from", int(lcwork), "to", int(cwork(1))
-        call checkResize(cwork,lcwork,int(cwork(1)))
+        if ( int(cwork(1)) > lcwork ) then
+          !write(std_out,*) "Allocate work from", int(lcwork), "to", int(cwork(1))
+          call checkResize(cwork,lcwork,int(cwork(1)))
+        end if
+
+      end select
+
+      if ( rwork(1) > lrwork ) then
+        !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+        call checkResize(rwork,lrwork,int(rwork(1)))
       end if
 
-    end select
+      if ( iwork(1) > liwork ) then
+        !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+        call checkResize(iwork,liwork,int(iwork(1)))
+      end if
 
-    if ( rwork(1) > lrwork ) then
-      !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
-      call checkResize(rwork,lrwork,int(rwork(1)))
-    end if
-
-    if ( iwork(1) > liwork ) then
-      !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
-      call checkResize(iwork,liwork,int(iwork(1)))
     end if
 
     call timab(tim_heevd,2,tsec)
@@ -1745,8 +2196,11 @@ contains
     integer         , intent(in   ), optional :: use_gpu_cuda
 
     double precision :: tsec(2)
-    integer          :: l_use_gpu_cuda = 0
+    integer          :: l_use_gpu_cuda
+
+#if defined HAVE_GPU
     integer          :: bufferSize = -1
+#endif
 
     call timab(tim_hegvd,1,tsec)
 
@@ -1759,6 +2213,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1824,6 +2279,75 @@ contains
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
       call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      select case(xgBlockA%space)
+
+      case (SPACE_R,SPACE_CR)
+
+        ! probe needed bufferSize
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecR,xgBlockB%vecR,xgBlockW%vecR)
+        call gpu_xsygvd_buffersize_omp(1, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecR), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecR), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             bufferSize)
+        !$OMP END TARGET DATA
+
+
+        ! resize rwork if needed
+        call checkResize(rwork,lrwork,bufferSize)
+
+        ! and compute
+        !$OMP TARGET DATA USE_DEVICE_PTR(rwork,xgBlockA%vecR,xgBlockB%vecR,xgBlockW%vecR)
+        call gpu_xsygvd_omp(1, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecR), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecR), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             c_loc(rwork), bufferSize, info)
+        !$OMP END TARGET DATA
+
+        call gpu_device_synchronize() !FIXME for timings only
+
+      case (SPACE_C)
+
+        ! probe needed bufferSize
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockB%vecC,xgBlockW%vecR)
+        call gpu_xsygvd_buffersize_omp(2, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecC), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecC), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             bufferSize)
+        !$OMP END TARGET DATA
+
+        ! resize cwork if needed
+        call checkResize(cwork,lcwork,bufferSize)
+
+        ! and compute
+        !$OMP TARGET DATA USE_DEVICE_PTR(cwork,xgBlockA%vecC,xgBlockB%vecC,xgBlockW%vecR)
+        call gpu_xsygvd_omp(2, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA%vecC), xgBlockA%ldim, &
+          &             c_loc(xgBlockB%vecC), xgBlockB%ldim, &
+          &             c_loc(xgBlockW%vecR), &
+          &             c_loc(cwork), bufferSize, info)
+        !$OMP END TARGET DATA
+
+        call gpu_device_synchronize()
+
+      end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
       call abi_abort('COLL')
 #endif
 
@@ -2086,7 +2610,7 @@ contains
   !! NAME
   !! xgBlock_trsmR
 
-  subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB)
+  subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha,xgBlockA,xgBlockB,use_gpu_cuda)
 
     character       , intent(in   ) :: side
     character       , intent(in   ) :: uplo
@@ -2095,23 +2619,62 @@ contains
     double precision, intent(in   ) :: alpha
     type(xgBlock_t) , intent(inout) :: xgBlockA
     type(xgBlock_t) , intent(inout) :: xgBlockB
+    integer         , intent(in   ), optional :: use_gpu_cuda
     complex(kind=8) :: calpha
     double precision :: tsec(2)
+    integer          :: l_use_gpu_cuda
 
     call timab(tim_trsm,1,tsec)
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
     end if
 
-    select case(xgBlockA%space)
-    case (SPACE_R,SPACE_CR)
-      call dtrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
-        alpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,xgBlockB%LDim)
-    case (SPACE_C)
-      calpha = dcmplx(alpha,0.d0)
-      call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
-        calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
-    end select
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecR,xgBlockB%vecR)
+        call gpu_xtrsm_omp(1,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+          alpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,xgBlockB%LDim)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        calpha = dcmplx(alpha,0.d0)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockB%vecC)
+        call gpu_xtrsm_omp(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+          calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
+        !$OMP END TARGET DATA
+      end select
+      call gpu_device_synchronize()
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
+      call abi_abort('COLL')
+#endif
+
+    else
+
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        call dtrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+          alpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,xgBlockB%LDim)
+      case (SPACE_C)
+        calpha = dcmplx(alpha,0.d0)
+        call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+          calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
+      end select
+
+    end if
 
     call timab(tim_trsm,2,tsec)
 
@@ -2123,7 +2686,7 @@ contains
   !! NAME
   !! xgBlock_trsmC
 
-  subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB)
+  subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB,use_gpu_cuda)
 
     character      , intent(in   ) :: side
     character      , intent(in   ) :: uplo
@@ -2132,7 +2695,9 @@ contains
     complex(kind=8), intent(in   ) :: alpha
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
+    integer        , intent(in   ), optional :: use_gpu_cuda
     double precision :: tsec(2)
+    integer          :: l_use_gpu_cuda
 
     call timab(tim_trsm,1,tsec)
 
@@ -2140,8 +2705,34 @@ contains
       ABI_ERROR("Not same space")
     end if
 
-    call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
-      alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA%vecC,xgBlockB%vecC)
+      call gpu_xtrsm_omp(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+        alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
+      !$OMP END TARGET DATA
+      call gpu_device_synchronize()
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
+      call abi_abort('COLL')
+#endif
+
+    else
+      call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+        alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
+    end if
 
     call timab(tim_trsm,2,tsec)
 
@@ -2162,8 +2753,11 @@ contains
     integer        , intent(in   ), optional :: use_gpu_cuda
 
     integer :: iblock
-    integer          :: l_use_gpu_cuda = 0
+    integer          :: l_use_gpu_cuda
 
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer :: jblock
+#endif
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockW%space ) then
       ABI_ERROR("Must be same space for caxmy")
@@ -2180,6 +2774,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2201,6 +2796,37 @@ contains
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
       call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecR,xgBlockB%vecR,xgBlockW%vecR,da%vecR)
+        do iblock = 1, xgBlockA%cols
+          do jblock = 1, xgBlockA%rows
+            xgBlockA%vecR(jblock,iblock) = - da%vecR(iblock,1) * xgBlockB%vecR(jblock,iblock) &
+                + xgBlockW%vecR(jblock,iblock)
+          end do
+        end do
+      case (SPACE_C)
+        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecC,xgBlockB%vecC,xgBlockW%vecC,da%vecR)
+        do iblock = 1, xgBlockA%cols
+          do jblock = 1, xgBlockA%rows
+            xgBlockA%vecC(jblock,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(jblock,iblock) &
+                + xgBlockW%vecC(jblock,iblock)
+          end do
+        end do
+      end select
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,&
+          "We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
       call abi_abort('COLL')
 #endif
 
@@ -2322,13 +2948,15 @@ contains
     integer,          intent(in   ), optional :: use_gpu_cuda
 
     integer :: rows
-    integer :: iblock
-    integer :: l_use_gpu_cuda = 0
+    integer :: iblock,irow
+    integer :: l_use_gpu_cuda
 
+    ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2352,6 +2980,35 @@ contains
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
       call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      !$OMP TARGET ENTER DATA MAP(to:vec)
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        !$OMP TARGET PARALLEL DO MAP(to:xgBlock%vecR) MAP(to:vec) PRIVATE(iblock,irow)
+        do iblock = 1, xgBlock%cols
+          do irow = shift+1, min(xgBlock%rows,shift+rows)
+            xgBlock%vecR(irow,iblock) = xgBlock%vecR(irow,iblock) * vec(irow)
+          end do
+        end do
+      case (SPACE_C)
+        !$OMP TARGET PARALLEL DO MAP(to:xgBlock%vecC) MAP(to:vec) PRIVATE(iblock,irow)
+        do iblock = 1, xgBlock%cols
+          do irow = shift+1, min(xgBlock%rows,shift+rows)
+            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+          end do
+        end do
+      end select
+      !$OMP TARGET EXIT DATA MAP(release:vec)
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
       call abi_abort('COLL')
 #endif
 
@@ -2392,13 +3049,15 @@ contains
     integer,         intent(in   ), optional :: use_gpu_cuda
 
     integer :: rows
-    integer :: iblock
-    integer :: l_use_gpu_cuda = 0
+    integer :: iblock,irow
+    integer :: l_use_gpu_cuda
 
+    ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2420,6 +3079,31 @@ contains
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
       call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        ABI_ERROR("Error colwiseMulC")
+      case (SPACE_C)
+        !$OMP TARGET ENTER DATA MAP(to:vec)
+        !$OMP TARGET PARALLEL DO MAP(to:xgBlock%vecC) MAP(to:vec) PRIVATE(iblock,irow)
+        do iblock = 1, xgBlock%cols
+          do irow = shift+1, min(xgBlock%rows,shift+rows)
+            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+          end do
+        end do
+      end select
+      !$OMP TARGET EXIT DATA MAP(release:vec)
+
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
       call abi_abort('COLL')
 #endif
 
@@ -2454,7 +3138,7 @@ contains
     type(xgBlock_t),  intent(in   ) :: xgBlock2
     integer        ,  intent(in   ), optional :: use_gpu_cuda
 
-    integer      :: l_use_gpu_cuda = 0
+    integer      :: l_use_gpu_cuda
     complex(dpc) :: da_cplx
 
     da_cplx = dcmplx(da,0.0_dp)
@@ -2471,6 +3155,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2488,8 +3173,20 @@ contains
       end select
 #endif
 
+    else if (l_use_gpu_cuda==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case(xgBlock1%space)
+      case (SPACE_R,SPACE_CR)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1%vecR,xgBlock2%vecR)
+        call gpu_xaxpy_omp(1, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2%vecR),1,c_loc(xgBlock1%vecR),1)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1%vecC,xgBlock2%vecC)
+        call gpu_xaxpy_omp(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2%vecC),1,c_loc(xgBlock1%vecC),1)
+        !$OMP END TARGET DATA
+      end select
+#endif
     else
-
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
         call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)
@@ -2514,7 +3211,7 @@ contains
     type(xgBlock_t), intent(in   ) :: xgBlock2
     integer        , intent(in   ), optional :: use_gpu_cuda
 
-    integer      :: l_use_gpu_cuda = 0
+    integer      :: l_use_gpu_cuda
 
     if ( xgBlock1%space /= xgBlock2%space ) then
       ABI_ERROR("Must be same space for Saxpy")
@@ -2531,6 +3228,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2538,6 +3236,12 @@ contains
     if (l_use_gpu_cuda==1) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       call gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2%vecC), 1, c_loc(xgBlock1%vecC), 1)
+#endif
+    else if (l_use_gpu_cuda==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1%vecC,xgBlock2%vecC)
+      call gpu_xaxpy_omp(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2%vecC), 1, c_loc(xgBlock1%vecC), 1)
+      !$OMP END TARGET DATA
 #endif
     else
       call zaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
@@ -2551,12 +3255,14 @@ contains
   !! NAME
   !! xgBlock_add
 
-  subroutine xgBlock_add(xgBlockA, xgBlockB)
+  subroutine xgBlock_add(xgBlockA, xgBlockB, use_gpu_cuda)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
+    integer, intent(in), optional :: use_gpu_cuda
     integer :: col
     integer :: row
+    integer      :: l_use_gpu_cuda
 
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Must be same space for add")
@@ -2568,24 +3274,54 @@ contains
       ABI_ERROR("Must have same cols for add")
     end if
 
-    select case(xgBlockA%space)
-    case (SPACE_R,SPACE_CR)
-      !$omp parallel do schedule(static)
-      do col = 1, xgBlockB%cols
-        do row = 1, xgBlockB%rows
-          xgBlockA%vecR(row,col) = xgBlockA%vecR(row,col) + xgBlockB%vecR(row,col)
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
+
+    if (l_use_gpu_cuda==666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecR,xgBlockB%vecR)
+        do col = 1, xgBlockB%cols
+          do row = 1, xgBlockB%rows
+            xgBlockA%vecR(row,col) = xgBlockA%vecR(row,col) + xgBlockB%vecR(row,col)
+          end do
         end do
-      end do
-      !call daxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
-    case (SPACE_C)
-      !$omp parallel do schedule(static)
-      do col = 1, xgBlockB%cols
-        do row = 1, xgBlockB%rows
-          xgBlockA%vecC(row,col) = xgBlockA%vecC(row,col) + xgBlockB%vecC(row,col)
+        !call daxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
+      case (SPACE_C)
+        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecC,xgBlockB%vecC)
+        do col = 1, xgBlockB%cols
+          do row = 1, xgBlockB%rows
+            xgBlockA%vecC(row,col) = xgBlockA%vecC(row,col) + xgBlockB%vecC(row,col)
+          end do
         end do
-      end do
-      !call zaxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
-    end select
+        !call zaxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
+      end select
+#endif
+    else
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        !$omp parallel do schedule(static)
+        do col = 1, xgBlockB%cols
+          do row = 1, xgBlockB%rows
+            xgBlockA%vecR(row,col) = xgBlockA%vecR(row,col) + xgBlockB%vecR(row,col)
+          end do
+        end do
+        !call daxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
+      case (SPACE_C)
+        !$omp parallel do schedule(static)
+        do col = 1, xgBlockB%cols
+          do row = 1, xgBlockB%rows
+            xgBlockA%vecC(row,col) = xgBlockA%vecC(row,col) + xgBlockB%vecC(row,col)
+          end do
+        end do
+        !call zaxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
+      end select
+    end if
 
   end subroutine xgBlock_add
   !!***
@@ -2631,8 +3367,12 @@ contains
 
     integer :: icol, ierr
     double precision,external :: ddot
-    integer      :: l_use_gpu_cuda = 0
+    integer      :: l_use_gpu_cuda
 
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    double precision :: tmp
+    integer :: i
+#endif
 
     if ( dot%space /= SPACE_R ) then
       ABI_ERROR("error space")
@@ -2640,6 +3380,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2677,6 +3418,53 @@ contains
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      select case(xgBlock%space)
+      case(SPACE_R,SPACE_CR)
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecR,xgBlock%vecR) PRIVATE(icol,tmp)
+        do icol = 1, xgBlock%cols
+          tmp=0
+          !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
+          do i = 1,xgBlock%rows
+            tmp = tmp + xgBlock%vecR(i,icol)*xgBlock%vecR(i,icol)
+          end do
+          dot%vecR(icol,1)=tmp
+        end do
+      case(SPACE_C)
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecR,xgBlock%vecC) PRIVATE(icol,tmp)
+        do icol = 1, xgBlock%cols
+          tmp=0
+          !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
+          do i = 1,xgBlock%rows
+            tmp = tmp + dconjg(xgBlock%vecC(i,icol))*xgBlock%vecC(i,icol)
+          end do
+          dot%vecR(icol,1)=tmp
+        end do
+      end select
+      !FIXME This should happen inplace ideally
+      !$OMP TARGET UPDATE FROM(dot%vecR)
+      call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
+      !$OMP TARGET UPDATE TO(dot%vecR)
+
+      ! do reductions
+      if ( present(max_val) ) then
+        max_val = maxval(dot%vecR(1:xgBlock%cols,1))
+      end if
+      if ( present(min_val) ) then
+        min_val = minval(dot%vecR(1:xgBlock%cols,1))
+      end if
+      if ( present(max_elt) ) then
+        max_elt = maxloc(dot%vecR(1:xgBlock%cols,1),dim=1)
+      end if
+      if ( present(min_elt) ) then
+        min_elt = minloc(dot%vecR(1:xgBlock%cols,1),dim=1)
+      end if
+
 #endif
 
     else
@@ -2739,10 +3527,16 @@ contains
     integer :: icol
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
-    integer :: l_use_gpu_cuda = 0
+    integer :: l_use_gpu_cuda
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    double precision :: tmp
+    integer :: i
+#endif
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2786,6 +3580,7 @@ contains
         end if
         if ( present(min_elt) ) then
           call computeMinloc_scalar(c_loc(dot%vecC(1,1)), xgBlockA%cols, min_elt)
+
         end if
 
       end select
@@ -2793,6 +3588,66 @@ contains
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case(xgBlockA%space)
+      case(SPACE_R,SPACE_CR)
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecR,xgBlockA%vecR,xgBlockB%vecR) PRIVATE(icol,tmp)
+        do icol = 1, xgBlockA%cols
+          tmp=0
+          !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
+          do i = 1,xgBlockA%rows
+            tmp = tmp + xgBlockA%vecR(i,icol)*xgBlockB%vecR(i,icol)
+          end do
+          dot%vecR(icol,1)=tmp
+        end do
+
+        !$OMP TARGET UPDATE FROM(dot%vecR)
+        !TODO Port this to GPU (reductions)
+        if ( present(max_val) ) then
+          max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dot%vecR(1:xgBlockA%cols,1))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
+        end if
+
+      case(SPACE_C)
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecC,xgBlockA%vecC,xgBlockB%vecC) PRIVATE(icol,tmp)
+        do icol = 1, xgBlockA%cols
+          tmp=0
+          !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
+          do i = 1, xgBlockA%rows
+            tmp = tmp + dconjg(xgBlockA%vecC(i,icol))*xgBlockB%vecC(i,icol)
+          end do
+          dot%vecC(icol,1)=tmp
+        end do
+
+        !$OMP TARGET UPDATE FROM(dot%vecC)
+        !TODO Port this to GPU (reductions)
+        if ( present(max_val) ) then
+          max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dble(dot%vecC(1:xgBlockA%cols,1)))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
+        end if
+
+      end select
+
 #endif
 
     else
@@ -2865,14 +3720,20 @@ contains
     integer,               intent(in   ), optional :: use_gpu_cuda
 
     integer :: irow
-    integer :: l_use_gpu_cuda = 0
+    integer :: l_use_gpu_cuda
 
+#if defined HAVE_GPU
     ! TODO: evaluate if total_size should be a 64 bit integer, i.e.
     ! does spacedim * neigenpairs be larger than 2^31 = 2. 10^9
     integer(kind=c_int32_t)  :: total_size
+#if defined HAVE_OPENMP_OFFLOAD
+    integer :: icol
+#endif
+#endif
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -2922,12 +3783,67 @@ contains
         if ( present(min_elt) ) then
           call computeMinloc_complex_2d(c_loc(divResult%vecC(1,1)), xgBlockA%rows, xgBlockA%cols, c_loc(min_elt))
         end if
-
       end select
 
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+      total_size = xgBlockA%rows * xgBlockA%cols
+
+      select case(xgBlockA%space)
+      case(SPACE_R,SPACE_CR)
+        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecR,xgBlockB%vecR,divResult%vecR)
+        do irow = 1, xgBlockA%rows
+          do icol = 1, xgBlockA%cols
+            divResult%vecR(irow,icol) = xgBlockA%vecR(irow,icol)/xgBlockB%vecR(irow,icol)
+          end do
+        end do
+        !FIXME Port this on GPU to avoid copy below ?
+        !$OMP TARGET UPDATE FROM(divResult%vecR)
+        if ( present(max_val) ) then
+          max_val = maxval(dble(divResult%vecR))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dble(divResult%vecR))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+
+      case(SPACE_C)
+
+        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecC,xgBlockB%vecC,divResult%vecC)
+        do irow = 1, xgBlockA%rows
+          do icol = 1, xgBlockA%cols
+            divResult%vecC(irow,icol) = xgBlockA%vecC(irow,icol)/xgBlockB%vecC(irow,icol)
+          end do
+        end do
+        !FIXME Port this on GPU to avoid copy below ?
+        !$OMP TARGET UPDATE FROM(divResult%vecC)
+        if ( present(max_val) ) then
+          max_val = maxval(dble(divResult%vecC))
+        end if
+        if ( present(min_val) ) then
+          min_val = minval(dble(divResult%vecC))
+        end if
+        if ( present(max_elt) ) then
+          max_elt = maxloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+        if ( present(min_elt) ) then
+          min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
+        end if
+        !print*, "---------------"
+      end select
+
 #endif
 
     else
@@ -3002,6 +3918,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -3026,6 +3943,43 @@ contains
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
       call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
+      call abi_abort('COLL')
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+#if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
+      if ( xgBlock%ldim .eq. xgBlock%rows ) then
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
+          call gpu_xscal_omp(1, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock%vecR), inc)
+          !$OMP END TARGET DATA
+        case (SPACE_C)
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+          call gpu_xscal_omp(2, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock%vecC), inc)
+          !$OMP END TARGET DATA
+        end select
+      else
+        !FIXME Do loop that calls scal on each column sequentially, might be improved
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          do i=1,xgBlock%cols
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
+            call gpu_xscal_omp(1, xgBlock%rows/inc, valc, c_loc(xgBlock%vecR(:,i)), inc)
+            !$OMP END TARGET DATA
+          end do
+        case (SPACE_C)
+          do i=1,xgBlock%cols
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+            call gpu_xscal_omp(2, xgBlock%rows/inc, valc, c_loc(xgBlock%vecC(:,i)), inc)
+            !$OMP END TARGET DATA
+          end do
+        end select
+      end if
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
       call abi_abort('COLL')
 #endif
 
@@ -3071,10 +4025,11 @@ contains
     integer        , intent(in   ), optional :: use_gpu_cuda
 
     integer :: i
-    integer :: l_use_gpu_cuda = 0
+    integer :: l_use_gpu_cuda
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -3102,8 +4057,31 @@ contains
       call abi_abort('COLL')
 #endif
 
-    else
+    else if (l_use_gpu_cuda==666) then
 
+#if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
+      if ( xgBlock%ldim .eq. xgBlock%rows ) then
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          ABI_ERROR("Scaling real vector with a complex not possible")
+        case (SPACE_C)
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+          call gpu_xscal_omp(2, xgBlock%ldim*xgBlock%cols/inc, val, c_loc(xgBlock%vecC), inc)
+          !$OMP END TARGET DATA
+        end select
+      else
+
+        ! TODO (PK) : evaluate if it is really necessary to deal with this case
+        ABI_BUG("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
+
+      end if
+#else
+      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 666 in
+      ! input parameter file
+      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
+      call abi_abort('COLL')
+#endif
+    else
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
@@ -3179,6 +4157,76 @@ contains
 
   end subroutine xgBlock_check
 !!***
+
+  !!****f* m_xg/xgBlock_copy_to_gpu
+  !!
+  !! NAME
+  !! xgBlock_copy_to_gpu
+
+  subroutine xgBlock_copy_to_gpu(xgBlock)
+    type(xgBlock_t), intent(in   ) :: xgBlock
+#if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
+    integer(c_size_t) :: size
+
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      size=xgBlock%LDim*xgBlock%cols*dp
+      call copy_on_gpu_omp(xgBlock%vecR, xgBlock%vecR_gpu, size)
+    case (SPACE_C)
+      size=xgBlock%LDim*xgBlock%cols*dpc*2
+      call copy_on_gpu_omp(xgBlock%vecC, xgBlock%vecC_gpu, size)
+    end select
+#else
+    ABI_UNUSED_A(xgBlock)
+#endif
+  end subroutine xgBlock_copy_to_gpu
+  !!***
+
+  !!****f* m_xg/xgBlock_copy_from_gpu
+  !!
+  !! NAME
+  !! xgBlock_copy_from_gpu
+
+  subroutine xgBlock_copy_from_gpu(xgBlock)
+    type(xgBlock_t), intent(in   ) :: xgBlock
+#if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
+    integer(c_size_t) :: size
+
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      size=xgBlock%LDim*xgBlock%cols*dp
+      call copy_from_gpu_omp(xgBlock%vecR, xgBlock%vecR_gpu, size)
+    case (SPACE_C)
+      size=xgBlock%LDim*xgBlock%cols*dpc*2
+      call copy_from_gpu_omp(xgBlock%vecC, xgBlock%vecC_gpu, size)
+    end select
+#else
+    ABI_UNUSED_A(xgBlock)
+#endif
+  end subroutine xgBlock_copy_from_gpu
+  !!***
+
+#if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
+  !!****f* m_xg/xgBlock_map_gpu_ptr
+  !!
+  !! NAME
+  !! xgBlock_map_gpu_ptr
+
+  subroutine xgBlock_map_gpu_ptr(xgBlock)
+    type(xgBlock_t), intent(in   ) :: xgBlock
+    type(c_ptr) :: gpu_ptr
+
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(xgBlock%vecR))
+      call c_f_pointer(gpu_ptr, xgBlock%vecR_gpu, (/ xgBlock%LDim, xgBlock%cols /))
+    case (SPACE_C)
+      gpu_ptr = xomp_get_mapped_ptr(c_loc(xgBlock%vecC))
+      call c_f_pointer(gpu_ptr, xgBlock%vecC_gpu, (/ xgBlock%LDim, xgBlock%cols /))
+    end select
+  end subroutine xgBlock_map_gpu_ptr
+  !!***
+#endif
 
   !!****f* m_xg/xgBlock_reshape
   !!
@@ -3265,11 +4313,14 @@ contains
     integer        , intent(in   ), optional :: use_gpu_cuda
 
     integer :: i
-    integer :: l_use_gpu_cuda = 0
+    integer :: l_use_gpu_cuda
+#if defined HAVE_GPU
     integer(C_SIZE_T) :: byte_count
+#endif
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -3277,14 +4328,31 @@ contains
     if (l_use_gpu_cuda==1) then
 
 #if defined HAVE_GPU
-       select case(xgBlock%space)
+      select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         byte_count = xgBlock%ldim * xgBlock%cols * dp
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
       case (SPACE_C)
         byte_count = xgBlock%ldim * xgBlock%cols * dpc
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
-     end select
+      end select
+#endif
+
+    else if (l_use_gpu_cuda==666) then
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        byte_count = xgBlock%ldim * xgBlock%cols * dp
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
+        call gpu_memset_omp(c_loc(xgBlock%vecR), 0, byte_count)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        byte_count = xgBlock%ldim * xgBlock%cols * dpc
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
+        call gpu_memset_omp(c_loc(xgBlock%vecC), 0, byte_count)
+        !$OMP END TARGET DATA
+      end select
 #endif
 
     else
@@ -3515,23 +4583,41 @@ contains
   !! NAME
   !! xgBlock_print
 
-  subroutine xgBlock_print(xgBlock,outunit)
+  subroutine xgBlock_print(xgBlock,outunit, use_gpu_cuda)
 
     type(xgBlock_t), intent(in) :: xgBlock
     integer, intent(in) :: outunit
+    integer,optional :: use_gpu_cuda
     integer :: i, j
     character(len=4) :: ccols
     character(len=50) :: fstring
+    integer :: l_use_gpu_cuda
 
+    ! if optional parameter is present, use it
+    ! else use default value, i.e. don't use GPU
+    l_use_gpu_cuda = 0
+    if (present(use_gpu_cuda)) then
+      l_use_gpu_cuda = use_gpu_cuda
+    end if
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if (l_use_gpu_cuda==666) then
+        !$OMP TARGET UPDATE FROM(xgBlock%vecR)
+      end if
+#endif
       write(ccols,'(i4)') xgBlock%cols
       fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
       do i = 1, xgBlock%rows
         write(outunit,fstring) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
       end do
     case (SPACE_C)
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if (l_use_gpu_cuda==666) then
+        !$OMP TARGET UPDATE FROM(xgBlock%vecC)
+      end if
+#endif
       write(ccols,'(i4)') xgBlock%cols
       fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'ES22.14))'
       do i = 1, xgBlock%rows
@@ -3548,6 +4634,7 @@ contains
 
   subroutine xg_finalize()
 
+!FIXME Improvement needed, GPU variants aren't properly encapsulated
 #if defined HAVE_GPU && defined HAVE_YAKL
 
     if ( associated(iwork) ) then
@@ -3558,6 +4645,18 @@ contains
     end if
     if ( associated(cwork) ) then
       ABI_FREE_MANAGED(cwork)
+    end if
+
+#elif defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+
+    if ( allocated(iwork) ) then
+      !$OMP TARGET EXIT DATA MAP(release:iwork)
+    end if
+    if ( allocated(rwork) ) then
+      !$OMP TARGET EXIT DATA MAP(release:rwork)
+    end if
+    if ( allocated(cwork) ) then
+      !$OMP TARGET EXIT DATA MAP(release:cwork)
     end if
 
 #else
