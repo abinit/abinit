@@ -123,7 +123,7 @@ module m_xgTransposer
 !! NAME
 !! xgTransposer_constructor
 
-  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,ncpuRows,ncpuCols,state,algo)
+  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,ncpuRows,ncpuCols,state,algo,use_gpu)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
@@ -132,6 +132,7 @@ module m_xgTransposer
     integer                , intent(in   ) :: ncpuCols
     integer                , intent(in   ) :: state
     integer                , intent(in   ) :: algo
+    integer , optional     , intent(in   ) :: use_gpu
     integer :: commLinalg
     integer :: ncols
     integer :: nrows
@@ -147,6 +148,8 @@ module m_xgTransposer
     xgTransposer%xgBlock_linalg => xgBlock_linalg
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
     xgTransposer%state = state
+    xgTransposer%use_gpu = 0
+    if(present(use_gpu)) xgTransposer%use_gpu = use_gpu
     commLinalg = comm(xgBlock_linalg)
     xgTransposer%mpiData(MPI_LINALG)%comm = commLinalg
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
@@ -264,6 +267,7 @@ module m_xgTransposer
     xgTransposer%mpiData(MPI_ROWS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_ROWS)%comm)
 
     xgTransposer%mpiAlgo = xgTransposerInitialized%mpiAlgo
+    xgTransposer%use_gpu = xgTransposerInitialized%use_gpu
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
     ncpuRows = xgTransposer%mpiData(MPI_ROWS)%size
@@ -425,6 +429,11 @@ module m_xgTransposer
       end if
 #else
       if ( allocated(xgTransposer%buffer) ) then
+        if(xgTransposer%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+          !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
+#endif
+        end if
         ABI_FREE(xgTransposer%buffer)
       end if
 #endif
@@ -437,6 +446,11 @@ module m_xgTransposer
 #else
         ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
 #endif
+        if(xgTransposer%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+          !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
+#endif
+        end if
         call xgBlock_map(xgTransposer%xgBlock_colsrows,xgTransposer%buffer,space(xgTransposer%xgBlock_linalg),&
           xgTransposer%perPair*xgTransposer%nrowsColsRows,&
           xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm)
@@ -627,6 +641,11 @@ module m_xgTransposer
    end select
 
    xgTransposer%state = STATE_LINALG
+   if(xgTransposer%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(recvbuf)
+#endif
+   end if
 
    !ABI_MALLOC(status,(MPI_STATUS_SIZE))
    !call mpi_wait(request(myrequest),status,ierr)
@@ -733,6 +752,11 @@ module m_xgTransposer
 
      call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf, &
 &      xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
+     if(xgTransposer%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET UPDATE FROM(sendbuf)
+#endif
+     end if
      !write(*,*) "Before ialltoall"
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
@@ -907,7 +931,17 @@ module m_xgTransposer
           bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
         end do
       end do
+      if(xgTransposer%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET UPDATE TO(bufferOrdered)
+#endif
+      end if
     case (STATE_COLSROWS)
+      if(xgTransposer%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET UPDATE FROM(bufferOrdered)
+#endif
+      end if
       ! We are going to STATE_LINALG so we are before all2all
       !$omp parallel do private(shiftCpu,toe,tos,frome,froms), collapse(2)
       do col = 1, ncolsColsRows
@@ -1010,6 +1044,11 @@ module m_xgTransposer
     end if
 #else
     if ( allocated(xgTransposer%buffer) ) then
+      if(xgTransposer%use_gpu == 666) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+        !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
+#endif
+      end if
       ABI_FREE(xgTransposer%buffer)
     end if
 #endif
