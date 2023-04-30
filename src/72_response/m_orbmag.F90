@@ -17,6 +17,8 @@
 !! OUTPUT
 !!
 !! NOTES
+!! These routines implement the theory developed in Zwanziger, Torrent, Gonze 
+!! Phys Rev B 107, 165157 (2023). This paper will be referred to the comments as ZTG23.
 !!
 !! SOURCE
 
@@ -201,7 +203,7 @@ CONTAINS  !=====================================================================
 !! TODO
 !!
 !! NOTES
-!! See Gonze and Zwanziger, PRB 84, 064446 (2011)
+!! See Zwanziger, Torrent, and Gonze Phys Rev B 107, 165157 (2023), "ZTG23"
 !! DDK wavefunctions are used for the derivatives.
 !!
 !! SOURCE
@@ -494,34 +496,45 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,&
      ABI_MALLOC(m2_k,(2,nband_k,3))
      ABI_MALLOC(m2_mu_k,(2,nband_k,3))
 
+     ! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
      call orbmag_cc_k(atindx,b1_k,cprj1_k,dimlmn,dtset,eig_k,fermie,gs_hamk,ikpt,isppol,&
        & m1_k,m1_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k,ucvol)
 
+     ! ZTG Eq. 46 term 1
      orbmag_terms(:,:,isppol,:,ibcc) = orbmag_terms(:,:,isppol,:,ibcc) + b1_k(:,:,:)
 
      orbmag_terms(:,:,isppol,:,imcc) = orbmag_terms(:,:,isppol,:,imcc) + m1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,imcc) = orbmag_terms(:,:,isppol,:,imcc) + m1_mu_k(:,:,:)
 
+     ! ZTG23 Eq. 36 terms 3 and 4 and Eq. 46 term 2
      call orbmag_vv_k(atindx,b1_k,b2_k,cg_k,cprj_k,dimlmn,dtset,eig_k,fermie,gs_hamk,&
       & ikpt,isppol,m1_k,m1_mu_k,m2_k,m2_mu_k,mcgk,mcprjk,mpi_enreg,nband_k,&
       & npw_k,occ_k,pcg1_k,ucvol)
+
+     ! ZTG Eq. 46 term 2
      orbmag_terms(:,:,isppol,:,ibvv1) = orbmag_terms(:,:,isppol,:,ibvv1) + b1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,ibvv2) = orbmag_terms(:,:,isppol,:,ibvv2) + b2_k(:,:,:)
 
+     ! ZTG23 Eq. 36 term 3
      orbmag_terms(:,:,isppol,:,imvv1) = orbmag_terms(:,:,isppol,:,imvv1) + m1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,imvv1) = orbmag_terms(:,:,isppol,:,imvv1) + m1_mu_k(:,:,:)
 
+     ! ZTG23 Eq. 36 term 4
      orbmag_terms(:,:,isppol,:,imvv2) = orbmag_terms(:,:,isppol,:,imvv2) + m2_k(:,:,:)
      orbmag_terms(:,:,isppol,:,imvv2) = orbmag_terms(:,:,isppol,:,imvv2) + m2_mu_k(:,:,:)
 
+     ! ZTG23 Eq. 36 term 1
      call orbmag_nl_k(atindx,cprj_k,dimlmn,dterm,dtset,eig_k,ikpt,isppol,&
        & m1_k,mcprjk,nband_k,occ_k,pawtab,ucvol)
      orbmag_terms(:,:,isppol,:,imnl) = orbmag_terms(:,:,isppol,:,imnl) + m1_k(:,:,:)
 
+     ! ZTG23 text after Eq. 42
      nl1_option = 1 ! LR
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,&
        & nband_k,nl1_option,occ_k,pawtab,ucvol)
      orbmag_terms(:,:,isppol,:,imlr) = orbmag_terms(:,:,isppol,:,imlr) + m1_k
+     
+     ! ZTG23 Eq. 43
      nl1_option = 2 ! BM
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,&
        & nband_k,nl1_option,occ_k,pawtab,ucvol)
@@ -805,6 +818,7 @@ end subroutine orbmag_nl1_k
 !!
 !! NOTES
 !! computes -\frac{i}{2}\sum_{Rij}<u|d_b p_i>D^0_{ij} - E^0s^0_{ij}<d_g p_j|u>
+!! This is ZTG23 Eq. 36 term 1
 !!
 !! SOURCE
 
@@ -919,6 +933,7 @@ end subroutine orbmag_nl_k
 !! TODO
 !!
 !! NOTES
+!! ZTG23 Eq. 36 term 2 and Eq. 46 term 1
 !!
 !! SOURCE
 
@@ -1076,6 +1091,7 @@ end subroutine orbmag_cc_k
 !! NOTES
 !! contributions (1) <Pc d_b u|E d_gS|u> + <u|E d_bS|Pc d_g u> and
 !! (2) \sum_n' <u |d_b ES|u_n'><u_n'|d_g ES|u> to orbital magnetization
+!! these are ZTG23 Eq 36 terms 3 and 4, and Eq. 46 term 2
 !!
 !! SOURCE
 
@@ -1711,6 +1727,7 @@ end subroutine dterm_qij
 !! TODO
 !!
 !! NOTES
+!! ZTG23 Eq. 43
 !! this term is A0.An = \frac{1}{2}(B x r).\alpha^2(m x r) which can be rewritten
 !! as \frac{\alpha^2}{2} [(B.m)r^2 - B.rr.m]
 !! the first term is bm1 below; the second term involves writing rr as a rank 2 cartesian
@@ -1885,6 +1902,7 @@ end subroutine dterm_BM
 !! TODO
 !!
 !! NOTES
+!! ZTG23 text after Eq 42, the on-site angular momentum
 !!
 !! SOURCE
 

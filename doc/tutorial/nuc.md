@@ -197,7 +197,7 @@ shielded magnetic field (the traditional view),
 or conversely [[cite:Thonhauser2009]] [[cite:Ceresoli2010]], 
 a shielded dipole interacting with the bare magnetic field. In Abinit we adopt
 the second view point, and so compute the perturbed energy $\partial E/\partial B$ in the
-presence of a nuclear dipole moment. The necessary expressions follow from references [[cite:Ceresoli2006]] [[cite:Gonze2011a]], and
+presence of a nuclear dipole moment. The necessary expressions are found in [[cite:Zwanziger2023]], see also [[cite:Gonze2011a]] [[cite:Ceresoli2006]], and
 are quite complex; in highly abbreviated form we evaluate
 $$ \partial E/\partial B_\alpha = M_\alpha = \frac{i}{2}\epsilon_{\alpha\beta\gamma}\sum_n^{\mathrm{occ}} \int d\mathbf{k} 
 \langle \partial_{k_\beta} u_{n\mathbf{k}}|(H_{\mathbf{k}}+E_{\mathbf{k}})|\partial_{k_\gamma} u_{n\mathbf{k}}\rangle $$
