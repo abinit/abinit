@@ -489,6 +489,7 @@ type, public :: dataset_type
  integer :: ph_nqpath = 0
  integer :: ph_nqshift = 1
  integer :: pimd_constraint
+ integer :: prt_lorbmag = 0
  integer :: pitransform
  integer :: plowan_bandi
  integer :: plowan_bandf
@@ -1820,6 +1821,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%paral_atom         = dtin%paral_atom
  dtout%paral_kgb          = dtin%paral_kgb
  dtout%paral_rf           = dtin%paral_rf
+ dtout%prt_lorbmag        = dtin%prt_lorbmag
  dtout%pawcpxocc          = dtin%pawcpxocc
  dtout%pawcross           = dtin%pawcross
  dtout%pawlcutd           = dtin%pawlcutd
@@ -3436,7 +3438,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtphbands prtocc prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model prtnabla prtnest prtphbands prtocc prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
