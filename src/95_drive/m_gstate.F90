@@ -2038,7 +2038,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 #if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
      filename=trim(fnameabo_eig)//'.nc'
-     call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
+     call write_eig(eigen,fermie,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
 #endif
  end if

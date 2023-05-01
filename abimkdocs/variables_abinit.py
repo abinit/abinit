@@ -15571,6 +15571,16 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 If set to 1, a file *_EIG, containing the k-points and one-electron eigenvalues is printed.
+
+If set to 2, with [[ionmov]] /= 0, eigenenergies file will be output at each time step, with
+the name being made of
+
+  * the root output name,
+  * followed by _TIMx, where x is related to the time step (see later)
+  * then followed by _EIG.
+
+The file structure of this unformatted output file is described in [[help:abinit#localpotfile|this section]].
+No output is provided by a negative value of this variable.
 """,
 ),
 
@@ -16478,6 +16488,23 @@ prtwf_full requires [[prtwf]] == 1 and a ground-state calculation done on a
 homogeneous k-mesh (see [[ngkpt]] and [[shiftk]]). The tetrahedron table is
 produced only if the number of k-points in the irreducible zone ([[nkpt]]) is
 greater than 3.
+""",
+),
+
+Variable(
+    abivarname="prt_lorbmag",
+    varset="gstate",
+    vartype="integer",
+    topics=['printing_prden'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT L ORBital MAGnetic moment inside PAW spheres",
+    requires="[[nspden]] == 4 and [[usepaw]] == 1 and [[usepawu]] != 0",
+    added_in_version="v9",
+    text=r"""
+If set to 1, prints in the output the orbital magnetic moment integrated inside the PAW spheres (Bohr magneton).
+The orbital magnetic moment is resolved orbital by orbital (p, d and f, the s orbital moment being always zero) on each atom.
+Works only if PAW and DFT+U is used and if the spin-orbit coupling is on (with [[nspden]] == 4).
 """,
 ),
 
@@ -23059,9 +23086,9 @@ future.
 In case of electronic SCF cycle convergency problems, try to set a number of
 unoccupied bands in the buffer with [[extfpmd_nbdbuf]] input variable.
 
-  * **useextfpmd** = 1 *(Recommanded)*, the energy shift will be evaluated
+  * **useextfpmd** = 1 *(Recommended)*, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
-contributions will be computed with integrals over the band number.
+contributions will be computed using the density of states of the Fermi gas.
 
   * **useextfpmd** = 2, the energy shift will be evaluated by making
 the average between the eigenvalues and the Fermi gas energy over the last
@@ -23072,6 +23099,10 @@ over the band number.
 average between the eigenvalues and the kinetic energies over the last
 [[extfpmd_nbcut]] bands, and the contributions will be computed using the
 density of states of the Fermi gas.
+
+  * **useextfpmd** = 4, the energy shift will be evaluated
+by making an integration of the trial potential over the real space and the
+contributions will be computed with integrals over the band number.
 """,
 ),
 
@@ -23110,9 +23141,6 @@ electronic contributions starting from [[nband]] - [[extfpmd_nbdbuf]].
 In some cases, setting this input variable to a positive number can solve
 convergency problems due to high variations of electron density within the SCF
 cycle.
-
-Moreover, setting [[extfpmd_nbdbuf]] = [[nband]] should theoretically give
-access to Fermi gas orbital free calculations (not tested yet).
 
 **extfpmd_nbdbuf** must be less than or equal to [[nband]].
 """,
