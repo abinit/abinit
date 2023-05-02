@@ -633,6 +633,7 @@ ABI_FREE(xcart)
 &           coeffs_all(ii),&
 &           effective_potential%anharmonics_terms%coefficients(ii)%terms,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%name,&
+&           isbound=0,   &
 &           check=.false.)
          end do
 
@@ -658,6 +659,7 @@ ABI_FREE(xcart)
 &             coeffs_tmp(jj),&
 &             coeffs_all(jj)%terms,&
 &             coeffs_all(jj)%name,&
+&             isbound=0,   &
 &             check=.false.)
            end do
 
@@ -729,6 +731,7 @@ ABI_FREE(xcart)
 &           coeffs_all(ii),&
 &           effective_potential%anharmonics_terms%coefficients(ii)%terms,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%name,&
+&           isbound=0,  &
 &           check=.false.)
          end do
 
@@ -738,6 +741,7 @@ ABI_FREE(xcart)
 &           coeffs_all(ncoeff+ii),&
 &           coeffs_bound(ii)%terms,&
 &           coeffs_bound(ii)%name,&
+&           isbound=0,   &
 &           check=.false.)
          end do
 
@@ -750,6 +754,7 @@ ABI_FREE(xcart)
 &           coeffs_tmp(ii),&
 &           effective_potential%anharmonics_terms%coefficients(ii)%terms,&
 &           effective_potential%anharmonics_terms%coefficients(ii)%name,&
+&           isbound=0,   &
 &           check=.false.)
          end do
 
@@ -843,6 +848,7 @@ ABI_FREE(xcart)
 &                     coeffs_tmp(kk),&
 &                     coeffs_bound(icoeff_bound)%terms,&
 &                     coeffs_bound(icoeff_bound)%name,&
+&                     isbound=0,   &
 &                     check=.false.)
 
                    end if
@@ -904,6 +910,7 @@ ABI_FREE(xcart)
 &               coeffs_tmp(kk),&
 &               coeffs_bound(icoeff_bound)%terms,&
 &               coeffs_bound(icoeff_bound)%name,&
+&               isbound=0,   &
 &               check=.false.)
              end do
              ABI_FREE(coeff_values)

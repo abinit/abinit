@@ -3465,7 +3465,9 @@ integer ::   max_nbody_copy(size(max_nbody))
     ABI_ERROR("max_nbody should be -1, 0, or positive.")
   end if
 
-  if(max_nbody_copy(totpower)/=0 .and. nbody> max_nbody_copy(totpower)) then
+  ! skip if max_nbody=0,
+  ! and skip if nbody>max_nbody
+  if(max_nbody_copy(totpower)==0 .or. nbody> max_nbody_copy(totpower)) then
     call irred_combinations%free()
     return
   end if
