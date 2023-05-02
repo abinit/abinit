@@ -3426,7 +3426,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   !integer, pointer :: symlist_i(:)
   integer :: nbody, totpower, nbody_strain, totpower_strain, nbody_disp, totpower_disp
   type(polyform_t) :: polyform
-integer ::   max_nbody_copy(size(max_nbody))
+  integer ::   max_nbody_copy(size(max_nbody))
   !Source
 
   ABI_UNUSED(compute)
