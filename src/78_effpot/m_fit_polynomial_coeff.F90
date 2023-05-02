@@ -126,7 +126,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,&
 &                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv,&
-&                                   dispterms,coeff_file_rw,read_effective_potential, max_nbody)
+&                                   dispterms,coeff_file_rw,read_effective_potential, max_nbody, min_bound_coeff)
 
  implicit none
 
@@ -148,6 +148,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical,optional,intent(in) :: initialize_data,prt_files,prt_GF_csv
  logical,optional,intent(in) :: fit_on(3), sel_on(3),dispterms
  real(dp),optional,intent(in) :: fit_factors(3)
+ real(dp), optional, intent(in) :: min_bound_coeff
 !Local variables-------------------------------
 !scalar
  integer :: nbound
@@ -166,7 +167,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: need_prt_files,need_prt_GF_csv,need_disp
  logical :: fit_iatom_all
 !arrays
- real(dp) :: mingf(4),int_fit_factors(3)
+ real(dp) :: mingf(4),int_fit_factors(3), min_bound_coeff1
  integer :: sc_size(3)
  logical,allocatable  :: fix_and_impose(:)
  integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:),fixcoeff_corr(:)
@@ -270,6 +271,9 @@ end if
  if(present(fit_tolMSDE)) tolMSDE  = fit_tolMSDE
  if(present(fit_tolMSDFS))tolMSDFS = fit_tolMSDFS
  if(present(fit_tolGF))      tolGF = fit_tolGF
+
+ min_bound_coeff1=-100
+ if(present(min_bound_coeff))  min_bound_coeff1=min_bound_coeff
 
  end block
 
@@ -644,7 +648,7 @@ print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
    else
      coeffs_in => coeffs_tmp
    end if
-   call polynomial_coeff_init(one,coeffs_in(jcoeff)%nterm,&
+   call polynomial_coeff_init(zero,coeffs_in(jcoeff)%nterm,&
      &                             my_coeffs(icoeff),coeffs_in(jcoeff)%terms,&
      &                             coeffs_in(jcoeff)%name,&
      &                              coeffs_in(jcoeff)%isbound, &
@@ -729,8 +733,8 @@ end block
       ncycle_tot=ncycle_tot+nbound
       ncycle_max=ncycle_max+nbound
     end if
-    print *, "ncycle_max:", ncycle_max
-    print *, "ncycle_tot:", ncycle_tot
+   ! print *, "ncycle_max:", ncycle_max
+   ! print *, "ncycle_tot:", ncycle_tot
   end block
 
 
@@ -860,7 +864,6 @@ end block
      rank_to_send = 0
      do icoeff=1,my_ncoeff
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
-
          if(need_initialize_data)then
            my_icoeff = icoeff
          else
@@ -873,10 +876,13 @@ end block
 &                                          strten_coeffs,fit_data%training_set%ucvol,&
 &                                          my_coefflist(icoeff),1)
          end if
-
          energy_coeffs_tmp(icycle,:)    = energy_coeffs(my_icoeff,:)
          fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
          strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
+         !energy_coeffs_tmp(icycle,:)    = 0
+         !fcart_coeffs_tmp(:,:,icycle,:) = 0
+         !strten_coeffs_tmp(:,:,icycle)  = 0
+
          rank_to_send = my_rank
          call polynomial_coeff_free(coeffs_tmp(icycle))
          call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
@@ -884,6 +890,7 @@ end block
            &                                   my_coeffs(icoeff)%name,&
            &                                   my_coeffs(icoeff)%isbound,&
            &                                   check=.false.)
+
          exit
        end if
      end do
@@ -956,9 +963,6 @@ end block
 &                                            "(eV^2/A^2)"
      call wrtout(ab_out,message,'COLL')
    end if
-
-
-   ! put the bounding terms to the list.
 
 
 !  Start fit process
@@ -1042,14 +1046,18 @@ end block
        fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
        strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
 
+
 !      call the fit process routine
 !      This routine solves the linear system proposed
 !      by C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
        call fit_polynomial_coeff_solve(coeff_values(1:icycle),fcart_coeffs_tmp,fit_data%fcart_diff,&
-&                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
-&                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncycle_max,ntime,&
-&                                      strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega,fit_on,int_fit_factors, nbound=nbound)
+         &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
+         &                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncycle_max,ntime,&
+         &                                      strten_coeffs_tmp,fit_data%strten_diff,&
+         &                                      fit_data%training_set%sqomega,fit_on,int_fit_factors, &
+         &                                      nbound=nbound, min_bound_coeff=min_bound_coeff1,  &
+         &                                      ignore_bound=.True.)
+!&                                      ignore_bound=(.not. (icycle_tmp==ncycle) ))
 
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
@@ -1064,20 +1072,20 @@ end block
 &                                            fit_data%strten_diff,fit_data%training_set%sqomega)
 
            write (j_char, '(i7)') my_coeffindexes(icoeff)
-           write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char),&
+           write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char), &
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&
-&                                   gf_values(4,icoeff)*HaBohr_eVAng**2,&
-&                                   gf_values(1,icoeff)*HaBohr_eVAng**2,&
-&                                   gf_values(2,icoeff)*HaBohr_eVAng**2,&
-&                                   gf_values(3,icoeff)*HaBohr_eVAng**2
+           &   gf_values(4,icoeff)*HaBohr_eVAng**2, &
+           &   gf_values(1,icoeff)*HaBohr_eVAng**2, &
+           &   gf_values(2,icoeff)*HaBohr_eVAng**2, &
+           &   gf_values(3,icoeff)*HaBohr_eVAng**2
            if(need_prt_GF_csv)then
              write(message2, '(I7.7,3a,ES18.10,a,ES18.10,a,ES18.10,a,ES18.10)') my_coeffindexes(icoeff),",",&
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
-&                                   trim(my_coeffs(icoeff)%name),",",&
-&                                   gf_values(4,icoeff)*HaBohr_eVAng**2,",",&
-&                                   gf_values(1,icoeff)*HaBohr_eVAng**2,",",&
-&                                   gf_values(2,icoeff)*HaBohr_eVAng**2,",",&
-&                                   gf_values(3,icoeff)*HaBohr_eVAng**2
+             & trim(my_coeffs(icoeff)%name),",", &
+             & gf_values(4,icoeff)*HaBohr_eVAng**2,",", &
+             & gf_values(1,icoeff)*HaBohr_eVAng**2,",", &
+             & gf_values(2,icoeff)*HaBohr_eVAng**2,",", &
+             & gf_values(3,icoeff)*HaBohr_eVAng**2
            end if
          end if
        else!In this case the matrix is singular
@@ -1085,13 +1093,13 @@ end block
          singular_coeffs(icoeff) = 1
          write(message, '(a)') ' The matrix is singular...'
          if(need_prt_GF_csv)then
-           write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",",&
+           write(message2, '(I7.7,10a)') my_coeffindexes(icoeff),",", &
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2,",",&
 &                                   trim(my_coeffs(icoeff)%name),",",&
 &                                  "None",",",&
-&                                  "None",",",&
-&                                  "None",",",&
-&                                  "None"
+             & "None",",",&
+             & "None",",",&
+             & "None"
          endif
        end if
        if(need_verbose)then
@@ -1143,7 +1151,6 @@ end block
        list_coeffs(icycle) = index_min
      end if
 
-     !Check the bounding terms.
 
 
 !    Check if this coeff is treat by this cpu and fill the
@@ -1168,6 +1175,13 @@ end block
          fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
          strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
          call polynomial_coeff_free(coeffs_tmp(icycle))
+
+         !block
+         !  integer :: ic
+         !  do ic =1, icycle-1
+         !    call polynomial_coeff_setCoefficient(coeff_values(ic), coeffs_tmp(ic))
+         !  end do
+         !end block
          call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
            &                                   coeffs_tmp(icycle),my_coeffs(icoeff)%terms,&
            &                                   my_coeffs(icoeff)%name,&
@@ -1186,6 +1200,13 @@ end block
      call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
      call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
      call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm)
+     !block
+     !  integer :: ic
+     !  do ic =1, icycle-1
+     !    call polynomial_coeff_broadcast(coeffs_tmp(ic), rank_to_send, comm)
+     !    print *, coeffs_tmp(ic)%name
+     !  end do
+     !end block
 
      if(need_verbose) then
        write(message, '(a,I0,2a)' )' Selecting the coefficient number ',list_coeffs(icycle),&
@@ -1318,12 +1339,14 @@ end block
 
 !      call the fit process routine
 !      This routine solves the linear system proposed by
-!      C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
-       call fit_polynomial_coeff_solve(coeff_values(1:icycle_tmp),fcart_coeffs_tmp,fit_data%fcart_diff,&
-&                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
-&                                      list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp,ncycle_max,&
-&                                      ntime,strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega,fit_on,int_fit_factors, nbound=nbound)
+!      C.Escorihuela-Sayalero see PRB95,094115(2017)
+       !      [[cite:Escorihuela-Sayalero2017]]
+       call fit_polynomial_coeff_solve(coeff_values(1:icycle_tmp)&
+         &,fcart_coeffs_tmp,fit_data%fcart_diff, energy_coeffs_tmp,fit_data&
+         &%energy_diff,info, list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp&
+         &,ncycle_max, ntime,strten_coeffs_tmp,fit_data%strten_diff, fit_data&
+         &%training_set%sqomega,fit_on,int_fit_factors, nbound=nbound, &
+         & min_bound_coeff=min_bound_coeff1, ignore_bound=.False. )
        if(info==0)then
          call fit_polynomial_coeff_computeGF(coeff_values(1:icycle_tmp),energy_coeffs_tmp,&
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
@@ -1418,7 +1441,8 @@ end block
 &                                  energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                  list_coeffs_tmp(1:ncycle_tot),natom_sc,&
 &                                  ncycle_tot,ncycle_max,ntime,strten_coeffs_tmp,&
-&                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on,int_fit_factors, nbound=nbound)
+&                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on,int_fit_factors, &
+&                                  nbound=nbound, min_bound_coeff=min_bound_coeff1, ignore_bound=.False.)
 
    if(need_verbose) then
      write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
@@ -1514,12 +1538,13 @@ end block
 &                                       compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
 
 
-   INQUIRE(FILE='TRS_fit_diff_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_anh)
+   INQUIRE(FILE='TRS_fit_diff_anharmonic_terms_energy.dat',OPENED=file_opened&
+     &,number=unit_anh)
    if(file_opened) close(unit_anh)
 
 !    if(need_verbose) then
 ! !  Print the standard deviation after the fit
-!      write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+!      write(message,'(4a,ES24.16,4a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10, &
 ! &                    ' Mean Standard Deviation values at the end of the fit process (meV/f.u.):',&
 ! &               ch10,'   Energy          : ',&
 ! &               gf_values(4,1)*Ha_EV*1000/ ncell ,ch10,&
@@ -1758,7 +1783,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  do imodel=1,my_nmodel
    if(my_rank >= (nproc-nmodel_alone))then
      my_modelindexes(imodel)=(int(aint(real(nmodel,sp)/nproc)))*(my_rank)+&
-&                              (my_rank - (nproc-nmodel_alone)) + imodel
+       & (my_rank - (nproc-nmodel_alone)) + imodel
      my_modellist(imodel) = imodel
    else
      my_modelindexes(imodel)=(my_nmodel)*(my_rank)  + imodel
@@ -1772,11 +1797,11 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  coeff_values = zero
  do ii=1,my_nmodel
    imodel = my_modelindexes(ii)
-   call fit_polynomial_coeff_solve(coeff_values(imodel,1:ncoeff),fcart_coeffs,fit_data%fcart_diff,&
-&                                  energy_coeffs,fit_data%energy_diff,info,&
-&                                  list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
-&                                  ncoeff_tot,ntime,strten_coeffs,fit_data%strten_diff,&
-&                                  fit_data%training_set%sqomega,fit_on,fit_factors, nbound=0)
+   call fit_polynomial_coeff_solve(coeff_values(imodel,1:ncoeff),fcart_coeffs&
+     &,fit_data%fcart_diff, energy_coeffs,fit_data%energy_diff,info,&
+     & list_coeff(imodel,1:ncoeff),natom_sc,ncoeff, ncoeff_tot,ntime&
+     &,strten_coeffs,fit_data%strten_diff, fit_data%training_set%sqomega,fit_on&
+     &,fit_factors, nbound=0, min_bound_coeff=-10.0_dp, ignore_bound=.True.)
 
    if(info==0)then
 
@@ -2096,7 +2121,8 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 
 subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energy_coeffs,energy_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
-&                                     strten_coeffs,strten_diff,sqomega,fit_on,fit_factors, nbound)
+&                                     strten_coeffs,strten_diff,sqomega,fit_on,fit_factors, nbound, &
+&                                     min_bound_coeff, ignore_bound)
 
  implicit none
 
@@ -2114,7 +2140,9 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(out):: coefficients(ncoeff_fit)
  real(dp),intent(in)  :: fit_factors(3)
+ real(dp), intent(in) :: min_bound_coeff
  logical,intent(in)  :: fit_on(3)
+ logical,intent(in)  :: ignore_bound
 
 !Local variables-------------------------------
 !scalar
@@ -2224,30 +2252,42 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
 !2-Solve Ax=B
 !OLD VERSION..
 ! call dgesvx(FACT,TRANS,N,NRHS,A,LDA,AF,LDAF,IPIV,EQUED,R,C,B,LDB,coefficients,LDX,&
-!             RCOND,FERR,BERR,WORK,IWORK,INFO)
+ !RCOND,FERR,BERR,WORK,IWORK,INFO)
 !U is nonsingular
 ! if (INFO==N+1) then
 !   coefficients = zero
 ! end if
 
 
- if(nbound>0)  then
+ if(nbound>0 .and. (.not. ignore_bound))  then
    block
      real(dp) :: bl(N), bu(N), w(N)
      integer :: istate(N+1), loopa
-     bl=-10.0_dp
-     bu=10.0_dp
-     bl(:nbound) = 1e-8
-     call RANDOM_NUMBER(coefficients)
-     CALL bvls(key=0, m=N, n=N, a=A, b=B, bl=bl, bu=bu, x=coefficients, istate=istate, loopa=loopa, w=w)
-     info=0
+    real(dp) :: AC(N-nbound,N-nbound),BC(n-nbound,1)
+     AC=A(nbound+1:, nbound+1:)
+     BC=B(nbound+1:, :)
+     call DSGESV(N-nbound,NRHS,AC,LDA-nbound,IPIV,BC,LDB,coefficients(nbound+1:), &
+       &     LDX-nbound,WORK,SWORK,ITER,INFO)
+     bl=-1.0_dp
+     bu=1.0_dp
+     bl(nbound+1:)=coefficients(nbound+1:)-abs(coefficients(nbound+1:))*0.1
+     bu(nbound+1:)=coefficients(nbound+1:)+abs(coefficients(nbound+1:))*0.1
+     bl(:nbound) = min_bound_coeff
+     bu(:nbound) = 1e3_dp
+     coefficients=0.0_dp
+     !istate(N+1) = nbound
+     CALL bvls(key=0, m=N, n=N, a=A, b=B, bl=bl, bu=bu, x=coefficients, istate&
+       &=istate, loopa=loopa, w=w)
    end block
  else
+   if(nbound>0 .and. ignore_bound) then
 
-   !print *, "N=", N
-   !print *, "A=", A
-   !print *, "B=", B
-   call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
+     call DSGESV(N-nbound,1,A(nbound+1:, nbound+1:),LDA-nbound,IPIV,B(nbound+1:, 1),LDB,coefficients(nbound+1:), &
+       &     LDX-nbound,WORK,SWORK,ITER,INFO)
+     coefficients(:nbound)=0.0_dp
+   else
+     call DSGESV(N,NRHS,A,LDA,IPIV,B,LDB,coefficients,LDX,WORK,SWORK,ITER,INFO)
+   end if
 
    !other routine
    ! call dgesv(N,NRHS,A,LDA,IPIV,B,LDB,INFO)

@@ -201,7 +201,7 @@ INTEGER, INTENT(OUT)       :: loopa
 
 ! Local variables
 
-REAL (dp), PARAMETER  :: eps = 1.0E-1_dp
+REAL (dp), PARAMETER  :: eps = 1.0E-5_dp
 INTEGER               :: i, iact, ifrom5, it, j, jj, k, k1, kk, ks, mm, mm1, &
                          nact, nbound, noldb
 REAL (dp)             :: act(m,m+2), alf, alpha, bad, bdiff, bnorm, bound, &
@@ -272,7 +272,7 @@ bnorm = SQRT(bsq)
 !-----------------------------Main Loop---------------------------------
 
 !  Initialization complete.  Begin major loop (Loop A).
-DO  loopa = 1, 3 * n
+DO  loopa = 1, 3 * n+1000
 
 !  Step 2.
 !  Initialize the negative gradient vector w(*).
@@ -291,7 +291,7 @@ DO  loopa = 1, 3 * n
 
 !  Converged?  Stop if the misfit << || b ||, or if all components are
 !   active (unless this is the first iteration from a warm start).
-  IF (SQRT(obj) <= bnorm*eps.OR.(loopa > 1.AND.nbound == 0)) THEN
+  IF ((SQRT(obj) <= bnorm*eps.OR.(loopa > 1.AND.nbound == 0)).or. loopa==3*n+999) THEN
     istate(n+1) = nbound
     w(1) = SQRT(obj)
     RETURN

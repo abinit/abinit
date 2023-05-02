@@ -255,8 +255,8 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
     &                                  energy_coeffs,fit_data%energy_diff,info,&
     &                                  coeff_inds,natom_sc,opt_ncoeff,opt_ncoeff,ntime,&
     &                                  strten_coeffs,fit_data%strten_diff,&
-    &                                  fit_data%training_set%sqomega,opt_on,opt_factors, nbound=0)
-
+    &                                  fit_data%training_set%sqomega,opt_on,opt_factors, nbound=0, &
+    &                                  min_bound_coeff=-1000.0_dp, ignore_bound=.False.)
   if (info /= 0 .and. all(coeff_values < tol16))then
     write(frmt,*) opt_ncoeff
     write(message, '(2a,'//ADJUSTR(frmt)//'I4,8a)' ) ch10,&
