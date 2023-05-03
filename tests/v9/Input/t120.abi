@@ -25,7 +25,7 @@ nshiftk   1
 shiftk   0.0 0.0 0.0  # This grid contains the Gamma point
 tolvrs   1.0d-12
 nband       5
-istwfk     *1   
+istwfk     *1
 
 getwfk     -1
 
@@ -67,14 +67,14 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t120.abo, tolnlines=67, tolabs= 4.0e-3, tolrel= 1.0e-1, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]
 #%% authors = F. Bruneval and M. Torrent
 #%% keywords = GW
-#%% description = 
+#%% description =
 #%%   Diamond: PAW hybrid functionals: PBE, PBE0 with vanishing alpha (=PBE), PBE0, PBE0 with manually tuned alpha =0.25
-#%%   
+#%%
 #%%<END TEST_INFO>

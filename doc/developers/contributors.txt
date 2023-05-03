@@ -32,6 +32,7 @@ If you need to contact somebody, try the forum or the github.
 B. Amadon
 G. Antonius
 L. Baguet
+S. Bandyopadhyay
 L. Bastogne
 J.-M. Beuken
 J. Bieder
@@ -62,9 +63,11 @@ F. Jollet
 T. Karatsu
 P. Kestener
 A. H. Larsen
+L. MacEnulty
 H. Miranda
 F. Naccarato
 O. Nadeau
+D. D. O'Regan
 R. Outerovitch
 Ch. Paillard
 G. Petretto
@@ -75,6 +78,7 @@ F. Ricci
 G.-M. Rignanese
 M. Rodriguez-Mayorga
 M. Royo
+A. Sasani
 B. Sataric
 M. Schmitt
 B. Seddon
