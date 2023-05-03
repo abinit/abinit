@@ -276,8 +276,7 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call wrtout(std_out, " Solving isotropic Migdal-Eliashberg equations on the imaginary axis", pre_newlines=2)
  call cwtime(cpu, wall, gflops, "start")
 
- cryst => gstore%cryst
- ebands => gstore%ebands
+ cryst => gstore%cryst; ebands => gstore%ebands
  !natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
 
  ! Consistency check
@@ -384,7 +383,6 @@ subroutine matsubara_mesh(bosons_or_fermions, kt, wmax, niw, imag_w)
  real(dp),allocatable,intent(out) :: imag_w(:)
 
 !Local variables-------------------------------
-!scalars
  integer :: nn
 !----------------------------------------------------------------------
 

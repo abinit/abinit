@@ -980,7 +980,6 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 !scalars
  integer,parameter :: master=0
  integer :: unt,fform,iomode,my_rank,mybase,globase,cplex_file
-!integer :: optin,optout
  integer :: ispden,ifft,nfftot_file,nprocs,ierr,i1,i2,i3,i3_local,n1,n2,n3
  integer,parameter :: fform_den=52
  integer :: restart, restartpaw
@@ -991,12 +990,9 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: my_fname
  character(len=nctk_slen) :: varname
- !type(mpi_type) :: mpi_enreg_seq
 !arrays
-!integer :: ngfft_file(18)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),tsec(2)
-!real(dp) :: rhogdum(1)
  real(dp),allocatable :: rhor_file(:,:),rhor_tmp(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij_file(:)
 
@@ -1080,10 +1076,16 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    end select
 
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
-   if (need_interp .and. allow_interp__) then
-     msg = sjoin("Different FFT meshes. Caller:", ltoa(ngfft(1:3)), &
+   if (need_interp) then
+     msg = sjoin("Different FFT meshes. Caller expects:", ltoa(ngfft(1:3)), &
                  ". File: ", ltoa(ohdr%ngfft(1:3)), ". Need to perform interpolation.")
      ABI_COMMENT(msg)
+     if (.not. allow_interp__) then
+       write(msg, "(5a)") &
+        " Cannot continue as allow_interp = .False. ", ch10, &
+        " Please set ngfft to: ", trim(ltoa(ohdr%ngfft(1:3))), " in the input file"
+       ABI_ERROR(msg)
+     end if
 
      ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))
      call timab(1281,1,tsec)

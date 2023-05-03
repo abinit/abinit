@@ -4550,11 +4550,10 @@ integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 ! *************************************************************************
 
  my_qtol = tol6; if (present(qtol)) my_qtol = qtol
-
  iqpt = -1
  do iq=1,db%nqpt
    if (all(abs(db%qpts(:, iq) - qpt) < my_qtol)) then
-      iqpt = iq; exit
+     iqpt = iq; exit
    end if
  end do
 
@@ -6533,7 +6532,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  end if
 
  ! Read the quadrupoles
- iblock_quadrupoles = ddb_ptr%get_quadrupoles(1, 3, dvdb%qstar)
+ iblock_quadrupoles = ddb_ptr%get_quadrupoles(ddb_hdr%ddb_version,1, 3, dvdb%qstar)
  if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
  ABI_FREE(zeff)

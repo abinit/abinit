@@ -254,8 +254,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    ! From total number of procs, compute all possible distributions
    ! Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then
-       iexit = 0
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR, RUNL_NONLINEAR])) then
+     iexit = 0
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
@@ -270,7 +270,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%np_spkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
      dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     ABI_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
+     ABI_COMMENT('For non ground state calculations, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
    end if
 
 !  Take into account a possible change of paral_kgb (change of the default algorithm)
@@ -488,25 +488,25 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
    end if
 
-   !Check parallelization in case of RTTDDFT 
+   !Check parallelization in case of RTTDDFT
    !In particular ensure that bandpp = nband / npband
    if (optdriver == RUNL_RTTDDFT) then
       dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
-      if ( tread(8) == 1 ) then 
+      if ( tread(8) == 1 ) then
          write(msg, '(a,a)') 'Setting bandpp is useless in RT-TDDFT because it is automatically set to nband/npband.', ch10
          ABI_WARNING(msg)
       end if
-      if (dtsets(idtset)%npfft/=1) then 
+      if (dtsets(idtset)%npfft/=1) then
          dtsets(idtset)%npfft=1
          write(msg, '(a,a)') 'RT-TDDFT is not compatible with FFT-parallelization. Remove npfft or set it to 1.', ch10
          ABI_ERROR(msg)
       end if
-      if (dtsets(idtset)%npspinor/=1) then 
+      if (dtsets(idtset)%npspinor/=1) then
          dtsets(idtset)%npspinor=1
          write(msg, '(a,a)') 'RT-TDDFT is not compatible with spinor parallelization. Remove npspinor or set it to 1.', ch10
          ABI_ERROR(msg)
       end if
-      if (dtsets(idtset)%nphf/=1) then 
+      if (dtsets(idtset)%nphf/=1) then
          dtsets(idtset)%nphf=1
          write(msg, '(a,a)') 'RT-TDDFT is not compatible with HF parallelization. Remove nphf or set it to 1.', ch10
          ABI_ERROR(msg)
@@ -694,7 +694,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        !  mkmem was not set in the input file so default to incore solution
        !write(msg,'(6a)') &
        !'mpi_setup: ',nm_mkmem(ii),' undefined in the input file.','Use default ',nm_mkmem(ii),' = nkpt'
-       !call wrtout(std_out,msg,'COLL')
+       !call wrtout(std_out, msg)
        mkmem=nkpt
      end if
 
@@ -735,14 +735,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
-!  Check if some MPI processes are empty (MBPT code uses a complete different MPI algorithm)
-   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])
+!  Check if some MPI processes are empty (MBPT codes uses a complete different MPI algorithm)
+   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR])
    if (dtsets(idtset)%usewvl == 0 .and. do_check) then
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
           dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=msg)) then
        write(msg,'(5a)') trim(msg),ch10,&
          'YOU ARE STRONGLY ADVISED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
-         'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
+         'USE "AUTOPARAL=1" IN THE INPUT FILE.'
        ABI_WARNING(msg)
      end if
    end if
@@ -1948,14 +1948,13 @@ end subroutine mpi_setup
 
  DBG_EXIT("COLL")
 
- contains
+contains
 
-   function speedup_fdp(nn,mm)
-   !Expected linear speedup for a nn-sized problem and mm processes
-   real(dp) :: speedup_fdp
-   integer,intent(in) :: nn,mm
-   speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
- end function speedup_fdp
+real(dp) pure function speedup_fdp(nn, mm)
+  ! Expected linear speedup for a nn-sized problem and mm processes
+  integer,intent(in) :: nn, mm
+  speedup_fdp = (one*nn) / (one* ((nn / mm) + merge(0, 1, mod(nn, mm) == 0)))
+end function speedup_fdp
 
 end subroutine finddistrproc
 !!***

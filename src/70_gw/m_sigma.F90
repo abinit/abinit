@@ -27,7 +27,7 @@ MODULE m_sigma
  use m_xmpi
  use m_abicore
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
  use m_yaml
  use m_melemts
@@ -35,7 +35,6 @@ MODULE m_sigma
  use netcdf
 #endif
  use m_wfd
-
 
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
@@ -100,11 +99,11 @@ MODULE m_sigma
 
   real(dp),allocatable :: degwgap(:,:)
   ! (nkibz, nsppol)
-  ! Difference btw the QP and the KS optical gap.
+  ! Difference btw the QP and the KS direct gap.
 
   real(dp),allocatable :: egwgap(:,:)
   ! (nkibz,nsppol))
-  ! QP optical gap at each k-point and spin.
+  ! QP direct gap at each k-point and spin.
 
   real(dp),allocatable :: en_qp_diago(:,:,:)
   ! (nbnds,nkibz, nsppol))
@@ -136,12 +135,13 @@ MODULE m_sigma
   ! Diagonal matrix elements $\<nks|\Sigma_xc|nks\>$ taking sqrt(occs) in \Sigma_x, occs in [0,1]
 
   complex(dp),allocatable :: x_mat(:,:,:,:)
-  ! (b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab))
-  ! Matrix elements of $\<nks|\Sigma_x|nk's\>$
+  ! (b1gw:b2gw, b1gw:b2gw, nkibz, nsppol*nsig_ab)
+  ! Matrix elements of $\<nks|\Sigma_x|mks\>$
 
   real(dp),allocatable :: vxcme(:,:,:)
   ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
-  ! $\<nks|v_{xc}[n_val]|nks\>$ matrix elements of vxc (valence-only contribution).
+  ! $\<nks|v_{xc}[n_val]|nks\>$ matrix elements of vxc
+  ! NB: valence-only contribution i.e. computed without model core charge
 
   real(dp),allocatable :: vUme(:,:,:)
   ! (b1gw:b2gw,nkibz,nsppol*nsig_ab))
@@ -170,6 +170,7 @@ MODULE m_sigma
   complex(dpc),allocatable :: hhartree(:,:,:,:)
   ! (b1gw:b2gw,b1gw:b2gw,nkibz,nsppol*nsig_ab)
   ! $\<nks|T+v_H+v_{loc}+v_{nl}|mks\>$
+  ! Note that v_{loc} does not include the contribution to vxc(r) given by the model core charge.
 
   complex(dpc),allocatable :: sigcme(:,:,:,:)
   ! (b1gw:b2gw,nkibz,nomega_r,nsppol*nsig_ab))
@@ -434,11 +435,11 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
  gwcalctyp=Sigp%gwcalctyp
  mod10=MOD(Sigp%gwcalctyp,10)
 
- !unt_gw  File with GW corrections.
- !unt_sig Self-energy as a function of frequency.
- !unt_sgr Derivative wrt omega of the Self-energy.
- !unt_sigc Sigma_c(eik) MRM
- !unt_sgm Sigma on the Matsubara axis.
+ ! unt_gw:  File with GW corrections.
+ ! unt_sig: Self-energy as a function of frequency.
+ ! unt_sgr: Derivative wrt omega of the Self-energy.
+ ! unt_sigc: Sigma_c(eik) MRM
+ ! unt_sgm: Sigma on the Matsubara axis (imag axis)
 
  tag_spin=(/'            ','            '/); if (Sr%nsppol==2) tag_spin=(/',  SPIN UP  ',',  SPIN DOWN'/)
 
@@ -484,7 +485,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    write(unt_sigc,'("# b = ",2i10)')Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
-     if (gwcalctyp>=10) then
+     if (gwcalctyp >= 10) then
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=dev_null, ydoc=ydoc)
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 
@@ -505,7 +506,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
        call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=std_out,prtvol=1)
      end if
 
-     write(unt_gw,'(i6,3f9.4)')          &
+     write(unt_gw,'(i6,3f9.4)')         &
       ib,                               &
       REAL (Sr%egw (ib,ikibz,is))*Ha_eV,&
       REAL (Sr%degw(ib,ikibz,is))*Ha_eV,&
@@ -555,7 +556,8 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      end do
    end do
    !
-   if (mod10==1) then ! For AC, write sigma matrix elements along the imaginary axis
+   if (mod10 == 1) then
+     ! For AC, write sigma matrix elements along the imaginary axis
      do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
        write(unt_sgm,'("# ik, ib",2i5)')ikibz,ib
        do io=1,Sr%nomega_i
@@ -579,29 +581,27 @@ end subroutine write_sigma_results
 !! gw_spectral_function
 !!
 !! FUNCTION
-!!  Compute the spectral function in the GW approximation
+!!  Compute the spectral function
 !!
 !! INPUTS
-!!  io,ib,ikibz,is=Frequency, band, k-point, spin index
+!!  io,ib,ikibz,spin=Frequency, band, k-point, spin index
 !!  Sr=sigma results datatype
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-function gw_spectral_function(Sr,io,ib,ikibz,is) result(aw)
+real(dp) pure function gw_spectral_function(Sr, io, ib, ikibz, spin) result(aw)
 
 !Arguments ------------------------------------
-!scalars
- integer,intent(in) :: io,ib,ikibz,is
- real(dp) :: aw
+ integer,intent(in) :: io,ib,ikibz,spin
  type(sigma_t),intent(in) :: Sr
 
 ! *********************************************************************
 
- aw = one/pi*ABS(AIMAG(Sr%sigcme(ib,ikibz,io,is)))&
-   /( (REAL(Sr%omega_r(io)-Sr%hhartree(ib,ib,ikibz,is)-Sr%sigxcme(ib,ikibz,io,is)))**2&
-     +(AIMAG(Sr%sigcme(ib,ikibz,io,is)))**2) /Ha_eV
+ aw = one / pi * abs(aimag(Sr%sigcme(ib,ikibz,io,spin))) &
+   /( (real(Sr%omega_r(io) - Sr%hhartree(ib,ib,ikibz,spin) - Sr%sigxcme(ib,ikibz,io,spin)))**2 &
+     +(aimag(Sr%sigcme(ib,ikibz,io,spin))) ** 2) / Ha_eV
 
 end function gw_spectral_function
 !!***
@@ -1104,7 +1104,7 @@ real(dp) pure function sigma_get_exene(sigma, kmesh, bands) result(ex_energy)
      wtk = kmesh%wt(ik)
      do ib=sigma%b1gw,sigma%b2gw
        occ_bks = bands%occ(ib,ik,spin)
-       if (sigma%nsig_ab==1) then
+       if (sigma%nsig_ab == 1) then
          ex_energy = ex_energy + half * occ_bks * wtk * sigma%sigxme(ib,ik,spin)
        else
          ex_energy = ex_energy + half * occ_bks * wtk * SUM(sigma%sigxme(ib,ik,:))

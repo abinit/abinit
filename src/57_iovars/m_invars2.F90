@@ -47,6 +47,7 @@ module m_invars2
  use m_ipi,       only : ipi_check_initial_consistency
  use m_crystal,   only : crystal_t
  use m_bz_mesh,   only : kmesh_t, find_qmesh
+ use m_drivexc,   only : has_kxc
 
  implicit none
 
@@ -252,6 +253,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
+ type(libxc_functional_type) :: xcfunc_tmp(2)
 
 ! *************************************************************************
 
@@ -386,14 +388,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwmem',tread,'INT')
  if(tread==1) dtset%gwmem=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_sctype',tread,'INT')
- if(tread==1) dtset%gw_sctype=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_nstep',tread,'INT')
+ if(tread==1) dtset%gwr_nstep=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_nstep',tread,'INT')
- if(tread==1) dtset%gw_nstep=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_toldfeig',tread,'ENE')
- if(tread==1) dtset%gw_toldfeig=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_tolqpe',tread,'ENE')
+ if(tread==1) dtset%gwr_tolqpe=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_stern_kmax',tread,'INT')
  if(tread==1) dtset%gwls_stern_kmax=intarr(1)
@@ -581,17 +580,31 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgmcorr',tread,'INT')
  if(tread==1) dtset%gwgmcorr=intarr(1)
 
- narr = size(dtset%gwr_np_gtks)
- call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_gtks', tread, 'INT')
- if (tread == 1) dtset%gwr_np_gtks = intarr(1:narr)
+ narr = size(dtset%gwr_np_kgts)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_kgts', tread, 'INT')
+ if (tread == 1) dtset%gwr_np_kgts = intarr(1:narr)
+
+ narr = size(dtset%gwr_ucsc_batch)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_ucsc_batch', tread, 'INT')
+ if (tread == 1) dtset%gwr_ucsc_batch = intarr(1:narr)
 
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_ntau', tread,'INT')
  if (tread == 1) dtset%gwr_ntau = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_chi_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_chi_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_sigma_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_sigma_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_rpa_ncut', tread,'INT')
+ if (tread == 1) dtset%gwr_rpa_ncut = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_boxcutmin', tread, 'DPR')
  if (tread == 1) dtset%gwr_boxcutmin = dprarr(1)
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_max_hwtene', tread, 'ENE')
+ if (tread == 1) dtset%gwr_max_hwtene = dprarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gwr_task", tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
 
  ! RESPFN integer input variables (needed here to get the value of response)
@@ -972,8 +985,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_qdrpl',tread,'INT')
    if(tread==1) dtset%lw_qdrpl=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_natopt',tread,'INT')
+   if(tread==1) dtset%lw_natopt=intarr(1)
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
    if(tread==1) dtset%prepalw=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ffnl_lw',tread,'INT')
+   if(tread==1) dtset%ffnl_lw=intarr(1)
 ! end if
 
  ! Recursion input variables
@@ -1429,6 +1448,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf',tread,'INT')
  if(tread==1) dtset%get1wf=intarr(1)
+ ! TODO
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf_filepath',tread,'KEY', key_value=key_value)
+ !if(tread==1) dtset%get1wf_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddk',tread,'INT')
  if(tread==1) dtset%getddk=intarr(1)
@@ -1768,21 +1790,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdwfkfine',tread,'INT')
  if(tread==1) dtset%irdwfkfine=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
- if(tread==1) then
-   dtset%iscf=intarr(1)
-   if (dtset%usewvl==1) then
-     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
-     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
-     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
-   end if
- else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
-   dtset%iscf=dtset%iscf-10
- else if (dtset%optdriver==RUNL_GWLS) then
-   dtset%iscf=-2
- end if
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'isecur',tread,'INT')
  if(tread==1) dtset%isecur=intarr(1)
 
@@ -1846,10 +1853,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
      dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
    else if (ixc_current<0) then
-     call libxc_functionals_init(ixc_current,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+     call libxc_functionals_init(ixc_current,dtset%nspden,xc_functionals=xcfunc_tmp)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
-       hyb_range=dtset%hyb_range_dft)
-     call libxc_functionals_end()
+       hyb_range=dtset%hyb_range_dft,xc_functionals=xcfunc_tmp)
+     call libxc_functionals_end(xc_functionals=xcfunc_tmp)
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
 
@@ -1902,6 +1909,38 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
    if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft
 
+ end if
+
+!Note iscf has to be read after ixc, usewvl, optdriver, optforces, densfor_pred
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
+ if(tread==1) then
+   dtset%iscf=intarr(1)
+   if (dtset%usewvl==1) then
+     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
+     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
+     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
+   end if
+ else if (dtset%optdriver==RUNL_GWLS) then
+   !For GWLS, iscf=-2 is mandatory
+   dtset%iscf=-2
+ else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
+   !Only potential mixing available for response function
+   dtset%iscf=dtset%iscf-10
+ else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and. &
+&         dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) then
+   !In case of density mixing (iscf>=10) and correction of forces (densfor_pred/=0 and 5)
+   !  we need Kxc. If it is not available, we switch to potential mixing (iscf<10)
+   if (dtset%ixc<0) call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_functionals=xcfunc_tmp)
+   if (.not.has_kxc(dtset%ixc,xcfunc_tmp)) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
+     if (dtset%optforces/=0.or.intarr(1)/=0) then
+       dtset%iscf=dtset%iscf-10
+       msg='Automatically switching to potential mixing (iscf<10), because XC functional doesnt provide Kxc!'
+       ABI_COMMENT(msg)
+     end if
+   end if
+   if (dtset%ixc<0) call libxc_functionals_end(xc_functionals=xcfunc_tmp)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
@@ -2478,7 +2517,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%use_gemm_nonlop == 1) dtset%useylm = 1
  if (usepaw==1) dtset%useylm=1
  if (usepaw==1 .and. dtset%usewvl==1) dtset%useylm=0
- if (dtset%efmas==1.or.dtset%use_gpu_cuda==1.or.dtset%rf2_dkdk/=0.or.dtset%rf2_dkde/=0) dtset%useylm=1
+ if (dtset%efmas==1 .or. dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0) dtset%useylm=1
+ if (dtset%use_gpu_cuda /= 0 .and. dtset%optdriver /= RUNL_GWR) dtset%useylm=1
  if(dtset%tfkinfunc==2 .and. dtset%usewvl==0 ) then
    dtset%useylm=1
    dtset%userec=1
@@ -2608,6 +2648,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'orbmag',tread,'INT')
  if(tread==1) dtset%orbmag=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_lorbmag',tread,'INT')
+ if(tread==1) dtset%prt_lorbmag=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ortalg',tread,'INT')
  if(tread==1) then
@@ -2798,6 +2841,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,3*dtset%natsph_extra,string(1:lenstr),'xredsph_extra',tread,'DPR')
  if(tread==1) dtset%xredsph_extra=reshape(dprarr(1:3*dtset%natsph_extra), (/3,dtset%natsph_extra/))
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfinit',tread,'INT')
+ if(tread==1) dtset%wfinit=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfmix',tread,'DPR')
  if(tread==1) dtset%wfmix=dprarr(1)
@@ -3008,6 +3054,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%tolmxde=tolmxde_
    dtset%tolmxf=tolmxf_
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolcum',tread,'DPR',ds_input)
+ if(tread==1) dtset%tolcum=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%focktoldfe=dprarr(1)
@@ -3320,12 +3369,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
-#ifdef HAVE_NETCDF
    if (my_rank == 0) then
      ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
      NCF_CHECK(ncerr)
    end if
-#endif
    call xmpi_barrier(comm)
    ABI_ERROR_NODUMP("kpts.nc file written. Aborting now")
  end if
@@ -3648,7 +3695,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')
    if (tread == 1) dtset%sigma_nshiftk = intarr(1)
    if (dtset%sigma_nshiftk < 1 .or. dtset%sigma_nshiftk > MAX_NSHIFTK ) then
-     write(msg,  '(a,i0,2a,i0,3a)' )&
+     write(msg, '(a,i0,2a,i0,3a)' ) &
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
      'while it is found to be ',dtset%sigma_nshiftk,'.',ch10,&
      'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
@@ -3705,12 +3752,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    Kmesh%nshift        =Dtset%nshiftk
    ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
    Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
-   !call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0, "COLL")
+   !call Kmesh%print("K-mesh for the wavefunctions",ab_out, dtset%prtvol)
    call find_qmesh(Qmesh, Cryst, Kmesh)
 #ifdef HAVE_NETCDF
    if (my_rank == master) then
-      ncerr = nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt)
-      NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt))
    end if
 #endif
    call xmpi_barrier(comm)

@@ -1,0 +1,91 @@
+#!/bin/bash
+#MSUB -r paral-bandpw_02   # Job name
+#MSUB -T 1000            # Elapsed time of the job
+#MSUB -A tgcc0002        # Project number
+#MSUB -n 108             # Number of processors
+#MSUB -o paral-bandpw_02.o # Standard output
+#MSUB -e paral-bandpw_02.e # Error output
+
+set -x
+
+ABINIT=/ccc/work/cont005/pa0397/bottinf/6.10.1-public/curie/src/98_main/abinit
+TMPDIR=$SCRATCHDIR/paral-bandpw_02
+mkdir $TMPDIR
+cd $TMPDIR
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "npband 108 npfft 1"         >> $TMPDIR/tparal_bandpw_02.in
+
+ccc_mprun $ABINIT < tparal_bandpw_02.files > tparal_bandpw_02.log
+
+cp $TMPDIR/tparal_bandpw_02.out $BRIDGE_MSUB_PWD/tparal_bandpw_02.108-01.out
+cp $TMPDIR/tparal_bandpw_02.log $BRIDGE_MSUB_PWD/tparal_bandpw_02.108-01.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "npband 54 npfft 2"         >> $TMPDIR/tparal_bandpw_02.in
+
+ccc_mprun $ABINIT < tparal_bandpw_02.files > tparal_bandpw_02.log
+
+cp $TMPDIR/tparal_bandpw_02.out $BRIDGE_MSUB_PWD/tparal_bandpw_02.054-02.out
+cp $TMPDIR/tparal_bandpw_02.log $BRIDGE_MSUB_PWD/tparal_bandpw_02.054-02.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "npband 36 npfft 3"         >> $TMPDIR/tparal_bandpw_02.in
+
+ccc_mprun $ABINIT < tparal_bandpw_02.files > tparal_bandpw_02.log
+
+cp $TMPDIR/tparal_bandpw_02.out $BRIDGE_MSUB_PWD/tparal_bandpw_02.036-03.out
+cp $TMPDIR/tparal_bandpw_02.log $BRIDGE_MSUB_PWD/tparal_bandpw_02.036-03.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "npband 27 npfft 4"         >> $TMPDIR/tparal_bandpw_02.in
+
+ccc_mprun $ABINIT < tparal_bandpw_02.files > tparal_bandpw_02.log
+
+cp $TMPDIR/tparal_bandpw_02.out $BRIDGE_MSUB_PWD/tparal_bandpw_02.027-04.out
+cp $TMPDIR/tparal_bandpw_02.log $BRIDGE_MSUB_PWD/tparal_bandpw_02.027-04.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "npband 18 npfft 6"         >> $TMPDIR/tparal_bandpw_02.in
+
+ccc_mprun $ABINIT < tparal_bandpw_02.files > tparal_bandpw_02.log
+
+cp $TMPDIR/tparal_bandpw_02.out $BRIDGE_MSUB_PWD/tparal_bandpw_02.018-06.out
+cp $TMPDIR/tparal_bandpw_02.log $BRIDGE_MSUB_PWD/tparal_bandpw_02.018-06.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "npband 12 npfft 9"         >> $TMPDIR/tparal_bandpw_02.in
+
+ccc_mprun $ABINIT < tparal_bandpw_02.files > tparal_bandpw_02.log
+
+cp $TMPDIR/tparal_bandpw_02.out $BRIDGE_MSUB_PWD/tparal_bandpw_02.012-09.out
+cp $TMPDIR/tparal_bandpw_02.log $BRIDGE_MSUB_PWD/tparal_bandpw_02.012-09.log
+
+rm -rf *log *.out *.in *.files
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.in     $TMPDIR/
+cp $BRIDGE_MSUB_PWD/tparal_bandpw_02.files  $TMPDIR/
+cp $BRIDGE_MSUB_PWD/79au.pspnc      $TMPDIR/
+echo "npband 9 npfft 12"         >> $TMPDIR/tparal_bandpw_02.in
+
+ccc_mprun $ABINIT < tparal_bandpw_02.files > tparal_bandpw_02.log
+
+cp $TMPDIR/tparal_bandpw_02.out $BRIDGE_MSUB_PWD/tparal_bandpw_02.009-12.out
+cp $TMPDIR/tparal_bandpw_02.log $BRIDGE_MSUB_PWD/tparal_bandpw_02.009-12.log
