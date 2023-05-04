@@ -680,6 +680,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
 &     "to decrease the memory requirements. Consider also OpenMP threads."
+!     ii = 0
      ABI_ERROR_NOSTOP(msg,ii)
      write (msg,'(5(a,i0), 2a)')&
 &     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
@@ -2036,7 +2037,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 #if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
      filename=trim(fnameabo_eig)//'.nc'
-     call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
+     call write_eig(eigen,fermie,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
 #endif
  end if
@@ -2516,9 +2517,10 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  real(dp) :: ures
  !character(len=500) :: msg
 !arrays
- real(dp),allocatable :: cgstart(:,:)
+ !real(dp),allocatable :: cgstart(:,:)
  type(macro_uj_type),allocatable,target :: dtpawuj(:)
 ! *********************************************************************
+
 
  DBG_ENTER("COLL")
 
@@ -2527,41 +2529,34 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end if
 
  ABI_MALLOC(dtpawuj,(0:ndtpawuj))
- ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
+ !ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
 
  call pawuj_ini(dtpawuj,ndtpawuj)
 
- cgstart=scfcv_args%cg
+ !cgstart=scfcv_args%cg
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
    dtpawuj(iuj)%pawprtvol=dtset%pawprtvol
    dtpawuj(iuj)%diemix=dtset%diemix
+   dtpawuj(iuj)%diemixmag=dtset%diemixmag
    dtpawuj(iuj)%pawujat=dtset%pawujat
    dtpawuj(iuj)%nspden=dtset%nspden
    dtpawuj(iuj)%rprimd=dtset%rprimd_orig(1:3,1:3,1)
+   dtpawuj(iuj)%dmatpuopt=dtset%dmatpuopt
  end do
 
-!allocate(dtpawuj(0)%vsh(0,0),dtpawuj(0)%occ(0,0))
+ iuj=1 !LMac Flag to collect occupancies for unperturbed calculation
+ dtpawuj(iuj)%iuj=iuj
 
- do iuj=1,2
-   if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
+ scfcv_args%ndtpawuj=>ndtpawuj
+ scfcv_args%dtpawuj=>dtpawuj
 
-   dtpawuj(iuj*2-1)%iuj=iuj*2-1
-
-   scfcv_args%ndtpawuj=>ndtpawuj
-   scfcv_args%dtpawuj=>dtpawuj
-
-   !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
-!&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   itimes(1)=itime0 ; itimes(2)=1
-   call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-
-   scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
- end do
+ itimes(1)=itime0 ; itimes(2)=1
+ call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 !Calculate Hubbard U (or J)
- call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv_args%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
+ call pawuj_det(dtpawuj, ndtpawuj, dtset, scfcv_args%dtfil, ures, scfcv_args%mpi_enreg%comm_cell)
  dtset%upawu(dtset%typat(dtset%pawujat),1)=ures/Ha_eV
 
 !Deallocations
@@ -2570,7 +2565,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end do
 
  ABI_FREE(dtpawuj)
- ABI_FREE(cgstart)
+ !ABI_FREE(cgstart)
 
  DBG_EXIT("COLL")
 

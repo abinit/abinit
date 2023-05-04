@@ -525,11 +525,23 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        end if ! Test of existence of symmetry of perturbation
      else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        to_compute_this_pert = 1
-     else if (ipert==dtset%natom+10 .and. rfpert(ipert)==1 .and. idir <= 6) then
-       if (idir<=3) then
-         if (rfdir(idir) == 1) to_compute_this_pert = 1
+     else if (ipert==dtset%natom+10 .and. rfpert(ipert)==1) then
+       if (dtset%rf2_dkdk==2 .or. dtset%rf2_dkdk==3) then
+         if (idir <= 3 .and. rfdir(idir) == 1) then
+           to_compute_this_pert = 1
+         else if (idir>=4.and.idir<=6) then
+           if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+         else if (idir>=7.and.idir<=9) then
+           if (rfdir(idir) == 1 .or. rfdir(idir-3) == 1) to_compute_this_pert = 1
+         end if
        else
-         if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+         if (idir<=6) then
+           if (idir<=3) then
+             if (rfdir(idir) == 1) to_compute_this_pert = 1
+           else
+             if (rfdir(idir) == 1 .or. rfdir(idir+3) == 1) to_compute_this_pert = 1
+           end if
+         end if
        end if
      else if (ipert==dtset%natom+11 .and. rfpert(ipert)==1) then
        if (idir <= 3 .and. rfdir(idir) == 1) then
@@ -888,14 +900,24 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &      ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
 
-     !MR: Modified to agree with quadrupole and flexoelectrics routines
-     if(dtset%prepalw==1) then
+     !MR: Modified to agree with longwave driver
+     if(dtset%prepalw/=0) then
        if (dtset%kptopt==2) timrev_pert=1
        if (dtset%kptopt==3) timrev_pert=0
        timrev_kpt = timrev_pert
        !MR tmp: this has to be removed if perturbation-dependent spatial symmetries are
        !implemented in the quadrupole and flexoelectrics routines
        nsym1=1
+
+       if (dtset%rfstrs/=0.and.dtset%rfstrs_ref==0) then
+         write(msg,'(9a)')&
+         'If the outputs of this strain response function calculation are to be',ch10,&
+         'subsequently used as inputs of a longwave calculation the same energy',ch10,&
+         'reference has to be used in both cases. Otherwise wrong spatial-dispersion',ch10,&
+         'coefficients will be obtained',ch10,&
+         'Action: Put rfstrs_ref=1 '
+         ABI_WARNING(msg)
+       end if
      end if
 
 !    The time reversal symmetry is not used for the BZ sampling when kptopt=3 or 4
