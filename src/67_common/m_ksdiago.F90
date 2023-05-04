@@ -1014,7 +1014,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
                                nspden, gs_hamk%nvloc, ncomp1, pawfgr, mpi_enreg_seq, vtrial, vlocal)
  call gs_hamk%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
- ! This for meta-gga.
+ ! TODO: This for meta-gga.
  !if (with_vxctau) then
  !  call gspot_transgrid_and_pack(spin, psps%usepaw, paral_kgb0, nfftc, ngfftc, nfftf, &
  !                                nspden, gs_hamk%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)

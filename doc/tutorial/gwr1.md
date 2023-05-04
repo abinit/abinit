@@ -55,7 +55,6 @@ Explictly via:
 
 Implicitly via [[gw_qprange]]
 
-
 For the spectral function
 [[nfreqsp]], [[freqspmax]]
 

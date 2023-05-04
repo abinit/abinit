@@ -5,14 +5,16 @@ authors: MG
 # An overview of the GWR code
 
 This page provides a quick introduction to the new GWR driver of ABINIT
-We discuss the technical details related to the implementation and the associated input variables.
-The drawbacks/advantages with respect to the legacy GW implementation 
-in Fourier-space and frequency domain are also discussed.
+We discuss the technical details related to the implementation, the associated input variables.
+as well as the pros and cons with respect to the legacy GW implementation 
+in Fourier-space and frequency domain.
 
-## Why a new GWR code?
+## Why a new GW code?
 
 The conventional GW algorithm has quartic scaling with the number of atoms whereas GWR scales cubically.
-The legacy GW code 
+The legacy GW code obtains the matrix elelments of self-energy by performing a convolution in frequency domain, 
+usually withing the plasmon-pole approximation whereas GWR computes the self-energy elements in 
+imaginary-time 
 
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 while [[gwr_task]] defines the task
@@ -62,10 +64,10 @@ Clearly, it does not make any sense to ask for more bands than the ones availabl
 The imaginary axis is sampled using a minimax mesh with [[gwr_ntau]] points.
 The other piece of information required for the selection of the minimax mesh 
 is the ratio between the fundamental gap and the maximum transition energy i.e. 
-the differerence between the highest KS eigenvalue for empty states that clearly depends on [[nband]] and
-the lowest occupied state.
+the differerence between the highest KS eigenvalue for empty states that clearly depends 
+on [[nband]] and the energy of the lowest occupied state.
 
-The k-mesh must be k-centered e.g.
+The k-mesh must be $\Gamma$-centered e.g.
 
 * [[ngkpt]] 4 4 4
 * [[nshiftk]] 1 
@@ -74,9 +76,9 @@ The k-mesh must be k-centered e.g.
 The cutoff energy for the polarizability is given by [[ecuteps]]
 while [[ecutsigx]] defines the number of g-vectors for the exchange part of the self-energy.
 
-Note that GWR needs the GS density produced during the GS run.
+Note that GWR also needs the GS density produced by a previous GS SCF run.
 This file can be read via [[getden_filepath]] (recommended) or, alternatively 
-with [[getden]] when using the multi dataset mode.
+with [[getden]] in multi dataset mode.
 
 \begin{equation}
 \chi(\rr,\RR', t) = G(\rr,\RR', i\tau) G^*(\rr,\RR', -i\tau)
