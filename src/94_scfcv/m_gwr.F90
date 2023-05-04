@@ -2331,7 +2331,7 @@ subroutine gwr_build_green(gwr, free_ugb)
    msg = sjoin("Fermi energy is not set to zero! fermie:", ftoa(gwr%ks_ebands%fermie))
    ABI_CHECK(abs(gwr%ks_ebands%fermie) < tol12, msg)
 
-   ! Allocate Green's functions if this is the first iteration
+   ! Allocate my Green's functions in IBZ if this is the first iteration.
    mask_kibz = 0; mask_kibz(gwr%my_kibz_inds(:)) = 1
    call gwr%malloc_free_mats(mask_kibz, "green", "malloc")
 
@@ -2366,7 +2366,7 @@ subroutine gwr_build_green(gwr, free_ugb)
      do my_it=1,gwr%my_ntau
        itau = gwr%my_itaus(my_it)
        do ipm=1,2
-         ! Multiply columns by exponentials in imaginary time.
+         ! Multiply my columns by exponentials in imaginary time.
          work_gb%buffer_cplx = ugb_ks%buffer_cplx
 
          !$OMP PARALLEL DO PRIVATE(band, f_nk, eig_nk, gt_rfact)
@@ -2385,7 +2385,7 @@ subroutine gwr_build_green(gwr, free_ugb)
            call xscal(npwsp, real(sqrt(gt_rfact), kind=gwpc), work_gb%buffer_cplx(:,il_b), 1)
          end do ! il_b
 
-         ! Build G(g,g',ipm) with PZGEMM
+         ! Now build G(g,g',ipm) with PZGEMM.
          isgn = merge(1, -1, ipm == 2)
          ija = [1, 1]; ijb = [1, 1]
          ! TODO: optimize
@@ -5874,6 +5874,7 @@ end subroutine write_notations
 !!  sig_braket_ur
 !!
 !! FUNCTION
+!!    Integrate self-energy matrix elements in the unit cell.
 !!
 !! INPUTS
 !!
@@ -6323,7 +6324,7 @@ subroutine gwr_check_scf_cycle(gwr, converged)
  end do
  end associate
 
- ! Just to make sure that all MPI procs agree on this!
+ ! Make sure that all MPI procs agree on this!
  call xmpi_land(converged, gwr%comm%value)
 
  if (gwr%comm%me == master) then
@@ -6812,7 +6813,7 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
  dim_rtwg = 1 !; if (nspinor==2) dim_rtwg=2 ! Can reduce size depending on Ep%nI and Ep%nj
  ABI_MALLOC(rhotwg, (npwe * dim_rtwg))
 
-! TODO:
+ ! TODO:
  ddkop = ddkop_new(dtset, gwr%cryst, gwr%pawtab, gwr%psps, gwr%mpi_enreg, u_mpw, u_ngfft)
 
  do my_is=1,gwr%my_nspins

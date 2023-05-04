@@ -1058,7 +1058,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  comm = ugb%comm; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
- bz_vol = two_pi**3/cryst%ucvol
+ bz_vol = two_pi**3 / cryst%ucvol
 
  debug_this = merge(.False., .True., nproc > 1)
  debug_this = .False.

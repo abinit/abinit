@@ -5090,6 +5090,7 @@ end subroutine wfdgw_plot_ur
 !!
 !! FUNCTION
 !!  Compute the non-local potential using the Wfd information.
+!!
 !! INPUTS
 !! cryst<crystal_t>= data type gathering info on symmetries and unit cell
 !! psps<pseudopotential_type>=variables related to pseudopotentials
