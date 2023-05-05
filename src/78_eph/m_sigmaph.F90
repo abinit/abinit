@@ -1058,6 +1058,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
      write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
      do nu=1,natom3
+       if (abs(zpr_frohl_sphcorr(nu)) < tol12) cycle
        write(ab_out, "(a,f8.1,a,i0,a,f8.1,a)")&
          " ZPR Spherical correction:", zpr_frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", &
          nu, ", w_qnu:", phfrq(nu) * Ha_meV, " (meV)"
@@ -1344,7 +1345,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            do iatom=1, natom
              cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
            end do
-           cnum = dot_product(qpt_cart, cp3); if (abs(cum) < tol12) cycle
+           cnum = dot_product(qpt_cart, cp3); if (abs(cnum) < tol12) cycle
 
            ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
            weight = four_pi * sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu
@@ -1353,10 +1354,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              band_ks = ib_k + bstart_ks - 1
              eig0nk = ebands%eig(band_ks, ik_ibz, spin)
              do it=1,sigma%ntemp
-               !f_nk = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
                f_nk = f_tlist_b(it,ib_k)
                nqnu = nqnu_tlist(it)
-
                fm_frohl_sphcorr(:,nu,it,ib_k) = fm_frohl_sphcorr(:,nu,it,ib_k) + &
                  ((nqnu + f_nk      ) / (sigma%wrmesh_b(:,ib_k) - eig0nk + wqnu + sigma%ieta) + &
                   (nqnu - f_nk + one) / (sigma%wrmesh_b(:,ib_k) - eig0nk - wqnu + sigma%ieta) ) * weight
@@ -1368,19 +1367,23 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
        call xmpi_sum(fm_frohl_sphcorr, sigma%kcalc_comm%value, ierr)
        fm_frohl_sphcorr = fm_frohl_sphcorr * (four_pi/cryst%ucvol)**2 * q0rad * half / bz_vol
+
        if (my_rank == master) then
-         !write(ab_out, "(/,a)")" Frohlich model integrated inside the small q-sphere around Gamma: "
-         !write(ab_out, "(a)")" This correction is used to accelerate the convergence of the ZPR with the q-point sampling "
-         !write(ab_out, "(a)")" Note that this term tends to zero for N_q --> oo "
-         !write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
-         !write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
-         it = 1; iw = 1 + (sigma%nwr / 2)
+         write(ab_out, "(/,a)")" Frohlich model integrated inside the small q-sphere around Gamma: "
+         write(ab_out, "(a)")" This correction is used to accelerate the convergence of Sigma(w) with the q-point sampling "
+         write(ab_out, "(a)")" Note that this term tends to zero for N_q --> oo "
+         write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
+         write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
          do ib_k=1,nbcalc_ks
            band_ks = ib_k + bstart_ks - 1
            write(ab_out, "(a, i0)")" For band:", band_ks
            do nu=1,natom3
+           do it=1,1 !sigma%ntemp
+             if (abs(fm_frohl_sphcorr(iw,nu,it,ib_k)) < tol12) cycle
+             iw = 1 + (sigma%nwr / 2)
              write(ab_out, "(a,2(f8.1),a,i0)")&
                " FM(w=e_KS) Spherical correction:", fm_frohl_sphcorr(iw,nu,it,ib_k) * Ha_meV, " (meV) for ph-mode: ",nu
+           end do
            end do
            write(ab_out, "(a)")ch10
          end do
