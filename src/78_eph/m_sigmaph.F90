@@ -1059,7 +1059,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
      do nu=1,natom3
        write(ab_out, "(a,f8.1,a,i0,a,f8.1,a)")&
-         " Spherical correction:", zpr_frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", &
+         " ZPR Spherical correction:", zpr_frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", &
          nu, ", w_qnu:", phfrq(nu) * Ha_meV, " (meV)"
      end do
      write(ab_out, "(a)")ch10
@@ -1377,10 +1377,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          it = 1; iw = (sigma%nwr / 2)
          do ib_k=1,nbcalc_ks
            band_ks = ib_k + bstart_ks - 1
-           write(ab_out, "(a, i0)")"For band:", band_ks
+           write(ab_out, "(a, i0)")" For band:", band_ks
            do nu=1,natom3
-             write(ab_out, "(a,f8.1,a,i0)")&
-               " FM(w) Spherical correction:", fm_frohl_sphcorr(iw,nu,it,ib_k) * Ha_meV, " (meV) for ph-mode: ",nu
+             write(ab_out, "(a,2(f8.1),a,i0)")&
+               " FM(w=e_KS) Spherical correction:", fm_frohl_sphcorr(iw,nu,it,ib_k) * Ha_meV, " (meV) for ph-mode: ",nu
            end do
            write(ab_out, "(a)")ch10
          end do
