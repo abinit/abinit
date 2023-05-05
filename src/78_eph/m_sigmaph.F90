@@ -698,7 +698,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer, allocatable :: recvcounts(:), displs(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
- real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
+ real(dp) :: zpr_frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq, f_nk
  real(dp) :: gdw2, gdw2_stern, rtmp
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
@@ -1024,10 +1024,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Radius of sphere with volume equivalent to the micro zone.
  q0rad = two_pi * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
 
- frohl_sphcorr = zero
+ zpr_frohl_sphcorr = zero
  if (sigma%frohl_model == 1 .and. .not. sigma%imag_only) then
    ! Prepare treatment of Frohlich divergence with spherical integration in the microzone around Gamma.
-   ! Correction does not depend on (nk) so we precompute values at this level.
+   ! Correction does not depend on (n,k) so we can precompute values at this level.
    call wrtout(std_out, " Computing spherical average to treat Frohlich divergence ...")
    do iang=1,sigma%angl_size
      if (mod(iang, nprocs) /= my_rank) cycle ! MPI parallelism
@@ -1045,12 +1045,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end do
        cnum = dot_product(qpt_cart, cp3)
        ! Compute spherical average.
-       frohl_sphcorr(nu) = frohl_sphcorr(nu) + sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
+       zpr_frohl_sphcorr(nu) = zpr_frohl_sphcorr(nu) + sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu ** 2
      end do
    end do
-   call xmpi_sum(frohl_sphcorr, comm, ierr)
+   call xmpi_sum(zpr_frohl_sphcorr, comm, ierr)
 
-   frohl_sphcorr = frohl_sphcorr * eight * pi / cryst%ucvol * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
+   zpr_frohl_sphcorr = zpr_frohl_sphcorr * eight * pi / cryst%ucvol * (three / (four_pi * cryst%ucvol * sigma%nqbz)) ** third
    if (my_rank == master) then
      write(ab_out, "(/,a)")" Frohlich model integrated inside the small q-sphere around Gamma: "
      write(ab_out, "(a)")" This correction is used to accelerate the convergence of the ZPR with the q-point sampling "
@@ -1059,7 +1059,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
      do nu=1,natom3
        write(ab_out, "(a,f8.1,a,i0,a,f8.1,a)")&
-         " Spherical correction:", frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", &
+         " Spherical correction:", zpr_frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", &
          nu, ", w_qnu:", phfrq(nu) * Ha_meV, " (meV)"
      end do
      write(ab_out, "(a)")ch10
@@ -2016,7 +2016,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                gf_val = gkq_nu(1, ib_k, nu) ** 2 + gkq_nu(2, ib_k, nu) ** 2
                if (sigma%frohl_model == 1 .and. is_qzero .and. ibsum_kq == band_ks) then
-                 gf_val = frohl_sphcorr(nu) * (four_pi / three * q0rad ** 3)
+                 gf_val = zpr_frohl_sphcorr(nu) * (four_pi / three * q0rad ** 3)
                end if
                sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 2) + gf_val * rfact
                ! TODO: Add Sternheimer contribution
@@ -2074,6 +2074,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                              (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ) * weight
                    enddo
                  else
+                   ! No double-grid.
                    cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
                  endif
@@ -2091,13 +2092,14 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                    end if
 
                  else
+                   ! Re + Im self-energy
                    sig_cplx = gkq2 * cfact
                    if (sigma%frohl_model == 1 .and. is_qzero .and. ediff <= TOL_EDIFF) then
                      ! Treat Frohlich divergence with spherical integration around the Gamma point.
                      ! In principle one should rescale by the number of degenerate states but it's
                      ! easier to move all the weight to a single band.
                      sig_cplx = czero
-                     if (ibsum_kq == band_ks) sig_cplx = frohl_sphcorr(nu) * (two * f_mkq - one)
+                     if (ibsum_kq == band_ks) sig_cplx = zpr_frohl_sphcorr(nu) * (two * f_mkq - one)
                    end if
 
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + sig_cplx
@@ -2109,6 +2111,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  ! Tetrahedron method
                  ! ===================
                  if (sigma%use_doublegrid) then
+                   ! Tetra + double grid
 
                    do jj=1,sigma%eph_doublegrid%ndiv
                      ! Double Grid shared points weights
@@ -2145,6 +2148,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        end if
 
                      else
+                         ! Re + Sigma with tetra and double grid
                        sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + gkq2_pf * ( &
                          (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, jj) +  &
                          (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, imyp, ibsum_kq, imyq, jj) ) * weight
@@ -2187,6 +2191,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      end if
 
                    else
+                     ! Re + Sigma with tetra and WITHOUT double grid
                      sig_cplx = gkq2 * ( &
                        (nqnu + f_mkq      ) * sigma%cweights(1, 1, ib_k, imyp, ibsum_kq, imyq, 1) +  &
                        (nqnu - f_mkq + one) * sigma%cweights(1, 2, ib_k, imyp, ibsum_kq, imyq, 1) )
@@ -2195,7 +2200,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                        ! In principle one should rescale by the number of degenerate states but it's
                        ! easier to move all the weight to a single band
                        sig_cplx = czero
-                       if (ibsum_kq == band_ks) sig_cplx = frohl_sphcorr(nu) * (two * f_mkq - one)
+                       if (ibsum_kq == band_ks) sig_cplx = zpr_frohl_sphcorr(nu) * (two * f_mkq - one)
                      end if
 
                      sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + sig_cplx
