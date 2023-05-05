@@ -96,6 +96,9 @@ module m_crystal
   real(dp) :: ucvol
   ! Real space unit cell volume.
 
+  !real(dp) :: bzvol
+  ! Real space unit cell volume.
+
   logical :: use_antiferro
   ! .TRUE. if AFM symmetries are present and used.
 
