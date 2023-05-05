@@ -5069,6 +5069,7 @@ subroutine gwr_build_sigmac(gwr)
  complex(dp) :: qpe_pade_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigxc_rw_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  type(sigma_pade_t) :: spade
+ type(sigijtab_t),allocatable :: Sigxij_tab(:,:), Sigcij_tab(:,:)
 
 ! *************************************************************************
 
@@ -5103,6 +5104,17 @@ subroutine gwr_build_sigmac(gwr)
  ABI_CALLOC(sigc_it_diag_kcalc, (2, gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol))
  max_abs_imag_wct = zero; max_abs_re_wct = zero
  call gwr%print_mem(unit=std_out)
+
+ ! Table for \Sigmax_ij matrix elements.
+ !only_diago = .True.; sigc_is_herm = .False.
+ !if (string_in(gwr%dtset%gwr_task, "GAMMA_GW")) only_diago = .False.
+ !call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
+ !                        only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
+
+ !call sigijtab_free(Sigxij_tab)
+ !ABI_FREE(Sigxij_tab)
+ !call sigijtab_free(Sigcij_tab)
+ !ABI_FREE(Sigcij_tab)
 
 if (gwr%use_supercell_for_sigma) then
 
@@ -5252,6 +5264,7 @@ else
 end if
 
        ! Integrate Sigma matrix elements in the R-supercell for ndat r-points and accumulate.
+       ! TODO: Include off-diagonal terms.
        do ikcalc=1,gwr%nkcalc
          if (gwr%kpt_comm%skip(ikcalc)) cycle ! FIXME: Temporary hack till I find a better MPI algo for k-points.
          k_is_gamma = normv(gwr%kcalc(:,ikcalc), gwr%cryst%gmet, "G") < GW_TOLQ0
@@ -7172,6 +7185,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
  ! Table for \Sigmax_ij matrix elements.
  only_diago = .True.; sigc_is_herm = .False.
+ !if (string_in(gwr%dtset%gwr_task, "GAMMA_GW")) only_diago = .False.
  call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
                          only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
 
