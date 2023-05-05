@@ -1056,7 +1056,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      write(ab_out, "(a)")" This correction is used to accelerate the convergence of the ZPR with the q-point sampling "
      write(ab_out, "(a)")" Note that this term tends to zero for N_q --> oo "
      write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
-     write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
+     write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, ", nphi: ", sigma%nphi
      do nu=1,natom3
        if (abs(zpr_frohl_sphcorr(nu)) < tol12) cycle
        write(ab_out, "(a,f8.1,a,i0,a,f8.1,a)")&
@@ -1321,8 +1321,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(f_tlist_b, (sigma%ntemp, nbcalc_ks))
 
        do ib_k=1,nbcalc_ks
-         band_ks = ib_k + bstart_ks - 1
-         eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+         band_ks = ib_k + bstart_ks - 1; eig0nk = ebands%eig(band_ks, ik_ibz, spin)
          do it=1,sigma%ntemp
            f_tlist_b(it,ib_k) = occ_fd(eig0nk, sigma%kTmesh(it), sigma%mu_e(it))
          end do
@@ -1351,8 +1350,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            weight = four_pi * sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu
 
            do ib_k=1,nbcalc_ks
-             band_ks = ib_k + bstart_ks - 1
-             eig0nk = ebands%eig(band_ks, ik_ibz, spin)
+             band_ks = ib_k + bstart_ks - 1; eig0nk = ebands%eig(band_ks, ik_ibz, spin)
              do it=1,sigma%ntemp
                f_nk = f_tlist_b(it,ib_k)
                nqnu = nqnu_tlist(it)
@@ -1373,19 +1371,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          write(ab_out, "(a)")" This correction is used to accelerate the convergence of Sigma(w) with the q-point sampling "
          write(ab_out, "(a)")" Note that this term tends to zero for N_q --> oo "
          write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
-         write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
+         write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, ", nphi: ", sigma%nphi
          do ib_k=1,nbcalc_ks
            band_ks = ib_k + bstart_ks - 1
-           write(ab_out, "(a, i0)")" For band:", band_ks
+           write(ab_out, "(a, i0)")" Spherical correction to Sigma^{FM}(w=e_KS) for band: ", band_ks
            do nu=1,natom3
-           do it=1,1 !sigma%ntemp
-             if (abs(fm_frohl_sphcorr(iw,nu,it,ib_k)) < tol12) cycle
+           do it=1,sigma%ntemp
              iw = 1 + (sigma%nwr / 2)
-             write(ab_out, "(a,2(f8.1),a,i0)")&
-               " FM(w=e_KS) Spherical correction:", fm_frohl_sphcorr(iw,nu,it,ib_k) * Ha_meV, " (meV) for ph-mode: ",nu
+             if (abs(fm_frohl_sphcorr(iw,nu,it,ib_k)) < tol12) cycle
+             write(ab_out, "(2(f8.1),2(a,i0))") &
+               fm_frohl_sphcorr(iw,nu,it,ib_k) * Ha_meV, " (meV) for ph-mode: ",nu, ", itemp:", it
            end do
            end do
-           write(ab_out, "(a)")ch10
          end do
        end if
      end if
@@ -5298,7 +5295,7 @@ subroutine sigmaph_print(self, dtset, unt)
 
  !select case (self%frohl_model)
  !case (0)
- !  write(unt,"(a)")" No special treatment for the integration of the Frohlich divergence in gkq for q --> 0"
+ !  write(unt,"(a)")" No special treatment for the integration of the Frohlich divergence in the microzone around Gamma"
  !case (1)
  !  write(unt,"(a)")" Integrating Frohlich model in small sphere around Gamma to accelerate qpt convergence"
  !  write(unt,"(2(a,i0,1x))")" Sperical integration performed with: ntheta: ", self%ntheta, ", nphi: ", self%nphi
