@@ -1314,7 +1314,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      !end if
 
      if (sigma%frohl_model == 1 .and. .not. sigma%imag_only .and. sigma%nwr > 0) then
-       call wrtout(std_out, " Computing FM spherical average to treat Frohlich divergence ...")
+       call wrtout(std_out, " Computing FM(w) spherical average to treat Frohlich divergence ...")
        ! This integral depends on the (n, k) state
        ABI_CALLOC(fm_frohl_sphcorr, (sigma%nwr, natom3, sigma%ntemp, nbcalc_ks))
        ABI_MALLOC(f_tlist_b, (sigma%ntemp, nbcalc_ks))
@@ -1344,7 +1344,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            do iatom=1, natom
              cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), cmplx(displ_cart(1,:,iatom, nu), displ_cart(2,:,iatom, nu), kind=dpc))
            end do
-           cnum = dot_product(qpt_cart, cp3)
+           cnum = dot_product(qpt_cart, cp3); if (abs(cum) < tol12) cycle
 
            ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
            weight = four_pi * sigma%angwgth(iang) * abs(cnum) ** 2 * inv_qepsq ** 2 / wqnu
@@ -1374,7 +1374,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          !write(ab_out, "(a)")" Note that this term tends to zero for N_q --> oo "
          !write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
          !write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, "nphi: ", sigma%nphi
-         it = 1; iw = (sigma%nwr / 2)
+         it = 1; iw = 1 + (sigma%nwr / 2)
          do ib_k=1,nbcalc_ks
            band_ks = ib_k + bstart_ks - 1
            write(ab_out, "(a, i0)")" For band:", band_ks
