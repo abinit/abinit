@@ -53,6 +53,9 @@ module m_dynamic_array
     real(dp), allocatable :: data(:)
   CONTAINS
     procedure :: push => real_array_type_push
+    procedure :: sort => real_array_type_sort
+    procedure :: from_static => real_array_type_from_static
+    procedure :: allgatherv => real_array_type_allgatherv
     procedure :: finalize => real_array_type_finalize
   end type real_array_type
 
@@ -155,6 +158,55 @@ subroutine real_array_type_push(self, val)
 
 end subroutine real_array_type_push
 !!***
+
+subroutine int_array_type_from_static(self, A)
+  class(int_array_type), intent(inout):: self
+  integer, intent(in) :: A(:)
+  integer :: n
+  n=size(A)
+  self%size=n
+  self%capacity=n
+  ABI_MALLOC(self%data, (n))
+  self%data(:) = A
+end subroutine int_array_type_from_static
+
+subroutine real_array_type_from_static(self, A)
+  class(real_array_type), intent(inout):: self
+  real(dp), intent(in) :: A(:)
+  integer :: n
+  n=size(A)
+  self%size=n
+  self%capacity=n
+  ABI_MALLOC(self%data, (n))
+  self%data(:) = A
+end subroutine real_array_type_from_static
+
+subroutine real_array_type_sort(self, order)
+  class(real_array_type), intent(inout):: self
+  real(dp):: work((self%size+1)/2)
+  integer, optional, intent(inout):: order(self%size)
+  integer :: work_order((self%size+1)/2)
+  call MergeSort(self%data(:self%size), work, order, work_order)
+end subroutine real_array_type_sort
+
+subroutine real_array_type_allgatherv(self,buff, comm, nproc)
+  class(real_array_type), intent(inout):: self
+  integer, intent(in) :: comm, nproc
+  real(dp), allocatable, intent(out) :: buff(:)
+  integer :: disps(nproc), sizes(nproc)
+  integer :: totsize, ierr, i
+  totsize=self%size
+  call xmpi_sum(totsize, comm, ierr)
+  ABI_MALLOC(buff, (totsize))
+  call xmpi_allgather(self%size, sizes, comm, ierr)
+  disps(1)=0
+  do i=2, nproc
+    disps(i)=disps(i-1)+sizes(i-1)
+  end do
+  call xmpi_allgatherv(self%data(:self%size), self%size, buff, sizes, disps, comm, ierr  )
+end subroutine real_array_type_allgatherv
+
+
 
 !****f* m_disarray/real_array_type_finalize
 !!
