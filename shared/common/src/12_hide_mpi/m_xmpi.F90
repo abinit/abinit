@@ -659,6 +659,7 @@ end interface xmpi_isum_ip
 
 interface xmpi_land
   module procedure xmpi_land_log0d
+  module procedure xmpi_land_log1d
 end interface xmpi_land
 !!***
 
