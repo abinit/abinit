@@ -128,7 +128,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_anh,&
 &                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv,&
-&                                   dispterms,coeff_file_rw,read_effective_potential, max_nbody, min_bound_coeff)
+&                                   dispterms,coeff_file_rw,read_effective_potential, max_nbody, &
+&                                   min_bound_coeff, remaining_rate)
 
  implicit none
 
@@ -151,6 +152,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical,optional,intent(in) :: fit_on(3), sel_on(3),dispterms
  real(dp),optional,intent(in) :: fit_factors(3)
  real(dp), optional, intent(in) :: min_bound_coeff
+ real(dp), optional, intent(in) :: remaining_rate
 !Local variables-------------------------------
 !scalar
  integer :: nbound
@@ -170,6 +172,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: fit_iatom_all
 !arrays
  real(dp) :: mingf(4),int_fit_factors(3), min_bound_coeff1
+ real(dp) :: remaining_rate1
  integer :: sc_size(3)
  logical, allocatable :: isbanned(:)
  logical, allocatable :: isselected(:)
@@ -198,6 +201,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  character(len=5),allocatable :: symbols(:)
  type(int_array_type) :: ind_bound
  integer, allocatable :: list_bound(:)
+
+
+ integer :: n_remaining
+
 ! *************************************************************************
 
 !MPI variables
@@ -280,6 +287,9 @@ end if
 
  min_bound_coeff1=-100
  if(present(min_bound_coeff))  min_bound_coeff1=min_bound_coeff
+ remaining_rate1=0.5
+ !if(present(remaining_rate))  remaining_rate1=remaining_rate
+
 
  end block
 
@@ -598,7 +608,7 @@ end if   ! generateterm == 1
   end if
 
   endif
-print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
+!print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
 !Copy the initial coefficients from the model on the CPU 0
 
 
@@ -683,6 +693,15 @@ print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
    call wrtout(std_out,message,"COLL")
  end if
 
+ ! initialize isselected and isbanned
+ ABI_MALLOC(isselected, (ncoeff_tot))
+ ABI_MALLOC(isbanned, (ncoeff_tot))
+
+ n_remaining=ncoeff_tot
+
+ isselected(:)=.False.
+ isbanned(:)=.False.
+
 
  block ! find the bounding terms.
    integer :: ico
@@ -693,12 +712,15 @@ print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
        if (.not.(any(fixcoeff_corr==my_coeffindexes(ico)))) then
          nbound =nbound +1
          call ind_bound%push(my_coeffindexes(ico))
+         isselected(my_coeffindexes(ico))=.True.
        end if
      end if
    end do
    call xmpi_sum(nbound, comm, ierr)
    call ind_bound%allgatherv(list_bound, comm, nproc)
+   call xmpi_bcast(list_bound, master, comm, ierr)
    call ind_bound%finalize()
+   call xmpi_lor(isselected, comm)
 end block
 
 
@@ -742,9 +764,16 @@ end block
    ! print *, "ncycle_tot:", ncycle_tot
   end block
 
-  print *, "allocate isselected, size=", ncoeff_tot
-  ABI_MALLOC(isselected, (ncoeff_tot))
-  ABI_MALLOC(isbanned, (ncoeff_tot))
+
+  block
+    integer :: i
+    do i=1, nbancoeff
+      isbanned(bancoeff(i))=.True.
+    end do
+  end block
+
+  call xmpi_lor(isselected, comm)
+  call xmpi_lor(isbanned, comm)
 
 
 
@@ -797,12 +826,16 @@ end block
      if(nfixcoeff_corr == -1)then
        if(ii <= ncoeff_model)then
          list_coeffs(ii) = ii
+         isselected(ii) = .True.
        end if
      else
        list_coeffs(ii) = fixcoeff_corr(ii-nbound)
+       isselected(fixcoeff_corr(ii-nbound)) = .True.
      end if
    end do
  end if
+
+call  xmpi_lor(isselected, comm)
 
 !Get the decomposition for each coefficients of the forces and stresses for
 !each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
@@ -873,6 +906,7 @@ end block
      rank_to_send = 0
      do icoeff=1,my_ncoeff
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
+         print *, "DEBUG:        icycle:",icycle, "icoeff:",  list_coeffs(icycle)
          if(need_initialize_data)then
            my_icoeff = icoeff
          else
@@ -888,9 +922,6 @@ end block
          energy_coeffs_tmp(icycle,:)    = energy_coeffs(my_icoeff,:)
          fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
          strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
-         !energy_coeffs_tmp(icycle,:)    = 0
-         !fcart_coeffs_tmp(:,:,icycle,:) = 0
-         !strten_coeffs_tmp(:,:,icycle)  = 0
 
          rank_to_send = my_rank
          call polynomial_coeff_free(coeffs_tmp(icycle))
@@ -899,13 +930,12 @@ end block
            &                                   my_coeffs(icoeff)%name,&
            &                                   my_coeffs(icoeff)%isbound,&
            &                                   check=.false.)
-
          exit
        end if
      end do
-!    Need to send the rank with the chosen coefficient
+     !    Boadcast the coefficient
+     !    Need to send the rank with the chosen coefficient
      call xmpi_sum(rank_to_send, comm, ierr)
-!    Boadcast the coefficient
      call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
      call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
      call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
@@ -1022,21 +1052,27 @@ end block
         end if
      end if
 !    Reset gf_values
-     gf_values(:,:) = zero
+     gf_values(:,:) = huge(0.0_dp)
+
      do icoeff=1,my_ncoeff
 !    cycle if this coefficient is not allowed
-       if(any(list_coeffs==my_coeffindexes(icoeff)).or.singular_coeffs(icoeff) == 1)then
-          gf_values(:,icoeff) = zero
+       !if(nbound > 0)then
+       !  if(any(list_bound==my_coeffindexes(icoeff)))then
+       !    gf_values(:,icoeff) =zero
+       !    cycle
+       !  end if
+       !endif
+       if(any(list_coeffs==my_coeffindexes(icoeff)) .or. singular_coeffs(icoeff) == 1)then
+          gf_values(:,icoeff) = huge(0.0_dp)/5
           cycle
        endif
-       if(nbancoeff >= 1)then
-         if(any(bancoeff==my_coeffindexes(icoeff)) .or. &
-           & isbanned(my_coeffindexes(icoeff)) .or. &
-           & isselected(my_coeffindexes(icoeff))  )then
-            gf_values(:,icoeff) = zero
-            cycle
-         endif
-       end if
+       !if(nbancoeff >= 1)then
+       if(isbanned(my_coeffindexes(icoeff)) .or. &
+         & isselected(my_coeffindexes(icoeff))  )then
+         gf_values(:,icoeff) = huge(0.0_dp)/5
+         cycle
+       endif
+       !end if
        list_coeffs(icycle) = my_coeffindexes(icoeff)
 
        if(need_initialize_data)then
@@ -1049,7 +1085,7 @@ end block
 &                                        energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
 &                                        my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
 &                                        strten_coeffs,fit_data%training_set%ucvol,&
-&                                        my_coefflist(icoeff),1)
+                                        my_coefflist(icoeff),1)
        end if
 
 !      Fill the temporary arrays
@@ -1068,7 +1104,6 @@ end block
          &                                      fit_data%training_set%sqomega,fit_on,int_fit_factors, &
          &                                      nbound=nbound, min_bound_coeff=min_bound_coeff1,  &
          &                                      ignore_bound=.True.)
-!&                                      ignore_bound=(.not. (icycle_tmp==ncycle) ))
 
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
@@ -1100,7 +1135,8 @@ end block
            end if
          end if
        else!In this case the matrix is singular
-         gf_values(:,icoeff) = zero
+         gf_values(:,icoeff) = huge(0.0_dp)/5
+         isbanned(my_coeffindexes(icoeff))=.True.
          singular_coeffs(icoeff) = 1
          write(message, '(a)') ' The matrix is singular...'
          if(need_prt_GF_csv)then
@@ -1120,68 +1156,105 @@ end block
            end if
        endif
      end do !icoeff=1,my_ncoeff
+     call xmpi_lor(isbanned, comm)
+     !print *, "DEBUG==================> ", "before mingf on this cpu found"
 
      !Close *csv file for GF values of this iteration
      if(need_prt_GF_csv)close(unit_GF_val)
 
 !    find the best coeff on each CPU
-     mingf(:)  = 9D99
+     mingf(:)  = huge(0.0_dp)
      index_min = 0
      do icoeff=1,my_ncoeff
-       if(gf_values(1,icoeff) < zero) cycle
-       if(abs(gf_values(1,icoeff)) <tol16) cycle
+       !if(gf_values(1,icoeff) > huge(0.0_dp)/5-1.0) cycle
+       !if(abs(gf_values(1,icoeff)) <tol16) cycle
+       if(isbanned(my_coeffindexes(icoeff)) .or. isselected(my_coeffindexes(icoeff)) ) cycle
        if(sum(gf_values(2:4,icoeff),MASK=sel_on) < sum(mingf(2:4),MASK=sel_on))then
          mingf(:) = gf_values(:,icoeff)
          index_min = my_coeffindexes(icoeff)
        end if
      end do
+     !print *, "DEBUG==================> ", "mingf on this cpu found"
+
+!    MPI GATHER THE BEST COEFF ON EACH CPU
+     if(nproc > 1)then
+
+       !print *, "DEBUG==================> ", "after mingf on this cpu found. nproc=", nproc
+       buffGF(1,1) = index_min
+       buffGF(2:5,1) =  mingf(:)
+
+       call xmpi_barrier(comm)
+       !print *, "DEBUG==================> ", "before gather buffGF. nproc=", nproc
+       call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
+       !print *, "DEBUG==================> ", "gather buffGF. nproc=", nproc
+!      find the best coeff
+       mingf(:)    = huge(0.0_dp)
+       index_min= 0
+       do icoeff=1,nproc
+         if(gf_mpi(2,icoeff) > huge(0.0_dp)/5-1) cycle
+         !if(abs(gf_mpi(2,icoeff)) < tol16) cycle
+         if(sum(gf_mpi(3:5,icoeff),MASK=sel_on) < sum(mingf(2:4),MASK=sel_on))then
+           mingf(:) = gf_mpi(2:5,icoeff)
+           index_min = int(gf_mpi(1,icoeff))
+           !print *, "index_min==================> ", "gather buffGF. index_min=", index_min
+         end if
+       end do
+     end if
+
+     !print *, "DEBUG==================> ", "Gather best on each cpu finished."
 
      BLOCK  ! sort the coeff on each CPU
        real(dp) :: mygf(my_ncoeff)
        integer :: myorder(my_ncoeff), ntot
        real(dp), allocatable :: allgf(:)
        integer, allocatable :: allorder(:)
+
+
+       !print *, "DEBUG==================> ", "Gather best on each cpu finished2."
        do icoeff=1,my_ncoeff
-         if(gf_values(1,icoeff) < zero) mygf(icoeff)=9D99
-         if(abs(gf_values(1,icoeff)) <tol16) mygf(icoeff)=9D99
-         mygf(icoeff) = sum(gf_values(2:4,icoeff),MASK=sel_on)
+         if(gf_values(1,icoeff) < zero) then
+           mygf(icoeff)=9D99
+         else if(abs(gf_values(1,icoeff)) <tol16) then
+           mygf(icoeff)=9D99
+         else
+           mygf(icoeff) = sum(gf_values(2:4,icoeff),MASK=sel_on)
+         end if
          myorder(icoeff) = my_coeffindexes(icoeff)
        end do
+       !print *, "DEBUG==================> ", "GatherV"
        call mpigatherv(mygf,myorder, my_ncoeff, allgf, allorder, ntot, comm, nproc)
+       !print *, "DEBUG==================> ", "GatherV finished"
        BLOCK
          real(dp):: work((ntot+1)/2)
          integer:: worder((ntot+1)/2)
+         integer :: i
+
          call MergeSort(allgf, work, allorder, worder)
+         ! at least n_remaining terms should be kept. It reduces to a percentage everytime, but should be larger than 10*ncycle.
+         ! if ncycle*10>ncoeff_tot, use ncoeff_tot
+         print *, "n_remaining:----------------------", n_remaining
+         n_remaining = max(ceiling(n_remaining * remaining_rate1), min(ncycle*40, ncoeff_tot) )
+
+         do i=n_remaining+1, ncoeff_tot
+           isbanned(allorder(i))=.True.
+         end do
+         if(my_rank==0) then
+           do i=1, 30 !size(allorder)
+             print *, "index=", i, "icoeff=", allorder(i), "  GF=", allgf(i)
+           end do
+         end if
+         ABI_FREE(allgf)
+         ABI_FREE(allorder)
        end BLOCK
      end BLOCK
-
-
-!    MPI GATHER THE BEST COEFF ON EACH CPU
-     if(nproc > 1)then
-       buffGF(1,1) = index_min
-       buffGF(2:5,1) =  mingf(:)
-
-       call xmpi_allgatherv(buffGF,5,gf_mpi,buffsize,buffdisp, comm, ierr)
-!      find the best coeff
-       mingf(:)    = 9D99
-       index_min= 0
-       do icoeff=1,nproc
-         if(gf_mpi(2,icoeff) < zero) cycle
-         if(abs(gf_mpi(2,icoeff)) < tol16) cycle
-         if(sum(gf_mpi(3:5,icoeff),MASK=sel_on) < sum(mingf(2:4),MASK=sel_on))then
-           mingf(:) = gf_mpi(2:5,icoeff)
-           index_min = int(gf_mpi(1,icoeff))
-         end if
-       end do
-     end if
 
 !    Check if there is still coefficient
      if(index_min==0) then
        exit
      else
        list_coeffs(icycle) = index_min
+       isselected(index_min)=.True.
      end if
-
 
 
 !    Check if this coeff is treat by this cpu and fill the
@@ -1207,12 +1280,6 @@ end block
          strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
          call polynomial_coeff_free(coeffs_tmp(icycle))
 
-         !block
-         !  integer :: ic
-         !  do ic =1, icycle-1
-         !    call polynomial_coeff_setCoefficient(coeff_values(ic), coeffs_tmp(ic))
-         !  end do
-         !end block
          call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
            &                                   coeffs_tmp(icycle),my_coeffs(icoeff)%terms,&
            &                                   my_coeffs(icoeff)%name,&
@@ -1231,23 +1298,11 @@ end block
      call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
      call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
      call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm)
-     !block
-     !  integer :: ic
-     !  do ic =1, icycle-1
-     !    call polynomial_coeff_broadcast(coeffs_tmp(ic), rank_to_send, comm)
-     !    print *, coeffs_tmp(ic)%name
-     !  end do
-     !end block
 
      if(need_verbose) then
        write(message, '(a,I0,2a)' )' Selecting the coefficient number ',list_coeffs(icycle),&
 &                                   ' ===> ',trim(coeffs_tmp(icycle)%name)
        call wrtout(std_out,message,'COLL')
-
-!       write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
-!&                                        ' the iteration ',icycle_tmp,' (meV^2/atm): ',&
-!&                         mingf(4)* factor * (Ha_eV *1000)**2
-!       call wrtout(std_out,message,'COLL')
 
        write (i_char, '(i3)') icycle
        write (j_char, '(i7)') list_coeffs(icycle)
@@ -1268,8 +1323,10 @@ end block
 !    Check the stopping criterion
      converge = .false.
      if(tolGF > zero)then
-       check_value =  (sum(gf_values_iter(2:4,icycle_tmp+1),MASK=sel_on) - sum(gf_values_iter(2:4,icycle_tmp),MASK=sel_on)) &
-&                   /(sum(gf_values_iter(2:4,icycle_tmp+1),MASK=sel_on) - sum(gf_values_iter(2:4,1),MASK=sel_on))
+       check_value =  (sum(gf_values_iter(2:4,icycle_tmp+1),MASK=sel_on) - &
+         &             sum(gf_values_iter(2:4,icycle_tmp),MASK=sel_on)) &
+         &            /(sum(gf_values_iter(2:4,icycle_tmp+1),MASK=sel_on) &
+         &            - sum(gf_values_iter(2:4,1),MASK=sel_on))
        if(check_value < tolGF)then
          write(message,'(2a,ES18.10,a,ES18.10,a)') ch10," Fit process complete =>",&
 &                                                check_value ," < ",tolGF,&
