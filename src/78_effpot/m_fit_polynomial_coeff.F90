@@ -32,8 +32,10 @@ module m_fit_polynomial_coeff
  use m_xmpi
  use m_supercell
 
+ use m_hashtable_strval, only: hash_table_t
+ use m_mergesort, only: mergesort
  use m_bvls, only: bvls
- use m_dynamic_array, only : int_array_type
+ use m_dynamic_array, only : int_array_type, real_array_type
  use m_special_funcs,only : factorial
  use m_geometry,       only : xred2xcart
  use m_crystal,only : symbols_crystal
@@ -169,6 +171,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !arrays
  real(dp) :: mingf(4),int_fit_factors(3), min_bound_coeff1
  integer :: sc_size(3)
+ logical, allocatable :: isbanned(:)
+ logical, allocatable :: isselected(:)
  logical,allocatable  :: fix_and_impose(:)
  integer,allocatable  :: buffsize(:),buffdisp(:),buffin(:),fixcoeff_corr(:)
  integer,allocatable  :: list_coeffs(:),list_coeffs_tmp(:),list_coeffs_tmp2(:)
@@ -185,6 +189,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  type(polynomial_coeff_type),target,allocatable :: coeffs_tmp(:)
  type(polynomial_coeff_type),pointer :: coeffs_in(:)
  type(fit_data_type) :: fit_data
+
+ !type(real_array_type) :: gf_array
  character(len=1000) :: message,message2
  character(len=fnlen) :: filename
  character(len=3)  :: i_char
@@ -281,7 +287,6 @@ end if
 !Copy the input effective potential eff_pot to eff_pot fixed
 !If nimposecoeff=0 the fixed potential is the harmonic potential
 ncoeff_model = eff_pot%anharmonics_terms%ncoeff
-
 
 
 if (nimposecoeff > ncoeff_model)then
@@ -651,7 +656,7 @@ print *, ' DEBUG ---------->> my_ncoeff, my rank   ' ,my_ncoeff, my_rank
    call polynomial_coeff_init(zero,coeffs_in(jcoeff)%nterm,&
      &                             my_coeffs(icoeff),coeffs_in(jcoeff)%terms,&
      &                             coeffs_in(jcoeff)%name,&
-     &                              coeffs_in(jcoeff)%isbound, &
+     &                             coeffs_in(jcoeff)%isbound, &
      &                             check=.true.)
    call polynomial_coeff_free(coeffs_in(jcoeff))
  end do
@@ -736,6 +741,10 @@ end block
    ! print *, "ncycle_max:", ncycle_max
    ! print *, "ncycle_tot:", ncycle_tot
   end block
+
+  print *, "allocate isselected, size=", ncoeff_tot
+  ABI_MALLOC(isselected, (ncoeff_tot))
+  ABI_MALLOC(isbanned, (ncoeff_tot))
 
 
 
@@ -1021,7 +1030,9 @@ end block
           cycle
        endif
        if(nbancoeff >= 1)then
-         if(any(bancoeff==my_coeffindexes(icoeff)))then
+         if(any(bancoeff==my_coeffindexes(icoeff)) .or. &
+           & isbanned(my_coeffindexes(icoeff)) .or. &
+           & isselected(my_coeffindexes(icoeff))  )then
             gf_values(:,icoeff) = zero
             cycle
          endif
@@ -1124,6 +1135,26 @@ end block
          index_min = my_coeffindexes(icoeff)
        end if
      end do
+
+     BLOCK  ! sort the coeff on each CPU
+       real(dp) :: mygf(my_ncoeff)
+       integer :: myorder(my_ncoeff), ntot
+       real(dp), allocatable :: allgf(:)
+       integer, allocatable :: allorder(:)
+       do icoeff=1,my_ncoeff
+         if(gf_values(1,icoeff) < zero) mygf(icoeff)=9D99
+         if(abs(gf_values(1,icoeff)) <tol16) mygf(icoeff)=9D99
+         mygf(icoeff) = sum(gf_values(2:4,icoeff),MASK=sel_on)
+         myorder(icoeff) = my_coeffindexes(icoeff)
+       end do
+       call mpigatherv(mygf,myorder, my_ncoeff, allgf, allorder, ntot, comm, nproc)
+       BLOCK
+         real(dp):: work((ntot+1)/2)
+         integer:: worder((ntot+1)/2)
+         call MergeSort(allgf, work, allorder, worder)
+       end BLOCK
+     end BLOCK
+
 
 !    MPI GATHER THE BEST COEFF ON EACH CPU
      if(nproc > 1)then
@@ -1615,6 +1646,9 @@ call effective_potential_free(eff_pot_fixed)
  ABI_FREE(strten_coeffs)
  ABI_FREE(strten_coeffs_tmp)
  ABI_FREE(stat_coeff)
+
+ ABI_FREE(isselected)
+ ABI_FREE(isbanned)
 
  ABI_SFREE(fixcoeff_corr)
  ABI_SFREE(fix_and_impose)
@@ -3332,6 +3366,30 @@ recursive subroutine genereList(i,m,m_max,n_max,list,list_out,size,compute)
 
 end subroutine genereList
 !!***
+
+subroutine mpigatherv(A, order, n ,buff_A, buff_order, totsize, comm, nproc)
+  integer, intent(inout) :: n, totsize
+  real(dp),  intent(out) ::  A(n)
+  integer, intent(inout):: order(n)
+  integer, intent(in) :: comm, nproc
+  real(dp), allocatable, intent(out) ::  buff_A(:)
+  integer, allocatable, intent(out) :: buff_order(:)
+  integer :: disps(nproc), sizes(nproc)
+  integer ::  ierr, i
+  totsize=n
+  call xmpi_sum(totsize, comm, ierr)
+  ABI_MALLOC(buff_A, (totsize))
+  ABI_MALLOC(buff_order, (totsize))
+  call xmpi_allgather(n, sizes, comm, ierr)
+  disps(1)=0
+  do i=2, nproc
+    disps(i)=disps(i-1)+sizes(i-1)
+  end do
+  call xmpi_allgatherv(A, n, buff_A, sizes, disps, comm, ierr  )
+  call xmpi_allgatherv(order, n, buff_order, sizes, disps, comm, ierr  )
+end subroutine mpigatherv
+
+
 
 end module m_fit_polynomial_coeff
 !!***
