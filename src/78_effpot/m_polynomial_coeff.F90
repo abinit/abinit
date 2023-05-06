@@ -84,6 +84,7 @@ module m_polynomial_coeff
  contains
    procedure :: init => IrreducibleCombinations_init
    procedure :: free => IrreducibleCombinations_free
+   procedure :: reset_array => IrreducibleCombinations_reset_array
    procedure :: add_irr => IrreducibleCombinations_add_irr
  end type IrreducibleCombinations_T
 
@@ -2146,6 +2147,10 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
 
  implicit none
 
+ !FIXME: There is a bug that the onebody term are duplicated.
+ ! e.g. (Bx-O1x)^6 and (O1x-Bx)^6 both appears
+ ! We can force ia<ib.
+
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: max_power_strain,option,comm
@@ -2441,8 +2446,6 @@ if(need_compute_symmetric)then
   else
      my_nirred = 0
   endif
-
-
   !write(std_out,*) "my_rank", my_rank, "my_ncmobi_start", my_ncombi_start, "my_ncombi_end", my_ncombi_end,'my_nirred',my_nirred
 
   !COPY IRREDUCIBLE COMBINTATIONS TO BE DONE TO EACH PROCESSOR
@@ -2456,6 +2459,9 @@ if(need_compute_symmetric)then
   !COUNT SYMMETRIC COMBINATIONS TO IRREDUCIBLE COMBINATIONS ON EACH PROCESSOR
 
   !COMPUTE SYMMETRIC COMBINATIONS
+  block
+    type(IrreducibleCombinations_T) :: irred_combinations
+    call irred_combinations%init()
     do i=1,my_nirred
       associate(comb => my_list_combination_tmp(:, i))
         !ABI_MALLOC(dummylist,(0))
@@ -2475,10 +2481,13 @@ if(need_compute_symmetric)then
 &                                        comb(:ndisp+nstrain),power_disps(2),&
 &                                        ncoeff_symsym,nstr_sym,nstrain, &
 &                                        compatibleCoeffs,compute_sym,comm, &
-&                                        only_even=need_only_even_power, max_nbody=max_nbody)
+&                                        only_even=need_only_even_power, max_nbody=max_nbody, &
+&                                        irred_combinations=irred_combinations)
 
      end associate
     enddo
+    call irred_combinations%free()
+  end block
 
   ABI_FREE(my_list_combination_tmp)
 
@@ -3397,7 +3406,7 @@ end subroutine symlist_free
 subroutine computeSymmetricCombinations(array_combination, &
   & list_symcoeff, list_symstr, ndisp, nsym, index_coeff_in,  &
   & ndisp_max,  ncoeff, nsym_str, nstrain, &
-  &  compatibleCoeffs,  compute, comm, only_even, max_nbody  )
+  &  compatibleCoeffs,  compute, comm, only_even, max_nbody , irred_combinations )
 
   integer,intent(in)    :: ndisp,nsym,ndisp_max, ncoeff,nstrain,nsym_str
   integer,intent(in)    :: comm
@@ -3410,7 +3419,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   integer,intent(in)    :: list_symcoeff(6,ncoeff,nsym),index_coeff_in(ndisp+nstrain)
   integer,intent(in)    :: list_symstr(6,nsym,2),compatibleCoeffs(ncoeff+nsym_str,ncoeff+nsym_str)
   integer, intent(in)   :: max_nbody(:)
-  type(IrreducibleCombinations_T) :: irred_combinations
+  type(IrreducibleCombinations_T), intent(inout) :: irred_combinations
   type(symlist_t), target :: symlist
   !Local variables-------------------------------
 
@@ -3432,7 +3441,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   ABI_UNUSED(compute)
   ABI_UNUSED(comm)
 
-
+  call irred_combinations%reset_array()
   need_only_even = .FALSE.
   if(present(only_even))need_only_even=only_even
   symcoeff_found = 0
@@ -3443,7 +3452,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   !otherwise pass through
 
   !call gen_symlist(nsym, ndisp, symlist)
-  call irred_combinations%init()
+  !call irred_combinations%init()
 
   ! nbody and power for strain term
   call get_totpower_and_nbody(index_coeff_in(ndisp+1:ndisp+nstrain), nstrain, nbody_strain,  totpower_strain)
@@ -3468,7 +3477,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   ! skip if max_nbody=0,
   ! and skip if nbody>max_nbody
   if(max_nbody_copy(totpower)==0 .or. nbody> max_nbody_copy(totpower)) then
-    call irred_combinations%free()
+    !call irred_combinations%free()
     return
   end if
 
@@ -3555,7 +3564,7 @@ subroutine computeSymmetricCombinations(array_combination, &
 
   call array_combination%concate(irred_combinations%array)
   call symlist%free()
-  call irred_combinations%free()
+  !call irred_combinations%free()
   !ABI_FREE(index_isym)
 end subroutine computeSymmetricCombinations
 
@@ -4486,6 +4495,13 @@ subroutine IrreducibleCombinations_free(self)
   call self%table%free()
   call self%array%finalize()
 end subroutine IrreducibleCombinations_free
+
+subroutine IrreducibleCombinations_reset_array(self)
+  class(IrreducibleCombinations_t), intent(inout) :: self
+  call self%array%finalize()
+end subroutine IrreducibleCombinations_Reset_Array
+
+
 
 function IrreducibleCombinations_add_irr(self, combination, list_symcoeff, &
   & list_symstr, ncoeff_sym, nsym, ndisp ) result(irreducible)
