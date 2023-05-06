@@ -34,6 +34,56 @@ end subroutine xmpi_land_log0d
 
 !----------------------------------------------------------------------
 
+!!****f* ABINIT/xmpi_land_log1d
+!! NAME
+!!  xmpi_land_log1d
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: one-dimensional logical arrays.
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_land_log1d(xval,comm)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: comm
+ logical, DEV_CONTARRD intent(inout) :: xval(:)
+
+!Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: ierr,n1
+ logical,allocatable :: xsum(:)
+#endif
+
+! *************************************************************************
+
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+!  Accumulate xval on all proc. in comm
+   n1 = size(xval)
+   ABI_STAT_MALLOC(xsum,(n1), ierr)
+   if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_land_log1d')
+   call MPI_ALLREDUCE(xval,xsum,n1,MPI_LOGICAL,MPI_LAND,comm,ierr)
+   xval (:) = xsum(:)
+   ABI_FREE(xsum)
+ end if
+#endif
+
+end subroutine xmpi_land_log1d
+!!***
+
+
+
+!----------------------------------------------------------------------
+
 !!****f* ABINIT/xmpi_lor_log1d
 !! NAME
 !!  xmpi_lor_log1d
