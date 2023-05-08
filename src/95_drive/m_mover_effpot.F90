@@ -160,7 +160,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp),allocatable :: gred(:,:),fcart(:,:)
  real(dp),allocatable :: vel(:,:)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
- real(dp) :: efield(3)  
+ real(dp) :: efield(3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename,md_hist_name
  character(len=fnlen) :: name_file
@@ -619,7 +619,7 @@ ABI_FREE(xcart)
 &         1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
 &         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on, &
-&         max_nbody=inp%fit_max_nbody)
+&         max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -669,7 +669,7 @@ ABI_FREE(xcart)
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
 &           -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.true.,positive=.false.,&
-&            fit_on=inp%fit_on,sel_on=inp%sel_on, max_nbody=inp%fit_max_nbody)
+&            fit_on=inp%fit_on,sel_on=inp%sel_on, max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -859,7 +859,7 @@ ABI_FREE(xcart)
 &                 ncoeff+ii)
                  call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
                    &                 -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,positive=.false., &
-                   &                  max_nbody=inp%fit_max_nbody)
+                   &                  max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp)
                  call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
                  acell(:) = one
@@ -942,7 +942,7 @@ ABI_FREE(xcart)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
          &       -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
-         &       max_nbody=inp%fit_max_nbody)
+         &       max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')

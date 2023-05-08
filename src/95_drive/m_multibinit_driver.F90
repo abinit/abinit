@@ -424,7 +424,8 @@ elec_eval = .FALSE.
                     &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
                     &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1,&
                     &         coeff_file_rw=inp%coeff_file_rw,read_effective_potential=read_effective_potential, &
-                    &         max_nbody=inp%fit_max_nbody, min_bound_coeff=inp%fit_min_bound_coeff)
+                    &         max_nbody=inp%fit_max_nbody, min_bound_coeff=inp%fit_min_bound_coeff, &
+                    &         drop_rate=inp%fit_drop_rate)
              else
                 if (inp%fit_ncoeff_per_iatom/=0)then
                    if (mod(inp%fit_ncoeff,inp%fit_ncoeff_per_iatom) /= 0)then
@@ -488,7 +489,7 @@ elec_eval = .FALSE.
                           &         prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on,&
                           &         fit_factors=inp%fit_factors,prt_GF_csv=inp%prt_GF_csv,dispterms=inp%fit_dispterms==1, &
    &         coeff_file_rw=inp%coeff_file_rw,read_effective_potential=read_effective_potential, &
-                          &         max_nbody=inp%fit_max_nbody, min_bound_coeff=inp%fit_min_bound_coeff)
+                          &         max_nbody=inp%fit_max_nbody, min_bound_coeff=inp%fit_min_bound_coeff, drop_rate=inp%fit_drop_rate)
                   enddo
                 enddo
              endif
