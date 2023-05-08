@@ -4149,6 +4149,24 @@ as well as temperature dependence.
 ),
 
 Variable(
+    abivarname="eph_frohl_ntheta",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electron-PHonon: FROHLIich Number of THETA points",
+    added_in_version="9.8.0",
+    text=r"""
+Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 i.e. computation of the e-ph self-energy.
+This variable defines the angular mesh for the spherical integration of the Frohlich divergence
+in the microzone around the Gamma point to accelerate the convergence with the number of q-points.
+
+Set it to zero to disable the correction for testing purposes.
+""",
+),
+
+Variable(
     abivarname="eph_fsewin",
     varset="eph",
     vartype="real",
@@ -4550,15 +4568,15 @@ Variable(
     added_in_version="v9",
     text=r"""
 In a longwave calculation, the nonlocal form factors and their derivatives are
-by default computed for all k points and atom types at an initial step and then 
-specifically used for each type of perturbation. Depending on the calculation 
+by default computed for all k points and atom types at an initial step and then
+specifically used for each type of perturbation. Depending on the calculation
 parameters --in particular for dense k-point grids, large ecut and pseudopotentials
 with large l and n values-- such approach might lead to high virtual memory usage.
 
-With [[ffnl_lw]] = 1 the form factors and derivatives are instead calculated 
-on-the-fly for each type of perturbation and k point when they are required. 
-This option saves virtual memory but makes the computation of spatial-dispersion 
-tensors slower. 
+With [[ffnl_lw]] = 1 the form factors and derivatives are instead calculated
+on-the-fly for each type of perturbation and k point when they are required.
+This option saves virtual memory but makes the computation of spatial-dispersion
+tensors slower.
 """,
 ),
 
@@ -9884,15 +9902,15 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
-Used to run natural optical activity tensor calculation. 
+Used to run natural optical activity tensor calculation.
 
   * 0 --> No natural optical activity tensor is calculated.
   * 1 --> Natural optical activity tensor is calculated.
 
 This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
-ddk, d2_dkdk, electric fields. The number of linear-response calculations 
-to be explicitly precomputed can be reduced via symmetry arguments  
+ddk, d2_dkdk, electric fields. The number of linear-response calculations
+to be explicitly precomputed can be reduced via symmetry arguments
 selecting the appropiate value of the [[prepalw]] variable.
 """,
 ),
@@ -9920,8 +9938,8 @@ phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
 
 This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
-ddk, d2_dkdk, atomic displacements and electric fields. The number of linear-response calculations 
-to be explicitly precomputed can be reduced via symmetry arguments  
+ddk, d2_dkdk, atomic displacements and electric fields. The number of linear-response calculations
+to be explicitly precomputed can be reduced via symmetry arguments
 selecting the appropiate value of the [[prepalw]] variable.
 """,
 ),
@@ -15094,30 +15112,30 @@ a linear response calculation. The standard approach in a linear response calcul
 This approach cannot be applied, presently (v9.x), if the first-order
 wavefunctions are to be used to compute spatial dispersion properties.
 During the linear response calculation, in order to prepare a longwave
-calculation, one should use [[prepalw]] /= 0 in order to force ABINIT to keep 
+calculation, one should use [[prepalw]] /= 0 in order to force ABINIT to keep
 the full number of k-points in half the BZ (kptopt=2), or the full BZ (kptopt=3).
-Different options can then be used to set the reducible perturbations that 
+Different options can then be used to set the reducible perturbations that
 are enforced to be explicitly calculated:
 
   * 1 --> Activates the calculation of perturbations required to build spatial-
           dispersion tensors which depend on strain. It is therefore the option
-          to choose if one intends to run subsequent longwave calculations with 
+          to choose if one intends to run subsequent longwave calculations with
           [[lw_flexo]] = 1, 2, or 4.
 
   * 2 --> Activates the calculation of perturbations required to build spatial-
           dispersion tensors which combine electric field and atomic displacement
-          perturbations. It is therefore the option to choose if one intends to 
+          perturbations. It is therefore the option to choose if one intends to
           run subsequent longwave calculations with [[lw_qdrpl]] = 1.
 
   * 3 --> Activates the calculation of perturbations required to build spatial-
           dispersion tensors which combine electric field and atomic displacement
-          perturbations as well as two atomic displacements. It is therefore the 
-          option to choose if one intends to run subsequent longwave calculations 
+          perturbations as well as two atomic displacements. It is therefore the
+          option to choose if one intends to run subsequent longwave calculations
           with [[lw_flexo]] = 3.
 
   * 4 --> Activates the calculation of perturbations required to build spatial-
-          dispersion tensors which combine two electric field perturbations. 
-          It is therefore the option to choose if one intends to run subsequent 
+          dispersion tensors which combine two electric field perturbations.
+          It is therefore the option to choose if one intends to run subsequent
           longwave calculations with [[lw_natopt]] = 1.
 """,
 ),
@@ -17266,14 +17284,14 @@ If ALL directions are activated (default behavior) AND [[prepanl]] == 1, then th
 only the directions that will be used by the non-linear routine ([[optdriver]] == 5) using crystal symmetries.
 
 Since v9.x this variable also activates the computation of the response to a vector potential
-in the long-wavelength limit. At first order in the momentum, the perturbation and response can be split 
+in the long-wavelength limit. At first order in the momentum, the perturbation and response can be split
 into symmetric plus antisymmetric parts, see Refs. [[cite:Royo2019]] and [[cite:Zabalo2022]].
-The symmetric part, activated with [[rf2_dkdk]] == 1, corresponds to the aforementioned second derivatives 
-of wavefunctions with respect to wavevectors. The antisymmetric part, activated with [[rf2_dkdk]] == 2, 
-gives the response to a uniform orbital magnetic field, as defined in Ref. [[cite:Essin2010]]. The total, 
+The symmetric part, activated with [[rf2_dkdk]] == 1, corresponds to the aforementioned second derivatives
+of wavefunctions with respect to wavevectors. The antisymmetric part, activated with [[rf2_dkdk]] == 2,
+gives the response to a uniform orbital magnetic field, as defined in Ref. [[cite:Essin2010]]. The total,
 symmetric plus antisymmetric, response is activated with [[rf2_dkdk]] == 3.
 
-The response function to a long-wavelength vector potential is a crucial ingredient to compute some of the 
+The response function to a long-wavelength vector potential is a crucial ingredient to compute some of the
 spatial-dispersion quantities available in the longwave driver. In particular, those that involve the gradient of an
 electric field: the clamped-ion flexoelectric tensor, the first moment of the polarization
 response to an atomic displacement and the natural optical activity tensor.
@@ -17561,12 +17579,12 @@ Variable(
     mnemonics="Response Function with respect to STRainS with the energy REFerence at the average electrostatic potential",
     added_in_version="v9",
     text=r"""
-If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the 
-reference energy placed at the average electrostatic potential. The later is the reference adopted 
-in the longwave driver. Since v9.x, [[rfstrs_ref]] = 1 is warned if [[prepalw]]/=0 because first-order 
-energies are no longer recomputed by the longwave driver but read from the precalculated 1WF files. 
+If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the
+reference energy placed at the average electrostatic potential. The later is the reference adopted
+in the longwave driver. Since v9.x, [[rfstrs_ref]] = 1 is warned if [[prepalw]]/=0 because first-order
+energies are no longer recomputed by the longwave driver but read from the precalculated 1WF files.
 
-Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, 
+Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance,
 in the calculation of absolute deformation potentials [[cite:Stengel2015]].
 """,
 ),
