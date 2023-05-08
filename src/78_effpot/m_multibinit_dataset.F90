@@ -195,6 +195,7 @@ module m_multibinit_dataset
   real(dp) :: bound_Temp
   real(dp) :: fit_cutoff
   real(dp):: fit_min_bound_coeff
+  real(dp):: fit_drop_rate
   real(dp) :: fit_tolMSDF
   real(dp) :: fit_tolMSDS
   real(dp) :: fit_tolMSDE
@@ -412,6 +413,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%bound_SPCoupling=1
  multibinit_dtset%fit_coeff=0
  multibinit_dtset%fit_min_bound_coeff=0.0_dp
+ multibinit_dtset%fit_drop_rate=0.0_dp
  multibinit_dtset%fit_cutoff=0
  multibinit_dtset%fit_nbancoeff=0
  multibinit_dtset%fit_ncoeff=0
@@ -2747,6 +2749,20 @@ multibinit_dtset%lwf_temperature_start=0.0
    ABI_ERROR(message)
  end if
 
+ multibinit_dtset%fit_drop_rate=0.0_dp
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_drop_rate',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_drop_rate=dprarr(1)
+ if(multibinit_dtset%fit_drop_rate<0.or.multibinit_dtset%fit_drop_rate>1.0)then
+   write(message, '(a,i0,a,a,a,a)' )&
+     &     'fit_drop_rate is ',multibinit_dtset%fit_drop_rate,', which is lower',&
+     &     ' than 0 of superior than 1.',&
+     &     ch10,'Action: correct fit_drop_rate in your input file.'
+   ABI_ERROR(message)
+ end if
+
+
+
+
  multibinit_dtset%fit_grid(:)= 1
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_grid',tread,'INT')
  if(tread==1) multibinit_dtset%fit_grid(1:3)=intarr(1:3)
@@ -2763,6 +2779,7 @@ multibinit_dtset%lwf_temperature_start=0.0
  multibinit_dtset%fit_min_bound_coeff=0.0_dp
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_min_bound_coeff',tread,'DPR')
  if(tread==1) multibinit_dtset%fit_min_bound_coeff=dprarr(1)
+
 
 
  multibinit_dtset%fit_rangePower(:)= (/3,4/)
@@ -3598,6 +3615,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(1x,a17,es16.8)')'   fit_tolMSDFS',multibinit_dtset%fit_tolMSDFS
    end if
    write(nunit,'(1x,a17,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
+   write(nunit,'(1x,a17,es16.8)')'      fit_droprate',multibinit_dtset%fit_drop_rate
    write(nunit,'(1x,a17,es16.8)')'      fit_min_bound_coeff',multibinit_dtset%fit_min_bound_coeff
    write(nunit,'(1x,a17,I3.1)')'      fit_option',multibinit_dtset%fit_option
    write(nunit,'(1x,a17,2x,I0)')'      fit_iatom',multibinit_dtset%fit_iatom

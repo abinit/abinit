@@ -129,7 +129,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   only_odd_power,only_even_power,prt_anh,&
 &                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv,&
 &                                   dispterms,coeff_file_rw,read_effective_potential, max_nbody, &
-&                                   min_bound_coeff, remaining_rate)
+&                                   min_bound_coeff, drop_rate)
 
  implicit none
 
@@ -152,7 +152,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical,optional,intent(in) :: fit_on(3), sel_on(3),dispterms
  real(dp),optional,intent(in) :: fit_factors(3)
  real(dp), optional, intent(in) :: min_bound_coeff
- real(dp), optional, intent(in) :: remaining_rate
+ real(dp), optional, intent(in) :: drop_rate
 !Local variables-------------------------------
 !scalar
  integer :: nbound
@@ -172,7 +172,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: fit_iatom_all
 !arrays
  real(dp) :: mingf(4),int_fit_factors(3), min_bound_coeff1
- real(dp) :: remaining_rate1
+ real(dp) :: remaining_rate
  integer :: sc_size(3)
  logical, allocatable :: isbanned(:)
  logical, allocatable :: isselected(:)
@@ -287,8 +287,8 @@ end if
 
  min_bound_coeff1=-100
  if(present(min_bound_coeff))  min_bound_coeff1=min_bound_coeff
- remaining_rate1=0.5
- !if(present(remaining_rate))  remaining_rate1=remaining_rate
+ remaining_rate=0.5
+ if(present(drop_rate))  remaining_rate=1.0_dp-drop_rate
 
 
  end block
@@ -1233,7 +1233,7 @@ call  xmpi_lor(isselected, comm)
          ! at least n_remaining terms should be kept. It reduces to a percentage everytime, but should be larger than 10*ncycle.
          ! if ncycle*10>ncoeff_tot, use ncoeff_tot
          print *, "n_remaining:----------------------", n_remaining
-         n_remaining = max(ceiling(n_remaining * remaining_rate1), min(ncycle*40, ncoeff_tot) )
+         n_remaining = max(ceiling(n_remaining * remaining_rate), min(ncycle*40, ncoeff_tot) )
 
          do i=n_remaining+1, ncoeff_tot
            isbanned(allorder(i))=.True.
@@ -2134,7 +2134,8 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
    if(counter==0)ncoeff_model = ncoeff_model + ncoeff_bound
 !   call effective_potential_setCoeffs(coeffs_test,eff_pot,ncoeff_model)
    call fit_polynomial_coeff_fit(eff_pot,(/0/),(/0/),hist,0,(/0,0/),1,0,&
-&             -1,0,(/0/),1,comm,verbose=.true.,positive=.false., max_nbody=max_nbody)
+     &             -1,0,(/0/),1,comm,verbose=.true.,positive=.false., max_nbody=max_nbody, &
+     & drop_rate=0.0_dp)
 
    coeffs_in => eff_pot%anharmonics_terms%coefficients
 
