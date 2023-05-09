@@ -3526,7 +3526,7 @@ subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
 !arrays
  integer :: statux(MPI_STATUS_SIZE)
  integer, allocatable :: length1(:),type1(:)
- integer(kind=MPI_OFFSET_KIND),allocatable :: depl(:),depl1(:),depl_val(:)
+ integer(kind=XMPI_ADDRESS_KIND),allocatable :: depl(:),depl1(:),depl_val(:)
  real(dp),allocatable :: buf_val(:),val(:)
 #endif
 

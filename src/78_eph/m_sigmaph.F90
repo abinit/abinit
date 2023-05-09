@@ -459,6 +459,7 @@ module m_sigmaph
    ! computed numerically with the Frohlich model by Verdi and angular integration.
    ! The first dimension stores the contributions due to +/- omega_qn
    ! Used if frohl_model == 1 and imag_only. This array depend on (ikcalc, spin)
+   ! TODO: Finalize implementation
 
   integer, allocatable :: qp_done(:,:)
    ! qp_done(kcalc, spin)
@@ -1375,13 +1376,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        if (my_rank == master .and. is_open(ab_out)) then
-         write(ab_out, "(/,a)")" Frohlich model integrated inside the small q-sphere around Gamma with: "
-         write(ab_out,"(2(a,i0,1x),/)")" ntheta: ", sigma%ntheta, ", nphi: ", sigma%nphi
-         !write(ab_out, "(a)")" This correction is used to accelerate the convergence with the q-point sampling "
-         !write(ab_out, "(a)")" Note that this term tends to zero for N_q --> oo "
-         !write(ab_out, "(a)")" so it is different from the integral of the Frohlich potential in the full BZ."
-         write(ab_out, "(a)")" Contributions to Sigma^{FM}(w=e_KS):"
-         write(ab_out, "(a)")ch10
+         write(ab_out, "(/,a)")" Frohlich model integrated inside the small q-sphere around Gamma."
+         write(ab_out,"(2(a,i0,1x),/)")" Angular mesh with ntheta: ", sigma%ntheta, ", nphi: ", sigma%nphi
+         write(ab_out, "(2a)")" Phonon-resolved contributions to Sigma^{FM}(w=e_KS):", ch10
          do nu=1,natom3
            if (abs(zpr_frohl_sphcorr(nu)) < tol12) cycle
            write(ab_out, "(1x,f8.1,a,i0)")zpr_frohl_sphcorr(nu) * Ha_meV, " (meV) for ph-mode: ", nu
@@ -1401,8 +1398,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          !  end do
          !  end do
          !end do
-         write(ab_out, "(a)")ch10
-         end if
+         !write(ab_out, "(a)")ch10
+         !end if
        end if
      end if
 
@@ -3527,8 +3524,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  if (new%frohl_model /= 0) then
    ! Set angular mesh for numerical integration inside micro BZ around Gamma.
    new%nphi = 2 * new%ntheta
-   write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
-   write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
+   !write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
+   !write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
 
    ! Initialize angular mesh qvers_cart and angwgth
    ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
