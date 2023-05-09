@@ -125,8 +125,6 @@ nstep  20
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [shell]
-#%% post_commands =
 #%% [files]
 #%% files_to_test =
 #%%   t60.abo, tolnlines = 30, tolabs = 1.1e-2, tolrel = 5.0e-3, fld_options=-medium;
