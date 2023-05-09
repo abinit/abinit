@@ -3516,16 +3516,17 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ! TODO: Reintegrate at least frohl_model 1 for the full self-energy
  new%frohl_model = 0
  new%ntheta = abs(dtset%eph_frohl_ntheta)
+ !print *, "ntheta:", new%ntheta; stop
  if (.not. new%imag_only .and. new%ntheta > 0) then
-    new%frohl_model = 1
-    !if (.not. dvdb%has_zeff) new%frohl_model = 0
+   new%frohl_model = 1
+   !if (.not. dvdb%has_zeff) new%frohl_model = 0
  end if
 
  if (new%frohl_model /= 0) then
    ! Set angular mesh for numerical integration inside micro BZ around Gamma.
    new%nphi = 2 * new%ntheta
-   !write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
-   !write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
+   write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
+   write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
 
    ! Initialize angular mesh qvers_cart and angwgth
    ! NB: summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)

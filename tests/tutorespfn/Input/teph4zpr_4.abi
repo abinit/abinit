@@ -12,6 +12,8 @@
 ##############################################
  optdriver 7              # Enter EPH driver
  eph_task 4               # Compute e-ph self-energy (real + imag)
+ eph_frohl_ntheta 0       # Disable spherical integration of FM integrand in the microzone around Gamma.
+                          # to preserve previous behaviour.
  tmesh 0 100 4            # [start, step, num_T] in K
 
  getddb_filepath "teph4zpr_1_DDB"
