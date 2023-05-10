@@ -237,12 +237,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
- integer :: ilwrk
+ integer :: ilwrk, neigmax
  integer :: neig(Er%nomega_i)
- integer :: neigmax
  real(gwp) :: epsm1_ev(Sigp%npwc)
- complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
- complex(gwpc),allocatable :: rhotw_epsm1_rhotw(:,:,:)
+ complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:)
 
 !************************************************************************
 
