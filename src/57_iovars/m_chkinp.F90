@@ -4026,12 +4026,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    if (optdriver == RUNL_GWR) then
-     msg = "G0W0, HDIAGO, HDIAGO_FULL, RPA_ENERGY, EGEW, EGW0, G0EW, G0V, CC4S, CC4S_FULL"
+     msg = "G0W0, HDIAGO, HDIAGO_FULL, RPA_ENERGY, EGEW, EGW0, G0EW, G0V, CC4S, CC4S_FULL, GAMMA_GW"
      if (.not. string_in(dt%gwr_task, msg)) then
        ABI_ERROR_NOSTOP(sjoin("Invalid gwr_task:`", dt%gwr_task, "`, must be among:", msg), ierr)
      end if
 #ifndef HAVE_LINALG_SCALAPACK
-       ABI_ERROR("GWR code requires scalapack library")
+     ABI_ERROR("GWR code requires scalapack library")
 #endif
 
      ! Avoid wasting CPUs if nsppol==2.

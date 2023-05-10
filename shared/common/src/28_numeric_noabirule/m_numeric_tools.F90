@@ -3222,9 +3222,7 @@ subroutine hermitianize_spc(mat,uplo)
  complex(spc),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: nn,ii,jj
-!arrays
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
 
@@ -3232,7 +3230,8 @@ subroutine hermitianize_spc(mat,uplo)
 
  select case (uplo(1:1))
 
- case ("A","a") ! Full matrix has been calculated.
+ case ("A","a")
+   ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3244,7 +3243,8 @@ subroutine hermitianize_spc(mat,uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u") ! Only the upper triangle is used.
+ case ("U","u")
+   ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3255,7 +3255,8 @@ subroutine hermitianize_spc(mat,uplo)
      end do
    end do
 
- case ("L","l") ! Only the lower triangle is used.
+ case ("L","l")
+  ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
@@ -3297,7 +3298,7 @@ end subroutine hermitianize_spc
 !!
 !! SOURCE
 
-subroutine hermitianize_dpc(mat,uplo)
+subroutine hermitianize_dpc(mat, uplo)
 
 !Arguments ------------------------------------
 !scalars
@@ -3306,9 +3307,7 @@ subroutine hermitianize_dpc(mat,uplo)
  complex(dpc),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
-!scalars
  integer :: nn,ii,jj
-!arrays
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
 
@@ -3316,7 +3315,8 @@ subroutine hermitianize_dpc(mat,uplo)
 
  select case (uplo(1:1))
 
- case ("A","a") ! Full matrix has been calculated.
+ case ("A","a")
+   ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3327,7 +3327,8 @@ subroutine hermitianize_dpc(mat,uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u") ! Only the upper triangle is used.
+ case ("U","u")
+  ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3338,7 +3339,8 @@ subroutine hermitianize_dpc(mat,uplo)
      end do
    end do
 
- case ("L","l") ! Only the lower triangle is used.
+ case ("L","l")
+  ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then

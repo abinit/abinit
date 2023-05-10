@@ -683,6 +683,9 @@ module m_gwr
    ! Matrix elements of $\<nks|\Sigma_x|nk's\>$ with
    ! b1gw = minval(gwr%bstart_ks); b2gw = maxval(gwr%bstop_ks)
 
+   !complex(dp),allocatable :: sigc_iw_mat(:,:,:,:)
+   ! (ntau, b1gw:b2gw, b1gw:b2gw, nkcalc, nsppol*nsig_ab)
+
    type(pstat_t) :: pstat
    ! Interface to the /proc/{pid}/status file.
 
@@ -758,6 +761,8 @@ module m_gwr
 
    procedure :: rpa_energy => gwr_rpa_energy
    ! Compute RPA energy.
+
+   procedure :: gamma_gw => gwr_gamma_gw
 
    procedure :: build_chi0_head_and_wings => gwr_build_chi0_head_and_wings
    ! Compute head and wings of chi0
@@ -1106,6 +1111,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
        do ii=1,ndeg
          cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
          ABI_MALLOC(gwr%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
+         ! Note that we start to count bands from bstart_ks(ikcalc, spin)
          gwr%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
            degblock_all(1, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1, &
            degblock_all(2, ii, ikcalc, spin) - gwr%bstart_ks(ikcalc, spin) + 1)]
@@ -1978,10 +1984,10 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  !cryst = wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
 
- nkibz = ks_ebands%nkpt; nsppol = ks_ebands%nsppol !; mband = ks_ebands%mband
+ nkibz = ks_ebands%nkpt; nsppol = ks_ebands%nsppol
 
  ! Don't take mband from ks_ebands but compute it from gwr%bstop_ks
- mband = maxval(gwr%bstop_ks)
+ mband = maxval(gwr%bstop_ks) !; mband = ks_ebands%mband
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical imagine of the k wavevectors
@@ -5026,7 +5032,7 @@ subroutine gwr_build_sigmac(gwr)
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii
  integer :: iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, nbc ! col_bsize, ib1, ib2,
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp ! npwsp, my_iqi, sc_ir, ig, my_iqf,
- integer :: isym_k, trev_k, g0_k(3), tsign_k
+ integer :: isym_k, trev_k, g0_k(3), tsign_k, b1gw, b2gw
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
  integer :: gt_scbox_win, wct_scbox_win, use_umklp, ideg, nstates
  real(dp) :: cpu_tau, wall_tau, gflops_tau, cpu_all, wall_all, gflops_all !, cpu, wall, gflops
@@ -5060,7 +5066,7 @@ subroutine gwr_build_sigmac(gwr)
  real(dp) :: spfunc_diag_kcalc(gwr%nwr, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  real(dp) :: rw_mesh(gwr%nwr)
  !real(dp) :: sigx_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
- logical :: define
+ logical :: define, only_diago, sigc_is_herm
  integer :: qp_solver_ierr(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: ze0_kcalc(gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
  complex(dp) :: sigc_iw_diag_kcalc(gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol)
@@ -5101,20 +5107,20 @@ subroutine gwr_build_sigmac(gwr)
  call gwr%kcalc_wfd%change_ngfft(gwr%cryst, gwr%psps, gwr%g_ngfft)
 
  ! Diagonal matrix elements Sigmac_(itau) in the KS basis set.
+ b1gw = minval(gwr%bstart_ks); b2gw = maxval(gwr%bstop_ks)
  ABI_CALLOC(sigc_it_diag_kcalc, (2, gwr%ntau, gwr%max_nbcalc, gwr%nkcalc, gwr%nsppol))
  max_abs_imag_wct = zero; max_abs_re_wct = zero
  call gwr%print_mem(unit=std_out)
 
- ! Table for \Sigmax_ij matrix elements.
- !only_diago = .True.; sigc_is_herm = .False.
- !if (string_in(gwr%dtset%gwr_task, "GAMMA_GW")) only_diago = .False.
- !call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
- !                        only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
+ ! Table for \Sigmac_ij matrix elements.
+ only_diago = .True.; sigc_is_herm = .False.
+ if (string_in(gwr%dtset%gwr_task, "GAMMA_GW")) only_diago = .False.
+ call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
+                         only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
 
- !call sigijtab_free(Sigxij_tab)
- !ABI_FREE(Sigxij_tab)
- !call sigijtab_free(Sigcij_tab)
- !ABI_FREE(Sigcij_tab)
+ call sigijtab_free(Sigxij_tab)
+ ABI_FREE(Sigxij_tab)
+
 
 if (gwr%use_supercell_for_sigma) then
 
@@ -5513,6 +5519,9 @@ else
  call wrtout(std_out, " Mixed space algorithm for sigma completed")
 end if
 
+ call sigijtab_free(Sigcij_tab)
+ ABI_FREE(Sigcij_tab)
+
  ! Collect results and average
  call xmpi_sum(sigc_it_diag_kcalc, gwr%comm%value, ierr)
 
@@ -5525,7 +5534,7 @@ end if
        nstates = size(bids)
        avg_2ntau = sum(sigc_it_diag_kcalc(:,:,bids(:), ikcalc, spin), dim=3) / nstates
        do ii=1,nstates
-         sigc_it_diag_kcalc(:,:,bids(ii),ikcalc,spin) = avg_2ntau
+         sigc_it_diag_kcalc(:,:,bids(ii), ikcalc, spin) = avg_2ntau
        end do
        end associate
      end do ! ideg
@@ -7181,11 +7190,11 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
  ! Allocate array with Sigma_x matrix elements.
  ii = minval(gwr%bstart_ks); jj = maxval(gwr%bstop_ks)
- ABI_RECALLOC(gwr%x_mat, (ii:jj, ii:jj, gwr%nkcalc, gwr%nsppol * nsig_ab))
+ ABI_RECALLOC(gwr%x_mat, (ii:jj, ii:jj, gwr%nkcalc, gwr%nsppol*nsig_ab))
 
  ! Table for \Sigmax_ij matrix elements.
  only_diago = .True.; sigc_is_herm = .False.
- !if (string_in(gwr%dtset%gwr_task, "GAMMA_GW")) only_diago = .False.
+ if (string_in(gwr%dtset%gwr_task, "GAMMA_GW")) only_diago = .False.
  call sigtk_sigma_tables(gwr%nkcalc, gwr%nkibz, gwr%nsppol, gwr%bstart_ks, gwr%bstop_ks, gwr%kcalc2ibz(:,1), &
                          only_diago, sigc_is_herm, sigxij_tab, sigcij_tab)
 
@@ -7568,11 +7577,11 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    end if
 
    ! Reconstruct the full sigma_x matrix from the upper triangle.
-   !if (nspinor == 1) then
-   !  call hermitianize(sigxme_tmp, "Upper")
-   !else
-   !  ABI_WARNING("Should hermitianize non-collinear sigma!")
-   !end if
+   if (nsig_ab == 1) then
+     call hermitianize(sigxme_tmp(:,:,spin), "Upper")
+   else
+     ABI_WARNING("Should hermitianize non-collinear sigma!")
+   end if
 
    ! Save exchange matrix in gwr%x_mat
    if (gwr%nspinor == 1) then
@@ -7814,6 +7823,130 @@ integer pure function memb_limited_step(start, stop, num_items, bsize, maxmem_mb
  if (totmem_mb > maxmem_mb) step = floor(totmem_mb / maxmem_mb)
 
 end function memb_limited_step
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gwr/gwr_gamma_gw
+!! NAME
+!!  gwr_gamma_gw
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gwr_gamma_gw(gwr)
+
+ use m_gwrdm,         only : calc_rdmx,calc_rdmc,natoccs,update_hdr_bst,print_tot_occ,get_chkprdm,&
+                             print_chkprdm,change_matrix,print_total_energy,print_band_energies
+ !use m_spacepar,      only : hartre
+
+!Arguments ------------------------------------
+ class(gwr_t),target,intent(inout) :: gwr
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin, ikcalc, ik_ibz, ib, ib1, ib2, b1gw, b2gw !, band, istwf_k, npw_k
+ integer :: nkibz, nsppol, mband
+ !real(dp) :: cpu_all, wall_all, gflops_all
+ character(len=500) :: msg
+!arrays
+ integer :: units(2)
+ real(dp) :: kgw(3) ! kk_ibz(3),
+ real(dp),allocatable :: nat_occs(:,:), gw_rhor(:,:), gw_rhog(:,:), gw_vhartr(:)
+ complex(dpc),allocatable :: xrdm_k_full(:,:,:), rdm_k(:,:), pot_k(:,:), nateigv(:,:,:,:), old_ks_purex(:,:), new_hartr(:,:)
+ complex(dp) :: omega_i(gwr%ntau)
+ !complex(dpc),allocatable :: sigcme_k(:,:,:,:), rhot1_q_m(:,:,:,:,:,:,:), M1_q_m(:,:,:,:,:,:,:)
+
+! *************************************************************************
+
+ call gwr%run_g0w0(free_ugb=.False.)
+
+ ! This section is copied from m_sigma_driver with small changes in order to intergrate it with the gwr% object.
+ associate (dtset => gwr%dtset, qp_ebands => gwr%qp_ebands, ks_me => gwr%ks_me)
+ units = [std_out, ab_out]
+ nkibz = gwr%nkibz; nsppol = gwr%nsppol
+ b1gw = minval(gwr%bstart_ks); b2gw = maxval(gwr%bstop_ks)
+
+ ! Don't take mband from ks_ebands but compute it from gwr%bstop_ks
+ mband = maxval(gwr%bstop_ks) !; mband = gwr%ks_ebands%mband
+ ! Note: all subroutines of 70_gw/m_gwrdm.F90 are implemented assuming nsppol == 1
+ ABI_CHECK(dtset%nsppol == 1, "1-RDM GW correction only implemented for restricted closed-shell calculations!")
+
+ ABI_CALLOC(nateigv, (mband, mband, nkibz, nsppol))
+ ABI_CALLOC(nat_occs, (mband, nkibz))
+ ABI_CALLOC(xrdm_k_full, (b1gw:b2gw, b1gw:b2gw, nkibz))
+
+ write(msg,'(a34,2i9)')' Bands used for the GW 1RDM arrays',b1gw,b2gw
+ call wrtout(units, msg)
+
+ do ik_ibz=1,nkibz
+   do ib=b1gw,b2gw
+     xrdm_k_full(ib,ib,ik_ibz) = qp_ebands%occ(ib,ik_ibz,1)
+   end do
+   do ib=1,mband
+     ! Copy initial occ numbers (in principle 2 or 0 from KS-DFT)
+     nat_occs(ib,ik_ibz) = qp_ebands%occ(ib,ik_ibz,1)
+     ! Set to identity matrix
+     nateigv(ib,ib,ik_ibz,1) = cone
+   end do
+ end do
+
+ omega_i = j_dpc * gwr%iw_mesh
+
+ do spin=1,gwr%nsppol
+ do ikcalc=1,gwr%nkcalc ! TODO: Should be spin dependent!
+   ! Index of the irred k-point
+   ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+   kgw = gwr%kcalc(:, ikcalc)
+   ! min and max band indices for GW corrections (for this k-point)
+   ib1 = gwr%bstart_ks(ikcalc, spin); ib2 = gwr%bstop_ks(ikcalc, spin)
+
+   ! Compute Sigma_x - Vxc or DELTA Sigma_x - Vxc
+   ! where DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact for hyb Functionals.
+   ! NB: Only restricted closed-shell calcs are implemented here
+   ABI_CALLOC(pot_k, (ib1:ib2, ib1:ib2))
+   ABI_CALLOC(rdm_k, (ib1:ib2, ib1:ib2))
+   pot_k(ib1:ib2,ib1:ib2) = gwr%x_mat(ib1:ib2,ib1:ib2,ik_ibz,spin) - ks_me%vxcval(ib1:ib2,ib1:ib2,ik_ibz,spin)
+   call calc_rdmx(ib1, ib2, ik_ibz, pot_k, rdm_k, qp_ebands)
+
+   ! Update the full 1RDM with the exchange corrected one for this k-point
+   xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz) = xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz) + rdm_k(ib1:ib2,ib1:ib2)
+
+   ! Compute NAT ORBS for exchange corrected 1-RDM
+   ! Only restricted closed-shell calcs
+   do ib=ib1,ib2
+     rdm_k(ib,ib) = rdm_k(ib,ib) + qp_ebands%occ(ib,ik_ibz,1)
+   end do
+   call natoccs(ib1, ib2, rdm_k, nateigv, nat_occs, qp_ebands, ik_ibz, 0)
+
+   ! ================
+   ! Correlation part
+   ! ================
+   !ABI_CALLOC(sigcme_k, (gwr%ntau, ib2-ib1+1, ib2-ib1+1, nsppol*nsig_ab))
+   !call calc_rdmc(ib1, ib2, ik_ibz, omega_i, gwr%iw_wgs, sigcme_k, qp_ebands, rdm_k)
+   !ABI_FREE(sigcme_k)
+   ! Update the full 1RDM with the GW corrected one for this k-point
+   ! Only restricted closed-shell calcs
+   rdm_k(ib1:ib2,ib1:ib2) = xrdm_k_full(ib1:ib2,ib1:ib2,ik_ibz) + rdm_k(ib1:ib2,ib1:ib2)
+   ! Compute nat orbs and occ numbers at k-point ik_ibz
+   call natoccs(ib1, ib2, rdm_k, nateigv, nat_occs, qp_ebands, ik_ibz, 1)
+
+   ABI_FREE(pot_k)
+   ABI_FREE(rdm_k)
+ end do ! ikcalc
+ end do ! spin
+
+ ABI_FREE(nateigv)
+ ABI_FREE(nat_occs)
+ ABI_FREE(xrdm_k_full)
+ end associate
+
+end subroutine gwr_gamma_gw
 !!***
 
 end module m_gwr
