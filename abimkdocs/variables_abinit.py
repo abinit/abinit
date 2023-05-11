@@ -13451,7 +13451,7 @@ Compute quantities related to orbital magnetic moment. Typically used in the
 presence of a nonzero nuclear magnetic dipole moment, see [[nucdipmom]], to compute
 the nuclear magnetic shielding as measured in NMR. [[orbmag]]
     is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Gonze2011a]] extended to the PAW case.
+    theory outlined in [[cite:Zwanziger2023]].
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
     both the ground state and DDK wavefunctions (see [[rfddk]]), and is triggered at the end of a
