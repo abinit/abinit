@@ -186,7 +186,7 @@ The chemical shielding is routinely measured in NMR spectroscopy, and arises fro
 currents induced by an external magnetic field. From an energetic point of view, it can be
 understood as the joint response between an external magnetic field, and the nuclear magnetic
 dipole moment at an atomic site, that is,
-$$ \sigma_{ij} = -\frac{\partial^2 E}{\partial_i m\partial_j B} $$
+$$ \sigma_{ij} = \frac{\partial^2 E}{\partial_i m\partial_j B} $$
 for shielding $\sigma$ and magnetic dipole $m$. 
 The total energy could then be viewed as
 $$ E = E^0 - m\cdot B + m_i\sigma_{ij}B_j, $$
@@ -199,9 +199,9 @@ a shielded dipole interacting with the bare magnetic field. In Abinit we adopt
 the second view point, and so compute the perturbed energy $\partial E/\partial B$ in the
 presence of a nuclear dipole moment. The necessary expressions are found in [[cite:Zwanziger2023]], see also [[cite:Gonze2011a]] [[cite:Ceresoli2006]], and
 are quite complex; in highly abbreviated form we evaluate
-$$ \partial E/\partial B_\alpha = M_\alpha = \frac{i}{2}\epsilon_{\alpha\beta\gamma}\sum_n^{\mathrm{occ}} \int d\mathbf{k} 
+$$ \partial E/\partial B_\alpha = -M_{\alpha} = \frac{i}{2}\epsilon_{\alpha\beta\gamma}\sum_n^{\mathrm{occ}} \int d\mathbf{k} 
 \langle \partial_{k_\beta} u_{n\mathbf{k}}|(H_{\mathbf{k}}+E_{\mathbf{k}})|\partial_{k_\gamma} u_{n\mathbf{k}}\rangle $$
-for the induced magnetic moment in direction $\alpha$. Notice the implied summation over the antisymmetric unit tensor $\epsilon_{\alpha\beta\gamma}$;
+for the induced magnetic moment $M$ in direction $\alpha$. Notice the implied summation over the antisymmetric unit tensor $\epsilon_{\alpha\beta\gamma}$;
 the structure is hence of a cross product, which yields the circulation induced by the Hamiltonian.
 In the full PAW treatment implemented in Abinit there are a number of other related terms as well. Note
 in this expression the appearance of the derivatives of the wavefunctions; these are obtained from the DDK
@@ -215,8 +215,9 @@ making up $\sigma_{ij}$.  Here is a sample input file:
 
 {% dialog tests/tutorial/Input/tnuc_4.abi %}
 
-This file is for an isolated neon atom, so, a neon atom at the center of a large box. There are two chained calculations, first, the ground state,
-and then, the DDK perturbation ([rfelfd] = 2 or equivalently [rfddk] = 1). The orbital magnetic moment calculation is triggered at the end of 
+This file is for an isolated neon atom, that is, a neon atom at the center of a large box. There are two chained calculations, first, the ground state,
+and then, the DDK perturbation ([[rfelfd]] = 2 or equivalently [[rfddk]] = 1). In both cases, a nuclear magnetic dipole moment is applied to the
+neon atom with the input variable [[nucdipmom]]. The orbital magnetic moment calculation is triggered at the end of 
 the DDK calculation with
 
     orbmag2 2
@@ -228,7 +229,8 @@ atom, and due to spherical symmetry, all directions are equivalent, so it is suf
 
 Notice that we use a dipole moment of size 1; this is purely for convenience as we will see below. Running this file should take 3 minutes or so. After
 completion you will find in the output file:
-Orbital magnetic moment computed with DFPT derivative wavefunctions
+
+    Orbital magnetic moment computed with DFPT derivative wavefunctions
 
     Orbital magnetic moment, Cartesian directions :
     -5.54888268E-04 -1.71209435E-14  1.51847951E-14
@@ -239,14 +241,14 @@ Orbital magnetic moment computed with DFPT derivative wavefunctions
 
 The first result is the induced magnetic moment, which is a vector--note that it points in the original dipole direction. To get the shielding, divide the
 dipole strength (1), and multiply by (-1) to get the normal NMR sign convention--the result is 554.9~ppm. This result is underconverged--the
-fully converged result, with [ecut]=30, is 552.1~ppm. For comparison, the all-electron, wavefunction-based calculation using CCSD(T) 
-of [[cite:Vaara2003relativistic]] yields 551.9, so clearly the present method is capable of excellent accuracy. 
+fully converged result, with [[ecut]]=30, is 552.1 ppm. For comparison, the all-electron, wavefunction-based calculation using post-Hartree-Fock CCSD(T) 
+of [[cite:Vaara2003relativistic]] yields 551.9 ppm, so clearly the present method is capable of excellent accuracy. 
 The second line is the Chern vector [[cite:Ceresoli2006]], that is, the integral of the Berry 
 curvature, which outside of exotic topological insulators, should be zero. We include it as a convergence check. In this fast test run we obtained
 $-2.5\times 10^{-9}$; in fully converged calculations one would like numbers about 3 orders of magnitude smaller.
 
 A final detail to note: the induced moment due to the filled core orbitals, is due to what is called the Lamb shielding. Usual PAW datasets do not 
-include this value, but you can add it to your input file with the variable [lambsig]. To compute it you must obtain the core wavefunctions, which is 
+include this value, but you can add it to your input file with the variable [[lambsig]]. To compute it you must obtain the core wavefunctions, which is 
 a normal option in Atompaw (see [tutorial PAW2](/tutorial/paw2)). Then, you can integrate the core wavefunctions to generate the Lamb shielding,
 through
 
