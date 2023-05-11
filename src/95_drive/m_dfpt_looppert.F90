@@ -2168,7 +2168,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      !end if
      !vxc_local = vxc
      if(dtset%orbmag .NE. 0) then
-       call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mpi_enreg,nfftf,ngfftf,&
+       call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
          & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr)
      end if
      if( ALLOCATED(vtrial_local) ) then
