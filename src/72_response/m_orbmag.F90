@@ -1314,7 +1314,7 @@ subroutine make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,&
   !scalars
   integer :: adir,choice,cpopt,iband,jband
   integer :: ndat,nnlout,npwsp,paw_opt,signs,tim_nonlop
-  real(dp) :: doti,dotr,lambdar
+  real(dp) :: doti,dotr
   !arrays
   real(dp) :: lambda(1)
   real(dp),allocatable :: cwavef(:,:),enlout(:),svectout(:,:)
