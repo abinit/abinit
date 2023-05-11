@@ -16492,6 +16492,23 @@ greater than 3.
 ),
 
 Variable(
+    abivarname="prt_lorbmag",
+    varset="gstate",
+    vartype="integer",
+    topics=['printing_prden'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT L ORBital MAGnetic moment inside PAW spheres",
+    requires="[[nspden]] == 4 and [[usepaw]] == 1 and [[usepawu]] != 0",
+    added_in_version="v9",
+    text=r"""
+If set to 1, prints in the output the orbital magnetic moment integrated inside the PAW spheres (Bohr magneton).
+The orbital magnetic moment is resolved orbital by orbital (p, d and f, the s orbital moment being always zero) on each atom.
+Works only if PAW and DFT+U is used and if the spin-orbit coupling is on (with [[nspden]] == 4).
+""",
+),
+
+Variable(
     abivarname="prtxml",
     varset="files",
     vartype="integer",
