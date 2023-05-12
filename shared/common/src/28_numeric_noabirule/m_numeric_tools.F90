@@ -735,12 +735,6 @@ end function get_trace_cdp
 !! FUNCTION
 !!  Return the diagonal of a square matrix as a vector
 !!
-!! INPUTS
-!!  matrix(:,:)
-!!
-!! OUTPUT
-!!  diag(:)=the diagonal
-!!
 !! SOURCE
 
 function get_diag_int(mat) result(diag)
@@ -772,12 +766,6 @@ end function get_diag_int
 !! FUNCTION
 !!  Return the diagonal of a square matrix as a vector
 !!
-!! INPUTS
-!!  matrix(:,:)
-!!
-!! OUTPUT
-!!  diag(:)=the diagonal
-!!
 !! SOURCE
 
 function get_diag_rdp(mat) result(diag)
@@ -807,10 +795,7 @@ end function get_diag_rdp
 !!  get_diag_cdp
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Return the diagonal of a square matrix as a vector
 !!
 !! SOURCE
 

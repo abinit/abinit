@@ -545,8 +545,8 @@ end subroutine mkunitpawspherepot
 !! SOURCE
 
 subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
-                 &rcut,rhog,rprimd,vcutgeo,vhartr,&
-                 &qpt) ! Optional arguments
+                  rcut,rhog,rprimd,vcutgeo,vhartr,&
+                  qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars

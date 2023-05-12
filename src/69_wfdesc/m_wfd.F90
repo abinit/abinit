@@ -4216,7 +4216,7 @@ end subroutine wfd_sym_ug_kg
 !!
 !! SOURCE
 
-subroutine wfdgw_write_wfk(Wfd,Hdr,ebands,wfk_fname,wfknocheck)
+subroutine wfdgw_write_wfk(Wfd, Hdr, ebands, wfk_fname, wfknocheck)
 
 !Arguments ------------------------------------
 !scalars
@@ -5430,6 +5430,7 @@ end subroutine wfdgw_get_nl_me
 !! Calculate the charge density on the fine FFT grid in real space.
 !!
 !! INPUTS
+!!  Wfd<wfd_t)=datatype gathering info on the wavefunctions.
 !!  ngfftf(18)=array containing all the information for the "fine" FFT.
 !!  Cryst<crystal_t> Info on the crystalline structure
 !!  optcalc=option for calculation. If =0 (default value) perform calculation
@@ -5437,8 +5438,6 @@ end subroutine wfdgw_get_nl_me
 !!    In both cases, the result is returned in rhor.
 !!  Psps<type(pseudopotential_type)>=variables related to pseudopotentials
 !!  nfftf=Total number of points on the fine FFT grid (for this processor)
-!!  Kmesh<kmesh_t>= Info on the k-sampling:
-!!  Wfd<wfd_t)=datatype gathering info on the wavefunctions.
 !! [optcalc]=Optional option used to calculate the kinetic energy density. Defaults to 0.
 !!
 !! OUTPUT
@@ -5460,7 +5459,7 @@ end subroutine wfdgw_get_nl_me
 !!
 !! SOURCE
 
-subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
+subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
                       optcalc) ! optional arguments
 
 !Arguments ------------------------------------
@@ -5468,10 +5467,9 @@ subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
  integer,intent(in) :: nfftf
  integer,intent(in),optional :: optcalc
  type(ebands_t),intent(in) :: ebands
- type(kmesh_t),intent(in) :: Kmesh
- type(crystal_t),intent(in) :: Cryst
- type(Pseudopotential_type),intent(in) :: Psps
- class(wfdgw_t),intent(inout) :: Wfd
+ type(crystal_t),intent(in) :: cryst
+ type(Pseudopotential_type),intent(in) :: psps
+ class(wfdgw_t),intent(inout) :: wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(out) :: rhor(nfftf, Wfd%nspden)
@@ -5531,7 +5529,7 @@ subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
      do ik=1,Wfd%nkibz
        do ib_iter=1,iter_len(Iter_bks,ik,is)
          ib = iter_yield(Iter_bks,ib_iter,ik,is)
-         bks_weight = ebands%occ(ib,ik,is) * Kmesh%wt(ik) / Cryst%ucvol
+         bks_weight = ebands%occ(ib,ik,is) * ebands%wtk(ik) / Cryst%ucvol
 
          call wfd%get_ur(ib,ik,is,wfr)
 

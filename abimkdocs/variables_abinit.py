@@ -6436,9 +6436,9 @@ Variable(
 [[gw1rdm]] governs the calculation of the density matrix within the linearized GW approximation.
 It must be used with [[gwcalctyp]]=21.
 
-    * [[gw1rdm]] = 0: Do not update the density matrix.
-    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]].
-    * [[gw1rdm]] = 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
+* 0: Do not update the density matrix.
+* 1: Compute the update of the density matrix for the k-point list specified by [[kptgw]].
+* 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
 """,
 ),
 

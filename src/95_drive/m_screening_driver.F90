@@ -788,8 +788,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(rhor,(nfftf,Dtset%nspden))
  ABI_MALLOC(taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
- call wfd%mkrho(Cryst,Psps,Kmesh,qp_ebands,ngfftf,nfftf,rhor)
- if (Dtset%usekden==1) call wfd%mkrho(Cryst,Psps,Kmesh,qp_ebands,ngfftf,nfftf,taur,optcalc=1)
+ call wfd%mkrho(cryst, psps, qp_ebands, ngfftf, nfftf, rhor)
+ if (Dtset%usekden==1) call wfd%mkrho(cryst, psps, qp_ebands, ngfftf, nfftf, taur, optcalc=1)
 
  call timab(305,2,tsec) ! screening(densit
 
