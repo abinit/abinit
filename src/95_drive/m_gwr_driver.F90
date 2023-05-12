@@ -166,7 +166,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk, write_wfk, cc4s_task, rectangular
+ logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -192,7 +192,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
  real(dp) :: vxcavg !,vxcavg_qp ucvol,
  real(dp) :: gw_gsq !, gsqcut, gwc_gsq, gwx_gsq,
- logical :: call_pawinit
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
@@ -200,8 +199,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(xmpi_pool2d_t) :: diago_pool
  !type(fock_type),pointer :: fock => null()
 !arrays
- integer :: ngfftc(18),ngfftf(18),units(2) ! gwc_ngfft(18),gwx_ngfft(18),
- integer,allocatable :: nq_spl(:), l_size_atm(:) !,qp_vbik(:,:),tmp_gfft(:,:)
+ integer :: ngfftc(18),ngfftf(18),units(2)
+ integer,allocatable :: nq_spl(:), l_size_atm(:)
  integer,allocatable :: tmp_kstab(:,:,:), npwarr_ik(:), gvec_(:,:), istwfk_ik(:), nband_iks(:,:)
  real(dp) :: strsxc(6), diago_info(3, dtset%nkpt, dtset%nsppol),tsec(2)
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
@@ -835,19 +834,22 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    !  * This part is parallelized within wfd%comm since each node has all GW wavefunctions.
    !  * Note that vH matrix elements are calculated using the true uncutted interaction.
 
+   rdm_update = dtset%gwr_task == "GAMMA_GW"
+
    call KS_mflags%reset()
-   !if (rdm_update) then
-   !KS_mflags%has_hbare=1
-   !KS_mflags%has_kinetic=1
-   !end if
+   if (rdm_update) then
+     KS_mflags%has_hbare=1
+     KS_mflags%has_kinetic=1
+   end if
    KS_mflags%has_vhartree=1
    KS_mflags%has_vxc     =1
    KS_mflags%has_vxcval  =1
    if (Dtset%usepawu /= 0  ) KS_mflags%has_vu      = 1
    if (Dtset%useexexch /= 0) KS_mflags%has_lexexch = 1
    if (Dtset%usepaw==1 .and. Dtset%gw_sigxcore == 1) KS_mflags%has_sxcore = 1
-   !if (gwcalctyp<10        )  KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
-   KS_mflags%only_diago = 1 ! off-diagonal elements only for SC on wavefunctions.
+   ! off-diagonal elements only for SC on wavefunctions.
+   KS_mflags%only_diago = 1
+   if (rdm_update)  KS_mflags%only_diago = 0
 
    ! Load wavefunctions for Sigma_nk in gwr%kcalc_wfd.
    call gwr%load_kcalc_wfd(wfk_path, tmp_kstab)
@@ -864,10 +866,12 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_FREE(tmp_kstab)
 
    if (read_wfk) then
-     ! Build Green's function in imaginary-time from WFK file
+     ! Read wavefunctions from WFK file.
      call gwr%read_ugb_from_wfk(wfk_path)
    else
+     ! Diagonalize H on the fly and
      !call gwr%get_ugb_from_vtrial(ngfftf, ks_vtrial)
+     !gwr%wfk_hdr = ?
    end if
 
    ! Now call high-level routines depending on gwr_task.
@@ -875,7 +879,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    case ("RPA_ENERGY")
      call gwr%rpa_energy()
    case ("GAMMA_GW")
-     call gwr%gamma_gw()
+     call gwr%gamma_gw(nfftf, ngfftf, vpsp)
    case ("G0W0")
      call gwr%run_g0w0()
    case ("G0V")

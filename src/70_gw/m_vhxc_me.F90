@@ -245,7 +245,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 
  ! FABIEN's development
  ! Hybrid functional treatment
- if(Mflags%has_vxcval_hybrid==1) then
+ if (Mflags%has_vxcval_hybrid ==1 ) then
 
    call wrtout(std_out,' Hybrid functional xc potential is being set')
    ixc_sigma=Dtset%ixc_sigma
@@ -293,7 +293,7 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
  call wrtout(std_out, msg)
 
  ! has_hbare uses veffh0. Why only use it with usepaw=1? Let it be available always
- if (Mflags%has_hbare==1) then
+ if (Mflags%has_hbare == 1) then
    if (Mflags%has_kinetic/=1) then
      ABI_ERROR("Kinetic energy mels are required for the construction of Hbare mels!")
    end if
@@ -388,9 +388,9 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 
      ! Calculate |k+G|^2 needed by hbareme and kineticme
      ! MRM: Solved ecut problem
-     if (Mflags%has_kinetic==1) then
-       ABI_MALLOC(kinpw,(npw_k))
-       ABI_MALLOC(kinwf2,(npw_k*nspinor))
+     if (Mflags%has_kinetic == 1) then
+       ABI_MALLOC(kinpw, (npw_k))
+       ABI_MALLOC(kinwf2, (npw_k*nspinor))
        call mkkin(Dtset%ecutwfn,Dtset%ecutsm,Dtset%effmass_free,Cryst%gmet,kg_k,kinpw,kpt,npw_k,0,0)
        where (kinpw>HUGE(zero)*1.d-11)
          kinpw=zero
@@ -403,9 +403,9 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 
        ABI_CHECK(wfd%get_wave_ptr(jb, ik_ibz, is, wave_jb, msg) == 0, msg)
 
-       if (Mflags%has_kinetic==1) then
+       if (Mflags%has_kinetic == 1) then
          cg2 => wave_jb%ug
-         kinwf2(1:npw_k)=cg2(1:npw_k)*kinpw(:)
+         kinwf2(1:npw_k) = cg2(1:npw_k)*kinpw(:)
          if (nspinor==2) kinwf2(npw_k+1:)=cg2(npw_k+1:)*kinpw(:)
        end if
 
@@ -568,8 +568,8 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
 
    if (Mflags%has_sxcore==1) then
      if (     SIZE(dijexc_core,DIM=1) /= lmn2_size_max  &
-&        .or. SIZE(dijexc_core,DIM=2) /= 1              &
-&        .or. SIZE(dijexc_core,DIM=3) /= Cryst%ntypat ) then
+         .or. SIZE(dijexc_core,DIM=2) /= 1              &
+         .or. SIZE(dijexc_core,DIM=3) /= Cryst%ntypat ) then
        ABI_BUG("Wrong sizes in dijexc_core")
      end if
    end if
@@ -641,14 +641,14 @@ subroutine calc_vhxc_me(Wfd, Mflags, Mels, Cryst, Dtset, nfftf, ngfftf, &
                    isp1=spinor_idxs(1,iab); isp2=spinor_idxs(2,iab)
 
                    re_p=  Cprj_b1ks(iat,isp1)%cp(1,ilmn) * Cprj_b2ks(iat,isp2)%cp(1,jlmn) &
-&                        +Cprj_b1ks(iat,isp1)%cp(2,ilmn) * Cprj_b2ks(iat,isp2)%cp(2,jlmn) &
-&                        +Cprj_b1ks(iat,isp1)%cp(1,jlmn) * Cprj_b2ks(iat,isp2)%cp(1,ilmn) &
-&                        +Cprj_b1ks(iat,isp1)%cp(2,jlmn) * Cprj_b2ks(iat,isp2)%cp(2,ilmn)
+                         +Cprj_b1ks(iat,isp1)%cp(2,ilmn) * Cprj_b2ks(iat,isp2)%cp(2,jlmn) &
+                         +Cprj_b1ks(iat,isp1)%cp(1,jlmn) * Cprj_b2ks(iat,isp2)%cp(1,ilmn) &
+                         +Cprj_b1ks(iat,isp1)%cp(2,jlmn) * Cprj_b2ks(iat,isp2)%cp(2,ilmn)
 
                    im_p=  Cprj_b1ks(iat,isp1)%cp(1,ilmn) * Cprj_b2ks(iat,isp2)%cp(2,jlmn) &
-&                        -Cprj_b1ks(iat,isp1)%cp(2,ilmn) * Cprj_b2ks(iat,isp2)%cp(1,jlmn) &
-&                        +Cprj_b1ks(iat,isp1)%cp(1,jlmn) * Cprj_b2ks(iat,isp2)%cp(2,ilmn) &
-&                        -Cprj_b1ks(iat,isp1)%cp(2,jlmn) * Cprj_b2ks(iat,isp2)%cp(1,ilmn)
+                         -Cprj_b1ks(iat,isp1)%cp(2,ilmn) * Cprj_b2ks(iat,isp2)%cp(1,jlmn) &
+                         +Cprj_b1ks(iat,isp1)%cp(1,jlmn) * Cprj_b2ks(iat,isp2)%cp(2,ilmn) &
+                         -Cprj_b1ks(iat,isp1)%cp(2,jlmn) * Cprj_b2ks(iat,isp2)%cp(1,ilmn)
 
                    ! ==================================================
                    ! === Load onsite matrix elements and accumulate ===

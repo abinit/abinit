@@ -225,7 +225,7 @@ subroutine calc_rdmx(ib1,ib2,ik_ibz,pot,rdm_k,ebands)
  spin_fact=two
  units = [std_out, ab_out]
 
- write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sx-Vxc  and k-point: ',ebands%kptns(1:,ik_ibz)
+ write(msg,'(a58,3f10.5)')' Computing the 1-RDM correction for  Sx-Vxc  and k-point: ',ebands%kptns(:,ik_ibz)
  call wrtout(units, msg)
  write(msg,'(a11,i5,a8,i5)')'from band ',ib1,' to band',ib2
  call wrtout(units, msg)
@@ -261,8 +261,6 @@ end subroutine calc_rdmx
 !! sigcme_k=array containing Sigma(iw) as Sigma(iw,ib1:ib2,ib1:ib2,nspin)
 !! rdm_k=density matrix, matrix (i,j), where i and j belong to the k-point k (see m_sigma_driver for more details).
 !! ebands=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
-!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
-!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
 !!
 !! OUTPUT
 !! Updated rdm_k matrix array with int Go(iw) Sigma_c(iw) Go(iw) dw
@@ -543,22 +541,18 @@ end subroutine update_hdr_bst
 !! Compute and print the total (averaged) occ. from all k-points
 !!
 !! INPUTS
-!! Kmesh <kmesh_t>=Structure describing the k-point sampling.
-!! sigma=sigma_t (see the definition of this structured datatype)
 !! ebands=<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
-!!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
-!!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
+!!  eig(Sigp%nbnds,%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
+!!  occ(Sigp%nbnds,%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
 !!
 !! OUTPUT
 !! Print the total (averaged) occ. = sum_k weight_k * Nelec_k
 !!
 !! SOURCE
 
-subroutine print_tot_occ(sigma,kmesh,ebands)
+subroutine print_tot_occ(ebands)
+
 !Arguments ------------------------------------
-!scalars
- type(sigma_t),intent(in) :: sigma
- type(kmesh_t),intent(in) :: kmesh
  type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------
@@ -572,13 +566,13 @@ subroutine print_tot_occ(sigma,kmesh,ebands)
 
  tot_occ=zero
 
- do spin=1,sigma%nsppol
-   do ik=1,sigma%nkibz
-     wtk = kmesh%wt(ik)
+ do spin=1,ebands%nsppol
+   do ik=1,ebands%nkpt
+     wtk = ebands%wtk(ik)
      occ_bks = sum(ebands%occ(:,ik,spin))
-     if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
-       tot_occ=tot_occ+occ_bks*wtk
-     end if
+     !if (sigma%nsig_ab==1) then ! Only closed-shell restricted is programed
+     tot_occ=tot_occ+occ_bks*wtk
+     !end if
    end do
  end do
 
