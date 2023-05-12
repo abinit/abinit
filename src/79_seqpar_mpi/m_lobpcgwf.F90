@@ -24,6 +24,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_lobpcgwf
 
  use defs_basis
@@ -45,6 +48,10 @@ module m_lobpcgwf
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_getghc,      only : multithreaded_getghc
  use m_cgtools,     only : dotprod_g
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
+#endif
 
  use, intrinsic :: iso_c_binding
 
@@ -343,6 +350,8 @@ end subroutine lobpcgwf2
   double precision, pointer :: gsc(:,:)
   double precision, allocatable :: l_gvnlxc(:,:)
 
+  ABI_NVTX_START_RANGE(NVTX_LOBPCG2_GET_AX_BX)
+
   call xgBlock_getSize(X,spacedim,blockdim)
   spacedim = spacedim/l_icplx
 
@@ -435,6 +444,7 @@ end subroutine lobpcgwf2
 
   if ( .not. l_paw ) call xgBlock_copy(X,BX,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
 
+  ABI_NVTX_END_RANGE()
   !call xgBlock_set(AX,ghc,0,spacedim)
   !call xgBlock_set(BX,gsc(:,1:blockdim*spacedim),0,spacedim)
  end subroutine getghc_gsc
