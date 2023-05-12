@@ -419,8 +419,6 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
 ! *********************************************************************
 
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
-
  call xgBlock_getSize(X,spacedim,blockdim)
 
  spacedim = spacedim/l_icplx
@@ -546,8 +544,6 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  end if ! l_istwf==2
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
-
- ABI_NVTX_END_RANGE()
 
 end subroutine getghc_gsc1
 !!***
