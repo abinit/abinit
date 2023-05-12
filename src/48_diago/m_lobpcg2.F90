@@ -900,6 +900,7 @@ module m_lobpcg2
     !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
     !---end
 
+    ABI_NVTX_START_RANGE(NVTX_RR_HEGV)
     call timab(tim_hegv,1,tsec)
     tsec(2) = abi_wtime()
     if ( var == VAR_X ) then
@@ -965,6 +966,7 @@ module m_lobpcg2
 !    end if
     if ( lobpcg%prtvol == 4 ) write(std_out,*) tsec(2)
     call timab(tim_hegv,2,tsec)
+    ABI_NVTX_END_RANGE()
 
     if ( eigenSolver == EIGENVX .or. EIGPACK(eigenSolver)) then
       call xg_free(subA)
