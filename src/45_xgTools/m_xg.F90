@@ -3439,10 +3439,12 @@ contains
     double complex,external :: zdotc !conjugated dot product
     integer :: l_use_gpu_cuda
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     double precision :: tmp
     integer :: i
-#endif
+
+    ! Actually used with NVHPC or OpenMP Offload
+    ABI_UNUSED((/i/))
+    ABI_UNUSED((/tmp/))
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
@@ -3585,12 +3587,26 @@ contains
         end if
 
       case(SPACE_C)
+!FIXME Somehow, zdotc call goes wrong with NVHPC here (NVHPC 22.11, MKL 22.3)
+#if defined(FC_NVHPC) && defined(HAVE_LINALG_MKL_THREADS)
+        !$omp parallel do private(i,tmp) shared(dot,xgBlockA,xgBlockB), &
+        !$omp& schedule(static)
+        do icol = 1, xgBlockA%cols
+          tmp=0
+          do i = 1, xgBlockA%rows
+            tmp = tmp + dconjg(xgBlockA%vecC(i,icol))*xgBlockB%vecC(i,icol)
+          end do
+          dot%vecC(icol,1)=tmp
+        end do
+        !$omp end parallel do
+#else
         !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
         !$omp& schedule(static)
         do icol = 1, xgBlockA%cols
           dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
         end do
         !$omp end parallel do
+#endif
 
         if ( present(max_val) ) then
           max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
