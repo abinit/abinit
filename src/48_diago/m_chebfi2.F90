@@ -1062,7 +1062,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   call timab(tim_RR_scale,2,tsec)
   ABI_NVTX_END_RANGE()
 
-  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_HEGV)
+  ABI_NVTX_START_RANGE(NVTX_RR_HEGV)
   call timab(tim_RR_hegv,1,tsec)
   select case (eigenSolver)
   case (EIGENVD)
