@@ -80,7 +80,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_INIT_INWFFIL = 46
   integer, parameter :: NVTX_INIT_INWFFIL2 = 47
   integer, parameter :: NVTX_CHEBFI2_RR_SCALE = 48
-  integer, parameter :: NVTX_CHEBFI2_RR_HEGV = 49
+  integer, parameter :: NVTX_RR_HEGV = 49
   integer, parameter :: NVTX_CHEBFI2_RR_XNP = 50
   integer, parameter :: NVTX_CHEBFI2_RR_GEMM = 51
   integer, parameter :: NVTX_INVOVL_INNER_GEMM = 52
@@ -157,7 +157,7 @@ contains
          & "INIT_INWFFIL", &
          & "INIT_INWFFIL2", &
          & "CHEBFI2_RR_SCALE", &
-         & "CHEBFI2_RR_HEGV", &
+         & "RR_HEGV", &
          & "CHEBFI2_RR_XNP", &
          & "CHEBFI2_RR_GEMM", &
          & "INVOVL_INNER_GEMM", &
@@ -221,7 +221,7 @@ contains
     nvtx_ids(46)= NVTX_INIT_INWFFIL
     nvtx_ids(47)= NVTX_INIT_INWFFIL2
     nvtx_ids(48)= NVTX_CHEBFI2_RR_SCALE
-    nvtx_ids(49)= NVTX_CHEBFI2_RR_HEGV
+    nvtx_ids(49)= NVTX_RR_HEGV
     nvtx_ids(50)= NVTX_CHEBFI2_RR_XNP
     nvtx_ids(51)= NVTX_CHEBFI2_RR_GEMM
     nvtx_ids(52)= NVTX_INVOVL_INNER_GEMM
