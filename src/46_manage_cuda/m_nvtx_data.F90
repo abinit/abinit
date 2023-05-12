@@ -122,8 +122,8 @@ contains
          & "LOCPOT", &
          & "NLOCPOT", &
          & "KINETIC", &
-         & "CHEBFI2_RR", &
-         & "CHEBFI2_RRQ", &
+         & "RAYLRITZ", &
+         & "RAYLRITZ_Q", &
          & "CHEBFI2_CORE", &
          & "CHEBFI2_NONLOP", &
          & "CTOCPRJ", &
@@ -138,9 +138,9 @@ contains
          & "INVOVL_POST2", &
          & "INVOVL_POST3", &
          & "SUB_SPC_DIAGO", &
-         & "CHEBFI2_NEXT_ORDER", &
-         & "CHEBFI2_SWAP_BUF", &
-         & "CHEBFI2_GET_AX_BX", &
+         & "NEXT_ORDER", &
+         & "SWAP_BUF", &
+         & "GET_AX_BX", &
          & "VTOWFK_EXTRA1", &
          & "VTOWFK_EXTRA2", &
          & "VTORHO_EXTRA", &
@@ -161,8 +161,8 @@ contains
          & "CHEBFI2_RR_XNP", &
          & "CHEBFI2_RR_GEMM", &
          & "INVOVL_INNER_GEMM", &
-         & "CHEBFI2_TRANSPOSE", &
-         & "CHEBFI2_GET_BM1X", &
+         & "TRANSPOSE", &
+         & "GET_BM1X", &
          & "LOBPCG2_BLOCK", &
          & "LOBPCG2_LINE", &
          & "LOBPCG2_ORTHO_X_WRT", &
