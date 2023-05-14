@@ -993,6 +993,36 @@ data: !Tabular |
 ...
 
 
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ >>>> For spin 1
+ Indirect band gap semiconductor
+ Fundamental gap:     0.903 (eV)
+   VBM:    -0.451 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ >>>> For spin 2
+ Indirect band gap semiconductor
+ Fundamental gap:     0.903 (eV)
+   VBM:    -0.451 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         2.454 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
+ >>>> For spin 1
+ Indirect band gap semiconductor
+ Fundamental gap:     0.828 (eV)
+   VBM:    -0.377 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         3.274 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ >>>> For spin 2
+ Indirect band gap semiconductor
+ Fundamental gap:     0.828 (eV)
+   VBM:    -0.377 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.451 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         3.274 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)

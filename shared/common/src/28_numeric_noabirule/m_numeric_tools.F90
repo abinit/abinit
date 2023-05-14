@@ -173,6 +173,8 @@ MODULE m_numeric_tools
    module procedure cdp2rdp_3D
    module procedure cdp2rdp_4D
    module procedure cdp2rdp_5D
+   module procedure cdp2rdp_6D
+   module procedure cdp2rdp_7D
  end interface c2r
 
  interface isinteger
@@ -1200,12 +1202,6 @@ end function cdp2rdp_0D
 !! FUNCTION
 !!  Create a real array containing real and imaginary part starting from a complex array
 !!
-!! INPUTS
-!!  cc(:)=the input complex array
-!!
-!! OUTPUT
-!!  rr(2,:)=the real array
-!!
 !! SOURCE
 
 pure function cdp2rdp_1D(cc) result(rr)
@@ -1230,10 +1226,7 @@ end function cdp2rdp_1D
 !!  cdp2rdp_2D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array!!
 !!
 !! SOURCE
 
@@ -1258,10 +1251,7 @@ end function cdp2rdp_2D
 !!  cdp2rdp_3D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array!!
 !!
 !! SOURCE
 
@@ -1287,10 +1277,7 @@ end function cdp2rdp_3D
 !!  cdp2rdp_4D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array!!
 !!
 !! SOURCE
 
@@ -1315,10 +1302,7 @@ end function cdp2rdp_4D
 !!  cdp2rdp_5D
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Create a real array containing real and imaginary part starting from a complex array!!
 !!
 !! SOURCE
 
@@ -1335,6 +1319,56 @@ pure function cdp2rdp_5D(cc) result(rr)
  rr(2,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:))
 
 end function cdp2rdp_5D
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_numeric_tools/cdp2rdp_6D
+!! NAME
+!!  cdp2rdp_6D
+!!
+!! FUNCTION
+!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! SOURCE
+
+pure function cdp2rdp_6D(cc) result(rr)
+
+!Arguments ------------------------------------
+!scalars
+ complex(dpc),intent(in) :: cc(:,:,:,:,:,:)
+ real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6))
+
+! *********************************************************************
+
+ rr(1,:,:,:,:,:,:)=REAL (cc(:,:,:,:,:,:))
+ rr(2,:,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:,:))
+
+end function cdp2rdp_6D
+!!***
+
+!!****f* m_numeric_tools/cdp2rdp_7D
+!! NAME
+!!  cdp2rdp_7D
+!!
+!! FUNCTION
+!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! SOURCE
+
+pure function cdp2rdp_7D(cc) result(rr)
+
+!Arguments ------------------------------------
+!scalars
+ complex(dpc),intent(in) :: cc(:,:,:,:,:,:,:)
+ real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6),SIZE(cc,7))
+
+! *********************************************************************
+
+ rr(1,:,:,:,:,:,:,:)=REAL (cc(:,:,:,:,:,:,:))
+ rr(2,:,:,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:,:,:))
+
+end function cdp2rdp_7D
 !!***
 
 !----------------------------------------------------------------------

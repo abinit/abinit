@@ -914,6 +914,22 @@ data: !Tabular |
 ...
 
 
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Indirect band gap semiconductor
+ Fundamental gap:     0.913 (eV)
+   VBM:    -0.456 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.456 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         4.425 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.660 (eV)
+   VBM:    -0.622 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.038 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         5.683 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+
+
 == END DATASET(S) ==============================================================
 ================================================================================
   

@@ -723,6 +723,22 @@ data: !Tabular |
 ...
 
 
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.620 (eV)
+   VBM:    -1.311 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.308 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.620 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
 
  Building Green's functions from KS orbitals and QP energies...
 
@@ -787,6 +803,22 @@ data: !Tabular |
        13    9.587   -7.330   -1.381   -6.887    0.848   -0.702   -0.148    8.885    0.000
        14    9.587   -7.330   -1.381   -6.900    0.848   -0.714   -0.151    8.873    0.000
 ...
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.654 (eV)
+   VBM:    -1.329 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.325 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.654 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
@@ -866,6 +898,22 @@ data: !Tabular |
        14    9.587   -7.330   -1.381   -6.947    0.846   -0.750   -0.036    8.837    0.000
 ...
 
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.657 (eV)
+   VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.657 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
     max(abs(E_i - E_{i-1})):  3.63453E+01 (meV) for band: 14
@@ -943,6 +991,22 @@ data: !Tabular |
        13    9.587   -7.330   -1.381   -6.943    0.845   -0.745   -0.008    8.842    0.000
        14    9.587   -7.330   -1.381   -6.957    0.846   -0.759   -0.008    8.828    0.000
 ...
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.657 (eV)
+   VBM:    -1.330 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.327 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.657 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
@@ -1203,6 +1267,22 @@ data: !Tabular |
        14    9.587   -7.330   -1.381   -6.714    0.852   -0.562   -0.562    9.025    0.000
 ...
 
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.620 (eV)
+   VBM:    -1.311 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.308 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.620 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
  Checking for convergence at iteration: 2
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
     max(abs(E_i - E_{i-1})):  1.12349E+03 (meV) for band: 11
@@ -1346,6 +1426,22 @@ data: !Tabular |
        13    9.587   -7.330   -1.381   -6.558    0.842   -0.415    0.138    9.172    0.000
        14    9.587   -7.330   -1.381   -6.565    0.842   -0.422    0.140    9.165    0.000
 ...
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.602 (eV)
+   VBM:    -1.302 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.300 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.602 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 3
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
@@ -1491,6 +1587,22 @@ data: !Tabular |
        14    9.587   -7.330   -1.381   -6.528    0.842   -0.394    0.028    9.193    0.000
 ...
 
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.600 (eV)
+   VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
  Checking for convergence at iteration: 4
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
      max(abs(E_i - E_{i-1})):  2.84099E+01 (meV) for band: 14
@@ -1634,6 +1746,22 @@ data: !Tabular |
        13    9.587   -7.330   -1.381   -6.513    0.842   -0.381    0.007    9.206    0.000
        14    9.587   -7.330   -1.381   -6.519    0.842   -0.387    0.007    9.200    0.000
 ...
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.271 (eV)
+   VBM:    -1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.136 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.271 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 1 k-points ===
+ Direct band gap semiconductor
+ Fundamental gap:     2.600 (eV)
+   VBM:    -1.301 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.299 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         2.600 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
  Checking for convergence at iteration: 5
  For k-point: 1 [ 0.0000E+00,  0.0000E+00,  0.0000E+00], spin: 1
