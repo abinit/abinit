@@ -1,5 +1,5 @@
 
-.Version 9.9.3 of ABINIT 
+.Version 9.11.0 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -836,6 +836,22 @@ data: !Tabular |
        24   -1.500  -17.930  -22.117    3.819    0.801   -0.295   -0.295   -1.795    2.000
        25    4.536  -12.131   -7.077   -2.948    0.847    1.783    1.783    6.319    0.000
 ...
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Indirect band gap semiconductor
+ Fundamental gap:     2.748 (eV)
+   VBM:    -1.374 (eV) at k: [ 5.0000E-01,  0.0000E+00,  5.0000E-01]
+   CBM:     1.374 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         3.170 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
+ Indirect band gap semiconductor
+ Fundamental gap:     3.984 (eV)
+   VBM:    -1.374 (eV) at k: [ 5.0000E-01,  0.0000E+00,  5.0000E-01]
+   CBM:     2.610 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         4.887 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
 
 
 == END DATASET(S) ==============================================================
