@@ -421,7 +421,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qphon_mq(3),qred2cart(3,3)
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
- real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
+ real(dp) :: intgden(cplex,dtset%nspden,dtset%natom),dentot(dtset%nspden)
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
  real(dp),allocatable :: d2bbb_mq(:,:,:,:,:,:),d2lo_mq(:,:,:,:,:),d2nl_mq(:,:,:,:,:)
  real(dp),allocatable :: d2bbb_pq(:,:,:,:,:,:),d2lo_pq(:,:,:,:,:),d2nl_pq(:,:,:,:,:)
@@ -1070,7 +1070,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
 !TMP
-!   do ifft=1,nfftf
+   do ifft=1,nfftf
 !     write(301,*) nvresid1(2*ifft-1,1), nvresid1(2*ifft ,1)
 !     write(302,*) nvresid1(2*ifft-1,2), nvresid1(2*ifft ,2)
 !     write(303,*) nvresid1(2*ifft-1,3), nvresid1(2*ifft ,3)
@@ -1078,7 +1078,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !     write(305,*) vhartr1(2*ifft-1),vhartr1(2*ifft)
 !     write(306,*) vxc1(2*ifft-1,1),vxc1(2*ifft,1)
 !     write(307,*) vxc1(2*ifft-1,2),vxc1(2*ifft,2)
-!   end do
+   end do
 
    end if
 
@@ -1552,8 +1552,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
- if (nspden==4.and.abs(omega)>tol10.and.dtset%prtvol>0) then
-   prtopt=idir+1
+! if (nspden==4.and.abs(omega)>tol10.and.dtset%prtvol>0) then
+ if (ipert/=dtset%natom+1.and.nspden==4.and.dtset%prtvol>0) then
+   prtopt=1
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
