@@ -80,7 +80,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=44
+ nrefs=45
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
@@ -475,6 +475,14 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' Strong suggestion to cite this paper in your publications.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#brouwer2021'
  priority(44)=20
+
+ ref(45)=' Orbital magnetism and chemical shielding in the projector augmented-wave formalism.'//ch10//&
+  ' J.W. Zwanziger, M. Torrent, and X. Gonze'// &
+  ' Phys. Rev. B 107, 165157 (2023).'
+ comment(45)=&
+  ' Comment: to be cited in case the computation of orbital magnetism is used, i.e. orbmag>0.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2023'
+ priority(45)=20
 
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
