@@ -640,7 +640,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
    if (check_conv) then
      do idynimage=1,ndynimage
-       _IBM6("hello world")
        iimage=list_dynimage(idynimage)
        delta_energy=delta_energy &
 &       +abs(results_img(iimage,itimimage)%results_gs%etotal &
@@ -1070,7 +1069,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end if
 
-!Write the msg 
+!Write the msg
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
  if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
@@ -1313,7 +1312,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
  nspden=resimg_all(1)%results_gs%nspden
  nsppol=resimg_all(1)%results_gs%nsppol
  call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
- call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb) 
+ call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb)
  results_gs_lincomb%etotal=etotal
  results_gs_lincomb%entropy=entropy
  results_gs_lincomb%fermie=fermie
@@ -1358,7 +1357,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 & m1geo_param%hmctt,&
 & m1geo_param%icycle,&
 & m1geo_param%iexit,&
-& itimimage_eff,&     
+& itimimage_eff,&
 & m1geo_param%mttk_vars,&
 & m1geo_param%nctime,&
 & m1geo_param%ncycle,&

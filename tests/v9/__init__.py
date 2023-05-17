@@ -58,7 +58,7 @@ inp_files = [
     "t41.abi",
     "t42.abi",
     "t43.abi",
-    "t44.abi",  # test orbital magnetism with DDK wavefunctions
+    "t44.abi",  # test orbital magnetism with DDK wavefunctions on Ne atom
     "t46.abi",  # longwave GGA
     "t47.abi",  # metallic iron GGA-PBE PAW nsppol=2
     "t48.abi",  # optic
@@ -82,7 +82,6 @@ inp_files = [
     "t65.abi",
     "t66.abi",
     "t67.abi",
-    "t70.abi",  # Longwave : test quadrupole calculation with all negative KB energies As PSP
 
     # More ground state
     "t71.abi",  # test cprj_update_lvl and nloc_alg options, istwfk=1
@@ -109,6 +108,10 @@ inp_files = [
     "t86.abi",  # Spin lattice coupling, Only Oiju term activated.
     "t87.abi",  # Spin lattice coupling, Oiju and Tijuv.
 
+    # test usepawu options with nspinor=2,nspden=4 and different pawxcdev
+    "t88.abi", # LDA
+    "t89.abi", # GGA
+
     # GS Coulomb cut-off
     "t90.abi",  # checkG Coulomb cut-off, large tolerance a.t.m.
     "t91.abi",  # occopt 9 tests on Si
@@ -129,15 +132,38 @@ inp_files = [
     # Optcell test
     "t104.abi", # Testing optcell 6 to relax 3rd vector not orthogonal to 1st and 2nd vectors
 
+    # PAW+U and lruj/ujdet utilities
+    "t105.abi", # Preliminary step for tests 106-109; generate WFK and DEN
+    "t106.abi", # Hubbard U (macro_uj=1) test of ujdet subroutines
+    "t107.abi", # Hund's J (macro_uj=4); preliminary step for t109
+    "t108.abi", # Test of irdden and prtdosm input keywords
+    "t109.abi", # Test of lruj post-processing w/ four LRUJ.nc files from t107
+
     # Lattice Wannier function
     # scdm-k method for lattice wannier function in anaddb (disentangle option 2)
     "t110.abi",
     # projWF method for lattice wannier function in anaddb (disentangle option 2)
     "t111.abi",
+    
+    # local orbital magnetic moments calculation.
+    "t112.abi", # test prt_lorbmag   printing local orbital magnetic moments in atomic spheres
 
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
 
+    # UPF2 format for norm-conserving pseudopotentials
+    "t130.abi",  # UPF2
+    "t131.abi",  # UPF2 with SOC
+    "t132.abi",  # Forces using Beigi 2D cut-off
+    # more DFPT
+    "t140.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
+    "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
+    "t142.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nsppol 2
+    "t143.abi",  # test orbital magnetism with DDK wavefunctions and metallic sodium
+    "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
+    "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
+    "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
+
     # write_files behaviour
-    "t130.abi",  # test the behaviour of supravariable write_files
+    "t150.abi",  # test the behaviour of supravariable write_files
 ]
