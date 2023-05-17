@@ -1,6 +1,6 @@
 
-.Version 9.9.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
+.Version 9.11.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  1 Dec 2022.
-- ( at 15h48 )
+.Starting date : Wed 17 May 2023.
+- ( at 11h15 )
   
-- input  file    -> t130.abi
-- output file    -> t130.abo
-- root for input  files -> t130i
-- root for output files -> t130o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bguster_print_save/tests/TestBot_MPI1/v9_t150/t150.abi
+- output file    -> t150.abo
+- root for input  files -> t150i
+- root for output files -> t150o
 
 
  DATASET    1 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -418,7 +418,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -427,7 +427,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
             acell      7.0000000000E+00  5.0000000000E+00  5.0000000000E+00 Bohr
               amu      1.00794000E+00
              ecut      2.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         312
            iatsph6       1    2
            iatsph8       1    2
            istwfk        2    0    3
@@ -904,8 +904,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/shostakovich/Documents/Projects/gitrepo/abinit/tests//Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/shostakovich/Documents/Projects/gitrepo/abinit/tests//Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bguster_print_save/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bguster_print_save/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1006,7 +1006,7 @@ force_length_stats: {min:   1.79865493E-01, max:   1.79865493E-01, mean:   1.798
  frms,max,avg= 5.3399443E+00 9.2490548E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  5.000000000000  5.000000000000 bohr
               =  3.704240460130  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t130o_DS1_EIG
+ prteigrs : about to open file t150o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.07660   Average Vxc (hartree)=  -0.22301
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband=  1, wtk=  0.25000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2597,7 +2597,7 @@ force_length_stats: {min:   1.79865493E-01, max:   1.79865493E-01, mean:   1.798
  frms,max,avg= 5.3399443E+00 9.2490548E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  5.000000000000  5.000000000000 bohr
               =  3.704240460130  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t130o_DS11_EIG
+ prteigrs : about to open file t150o_DS11_EIG
  Fermi (or HOMO) energy (hartree) =  -0.07660   Average Vxc (hartree)=  -0.22301
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband=  1, wtk=  0.25000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3087,7 +3087,7 @@ cartesian_forces: # hartree/bohr
 force_length_stats: {min:   1.79865493E-01, max:   1.79865493E-01, mean:   1.79865493E-01, }
 ...
 
- bonds_lgth_angles : about to open file t130o_DS14_GEO
+ bonds_lgth_angles : about to open file t150o_DS14_GEO
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4393,7 +4393,7 @@ force_length_stats: {min:   1.79865493E-01, max:   1.79865493E-01, mean:   1.798
  frms,max,avg= 5.3399443E+00 9.2490548E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  5.000000000000  5.000000000000 bohr
               =  3.704240460130  2.645886042950  2.645886042950 angstroms
- prteigrs : about to open file t130o_DS22_EIG
+ prteigrs : about to open file t150o_DS22_EIG
  Fermi (or HOMO) energy (hartree) =  -0.07660   Average Vxc (hartree)=  -0.22301
  Eigenvalues (hartree) for nkpt=   3  k points:
  kpt#   1, nband=  1, wtk=  0.25000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -4666,7 +4666,7 @@ band_energy         : -7.62447321375306E-01
                        1.7986549325E-01 -0.0000000000E+00 -0.0000000000E+00
             fcart23   -1.7986549325E-01 -0.0000000000E+00 -0.0000000000E+00
                        1.7986549325E-01 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            iatsph6       1    2
            iatsph8       1    2
            istwfk        2    0    3
@@ -5194,10 +5194,11 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=          7.2
+- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered 161 WARNINGs and 120 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.7  wall=          7.2
++Overall time at end (sec) : cpu=          5.8  wall=          6.0
+
