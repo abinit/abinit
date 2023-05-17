@@ -1,3 +1,57 @@
+## v9.10
+
+Version 9.10, released on May 30, 2023.
+List of changes with respect to version 9.8.
+<!-- Release notes updated on May 30, 2023. -->
+
+Many thanks to the contributors to the ABINIT project between
+Sptember 2022 and April 2023, and some late contributions up to XXX 2023 ! 
+These release notes
+are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, 911, are taken into account. -->
+
+The list of contributors includes:
+TO BE UPDATED
+B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet,
+F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote,
+C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner,
+R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran,
+M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings. 
+
+* * *
+
+### **B.** Most noticeable achievements
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized)
+
+**D.YY* Improve developer documentation.
+How to add a new test, commit dabc1b905.
+
+**D.YY** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+
+TO BE UPDATED
+By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843),
+A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
+M. Torrent (MR838 and 873), B. Seddon and X. Gonze (MR839 and 855), L. Baguet (MR857),
+J.-M. Beuken (MR882).
+
+* * *
+
+
 ## v9.8
 
 Version 9.8, released on December 23, 2022.
