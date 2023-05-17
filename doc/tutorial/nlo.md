@@ -2,7 +2,7 @@
 authors: JWZ, PhG,  MVeithen,  XG, NAP
 ---
 
-# Tutorial on static non-linear properties
+# Static non-linear properties
 
 ## Electronic non-linear susceptibility, non-resonant Raman tensor, electro-optic effect.
 
@@ -24,7 +24,7 @@ respect to atomic positions (Raman tensor), using finite differences.
 
 The user should have already completed several advanced tutorials, including:
 [Response-Function 1](/tutorial/rf1), [Response-Function 2](/tutorial/rf2),
-[Polarization and Finite electric fields](/tutorial/ffield), and the
+[Polarization and Finite electric fields](/tutorial/polarization), and the
 [Elastic properties](/tutorial/elastic).
 
 This tutorial should take about 1 hour and 30 minutes.
@@ -53,7 +53,7 @@ properties).
 
 We will adopt the following set of generic parameters (quite similar to those
 in the
-[tutorial on Polarization and finite electric field](/tutorial/ffield)):
+[tutorial on Polarization and finite electric field](/tutorial/polarization)):
 ```
 acell   3*7.1391127387E+00
 rprim      0.0000000000E+00  7.0710678119E-01  7.0710678119E-01

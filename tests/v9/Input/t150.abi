@@ -1,0 +1,151 @@
+# Hydrogen diatomic molecule
+# Multidataset testing : write_files testing with different flags for the different options 
+# This is to determine the behaviour of write_files 
+ 
+ ndtset 23
+
+ write_files1  "default"
+ write_files2  "ddb"         # Print only ddb 
+ write_files3  "den_1"       # Print only den  with opt 1. other options to be tested with PAW
+ write_files4  "dos_1"       # Print only dos  with opt 1
+ write_files5  "dos_2"       # Print only dos  with opt 2
+ write_files6  "dos_3"       # Print only dos  with opt 3
+ write_files7  "dos_4"       # Print only dos  with opt 4
+ write_files8  "dos_3, dosm_1"      # Print only dosm with opt 1, dos_3 required
+ write_files9  "ebands_1"    # Print only ebands with opt 1
+ write_files10 "ebands_2"    # Print only ebands with opt 2
+ write_files11 "eig"         # Print only eig
+ write_files12 "elf"         # Print only elf 
+ write_files13 "gden"        # Print only gden
+ write_files14 "geo"         # Print only geo
+ write_files15 "gsr"         # Print only gsr
+ write_files16 "pot"         # Print only pot
+ write_files17 "vha, vclmb_1"     # Print Vcoulomb with opt 1, vha required
+ write_files18 "vha, vclmb_2"     # Print Vcoulomb with opt 2, vha required
+ write_files19 "vha"         # Print only Vha
+ write_files20 "vhxc"        # Print only Vhxc
+ write_files21 "vxc"         # Print only Vxc
+ write_files22 "eig, wf_1"   # Print two random files from options
+ write_files23 ""            # Print nothing
+
+# Atomic Structure
+#-----------------
+ acell   7 5 5
+ natom   2
+ ntypat  1
+ typat   2*1
+ xcart  -0.385  0 0
+         0.385  0 0   Angstrom
+ znucl   1.0
+
+# Other Variables
+#----------------
+ ecut     2    #
+ ngkpt    4 1 1   #Used to make it compatible with fsurf
+ nshiftk  1       #Used to make it compatible with fsurf
+ shiftk   0 0 0   #Used to make it compatible with fsurf
+ nband    1
+ nline    3
+ nstep    7
+ occ      2
+ occopt   3       #Used to make it compatible with dos_2:5
+ tolvrs   1.0d-6
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%  t130.abo, tolnlines = 1, tolabs = 1.010e-08, tolrel = 2.000e-04
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% keywords = NC
+#%% authors = B. Guster
+#%% description = 
+#%%   Test different printing option with supravariable write_files.
+#%%   Except for DTSET 1, each option should print only one file.
+#%%   TODO: Modify this test file when other prt options are added to ABINIT.
+#%%<END TEST_INFO>
+||||||| cca49d0cb
+=======
+# Crystalline alpha-quartz: GS calculations with UPF2 pseudos
+ndtset 2
+
+ecut      25 # 35
+rmm_diis  1
+nband1    32
+tolvrs    1.0d-8
+
+###################################
+# Dataset 1: SCF run with useylm 0
+###################################
+useylm1     0
+wfinit1     2
+
+###################################
+# Dataset 2: SCF run with useylm 1
+###################################
+useylm2     1
+getwfk2    -1
+
+#################### COMMON PART #########################
+
+nstep    20
+diemac   4.0
+
+# Definition of the k-point grid
+occopt 1            # Semiconductor
+ngkpt   2 2 2
+nshiftk 1
+shiftk  0.0 0.0 0.0 # Gamma-centered
+
+# Definition of the atom types
+npsp   2
+znucl  14  8
+ntypat 2
+
+# Definition of the atoms
+natom 9
+typat 3*1  6*2
+
+# Experimental parameters (Wyckoff pag 312)
+# u(Si)= 0.465
+# x= 0.415 ; y= 0.272 ; z= 0.120
+acell   2*4.91304  5.40463  Angstrom
+
+xred   0.465   0.000   0.000              #Si
+       0.000   0.465   2/3                #Si
+      -0.465  -0.465   1/3                #Si
+       0.415   0.272   0.120              #O
+      -0.143  -0.415   0.4533333333333333 #O
+      -0.272   0.143   0.7866666666666666 #O
+       0.143  -0.272  -0.120              #O
+       0.272   0.415   0.5466666666666666 #O
+      -0.415  -0.143   0.2133333333333333 #O
+
+rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
+        5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
+        0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
+
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_nc_sr_04_pbe_standard_psp8"
+pseudos "Si.upf, O.upf"
+#pseudos "Si.psp8, O.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = t130.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 1.0e-02
+#%% [paral_info]
+#%% max_nprocs = 12
+#%% [extra_info]
+#%% authors =  M. Giantomassi
+#%% keywords = NC, UPF2
+#%% description =
+#%%   Crystalline alpha-quartz: GS calculations with UPF2 pseudos.
+#%%   Test scalar-relativistic pseudos with useylm 0 and 1.
+#%%<END TEST_INFO>

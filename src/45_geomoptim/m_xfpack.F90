@@ -189,7 +189,7 @@ subroutine xfpack_vin2x(acell,acell0,natom,ndim,nsym,optcell,&
      if (abs(scaling(1,1) - 1.0_dp) <1.E-14) scaling(1,1)=1.0_dp
      scaling(3,1)=vin(3*natom+2)  
      if (abs(scaling(3,1)) <1.E-14) scaling(3,1)=0.0_dp
-     scaling(1,2)=vin(3*natom+3)
+     scaling(2,1)=vin(3*natom+3)
      if (abs(scaling(2,1)) <1.E-14) scaling(2,1)=0.0_dp
    else if(optcell==5)then
      scaling(2,2)=vin(3*natom+1)

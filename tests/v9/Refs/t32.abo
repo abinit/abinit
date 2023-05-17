@@ -110,6 +110,14 @@ _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
          ecutsigx      3.00000000E+00 Hartree
           ecutwfn      1.20000000E+01 Hartree
 -          fftalg         312
+        freqspmax1     0.00000000E+00 Hartree
+        freqspmax2     0.00000000E+00 Hartree
+        freqspmax3     0.00000000E+00 Hartree
+        freqspmax4     1.83746627E-01 Hartree
+        freqspmin1    -0.00000000E+00 Hartree
+        freqspmin2    -0.00000000E+00 Hartree
+        freqspmin3    -0.00000000E+00 Hartree
+        freqspmin4    -1.83746627E-01 Hartree
            getscr1          0
            getscr2          0
            getscr3          2
@@ -154,6 +162,10 @@ P           mkmem           6
           nfreqim2         20
           nfreqim3         -1
           nfreqim4         -1
+          nfreqsp1          0
+          nfreqsp2          0
+          nfreqsp3          0
+          nfreqsp4         50
             ngfft          24      24      24
              nkpt           6
            nkptgw           2
@@ -1817,8 +1829,8 @@ meta: {optdriver: 4, gwcalctyp: 1, }
  number of q-points in BZ                           32
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
- number of omega for Sigma on real axis              0
- max omega for Sigma on real axis  [eV]           0.00
+ number of omega for Sigma on real axis             50
+ max omega for Sigma on real axis  [eV]           5.00
  zcut for avoiding poles [eV]                     0.10
  number of imaginary frequencies for Sigma          10
  max omega for Sigma on imag axis  [eV]          40.00
@@ -1916,6 +1928,14 @@ data: !SigmaeeData |
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
+        freqspmax1     0.00000000E+00 Hartree
+        freqspmax2     0.00000000E+00 Hartree
+        freqspmax3     0.00000000E+00 Hartree
+        freqspmax4     1.83746627E-01 Hartree
+        freqspmin1    -0.00000000E+00 Hartree
+        freqspmin2    -0.00000000E+00 Hartree
+        freqspmin3    -0.00000000E+00 Hartree
+        freqspmin4    -1.83746627E-01 Hartree
            getscr1          0
            getscr2          0
            getscr3          2
@@ -1960,6 +1980,10 @@ P           mkmem           6
           nfreqim2         20
           nfreqim3         -1
           nfreqim4         -1
+          nfreqsp1          0
+          nfreqsp2          0
+          nfreqsp3          0
+          nfreqsp4         50
             ngfft          24      24      24
              nkpt           6
            nkptgw           2

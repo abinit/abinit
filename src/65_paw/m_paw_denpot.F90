@@ -45,7 +45,7 @@ MODULE m_paw_denpot
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 #endif
 
  implicit none
@@ -827,12 +827,12 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 
      if (pawu_algo==PAWU_ALGO_1) then
 
-!      PAW+U Dij computation from nocc_m_mp
+!      PAW+U energy computation from nocc_m_mp
        call pawuenergy(iatom_tot,edftumdc,edftumdcdc,paw_ij(iatom)%noccmmp, &
 &                      paw_ij(iatom)%nocctot,pawprtvol,pawtab(itypat))
      else
 
-!      PAW+U Dij computation from eU_ijkl
+!      PAW+U energy computation from eU_ijkl
        !First, compute DijU
        call pawdiju_euijkl(paw_ij(iatom)%dijU,cplex_dij,cplex,ndij, &
 &                          pawrhoij(iatom),pawtab(itypat))

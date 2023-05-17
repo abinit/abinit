@@ -46,12 +46,10 @@ module m_ddb
  use m_crystal,        only : crystal_t, crystal_init
  use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
- use m_psps,           only : psps_copy, psps_free
 
  implicit none
 
  private
-
 
  public :: rdddb9           ! This routine reads the derivative database entirely,
  public :: nlopt            ! Output of all quantities related to third-order derivatives of the energy.
@@ -169,7 +167,7 @@ module m_ddb
      ! Allocate dynamic memory
 
     procedure :: copy => ddb_copy
-     ! Copy the object. 
+     ! Copy the object.
 
     procedure :: set_qpt => ddb_set_qpt
      ! Set the wavevector
@@ -342,14 +340,13 @@ CONTAINS  !===========================================================
 !!   ddb=the new ddb object
 !!   dtset=dtset object of the current calculation
 !!   nblok=number of blocks
-!!   mpert=maximum number of perturbations
-!!         (atom displacements + electric field + ...)
-!!   msize=maximum size of one block of the ddb
-!!         (e.g. 3*mpert * 3*mpert)
+!!   mpert=maximum number of perturbations (atom displacements + electric field + ...)
+!!   msize=maximum size of one block of the ddb e.g. 3*mpert * 3*mpert.
 !!
 !! SOURCE
 
 subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(inout) :: ddb
  type(dataset_type),intent(in) :: dtset
@@ -371,7 +368,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
  ddb%qpt(:,:) = zero
  ddb%nrm(:,:) = one
  ddb%typ(:) = one
- ddb%flg(:,:) = zero
+ ddb%flg(:,:) = 0
 
 end subroutine ddb_init
 !!***
@@ -424,7 +421,7 @@ subroutine ddb_copy(iddb, oddb)
 
 !Arguments ------------------------------------
 !array
- class(ddb_type),intent(inout) :: iddb
+ class(ddb_type),intent(in) :: iddb
  type(ddb_type),intent(out) :: oddb
 
 ! ************************************************************************
@@ -709,7 +706,7 @@ end subroutine ddb_set_pel
 !!  Set the stress tensor.
 !!
 !! INPUTS
-!!  strten=the stress tensor in cartesian coordinates. 
+!!  strten=the stress tensor in cartesian coordinates.
 !!  iblok=index of the block we are setting.
 !!
 !! OUTPUT
@@ -941,7 +938,7 @@ end subroutine ddb_bcast
 !! [rfqvec(4)] = 1=> d/dq (optional)
 !!
 !! OUTPUT
-!! iblok= number of the block that corresponds to the specifications
+!! iblok= number of the block that corresponds to the specifications. 0 if not found.
 !!
 !! SOURCE
 
@@ -1536,8 +1533,8 @@ end subroutine ddb_read_eig2d_txt
 !! FUNCTION
 !! This routine reads the derivative database entirely,
 !! for use in ppddb9, and performs some checks and symmetrisation
-!! At the end, the whole DDB is in central memory, contained in the
-!! array ddb%val(2,msize,ddb%nblok).
+!! At the end, the whole DDB is in central memory, contained in the array ddb%val(2,msize,ddb%nblok).
+!!
 !! The information on it is contained in the four arrays
 !!   ddb%flg(msize,ddb%nblok) : blok flag for each element
 !!   ddb%qpt(9,ddb%nblok)  : blok wavevector (unnormalized)
@@ -1557,8 +1554,8 @@ end subroutine ddb_read_eig2d_txt
 !! natom = number of atoms
 !! ntypat=number of atom types
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
-!!  raw = 1 -> do not perform any symetrization or transformation to cartesian coordinates.
-!!        0 (default) -> do perform these transformations.
+!! [raw] = 1 -> do not perform any symetrization or transformation to cartesian coordinates.
+!!         0 (default) -> do perform these transformations.
 !!
 !! OUTPUT
 !! acell(3)=length scales of cell (bohr)
@@ -2124,7 +2121,6 @@ subroutine ddb_from_file_txt(ddb, filename, brav, ddb_hdr, crystal, comm, prtvol
  character(len=*),intent(in) :: filename
  type(crystal_t),intent(out) :: Crystal
  type(ddb_hdr_type),intent(out) :: ddb_hdr
-!array
 
 !Local variables-------------------------------
 !scalars
@@ -2968,6 +2964,7 @@ end function ddb_get_dielt
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
+!!  ddb_version = 6 digit integer giving date. To mantain compatibility with old DDB files.
 !!  lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative
 !!             |-> 1st gradient of polarization response to atomic displacement
 !!         = 1 symmetrize the tensor wrt efield and qvec derivative
@@ -2986,11 +2983,11 @@ end function ddb_get_dielt
 !!
 !! SOURCE
 
-integer function ddb_get_quadrupoles(ddb, lwsym, rftyp, quadrupoles) result(iblok)
+integer function ddb_get_quadrupoles(ddb, ddb_version, lwsym, rftyp, quadrupoles) result(iblok)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: lwsym,rftyp
+ integer,intent(in) :: ddb_version,lwsym,rftyp
  class(ddb_type),intent(in) :: ddb
 !arrays
  real(dp),intent(out) :: quadrupoles(3,3,3,ddb%natom)
@@ -3034,7 +3031,7 @@ integer function ddb_get_quadrupoles(ddb, lwsym, rftyp, quadrupoles) result(iblo
    endif
    call wrtout([std_out, ab_out], msg)
 
-   call dtqdrp(ddb%val(:,:,iblok),lwsym,ddb%mpert,ddb%natom,quadrupoles)
+   call dtqdrp(ddb%val(:,:,iblok),ddb_version,lwsym,ddb%mpert,ddb%natom,quadrupoles)
  end if
 
 end function ddb_get_quadrupoles
@@ -3279,17 +3276,12 @@ subroutine ddb_diagoq(ddb, crystal, qpt, asrq0, symdynmat, rftyp, phfrq, displ_c
  qphnrm = one; my_qpt = qpt
 
  ! Look for the information in the DDB (no interpolation here!)
- rfphon(1:2)=1
- rfelfd(1:2)=0
- rfstrs(1:2)=0
- qphon_padded = zero
- qphon_padded(:,1) = qpt
+ rfphon(1:2)=1; rfelfd(1:2)=0; rfstrs(1:2)=0
+ qphon_padded = zero; qphon_padded(:,1) = qpt
  natom = crystal%natom
 
- call ddb%get_block(iblok,qphon_padded,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
- if (iblok == 0) then
-   ABI_ERROR(sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
- end if
+ call ddb%get_block(iblok, qphon_padded, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+ ABI_CHECK(iblok /= 0, sjoin("Cannot find q-point ", ktoa(qpt)," in DDB file"))
 
  ! Copy the dynamical matrix in d2cart
  d2cart(:,1:ddb%msize) = ddb%val(:,:,iblok)
@@ -3625,6 +3617,7 @@ end subroutine ddb_write_block
 !! SOURCE
 
 subroutine ddb_write(ddb, ddb_hdr, filename, fullinit, comm)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(in) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -3660,6 +3653,7 @@ end subroutine ddb_write
 !! SOURCE
 
 subroutine ddb_write_txt(ddb, ddb_hdr, filename, fullinit, comm)
+
 !Arguments ------------------------------------
  class(ddb_type),intent(in) :: ddb
  type(ddb_hdr_type),intent(inout) :: ddb_hdr
@@ -4026,6 +4020,10 @@ end subroutine ddb_set_d3matr
 !! FUNCTION
 !!   Initialize a dataset object from ddb.
 !!
+!! FIXME: I don't understand the goal of this routine.
+!! The dtset constructed from the DDB won't be equal to the one used to generate the DDB
+!!  There's only one safe way to init dtset i.e. from file by calling the parser
+!!
 !! INPUTS
 !!
 !! OUTPUT
@@ -4059,8 +4057,6 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
 !close ddb file, just want to read the headers
  close(ddbun)
  dtset%ngfft = ddb_hdr%ngfft
-
-! call psps_copy(psps, ddb_hdr%psps)
 
 ! Copy scalars from ddb
  dtset%natom = ddb_hdr%natom
@@ -4212,12 +4208,10 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 
  ! Make sure there is more than one ddb to be read
  if(nddb==1)then
-   write(msg, '(a)' )'Cannot merge a single DDB.'
-   ABI_ERROR(msg)
+   ABI_ERROR('Cannot merge a single DDB.')
  end if
 
  comm = xmpi_world
-
  ddbun = get_unit()
 
 ! ==============================================================
@@ -4225,7 +4219,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 ! ==============================================================
 
  if (xmpi_comm_rank(comm) == master) then
-   call wrtout(std_out, sjoin(ch10, " merge_ddb: Reading all headers."), 'COLL')
+   call wrtout(std_out, sjoin(ch10, " merge_ddb: Reading all headers."))
  end if
 
  dimekb=0 ; matom=0 ; mband=0  ; mblok=0 ; mkpt=0
@@ -4382,7 +4376,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
        nblok = nblok + 1
        iblok = nblok
      end if
-       
+
      ! Add the blok to the output ddb
      ddb%typ(iblok) = ddb2%typ(iblok2)
      do ii=1,9
@@ -4398,7 +4392,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
          ddb%val(2,ii,iblok) = ddb2%val(2,ii,iblok2)
        end if
      end do
-      
+
    end do  ! iblok2
 
    call ddb2%free()
@@ -4523,13 +4517,11 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd)
        do i2dir = 1, 3
          do i3dir = 1, 3
            do ii= 1, 2
-
              vec1(:) = d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert)
              flg1(:) = blkflg(:,i1pert,i2dir,i2pert,i3dir,i3pert)
              call cart39(flg1,flg2,gprimd,i1pert,natom,rprimd,vec1,vec2)
              d3cart(ii,:,i1pert,i2dir,i2pert,i3dir,i3pert) = vec2(:)
              carflg(:,i1pert,i2dir,i2pert,i3dir,i3pert) = flg2(:)
-
            end do
          end do
        end do
@@ -4578,6 +4570,7 @@ end subroutine lwcart
 !!
 !! INPUTS
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with olderDDB files.
 !! lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative
 !!             |-> 1st gradient of polarization response to atomic displacement
 !!        = 1 symmetrize the tensor wrt efield and qvec derivative
@@ -4590,18 +4583,20 @@ end subroutine lwcart
 !!
 !! SOURCE
 
-subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
+subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: lwsym,mpert,natom
+ integer,intent(in) :: ddb_version,lwsym,mpert,natom
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(out) :: lwtens(3,3,3,natom)
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: cvrsio8=20100401
  integer :: elfd,iatd,iatom,qvecd
+ real(dp) :: fac
  logical :: iwrite
  character(len=500) :: msg
 !arrays
@@ -4612,24 +4607,32 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+!Define a factor to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=one
+ end if
+
 !Extraction of quadrupoles (need symmetrization wrt qvecd and elfd)
  do iatom = 1,natom
    do iatd = 1,3
      do elfd = 1,3
        do qvecd = 1,elfd-1
          if (lwsym==1) then
-           lwtens(elfd,qvecd,iatd,iatom) = -two* &
+           lwtens(elfd,qvecd,iatd,iatom) = fac * &
          (d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)+d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8))
            lwtens(qvecd,elfd,iatd,iatom) = lwtens(elfd,qvecd,iatd,iatom)
          else if (lwsym==0) then
-           lwtens(elfd,qvecd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
-           lwtens(qvecd,elfd,iatd,iatom) = -two*d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
+           lwtens(elfd,qvecd,iatd,iatom) = fac * d3cart(2,elfd,natom+2,iatd,iatom,qvecd,natom+8)
+           lwtens(qvecd,elfd,iatd,iatom) = fac * d3cart(2,qvecd,natom+2,iatd,iatom,elfd,natom+8)
          end if
        end do
        if (lwsym==1) then
-         lwtens(elfd,elfd,iatd,iatom) = -four*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+         lwtens(elfd,elfd,iatd,iatom) = fac * two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
        else if (lwsym==0) then
-         lwtens(elfd,elfd,iatd,iatom) = -two*d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
+         lwtens(elfd,elfd,iatd,iatom) = fac * d3cart(2,elfd,natom+2,iatd,iatom,elfd,natom+8)
        end if
      end do
    end do
@@ -4859,7 +4862,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
 
  do iblok=1,ddb%nblok
 
-   if (abs(ddb%typ(iblok))==abs(rfmeth)) then
+   if (abs(ddb%typ(iblok)) == abs(rfmeth)) then
      qq(1)=ddb%qpt(1,iblok)/ddb%nrm(1,iblok)
      qq(2)=ddb%qpt(2,iblok)/ddb%nrm(1,iblok)
      qq(3)=ddb%qpt(3,iblok)/ddb%nrm(1,iblok)
