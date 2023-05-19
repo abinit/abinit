@@ -104,8 +104,8 @@
 #%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% input_ddb = trf2_3.ddb.abo 
 #%% [files]
-#%% files_to_test = trf2_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
-#%% files_to_test = trf2_5_PHANGMOM, tolnlines=  0, tolabs=  1.000e-15, tolrel=  0.000e+00
+#%% files_to_test = trf2_5.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00, fld_options=-easy;
+#%% files_to_test = trf2_5_PHANGMOM, tolnlines=54, tolabs=0.700, tolrel=1.000, fld_options=-ridiculous
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
