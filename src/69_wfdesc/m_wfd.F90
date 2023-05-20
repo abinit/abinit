@@ -32,14 +32,14 @@ module m_wfd
  use m_wfk
  use m_hdr
  use m_distribfft
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_cgtools
 
  use defs_datatypes,   only : pseudopotential_type, ebands_t
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab
- use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno
+ use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
@@ -977,26 +977,26 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  end do
  call xmpi_sum(wfd%npwarr, wfd%comm, ierr)
 
- mpw = MAXVAL(Wfd%npwarr)
+ mpw = maxval(Wfd%npwarr)
 
  ABI_MALLOC(Wfd%nband, (nkibz,nsppol))
- Wfd%nband=nband; Wfd%mband = mband
- ABI_CHECK(MAXVAL(Wfd%nband) == mband, "Wrong mband")
+ Wfd%nband = nband; Wfd%mband = mband
+ ABI_CHECK_IEQ(maxval(Wfd%nband), mband, "Wrong mband")
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
  write(msg,'(a,f8.1,a)')' Memory needed for Fourier components u(G): ',two*gwpc*ug_size*b2Mb, ' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 #ifdef HAVE_GW_DPC
- call wrtout(std_out, ' Storing wavefunctions in double precision array as `enable_gw_dpc="no"`')
- call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve the memory requirements for the WFs')
+ call wrtout(std_out, ' Storing wavefunctions in double precision as `enable_gw_dpc="no"`')
+ call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve memory requirements for the WFs')
 #else
- call wrtout(std_out, ' Storing wavefunctions in single precision array as `enable_gw_dpc="no"`')
+ call wrtout(std_out, ' Storing wavefunctions in single precision as `enable_gw_dpc="no"`')
 #endif
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
-   write(msg,'(a,f8.1,a)')' Memory needed for PAW projections Cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
+   write(msg,'(a,f8.1,a)')' Memory needed for PAW projections cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
@@ -1847,7 +1847,7 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
 ! *********************************************************************
 
  ! Different form factors have to be calculated and stored in Kdata.
- ABI_CHECK(choice == 1, "choice/=1 not coded")
+ ABI_CHECK_IEQ(choice, 1, "choice/=1 not coded")
 
  dimffnl = 1
  npw_k   = Wfd%npwarr(ik_ibz)
@@ -2947,7 +2947,7 @@ subroutine wfdgw_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmas
    else if (how_many > 1) then
      ! This band is duplicated. Assign it trying to obtain a good load distribution.
      rank_mask=.FALSE.; rank_mask(proc_ranks(1:how_many)+1)=.TRUE.
-     idle = imin_loc(get_more,mask=rank_mask)
+     idle = imin_loc(get_more, mask=rank_mask)
      get_more(idle) = get_more(idle) + 1
      if (Wfd%my_rank==idle-1) then
        my_nband=my_nband + 1
@@ -3690,7 +3690,7 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  integer,parameter :: npw0=0
  integer :: npw_k, ik_ibz, istwf_k, is, ik, ib
  logical :: iscompatibleFFT
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:)
 
@@ -3699,8 +3699,8 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  if (all(Wfd%ngfft(1:3) == new_ngfft(1:3)) ) RETURN ! Nothing to do.
 
  if (Wfd%prtvol > 0) then
-   write(msg,"(a,3(i0,1x),a,3(i0,1x),a)")" Changing FFT mesh: [",Wfd%ngfft(1:3),"] ==> [",new_ngfft(1:3),"]"
-   call wrtout(std_out, msg)
+   call wrtout(std_out,  &
+     sjoin(" Changing FFT mesh for wavefunctions: ",ltoa(Wfd%ngfft(1:3)), " ==> ", ltoa(new_ngfft(1:3))))
  end if
 
  ! Change FFT dimensions.
@@ -3721,7 +3721,7 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
- if (.not.iscompatibleFFT) then
+ if (.not. iscompatibleFFT) then
    ABI_WARNING("FFT mesh not compatible with symmetries. Wavefunction symmetrization should not be done in r-space!")
  end if
 
@@ -4606,11 +4606,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
       istwfk_disk = hdr%istwfk(ik_ibz)
       change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
-      nband_wfd  = Wfd%nband(ik_ibz,spin)
+      nband_wfd  = Wfd%nband(ik_ibz, spin)
 
       if (nband_wfd > nband_disk) then
-        write(msg,'(a,2(i0,1x))')&
-         "nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd,nband_disk
+        write(msg,'(2(a, i0))')&
+         "nband_wfd to be read: ", nband_wfd,", cannot be greater than nband_disk: ",nband_disk
         ABI_ERROR(msg)
       end if
 
@@ -4628,6 +4628,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
       else
         ! Master reads full set of bands and broadcasts data, then each proc extract its own set of wavefunctions.
+        ! TODO: Should read in blocks to reduce memory footprint
         ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*(bmax-bmin+1)), ierr)
         if (my_rank == master) then
           call wfk%read_band_block([bmin, bmax], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)
@@ -4733,7 +4734,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_SFREE(out_cg)
 
       if (ik_ibz <= 10 .or. mod(ik_ibz, 200) == 0) then
-        write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
+        write(msg,'(4x,4(a,i0),a)') "Reading kpt [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
     end do !ik_ibz

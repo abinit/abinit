@@ -95,8 +95,6 @@ subroutine psp6in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mqgrid,nproj,n1xccc,optnlxccc,positron,qchrg,qgrid,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lloc,lmax,lmnmax,lnmax,mmax,mpsang,mqgrid,n1xccc
@@ -347,8 +345,6 @@ end subroutine psp6in
 subroutine psp6cc(mmax,n1xccc,rchrg,xccc1d,znucl,&
 &                 vh_tnzc) ! optional argument
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mmax,n1xccc
@@ -538,8 +534,6 @@ end subroutine psp6cc
 
 subroutine psden(ilog,ff,mesh,nc,rc,rad,ff1,ff2)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ilog,mesh
@@ -662,8 +656,6 @@ end subroutine psden
 
 subroutine vhtnzc(nc,rc,vh_tnzc,mesh,rad,znucl)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mesh
@@ -770,8 +762,6 @@ end subroutine vhtnzc
 !! SOURCE
 
 subroutine psp6cc_drh(mmax,n1xccc,rchrg,xccc1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
