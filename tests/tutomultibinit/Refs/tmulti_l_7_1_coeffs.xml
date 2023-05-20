@@ -2062,7 +2062,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="15" value="   0.1524808011E+02" text="(Hf_y-O1_y)^4(eta_2)^2">
+  <coefficient number="15" value="   0.1524807975E+02" text="(Hf_y-O1_y)^4(eta_2)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -2106,7 +2106,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="16" value="   0.7143489374E+03" text="(Hf_y-O1_y)^2(eta_2)^4">
+  <coefficient number="16" value="   0.7140789062E+03" text="(Hf_y-O1_y)^2(eta_2)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2150,7 +2150,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="17" value="   0.7253677883E+02" text="(Hf_y-O1_y)^6(eta_2)^2">
+  <coefficient number="17" value="   0.7254179724E+02" text="(Hf_y-O1_y)^6(eta_2)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -2194,7 +2194,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="18" value="   0.2013922682E+07" text="(Hf_y-O1_y)^2(eta_2)^6">
+  <coefficient number="18" value="   0.2014006413E+07" text="(Hf_y-O1_y)^2(eta_2)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2238,7 +2238,7 @@
       <strain power=" 6" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="19" value="   0.3146281000E-04" text="(Hf_x-O1_x)^6">
+  <coefficient number="19" value="   0.3146268000E-04" text="(Hf_x-O1_x)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -2312,7 +2312,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="20" value="   0.1685087000E-04" text="(Hf_x-O1_x)^8">
+  <coefficient number="20" value="   0.1685084000E-04" text="(Hf_x-O1_x)^8">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="8">
         <cell_a>0 0 0</cell_a>
@@ -2386,7 +2386,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="21" value="   0.2311112900E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
+  <coefficient number="21" value="   0.2311097000E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -2724,7 +2724,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="22" value="   0.1368413500E-03" text="(Hf_x-O1_x)^4(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
+  <coefficient number="22" value="   0.1368411900E-03" text="(Hf_x-O1_x)^4(Hf_z-O1_z)^2(Hf_y-O3_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3062,7 +3062,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="23" value="   0.1178388000E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^4(Hf_y-O3_y)^2">
+  <coefficient number="23" value="   0.1178386600E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^4(Hf_y-O3_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -3400,7 +3400,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="24" value="   0.1201891900E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^4">
+  <coefficient number="24" value="   0.1201890200E-03" text="(Hf_x-O1_x)^2(Hf_z-O1_z)^2(Hf_y-O3_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -3738,7 +3738,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="25" value="   0.1096124729E-01" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^2">
+  <coefficient number="25" value="   0.1096114869E-01" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3800,7 +3800,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="26" value="   0.7182610608E-01" text="(Hf_y-O1_y)^6(Hf_y-O1_y[0 1 0])^2">
+  <coefficient number="26" value="   0.7182543159E-01" text="(Hf_y-O1_y)^6(Hf_y-O1_y[0 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -3862,7 +3862,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="27" value="   0.1573455705E+00" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^4">
+  <coefficient number="27" value="   0.1573446613E+00" text="(Hf_y-O1_y)^4(Hf_y-O1_y[0 1 0])^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3894,7 +3894,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="28" value="   0.8237457000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2">
+  <coefficient number="28" value="   0.5416134000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -3933,6 +3933,46 @@
       <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
@@ -4011,134 +4051,92 @@
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="29" value="   0.1229688700E-03" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^4">
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-  </coefficient>
-  <coefficient number="30" value="   0.3311027000E-04" text="(Hf_x-O1_x)^6(Hf_y-O2_y)^2">
+  <coefficient number="29" value="   0.2347089000E-04" text="(Hf_x-O1_x)^6(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -4177,6 +4175,46 @@
       <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
@@ -4259,520 +4297,212 @@
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
-  </coefficient>
-  <coefficient number="31" value="   0.5674741000E-04" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^6">
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
       <displacement_diff atom_a="1" atom_b="3" direction="z" power="6">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="3" direction="z" power="6">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
+        <cell_b>0 0 1</cell_b>
       </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="3" direction="z" power="6">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="3" direction="z" power="6">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-    </term>
-  </coefficient>
-  <coefficient number="32" value="   0.6530343000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^4">
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="6">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="33" value="   0.4455717231E-01" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^2">
+  <coefficient number="30" value="   0.7771326000E-04" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^4">
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
+        <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
+        <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <strain power=" 2" voigt=" 1"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="34" value="   0.4056443330E-02" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2(eta_1)^2">
+  <coefficient number="31" value="   0.4078292685E-01" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^2">
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4783,7 +4513,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
@@ -4794,7 +4524,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4805,7 +4535,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
@@ -4816,7 +4546,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4827,7 +4557,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
@@ -4838,7 +4568,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
@@ -4849,7 +4579,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4860,7 +4590,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4871,31 +4601,9 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <strain power=" 2" voigt=" 2"/>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
@@ -4904,7 +4612,29 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4915,7 +4645,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
@@ -4926,7 +4656,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4937,7 +4667,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
@@ -4948,7 +4678,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4959,7 +4689,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
@@ -4970,7 +4700,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
@@ -4981,7 +4711,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -4992,7 +4722,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -5003,7 +4733,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
@@ -5014,7 +4744,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -5025,7 +4755,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
@@ -5036,7 +4766,273 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="35" value="   0.3657319595E-01" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^4(eta_1)^2">
+  <coefficient number="32" value="   0.9166363030E-02" text="(Hf_x-O1_x)^4(Hf_y-O2_y)^2(eta_1)^2">
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 2"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 1"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="4">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <strain power=" 2" voigt=" 3"/>
+    </term>
+  </coefficient>
+  <coefficient number="33" value="   0.3668492430E-01" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^4(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5302,7 +5298,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="36" value="   0.2142224000E+03" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^4">
+  <coefficient number="34" value="   0.2035931210E+03" text="(Hf_x-O1_x)^2(Hf_y-O2_y)^2(eta_1)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5568,7 +5564,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="37" value="   0.3088343454E-01" text="(Hf_x-O1_x)^4(eta_3)^2">
+  <coefficient number="35" value="   0.3141413276E-01" text="(Hf_x-O1_x)^4(eta_3)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -5654,7 +5650,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="38" value="   0.2401474261E+02" text="(Hf_x-O1_x)^2(eta_3)^4">
+  <coefficient number="36" value="   0.2391792032E+02" text="(Hf_x-O1_x)^2(eta_3)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5740,7 +5736,7 @@
       <strain power=" 4" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="39" value="   0.2913357555E-01" text="(Hf_x-O1_x)^6(eta_3)^2">
+  <coefficient number="37" value="   0.2971173237E-01" text="(Hf_x-O1_x)^6(eta_3)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -5826,7 +5822,7 @@
       <strain power=" 2" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="40" value="   0.8674486335E+05" text="(Hf_x-O1_x)^2(eta_3)^6">
+  <coefficient number="38" value="   0.8628643105E+05" text="(Hf_x-O1_x)^2(eta_3)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -5912,7 +5908,7 @@
       <strain power=" 6" voigt=" 1"/>
     </term>
   </coefficient>
-  <coefficient number="41" value="   0.5056971800E-03" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^2">
+  <coefficient number="39" value="   0.5392543000E-03" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -6034,7 +6030,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="42" value="   0.2342640840E-02" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^4">
+  <coefficient number="40" value="   0.2392305980E-02" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -6156,7 +6152,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="43" value="   0.4870076200E-03" text="(Hf_x-O1_x)^6(Hf_y-O1_y)^2">
+  <coefficient number="41" value="   0.5131364200E-03" text="(Hf_x-O1_x)^6(Hf_y-O1_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -6278,7 +6274,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="44" value="   0.1358861323E-01" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^6">
+  <coefficient number="42" value="   0.1370027215E-01" text="(Hf_x-O1_x)^2(Hf_y-O1_y)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -6400,7 +6396,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="45" value="   0.3527622870E-02" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^4">
+  <coefficient number="43" value="   0.3597089090E-02" text="(Hf_x-O1_x)^4(Hf_y-O1_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -6522,7 +6518,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="46" value="   0.1639674500E-03" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^2">
+  <coefficient number="44" value="   0.1690377000E-03" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -6764,7 +6760,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="47" value="   0.1043112160E-02" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^4">
+  <coefficient number="45" value="   0.1051918530E-02" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -7006,7 +7002,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="48" value="   0.1543019700E-03" text="(Hf_x-O1_x)^6(Hf_z-O3_z)^2">
+  <coefficient number="46" value="   0.1592437400E-03" text="(Hf_x-O1_x)^6(Hf_z-O3_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -7248,7 +7244,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="49" value="   0.7938773910E-02" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^6">
+  <coefficient number="47" value="   0.7963271780E-02" text="(Hf_x-O1_x)^2(Hf_z-O3_z)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -7490,7 +7486,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="50" value="   0.1568603640E-02" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^4">
+  <coefficient number="48" value="   0.1587137430E-02" text="(Hf_x-O1_x)^4(Hf_z-O3_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -7732,7 +7728,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="51" value="   0.5715851000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2">
+  <coefficient number="49" value="   0.6268493000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -7974,7 +7970,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="52" value="   0.4915561000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4">
+  <coefficient number="50" value="   0.5261064000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -8216,7 +8212,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="53" value="   0.3876976000E-04" text="(Hf_x-O1_x)^6(Hf_z-O2_z)^2">
+  <coefficient number="51" value="   0.4109395000E-04" text="(Hf_x-O1_x)^6(Hf_z-O2_z)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="6">
         <cell_a>0 0 0</cell_a>
@@ -8458,7 +8454,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="54" value="   0.3314434000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^6">
+  <coefficient number="52" value="   0.3449824000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -8700,7 +8696,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="55" value="   0.5634676000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^4">
+  <coefficient number="53" value="   0.5858684000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -8942,7 +8938,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="56" value="   0.5634676000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^2">
+  <coefficient number="54" value="   0.5858684000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -9208,7 +9204,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="57" value="   0.5634676000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2(eta_4)^2">
+  <coefficient number="55" value="   0.5858684000E-04" text="(Hf_x-O1_x)^4(Hf_z-O2_z)^2(eta_4)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -9474,7 +9470,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="58" value="   0.5634676000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4(eta_4)^2">
+  <coefficient number="56" value="   0.5858684000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^4(eta_4)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -9740,7 +9736,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="59" value="   0.5634676000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^4">
+  <coefficient number="57" value="   0.5858684000E-04" text="(Hf_x-O1_x)^2(Hf_z-O2_z)^2(eta_4)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10006,7 +10002,7 @@
       <strain power=" 4" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="60" value="   0.1642236096E+01" text="(Hf_y-O1_y)^4(eta_1)^2">
+  <coefficient number="58" value="   0.1635402528E+01" text="(Hf_y-O1_y)^4(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -10092,7 +10088,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="61" value="   0.1733538594E+03" text="(Hf_y-O1_y)^2(eta_1)^4">
+  <coefficient number="59" value="   0.1728254096E+03" text="(Hf_y-O1_y)^2(eta_1)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10178,7 +10174,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="62" value="   0.1296044096E+02" text="(Hf_y-O1_y)^6(eta_1)^2">
+  <coefficient number="60" value="   0.1290962701E+02" text="(Hf_y-O1_y)^6(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -10264,7 +10260,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="63" value="   0.6790310584E+06" text="(Hf_y-O1_y)^2(eta_1)^6">
+  <coefficient number="61" value="   0.6770332895E+06" text="(Hf_y-O1_y)^2(eta_1)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10350,7 +10346,7 @@
       <strain power=" 6" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="64" value="   0.2451753300E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
+  <coefficient number="62" value="   0.2520316400E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -10688,7 +10684,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="65" value="   0.3183491100E-03" text="(Hf_x-O1_x)^4(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
+  <coefficient number="63" value="   0.3287829600E-03" text="(Hf_x-O1_x)^4(Hf_x-O2_x)^2(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="4">
         <cell_a>0 0 0</cell_a>
@@ -11026,7 +11022,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="66" value="   0.1874879720E-02" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^4(Hf_y-O2_y)^2">
+  <coefficient number="64" value="   0.1891722460E-02" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^4(Hf_y-O2_y)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -11364,7 +11360,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="67" value="   0.3442596400E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^4">
+  <coefficient number="65" value="   0.3549288900E-03" text="(Hf_x-O1_x)^2(Hf_x-O2_x)^2(Hf_y-O2_y)^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="2">
         <cell_a>0 0 0</cell_a>
@@ -11702,7 +11698,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="68" value="   0.7812500000E+04" text="(eta_1)^6">
+  <coefficient number="66" value="   0.1000000000E+01" text="(eta_1)^6">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 1"/>
     </term>
@@ -11713,7 +11709,7 @@
       <strain power=" 6" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="69" value="   0.1000000000E+07" text="(eta_1)^8">
+  <coefficient number="67" value="   0.1000000000E+01" text="(eta_1)^8">
     <term weight=" 1.000000">
       <strain power=" 8" voigt=" 1"/>
     </term>
@@ -11724,7 +11720,7 @@
       <strain power=" 8" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="70" value="   0.1000000000E+07" text="(eta_1)^6(eta_2)^2">
+  <coefficient number="68" value="   0.1000000000E+01" text="(eta_1)^6(eta_2)^2">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -11750,7 +11746,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
   </coefficient>
-  <coefficient number="71" value="   0.1000000000E+07" text="(eta_1)^6(eta_4)^2">
+  <coefficient number="69" value="   0.1000000000E+01" text="(eta_1)^6(eta_4)^2">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -11764,7 +11760,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="72" value="   0.1000000000E+07" text="(eta_1)^6(eta_5)^2">
+  <coefficient number="70" value="   0.1000000000E+01" text="(eta_1)^6(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 1"/>
       <strain power=" 2" voigt=" 5"/>
@@ -11790,7 +11786,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="73" value="   0.3906250000E+04" text="(eta_1)^4(eta_2)^2">
+  <coefficient number="71" value="   0.1000000000E+01" text="(eta_1)^4(eta_2)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -11816,7 +11812,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
   </coefficient>
-  <coefficient number="74" value="   0.1000000000E+07" text="(eta_1)^4(eta_2)^4">
+  <coefficient number="72" value="   0.1000000000E+01" text="(eta_1)^4(eta_2)^4">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 4" voigt=" 2"/>
@@ -11830,7 +11826,7 @@
       <strain power=" 4" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="75" value="   0.1000000000E+07" text="(eta_1)^4(eta_2)^2(eta_3)^2">
+  <coefficient number="73" value="   0.1000000000E+01" text="(eta_1)^4(eta_2)^2(eta_3)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -11847,7 +11843,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
   </coefficient>
-  <coefficient number="76" value="   0.1000000000E+07" text="(eta_1)^4(eta_2)^2(eta_4)^2">
+  <coefficient number="74" value="   0.1000000000E+01" text="(eta_1)^4(eta_2)^2(eta_4)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -11879,7 +11875,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="77" value="   0.1000000000E+07" text="(eta_1)^4(eta_2)^2(eta_5)^2">
+  <coefficient number="75" value="   0.1000000000E+01" text="(eta_1)^4(eta_2)^2(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -11911,7 +11907,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="78" value="   0.1000000000E+07" text="(eta_1)^4(eta_2)^2(eta_6)^2">
+  <coefficient number="76" value="   0.1000000000E+01" text="(eta_1)^4(eta_2)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -11943,7 +11939,7 @@
       <strain power=" 2" voigt=" 4"/>
     </term>
   </coefficient>
-  <coefficient number="79" value="   0.1000000000E+07" text="(eta_1)^4(eta_4)^2">
+  <coefficient number="77" value="   0.1000000000E+01" text="(eta_1)^4(eta_4)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -11957,7 +11953,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="80" value="   0.1000000000E+07" text="(eta_1)^4(eta_4)^4">
+  <coefficient number="78" value="   0.1000000000E+01" text="(eta_1)^4(eta_4)^4">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 4" voigt=" 4"/>
@@ -11971,7 +11967,7 @@
       <strain power=" 4" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="81" value="   0.1000000000E+07" text="(eta_1)^4(eta_4)^2(eta_5)^2">
+  <coefficient number="79" value="   0.1000000000E+01" text="(eta_1)^4(eta_4)^2(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -12003,7 +11999,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="82" value="   0.1000000000E+07" text="(eta_1)^4(eta_5)^2">
+  <coefficient number="80" value="   0.1000000000E+01" text="(eta_1)^4(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 5"/>
@@ -12029,7 +12025,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="83" value="   0.1000000000E+07" text="(eta_1)^4(eta_5)^4">
+  <coefficient number="81" value="   0.1000000000E+01" text="(eta_1)^4(eta_5)^4">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 4" voigt=" 5"/>
@@ -12055,7 +12051,7 @@
       <strain power=" 4" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="84" value="   0.1000000000E+07" text="(eta_1)^4(eta_5)^2(eta_6)^2">
+  <coefficient number="82" value="   0.1000000000E+01" text="(eta_1)^4(eta_5)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 5"/>
@@ -12072,14 +12068,14 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="85" value="   0.1562500000E+05" text="(eta_1)^2(eta_2)^2(eta_3)^2">
+  <coefficient number="83" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_3)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="86" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_3)^2(eta_4)^2">
+  <coefficient number="84" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_3)^2(eta_4)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -12099,7 +12095,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="87" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_4)^2">
+  <coefficient number="85" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_4)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -12131,7 +12127,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="88" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_4)^4">
+  <coefficient number="86" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_4)^4">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -12163,7 +12159,7 @@
       <strain power=" 4" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="89" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_4)^2(eta_5)^2">
+  <coefficient number="87" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_4)^2(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -12183,7 +12179,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="90" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_4)^2(eta_6)^2">
+  <coefficient number="88" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_4)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -12221,7 +12217,7 @@
       <strain power=" 2" voigt=" 4"/>
     </term>
   </coefficient>
-  <coefficient number="91" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_6)^2">
+  <coefficient number="89" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -12238,7 +12234,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="92" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_6)^4">
+  <coefficient number="90" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_6)^4">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -12255,7 +12251,7 @@
       <strain power=" 4" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="93" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^4">
+  <coefficient number="91" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^4">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 4" voigt=" 4"/>
@@ -12269,7 +12265,7 @@
       <strain power=" 4" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="94" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^6">
+  <coefficient number="92" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^6">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 6" voigt=" 4"/>
@@ -12283,7 +12279,7 @@
       <strain power=" 6" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="95" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^4(eta_5)^2">
+  <coefficient number="93" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^4(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 4" voigt=" 4"/>
@@ -12315,7 +12311,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="96" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^2(eta_5)^2">
+  <coefficient number="94" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^2(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -12347,7 +12343,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="97" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^2(eta_5)^4">
+  <coefficient number="95" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^2(eta_5)^4">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -12379,7 +12375,7 @@
       <strain power=" 4" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="98" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^2(eta_5)^2(eta_6)^2">
+  <coefficient number="96" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^2(eta_5)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -12399,7 +12395,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="99" value="   0.1000000000E+07" text="(eta_1)^2(eta_5)^4">
+  <coefficient number="97" value="   0.1000000000E+01" text="(eta_1)^2(eta_5)^4">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 4" voigt=" 5"/>
@@ -12425,7 +12421,7 @@
       <strain power=" 4" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="100" value="   0.1000000000E+07" text="(eta_1)^2(eta_5)^6">
+  <coefficient number="98" value="   0.1000000000E+01" text="(eta_1)^2(eta_5)^6">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 6" voigt=" 5"/>
@@ -12451,7 +12447,7 @@
       <strain power=" 6" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="101" value="   0.1000000000E+07" text="(eta_1)^2(eta_5)^4(eta_6)^2">
+  <coefficient number="99" value="   0.1000000000E+01" text="(eta_1)^2(eta_5)^4(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 4" voigt=" 5"/>
@@ -12483,7 +12479,7 @@
       <strain power=" 2" voigt=" 4"/>
     </term>
   </coefficient>
-  <coefficient number="102" value="   0.1000000000E+07" text="(eta_1)^2(eta_5)^2(eta_6)^2">
+  <coefficient number="100" value="   0.1000000000E+01" text="(eta_1)^2(eta_5)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 5"/>
@@ -12500,7 +12496,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="103" value="   0.1000000000E+07" text="(eta_4)^6">
+  <coefficient number="101" value="   0.1000000000E+01" text="(eta_4)^6">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 4"/>
     </term>
@@ -12511,7 +12507,7 @@
       <strain power=" 6" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="104" value="   0.1000000000E+07" text="(eta_4)^8">
+  <coefficient number="102" value="   0.1000000000E+01" text="(eta_4)^8">
     <term weight=" 1.000000">
       <strain power=" 8" voigt=" 4"/>
     </term>
@@ -12522,7 +12518,7 @@
       <strain power=" 8" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="105" value="   0.1000000000E+07" text="(eta_4)^6(eta_5)^2">
+  <coefficient number="103" value="   0.1000000000E+01" text="(eta_4)^6(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 4"/>
       <strain power=" 2" voigt=" 5"/>
@@ -12548,7 +12544,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="106" value="   0.1000000000E+07" text="(eta_4)^4(eta_5)^2">
+  <coefficient number="104" value="   0.1000000000E+01" text="(eta_4)^4(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 4"/>
       <strain power=" 2" voigt=" 5"/>
@@ -12574,7 +12570,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="107" value="   0.1000000000E+07" text="(eta_4)^4(eta_5)^4">
+  <coefficient number="105" value="   0.1000000000E+01" text="(eta_4)^4(eta_5)^4">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 4"/>
       <strain power=" 4" voigt=" 5"/>
@@ -12588,7 +12584,7 @@
       <strain power=" 4" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="108" value="   0.1000000000E+07" text="(eta_4)^4(eta_5)^2(eta_6)^2">
+  <coefficient number="106" value="   0.1000000000E+01" text="(eta_4)^4(eta_5)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 4"/>
       <strain power=" 2" voigt=" 5"/>
@@ -12605,7 +12601,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="109" value="   0.1000000000E+07" text="(eta_4)^2(eta_5)^2(eta_6)^2">
+  <coefficient number="107" value="   0.1000000000E+01" text="(eta_4)^2(eta_5)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 4"/>
       <strain power=" 2" voigt=" 5"/>

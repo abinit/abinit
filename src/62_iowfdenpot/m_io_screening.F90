@@ -32,7 +32,7 @@ MODULE m_io_screening
  use m_nctk
  use m_errors
  use m_dtset
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use netcdf
  use m_hdr
  use m_sort
@@ -411,7 +411,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
 !scalars
  integer :: my_rank,nprocs,ncerr,ncid,varid,ierr !ii
  character(len=500) :: errmsg
- character(len=nctk_slen) :: varname,head_shape,wing_shape
+ character(len=nctk_slen) :: varname !,head_shape,wing_shape
 !arrays
  real(dp),allocatable :: real_omega(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:) !,rvals3(:,:,:)
@@ -565,7 +565,7 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
      write(unt, err=10, iomsg=errmsg)hscr%omega(:)
 
      ! Add q-points for heads and wings for q-->0.
-     if (hscr%nqlwl>0) then
+     if (hscr%nqlwl > 0) then
        write(unt, err=10, iomsg=errmsg)hscr%qlwl(:,:)
      end if
 
@@ -646,20 +646,20 @@ subroutine hscr_io(hscr, fform, rdwr, unt, comm, master, iomode)
      ])
      NCF_CHECK(ncerr)
 
-     ! TODO
      ! Add q-points for heads and wings for q-->0.
-     if (hscr%nqlwl>0) then
-       head_shape = "complex, number_of_spins, number_of_spins, number_of_frequencies_dielectric_function"
-       head_shape = trim(head_shape)//", number_of_qpoints_gamma_limit"
+     if (hscr%nqlwl > 0) then
+       !  MG: This part has been commented out as it's not used
+       !  head_shape = "complex, number_of_spins, number_of_spins, number_of_frequencies_dielectric_function"
+       !  head_shape = trim(head_shape)//", number_of_qpoints_gamma_limit"
 
-       wing_shape = "complex, number_of_coefficients_dielectric_function, number_of_spins, number_of_spins"
-       wing_shape = trim(wing_shape)//", number_of_frequencies_dielectric_function, number_of_qpoints_gamma_limit"
+       !  wing_shape = "complex, number_of_coefficients_dielectric_function, number_of_spins, number_of_spins"
+       !  wing_shape = trim(wing_shape)//", number_of_frequencies_dielectric_function, number_of_qpoints_gamma_limit"
 
-       ncerr = nctk_def_arrays(ncid, [&
-         nctkarr_t("dielectric_function_head", "dp", head_shape),&
-         nctkarr_t("dielectric_function_upper_wing", "dp", wing_shape),&
-         nctkarr_t("dielectric_function_lower_wing", "dp", wing_shape)], defmode=.True.)
-       NCF_CHECK(ncerr)
+       !  ncerr = nctk_def_arrays(ncid, [&
+       !    nctkarr_t("dielectric_function_head", "dp", head_shape),&
+       !    nctkarr_t("dielectric_function_upper_wing", "dp", wing_shape),&
+       !    nctkarr_t("dielectric_function_lower_wing", "dp", wing_shape)], defmode=.True.)
+       !  NCF_CHECK(ncerr)
 
        NCF_CHECK(nctk_set_datamode(ncid))
        NCF_CHECK(nf90_put_var(ncid, vid('qpoints_gamma_limit'), hscr%qlwl))
@@ -1342,7 +1342,7 @@ subroutine write_screening(varname, unt, iomode, npwe, nomega, iqibz, epsm1)
    ! but this is ok since: if the type of data differs from the netCDF variable type, type conversion will occur
    ! inside nf90_put_var
    varid = nctk_idname(unt, varname)
-   call c_f_pointer(c_loc(epsm1(1,1,1)), real_epsm1, [2,npwe,npwe,1,1,nomega,1])
+   call c_f_pointer(c_loc(epsm1(1,1,1)), real_epsm1, [2, npwe, npwe, 1, 1, nomega, 1])
    ! [cplex, npwe, npwe, nspin, nspin, nomega, nqpt]
    spins = 1; s1 = spins(1); s2 = spins(2)
    ncerr = nf90_put_var(unt, varid, real_epsm1, start=[1,1,1,s1,s2,1,iqibz], count=[2,npwe,npwe,1,1,nomega,1])

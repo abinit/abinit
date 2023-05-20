@@ -28,6 +28,7 @@ module m_cgprj
 
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
+ use m_fstrings, only : itoa, sjoin
  use m_kg,       only : ph1d3d, mkkpg
  use m_geometry, only : strconv
  use m_mkffnl,   only : mkffnl
@@ -548,6 +549,7 @@ contains
      spaceComm_band=mpi_enreg%comm_band ! not actually used as npband_bandfft=1
      cg_band_distributed=.true.
      cprj_band_distributed=.true.
+     !npband_dfpt=1
      npband_dfpt=mpi_enreg%nproc_band
    else
      spaceComm_band=xmpi_comm_self
@@ -569,12 +571,10 @@ contains
 
 !Check sizes
  if (mpw*mband_cg*my_nspinor*mkmem*my_nsppol>mcg) then
-!write (100+mpi_enreg%me_kpt, *) ' mcg = ', mcg, ' and mpw*mband_cg*my_nspinor*mkmem*my_nsppol  = ', mpw,mband_cg,my_nspinor,mkmem,my_nsppol, ' mpi_enreg%nproc_band ', mpi_enreg%nproc_band
-!flush (100+mpi_enreg%me_kpt)
-   ABI_BUG('Bad mcg value!')
+   ABI_BUG(sjoin('Bad mcg value!', itoa(mcg)))
  end if
  if (mband_cprj*my_nspinor*mkmem*my_nsppol>mcprj) then
-   ABI_BUG('Bad mcprj value!')
+   ABI_BUG(sjoin('Bad mcprj value!', itoa(mcprj)))
  end if
 
  !Check sizes for cprj (distribution is tricky)

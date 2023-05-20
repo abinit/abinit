@@ -1502,15 +1502,15 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        itoken2=index(string,trial_cs(1:trial_cslen))
        if(itoken2/=0)then
          if(trial_jdtset==0)then
-           write(msg, '(a,a,a,a,a,a,a)' )&
+           write(msg, '(7a)' )&
            'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
            'This is forbidden.',ch10,&
            'Action: remove this occurence.'
          else
-           write(msg, '(a,a,a,a,a,i1,a,a,a,a,a)' )&
+           write(msg, '(5a,i0,5a)' )&
            'In the input file, there is an occurence of the ',ch10,&
            'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
-           'This is forbidden when ndtset==0 .',ch10,&
+           'This is forbidden when ndtset = =0 .',ch10,&
            'Action: remove this occurence, or change ndtset.'
          end if
          ABI_ERROR(msg)
@@ -1538,16 +1538,16 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! Consistency check for keyword (no multidataset, no series)
    if (opttoken>=2) then
      write(msg, '(9a)' )&
-     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-     'a series has been defined in the input file.',ch10,&
-     'This is forbidden.',ch10,'Action: check your input file.'
+       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+       'a series has been defined in the input file.',ch10,&
+       'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
    if (narr>=2) then
      write(msg, '(9a)' )&
-     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-     'the number of data requested is larger than 1.',ch10,&
-     'This is forbidden.',ch10,'Action: check your input file.'
+       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+       'the number of data requested is larger than 1.',ch10,&
+       'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
  end if

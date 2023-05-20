@@ -374,7 +374,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
-   
+
    ! Read extfpmd calculations
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
    if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
@@ -1972,12 +1972,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
+ dtset%optdcmagpawu=3
  if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usedmatpu',tread,'INT')
    if(tread==1) dtset%usedmatpu=intarr(1)
+   if (dtset%nspden==4) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdcmagpawu',tread,'INT')
+     if(tread==1) dtset%optdcmagpawu=intarr(1)
+   end if
  end if
 
 !Some PAW+Exact exchange keywords
@@ -2242,7 +2247,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftqmc_seed=jdtset
    dtsets(idtset)%dmftqmc_therm=1000
    dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
-   dtsets(idtset)%dosdeltae=zero
+   dtsets(idtset)%dosdeltae=0.0
    dtsets(idtset)%dtion=100.0_dp
    dtsets(idtset)%dtele=0.1_dp
    dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
@@ -2312,8 +2317,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
    dtsets(idtset)%gw_sigxcore=0
-   dtsets(idtset)%gw_sctype = GWSC_one_shot
-   dtsets(idtset)%gw_toldfeig=0.1/Ha_eV
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
@@ -2398,6 +2401,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%lambsig(:) = zero
    dtsets(idtset)%lw_qdrpl=0
    dtsets(idtset)%lw_flexo=0
+   dtsets(idtset)%lw_natopt=0
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp

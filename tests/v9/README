@@ -21,10 +21,14 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 90-99 concern ground state
 
-* Tests 105-108 concern paw+u
+* Tests 105-109 concern paw+u (specifically lruj)
 
 * Tests 110-119 concern lattice Wannier function
 
 * Tests 120-129 concern PAW hybrid functionals
+
+* Tests 130-139 concern ground state
+
+* Tests 140-149 concern response functions except electron-phonon 
 
 ------------------------------------------------------------------

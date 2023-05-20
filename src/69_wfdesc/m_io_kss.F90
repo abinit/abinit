@@ -1643,7 +1643,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      if (MPI_enreg%proc_distrb(ikpt,1,isppol)==my_rank) then
 
        write(msg,'(2a,i3,3x,a)')ch10,' k-point ',ikpt,stag(isppol)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out, msg)
 
        if (do_diago) then
          ! Direct diagonalization of the KS Hamiltonian.
