@@ -2430,6 +2430,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
    dtsets(idtset)%nctime=0
+   dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
    dtsets(idtset)%neb_algo=1
    dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)

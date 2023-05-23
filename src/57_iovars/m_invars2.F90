@@ -2878,6 +2878,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(dtset%write_files=='default') then
   !!!EMPTY ON PURPOSE
  else if(dtset%write_files=='all') then
+   dtset%ncout      = 1 !Already the default but good to keep track
    dtset%prtddb     = 1
    dtset%prtden     = 1
    !dtset%prtdos     = 1
@@ -2908,6 +2909,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%prtwf      = 1
    dtset%prtxml     = 1
  else if(dtset%write_files=='none') then 
+   dtset%ncout      = 0
    dtset%prtddb     = 0
    dtset%prtden     = 0
    dtset%prtdos     = 0
@@ -3046,6 +3048,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtlden = 1
    else
       dtset%prtlden = 0
+   end if   
+   if (INDEX(dtset%write_files,'ncout') .gt. 0) then
+      dtset%ncout = 1
+   else
+      dtset%ncout = 0
    end if   
    if (INDEX(dtset%write_files,'pot') .gt. 0) then
       dtset%prtpot = 1
