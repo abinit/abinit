@@ -10,6 +10,7 @@ config.h.in~
 .*.sw[op]
 __pycache__
 .ipynb_checkpoints
+.version
 *.egg
 *.egg-info
 Makefile.am
