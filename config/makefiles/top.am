@@ -1,3 +1,7 @@
+BUILT_SOURCES = $(top_srcdir)/.version
+$(top_srcdir)/.version:
+	echo $(VERSION) > $@-t && mv $@-t $@
+
 # Additional files to distribute
 EXTRA_DIST += \
 	KNOWN_PROBLEMS \
@@ -78,7 +82,7 @@ test_wannier90:
 	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && export ABI_PSPDIR="../../Psps_for_tests" && ./abinit testin_wannier90.abi >& testin_wannier90.stdout && cat testin_wannier90t_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn *abo* *o_* *t_STATUS*
 
 tests_in:
-	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90 
+	$(MAKE) test_fast test_v1 test_v5 test_libxc test_wannier90
 
 # ---------------------------------------------------------------------------- #
 
@@ -164,6 +168,16 @@ binary_package_lite:
 	 rm -rf usr share/doc; \
 	 mkdir -p etc; \
 	 chmod -R o+rX *
+
+dist-hook:
+	echo $(VERSION) > $(distdir)/.tarball-version
+	(GITGEN_VERSION=`(cd @top_srcdir@ && ./config/gnu/git-version-gen\
+                .tarball-version)` ; \
+	 test "x$(VERSION)" = "x$${GITGEN_VERSION}" || \
+         ((echo "Stale version;"; echo $(VERSION); echo "$${GITGEN_VERSION}"; \
+           echo "Please run:" ; \
+           echo "     (cd @top_srcdir@ && ./config/script/makemake)" ; \
+           echo "before make dist") 1>&2 ; rm -r $(distdir) ; exit 1))
 
 dist-lite: distdir
 	tardir=$(distdir) && \

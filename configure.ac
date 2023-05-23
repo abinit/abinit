@@ -38,7 +38,10 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.11.4],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],
+    [m4_esyscmd([config/gnu/git-version-gen .tarball-version])],
+    [https://bugs.launchpad.net/abinit/],
+    [abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1049,7 +1052,7 @@ fi
 # Help to produce libraires
 if test ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
-fi 
+fi
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
