@@ -388,6 +388,7 @@ type, public :: dataset_type
  integer :: nberry
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
+ integer :: ncout = 1 
  integer :: nctime
  integer :: ndivsm = 0
  integer :: ndtset
@@ -1757,6 +1758,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nc_xccc_gspace     = dtin%nc_xccc_gspace
  dtout%nbandkss           = dtin%nbandkss
  dtout%nconeq             = dtin%nconeq
+ dtout%ncout              = dtin%ncout
  dtout%nctime             = dtin%nctime
  dtout%ndtset             = dtin%ndtset
  dtout%ndynimage          = dtin%ndynimage
@@ -3413,7 +3415,7 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout nc_xccc_gspace'
  list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
