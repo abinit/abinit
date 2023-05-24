@@ -388,7 +388,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  call wrtout(iout,message,'COLL')
 
 #ifdef HAVE_NETCDF
- if (ncid /= 0) then
+ if (ncid /= 0 .and. dtsets(1)%ncout == 1) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then
      message='Netcdf Error while closing the OUT.nc file: '//trim(nf90_strerror(ncerr))
