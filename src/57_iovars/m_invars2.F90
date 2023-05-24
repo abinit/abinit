@@ -3059,8 +3059,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    else
       dtset%prtpot = 0
    end if
-   if (INDEX(dtset%write_files,'psps') .gt. 0) then
+   if (INDEX(dtset%write_files,'psps_1') .gt. 0) then
       dtset%prtpsps = 1
+   else if (INDEX(dtset%write_files,'psps_-1') .gt. 0) then
+      dtset%prtpsps = -1
    else
       dtset%prtpsps = 0
    end if
@@ -3101,8 +3103,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    else
       dtset%prtvxc = 0
    end if 
-   if (INDEX(dtset%write_files,'want') .gt. 0) then
+   if (INDEX(dtset%write_files,'want_1') .gt. 0) then
       dtset%prtwant = 1
+   else if (INDEX(dtset%write_files,'want_2') .gt. 0) then
+      dtset%prtwant = 2
+   else if (INDEX(dtset%write_files,'want_3') .gt. 0) then
+      dtset%prtwant = 3
    else
       dtset%prtwant = 0
    end if 
