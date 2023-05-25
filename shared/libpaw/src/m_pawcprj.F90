@@ -1055,26 +1055,33 @@ end subroutine pawcprj_lincom
 !!
 !! INPUTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
+!!  prtgrads :: optional, 1 to print gradients also
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
- subroutine pawcprj_output(cprj)
+ subroutine pawcprj_output(cprj,prtgrads)
 
 !Arguments ------------------------------------
 !scalar
+integer,optional :: prtgrads
 !arrays
  type(pawcprj_type),intent(in) :: cprj(:,:)
 
 !Local variables-------------------------------
 !scalar
  integer :: ii,jj,kk,nlmn,n1dim,n2dim
+ logical :: gradoutput
 
 ! *************************************************************************
 
  n1dim=size(cprj,dim=1)
  n2dim=size(cprj,dim=2)
+ gradoutput = .FALSE.
+ if(present(prtgrads)) then
+   gradoutput = (prtgrads .EQ. 1)
+ end if
 
  write(std_out,'(a)')' pawcprj_output '
 
@@ -1084,6 +1091,11 @@ end subroutine pawcprj_lincom
      nlmn=cprj(ii,jj)%nlmn
      do kk=1,nlmn
        write(std_out,'(2f12.8)')cprj(ii,jj)%cp(1,kk),cprj(ii,jj)%cp(2,kk)
+       if(gradoutput) then
+         write(std_out,'(6f12.8)')cprj(ii,jj)%dcp(1,1,kk),cprj(ii,jj)%dcp(2,1,kk),&
+           &cprj(ii,jj)%dcp(1,2,kk),cprj(ii,jj)%dcp(2,2,kk),&
+           &cprj(ii,jj)%dcp(1,3,kk),cprj(ii,jj)%dcp(2,3,kk)
+       end if
      end do
    end do
  end do

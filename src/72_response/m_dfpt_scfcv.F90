@@ -428,7 +428,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
- real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:),vhartr1(:),vxc1(:,:)
+ real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:,:),vhartr1(:),vxc1(:,:)
  real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),allocatable :: vtrial1_mq(:,:),rhorfermi_mq(:,:)
@@ -466,8 +466,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  me=mpi_enreg%me_kpt
  paral_atom=(my_natom/=dtset%natom)
  my_atmtab=>mpi_enreg%my_atmtab
-
- _IBM6("XLF in dfpt_scfcv")
 
 !Save some variables from dataset definition
  ecut=dtset%ecut
@@ -711,10 +709,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  if(allocated(vectornd)) then
    ABI_FREE(vectornd)
  end if
- ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
+ ABI_MALLOC(vectornd,(with_vectornd*nfftf,dtset%nspden,3))
  if(with_vectornd .EQ. 1) then
    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,&
-   & ngfftf,dtset%nucdipmom,rprimd,vectornd,xred)
+   & ngfftf,dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
  endif
 
  ! Set the value of omega for a finite-frequency calculation
@@ -821,10 +819,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    Set initial guess for 1st-order potential
 !    ----------------------------------------------------------------------
      option=1;optene=0;if (iscf_mod==-2) optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&     nkxc,nspden,n3xccc,nmxc,optene,option,qphon,&
-&     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,&
+&     nkxc,nspden,n3xccc,nmxc,optene,option,dtset%qptn,&
+&     rhog,rhog1,rhor,rhor1,rprimd,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
      !Compute vtrial1 at (+q,+omega) and (-q,-omega) with specific local part if q/=0
@@ -1064,10 +1062,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  meaningful first-order density
    if (.not.kramers_deg.and.ipert<dtset%natom+10) then
      optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
-&     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
+&     rprimd,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
 
 !TMP
    do ifft=1,nfftf
@@ -1136,10 +1134,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    if (kramers_deg.and.ipert<dtset%natom+10) then
      optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
-&     rprimd,ucvol,psps%usepaw,usexcnhat,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
+&     rprimd,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
    end if
 
 !  ######################################################################
@@ -3532,9 +3530,9 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
        if(ipert1 <= dtset%natom)then
 
 !        Get first-order local potential and first-order pseudo core density
-         call dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
-&         nattyp,nfft,ngfft,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
-&         qphon,ucvol,psps%vlspl,vpsp1,xred)
+         call dfpt_vlocal(atindx,cplex,gmet,gsqcut,dtset%icutcoul,idir1,ipert1,mpi_enreg,psps%mqgrid_ff,dtset%natom,&
+&         nattyp,nfft,ngfft,dtset%nkpt,dtset%ntypat,n1,n2,n3,ph1d,psps%qgrid_ff,&
+&         dtset%qptn,dtset%rcut,rprimd,ucvol,dtset%vcutgeo,psps%vlspl,vpsp1,xred)
          if(psps%n1xccc/=0)then
            call dfpt_mkcore(cplex,idir1,ipert1,dtset%natom,dtset%ntypat,n1,psps%n1xccc,&
 &           n2,n3,qphon,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d1,xred)

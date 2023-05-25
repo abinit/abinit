@@ -17,6 +17,7 @@ kptopt2   2
 iscf2    -3     
 rfelfd2   2    
 tolwfr2   1.0d-20
+rfphon2   0
 
 #Set 3: Response function calculation of d2/dkdk wave function
 #*************************************************************
@@ -25,6 +26,7 @@ getddk3   2
 iscf3    -3
 rf2_dkdk3 3
 tolwfr3   1.0d-20
+rfphon3   0
 
 #Set 4 : Response function calculation of Q=0 phonons and electric field
 #***********************************************************************

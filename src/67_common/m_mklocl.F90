@@ -295,8 +295,9 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
  integer :: shift2,shift3
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
- real(dp) :: dqm1,ee,ff,gmag,gsquar,ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
- real(dp) :: ph3i,ph3r,phimag_igia,phre_igia,sfi,sfr
+ real(dp) :: dqm1,ee,ff,gmag,gsquar!beta,gcart_para,gcart_perp
+ real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
+ real(dp) :: ph3i,ph3r,phimag_igia,phre_igia,rcut_loc,sfi,sfr
  real(dp) :: svion,svioni,svionr,term,vion1,vion2,xnorm
  character(len=500) :: message
 !arrays
@@ -362,6 +363,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
  !Initialize Gcut-off array from m_gtermcutoff
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+ rcut_loc = half*SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -472,41 +474,84 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
                end do
 
              else if(option==3)then
+!               if(icutcoul .ne. 2) then
+!                Also get (dV(q)/dq)/q:
+!                (note correction of Numerical Recipes sign error
+!                before (3._dp*aa**2-1._dp)
+!                ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
+                 ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
+                 ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
+&                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
+                 vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
+&                 - 2.0_dp*vion1                 ) / gsquar 
 
-!              Also get (dV(q)/dq)/q:
-!              (note correction of Numerical Recipes sign error
-!              before (3._dp*aa**2-1._dp)
-!              ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
-               ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
-               ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
-&               - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
-               vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
-&               - 2.0_dp*vion1                 ) / gsquar
-
-               gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
-&               gprimd(1,3)*dble(ig3)
-               gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
-&               gprimd(2,3)*dble(ig3)
-               gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
-&               gprimd(3,3)*dble(ig3)
-!              Assemble structure over all atoms of given type
-               sfr=zero
-               sfi=zero
-               do ia=ia1,ia2
-                 sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
-                 sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
-               end do
-
-!              Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
-               term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
-
-!              Compute contribution to stress tensor
-               lpsstr(1)=lpsstr(1)-term*gcart(1)*gcart(1)
-               lpsstr(2)=lpsstr(2)-term*gcart(2)*gcart(2)
-               lpsstr(3)=lpsstr(3)-term*gcart(3)*gcart(3)
-               lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
-               lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
-               lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+                 gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
+&                 gprimd(1,3)*dble(ig3)
+                 gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
+&                 gprimd(2,3)*dble(ig3)
+                 gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
+&                 gprimd(3,3)*dble(ig3)
+!                Assemble structure over all atoms of given type
+                 sfr=zero
+                 sfi=zero
+                 do ia=ia1,ia2
+                   sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
+                   sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
+                 end do               
+!                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
+                 term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
+!                Compute contribution to stress tensor
+                 lpsstr(1)=lpsstr(1)-term*gcart(1)*gcart(1)
+                 lpsstr(2)=lpsstr(2)-term*gcart(2)*gcart(2)
+                 lpsstr(3)=lpsstr(3)-term*gcart(3)*gcart(3)
+                 lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
+                 lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
+                 lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+!               else if (icutcoul .eq. 2) then
+!!                Also get (dV(q)/dq)/q:
+!!                (note correction of Numerical Recipes sign error
+!!                before (3._dp*aa**2-1._dp)
+!!                ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
+!                 ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
+!                 ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
+!&                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
+!                 vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
+!&                 - 2.0_dp*vion1          ) / gsquar 
+!
+!                 gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
+!&                 gprimd(1,3)*dble(ig3)
+!                 gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
+!&                 gprimd(2,3)*dble(ig3)
+!                 gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
+!&                 gprimd(3,3)*dble(ig3)
+!!                Assemble structure over all atoms of given type
+!                 sfr=zero
+!                 sfi=zero
+!                 do ia=ia1,ia2
+!                   sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
+!                   sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
+!                 end do
+!                 !Implement beta correction as in eq. 62 (PRB 96 075448 2017)           
+!                 gcart_para = sqrt(gcart(1)**2+gcart(2)**2)
+!                 gcart_perp = gcart(3)
+!                 gsquar = gcart(1)**2+gcart(2)**2+gcart(3)**2
+!                 if(gcart_para .gt. tol12) then
+!                   beta = gsquar*rcut_loc/(two*gcart_para)* &
+!                        &       exp(-gcart_para*rcut_loc)* &
+!                        &cos(gcart_perp*rcut_loc)/(one-exp(-gcart_para*rcut_loc)*cos(gcart_perp*rcut_loc))
+!                 else
+!                   beta = zero
+!                 end if
+!!                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
+!                 term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
+!!                Compute contribution to stress tensor                 
+!                 lpsstr(1)=lpsstr(1)-term*(gcart(1)*gcart(1))*(1+beta)
+!                 lpsstr(2)=lpsstr(2)-term*(gcart(2)*gcart(2))*(1+beta)
+!                 lpsstr(3)=lpsstr(3)-term*(gcart(3)*gcart(3)-gsquar)
+!                 lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
+!                 lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
+!                 lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+!              endif
 
              else
                write(message, '(a,i0,a)' )' mklocl: Option=',option,' not allowed.'
@@ -604,15 +649,25 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
 !  Normalize and add term -eei/ucvol on diagonal
 !  (see page 802 of notes)
-   lpsstr(1)=(lpsstr(1)-eei)/ucvol
-   lpsstr(2)=(lpsstr(2)-eei)/ucvol
-   lpsstr(3)=(lpsstr(3)-eei)/ucvol
-   lpsstr(4)=lpsstr(4)/ucvol
-   lpsstr(5)=lpsstr(5)/ucvol
-   lpsstr(6)=lpsstr(6)/ucvol
+!   if(icutcoul .ne. 2) then
+     lpsstr(1)=(lpsstr(1)-eei)/ucvol
+     lpsstr(2)=(lpsstr(2)-eei)/ucvol
+     lpsstr(3)=(lpsstr(3)-eei)/ucvol
+     lpsstr(4)=lpsstr(4)/ucvol
+     lpsstr(5)=lpsstr(5)/ucvol
+     lpsstr(6)=lpsstr(6)/ucvol
+!   elseif (icutcoul .eq. 2) then
+!     lpsstr(1)=(lpsstr(1)-eei)/ucvol
+!     lpsstr(2)=(lpsstr(2)-eei)/ucvol
+!     lpsstr(3)=(lpsstr(3)-eei)/ucvol
+!     lpsstr(4)=lpsstr(4)/ucvol
+!     lpsstr(5)=lpsstr(5)/ucvol
+!     lpsstr(6)=lpsstr(6)/ucvol   
+     !lpsstr=lpsstr/ucvol
+!   endif 
 
  end if
-
+ 
  if(option==4)then
 !  Init mpi_comm
    if(mpi_enreg%nproc_fft>1)then
@@ -702,6 +757,7 @@ end subroutine mklocl_recipspace
 !!    are REAL, if 2, COMPLEX
 !!  gmet(3,3)=reciprocal space metric (Bohr**-2)
 !!  gsqcut=cutoff G**2 for included G s in fft box.
+!!  icutcoul= type of Coulomb cutoff to apply
 !!  idir=direction of atomic displacement (=1,2 or 3 : displacement of
 !!    atom ipert along the 1st, 2nd or 3rd axis).
 !!  ipert=number of the atom being displaced in the frozen-phonon
@@ -716,7 +772,9 @@ end subroutine mklocl_recipspace
 !!  ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phase information.
 !!  qgrid(mqgrid)=grid of q points from 0 to qmax.
 !!  qphon(3)=wavevector of the phonon
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  ucvol=unit cell volume (Bohr**3).
+!!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
 !!  xred(3,natom)=reduced atomic coordinates
 !!
@@ -726,19 +784,19 @@ end subroutine mklocl_recipspace
 !!
 !! SOURCE
 
-subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
-& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qgrid,qphon,ucvol,vlspl,vpsp1,xred)
+subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
+& mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,nkpt,&
+& ntypat,n1,n2,n3,ph1d,qgrid,qphon,rcut,rprimd,ucvol,vcutgeo,vlspl,vpsp1,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,ntypat
- real(dp),intent(in) :: gsqcut,ucvol
+ integer,intent(in) :: cplex,icutcoul,idir,ipert,mqgrid,n1,n2,n3,natom,nfft,nkpt,ntypat
+ real(dp),intent(in) :: gsqcut,rcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
- real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
+ real(dp),intent(in) :: qgrid(mqgrid),qphon(3),rprimd(3,3),vcutgeo(3),vlspl(mqgrid,2,ntypat)
  real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out) :: vpsp1(cplex*nfft)
 
@@ -755,6 +813,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
+ real(dp),allocatable :: gcutoff(:)
  real(dp),allocatable :: work1(:,:)
 
 ! *********************************************************************
@@ -804,6 +863,9 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
    phqim=sin(qxred2pi)
    ii=0
 
+!  Initialize Gcut-off array from m_gtermcutoff
+   call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo,qpt=qphon)
+
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
      gq3=dble(ig3)+qphon(3)
@@ -845,7 +907,7 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,idir,ipert,&
              dd = bb*(bb**2-1.0_dp)*dq2div6
              vion1 = (aa*vlspl(jj,1,itypat)+bb*vlspl(jj+1,1,itypat) + &
 &             cc*vlspl(jj,2,itypat)+dd*vlspl(jj+1,2,itypat) ) &
-&             / gsquar
+&             / gsquar*gcutoff(ii)
 
 !            Phase   G*xred  (complex conjugate) * -i *2pi*(g+q)*vion
              sfr=-phimag_vl3(ig1,ig2,ig3,iatom)*2.0_dp*pi*gq(idir)*vion1
