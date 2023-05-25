@@ -32,7 +32,7 @@ tolvrs    1.0d-4     # This default is active for sets 3-10
 
 nsym 1
 
-#Definition de la grille des points k
+#k-point grid definition
 ngkpt 2 2 2
 nshiftk 4
 shiftk  0.5 0.5 0.5
@@ -41,17 +41,17 @@ shiftk  0.5 0.5 0.5
         0.0 0.0 0.5
 
 
-#Definition de la base d'ondes planes
+#Planewave basis definition
 ecut 5
 ecutsm 0.5
 
-#definition de la cellule primitive
+#Primitive cell definition 
 acell   3*5.397917890425 angstrom
 rprim   0.0  0.5  0.5
         0.5  0.0  0.5
         0.5  0.5  0.0
 
-#definition du systeme
+#System definition
 
 natom 2
 ntypat 1

@@ -26,7 +26,6 @@ module m_sigc
  use m_splines
  use m_dtset
 
-
  use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_hide_blas,     only : xdotc, xgemv, xgemm, xherk
  use m_hide_lapack,   only : xheev
@@ -461,7 +460,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end do
 
    write(msg,'(a,i0,a)')" Will treat ",COUNT(extrapolar_distrb==Wfd%my_rank)," extrapolar terms."
-   call wrtout(std_out,msg,'PERS')
+   call wrtout(std_out, msg)
  end if
 
  ABI_MALLOC(rhotwg_ki, (npwc*nspinor, minbnd:maxbnd))
@@ -470,7 +469,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(rhotwgp, (npwc*nspinor))
  ABI_MALLOC(vc_sqrt_qbz, (npwc))
 
- if (Er%mqmem==0) then ! Use out-of-core solution for epsilon.
+ if (Er%mqmem == 0) then ! Use out-of-core solution for epsilon.
    ABI_COMMENT('Reading q-slices from file. Slower but less memory.')
  end if                                                                                !
 
@@ -490,22 +489,29 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    end if
  end if ! usepaw==1
 
- if (mod10==SIG_GW_AC) then ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
+ if (mod10==SIG_GW_AC) then
+   ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
 
    ABI_MALLOC(rhotw_epsm1_rhotw, (minbnd:maxbnd, minbnd:maxbnd, Er%nomega_i))
-
    call coeffs_gausslegint(zero,one,gl_knots,gl_wts,Er%nomega_i)
 
+   ierr = 0
    do io=1,Er%nomega_i ! First frequencies are always real
      if (ABS(AIMAG(one*Er%omega(Er%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
-      write(msg,'(3a)')&
-&       ' Frequencies in the SCR file are not compatible with the analytic continuation. ',ch10,&
-&       ' Verify the frequencies in the SCR file. '
-      ABI_WARNING(msg)
-      if (Wfd%my_rank==Wfd%master) write(std_out,*)AIMAG(Er%omega(Er%nomega_r+io)),(one/gl_knots(io)-one)
-      ABI_ERROR("Cannot continue!")
+      ierr = ierr + 1
+      if (Wfd%my_rank == Wfd%master) then
+        if (io == 1) write(std_out, "(a)")"omega_file, gauss_legendre_omega (ev)"
+        write(std_out,*)io, AIMAG(Er%omega(Er%nomega_r+io)) * Ha_eV, (one/gl_knots(io)-one) * Ha_eV
+      end if
      end if
    end do
+   if (ierr /= 0) then
+     write(std_out, *)"Er%nomega_r:", Er%nomega_r, "Er%nomega_i:", Er%nomega_i
+     write(msg,'(3a)')&
+       'Frequencies in the SCR file are not compatible with the analytic continuation. ',ch10,&
+       'Verify the frequencies in the SCR file. '
+     ABI_ERROR(msg)
+  end if
 
    ! To calculate \int_0^\infty domegap f(omegap), we calculate \int_0^1 dz f(1/z-1)/z^2.
    omegap(:)=one/gl_knots(:)-one
@@ -545,8 +551,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  endif
  ABI_MALLOC(omegame0i,(nomega_tot))
 
- ! Here we divide the states where the QP energies are required into complexes. Note however that this approach is not
- ! based on group theory, and it might lead to spurious results in case of accidental degeneracies.
+ ! Here we divide the states where the QP energies are required into degenerate groups
+ ! Note however that this approach is not based on group theory, and it might lead to
+ ! spurious results in case of accidental degeneracies.
  nq_summed=Kmesh%nbz
  if (Sigp%symsigma > 0) then
    call Ltg_k%print(std_out, Dtset%prtvol, mode_paral='COLL')
@@ -573,7 +580,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Here we have a problem in case of CD since epsm1q might be huge
  ! TODO if single q (ex molecule) dont allocate epsm1q, avoid waste of memory
- if ( ANY(mod10== [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
+ if ( ANY(mod10 == [SIG_GW_AC, SIG_GW_CD, SIG_QPGW_CD])) then
    if (.not.(mod10==SIG_GW_CD.and.Er%mqmem==0)) then
      ABI_MALLOC_OR_DIE(epsm1_qbz, (npwc, npwc, Er%nomega), ierr)
    end if
@@ -657,22 +664,22 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      ! If symsigma, symmetrize the matrix elements.
      ! Sum only q"s in IBZ_k. In this case elements are weighted
      ! according to wtqp and wtqm. wtqm is for time-reversal.
-     wtqp=1; wtqm=0
+     wtqp = 1; wtqm = 0
      if (can_symmetrize(spin)) then
        if (Ltg_k%ibzq(iq_bz)/=1) CYCLE
-       wtqp=0; wtqm=0
+       wtqp = 0; wtqm = 0
        do isym=1,Ltg_k%nsym_sg
-         wtqp=wtqp+Ltg_k%wtksym(1,isym,iq_bz)
-         wtqm=wtqm+Ltg_k%wtksym(2,isym,iq_bz)
+         wtqp = wtqp + Ltg_k%wtksym(1,isym,iq_bz)
+         wtqm = wtqm + Ltg_k%wtksym(2,isym,iq_bz)
        end do
      end if
 
      write(msg,'(3(a,i0),a,i0)')' Sigma_c: ik_bz ',ik_bz,'/',Kmesh%nbz,", spin: ",spin,' done by mpi-rank: ',Wfd%my_rank
-     call wrtout(std_out,msg,'PERS')
+     call wrtout(std_out, msg)
 
      ! Find the corresponding irred q-point.
      call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
-     q_is_gamma = (normv(qbz,Cryst%gmet,"G") < GW_TOLQ0)
+     q_is_gamma = normv(qbz, Cryst%gmet, "G") < GW_TOLQ0
 
      !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)
      !if (iq_ibz/=2.and.iq_ibz/=1) CYCLE
@@ -900,7 +907,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        call timab(437,2,tsec) ! rho_tw_g
        call timab(443,1,tsec) ! ac_lrk_appl
 
-       if (mod10==SIG_GW_AC) then
+       if (mod10 == SIG_GW_AC) then
          rhotw_epsm1_rhotw(:,:,:) = czero_gw
          do iiw=1,Er%nomega_i
            ABI_MALLOC(epsm1_sqrt_rhotw, (neig(iiw), minbnd:maxbnd))
@@ -1222,7 +1229,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  sigcme_tmp = sigcme_tmp /(Cryst%ucvol*Kmesh%nbz)
  sigc       = sigc       /(Cryst%ucvol*Kmesh%nbz)
 
- ! If we have summed over the IBZ_q now we have to average over complexes ===
+ ! If we have summed over the IBZ_q now we have to average over degenerate states
  ! Presently only diagonal terms are considered
  ! TODO QP-SCGW required a more involved approach, there is a check in sigma
  ! TODO it does not work if nspinor==2.
@@ -1391,9 +1398,9 @@ end subroutine calc_sigc_me
 !! nsig_ab=Number of components in the self-energy operator (1 for collinear magnetism)
 !! npwc=number of plane waves in $\tilde epsilon^{-1}$
 !! nspinor=Number of spinorial components.
-!! i_sz=contribution arising from the integrable coulombian singularity at q==0
+!! i_sz=contribution arising from the integrable coulomb singularity at q==0
 !! (see csigme for the method used), note that in case of 3-D systems the factor
-!! 4pi in the coulombian potential is included in the definition of i_sz
+!! 4pi in the Coulomb potential is included in the definition of i_sz
 !! gvec(3,npwc)=G vectors in reduced coordinates
 !! vc_sqrt(npwc)= square root of the coulombian matrix elements for this q-point
 !! botsq = Plasmon-pole parameters

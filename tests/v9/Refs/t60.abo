@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.9.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h31 )
+.Starting date : Wed  8 Mar 2023.
+- ( at 16h02 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
 - output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -192,6 +192,40 @@ P This job should need less than                       5.010 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
+
+ DATASET   11 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 11.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =          20        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       5.742 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
+
+ DATASET   12 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
+================================================================================
+ Values of the parameters that define the memory need for DATASET 12.
+     intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
+     lnmax =       1     mgfft =      16  mpssoang =       2    mqgrid =    3001
+     natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
+    nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
+    occopt =       3   xclevel =       1
+-    mband =          20        mffmem =           1         mkmem =           8
+       mpw =        1131          nfft =        4096          nkpt =           8
+================================================================================
+P This job should need less than                       5.742 Mbytes of memory.
+  Rough estimation (10% accuracy) of disk space for files :
+_ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
+================================================================================
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -218,6 +252,20 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
     eph_phwinfact8     1.10000000E+00
     eph_phwinfact9     1.10000000E+00
     eph_phwinfact10    1.10000000E+00
+    eph_phwinfact11    1.10000000E+00
+    eph_phwinfact12    1.10000000E+00
+      eph_extrael1     0.00000000E+00
+      eph_extrael2     0.00000000E+00
+      eph_extrael3     0.00000000E+00
+      eph_extrael4     0.00000000E+00
+      eph_extrael5     0.00000000E+00
+      eph_extrael6     0.00000000E+00
+      eph_extrael7     0.00000000E+00
+      eph_extrael8     0.00000000E+00
+      eph_extrael9     0.00000000E+00
+      eph_extrael10    0.00000000E+00
+      eph_extrael11   -1.69326306E-03
+      eph_extrael12   -1.69326306E-03
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -228,6 +276,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+      eph_intmeth11         1
+      eph_intmeth12         1
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       4    4    4
    eph_ngqpt_fine3       4    4    4
@@ -238,6 +288,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
    eph_ngqpt_fine8       4    4    4
    eph_ngqpt_fine9       0    0    0
    eph_ngqpt_fine10      0    0    0
+   eph_ngqpt_fine11      4    4    4
+   eph_ngqpt_fine12      4    4    4
     eph_phrange_w1     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w2     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w3     0.00000000E+00  0.00000000E+00 Hartree
@@ -248,6 +300,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
     eph_phrange_w8     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w9     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w10    0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w11    0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w12    0.00000000E+00  0.00000000E+00 Hartree
    eph_prtscratew1          0
    eph_prtscratew2          0
    eph_prtscratew3          0
@@ -258,6 +312,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
    eph_prtscratew8          0
    eph_prtscratew9          0
    eph_prtscratew10         0
+   eph_prtscratew11         0
+   eph_prtscratew12         0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -269,6 +325,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          eph_task8          4
          eph_task9         15
          eph_task10       -15
+         eph_task11         4
+         eph_task12         9
   eph_tols_idelta1     1.00000000E-12  1.00000000E-12
   eph_tols_idelta2     1.00000000E-12  1.00000000E-12
   eph_tols_idelta3     1.00000000E-12  1.00000000E-12
@@ -279,6 +337,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
   eph_tols_idelta8     1.00000000E-12  1.00000000E-12
   eph_tols_idelta9     1.00000000E-12  1.00000000E-12
   eph_tols_idelta10    1.00000000E-12  1.00000000E-12
+  eph_tols_idelta11    1.00000000E-12  1.00000000E-12
+  eph_tols_idelta12    1.00000000E-12  1.00000000E-12
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
@@ -292,6 +352,8 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
           getdvdb8         20
           getdvdb9          0
           getdvdb10         0
+          getdvdb11         0
+          getdvdb12         0
        gw_qprange1          4
        gw_qprange2          0
        gw_qprange3          4
@@ -302,8 +364,11 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
        gw_qprange8          4
        gw_qprange9          0
        gw_qprange10         0
+       gw_qprange11         0
+       gw_qprange12         0
            istwfk        2    0    3    0    0    0    7    0
            jdtset        1    2    3    4    5    6    7    8    9   10
+                        11   12
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
                        2.50000000E-01  0.00000000E+00  0.00000000E+00
                        5.00000000E-01  0.00000000E+00  0.00000000E+00
@@ -317,17 +382,140 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
           mixprec        1
 P           mkmem           8
             natom           2
-            nband          20
-           ndtset          10
-          nfreqsp         100
+            nband1         20
+            nband2         20
+            nband3         20
+            nband4         20
+            nband5         20
+            nband6         20
+            nband7         20
+            nband8         20
+            nband9         20
+            nband10        20
+            nband11        20
+            nband12        20
+           ndtset          12
+          nfreqsp         135
             ngfft          16      16      16
              nkpt           8
              nsym          48
            ntypat           2
-              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ6     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ7     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ8     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ9     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ10    2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ11    2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ12    2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+           occopt1          1
+           occopt2          1
+           occopt3          1
+           occopt4          1
+           occopt5          1
+           occopt6          1
+           occopt7          1
+           occopt8          1
+           occopt9          1
+           occopt10         1
+           occopt11         3
+           occopt12         3
         optdriver           7
         ph_nqpath1          3
         ph_nqpath2          3
@@ -339,6 +527,8 @@ P           mkmem           8
         ph_nqpath8          3
         ph_nqpath9          5
         ph_nqpath10         3
+        ph_nqpath11         3
+        ph_nqpath12         3
         prteliash           1
          prtphdos           0
           rifcsph1     0.00000000E+00
@@ -351,6 +541,8 @@ P           mkmem           8
           rifcsph8     0.00000000E+00
           rifcsph9     0.00000000E+00
           rifcsph10    0.00000000E+00
+          rifcsph11    0.00000000E+00
+          rifcsph12    0.00000000E+00
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00
@@ -364,6 +556,8 @@ P           mkmem           8
  sigma_bsum_range8       2    4
  sigma_bsum_range9       0    0
  sigma_bsum_range10      0    0
+ sigma_bsum_range11      0    0
+ sigma_bsum_range12      0    0
      sigma_erange1     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange2     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
@@ -374,6 +568,8 @@ P           mkmem           8
      sigma_erange8     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange9     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange10    0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange11    3.67493254E-02  3.67493254E-02 Hartree
+     sigma_erange12    3.67493254E-02  3.67493254E-02 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2
@@ -384,6 +580,8 @@ P           mkmem           8
       sigma_ngkpt8       2    2    2
       sigma_ngkpt9       0    0    0
       sigma_ngkpt10      0    0    0
+      sigma_ngkpt11      0    0    0
+      sigma_ngkpt12      0    0    0
           spgroup         225
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -410,8 +608,31 @@ P           mkmem           8
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
          symv1scf        1
+           tolcum1     0.00000000E+00
+           tolcum2     0.00000000E+00
+           tolcum3     0.00000000E+00
+           tolcum4     0.00000000E+00
+           tolcum5     0.00000000E+00
+           tolcum6     0.00000000E+00
+           tolcum7     0.00000000E+00
+           tolcum8     0.00000000E+00
+           tolcum9     0.00000000E+00
+           tolcum10    0.00000000E+00
+           tolcum11    0.00000000E+00
+           tolcum12    1.00000000E-03
            tolwfr      1.00000000E-16
-            tmesh      0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh1     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh2     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh3     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh4     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh5     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh6     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh7     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh8     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh9     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh10    0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh11    3.00000000E+03  1.00000000E+00  1.00000000E+00
+            tmesh12    3.00000000E+03  1.00000000E+00  1.00000000E+00
             typat      1  2
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
@@ -444,6 +665,10 @@ P           mkmem           8
  chkinp: Checking input parameters for consistency, jdtset=   9.
 
  chkinp: Checking input parameters for consistency, jdtset=  10.
+
+ chkinp: Checking input parameters for consistency, jdtset=  11.
+
+ chkinp: Checking input parameters for consistency, jdtset=  12.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -531,8 +756,8 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -546,8 +771,8 @@ meta: {optdriver: 7, eph_task: 4, }
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -587,7 +812,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 135 , Step: 0.015 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -932,7 +1157,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 135 , Step: 0.015 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -1183,7 +1408,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Tolerance for integration weights <     1.000000E-12     1.000000E-12
  eph_phwinfact:  1.10
  Only the Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 135 , Step: 0.015 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -1518,7 +1743,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Tolerance for integration weights <     1.000000E-06     1.000000E-06
  eph_phwinfact:  3.90
  Only the Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 135 , Step: 0.015 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -1764,7 +1989,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Tolerance for integration weights <     1.000000E-06     1.000000E-06
  eph_phwinfact:  1.10
  Only the Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 135 , Step: 0.015 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -2009,7 +2234,7 @@ meta: {optdriver: 7, eph_task: 4, }
  Imaginary shift in the denominator (zcut): 0.100 [eV]
  Method for q-space integration:  Standard quadrature
  Both Real and Imaginary part of Sigma will be computed.
- Number of frequencies along the real axis: 101 , Step: 0.020 [eV]
+ Number of frequencies along the real axis: 135 , Step: 0.015 [eV]
  Number of frequency in generalized Eliashberg functions: 841
  Number of temperatures: 2 From: 0.000000E+00 to 3.000000E+02 [K]
  Ab-initio q-mesh from DDB file: [2, 2, 2]
@@ -2338,6 +2563,347 @@ meta: {optdriver: 7, eph_task: -15, }
  - Results stored in: t60o_DS10_V1QAVG.nc
  Use `abiopen.py out_V1QAVG.nc -e` to visualize results
 
+================================================================================
+== DATASET 11 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 11, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1131, }
+cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: 4, }
+...
+
+ mkfilename: getwfk from: t60o_DS20_WFK
+
+ mkfilename: getddb from: t60o_DS20_DDB
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: -1.693263E-03 to input nelect: 8.000000E+00
+ Old fermi level:     1.659170E-01, with nelect:     8.000000E+00
+ New fermi level:     5.528197E-02, with nelect:     7.998307E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
+ R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
+ R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
+ Unit cell volume ucvol=  1.1426706E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
+         1         3    1.294974E-16    1.294974E-16    1.040868E+00
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
+         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+--------------------------------------------------------------------------------
+
+
+ === Gaps, band edges and relative position wrt Fermi level ===
+ Direct band gap semiconductor
+ Fundamental gap:     8.536 (eV)
+   VBM:    -0.193 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     8.342 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+ Direct gap:         8.536 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+
+ Position of CBM/VBM with respect to the Fermi level:
+ Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)
+
+  T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
+3000.0     0.259     1.407     1.601     6.935
+
+
+
+ Number of bands in e-ph self-energy sum: 20
+ From bsum_start: 1 to bsum_stop: 20
+ Symsigma: 1 Timrev: 1
+ Imaginary shift in the denominator (zcut): 0.100 [eV]
+ Method for q-space integration:  Standard quadrature
+ Both Real and Imaginary part of Sigma will be computed.
+ Number of frequencies along the real axis: 135 , Step: 0.015 [eV]
+ Number of frequency in generalized Eliashberg functions: 841
+ Number of temperatures: 1 From: 3.000000E+03 to 3.000000E+03 [K]
+ Ab-initio q-mesh from DDB file: [2, 2, 2]
+ Q-mesh used for self-energy integration [ngqpt]: [4, 4, 4]
+ Number of q-points in the IBZ: 8
+ asr: 1 chneut: 1
+ dipdip: 1 symdynmat: 1
+ Number of k-points for self-energy corrections: 8
+ sigma_erange:  1.000  1.000  (eV)
+ List of k-points for self-energy corrections:
+   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   2    5
+   2     1  [ 2.5000E-01,  0.0000E+00,  0.0000E+00]   3    4
+   3     1  [ 5.0000E-01,  0.0000E+00,  0.0000E+00]   3    4
+   4     1  [ 2.5000E-01,  2.5000E-01,  0.0000E+00]   3    4
+   5     1  [ 5.0000E-01,  2.5000E-01,  0.0000E+00]   4    4
+   6     1  [-2.5000E-01,  2.5000E-01,  0.0000E+00]   4    4
+   7     1  [ 5.0000E-01,  5.0000E-01,  0.0000E+00]   3    4
+   8     1  [-2.5000E-01,  5.0000E-01,  2.5000E-01]   4    4
+
+ === MPI parallelism ===
+P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 20
+P Number of CPUs for parallelism over perturbations: 1
+P Number of perturbations treated by this CPU: 6
+P Number of CPUs for parallelism over q-points: 1
+P Number of q-points in the IBZ treated by this proc: 8 of 8
+P Number of CPUs for parallelism over bands: 1
+P Number of CPUs for parallelism over spins: 1
+P Number of CPUs for parallelism over k-points: 1
+P Number of k-point in Sigma_nk treated by this proc: 8 of 8
+
+ Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.
+================================================================================
+ Final results in eV.
+ Notations:
+     eKS: Kohn-Sham energy. eQP: quasi-particle energy.
+     eQP - eKS: Difference between the QP and the KS energy.
+     SE1(eKS): Real part of the self-energy computed at the KS energy, SE2 for imaginary part.
+     Z(eKS): Renormalization factor.
+     FAN: Real part of the Fan term at eKS. DW: Debye-Waller term.
+     DeKS: KS energy difference between this band and band-1, DeQP same meaning but for eQP.
+     OTMS: On-the-mass-shell approximation with eQP ~= eKS + Sigma(omega=eKS)
+     TAU(eKS): Lifetime in femtoseconds computed at the KS energy.
+     mu_e: Fermi level for given (T, nelect)
+ 
+ 
+K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   2  -0.193   -3.707   -3.514    2.619   -1.468   -1.342   -6.642    9.260    0.000    0.000
+   3  -0.193   -3.707   -3.514    2.619   -1.468   -1.342   -6.642    9.260    0.000    0.000
+   4  -0.193   -3.707   -3.514    2.619   -1.468   -1.342   -6.642    9.260    0.000    0.000
+   5   8.342    7.303   -1.040   -1.530   -0.047    0.680   -0.213   -1.317    8.536   11.010
+ 
+ KS gap:    8.536 (assuming bval:4 ==> bcond:5)
+ QP gap:   11.010 (OTMS:    4.387)
+ QP_gap - KS_gap:    2.474 (OTMS:   -4.148)
+ 
+============================================================================================
+K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   3  -0.306   -0.095    0.211   -0.789   -1.917   -0.268   -7.337    6.548    0.000    0.000
+   4  -0.306   -0.095    0.211   -0.789   -1.917   -0.268   -7.337    6.548    0.000    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   3  -0.415   -0.607   -0.192    0.421   -1.685   -0.456   -8.015    8.436    0.000    0.000
+   4  -0.415   -0.607   -0.192    0.421   -1.685   -0.456   -8.015    8.436    0.000    0.000
+============================================================================================
+K-point: [ 2.5000E-01,  2.5000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   3  -0.689   -1.781   -1.092   -1.529   -1.617    0.714   -7.856    6.327    0.000    0.000
+   4  -0.689   -1.781   -1.092   -1.529   -1.617    0.714   -7.856    6.327    0.000    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  2.5000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   4  -0.804    0.374    1.178   -1.724   -1.912   -0.683   -8.180    6.457    0.000    0.000
+============================================================================================
+K-point: [-2.5000E-01,  2.5000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   4  -0.426   -1.350   -0.924    1.474   -1.742   -0.627   -8.076    9.550    0.000    0.000
+============================================================================================
+K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   3  -1.171   -1.325   -0.154   -0.957   -1.200    0.161   -7.767    6.811    0.000    0.000
+   4  -1.171   -1.325   -0.154   -0.957   -1.200    0.161   -7.767    6.811    0.000    0.000
+============================================================================================
+K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T: 3000.0 [K], mu_e:    1.407
+   B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
+   4  -0.977   -0.586    0.391    2.340   -1.365    0.167   -8.632   10.972    0.000    0.000
+============================================================================================
+
+================================================================================
+== DATASET 12 ==================================================================
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 12, }
+dimensions: {natom: 2, nkpt: 8, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1131, }
+cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: 9, }
+...
+
+ mkfilename: getwfk from: t60o_DS20_WFK
+
+ mkfilename: getddb from: t60o_DS20_DDB
+
+ mkfilename: getsigeph from: t60o_DS11_SIGEPH.nc
+
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
+- Reading GS states from WFK file: t60o_DS20_WFK
+- Reading DDB from file: t60o_DS20_DDB
+- Reading DVDB from file: t60o_DS20_DVDB
+
+
+
+ Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
+   From WFK file: occopt = 1, tsmear =       0.010000
+   From input:    occopt = 3, tsmear =       0.010000
+
+ Adding eph_extrael: -1.693263E-03 to input nelect: 8.000000E+00
+ Old fermi level:     1.659170E-01, with nelect:     8.000000E+00
+ New fermi level:     5.528197E-02, with nelect:     7.998307E+00
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
+ R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
+ R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
+ Unit cell volume ucvol=  1.1426706E+02 bohr^3
+ Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
+ Now the whole DDB is in central memory
+
+================================================================================
+
+ Dielectric Tensor and Effective Charges 
+
+
+ anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
+   and impose the ASR on the effective charges 
+
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
+         1         2   -1.294974E-16    1.040868E+00    1.294755E-16
+         1         3    1.294974E-16    1.294974E-16    1.040868E+00
+         2         1   -1.040868E+00    1.294974E-16    1.295194E-16
+         2         2    1.294974E-16   -1.040868E+00   -1.294755E-16
+         2         3   -1.294974E-16   -1.294974E-16   -1.040868E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
+- Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+ Values initialized with zeros.
+       Homogeneous q point set in the B.Z.
+ Grid q points  :        8
+  1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
+  2)   5.00000000E-01  0.00000000E+00  0.00000000E+00
+  3)   0.00000000E+00  5.00000000E-01  0.00000000E+00
+  4)   5.00000000E-01  5.00000000E-01  0.00000000E+00
+  5)   0.00000000E+00  0.00000000E+00  5.00000000E-01
+  6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
+  7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
+  8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
+
+ The interatomic forces have been obtained
+--------------------------------------------------------------------------------
+
+
+ Entering cumulant expansion computation driver.
+- Reading Sigma results from: t60o_DS11_SIGEPH.nc
+
+ Cumulant parameters:
+ Number of spins: 1
+ Number of spinor components: 1
+ Number of k-points computed: 8
+ Maximum number of bands computed: 4
+ Number of frequencies in Sigma(w): 135
+ Number of frequencies in G(w): 135
+ Number of Temperatures: 1
+- Using: 1 MPI procs to distribute: 8 k-points.
+
+- Writing cumulant results to: t60o_DS12_EPH_CUMULANT.nc
+
+ Print first 10 frequencies in gw_vals array (re-im) for testing purposes:
+ spin: 1, ikcalc: 1
+ gw_vals for itemp:1ib: 1
+ -2.31612E+00 -2.04180E+00 -1.76310E+00 -1.48058E+00 -1.19479E+00 -9.06323E-01 -6.15757E-01 -3.23680E-01 -3.06842E-02  2.62633E-01
+ -4.87600E+01 -4.88610E+01 -4.89494E+01 -4.90251E+01 -4.90879E+01 -4.91376E+01 -4.91742E+01 -4.91975E+01 -4.92074E+01 -4.92040E+01
+ gw_vals for itemp:1ib: 2
+ -2.31612E+00 -2.04180E+00 -1.76310E+00 -1.48058E+00 -1.19479E+00 -9.06323E-01 -6.15757E-01 -3.23680E-01 -3.06842E-02  2.62633E-01
+ -4.87600E+01 -4.88610E+01 -4.89494E+01 -4.90251E+01 -4.90879E+01 -4.91376E+01 -4.91742E+01 -4.91975E+01 -4.92074E+01 -4.92040E+01
+ gw_vals for itemp:1ib: 3
+ -2.31612E+00 -2.04180E+00 -1.76310E+00 -1.48058E+00 -1.19479E+00 -9.06323E-01 -6.15757E-01 -3.23680E-01 -3.06842E-02  2.62633E-01
+ -4.87600E+01 -4.88610E+01 -4.89494E+01 -4.90251E+01 -4.90879E+01 -4.91376E+01 -4.91742E+01 -4.91975E+01 -4.92074E+01 -4.92040E+01
+ gw_vals for itemp:1ib: 4
+  3.90728E+01  3.73106E+01  3.56189E+01  3.39923E+01  3.24259E+01  3.09153E+01  2.94567E+01  2.80464E+01  2.66815E+01  2.53591E+01
+ -8.16101E+00 -7.92371E+00 -7.71120E+00 -7.52148E+00 -7.35291E+00 -7.20397E+00 -7.07347E+00 -6.96039E+00 -6.86382E+00 -6.78305E+00
+
+ Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+ spin: 1
+ mobility_mu for itemp:1 ieh: 2 xyz: 1
+  4.78510E-02
+ mobility_mu for itemp:1 ieh: 2 xyz: 2
+  4.78510E-02
+ mobility_mu for itemp:1 ieh: 2 xyz: 3
+  4.78510E-02
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -2357,6 +2923,20 @@ meta: {optdriver: 7, eph_task: -15, }
     eph_phwinfact8     1.10000000E+00
     eph_phwinfact9     1.10000000E+00
     eph_phwinfact10    1.10000000E+00
+    eph_phwinfact11    1.10000000E+00
+    eph_phwinfact12    1.10000000E+00
+      eph_extrael1     0.00000000E+00
+      eph_extrael2     0.00000000E+00
+      eph_extrael3     0.00000000E+00
+      eph_extrael4     0.00000000E+00
+      eph_extrael5     0.00000000E+00
+      eph_extrael6     0.00000000E+00
+      eph_extrael7     0.00000000E+00
+      eph_extrael8     0.00000000E+00
+      eph_extrael9     0.00000000E+00
+      eph_extrael10    0.00000000E+00
+      eph_extrael11   -1.69326306E-03
+      eph_extrael12   -1.69326306E-03
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -2367,6 +2947,8 @@ meta: {optdriver: 7, eph_task: -15, }
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+      eph_intmeth11         1
+      eph_intmeth12         1
    eph_ngqpt_fine1       0    0    0
    eph_ngqpt_fine2       4    4    4
    eph_ngqpt_fine3       4    4    4
@@ -2377,6 +2959,8 @@ meta: {optdriver: 7, eph_task: -15, }
    eph_ngqpt_fine8       4    4    4
    eph_ngqpt_fine9       0    0    0
    eph_ngqpt_fine10      0    0    0
+   eph_ngqpt_fine11      4    4    4
+   eph_ngqpt_fine12      4    4    4
     eph_phrange_w1     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w2     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w3     0.00000000E+00  0.00000000E+00 Hartree
@@ -2387,6 +2971,8 @@ meta: {optdriver: 7, eph_task: -15, }
     eph_phrange_w8     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w9     0.00000000E+00  0.00000000E+00 Hartree
     eph_phrange_w10    0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w11    0.00000000E+00  0.00000000E+00 Hartree
+    eph_phrange_w12    0.00000000E+00  0.00000000E+00 Hartree
    eph_prtscratew1          0
    eph_prtscratew2          0
    eph_prtscratew3          0
@@ -2397,6 +2983,8 @@ meta: {optdriver: 7, eph_task: -15, }
    eph_prtscratew8          0
    eph_prtscratew9          0
    eph_prtscratew10         0
+   eph_prtscratew11         0
+   eph_prtscratew12         0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -2408,6 +2996,8 @@ meta: {optdriver: 7, eph_task: -15, }
          eph_task8          4
          eph_task9         15
          eph_task10       -15
+         eph_task11         4
+         eph_task12         9
   eph_tols_idelta1     1.00000000E-12  1.00000000E-12
   eph_tols_idelta2     1.00000000E-12  1.00000000E-12
   eph_tols_idelta3     1.00000000E-12  1.00000000E-12
@@ -2418,6 +3008,8 @@ meta: {optdriver: 7, eph_task: -15, }
   eph_tols_idelta8     1.00000000E-12  1.00000000E-12
   eph_tols_idelta9     1.00000000E-12  1.00000000E-12
   eph_tols_idelta10    1.00000000E-12  1.00000000E-12
+  eph_tols_idelta11    1.00000000E-12  1.00000000E-12
+  eph_tols_idelta12    1.00000000E-12  1.00000000E-12
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -2428,6 +3020,8 @@ meta: {optdriver: 7, eph_task: -15, }
            etotal8     0.0000000000E+00
            etotal9     0.0000000000E+00
            etotal10    0.0000000000E+00
+           etotal11    0.0000000000E+00
+           etotal12    0.0000000000E+00
             fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2448,6 +3042,10 @@ meta: {optdriver: 7, eph_task: -15, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart11    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart12    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
@@ -2461,6 +3059,8 @@ meta: {optdriver: 7, eph_task: -15, }
           getdvdb8         20
           getdvdb9          0
           getdvdb10         0
+          getdvdb11         0
+          getdvdb12         0
        gw_qprange1          4
        gw_qprange2          0
        gw_qprange3          4
@@ -2471,23 +3071,149 @@ meta: {optdriver: 7, eph_task: -15, }
        gw_qprange8          4
        gw_qprange9          0
        gw_qprange10         0
+       gw_qprange11         0
+       gw_qprange12         0
            jdtset        1    2    3    4    5    6    7    8    9   10
+                        11   12
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.17873965E+01
           mixprec        1
 P           mkmem           8
             natom           2
-            nband          20
-           ndtset          10
-          nfreqsp         100
+            nband1         20
+            nband2         20
+            nband3         20
+            nband4         20
+            nband5         20
+            nband6         20
+            nband7         20
+            nband8         20
+            nband9         20
+            nband10        20
+            nband11        20
+            nband12        20
+           ndtset          12
+          nfreqsp         135
             ngfft          16      16      16
              nkpt           8
              nsym          48
            ntypat           2
-              occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+              occ1     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
+              occ2     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ3     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ4     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ5     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ6     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ7     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ8     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ9     2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ10    2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ11    2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+              occ12    2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+                       2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
+                       0.000000  0.000000
+           occopt1          1
+           occopt2          1
+           occopt3          1
+           occopt4          1
+           occopt5          1
+           occopt6          1
+           occopt7          1
+           occopt8          1
+           occopt9          1
+           occopt10         1
+           occopt11         3
+           occopt12         3
         optdriver           7
         ph_nqpath1          3
         ph_nqpath2          3
@@ -2499,6 +3225,8 @@ P           mkmem           8
         ph_nqpath8          3
         ph_nqpath9          5
         ph_nqpath10         3
+        ph_nqpath11         3
+        ph_nqpath12         3
         prteliash           1
          prtphdos           0
           rifcsph1     0.00000000E+00
@@ -2511,6 +3239,8 @@ P           mkmem           8
           rifcsph8     0.00000000E+00
           rifcsph9     0.00000000E+00
           rifcsph10    0.00000000E+00
+          rifcsph11    0.00000000E+00
+          rifcsph12    0.00000000E+00
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
                        3.8515039575E+00  0.0000000000E+00  3.8515039575E+00
                        3.8515039575E+00  3.8515039575E+00  0.0000000000E+00
@@ -2524,6 +3254,8 @@ P           mkmem           8
  sigma_bsum_range8       2    4
  sigma_bsum_range9       0    0
  sigma_bsum_range10      0    0
+ sigma_bsum_range11      0    0
+ sigma_bsum_range12      0    0
      sigma_erange1     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange2     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange3     0.00000000E+00  0.00000000E+00 Hartree
@@ -2534,6 +3266,8 @@ P           mkmem           8
      sigma_erange8     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange9     0.00000000E+00  0.00000000E+00 Hartree
      sigma_erange10    0.00000000E+00  0.00000000E+00 Hartree
+     sigma_erange11    3.67493254E-02  3.67493254E-02 Hartree
+     sigma_erange12    3.67493254E-02  3.67493254E-02 Hartree
       sigma_ngkpt1       2    2    2
       sigma_ngkpt2       0    0    0
       sigma_ngkpt3       2    2    2
@@ -2544,6 +3278,8 @@ P           mkmem           8
       sigma_ngkpt8       2    2    2
       sigma_ngkpt9       0    0    0
       sigma_ngkpt10      0    0    0
+      sigma_ngkpt11      0    0    0
+      sigma_ngkpt12      0    0    0
           spgroup         225
            strten1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -2564,6 +3300,10 @@ P           mkmem           8
            strten9     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten11    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten12    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -2590,8 +3330,31 @@ P           mkmem           8
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
          symv1scf        1
+           tolcum1     0.00000000E+00
+           tolcum2     0.00000000E+00
+           tolcum3     0.00000000E+00
+           tolcum4     0.00000000E+00
+           tolcum5     0.00000000E+00
+           tolcum6     0.00000000E+00
+           tolcum7     0.00000000E+00
+           tolcum8     0.00000000E+00
+           tolcum9     0.00000000E+00
+           tolcum10    0.00000000E+00
+           tolcum11    0.00000000E+00
+           tolcum12    1.00000000E-03
            tolwfr      1.00000000E-16
-            tmesh      0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh1     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh2     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh3     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh4     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh5     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh6     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh7     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh8     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh9     0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh10    0.00000000E+00  3.00000000E+02  2.00000000E+00
+            tmesh11    3.00000000E+03  1.00000000E+00  1.00000000E+00
+            tmesh12    3.00000000E+03  1.00000000E+00  1.00000000E+00
             typat      1  2
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.0381281131E+00  2.0381281131E+00  2.0381281131E+00
@@ -2690,10 +3453,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.2  wall=          7.7
+- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.2  wall=          7.7
+.Delivered  14 WARNINGs and  23 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.2  wall=          9.8

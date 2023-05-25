@@ -372,6 +372,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    Pawtab(:)%usepawu   = 0
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
+   Pawtab(:)%lamb_shielding = zero
 
    ! * Evaluate <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for the long wavelength limit.
    ! TODO solve problem with memory leak and clean this part as well as the associated flag
@@ -382,7 +383,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Dtset%nspinor,Cryst%ntypat,Dtset%optdcmagpawu,Pawang,Dtset%pawprtvol,&
       Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu)
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
      ABI_ERROR('BS equation with DFT+U not completely coded!')
@@ -686,7 +687,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! ==== Compute KS PAW Dij ====
  ! ============================
  if (Wfd%usepaw==1) then
-   _IBM6("Another silly write for IBM6")
    call timab(561,1,tsec)
    !
    ! Calculate the unsymmetrized Dij.
@@ -1102,7 +1102,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  integer,allocatable :: npwarr(:),val_indeces(:,:),nlmn_atm(:)
  real(dp) :: qpt_bz(3),minmax_tene(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),sq(3)
- real(dp) :: qred2cart(3,3),qcart2red(3,3)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
  real(dp),allocatable :: igwene(:,:,:)
  real(dp),pointer :: energies_p(:,:,:)
@@ -1422,30 +1421,19 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ! ==============================================
  Bsp%inclvkb = Dtset%inclvkb
 
- qred2cart = two_pi*Cryst%gprimd
- qcart2red = qred2cart
- call matrginv(qcart2red,3,3)
-
- if (Dtset%gw_nqlwl==0) then
-   BSp%nq = 6
-   ABI_MALLOC(BSp%q,(3,BSp%nq))
-   BSp%q(:,1) = (/one,zero,zero/)  ! (100)
-   BSp%q(:,2) = (/zero,one,zero/)  ! (010)
-   BSp%q(:,3) = (/zero,zero,one/)  ! (001)
-   BSp%q(:,4) = MATMUL(qcart2red,(/one,zero,zero/)) ! (x)
-   BSp%q(:,5) = MATMUL(qcart2red,(/zero,one,zero/)) ! (y)
-   BSp%q(:,6) = MATMUL(qcart2red,(/zero,zero,one/)) ! (z)
+ if (Dtset%gw_nqlwl == 0) then
+   ! Predefined list of 6 q-versors (b vectors and Cart axis)
+   call cryst%get_redcart_qdirs(Bsp%nq, Bsp%q)
  else
    BSp%nq = Dtset%gw_nqlwl
-   ABI_MALLOC(BSp%q,(3,BSp%nq))
+   ABI_MALLOC(BSp%q, (3,BSp%nq))
    BSp%q = Dtset%gw_qlwl
+   do iq=1,BSp%nq ! normalization
+     qnorm = normv(BSp%q(:,iq), Cryst%gmet,"G")
+     BSp%q(:,iq) = BSp%q(:,iq) / qnorm
+   end do
  end if
 
- do iq=1,BSp%nq ! normalization
-   qnorm = normv(BSp%q(:,iq),Cryst%gmet,"G")
-   BSp%q(:,iq) = BSp%q(:,iq)/qnorm
- end do
- !
  ! ======================================================
  ! === Define the flags defining the calculation type ===
  ! ======================================================
