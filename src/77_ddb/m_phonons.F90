@@ -2396,7 +2396,7 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart,
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
  ncerr = nctk_def_dims(ncid, [&
-   nctkdim_t("number_of_qpoints", nqpts), nctkdim_t('number_of_phonon_modes', nphmodes), nctkdim_t('3', 3)])
+   nctkdim_t("number_of_qpoints", nqpts), nctkdim_t('number_of_phonon_modes', nphmodes), nctkdim_t('three', 3)])
  NCF_CHECK(ncerr)
 
  ! Define arrays
@@ -2405,7 +2405,7 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart,
    nctkarr_t('qweights',"dp", 'number_of_qpoints'),&
    nctkarr_t('phfreqs',"dp", 'number_of_phonon_modes, number_of_qpoints'),&
    nctkarr_t('phdispl_cart',"dp", 'complex, number_of_phonon_modes, number_of_phonon_modes, number_of_qpoints'),&
-   nctkarr_t('phangmom',"dp", '3, number_of_phonon_modes, number_of_qpoints')])
+   nctkarr_t('phangmom',"dp", 'three, number_of_phonon_modes, number_of_qpoints')])
  NCF_CHECK(ncerr)
 
  ! Write variables.
