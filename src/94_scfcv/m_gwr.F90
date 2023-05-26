@@ -910,7 +910,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  mband = ks_ebands%mband; nbsum = dtset%nband(1)
  ABI_CHECK_IRANGE(nbsum, 1, mband, "Invalid nbsum")
 
- call gwr%pstat%from_pid()
+ !call gwr%pstat%from_pid()
 
  ! Define frequency mesh for sigma(w_real) and spectral functions.
  ! Note that in GWR computing quantities on the real-axis is really cheap
@@ -1548,6 +1548,8 @@ end block
  ! Create netcdf file to store results
  ! ====================================
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
+ if (dtset%gwr_task == "RPA_ENERGY") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_RPAGWR.nc")
+ if (dtset%gwr_task == "GAMMA_GW") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GAMMAGWR.nc")
 
  if (my_rank == master) then
    call gwr%print(units)
@@ -1585,8 +1587,8 @@ end block
      !nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("bstop_ks", "int", "nkcalc, nsppol"), &
-     nctkarr_t("kcalc", "dp", "three, nkcalc") &
-     !nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+     nctkarr_t("kcalc", "dp", "three, nkcalc"), &
+     nctkarr_t("kcalc2ibz", "int", "nkcalc, six") &
    ])
    NCF_CHECK(ncerr)
 
@@ -1594,7 +1596,6 @@ end block
    ! Write data that do not depend on the (kpt, spin) loop.
    ! ======================================================
    NCF_CHECK(nctk_set_datamode(ncid))
-   !ii = 0; if (gwr%imag_only) ii = 1
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
      "sig_diago", "b1gw", "b2gw", "symsigma", "symchi", "scf_iteration"], &
      [merge(1, 0, gwr%sig_diago), gwr%b1gw, gwr%b2gw, gwr%dtset%symsigma, dtset%symchi, gwr%scf_iteration])
@@ -1608,9 +1609,10 @@ end block
    NCF_CHECK(nf90_put_var(ncid, vid("gwr_task"), trim(dtset%gwr_task)))
    NCF_CHECK(nf90_put_var(ncid, vid("tau_mesh"), gwr%tau_mesh))
    NCF_CHECK(nf90_put_var(ncid, vid("iw_mesh"), gwr%iw_mesh))
-   NCF_CHECK(nf90_put_var(ncid, vid("kcalc"), gwr%kcalc))
    NCF_CHECK(nf90_put_var(ncid, vid("bstart_ks"), gwr%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, vid("bstop_ks"), gwr%bstop_ks))
+   NCF_CHECK(nf90_put_var(ncid, vid("kcalc"), gwr%kcalc))
+   NCF_CHECK(nf90_put_var(ncid, vid("kcalc2ibz"), gwr%kcalc2ibz))
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
@@ -2055,7 +2057,7 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  end associate
 
  call cwtime_report(" gwr_load_kcalc_from_wfk:", cpu, wall, gflops)
- call gwr%pstat%print([std_out], reload=.True.)
+ !call gwr%pstat%print([std_out], reload=.True.)
 
 end subroutine gwr_load_kcalc_wfd
 !!***
