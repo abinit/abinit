@@ -2003,9 +2003,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal%ncwrite(ncid))
-   call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart,save_phangmom)
-   ! call my sous routine pour output le moment angulaire (for .nc file)
+   ! call modified subroutine that also output the angular momentum (for .nc file)
    ! -> added in phonons_ncwrite, maybe not the best idea as it is also used by mkphdos (this last had to be slightly modified)
+   call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart,save_phangmom)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
    if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
@@ -2013,9 +2013,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    end if
    NCF_CHECK(nf90_close(ncid))
 
-   call phonons_write_phfrq(prefix, natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart, save_phangmom)
-   ! call my sous routine pour output le moment angulaire (for _PHFRQ or another file)
+   ! call modified subroutine that also output the angular momentum (for _PHFRQ or another file)
    ! -> added directly in phonons_write_phfrq
+   call phonons_write_phfrq(prefix, natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart, save_phangmom)
 
    select case (inp%prtphbands)
    case (0)
