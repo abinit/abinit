@@ -47,7 +47,8 @@ module m_phonons
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
- use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec, &
+                               phangmom_from_eigvec
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
@@ -753,10 +754,10 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  integer,allocatable :: bz2ibz_smap(:,:), bz2ibz(:)
  real(dp) :: speedofsound(3),speedofsound_(3)
  real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom)
- real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom)
+ real(dp) :: eigvec(2,3,Crystal%natom,3*Crystal%natom),phfrq(3*Crystal%natom),phangmom(3,3*Crystal%natom)
  real(dp) :: qlatt(3,3),rlatt(3,3), msqd_atom_tmp(3,3),temp_33(3,3)
  real(dp) :: symcart(3,3,crystal%nsym), syme2_xyza(3, crystal%natom)
- real(dp),allocatable :: full_eigvec(:,:,:,:,:),full_phfrq(:,:),new_shiftq(:,:)
+ real(dp),allocatable :: full_eigvec(:,:,:,:,:),full_phfrq(:,:),full_phangmom(:,:,:),new_shiftq(:,:)
  real(dp),allocatable :: qbz(:,:),qibz(:,:),tmp_phfrq(:) !, work_msqd(:,:,:,:)
  real(dp),allocatable :: wtq_ibz(:),xvals(:), gvals_wtq(:), wdt(:,:), energies(:)
 
@@ -844,6 +845,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    ! Allocate arrays used to store the entire spectrum, Required to calculate tetra weights.
    ! this may change in the future if Matteo refactorizes the tetra weights as sums over k instead of sums over bands
    ABI_CALLOC(full_phfrq, (3*natom, phdos%nqibz))
+   ABI_MALLOC(full_phangmom, (3, 3*natom, phdos%nqibz))
    ABI_MALLOC_OR_DIE(full_eigvec, (2, 3, natom, 3*natom, phdos%nqibz), ierr)
    full_eigvec = zero
  end if ! tetra
@@ -855,7 +857,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  !   speedofsound, nsmallq
  !   wminmax and count_wminmax
  !   if gauss: %phdos, %msqd_dos_atom
- !   if tetra: full_phfrq, full_eigvec, %phdos_int
+ !   if tetra: full_phfrq, full_eigvec, full_phangmom, %phdos_int
 
  nsmallq = zero; speedofsound = zero
  wminmax = [huge(one), -huge(one)]; count_wminmax = 0
@@ -958,10 +960,11 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
      end do ! imode
 
    case (2)
-     ! Tetrahedra; Save phonon frequencies and eigenvectors.
+     ! Tetrahedra; Save phonon frequencies, eigenvectors and angular momentum.
      ! Sum is done after the loops over the two meshes.
      full_phfrq(:,iq_ibz) = phfrq(:)
      full_eigvec(:,:,:,:,iq_ibz) = eigvec
+     full_phangmom(:,:,iq_ibz) = phangmom
 
    case default
      ABI_ERROR(sjoin("Wrong value for prtdos:", itoa(prtdos)))
@@ -1000,9 +1003,10 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  if (prtdos == 2) then
    call cwtime(cpu, wall, gflops, "start")
    ! Finalize integration with tetrahedra
-   ! All the data are contained in full_phfrq and full_eigvec.
+   ! All the data are contained in full_phfrq, full_eigvec and full_phangmom.
    call xmpi_sum(full_phfrq, comm, ierr)
    call xmpi_sum(full_eigvec, comm, ierr)
+   call xmpi_sum(full_phangmom, comm, ierr)
 
    ABI_MALLOC(tmp_phfrq, (phdos%nqibz))
 
@@ -1116,13 +1120,14 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
    if (my_rank == master .and. len_trim(prefix) > 0) then
      NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHIBZ.nc"), xmpi_comm_self), "Creating PHIBZ")
      NCF_CHECK(crystal%ncwrite(ncid))
-     call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec)
+     call phonons_ncwrite(ncid, natom, phdos%nqibz, qibz, wtq_ibz, full_phfrq, full_eigvec, full_phangmom)
      NCF_CHECK(nf90_close(ncid))
    end if
 
    ! Immediately free this - it contains displ and not eigvec at this stage
    ABI_FREE(full_eigvec)
    ABI_FREE(full_phfrq)
+   ABI_FREE(full_phangmom)
    ABI_FREE(tmp_phfrq)
    call htetraq%free()
  else
@@ -1817,9 +1822,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  real(dp) :: speedofsound(3),genafm(3)
  real(dp) :: qphnrm(3), qphon(3), qphon_padded(3,3),res(3)
  real(dp) :: d2cart(2,ddb%msize),real_qphon(3)
- real(dp) :: displ(2*3*crystal%natom*3*crystal%natom),eigval(3,crystal%natom)
+ real(dp) :: displ(2*3*Crystal%natom*3*Crystal%natom),eigval(3,Crystal%natom),phangmom(3,3*Crystal%natom)
  real(dp),allocatable :: phfrq(:),eigvec(:,:,:,:,:)
- real(dp),allocatable :: save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:)
+ real(dp),allocatable :: save_phfrq(:,:),save_phdispl_cart(:,:,:,:),save_qpoints(:,:),save_phangmom(:,:,:)
  real(dp),allocatable :: weights(:)
  real(dp),allocatable :: dos4bs(:)
  real(dp),allocatable,target :: alloc_path(:,:)
@@ -1868,6 +1873,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  ABI_MALLOC(save_qpoints, (3,nfineqpath))
  ABI_MALLOC(save_phfrq, (3*natom,nfineqpath))
  ABI_MALLOC(save_phdispl_cart, (2,3*natom,3*natom,nfineqpath))
+ ABI_MALLOC(save_phangmom, (3,3*natom,nfineqpath))
  qphnrm = one
 
  do iphl1=1,nfineqpath
@@ -1914,6 +1920,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    call dfpt_phfrq(ddb%amu,displ,d2cart,eigval,eigvec,Crystal%indsym,&
                    ddb%mpert,Crystal%nsym,natom,nsym,Crystal%ntypat,phfrq,qphnrm(1),qphon,&
                    crystal%rprimd,inp%symdynmat,Crystal%symrel,Crystal%symafm,Crystal%typat,Crystal%ucvol)
+   ! Calculation of the phonon angular momentum
+   ! maybe add it in dpft_phfrq directly ?
+   call phangmom_from_eigvec(natom, eigvec, phangmom)
 
    if (abs(freeze_displ) > tol10) then
      real_qphon = zero
@@ -1928,13 +1937,16 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
    if (eivec == 4) then
      call sortph(eigvec,displ,strcat(prefix, "_B2EPS"),natom,phfrq)
+     ! modification of sortph to include ang mom ?
    end if
 
    ! Write the phonon frequencies
    call dfpt_prtph(displ,eivec,enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
+   ! add printing of phangmom in dfpt_prtph ? This is only to stdout, maybe not needed
 
    save_phfrq(:,iphl1) = phfrq
    save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ, [2, 3*natom, 3*natom])
+   save_phangmom(:,:,iphl1) = RESHAPE(phangmom, [3, 3*natom])
 
    ! Determine the symmetries of the phonon mode at Gamma
    ! TODO: generalize for other q-point little groups.
@@ -1991,7 +2003,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal%ncwrite(ncid))
-   call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
+   call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart,save_phangmom)
+   ! call my sous routine pour output le moment angulaire (for .nc file)
+   ! -> added in phonons_ncwrite, maybe not the best idea as it is also used by mkphdos (this last had to be slightly modified)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
    if (inp%nph2l /= 0 .and. inp%ifcflag == 1) then
@@ -1999,7 +2013,9 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    end if
    NCF_CHECK(nf90_close(ncid))
 
-   call phonons_write_phfrq(strcat(prefix, "_PHFRQ"), natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart)
+   call phonons_write_phfrq(prefix, natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart, save_phangmom)
+   ! call my sous routine pour output le moment angulaire (for _PHFRQ or another file)
+   ! -> added directly in phonons_write_phfrq
 
    select case (inp%prtphbands)
    case (0)
@@ -2051,6 +2067,7 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
  ABI_FREE(save_qpoints)
  ABI_FREE(save_phfrq)
  ABI_FREE(save_phdispl_cart)
+ ABI_FREE(save_phangmom)
  ABI_FREE(phfrq)
  ABI_FREE(eigvec)
  ABI_FREE(dos4bs)
@@ -2347,24 +2364,26 @@ end subroutine phdos_print_msqd
 !!  weights(nqpts)= q-point weights
 !!  phfreq=Phonon frequencies
 !!  phdispl_cart=Phonon displacementent in Cartesian coordinates.
+!!  phangmom= Phonon angular momentum in cartesian coordinates
 !!
 !! NOTES
 !!  Input data is in a.u, whereas the netcdf files saves data in eV for frequencies
 !!  and Angstrom for the displacements
+!!  The angular momentum is output in units of hbar
 !!
 !! OUTPUT
 !!  Only writing
 !!
 !! SOURCE
 
-subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
+subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart,phangmom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ncid,natom,nqpts
 !arrays
  real(dp),intent(in) :: qpoints(3,nqpts),weights(nqpts)
- real(dp),intent(in) :: phfreq(3*natom,nqpts),phdispl_cart(2,3*natom,3*natom,nqpts)
+ real(dp),intent(in) :: phfreq(3*natom,nqpts),phdispl_cart(2,3*natom,3*natom,nqpts),phangmom(3,3*natom,nqpts)
 
 !Local variables-------------------------------
 !scalars
@@ -2377,7 +2396,7 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
  ncerr = nctk_def_dims(ncid, [&
-   nctkdim_t("number_of_qpoints", nqpts), nctkdim_t('number_of_phonon_modes', nphmodes)])
+   nctkdim_t("number_of_qpoints", nqpts), nctkdim_t('number_of_phonon_modes', nphmodes), nctkdim_t('three', 3)])
  NCF_CHECK(ncerr)
 
  ! Define arrays
@@ -2385,7 +2404,8 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
    nctkarr_t('qpoints', "dp" , 'number_of_reduced_dimensions, number_of_qpoints'),&
    nctkarr_t('qweights',"dp", 'number_of_qpoints'),&
    nctkarr_t('phfreqs',"dp", 'number_of_phonon_modes, number_of_qpoints'),&
-   nctkarr_t('phdispl_cart',"dp", 'complex, number_of_phonon_modes, number_of_phonon_modes, number_of_qpoints')])
+   nctkarr_t('phdispl_cart',"dp", 'complex, number_of_phonon_modes, number_of_phonon_modes, number_of_qpoints'),&
+   nctkarr_t('phangmom',"dp", 'three, number_of_phonon_modes, number_of_qpoints')])
  NCF_CHECK(ncerr)
 
  ! Write variables.
@@ -2394,6 +2414,8 @@ subroutine phonons_ncwrite(ncid,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
  NCF_CHECK(nf90_put_var(ncid, vid('qweights'), weights))
  NCF_CHECK(nf90_put_var(ncid, vid('phfreqs'), phfreq*Ha_eV))
  NCF_CHECK(nf90_put_var(ncid, vid('phdispl_cart'), phdispl_cart*Bohr_Ang))
+ NCF_CHECK(nf90_put_var(ncid, vid('phangmom'), phangmom))
+
 
 contains
 integer function vid(vname)
@@ -2429,7 +2451,7 @@ end subroutine phonons_ncwrite
 !!
 !! SOURCE
 
- subroutine phonons_write_phfrq(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart)
+ subroutine phonons_write_phfrq(path,natom,nqpts,qpoints,weights,phfreq,phdispl_cart,phangmom)
 
 !Arguments ------------------------------------
 !scalars
@@ -2439,6 +2461,7 @@ end subroutine phonons_ncwrite
  real(dp),intent(in) :: qpoints(3,nqpts),weights(nqpts)
  real(dp),intent(in) :: phfreq(3*natom,nqpts)
  real(dp),intent(in) :: phdispl_cart(2,3*natom,3*natom,nqpts)
+ real(dp),intent(in) :: phangmom(3,3*natom,nqpts)
 
 !Local variables-------------------------------
 !scalars
@@ -2453,7 +2476,8 @@ end subroutine phonons_ncwrite
 
  dummy = qpoints(1,1); dummy = weights(1)
 
- if (open_file(path, msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+ ! Write phonon frequencies
+ if (open_file(strcat(path, "_PHFRQ"), msg, newunit=iunit, form="formatted", status="unknown", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
 
@@ -2470,6 +2494,7 @@ end subroutine phonons_ncwrite
 
  close(iunit)
 
+ ! Does not Write phonon displacement ?
  if (.False.) then
    if (open_file(strcat(path, "_PHDISPL"), msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
      ABI_ERROR(msg)
@@ -2498,6 +2523,30 @@ end subroutine phonons_ncwrite
 
    close(iunit)
  end if
+
+ ! Write phonon angular momentum
+ if (open_file(strcat(path, "_PHANGMOM"), msg, unit=iunit, form="formatted", status="unknown", action="write") /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write (iunit, '(a)')     '# ABINIT generated phonon angular momentum, along points in PHFRQ file. All in Ha atomic units'
+ write (iunit, '(a)')     '# '
+ write (iunit, '(a)')     '# angular momentum in cartesian coordinates '
+ write (iunit, '(a,i0)')  '# number_of_qpoints ', nqpts
+ write (iunit, '(a,i0)')  '# number_of_phonon_modes ', nphmodes
+ write (iunit, '(a)')     '# '
+
+ write (formt,'(a,i0,a)') "(I5, ", nphmodes, "E20.10)"
+ do icomp = 1, 3
+   do iq= 1, nqpts
+     write (iunit, formt)  iq, phangmom(icomp,:,iq)
+   end do
+   if (icomp /= 3) then
+     write (iunit, '(a,a)') ''
+   end if
+ end do
+
+ close(iunit)
 
 end subroutine phonons_write_phfrq
 !!***
@@ -2781,7 +2830,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
  integer :: iqpt, nqpts, natom, ncid, nprocs, my_rank, ierr, nph2l, ncerr
  type(kpath_t) :: qpath
 !arrays
- real(dp),allocatable :: qph2l(:,:), qnrml2(:), eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),weights(:)
+ real(dp),allocatable :: qph2l(:,:), qnrml2(:), eigvec(:,:,:,:,:),phfrqs(:,:),phdispl_cart(:,:,:,:),phangmom(:,:,:),weights(:)
 
 ! *********************************************************************
 
@@ -2802,16 +2851,19 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 
  ABI_CALLOC(phfrqs, (3*natom,nqpts))
  ABI_CALLOC(phdispl_cart, (2,3*natom,3*natom,nqpts))
+ ABI_CALLOC(phangmom, (3,3*natom,nqpts))
  ABI_CALLOC(eigvec, (2,3,natom,3,natom))
 
  do iqpt=1,nqpts
    if (mod(iqpt, nprocs) /= my_rank) cycle ! MPI-parallelism
    ! Get phonon frequencies and displacements in cartesian coordinates for this q-point
    call ifc%fourq(cryst, qpath%points(:,iqpt), phfrqs(:,iqpt), phdispl_cart(:,:,:,iqpt), out_eigvec=eigvec)
+   call phangmom_from_eigvec(natom, eigvec, phangmom(:,:,iqpt))
  end do
 
  call xmpi_sum_master(phfrqs, master, comm, ierr)
  call xmpi_sum_master(phdispl_cart, master, comm, ierr)
+ call xmpi_sum_master(phangmom, master, comm, ierr)
 
  if (my_rank == master) then
    ABI_MALLOC(weights, (nqpts))
@@ -2850,7 +2902,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    ! Should centralize everything in a single routine
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(cryst%ncwrite(ncid))
-   call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
+   call phonons_ncwrite(ncid, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart, phangmom)
    ! This flag tells AbiPy that all the non-analytic directions have been computed.
    NCF_CHECK(nctk_defnwrite_ivars(ncid, ["has_abipy_non_anal_ph"], [1]))
    ncerr = nctk_def_arrays(ncid, [nctkarr_t("atomic_mass_units", "dp", "number_of_atom_species")], defmode=.True.)
@@ -2869,7 +2921,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
    case (2)
      call phonons_write_gnuplot(prefix, natom, nqpts, qpath%points, phfrqs, qptbounds=qpath%bounds)
    case (3)
-     call phonons_write_phfrq(strcat(prefix, "_PHFRQ"), natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart)
+     call phonons_write_phfrq(prefix, natom, nqpts, qpath%points, weights, phfrqs, phdispl_cart, phangmom)
    case default
      ABI_WARNING(sjoin("Unsupported value for prtphbands:", itoa(dtset%prtphbands)))
    end select
@@ -2879,6 +2931,7 @@ subroutine ifc_mkphbs(ifc, cryst, dtset, prefix, comm)
 
  ABI_FREE(phfrqs)
  ABI_FREE(phdispl_cart)
+ ABI_FREE(phangmom)
  ABI_FREE(eigvec)
 
  call qpath%free()
