@@ -150,6 +150,7 @@ inp_files = [
 
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
+
     # UPF2 format for norm-conserving pseudopotentials
     "t130.abi",  # UPF2
     "t131.abi",  # UPF2 with SOC
@@ -162,4 +163,7 @@ inp_files = [
     "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
     "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
     "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
+
+    # write_files behaviour
+    "t150.abi",  # test the behaviour of supravariable write_files
 ]
