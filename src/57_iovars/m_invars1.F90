@@ -2437,6 +2437,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
    dtsets(idtset)%nctime=0
+   dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
    dtsets(idtset)%neb_algo=1
    dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
@@ -2706,7 +2707,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%wvl_nprccg  = 10
    dtsets(idtset)%w90iniprj   = 1
    dtsets(idtset)%w90prtunk   = 0
-
+   dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
    dtsets(idtset)%xc_denpos = tol14
