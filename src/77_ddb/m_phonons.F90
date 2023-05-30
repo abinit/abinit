@@ -1730,7 +1730,7 @@ subroutine phdos_ncwrite(phdos, ncid)
 ! Define dimensions
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
- ncerr = nctk_def_dims(ncid, [nctkdim_t("three", 3), nctkdim_t("number_of_atoms", phdos%natom),&
+ ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_atoms", phdos%natom),&
    nctkdim_t("number_of_atom_species", phdos%ntypat), nctkdim_t("number_of_frequencies", phdos%nomega), &
    nctkdim_t("nqibz", phdos%nqibz)])
  NCF_CHECK(ncerr)
