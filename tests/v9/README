@@ -31,4 +31,6 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Tests 140-149 concern response functions except electron-phonon 
 
+* Test  150 concerning write_files supravariable
+
 ------------------------------------------------------------------

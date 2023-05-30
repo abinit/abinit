@@ -178,9 +178,9 @@ integer,       intent(in) :: nseeds, kmax
 character(*),  intent(in) :: output_filename
 
 
-complex(dpc), intent(out) :: Lbasis(npw_k,nseeds*kmax)
-complex(dpc), intent(out) :: alpha(nseeds,nseeds,kmax)
-complex(dpc), intent(out) :: beta (nseeds,nseeds,kmax)
+complex(dpc), intent(out) :: Lbasis(:,:)
+complex(dpc), intent(out) :: alpha(:,:,:)
+complex(dpc), intent(out) :: beta (:,:,:)
 
 
 ! local variables
