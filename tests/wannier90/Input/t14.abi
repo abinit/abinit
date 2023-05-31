@@ -1,34 +1,40 @@
 #GaAs crystal : ground-state with few bands,
 
-
+  ndtset  2
 #First dataset : SC run with kpoints in the IBZ
+  kptopt1 2
+  ngkpt  2  2  2        ! This is much too low : should be at least 24x24x24
+
+
+# dataset 2. Use wfk_task wannier for the wannierization
+ #irdwfk2 -1
+ optdriver2 8
+ wfk_task2 "wannier"
+ getwfk2   -1   # Read WKF in the IBZ
+ prtwant2 2
+ w90iniprj2 2
+ #kptopt2 0
+ #kpt2 0.00000 0.00000 0.00000              ! K-points list
+ #    0.00000 0.00000 0.50000
+ #    0.00000 0.50000 0.00000
+ #    0.00000 0.50000 0.50000
+ #    0.50000 0.00000 0.00000
+ #    0.50000 0.00000 0.50000
+ #    0.50000 0.50000 0.00000
+ #    0.50000 0.50000 0.50000
+ #nkpt2 8
+ kptopt 2
+ #istwfk2 8
+
+# common dataset.
+# prtdos 3
+#
   nband   8     
   nstep  30
- irdwfk 0
- prtwant 2
- w90iniprj 2
- useylm 1
-
- optdriver 8
- wfk_task "wannier"
-# prtdos 3
-
-#Data common to all datasets
-  kptopt 0
+  useylm 1
  nshiftk 1
  shiftk  0.0 0.0 0.0
-# kptopt 2
-# ngkpt  2  2  2        ! This is much too low : should be at least 24x24x24
- kpt 0.00000 0.00000 0.00000              ! K-points list
-     0.00000 0.00000 0.50000
-     0.00000 0.50000 0.00000
-     0.00000 0.50000 0.50000
-     0.50000 0.00000 0.00000
-     0.50000 0.00000 0.50000
-     0.50000 0.50000 0.00000
-     0.50000 0.50000 0.50000
-nkpt 8
-istwfk 8*1
+
 
  acell   3*10.60
  amu 69.72  74.9216
@@ -51,7 +57,9 @@ istwfk 8*1
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = t14.abo, tolnlines=   15,   tolabs=  1.5e-04,   tolrel=  1.00e-01
-#%% extra_inputs=t14o_w90.win 
+#%% extra_inputs=t14o_DS2_w90.win 
+#%% [shell]
+#%% pre_commands = iw_cp t14_w90o.win w90.win
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
