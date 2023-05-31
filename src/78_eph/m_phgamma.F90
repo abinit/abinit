@@ -43,7 +43,7 @@ module m_phgamma
  use m_ifc
  use m_ebands
  use m_fstab
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
  use netcdf
  use m_wfk
@@ -2315,7 +2315,7 @@ subroutine a2fw_write(a2f, basename, post, ncid)
  else
    write(unt,'(a)')"# Frequency, a2F_tot(w), lambda_tot(w)dw, a2F_spin1(w), lambda_spin1(w) ..."
    do iw=1,a2f%nomega
-     write(unt,*) a2f%omega(iw), &
+     write(unt,'(E20.10,3x,3(2E20.10, 2x))') a2f%omega(iw), &
                   sum(a2f%vals(iw,0,:)) , sum(a2f%lambdaw(iw,0,:)), &  ! TOT
                   a2f%vals(iw,0,1)      , a2f%lambdaw(iw,0,1),      &  ! UP
                   a2f%vals(iw,0,2)      , a2f%lambdaw(iw,0,2)          ! DOWN
@@ -2346,7 +2346,7 @@ subroutine a2fw_write(a2f, basename, post, ncid)
      write(unt,'(a,i0)')"# Phonon mode ",mu
      write(unt,'(a)')"# Frequency, a2F_tot(w), lambda_tot(w)dw, a2F_spin1(w), lambda_spin1(w) ..."
      do iw=1,a2f%nomega
-       write(unt,*) a2f%omega(iw), &
+       write(unt,'(E20.10,3x,3(2E20.10, 2x))') a2f%omega(iw), &
                     sum(a2f%vals(iw,mu,:)), sum(a2f%lambdaw(iw,mu,:)), &  ! TOT
                     a2f%vals(iw,mu,1)     , a2f%lambdaw(iw,mu,1),      &  ! UP
                     a2f%vals(iw,mu,2)     , a2f%lambdaw(iw,mu,2)          ! DOWN
@@ -3765,6 +3765,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
    ! Get phonon frequencies and eigenvectors for this q-point.
    call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+   wminmax(1) = min(wminmax(1), phfrq(1))
+   wminmax(2) = max(wminmax(2), phfrq(3*cryst%natom))
 
    ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
    ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))

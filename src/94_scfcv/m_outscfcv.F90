@@ -85,6 +85,7 @@ module m_outscfcv
                                 fourier_green,print_green,init_green,destroy_green,init_green_tau
  use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
+ use m_paw_correlations, only : loc_orbmom_cal
  implicit none
 
  private
@@ -255,6 +256,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
  integer :: my_comm_atom
  integer :: opt_imagonly
+ integer :: indsym(4,dtset%nsym,dtset%natom)
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
@@ -284,6 +286,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_zeeman
+ real(dp) :: dmatdum(0,0,0,0)
  real(dp) :: e_fermie, e_fermih ! CP added e_fermih
  type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
@@ -873,6 +876,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vtrial",dtfil%fnameabo_app_pot,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vtrial,mpi_enreg,ebands=ebands)
    end if
+   
+!  EIG
+#if defined HAVE_NETCDF
+   if (dtset%prteig==2 .and. me == master) then
+     fname=trim(dtfil%fnameabo_app_eig)//'.nc'
+     call write_eig(eigen,e_fermie,fname,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
+&     results_gs%shiftfactor_extfpmd) ! Optional arguments
+   end if
+#endif
 
    call timab(1160,2,tsec)
    call timab(1161,1,tsec)
@@ -892,7 +904,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call timab(1162,1,tsec)
 
 !  STM
-   if (dtset%prtstm>0) then
+   if (dtset%prtstm/=0) then
      call fftdatar_write("stm",dtfil%fnameabo_app_stm,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,rhor,mpi_enreg,ebands=ebands)
    end if
@@ -1059,6 +1071,33 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      if(any(dtset%constraint_kind(:)/=0))then
        call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
        call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     endif
+   end if
+
+!!!!!!!!!!!!!!!!!!!!!!!!if prt_lorbmag value is equal 1 and the calculations are noncollinear then the local orbital magnetic moments are calculated
+if (dtset%prt_lorbmag==1) then
+
+    if ((dtset%nspinor .ne. 2) .and. (dtset%nsppol .ne.4)) then
+        write (msg,'(a)')" "
+        call wrtout([std_out, ab_out], msg)
+        write (msg,'(a)')"WARNING*"
+        call wrtout([std_out, ab_out], msg)
+        write (msg,'(a)')"prt_lorbmag=1, To calcualte orbital magnetisation, calculations need to be noncollinear"
+        call wrtout([std_out, ab_out], msg)
+    else
+        if (dtset%usepawu .ne. 0)then
+            call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
+            &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
+            &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+            &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+        else
+            write (msg,'(a)')" "
+            call wrtout([std_out, ab_out], msg)
+            write (msg,'(a)')"WARNING*"
+            call wrtout([std_out, ab_out], msg)
+            write (msg,'(a)')"prt_lorbmag=1, To calcualte orbital magnetisation LDA+U calculations should be activated"
+            call wrtout([std_out, ab_out], msg)
+        end if
      endif
    end if
 

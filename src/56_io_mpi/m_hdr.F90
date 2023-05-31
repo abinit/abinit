@@ -1240,7 +1240,7 @@ end function hdr_get_nelect_from_occ
 !!   it, contain its definite values, except for evolving variables
 !!
 !! SOURCE
-! CP modified argument list: added ne_qFD,nh_qFD,ivalence
+
 subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
   codvsn,pertcase,natom,nsym,nspden,ecut,pawecutdg,ecutsm,dilatmx,&
   intxc,ixc,stmbias,usewvl,pawcpxocc,pawspnorb,ngfft,ngfftdg,so_psp,qptn,&
@@ -1692,7 +1692,7 @@ end subroutine hdr_mpio_skip
 !!
 !! SOURCE
 
-subroutine hdr_bsize_frecords(Hdr,formeig,nfrec,bsize_frecords)
+subroutine hdr_bsize_frecords(Hdr, formeig, nfrec, bsize_frecords)
 
 !Arguments ------------------------------------
 !scalars
@@ -4762,7 +4762,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    ABI_ERROR(msg)
  end if
 
- test=ALL(ABS(Hdr%xred-Dtset%xred_orig(:,1:Dtset%natom,1))<tol6)
+ test=ALL(ABS(Hdr%xred-Dtset%xred_orig(:,1:Dtset%natom,1)) < tol3)
  ABI_CHECK(test,'Mismatch in xred')
 
  test=ALL(Hdr%typat==Dtset%typat(1:Dtset%natom))
@@ -5009,6 +5009,7 @@ type(crystal_t) function hdr_get_crystal(hdr, gw_timrev, remove_inv) result(crys
    !my_timrev = kpts_timrev_from_kptopt(hdr%kptopt) + 1
    my_timrev = 1; if (any(hdr%kptopt == [3, 4])) my_timrev = 0
    my_timrev = my_timrev + 1
+   !print *, "my_timrev", my_timrev
  else
    my_timrev = gw_timrev
  end if

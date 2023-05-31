@@ -2,7 +2,7 @@
 authors: T. Rangel, O. Gingras
 ---
 
-# Tutorial on the use of Wannier90 library
+# Wannier90 postprocessor
 
 ## The Wannier90 interface tutorial
 
