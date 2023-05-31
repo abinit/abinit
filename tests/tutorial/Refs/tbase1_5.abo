@@ -30,7 +30,7 @@
      lnmax =       3     mgfft =      30  mpssoang =       2    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       2   xclevel =       1
+    occopt =       0   xclevel =       1
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         752          nfft =       27000          nkpt =           1
 ================================================================================
@@ -60,7 +60,7 @@ _ WF disk file :      0.025 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
            kptopt           0
 P           mkmem           1
             natom           1
-            nband           1       1
+            nband           1        
             ngfft          30      30      30
              nkpt           1
            nspden           2
@@ -70,7 +70,7 @@ P           mkmem           1
            ntypat           1
               occ      1.000000
                        0.000000
-           occopt           2
+           occopt           0
            prtvol           2
           spgroup         221
            spinat      0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -115,7 +115,7 @@ P           mkmem           1
 iteration_state: {dtset: 1, }
 dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 2, nspinor: 1, nspden: 2, mpw: 752, }
 cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
-electrons: {nelect:   1.00000000E+00, charge:   0.00000000E+00, occopt:   2.00000000E+00, tsmear:   1.00000000E-02, }
+electrons: {nelect:   1.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 ...
 
@@ -316,7 +316,7 @@ band_energy         : -2.66611263130436E-01
            kptopt           0
 P           mkmem           1
             natom           1
-            nband           1       1
+            nband           1        
             ngfft          30      30      30
              nkpt           1
            nspden           2
@@ -326,7 +326,7 @@ P           mkmem           1
            ntypat           1
               occ      1.000000
                        0.000000
-           occopt           2
+           occopt           0
            prtvol           2
           spgroup         221
            spinat      0.0000000000E+00  0.0000000000E+00  1.0000000000E+00

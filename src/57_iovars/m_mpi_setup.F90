@@ -104,7 +104,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 #ifdef HAVE_LINALG_ELPA
  integer :: icol,irow,np
 #endif
- logical :: fftalg_read,ortalg_read,wfoptalg_read,do_check
+ logical :: fftalg_read,ortalg_read,paral_kgb_read,wfoptalg_read,do_check
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
  character(len=500) :: msg
 !arrays
@@ -148,26 +148,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  Compute metric for this dataset
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-   ! Read paral_kgb and disable it if not supported in optdriver.
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_kgb',tread(1),'INT')
-   if (tread(1)==1) dtsets(idtset)%paral_kgb=intarr(1)
-
-   if(xmpi_paral==0.and.dtsets(idtset)%paral_kgb==1)then
-     dtsets(idtset)%paral_kgb=0
-     write(msg, '(5a)' ) &
-     'When ABINIT is compiled without MPI flag,',ch10,&
-     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
-     'Action: modify compilation option or paral_kgb in the input file.'
-     ABI_WARNING(msg)
-   end if
-
-   if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT]) .and. dtsets(idtset)%paral_kgb/=0) then
-     dtsets(idtset)%paral_kgb=0
-     write(msg, '(a,i0,a)') &
-      "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
-     ABI_COMMENT(msg)
-   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'max_ncpus',tread0,'INT')
    if (tread0==1) dtsets(idtset)%max_ncpus=intarr(1)
@@ -233,6 +213,25 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'autoparal',tread0,'INT')
    if(tread0==1) dtsets(idtset)%autoparal=intarr(1)
 
+!  Read paral_kgb and disable it if not supported in optdriver
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_kgb',tread(1),'INT')
+   paral_kgb_read=(tread(1)==1)
+   if (paral_kgb_read) dtsets(idtset)%paral_kgb=intarr(1)
+   if (xmpi_paral==0.and.dtsets(idtset)%paral_kgb==1) then
+     dtsets(idtset)%paral_kgb=0
+     write(msg, '(5a)' ) &
+     'When ABINIT is compiled without MPI flag,',ch10,&
+     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
+     'Action: modify compilation option or paral_kgb in the input file.'
+     ABI_WARNING(msg)
+   end if
+   if (ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT]) .and. dtsets(idtset)%paral_kgb/=0) then
+     dtsets(idtset)%paral_kgb=0
+     write(msg, '(a,i0,a)') &
+      "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
+     ABI_COMMENT(msg)
+   end if
+
    wfoptalg_read=.false.
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfoptalg',tread0,'INT')
    if(tread0==1) then
@@ -254,15 +253,24 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    ! From total number of procs, compute all possible distributions
    ! Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then
-       iexit = 0
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR, RUNL_NONLINEAR])) then
+     iexit = 0
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
 
-   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
-   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
+   call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
+   nproc=mpi_enregs(idtset)%nproc_cell
 
+!  Set paral_kgb to 1 when band-fft parallelism is activated
+   if (ANY(optdriver == [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT])) then
+     if (mpi_enregs(idtset)%nproc_cell>1) then
+       if (dtsets(idtset)%npband>1.or.dtsets(idtset)%npfft>1) then
+         if (.not.paral_kgb_read) dtsets(idtset)%paral_kgb=1
+       end if
+     end if
+   end if
+     
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS.and.optdriver/=RUNL_RTTDDFT).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
@@ -270,7 +278,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%np_spkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
      dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     ABI_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
+     ABI_COMMENT('For non ground state calculations, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
    end if
 
 !  Take into account a possible change of paral_kgb (change of the default algorithm)
@@ -336,16 +344,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%npfft>1.and.usepaw==1) then
      dtsets(idtset)%pawmixdg=1
    end if
-
-   call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
-   nproc=mpi_enregs(idtset)%nproc_cell
-
+     
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_FREE(intarr)
      ABI_FREE(dprarr)
      cycle
    end if
+
+   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
+   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
 
    response=0
    if (dtsets(idtset)%rfddk/=0 .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
@@ -488,25 +496,25 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
    end if
 
-   !Check parallelization in case of RTTDDFT 
+   !Check parallelization in case of RTTDDFT
    !In particular ensure that bandpp = nband / npband
    if (optdriver == RUNL_RTTDDFT) then
       dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
-      if ( tread(8) == 1 ) then 
+      if ( tread(8) == 1 ) then
          write(msg, '(a,a)') 'Setting bandpp is useless in RT-TDDFT because it is automatically set to nband/npband.', ch10
          ABI_WARNING(msg)
       end if
-      if (dtsets(idtset)%npfft/=1) then 
+      if (dtsets(idtset)%npfft/=1) then
          dtsets(idtset)%npfft=1
          write(msg, '(a,a)') 'RT-TDDFT is not compatible with FFT-parallelization. Remove npfft or set it to 1.', ch10
          ABI_ERROR(msg)
       end if
-      if (dtsets(idtset)%npspinor/=1) then 
+      if (dtsets(idtset)%npspinor/=1) then
          dtsets(idtset)%npspinor=1
          write(msg, '(a,a)') 'RT-TDDFT is not compatible with spinor parallelization. Remove npspinor or set it to 1.', ch10
          ABI_ERROR(msg)
       end if
-      if (dtsets(idtset)%nphf/=1) then 
+      if (dtsets(idtset)%nphf/=1) then
          dtsets(idtset)%nphf=1
          write(msg, '(a,a)') 'RT-TDDFT is not compatible with HF parallelization. Remove nphf or set it to 1.', ch10
          ABI_ERROR(msg)
@@ -694,7 +702,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        !  mkmem was not set in the input file so default to incore solution
        !write(msg,'(6a)') &
        !'mpi_setup: ',nm_mkmem(ii),' undefined in the input file.','Use default ',nm_mkmem(ii),' = nkpt'
-       !call wrtout(std_out,msg,'COLL')
+       !call wrtout(std_out, msg)
        mkmem=nkpt
      end if
 
@@ -735,14 +743,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
-!  Check if some MPI processes are empty (MBPT code uses a complete different MPI algorithm)
-   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])
+!  Check if some MPI processes are empty (MBPT codes uses a complete different MPI algorithm)
+   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR])
    if (dtsets(idtset)%usewvl == 0 .and. do_check) then
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
           dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=msg)) then
        write(msg,'(5a)') trim(msg),ch10,&
          'YOU ARE STRONGLY ADVISED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
-         'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
+         'USE "AUTOPARAL=1" IN THE INPUT FILE.'
        ABI_WARNING(msg)
      end if
    end if
@@ -1948,14 +1956,13 @@ end subroutine mpi_setup
 
  DBG_EXIT("COLL")
 
- contains
+contains
 
-   function speedup_fdp(nn,mm)
-   !Expected linear speedup for a nn-sized problem and mm processes
-   real(dp) :: speedup_fdp
-   integer,intent(in) :: nn,mm
-   speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
- end function speedup_fdp
+real(dp) pure function speedup_fdp(nn, mm)
+  ! Expected linear speedup for a nn-sized problem and mm processes
+  integer,intent(in) :: nn, mm
+  speedup_fdp = (one*nn) / (one* ((nn / mm) + merge(0, 1, mod(nn, mm) == 0)))
+end function speedup_fdp
 
 end subroutine finddistrproc
 !!***

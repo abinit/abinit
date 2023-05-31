@@ -6,6 +6,8 @@
 ndtset 9          # 9 datasets
 ecut: 8.          # The starting values of the plane-wave cut-off energy
 ecut+ 2.          # The increment of ecut from one dataset to the other
+#pawecutdg: 8.
+#pawecutdg+ 2.
 getwfk -1         # The starting wave-functions are those of the previous dataset
 
 #-------------------------------------------------------------------------------
@@ -42,6 +44,7 @@ occopt 1          # Automatic generation of occupation numbers, as a semiconduct
 ecut 15.0         # Maximal plane-wave kinetic energy cut-off, in Hartree (not used here)
 ecutsm 0.5        # Introduce a smooth PW cutoff within an 0.5 Ha region
 pawecutdg 50.     # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
+#pawecutdg 18.     # Max. plane-wave kinetic energy cut-off, in Ha, for the PAW double grid
 kptopt 1          # Automatic generation of k points, taking into account the symmetry
 ngkpt 6 6 6       # This is a 6x6x6 grid based on the primitive vectors
 nshiftk 4         # of the reciprocal space, repeated four times,

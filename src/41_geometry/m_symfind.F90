@@ -519,16 +519,14 @@ contains
        if(trialok==0)exit
      end do ! End loop over all classes
 
-!DEBUG
-!    write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
-!    write(std_out,*)' '
-!ENDDEBUG
+     !write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
+     !write(std_out,*)' '
 
      if(trialok==1)then
        nsym=nsym+1
        if(nsym>msym)then
          write(msg,'(a,i0,2a,i0,4a)')&
-         'The number of symmetries (including non-symmorphic translations) is:', nsym, ch10,&
+         'The number of symmetries (including non-symmorphic translations) is: ', nsym, ch10,&
          'is larger than maxnsym: ',msym,ch10,&
          'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
          'or at least smaller than the present one.'

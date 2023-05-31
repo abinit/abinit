@@ -75,9 +75,9 @@ contains
 !!   This is only computed for ider=0 or 1.
 !!
 !! NOTES
-!!        if ider=0, compute only the function (contained in fun)
-!!        if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
-!!        if ider=2, compute only the second derivative of the function (in derfun)
+!!  if ider=0, compute only the function (contained in fun)
+!!  if ider=1, compute the function (contained in fun) and its first derivative (in derfun)
+!!  if ider=2, compute only the second derivative of the function (in derfun)
 !!
 !! SOURCE
 
@@ -94,9 +94,6 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
  !real(dp) :: tsec(2)
 
 ! *************************************************************************
-
- ! Keep track of time spent in mkffnl
- !call timab(1905, 1, tsec)
 
  ! argmin is smallest x value in spline fit; de is uniform spacing of spline argument
  argmin = arg(1)
@@ -191,8 +188,6 @@ subroutine splfit(arg, derfun, fun, ider, newarg, newfun, numarg, numnew)
  case default
    ABI_ERROR(sjoin("Invalid ider:", itoa(ider)))
  end select
-
- !call timab(1905, 2, tsec)
 
 end subroutine splfit
 !!***

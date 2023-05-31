@@ -79,7 +79,7 @@ The command *mpirun* might possibly be replaced by *mpiexec* depending on your s
 ## Tutorials
 
 * [[tutorial:basepar|An introduction on ABINIT in Parallel]] should be read before going to the next tutorials about parallelism. One simple example of parallelism in ABINIT will be shown.
-* [[tutorial:paral_gspw|Parallelism for ground-state calculations, with plane waves]] presents the combined k-point (K), plane-wave (G), band (B), spin/spinor parallelism of ABINIT (so, the "KGB" parallelism), for the computation of total energy, density, and ground state properties 
+* [[tutorial:paral_bandpw|Parallelism over bands and plane waves]] presents the combined k-point (K), plane-wave (G), band (B), spin/spinor parallelism of ABINIT (so, the "KGB" parallelism), for the computation of total energy, density, and ground state properties 
 * [[tutorial:paral_moldyn|Parallelism for molecular dynamics calculations]]
 * [[tutorial:paral_images|Parallelism based on "images", e.g. for the determination of transitions paths (NEB, string method) or PIMD]], that can be activated on top of the "KGB" parallelism for force calculations.
 * [[tutorial:paral_gswvl|Parallelism for ground-state calculations, with wavelets]] presents the parallelism of ABINIT, when wavelets are used as a basis function instead of planewaves, for the computation of total energy, density, and ground state properties

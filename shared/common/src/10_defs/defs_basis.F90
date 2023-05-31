@@ -123,7 +123,7 @@ module defs_basis
  integer,public,parameter :: MAX_NSHIFTK = 210
  ! Maximun number of shifts in input k-mesh.
 
-!Real constants
+!Real dp constants
  real(dp), parameter :: zero=0._dp
  real(dp), parameter :: one=1._dp
  real(dp), parameter :: two=2._dp
@@ -136,6 +136,7 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
+!Real sp constants
  real(sp), parameter :: zero_sp=0._sp
  real(sp), parameter :: one_sp=1._sp
 
@@ -196,7 +197,7 @@ module defs_basis
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
- real(dp), parameter :: tol30=1.0d-30
+ real(dp), parameter :: tol30=1.0e-30_dp
 
 !real constants derived from sqrt(n.)
  real(dp), parameter :: sqrt2=1.4142135623730950488016887242096939_dp
@@ -215,6 +216,10 @@ module defs_basis
  ! numerical value.
  real(dp),parameter :: MAGIC_UNDEF = 9.9999999999D+99
 
+ ! Max Memory in Mb available for a MPI processor
+ ! This quantity might be used at runtime to determine how to distribute memory.
+ ! The default value (2Gb) can be changed at runtime via the command line interface.
+ real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
@@ -320,8 +325,8 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_DDK_DIAGO = 6
  integer,public,parameter :: WFK_TASK_OPTICS_FULLBZ = 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
- integer,public,parameter :: WFK_TASK_WANNIER = 9
-
+ integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
+ integer,public,parameter :: WFK_TASK_WANNIER = 10
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -430,9 +435,7 @@ CONTAINS  !=====================================================================
  subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
-!scalars
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
-!Local variables ------------------------------
 
 !************************************************************************
 
@@ -463,7 +466,6 @@ CONTAINS  !=====================================================================
  subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
-!scalars
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
 
 !************************************************************************
@@ -487,19 +489,14 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!   unit = Unit number for output file.
 !!
-!! OUTPUT
-!!   Only printing.
-!!
 !! SOURCE
 
  subroutine print_kinds(unit)
 
 !Arguments-------------------------------------
-!scalars
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
-!scalars
  integer :: my_unt
 
  ! *********************************************************************
@@ -567,6 +564,8 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_KPTS_ERANGE
  case ("optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
+ case ("check_symtab")
+   wfk_task = WFK_TASK_CHECK_SYMTAB
 case ("wannier")
    wfk_task = WFK_TASK_WANNIER
  case default
@@ -574,6 +573,30 @@ case ("wannier")
  end select
 
 end function str2wfktask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* defs_basis/set_mem_per_cpu_mb
+!! NAME
+!! set_mem_per_cpu_mb
+!!
+!! FUNCTION
+!!  Set the value of global variable `mem_per_cpu_mb`
+!!
+!! SOURCE
+
+subroutine set_mem_per_cpu_mb(mem_mb)
+
+!Arguments-------------------------------------
+ real(dp),intent(in) :: mem_mb
+
+! *********************************************************************
+
+ !print *, "Setting mem_per_cpu_mb to", mem_mb
+ mem_per_cpu_mb = mem_mb
+
+end subroutine set_mem_per_cpu_mb
 !!***
 
 !----------------------------------------------------------------------

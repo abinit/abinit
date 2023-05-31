@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.8.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Fri  4 Nov 2022.
+- ( at 13h34 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t18/t18.in
-- output file    -> t18.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/TestBot_MPI1/libxc_t18/t18.abi
+- output file    -> t18.abo
 - root for input  files -> t18i
 - root for output files -> t18o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         752          nfft =       27000          nkpt =           1
 ================================================================================
-P This job should need less than                      12.264 Mbytes of memory.
+P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         752          nfft =       27000          nkpt =           1
 ================================================================================
-P This job should need less than                      12.264 Mbytes of memory.
+P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         752          nfft =       27000          nkpt =           1
 ================================================================================
-P This job should need less than                      12.264 Mbytes of memory.
+P This job should need less than                      13.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
@@ -329,8 +329,8 @@ _ WF disk file :      0.094 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
              ecut      1.00000000E+01 Hartree
 -          fftalg         312
            istwfk        2
-              ixc1      -1022
-              ixc2      -1023
+              ixc1      -1003
+              ixc2      -1012
               ixc3      -1024
               ixc4    -139131
               ixc5    -140131
@@ -457,8 +457,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -497,17 +497,17 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -4.9248048665329    -4.925E+00 1.635E-01 2.433E+02
+ ETOT  1  -5.0303425431670    -5.030E+00 1.574E-01 4.745E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.85770623E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.85770623E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.85770623E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.07507341E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.07507341E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.07507341E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
-  maximum residual=  1.635E-01 exceeds tolwfr=  1.000E-14
+  maximum residual=  1.574E-01 exceeds tolwfr=  1.000E-14
 
 
 --- !ResultsGS
@@ -520,15 +520,15 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -4.925E+00, res2:  2.433E+02, residm:  1.635E-01, diffor: null, }
-etotal    :  -4.92480487E+00
+convergence: {deltae: -5.030E+00, res2:  4.745E+02, residm:  1.574E-01, diffor: null, }
+etotal    :  -5.03034254E+00
 entropy   :   0.00000000E+00
-fermie    :   1.51741934E-01
+fermie    :   1.44271850E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.85770623E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.85770623E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.85770623E-04, ]
-pressure_GPa:  -8.4077E+00
+- [  3.07507341E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.07507341E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.07507341E-04, ]
+pressure_GPa:  -9.0472E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
 cartesian_forces: # hartree/bohr
@@ -540,16 +540,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.629331     0.404399      1.033730     0.224933
+    1   2.00000     0.641242     0.405112      1.046354     0.236130
  ---------------------------------------------------------------------
-  Sum:              0.629331     0.404399      1.033730     0.224933
- Total magnetization (from the atomic spheres):             0.224933
+  Sum:              0.641242     0.405112      1.046354     0.236130
+ Total magnetization (from the atomic spheres):             0.236130
  Total magnetization (exact up - dn):                       3.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.931E-02; max=  16.354E-02
+ Mean square residual over all n,k,spin=   11.309E-02; max=  15.735E-02
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -567,39 +567,39 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
- Fermi (or HOMO) energy (hartree) =   0.15174   Average Vxc (hartree)=  -0.18246
+ Fermi (or HOMO) energy (hartree) =   0.14427   Average Vxc (hartree)=  -0.15632
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.41192   -0.04393   -0.03115    0.15174
+  -0.43932   -0.06034   -0.04686    0.14427
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.41192   -0.04393   -0.03115    0.15174
+  -0.43932   -0.06034   -0.04686    0.14427
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.25672542796552E+00
-hartree             :  5.41901884092137E-01
-xc                  : -9.51930917987736E-01
+kinetic             :  1.31593474181462E+00
+hartree             :  6.04237322915469E-01
+xc                  : -1.07128505772705E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -2.48497259333782E+00
-non_local_psp       :  8.61196042770431E-02
-total_energy        : -4.92480486653291E+00
-total_energy_eV     : -1.34010755658823E+02
-band_energy         : -7.47190165043572E-01
+local_psp           : -2.59564853829644E+00
+non_local_psp       :  8.90672596684483E-02
+total_energy        : -5.03034254316702E+00
+total_energy_eV     : -1.36882581889406E+02
+band_energy         : -8.41559021476471E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.85770623E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.85770623E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.85770623E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  3.07507341E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  3.07507341E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  3.07507341E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -8.4077E+00 GPa]
-- sigma(1 1)=  8.40766058E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.40766058E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.40766058E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -9.0472E+00 GPa]
+- sigma(1 1)=  9.04717680E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  9.04717680E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  9.04717680E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
@@ -625,8 +625,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -664,17 +664,17 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -4.8870125869020    -4.887E+00 1.634E-01 2.237E+02
+ ETOT  1  -5.0185485571490    -5.019E+00 1.637E-01 1.341E+02
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.84673204E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.84673204E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.84673204E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.88687817E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.88687817E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.88687817E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
-  maximum residual=  1.634E-01 exceeds tolwfr=  1.000E-14
+  maximum residual=  1.637E-01 exceeds tolwfr=  1.000E-14
 
 
 --- !ResultsGS
@@ -687,15 +687,15 @@ lattice_vectors:
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
-convergence: {deltae: -4.887E+00, res2:  2.237E+02, residm:  1.634E-01, diffor: null, }
-etotal    :  -4.88701259E+00
+convergence: {deltae: -5.019E+00, res2:  1.341E+02, residm:  1.637E-01, diffor: null, }
+etotal    :  -5.01854856E+00
 entropy   :   0.00000000E+00
-fermie    :   1.58830468E-01
+fermie    :   1.34573870E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  2.84673204E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   2.84673204E-04,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   2.84673204E-04, ]
-pressure_GPa:  -8.3754E+00
+- [  2.88687817E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.88687817E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.88687817E-04, ]
+pressure_GPa:  -8.4935E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Bi]
 cartesian_forces: # hartree/bohr
@@ -707,16 +707,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   2.00000     0.624903     0.403304      1.028208     0.221599
+    1   2.00000     0.635055     0.405725      1.040780     0.229330
  ---------------------------------------------------------------------
-  Sum:              0.624903     0.403304      1.028208     0.221599
- Total magnetization (from the atomic spheres):             0.221599
+  Sum:              0.635055     0.405725      1.040780     0.229330
+ Total magnetization (from the atomic spheres):             0.229330
  Total magnetization (exact up - dn):                       3.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.887E-02; max=  16.335E-02
+ Mean square residual over all n,k,spin=   10.991E-02; max=  16.373E-02
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -734,39 +734,39 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
- Fermi (or HOMO) energy (hartree) =   0.15883   Average Vxc (hartree)=  -0.16509
+ Fermi (or HOMO) energy (hartree) =   0.13457   Average Vxc (hartree)=  -0.17706
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.39879   -0.03268   -0.02065    0.15883
+  -0.43675   -0.06643   -0.05277    0.13457
  Eigenvalues (hartree) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.39879   -0.03268   -0.02065    0.15883
+  -0.43675   -0.06643   -0.05277    0.13457
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  1.24810111897121E+00
-hartree             :  5.31793387805399E-01
-xc                  : -9.16784879465164E-01
+kinetic             :  1.26840938098316E+00
+hartree             :  5.55681777890313E-01
+xc                  : -1.04280981589753E+00
 Ewald energy        : -3.54662184935089E+00
 psp_core            :  1.73973577808835E-01
-local_psp           : -2.46318263420267E+00
-non_local_psp       :  8.57086915312576E-02
-total_energy        : -4.88701258690203E+00
-total_energy_eV     : -1.32982375430843E+02
-band_energy         : -6.92066400340593E-01
+local_psp           : -2.51390542864681E+00
+non_local_psp       :  8.67238000639170E-02
+total_energy        : -5.01854855714901E+00
+total_energy_eV     : -1.36561651208631E+02
+band_energy         : -8.58136035201353E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.84673204E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.84673204E-04  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.84673204E-04  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.88687817E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.88687817E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.88687817E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -8.3754E+00 GPa]
-- sigma(1 1)=  8.37537342E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  8.37537342E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  8.37537342E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -8.4935E+00 GPa]
+- sigma(1 1)=  8.49348738E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  8.49348738E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  8.49348738E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -792,8 +792,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -959,8 +959,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1126,8 +1126,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1293,8 +1293,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1460,8 +1460,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1627,8 +1627,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1794,8 +1794,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1961,8 +1961,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2128,8 +2128,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2295,8 +2295,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2462,8 +2462,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2629,8 +2629,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2796,8 +2796,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2963,8 +2963,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3130,8 +3130,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3282,8 +3282,8 @@ band_energy         : -8.58157201013817E-01
            diemac      2.00000000E+00
            diemix      5.00000000E-01
              ecut      1.00000000E+01 Hartree
-           etotal1    -4.9248048665E+00
-           etotal2    -4.8870125869E+00
+           etotal1    -5.0303425432E+00
+           etotal2    -5.0185485571E+00
            etotal3    -5.0632928634E+00
            etotal4    -4.9765412723E+00
            etotal5    -4.9716874787E+00
@@ -3318,8 +3318,8 @@ band_energy         : -8.58157201013817E-01
             fcart18   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
            istwfk        2
-              ixc1      -1022
-              ixc2      -1023
+              ixc1      -1003
+              ixc2      -1012
               ixc3      -1024
               ixc4    -139131
               ixc5    -140131
@@ -3358,9 +3358,9 @@ P           mkmem           1
             prtwf           0
           spgroup         221
            spinat      1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten1     2.8577062280E-04  2.8577062280E-04  2.8577062280E-04
+           strten1     3.0750734094E-04  3.0750734094E-04  3.0750734094E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     2.8467320418E-04  2.8467320418E-04  2.8467320418E-04
+           strten2     2.8868781676E-04  2.8868781676E-04  2.8868781676E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     2.9244741509E-04  2.9244741509E-04  2.9244741509E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3515,10 +3515,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.4  wall=          7.6
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          5.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  56 WARNINGs and  38 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.4  wall=          7.6
+.Delivered  51 WARNINGs and  39 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.7  wall=          5.2
