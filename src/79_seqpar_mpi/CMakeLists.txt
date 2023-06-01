@@ -3,7 +3,6 @@
 #
 add_library(79_seqpar_mpi STATIC
   m_chebfiwf.F90
-  m_dfpt_lw.F90
   m_lobpcgwf_old.F90
   m_inwffil.F90
   m_lobpcgwf.F90
