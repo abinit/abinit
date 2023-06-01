@@ -6,7 +6,9 @@ add_library(72_response STATIC
   m_dfptnl_pert.F90
   m_dfpt_cgwf.F90
   m_dfpt_elt.F90
-  m_dfpt_lwwf.F90
+  m_dfptlw_nv.F90
+  m_dfptlw_wf.F90
+  m_dfptlw_pert.F90
   m_dfpt_mkrho.F90
   m_dfpt_mkvxcstr.F90
   m_dfpt_nstwf.F90

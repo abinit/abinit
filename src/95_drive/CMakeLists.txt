@@ -6,6 +6,7 @@ add_library(95_drive STATIC
   m_bader.F90
   m_cut3d.F90
   m_bethe_salpeter.F90
+  m_dfptlw_loop.F90
   m_dfptnl_loop.F90
   m_dfpt_looppert.F90
   m_driver.F90

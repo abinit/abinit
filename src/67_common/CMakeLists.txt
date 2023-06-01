@@ -35,6 +35,7 @@ add_library(67_common STATIC
   m_stress.F90
   m_vtorhotf.F90
   m_wvl_rho.F90
+  m_xc_tb09.F90
   )
 
 set_target_properties(67_common

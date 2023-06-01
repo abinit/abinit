@@ -40,7 +40,7 @@ extern "C" {
             << "] )"
             << std::endl ;
       }
-      Kokkos::print_configuration( msg );
+      //Kokkos::print_configuration( msg );
       std::cout << msg.str() << "##########################\n" << std::flush;
     } // end rank==0
 

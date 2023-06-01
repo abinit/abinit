@@ -20,7 +20,7 @@ endif()
 
 project(abinit
   LANGUAGES C CXX Fortran
-  VERSION 9.9.0
+  VERSION 9.11.0
   HOMEPAGE_URL https://www.abinit.org/
   DESCRIPTION "ABINIT is an atomic-scale simulation software suite.")
 

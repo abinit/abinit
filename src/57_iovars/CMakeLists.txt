@@ -14,6 +14,7 @@ add_library(57_iovars STATIC
   m_outvar_i_n.F90
   m_outvar_o_z.F90
   m_outxml.F90
+  m_out_spg_anal.F90
   m_out_acknowl.F90
   )
 
