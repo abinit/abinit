@@ -44,6 +44,10 @@ macro(abi_build_exe exe_name)
       abinit::netcdf)
   endif (ABINIT_NETCDF_FOUND)
 
+  set_target_properties(${exe_name}
+    PROPERTIES
+    LINKER_LANGUAGE "Fortran")
+
 endmacro(abi_build_exe)
 
 abi_build_exe(abinit)
@@ -67,7 +71,6 @@ abi_build_exe(mrgscr)
 abi_build_exe(multibinit)
 abi_build_exe(optic)
 abi_build_exe(testtransposer)
-abi_build_exe(ujdet)
 abi_build_exe(vdw_kernelgen)
 
 # abinit library
