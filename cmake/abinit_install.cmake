@@ -74,7 +74,7 @@ generate_pkgconfig(abinit)
 install(
   TARGETS abinit abitk aim anaddb atdep band2eps conducti cut3d dummy_tests fftprof
   fold2Bloch ioprof lapackprof macroave mrgddb mrgdv mrggkk mrgscr multibinit
-  optic testtransposer ujdet vdw_kernelgen
+  optic testtransposer vdw_kernelgen
   abinit_lib 39_libpaw 33_xc_lowlevel 28_numeric_noabirule 27_toolbox_oop 18_timing 17_yaml_out 16_hideleave 14_hidewrite 12_hide_mpi 11_memory_mpi 10_defs 02_clib
   EXPORT ${targets_export_name}
   ARCHIVE DESTINATION ${INSTALL_LIBDIR} COMPONENT lib
