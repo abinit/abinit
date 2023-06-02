@@ -32,6 +32,8 @@ module m_polynomial_term
 
  public :: polynomial_term_init
  public :: polynomial_term_free
+ public :: terms_compare
+ public :: terms_compare_inverse
 !!***
 
 !!****t* m_polynomial_term/polynomial_term_type
@@ -79,11 +81,11 @@ module m_polynomial_term
 
    real(dp) :: weight = zero
 !     weight of the term
-
  end type polynomial_term_type
 !!***
 
-interface operator (==)
+
+ interface  operator (==)
   module procedure terms_compare
 end interface
 
@@ -452,6 +454,26 @@ pure function terms_compare(t1,t2) result (res)
 
 end function terms_compare
 !!***
+
+subroutine terms_copy(tin, tout)
+  type(polynomial_term_type), intent(in) :: tin
+  type(polynomial_term_type), intent(out) :: tout
+  call polynomial_term_init( tin%atindx, tin%cell, tin%direction, &
+    & tin%ndisp, tin%nstrain, tout,tin%power_disp, tin%power_strain, tin%strain, &
+    & tin%weight, check=.True.)
+end subroutine terms_copy
+
+function terms_compare_inverse(t1, t2) result(res)
+  type(polynomial_term_type), intent(in) :: t1,t2
+  logical :: res
+  type(polynomial_term_type) :: t3
+  call terms_copy(t2, t3)
+  t3%atindx(1,:) =t2%atindx(2, :)
+  t3%atindx(2,:) =t2%atindx(1, :)
+  t3%cell(1,:, :) = 0
+  t3%cell(2, :, :) = -t2%cell(2,:, : )
+  res=terms_compare(t1, t3)
+end function terms_compare_inverse
 
 
 end module m_polynomial_term
