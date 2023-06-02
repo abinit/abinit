@@ -75,7 +75,7 @@ program optic
  integer,parameter :: formeig0 = 0, formeig1 = 1, master = 0
  integer :: fform,finunt,ep_ntemp,itemp,i1,i2
  integer :: bantot,bdtot0_index,bdtot_index
- integer :: ierr,ii,jj,ikpt
+ integer :: ierr,ii,jj,kk,ikpt ! VT bands decompo kk
  integer :: isppol,mband,nomega,nband1
  integer :: nkpt,nsppol
  integer :: nks_per_proc,work_size,lin1,lin2,nlin1,nlin2,nlin3
@@ -92,7 +92,9 @@ program optic
  real(dp) :: domega, eff
  real(dp) :: broadening,maxomega,scissor,tolerance
  real(dp) :: tcpu,tcpui,twall,twalli
+ real(dp) :: w_decompo ! VT bands decomposition
  logical :: do_antiresonant, do_temperature
+ logical :: do_decompo ! VT bands decomposition
  logical :: do_ep_renorm
  logical,parameter :: remove_inv = .False.
  type(hdr_type) :: hdr
@@ -124,7 +126,7 @@ program optic
  ! Input file
  namelist /FILES/ ddkfile_1, ddkfile_2, ddkfile_3, wfkfile
  namelist /PARAMETERS/ broadening, domega, maxomega, scissor, tolerance, do_antiresonant, do_temperature, &
-                       autoparal, max_ncpus, prtlincompmatrixelements, nband_sum
+                       do_decompo, w_decompo, autoparal, max_ncpus, prtlincompmatrixelements, nband_sum ! VT bands decomposition
  namelist /COMPUTATIONS/ num_lin_comp, lin_comp, num_nonlin_comp, nonlin_comp, &
           num_linel_comp, linel_comp, num_nonlin2_comp, nonlin2_comp
  namelist /TEMPERATURE/ epfile
@@ -204,6 +206,8 @@ program optic
    prtlincompmatrixelements = 0 ! print the sum elements for external analysis
    do_antiresonant = .TRUE. ! do use antiresonant approximation (only resonant transitions in the calculation)
    do_temperature = .FALSE.
+   do_decompo = .FALSE. ! do NOT perform the bands decomposition, VT
+   w_decompo  = 2.0_dp  ! Ha, random default value, VT
 
    ! Read input file
    read(finunt,nml=FILES)
@@ -371,6 +375,8 @@ program optic
  call xmpi_bcast(num_nonlin2_comp, master, comm, ierr)
  call xmpi_bcast(nonlin2_comp, master, comm, ierr)
  call xmpi_bcast(do_antiresonant, master, comm, ierr)
+ call xmpi_bcast(do_decompo, master, comm, ierr) ! VT bands decomposition 
+ call xmpi_bcast(w_decompo, master, comm, ierr)  ! VT bands decomposition 
  call xmpi_bcast(do_ep_renorm, master, comm, ierr)
  call xmpi_bcast(ep_ntemp, master, comm, ierr)
  call xmpi_bcast(filnam_out, master, comm, ierr)
@@ -502,7 +508,13 @@ program optic
    if (do_antiresonant) then
      write(std_out,'(a)') ' Will use the antiresonant approximation '
    else
-     write(std_out,'(a)') ' Will not use the antiresonant approximation (only available for nonlin2 and linel components!) '
+     write(std_out,'(a)') ' Will not use the antiresonant approximation (only available for nlinopt, nonlin2 and linel components!) '
+   end if
+   ! VT bands decomposition
+   if (do_decompo) then
+     write(std_out,'(a)') ' Will perform the bands decomposition (only available for nlinopt!) '
+   else
+     write(std_out,'(a)') ' Will not perform the bands decomposition '
    end if
    write(std_out,'(a)') ' linear coeffs to be calculated : '
    write(std_out,'(9i3)') lin_comp(1:num_lin_comp)
@@ -528,10 +540,10 @@ program optic
    NCF_CHECK(nctk_def_dims(optic_ncid, [nctkdim_t("ntemp", ep_ntemp), nctkdim_t("nomega", nomega)], defmode=.True.))
 
    ncerr = nctk_def_iscalars(optic_ncid, [character(len=nctk_slen) :: &
-       "do_antiresonant", "do_ep_renorm", "nband_sum"])
+       "do_antiresonant", "do_ep_renorm", "do_decompo", "nband_sum"]) ! VT bands decomposition
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "broadening", "domega", "maxomega", "scissor", "tolerance"])
+     "broadening", "domega", "maxomega", "scissor", "tolerance", "w_decompo"]) ! VT bands decomposition
    NCF_CHECK(ncerr)
 
    ! Define arrays containing output results
@@ -645,14 +657,15 @@ program optic
    ! Write optic input variables.
    ii = 0; if (do_antiresonant) ii = 1
    jj = 0; if (do_ep_renorm) jj = 1
+   kk = 0; if (do_decompo) kk = 1 ! VT bands decompo
    ncerr = nctk_write_iscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "do_antiresonant", "do_ep_renorm", "nband_sum"], &
-     [ii, jj, nband_sum])
+     "do_antiresonant", "do_ep_renorm", "do_decompo", "nband_sum"], & ! VT bands decompo
+     [ii, jj, kk, nband_sum]) ! VT bands decompo
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(optic_ncid, [character(len=nctk_slen) :: &
-     "broadening", "domega", "maxomega", "scissor", "tolerance"], &
-     [broadening, domega, maxomega, scissor, tolerance])
+     "broadening", "domega", "maxomega", "scissor", "tolerance", "w_decompo"], & ! VT bands decomposition
+     [broadening, domega, maxomega, scissor, tolerance, w_decompo])
    NCF_CHECK(ncerr)
 #endif
  end if
@@ -730,7 +743,8 @@ program optic
    end if
 
    call nlinopt(ii, itemp, nband_sum, cryst, ks_ebands, pmat, &
-                nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, tmp_radix, optic_ncid, comm)
+                nlin1, nlin2, nlin3, nomega, domega, scissor, broadening, tolerance, w_decompo, & ! VT bands decomposition
+                tmp_radix, do_decompo, do_antiresonant, optic_ncid, comm)
  end do
 
  ! linear electro-optic susceptibility for semiconductors
