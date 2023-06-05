@@ -19,11 +19,14 @@ ABI_SRC_DEP = 2     # The file depends on other files
 # Source files
 sources = [
  "defs_wannier90.F90",
+ "m_abstract_wf.F90",
  "m_mlwfovlp.F90",
  "m_mlwfovlp_qp.F90",
  "m_scdm_math.F90", 
  "m_wannier_builder.F90",
  "m_wann_netcdf.F90",
+ "m_wannier_io.F90",
+ "m_wfd_wannier.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

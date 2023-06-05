@@ -45,20 +45,18 @@ module m_wannier_builder
   use m_wann_netcdf, only: IOWannNC
   implicit none
   public:: WannierBuilder_t
+  public :: WannierBuilder_witheigen_t
   public:: Amn_to_H
   private
 
 
-
   !===============================================================
-  ! scdmk type:
+  ! WannierBuilder_t type:
   !> @ description: the class for scdmk method.
   !===============================================================
   type::  WannierBuilder_t
 
      ! Inputs 
-     real(dp),  pointer:: evals(:, :) => null()   !(iband, ikpt)
-     complex(dp),  pointer:: psi(:, :, :) => null() ! (ibasis, iband, ikpt)
      real(dp), allocatable:: kpts(:, :) !(idim, ikpt)
      real(dp), allocatable:: kweights(:) !(ikpt)
      !real(dp), allocatable:: weight(:, :) !(iband, ikpt)
@@ -121,25 +119,33 @@ module m_wannier_builder
      procedure:: get_wannier_eigen_klist
   end type WannierBuilder_t
 
+
+  ! Extends WannierBuilder_t with pointer to eigens. 
+  type, extends(WannierBuilder_t):: WannierBuilder_witheigen_t
+     real(dp),  pointer:: evals(:, :) => null()   !(iband, ikpt)
+     complex(dp),  pointer:: psi(:, :, :) => null() ! (ibasis, iband, ikpt)
+   contains
+     procedure :: set_eigen => set_eigen
+     procedure :: get_psi_k => get_psi_k_from_eigen
+     procedure :: get_evals_k => get_evals_k_from_eigen
+  end type WannierBuilder_witheigen_t
+
 contains
 
   !===============================================================
   !
   !> @
-  !> evals: pointer to eigen values. 2D real matrix. The indices are (iband, ikpt).
-  !> psi: pointer to wavefunctions. complex matrix. The indices are (ibasis, iband, ikpt)
   !> kpts: kpoints. indices: (idim, ikpt)
   !> kweights: kweights. indices: (ikpt)
   !> nwann: number of Wannier functions to be calcualted.
+  !> nbasis: number of basis in the original wavefunction.
   !> disentangle_func_type: the type of the disentanglement function. 1: unity function. 2. Fermi. 3. Gauss
   !> project_to_anchor: whether to multiply the weight function by the projection to the anchor states. 
   !===============================================================
-  subroutine initialize(self, evals, psi, kpts, kweights, Rlist, nwann, &
+  subroutine initialize(self,kpts, kweights, Rlist, nwann, nbasis, nband, &
        &  disentangle_func_type, mu, sigma, exclude_bands, project_to_anchor, method)
     class(WannierBuilder_t), intent(inout):: self
-    integer, intent(in):: nwann
-    real(dp), intent(in), target:: evals(:, :)   !(iband, ikpt)
-    complex(dp), intent(in), target:: psi(:, :, :) ! (ibasis, iband, ikpt)
+    integer, intent(in):: nwann, nbasis, nband
     real(dp), intent(in):: kpts(:, :)  !(idim, ikpt)
     real(dp), intent(in):: kweights(:)  !(ikpt)
     integer, intent(in):: Rlist(:, :)  !(idim, iRpt)
@@ -151,9 +157,9 @@ contains
 
     self%nkdim = size(kpts, 1)
     self%nkpt = size(kpts, 2)
-    self%nbasis = size(psi, 1)
-    self%nband = size(psi, 2)
     self%nwann = nwann
+    self%nbasis = nbasis
+    self%nband = nband
     self%method = method
     !if (present(psi_phase)) then
     !    if (psi_phase) then
@@ -166,8 +172,6 @@ contains
     !    self%psi => psi
     !end if
 
-    self%psi => psi
-    self%evals => evals
     ABI_MALLOC(self%cols, (self%nwann))
     self%cols(:) = 0
     ABI_MALLOC(self%kpts, (self%nkdim, self%nkpt))
@@ -212,10 +216,9 @@ contains
   end subroutine initialize
 
 
+
   subroutine finalize(self)
     class(WannierBuilder_t), intent(inout):: self
-    nullify(self%psi)
-    nullify(self%evals)
     ABI_SFREE(self%cols)
     ABI_SFREE(self%kpts)
     ABI_SFREE(self%kweights)
@@ -240,15 +243,23 @@ contains
     class(WannierBuilder_t), intent(inout):: self
     integer, intent(in):: ikpt
     complex(dp),  pointer:: psik(:, :)
-    psik => self%psi(:, :, ikpt)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(ikpt)
+    ABI_UNUSED_A(psik)
+    ABI_ERROR("WannierBuilder_t%get_psi_k should be overrided!")
   end function get_psi_k
+
 
   function get_evals_k(self, ikpt) result(ek)
     class(WannierBuilder_t), intent(inout):: self
     integer, intent(in):: ikpt
-    real(dp), pointer:: ek(:)
-    ek => self%evals( :, ikpt)
+    real(dp),  pointer:: ek(:)
+    ABI_UNUSED_A(self)
+    ABI_UNUSED_A(ikpt)
+    ABI_UNUSED_A(ek)
+    ABI_ERROR("WannierBuilder_t%get_evals_k should be overrided")
   end function get_evals_k
+
 
   ! automatically set the anchor points using the weight functions.
   ! The bands with the largest weights are selected as the anchor points. 
@@ -293,7 +304,6 @@ contains
     end if
     write(msg, "(2a)") "Anchor point band indices set to ", trim(ltoa(self%anchor_ibands))
     call wrtout([ab_out, std_out], msg )
-     
     psik=> self%get_psi_k(self%anchor_ikpt)
     do i = 1, self%nwann
         self%projectors(:, i)=psik(:, self%anchor_ibands(i))
@@ -726,7 +736,8 @@ contains
          & wannR = self%wannR, HwannR = self%HwannR, &
          & wannR_unit = wannR_unit, HwannR_unit = HwannR_unit)
     call ncfile%write_Amnk(nkpt = self%nkpt, nband = self%nband, nwann = self%nwann, &
-         & kpoints = self%kpts, eigvals = self%evals, Amnk = self%Amnk)
+         & kpoints = self%kpts, Amnk = self%Amnk)
+    !TODO: add write_eigenvalues
   end subroutine write_wann_netcdf
 
   subroutine get_wannier_eigen(self, kpoint, evals, evecs)
@@ -767,7 +778,32 @@ contains
     end do
   end subroutine get_wannier_eigen_klist
 
+
+!============================   WannierBuilder_witheigen_t   =========================
+
+subroutine set_eigen(self,  evals, psi)
+  class(WannierBuilder_witheigen_t) :: self
+  real(dp), intent(in), target:: evals(:, :)   !(iband, ikpt)
+  complex(dp), intent(in), target:: psi(:, :, :) ! (ibasis, iband, ikpt)
+  self%psi => psi
+  self%evals => evals
+end subroutine set_eigen
+
+function get_evals_k_from_eigen(self, ikpt) result(ek)
+  class(WannierBuilder_witheigen_t), intent(inout):: self
+  integer, intent(in):: ikpt
+  real(dp), pointer:: ek(:)
+  ek => self%evals( :, ikpt)
+end function get_evals_k_from_eigen
+
+
+function get_psi_k_from_eigen(self, ikpt) result(psik)
+  class(WannierBuilder_witheigen_t), intent(inout):: self
+  integer, intent(in):: ikpt
+  complex(dp),  pointer:: psik(:, :)
+  psik => self%psi(:, :, ikpt)
+end function get_psi_k_from_eigen
+
+
 end module m_wannier_builder
-
-
 !!***
