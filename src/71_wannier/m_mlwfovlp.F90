@@ -1248,6 +1248,7 @@ end subroutine mlwfovlp_seedname
    ngkpt(1)=dtset%kptrlatt(1,1)
    ngkpt(2)=dtset%kptrlatt(2,2) !  have to verif kptrlatt is diagonal
    ngkpt(3)=dtset%kptrlatt(3,3)
+   ABI_CHECK((sum(abs(dtset%kptrlatt)) == sum(abs(ngkpt))), 'kptrlatt must be diagonal')
    do iatom=1,natom
      itypat=dtset%typat(iatom)
      znucl1=dtset%znucl(itypat)
