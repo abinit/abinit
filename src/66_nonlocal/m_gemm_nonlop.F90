@@ -853,7 +853,7 @@ contains
           nlmn  = cprjin(iatom, idat)%nlmn
           do igrad=1,ngrads
             dprojections(1:cplex, shift+1:shift+nlmn, idat) = &
-&                   cprjin(iatom, idat)%dcp(1:cplex,igrad,1:ilmn)
+&                   cprjin(iatom, idat)%dcp(1:cplex,igrad,1:nlmn)
             shift = shift + nlmn
           end do
         end do
