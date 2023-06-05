@@ -251,7 +251,8 @@ class(abstract_wf), pointer :: mywfc
  leig=.true.          ! .false. and .true. are possible
 !
  gamma_only=.false. !not yet implemented
- spinors=.false. !not yet implemented
+ spinors=.false.
+ if (dtset%nspinor == 2) spinors = .true.
 !
 !mpi initialization
 !
