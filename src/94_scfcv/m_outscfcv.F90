@@ -75,7 +75,8 @@ module m_outscfcv
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
  use m_paw_mkaewf,       only : pawmkaewf
  use m_dens,             only : mag_penalty_e, calcdenmagsph, prtdenmagsph
- use m_mlwfovlp,         only : mlwfovlp
+ !use m_mlwfovlp,         only : mlwfovlp
+ use m_wfd_wannier,      only : wfd_run_wannier
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
@@ -383,15 +384,77 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  call timab(1151,2,tsec)
 
+ ! TODO: hexu: moved writting wavefunction before prtwant.
+ ! But should the timab be modified?
+ call timab(1170,1,tsec)
+
+!Optionally provide output for AE wavefunctions (only for PAW)
+ if (psps%usepaw==1 .and. dtset%pawprtwf==1) then
+   ABI_MALLOC(ps_norms,(nsppol,nkpt,mband))
+
+   call pawmkaewf(dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkmem,nsppol,Dtset%nband,&
+&   Dtset%istwfk,npwarr,Dtset%kptns,Dtset%ngfftdg,kg,dimcprj,pawfgrtab,&
+&   Pawrad,Pawtab,Hdr,Dtfil,cg,Cprj,&
+&   MPI_enreg,ierr,pseudo_norms=ps_norms,set_k=dtset%pawprt_k,set_band=dtset%pawprt_b,&
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+
+   if (dtset%pawprt_b==0) then
+     fname = strcat(dtfil%filnam_ds(4), '_PAWSTAT')
+     if (open_file(fname, msg,newunit=tmp_unt,status='unknown',form='formatted') /= 0) then
+       ABI_ERROR(msg)
+     end if
+     write(tmp_unt,'(5a)') '# This file contains the statistics on the cancellation of',ch10,&
+&     '# the onsite pseudo component of the all-electron wavefunction',ch10,&
+&     '# with the plane wave part'
+     ii = 0
+     do isppol=1,nsppol
+       write(tmp_unt,'(a,i0)') '# isppol = ',isppol
+       do ikpt=1,nkpt
+         write(tmp_unt,'(a,i0)') '# ikpt = ',ikpt
+         write(tmp_unt,'(a)') '#    band      norm'
+         occ_norm = zero; unocc_norm = zero; nocc = 0
+         do iband=1,dtset%nband(ikpt + (isppol-1)*nkpt)
+           ii = ii + 1
+           write(tmp_unt,'(i8,ES16.6)') iband,ps_norms(isppol,ikpt,iband)
+           if (abs(occ(ii)) <= tol16) then
+             unocc_norm = unocc_norm + ps_norms(isppol,ikpt,iband)
+           else
+             occ_norm = occ_norm + ps_norms(isppol,ikpt,iband)
+             nocc = nocc + 1
+           end if
+         end do
+         if(mband/=nocc)then
+           write(tmp_unt,'(2(a,ES16.6))') '# occ average: ',occ_norm/real(nocc),&
+&           ' unocc average: ',unocc_norm/real(mband-nocc)
+         else
+           write(tmp_unt,'(2(a,ES16.6))') '# occ average: ',occ_norm/real(nocc)
+         end if
+       end do
+     end do
+     close(tmp_unt)
+   end if
+   ABI_FREE(ps_norms)
+ end if
+
+ call timab(1170,2,tsec)
+
+
 !wannier interface
  call timab(1152,1,tsec)
 
  if (dtset%prtwant==2) then
+       call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
+         & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
+         & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
+         &  kg=kg, cg=cg, cprj=cprj)
+!    else
+!
+!       call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
+!&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
+!&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+!&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
-   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
-&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+
 
  else if (dtset%prtwant==3) then
 
@@ -403,10 +466,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
 
 !  Call Wannier90
-   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
-&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+!   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
+!&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
+!&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+!&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+
+   call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
+     & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
+     & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
+     &  kg=kg, cg=cg, cprj=cprj)
+
 
 !  this is the old implementation, risky due to unpredictable size effects
 !  now eigen is not overwritten, one should use other ways to print the GW corrections
@@ -1117,57 +1186,6 @@ if (dtset%prt_lorbmag==1) then
  end if
 
  call timab(1169,2,tsec)
- call timab(1170,1,tsec)
-
-!Optionally provide output for AE wavefunctions (only for PAW)
- if (psps%usepaw==1 .and. dtset%pawprtwf==1) then
-   ABI_MALLOC(ps_norms,(nsppol,nkpt,mband))
-
-   call pawmkaewf(dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkmem,nsppol,Dtset%nband,&
-&   Dtset%istwfk,npwarr,Dtset%kptns,Dtset%ngfftdg,kg,dimcprj,pawfgrtab,&
-&   Pawrad,Pawtab,Hdr,Dtfil,cg,Cprj,&
-&   MPI_enreg,ierr,pseudo_norms=ps_norms,set_k=dtset%pawprt_k,set_band=dtset%pawprt_b,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-
-   if (dtset%pawprt_b==0) then
-     fname = strcat(dtfil%filnam_ds(4), '_PAWSTAT')
-     if (open_file(fname, msg,newunit=tmp_unt,status='unknown',form='formatted') /= 0) then
-       ABI_ERROR(msg)
-     end if
-     write(tmp_unt,'(5a)') '# This file contains the statistics on the cancellation of',ch10,&
-&     '# the onsite pseudo component of the all-electron wavefunction',ch10,&
-&     '# with the plane wave part'
-     ii = 0
-     do isppol=1,nsppol
-       write(tmp_unt,'(a,i0)') '# isppol = ',isppol
-       do ikpt=1,nkpt
-         write(tmp_unt,'(a,i0)') '# ikpt = ',ikpt
-         write(tmp_unt,'(a)') '#    band      norm'
-         occ_norm = zero; unocc_norm = zero; nocc = 0
-         do iband=1,dtset%nband(ikpt + (isppol-1)*nkpt)
-           ii = ii + 1
-           write(tmp_unt,'(i8,ES16.6)') iband,ps_norms(isppol,ikpt,iband)
-           if (abs(occ(ii)) <= tol16) then
-             unocc_norm = unocc_norm + ps_norms(isppol,ikpt,iband)
-           else
-             occ_norm = occ_norm + ps_norms(isppol,ikpt,iband)
-             nocc = nocc + 1
-           end if
-         end do
-         if(mband/=nocc)then
-           write(tmp_unt,'(2(a,ES16.6))') '# occ average: ',occ_norm/real(nocc),&
-&           ' unocc average: ',unocc_norm/real(mband-nocc)
-         else
-           write(tmp_unt,'(2(a,ES16.6))') '# occ average: ',occ_norm/real(nocc)
-         end if
-       end do
-     end do
-     close(tmp_unt)
-   end if
-   ABI_FREE(ps_norms)
- end if
-
- call timab(1170,2,tsec)
  call timab(1171,1,tsec)
 
  if(dtset%plowan_compute>0 .and. dtset%plowan_compute<10) then

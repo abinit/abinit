@@ -63,6 +63,8 @@ module m_wfk_analyze
  use m_sigtk,           only : sigtk_kpts_in_erange
  use m_iowf,            only : prtkbff
 
+ use m_wfd_wannier,     only : wfd_run_wannier
+
  implicit none
 
  private
@@ -406,6 +408,41 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  !case ("paw_aeden")
 
+case (WFK_TASK_WANNIER)
+   ! Construct Wannier function.
+
+  ! TODO: only when kpoint in IBZ
+  ! First generate WFK for fullBZ
+  !if (my_rank == master) then
+  !  wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+  !  call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+  !end if
+  !call xmpi_barrier(comm)
+
+   if (.True.) then
+      ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
+      ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
+      keep_ur = .False.; bks_mask = .True.
+      call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
+        dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
+        dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
+
+      ABI_FREE(keep_ur)
+      ABI_FREE(bks_mask)
+
+      call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+
+      call wfd_run_wannier(cryst=cryst, ebands=ebands,&
+           & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
+           & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
+           & dtset=dtset, dtfil=dtfil,  &
+           & pawang=pawang,  pawrad=pawrad, &
+           & pawtab=pawtab, psps=psps )
+   else
+      call wfd_mlwfovlp(cryst, ebands, wfk0_hdr, mpi_enreg, &
+           & ngfftc, ngfftf,  dtset, dtfil,  &
+           & pawang,  pawrad, pawtab, psps, comm, my_rank,nprocs )
+   endif
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select
