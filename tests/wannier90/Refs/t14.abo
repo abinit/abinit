@@ -366,9 +366,6 @@ meta: {optdriver: 8, wfk_task: 9, }
 
 ---------------------------------------------------------------
 
-   mlwfovlp:  you should give k-point in the full brillouin zone 
-   with explicit k-points (or kptopt=3) and istwfk 1
-
    mlwfovlp :  mlwfovlp_setup done -
 -  see t14o_DS2_w90.wout for details.
 
