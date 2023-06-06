@@ -1,3 +1,6 @@
+# Added by runtests.py
+# end runtests.py section
+
 ndtset 2
 
 # wannier 90
@@ -6,6 +9,7 @@ w90iniprj1 2
 w90prtunk1 0
 prtden1 1
 
+# band structure
 iscf2  -2
 tolwfr2  1.0d-20
 ndivsm2  20
@@ -41,7 +45,7 @@ ecut 15
 ecutsm 0.5
 istwfk *1
 ixc 11
-kptopt 3 #4
+kptopt 3
 natom 1
 
 nband 24

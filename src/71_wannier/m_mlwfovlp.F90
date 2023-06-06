@@ -273,11 +273,16 @@ class(abstract_wf), pointer :: mywfc
 !must be changed to not print anything if kptopt 3 and istwfk 1 (the latter is easier to check)
 !
  if(rank==master) then
-   write(message, '(a,a,a,a)' ) ch10,&
-&   '   mlwfovlp:  you should give k-point in the full brillouin zone ',ch10,&
-&   '   with explicit k-points (or kptopt=3) and istwfk 1'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   if(.not. (all(dtset%istwfk(1:nkpt) == 1) .and. all(dtset%wtk(1:nkpt) == dtset%wtk(1))) ) then
+print *, ' istwfk ', dtset%istwfk(:)
+print *, ' dtset%wtk ', dtset%wtk(:)
+     write(message, '(a,a,a,a)' ) ch10,&
+&     '   mlwfovlp:  you should give k-point in the full brillouin zone ',ch10,&
+&     '   with explicit k-points (or kptopt=3) and istwfk 1'
+     call wrtout(ab_out,message,'COLL')
+     call wrtout(std_out,  message,'COLL')
+!     ABI_ERROR(message)
+   end if
  end if
 !
  if(MPI_enreg%paral_spinor==1) then
@@ -1320,18 +1325,18 @@ end subroutine mlwfovlp_seedname
    ABI_UNUSED(recip_lattice)
    ABI_UNUSED(spinors)
 #endif
-!  do isppol=1,nsppol
-!  write(std_out,*)  "1", nntot,nwan(isppol)
-!  write(std_out,*)  "2",num_bands(isppol)  ! states on which wannier functions are computed
-!  write(std_out,*)  "3", proj_site(:,1:nwan(isppol),isppol)
-!  write(std_out,*)  "4",proj_l(1:nwan(isppol),isppol)
-!  write(std_out,*)  "5",proj_m(1:nwan(isppol),isppol)
-!  write(std_out,*)  "6", proj_radial(1:nwan(isppol),isppol)
-!  write(std_out,*)  "7", proj_z(:,1:nwan(isppol),isppol)
-!  write(std_out,*)  "8", proj_x(:,1:nwan(isppol),isppol)
-!  write(std_out,*)  "9",proj_zona(1:nwan(isppol),isppol)
-!  write(std_out,*)  "10",exclude_bands(:,isppol)
-!  end do!isppol
+  do isppol=1,nsppol
+  write(std_out,*)  "1", nntot,nwan(isppol)
+  write(std_out,*)  "2",num_bands(isppol)  ! states on which wannier functions are computed
+  write(std_out,*)  "3", proj_site(:,1:nwan(isppol),isppol)
+  write(std_out,*)  "4",proj_l(1:nwan(isppol),isppol)
+  write(std_out,*)  "5",proj_m(1:nwan(isppol),isppol)
+  write(std_out,*)  "6", proj_radial(1:nwan(isppol),isppol)
+  write(std_out,*)  "7", proj_z(:,1:nwan(isppol),isppol)
+  write(std_out,*)  "8", proj_x(:,1:nwan(isppol),isppol)
+  write(std_out,*)  "9",proj_zona(1:nwan(isppol),isppol)
+  write(std_out,*)  "10",exclude_bands(:,isppol)
+  end do!isppol
 !  testdebug:  ovikp(1,1)=1
 !  ^^^^^^^^^^^^^^^^^^^^^^^ end ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  end if  ! lwanniersetup
