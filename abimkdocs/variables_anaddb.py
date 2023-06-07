@@ -350,7 +350,7 @@ Frequency-dependent dielectric tensor flag.
         vartype="real",
         topics=['PhononBands_useful'],
         dimensions="scalar",
-        defaultval="4.5E-06 Hartree = 1 cm$^{-1}$",
+        defaultval="0.2 cm$^{-1}$ (about 0.9E-06 Hartree)",
         mnemonics="DOS DELTA in Energy",
         added_in_version="before_v9",
         text=r"""
@@ -365,7 +365,7 @@ grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
         vartype="real",
         topics=['PhononBands_useful'],
         dimensions="scalar",
-        defaultval="4.5E-05 Hartree = 10 cm$^{-1}$",
+        defaultval="1 cm$^{-1}$ (about 4.5E-06 Hartree)",
         mnemonics="DOS SMEARing value",
         characteristics=['[[ENERGY]]'],
         added_in_version="before_v9",
@@ -1757,9 +1757,9 @@ must be set to 1 since the interatomic force constants are supposed to be known.
 
 The available options are:
 
-  * 0 --> no output of PHDOS (default);
-  * 1 --> calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]].
-  * 2 --> calculate PHDOS using the tetrahedron method.
+  * 0 --> No output of PHDOS (default);
+  * 1 --> Calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]]. This is the recommended technique, as usually the interpolation q-point grid is very fine.
+  * 2 --> Calculate PHDOS using the tetrahedron method. The tetrahedron DOS has Van Hove singularities, and this might yield problems with further post-treatment of the DOS.
 
 The step of the frequency grid employed to calculate the DOS can be defined
 through the input variable [[anaddb:dosdeltae]].
@@ -2586,7 +2586,7 @@ instead of the legacy mode based on the files file. Example:
 
     outdata_prefix = "t01_o"
 
-    See also [[outdata_prefix@abinit]]
+See also [[outdata_prefix@abinit]]
 """,
     ),
 

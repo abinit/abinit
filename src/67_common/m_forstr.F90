@@ -72,7 +72,7 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
- use iso_c_binding,      only : c_loc,c_f_pointer
+ use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer
 
  implicit none
 
