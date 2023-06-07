@@ -374,7 +374,7 @@ A new Markdown file **without underscore** will be generated and included in `mk
     so that `./mksite.py` can fill the template.
     Remember to restart `./mksite.py` to see the changes.
 
-## How to a add a new document
+## How to add a new document
 
 In order to add a new tutorial, create a new Markdown file in doc/tutorial and
 register it in `mkdocs.yml`
@@ -429,7 +429,7 @@ and the new tests [[test:v8_04]], [[test:libxc_41]].
 Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]]
 
 B.2
-Added subsuite syntax [[test:gspw_01]]
+Added subsuite syntax [[test:paral_bandpw_01]]
 
 C.2
 New versions of Fortran compilers have been integrated in the test farm:
@@ -452,7 +452,7 @@ and the new tests [[test:v8_04]], [[test:libxc_41]].
 Added in [[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]].
 
 B.2
-Added subsuite syntax [[test:gspw_01]]
+Added subsuite syntax [[test:paral_bandpw_01]]
 
 C.2
 New versions of Fortran compilers have been integrated in the test farm:
