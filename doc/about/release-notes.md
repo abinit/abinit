@@ -52,10 +52,12 @@ Activate it using [[optdriver]]=6, and specify [[gwr_task]].
 
 New input variables : [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
 [[gwr_np_kgts]], [[gwr_ucsc_batch]], [[gwr_ntau]], 
-[[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwa_rpa_ncut]], [[gwr_nstep]], [[gwr_tolqpe]] (replacing the obsolete gw_toldfeig input variable).
+[[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwr_rpa_ncut]], [[gwr_nstep]], [[gwr_tolqpe]] (replacing the obsolete gw_toldfeig input variable).
 
-Tests are provided in the newly created subdirectory tests/gwr, see [[test:gwr_1]], [[test:gwr_2]], [[test:gwr_3]], 
-[[test:gwr_4]], [[test:gwr_5]], [[test:gwr_6]], [[test:gwr_7]]. See also [[test:paral_78]] and [[test:paral_79]].
+Tests are provided in the newly created subdirectory tests/gwr, see 
+[[test:gwr_01]], [[test:gwr_02]], [[test:gwr_03]], 
+[[test:gwr_04]], [[test:gwr_05]], [[test:gwr_06]], [[test:gwr_07]].
+See also [[test:paral_78]] and [[test:paral_79]].
 
 By M. Giantomassi (MR 875, 907)
 
@@ -197,7 +199,7 @@ By A. Blanchet (MR883 and MR916)
 
 The writing of the file needed as input for computations with the CC4S package, allowing to the coupled-cluster
 calculations (and more) can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
-See test [[test:gwr_07]]
+See test [[test:gwr_07]].
 
 By M. Giantomassi (MR 875, 907)
 
