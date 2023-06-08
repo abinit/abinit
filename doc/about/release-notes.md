@@ -54,10 +54,8 @@ New input variables : [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
 [[gwr_np_kgts]], [[gwr_ucsc_batch]], [[gwr_ntau]], 
 [[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwr_rpa_ncut]], [[gwr_nstep]], [[gwr_tolqpe]] (replacing the obsolete gw_toldfeig input variable).
 
-Tests are provided in the newly created subdirectory tests/gwr, see 
-[[test:gwr_01]], [[test:gwr_02]], [[test:gwr_03]], 
-[[test:gwr_04]], [[test:gwr_05]], [[test:gwr_06]], [[test:gwr_07]].
-See also [[test:paral_78]] and [[test:paral_79]].
+Tests are provided in the newly created subdirectory tests/gwr, see tests 01 to 07 (not yet activated).
+See also test:paral_78 and test:paral_79 (not yet activated).
 
 By M. Giantomassi (MR 875, 907)
 
@@ -79,7 +77,7 @@ By J. Zwanziger, with some help by M. Torrent and X. Gonze (MR895, 904, 917).
 **B.3** Natural optical activity tensor, linear response to a vector potential (orbital magnetic field linear response) and other modifications of the longwave driver.
 
 Computation of the natural optical activity tensor can be performed via the input variable [[lw_natopt]].
-This is demonstrated with the test [[test:tutorespfn_lw8]]. 
+This is demonstrated with the test [[test:lw_8]]. 
 The topic [[topic:longwave]] has been upgraded.
 
 In addition, the computation of the linear response to a vector potential in the long-wavelength limit 
@@ -109,15 +107,15 @@ The old utility "ujdet" to compute the U and J parameters in DFT+U with the line
 has been replaced by the new "lruj" utility. The workflow is different.
 A [[tutorial:lruj]] tutorial has been written, with three corresponding tests, [[test:lruj_1]], [[test:lruj_2]], [[test:lruj_3]].
 See also the input variables [[pawujv]]. The tutorial and corresponding tests "ujdet" have been suppressed.
-The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[tests:v9_105]], 
-[[tests:v9_106]], [[tests:v9_107]], [[tests:v9_108]], [[tests:v9_109]], [[tests:v9_110]].
+The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]], 
+[[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]], [[test:v9_110]].
 
 By Lorien Mac Enulty with help from David D. O'Regan (MR905, 912).
 
 **B.5** Cumulant method for spectral function
 
 The computation of the electronic spectral function with electron-phonon coupling included is now enabled using the cumulant method.
-See [[cite:Nery2018]] and [[Abreu2022]] and other related publications.
+See [[cite:Nery2018]] and [[cite:Abreu2022]] and other related publications.
 
 Activate it using [[eph_task]]=9 when [[optdriver]] == 7.
 New input variable : [[tolcum]].
@@ -199,7 +197,7 @@ By A. Blanchet (MR883 and MR916)
 
 The writing of the file needed as input for computations with the CC4S package, allowing to the coupled-cluster
 calculations (and more) can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
-See test [[test:gwr_07]].
+See test test:gwr_07 (not yet activated)..
 
 By M. Giantomassi (MR 875, 907)
 
