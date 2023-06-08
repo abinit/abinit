@@ -12,7 +12,7 @@ are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
 
 The list of contributors includes:
 J. Abreu, J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, D.D. O'Regan, R. Rostami,
+L. Mac Enulty, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
@@ -55,7 +55,7 @@ New input variables : [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
 [[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwa_rpa_ncut]], [[gwr_nstep]], [[gwr_tolqpe]] (replacing the obsolete gw_toldfeig input variable).
 
 Tests are provided in the newly created subdirectory tests/gwr, see [[test:gwr_1]], [[test:gwr_2]], [[test:gwr_3]], 
-[[test:gwr_4]], [[test:gwr_5]], [[test:gwr_6]], [[test:gwr_7]]. 
+[[test:gwr_4]], [[test:gwr_5]], [[test:gwr_6]], [[test:gwr_7]]. See also [[test:paral_78]] and [[test:paral_79]].
 
 By M. Giantomassi (MR 875, 907)
 
@@ -64,10 +64,10 @@ By M. Giantomassi (MR 875, 907)
 
 The computation of the orbital magnetization and chemical shielding (converse method, that is, with a nuclear dipole moment added) has been implemented, 
 as described and tested in [[cite:Zwanziger2023]].
-This implementation works with PAW only, with [[nspinor]]=1 and 2, for insulators (tested) and metals (in principle).
+This implementation works with PAW only, with [[nspinor]]=1 and 2, for insulators and metals.
 Lamb shielding is treatedi. Atompaw has been updated accordingly to compute and output the Lamb shielding in xml files.
 
-See [[test:v9_44]] and [[tutorial:nuc_4]], with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
+See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[tutorial:nuc_4]], with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
 
 The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to present such computations.
 
@@ -83,7 +83,8 @@ The topic [[topic:longwave]] has been upgraded.
 In addition, the computation of the linear response to a vector potential in the long-wavelength limit 
 has been implemented via minimal modifications of the routines that calculate second derivatives 
 of wavefunctions with respect to wavevector as explained in [[cite:Zabalo2022]].
-(Are there tests/documentation for this feature ?).
+See test [[test:v9_146]], and input variable [[rf2_dkdk]] with value 2.
+Related test [[test:v9_147]].
 
 These are by-products of large modifications of the longwave driver, mimicking the structure of the nonlinear one.
 Other improvements related to the large modifications:
@@ -94,6 +95,8 @@ iv) the whole structure is now more general, thus facilitating the implementatio
 
 Also, see the new input variable [[ffnl_lw]] that allows to reduce memory footprint at the expense of CPU time.
 (A test should be provided).
+
+Finally, a bug has been removed (when all KB energies are negative), and a test introduced [[test:v9_145]].
 
 By Miquel Royo, Asier Zabalo and Massimiliano Stengel (MR913).
 
@@ -224,7 +227,8 @@ By JM Beuken (MR888)
 By X. Gonze (commit dabc1b905)
 
 **D.2* Coulomb interaction with 2D cut-off is now working for the total energy and forces.
-This has been tested agains Quantum Espresso impementation. However, stresses are still missing.
+This has been tested agains Quantum Espresso implementation. However, stresses are still missing.
+New test [[test:v9_132]].
 By B. Guster, with help from X. Gonze (MR908).
 
 **D.3** Implement forces and stresses using "gemm" programming model.
@@ -250,9 +254,13 @@ By M. Torrent (MR918)
 
 **D.8**
 New units are recognized by the input file parser : "meV" (for millielectron-volt) ;  "S", "Sec" or "Second" ; "Kelvin".
-By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit XXX)
+By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit 39801af30)
 
-**D.9** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.9**
+New tests of the band parallelism in DFPT : [[test:paral_65]] and [[test:paral_66]]
+By M. Giantomassi (commit 31e8aa66d8)
+
+**D.10** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 By P. Kesteneer (MR910), 
 
 * * *
@@ -298,7 +306,7 @@ By M. Torrent (MR849)
 
 **A.3**
 The default value for [[rfdir]] is now (1 1 1), instead of (0 0 0).  
-The one of [[rfatpol]] is now (1 [[natom]]).
+The one of [[rfatpol]] is now (1 [[natom]]), instead of (1 1).
 
 By X. Gonze (MR852)
 
@@ -569,7 +577,7 @@ From L. Baguet (MR831)
 **D.15**
 Miscellaneous changes in DMFT: keyword for Wannier orthonormalisation, 
 implementation of calculation of the weight of configuration in CTMQC, 
-double counting for chargeonly DFT+DMFT ([[dmft_dc]]=6), work in progress concerning alternate calculation of electronic entropy in DMFT. 
+double counting for charge only DFT+DMFT ([[dmft_dc]]=6), work in progress concerning alternate calculation of electronic entropy in DMFT. 
 
 From B. Amadon and R. Outerovich (MR833) 
 
