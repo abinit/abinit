@@ -10858,6 +10858,22 @@ during structural optimization or molecular dynamics (see [[natcon]], [[iatcon]]
 ),
 
 Variable(
+    abivarname="ncout",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Print netCDF output files",
+    added_in_version="9.11.0",
+    text=r"""
+If set to 1, ABINIT will produce a netCDF output file up to 10 datasets calculations.
+If set to 0, said files will not be printed.
+""",
+),
+
+
+Variable(
     abivarname="nctime",
     varset="dev",
     vartype="integer",
@@ -13451,7 +13467,7 @@ Compute quantities related to orbital magnetic moment. Typically used in the
 presence of a nonzero nuclear magnetic dipole moment, see [[nucdipmom]], to compute
 the nuclear magnetic shielding as measured in NMR. [[orbmag]]
     is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Gonze2011a]] extended to the PAW case.
+    theory outlined in [[cite:Zwanziger2023]].
     The computed results are returned in the
     standard output file, search for "Orbital magnetic moment". This calculation requires
     both the ground state and DDK wavefunctions (see [[rfddk]]), and is triggered at the end of a
@@ -15294,6 +15310,21 @@ It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usua
 ),
 
 Variable(
+    abivarname="prtddb",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="PRinT the Derivative Data Base file",
+    added_in_version="9.11.0",
+    text=r"""
+If set to 1, ABINIT will produce a DDB file. 
+""",
+),
+
+
+Variable(
     abivarname="prtden",
     varset="files",
     vartype="integer",
@@ -15619,6 +15650,21 @@ Please note that ELF is **not** yet implemented in the case of PAW
 ),
 
 Variable(
+    abivarname="prtevk",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT EVK",
+    added_in_version="9.11.0",
+    text=r"""
+   If set to 1, ABINIT will produce a netCDF EVK file.
+""",
+),
+
+
+Variable(
     abivarname="prtfull1wf",
     varset="dfpt",
     vartype="integer",
@@ -15742,6 +15788,23 @@ The GSR file contains the most important GS results (band structure, forces,
 stresses, electronic density). The GSR file can be read by AbiPy and used for further post-processing.
 """,
 ),
+
+Variable(
+    abivarname="prthist",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="PRinT the HISTory file",
+    added_in_version="9.11.0",
+    text=r"""
+If set to 1, ABINIT will produce a HIST file. The HIST file contains the history
+of structural relaxations or molecular dynamics calculations. This file can be
+used to restart the calculation or to analyze the results at the end of calculation.
+""",
+),
+
 
 Variable(
     abivarname="prtkden",
@@ -21126,6 +21189,74 @@ The different possibilities are:
   Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,
 ),
+
+Variable(
+    abivarname="write_files",
+    varset="files",
+    vartype="string",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval="default",
+    mnemonics="write files",
+    added_in_version="9.11.0",
+    text=r"""
+Supra-variable controlling the underlying printing options of the prt-type variables.
+It can be used as a simple string flagging the desired outputs as follows:
+
+ * "default"   --> An empty string will produce only the log and abo files
+ * "none"      --> It will deactivate all printing options currently available. Only the log and abo file will be produced following a calculation.  
+ * "ddb"       --> Activates the printing of the DDB file. Refer to [[prtddb]] for further documentation.
+ * "den_1"     --> Activates the printing of the density file under option 1 of the [[prtden]] variable.
+ * "den_2"     --> Activates the printing of the density file under option 2 of the [[prtden]] variable.
+ * "den_3"     --> Activates the printing of the density file under option 3 of the [[prtden]] variable.
+ * "den_4"     --> Activates the printing of the density file under option 4 of the [[prtden]] variable.
+ * "den_5"     --> Activates the printing of the density file under option 5 of the [[prtden]] variable.
+ * "den_6"     --> Activates the printing of the density file under option 6 of the [[prtden]] variable.
+ * "den_7"     --> Activates the printing of the density file under option 7 of the [[prtden]] variable.
+ * "dos_1"     --> Activates the printing of the density of states file under option 1 of the [[prtdos]] variable.
+ * "dos_2"     --> Activates the printing of the density of states file under option 2 of the [[prtdos]] variable.
+ * "dos_3"     --> Activates the printing of the density of states file under option 3 of the [[prtdos]] variable.
+ * "dos_4"     --> Activates the printing of the density of states file under option 4 of the [[prtdos]] variable.
+ * "dos_5"     --> Activates the printing of the density of states file under option 5 of the [[prtdos]] variable.
+ * "dosm_1"    --> Activates the printing of the density of states file with M decomposition. Refer to [[prtdosm]] variable for further documentation.
+ * "ebands_1"  --> Activates the printing of the electronic bands using option 1 as in [[prtebands]].
+ * "ebands_2"  --> Activates the printing of the electronic bands using option 2 as in [[prtebands]].
+ * "eig"       --> Activates the printing of the eigenvalues file. Refer to [[prteig]] for further documentation.
+ * "elf"       --> Activates the printing of the electron localization function. Refer to [[prtelf]] for further documentation.
+ * "evk"       --> Activates the printing of the netCDF EVK file. Refer to [[prtevk]] for further documentation.
+ * "fsurf"     --> Activates the printing of the Fermi surface file. Refer to [[prtfsurf]] for further documentation.
+ * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
+ * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
+ * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
+ * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documention.
+ * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
+ * "kbff"      --> Activates the printing of the Kleynman-Bylander form factors. Refer to [[prtkbff]] for further documentation.
+ * "kden"      --> Activates the printing of the kinetic energy density file. Refer to [[prtkden]] for further documentation.
+ * "lden"      --> Activates the printing of the Laplacian of the eletronic density. Refer to [[prtlden]] for further documentation.
+ * "ncout"     --> Activates the printing of the OUT file in netCDF format. Refer to [[ncout]] for further documentation.
+ * "pot"       --> Activates the printing of the total potential. Refer to [[prtpot]] for further documentation.
+ * "psps_1"    --> Activates the printing of the pseudopotential tables in netCDF format. Refer to [[prtpsps]] for further documentation.
+ * "psps_-1"   --> Activates the printing of the pseudopotential tables in netCDF format with code exit after printing. Refer to [[prtpsps]] for further documentation.
+ * "stm"       --> Activates the printing of the STM density. Refer to [[prtstm]] for further documentation.
+ * "suscep"    --> Activates the printing of the susceptibility file. Refer to [[prtsuscep]] for further documentation.
+ * "vclmb_1"   --> Activates the printing of the Coulomb potential. Refer to [[prtvclmb]] for further documentation.
+ * "vclmb_2"   --> Activates the printing of the Coulomb potential. Refer to [[prtvclmb]] for further documentation.
+ * "vha"       --> Activates the printing of the Hartree potential. Refer to [[prtvha]] for further documentation.
+ * "vhxc"      --> Activates the printing of the sum of the Hartree and XC potentials. Refer to [[prtvhxc]] for further documentation.
+ * "vpsp"      --> Activates the printing of the local pseudopotential. Refer to [[prtvpsp]] for further documentation.
+ * "vxc"       --> Activates the printing of the XC potential. Refer to [[prtvxc]] for further documentation.
+ * "want_1"    --> Activates the printing of the Wannierization in different settings. Refer to [[prtwant]] for further documentation.
+ * "want_2"    --> Activates the printing of the Wannierization in different settings. Refer to [[prtwant]] for further documentation.
+ * "want_2"    --> Activates the printing of the Wannierization in different settings. Refer to [[prtwant]] for further documentation.
+ * "wf_1"      --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "wf_full_1" --> Activates the printing of the wavefunction file on the full mesh. Refer to [[prtwf_full]] for further documentation.
+ * "wf_2"      --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "wf_3"      --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "wf_-1"     --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "xml"       --> Activates the printing of the xml file. Refer to [[prtxml]] for further documentation.
+""",
+),
+
 
 Variable(
     abivarname="wtatcon",

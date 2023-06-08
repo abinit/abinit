@@ -388,6 +388,7 @@ type, public :: dataset_type
  integer :: nberry
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
+ integer :: ncout = 1 
  integer :: nctime
  integer :: ndivsm = 0
  integer :: ndtset
@@ -508,6 +509,7 @@ type, public :: dataset_type
  integer :: prtbltztrp = 0
  integer :: prtchkprdm = 0
  integer :: prtcif = 0
+ integer :: prtddb = 1
  integer :: prtden
  integer :: prtdensph = 1
  integer :: prtdipole = 0
@@ -518,12 +520,15 @@ type, public :: dataset_type
  integer :: prteliash = 0
  integer :: prteig
  integer :: prtelf = 0
+ integer :: prtevk = 1
+ integer :: prtfc = 0
  integer :: prtfull1wf = 0
  integer :: prtfsurf = 0
  integer :: prtgsr = 1
  integer :: prtgden = 0
  integer :: prtgeo = 0
  integer :: prtgkk = 0
+ integer :: prthist = 1
  integer :: prtkden = 0
  integer :: prtkpt
  integer :: prtlden = 0
@@ -986,6 +991,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
+ character(len=fnlen) :: write_files = ABI_NOFILE
 
  contains
 
@@ -1752,6 +1758,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nc_xccc_gspace     = dtin%nc_xccc_gspace
  dtout%nbandkss           = dtin%nbandkss
  dtout%nconeq             = dtin%nconeq
+ dtout%ncout              = dtin%ncout
  dtout%nctime             = dtin%nctime
  dtout%ndtset             = dtin%ndtset
  dtout%ndynimage          = dtin%ndynimage
@@ -1865,6 +1872,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prtbltztrp         = dtin%prtbltztrp
  dtout%prtchkprdm         = dtin%prtchkprdm
  dtout%prtcif             = dtin%prtcif
+ dtout%prtddb             = dtin%prtddb
  dtout%prtden             = dtin%prtden
  dtout%prtdensph          = dtin%prtdensph
  dtout%prtdipole          = dtin%prtdipole
@@ -1875,12 +1883,15 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
  dtout%prteliash          = dtin%prteliash
+ dtout%prtevk             = dtin%prtevk
+ dtout%prtfc              = dtin%prtfc
  dtout%prtfull1wf         = dtin%prtfull1wf
  dtout%prtfsurf           = dtin%prtfsurf
  dtout%prtgsr             = dtin%prtgsr
  dtout%prtgden            = dtin%prtgden
  dtout%prtgeo             = dtin%prtgeo
  dtout%prtgkk             = dtin%prtgkk
+ dtout%prthist            = dtin%prthist
  dtout%prtkden            = dtin%prtkden
  dtout%prtkpt             = dtin%prtkpt
  dtout%prtlden            = dtin%prtlden
@@ -2015,6 +2026,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%vdw_xc             = dtin%vdw_xc
  dtout%wfinit             = dtin%wfinit
  dtout%wfoptalg           = dtin%wfoptalg
+ dtout%wfoptalg           = dtin%wfoptalg
+ dtout%write_files        = dtin%write_files
  dtout%wvl_bigdft_comp    = dtin%wvl_bigdft_comp
  dtout%w90iniprj          = dtin%w90iniprj
  dtout%w90prtunk          = dtin%w90prtunk
@@ -3402,7 +3415,7 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout nc_xccc_gspace'
  list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
@@ -3434,9 +3447,12 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefmas prteig prteliash prtelf'
- list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model prtnabla prtnest prtphbands prtocc prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
+ list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
+ list_vars=trim(list_vars)//' prtebands prtefg prtefmas prteig prteliash prtelf prtevk'
+ list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prthist prtkden prtkpt prtlden'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model prtnabla prtnest prtocc prtphbands prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
@@ -3520,6 +3536,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' wfinit wfmix wfoptalg wtatcon wtk wtq'
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
+ list_vars=trim(list_vars)//' write_files'
 !X
  list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile x1rdm'
 !Y
