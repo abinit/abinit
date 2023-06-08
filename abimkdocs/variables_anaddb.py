@@ -375,7 +375,7 @@ Prior to v9.10, the default was 1 cm$^{-1}$.
 **dossmear** defines the gaussian broadening used to calculate the phonon
 density of states when [[anaddb:prtdos]] = 1.
 
-Prior to v9.10, the default was "5 cm$^{-1}$
+Prior to v9.10, the default was 5 cm$^{-1}$.
 """,
     ),
 

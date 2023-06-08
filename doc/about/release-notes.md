@@ -23,9 +23,9 @@ Xavier
 
 ### **A.** Important remarks and warnings. 
 
-**A.1** The default value for [[dosdeltae@anaddb]] has been changed from 1cm-1 to 0.2cm-1, 
-and the default value for [[dossmear@anaddb]] has been changed from 5cm-1 to 1cm-1.
-Also, the default values for [[dosdeltae@atdep]] has been changed from 4.5d-6 to 0.2cm-1.
+**A.1** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1, 
+and the default value for [[dossmear@anaddb]] has been changed from 5 cm-1 to 1 cm-1.
+Also, the default values for [[dosdeltae@atdep]] has been changed from 4.5d-6 to 0.2 cm-1.
 This is to allow default calculation of thermal expansion using abipy to be more stable numerically.
 
 By S. Rostami and X. Gonze (commit 8b7697502c)
@@ -52,12 +52,12 @@ Activate it using [[optdriver]]=6, and specify [[gwr_task]].
 
 New input variables : [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
 [[gwr_np_kgts]], [[gwr_ucsc_batch]], [[gwr_ntau]], 
-[[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwr_rpa_ncut]], [[gwr_nstep]], [[gwr_tolqpe]] (replacing the obsolete gw_toldfeig input variable).
+[[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwr_rpa_ncut]], [[gwr_nstep]]. Also, [[gwr_tolqpe]] replaces the obsolete gw_toldfeig input variable.
 
 Tests are provided in the newly created subdirectory tests/gwr, see tests 01 to 07 (not yet activated).
 See also test:paral_78 and test:paral_79 (not yet activated).
 
-By M. Giantomassi (MR 875, 907)
+By M. Giantomassi (MR875, MR907)
 
 
 **B.2** Orbital magnetization 
@@ -65,9 +65,10 @@ By M. Giantomassi (MR 875, 907)
 The computation of the orbital magnetization and chemical shielding (converse method, that is, with a nuclear dipole moment added) has been implemented, 
 as described and tested in [[cite:Zwanziger2023]].
 This implementation works with PAW only, with [[nspinor]]=1 and 2, for insulators and metals.
-Lamb shielding is treatedi. Atompaw has been updated accordingly to compute and output the Lamb shielding in xml files.
+Lamb shielding is treated. The PAW atomic dataset generator "Atompaw" has been updated accordingly to compute and output the Lamb shielding in xml files.
 
-See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[tutorial:nuc_4]], with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
+See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[test:nuc_4]],
+(NOTE : description to be provided in the .abi file)  with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
 
 The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to present such computations.
 
@@ -105,10 +106,10 @@ By Miquel Royo, Asier Zabalo and Massimiliano Stengel (MR913).
 
 The old utility "ujdet" to compute the U and J parameters in DFT+U with the linear response method [[cite:Cococcioni2005]]
 has been replaced by the new "lruj" utility. The workflow is different.
-A [[tutorial:lruj]] tutorial has been written, with three corresponding tests, [[test:lruj_1]], [[test:lruj_2]], [[test:lruj_3]].
+The [[tutorial:lruj]] has been written, with three corresponding tests, [[test:lruj_1]], [[test:lruj_2]], [[test:lruj_3]].
 See also the input variables [[pawujv]]. The tutorial and corresponding tests "ujdet" have been suppressed.
 The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]], 
-[[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]], [[test:v9_110]].
+[[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]].
 
 By Lorien Mac Enulty with help from David D. O'Regan (MR905, 912).
 
@@ -130,8 +131,8 @@ Abinit now can read NC pseudos in UPF2 format (both scalar and relativistic vers
 routine used to convert FR pseudos from (j,kappa) to scalar + SOC term taken from oncvpsp.
 
 The total energy computed with UPF pseudos does not perfectly agree with the one obtained with the corresponding psp8 pseudos.
-Most of the difference originates from the value of epsatm ($ \int[r^2 (V(r)+\frac{Zv}{r}) dr]$ as the local part in the UPF file is tabulated
-on a much larger radial mesh. This should not represent a serious issue as long as total energy calculations are performed with the same pseudos.
+Most of the difference originates from the value of epsatm $$ \int r^2 (V(r)+\frac{Zv}{r}) dr$$ as the local part in the UPF file is tabulated
+on a much larger radial mesh. This should not represent a serious issue as long as total energy calculations are performed with the same pseudopotentials.
 Forces, stress tensor and KS eigenvalues are in much better agreement in the systems investigated so far.
 
 See the [[test:v9_130]] and [[test:v9_131]]
@@ -156,22 +157,22 @@ with [[ixc]]=-318, and from [[cite:Groth2017]], with [[ixc]]=-577.
 Previously, the IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]], with [[ixc]]=50
 had been coded, but not documented.
 
-See [[test:libxc_22]
+See [[test:libxc_22]].
 
 By M. Torrent (MR901)
 
 **B.9** Atomic orbital magnetic moment inside PAW spheres
 
 Implementation of atom orbital magnetization integration inside the PAW spheres. 
-x, y and z components are printed and decomposition on p, d and f orbitals is also done. 
+x, y and z components are printed. Decomposition on p, d and f orbitals is also done. 
 Works only for PAW+U+SOC (and nspden=4). 
 Works also for orbitals where no U is specified. 
-New input flag [[prt_lorbmag]]. See test [[test:v9_112]]
+New input flag [[prt_lorbmag]]. See test [[test:v9_112]].
 
 By A. Sasani & E. Bousquet (MR915).
 
 
-**B.10* High-temperature DFT: Improvements of the Extended First-Principles Molecular Dynamic (ExtFPMD) calculations.
+**B.10** High-temperature DFT: Improvements of the Extended First-Principles Molecular Dynamic (ExtFPMD) calculations.
 
 [[useextfpmd]]=1 now computes contributions using Fermi gas DOS (which was found to be more stable for pure and mixtures). 
 Old [[useextfpmd]]=1 is now [[useextfpmd]]=4 (tests were changed accordingly)
@@ -195,8 +196,8 @@ By A. Blanchet (MR883 and MR916)
 
 **B.11** Interface to coupled-cluster CC4S calculations.
 
-The writing of the file needed as input for computations with the CC4S package, allowing to the coupled-cluster
-calculations (and more) can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
+The writing of the file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, 
+allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
 See test test:gwr_07 (not yet activated)..
 
 By M. Giantomassi (MR 875, 907)
@@ -207,7 +208,7 @@ By M. Giantomassi (MR 875, 907)
 
 **C.1** Improvement of gfortran handling.
 
-Previously Abinit did not add the specific flags for gfortran 12 because this new version was not anticipated in config/hints/ 
+Previously Abinit did not add the specific flags for gfortran 12, similar to gfortran 11, because this new version was not anticipated in config/hints/ .
 The logic has been changed in config/hints, the default being the newest version.
 The old gfortran versions 7, 8 and 9 are treated as specific cases.
 So, ABINIT is working with gfortran 12 & 13.
@@ -223,45 +224,46 @@ By JM Beuken (MR888)
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
 **D.1** Improved developer documentation, section .
-[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite)
-By X. Gonze (commit dabc1b905)
+[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
+By X. Gonze (commit dabc1b905).
 
-**D.2* Coulomb interaction with 2D cut-off is now working for the total energy and forces.
-This has been tested agains Quantum Espresso implementation. However, stresses are still missing.
+**D.2** Coulomb interaction with 2D cut-off is now working for the total energy and forces.
+This has been tested agains Quantum Espresso implementation. However, stresses are still incorrect.
 New test [[test:v9_132]].
 By B. Guster, with help from X. Gonze (MR908).
 
-**D.3** Implement forces and stresses using "gemm" programming model.
+**D.3** Implemented forces and stresses using "gemm" programming model.
 This will later allow computing forces/stresses on GPU.
-By M. Torrent (MR886 and 887)
+By M. Torrent (MR886 and 887).
 
 **D.4**
 Added [[prteig]]=2, in order to print EIG.nc file at each timestep (using already used for other variables TIMx suffix). 
 (No test - should be added).
-By A. Blanchet (MR916)
+By A. Blanchet (MR916).
 
 **D.5**
 Allow for band-by-band decomposition of the STM density, using negative values of [[prtstm]].
-By X. Gonze (MR880)
+See test [[test:v4_46]].
+By X. Gonze (MR880).
 
 **D.6**
 Several improvements for recognition of parallel netcdf for macbookpro and the Zenobe Belgian supercomputer.
-By M. Verstraete (MR876)
+By M. Verstraete (MR876).
 
 **D.7**
-Improve the initialization of paral_kgb/wfoptalg/istwfk
-By M. Torrent (MR918)
+Improve the initialization of paral_kgb/wfoptalg/istwfk.
+By M. Torrent (MR918).
 
 **D.8**
 New units are recognized by the input file parser : "meV" (for millielectron-volt) ;  "S", "Sec" or "Second" ; "Kelvin".
-By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit 39801af30)
+By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit 39801af30).
 
 **D.9**
-New tests of the band parallelism in DFPT : [[test:paral_65]] and [[test:paral_66]]
-By M. Giantomassi (commit 31e8aa66d8)
+New tests of the band parallelism in DFPT : [[test:paral_65]] and [[test:paral_66]].
+By M. Giantomassi (commit 31e8aa66d8).
 
-**D.10** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
-By P. Kesteneer (MR910), 
+**D.10** Fixed typo in CITATION.cff.
+By P. Kesteneer (MR910). 
 
 * * *
 
