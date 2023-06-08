@@ -4547,7 +4547,7 @@ Variable(
     defaultval=0,
     mnemonics="NonLocal Form Factors in LongWave calculation",
     characteristics=['[[DEVELOP]]'],
-    added_in_version="v9",
+    added_in_version="v9.9",
     text=r"""
 In a longwave calculation, the nonlocal form factors and their derivatives are
 by default computed for all k points and atom types at an initial step and then 
@@ -6399,7 +6399,7 @@ Variable(
     text=r"""
 Sets a tolerance for absolute differences of QP energies between to consecutive iterations
 that will cause the self-consistent GWR cycle to stop.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
+Can be specified in Ha (the default), Ry, eV or Kelvin, since **gwr_tolqpe** has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
 """,
 ),
@@ -9893,7 +9893,7 @@ This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
 ddk, d2_dkdk, electric fields. The number of linear-response calculations 
 to be explicitly precomputed can be reduced via symmetry arguments  
-selecting the appropiate value of the [[prepalw]] variable.
+selecting the appropriate value of the [[prepalw]] variable.
 """,
 ),
 
@@ -13360,6 +13360,7 @@ The choice is among:
   * 3 --> susceptibility and dielectric matrix calculation (SCR), routine *screening*
   * 4 --> self-energy calculation (SIG), routine *sigma*.
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
+  * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see [[gwr_task]].
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
@@ -16035,11 +16036,14 @@ If set to 1, provide output of the electron density in real
 space rho(r), made only from the electrons close to the Fermi energy, in a
 range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
+
 Specifying a non-zero negative value is also allowed, and will produce also
 the output of an electron density in real space, like the above, but moreover
 will additionally filter it to have the contribution of one band only,
 whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
 must be smaller or equal to [[nband]].
+This allow one to perform a detailed band-by-band
+analysis.
 
 The electron density obtained from [[prtstm]]=1,
 is a very approximate way to obtain STM profiles: one can choose an
@@ -16051,9 +16055,6 @@ independent transfer matrix elements between the tip and the surface.
 The charge density is provided in units of electrons/Bohr^3. The name of the
 STM density file will be the root output name, followed by _STM. Like a _DEN
 file, it can be analyzed by cut3d.
-
-The negative values of [[prtstm]] allows one to perform a detailed band-by-band
-analysis of the [[prtstm]]=1 result.
 
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 For the STM charge density to be generated, one must give, as an input file,
@@ -23553,7 +23554,10 @@ Variable(
     requires="[[usepaw]] == 1, [[usepawu]] == 1 or 4, and [[nspden]] == 4",
     added_in_version="9.8.2",
     text=r"""
-This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), it defines how the double counting term in the PAW+U formalism is computed. The default is 3, but Abinit versions before 9.8 correspond to 1.
+This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), 
+it defines how the magnetism is treated in the double counting term in the PAW+U formalism.
+Abinit versions before 9.8 correspond to [[optdcmagpawu]]=1, without magnetism in the DC term,
+while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is currently the default.
 """,
 ),
 

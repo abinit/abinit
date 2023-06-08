@@ -1,22 +1,19 @@
 ## v9.10
 
-Version 9.10, released on May 30, 2023.
+Version 9.10, released on June 20, 2023.
 List of changes with respect to version 9.8.
-<!-- Release notes updated on May 30, 2023. -->
+<!-- Release notes updated on June 8, 2023. -->
 
 Many thanks to the contributors to the ABINIT project between
-Sptember 2022 and April 2023, and some late contributions up to XXX 2023 ! 
+September 2022 and April 2023 (with some late contributions until June 2023).
 These release notes
 are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
-<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, 911, are taken into account. -->
+<!-- Merge requests up to and including MR919. Also, MR XYZ are taken into account. -->
 
 The list of contributors includes:
-TO BE UPDATED
-B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet,
-F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote,
-C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner,
-R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran,
-M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
+J. Abreu, J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+L. Mac Enulty, D.D. O'Regan, R. Rostami,
+M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -26,28 +23,237 @@ Xavier
 
 ### **A.** Important remarks and warnings. 
 
+**A.1** The default value for [[dosdeltae@anaddb]] has been changed from 1cm-1 to 0.2cm-1, 
+and the default value for [[dossmear@anaddb]] has been changed from 5cm-1 to 1cm-1.
+Also, the default values for [[dosdeltae@atdep]] has been changed from 4.5d-6 to 0.2cm-1.
+This is to allow default calculation of thermal expansion using abipy to be more stable numerically.
+
+By S. Rostami and X. Gonze (commit 8b7697502c)
+
+
+**A.2** The names of several tutorial files have been changed to make them easier to understand. "gspw" is now "paral_bandpw", "ucrpa" is now "ucalc_crpa",
+"depes" is now "eph_tdep_legacy", "eph" is now "eph_legacy", "ffield" is now "polarization". The tutorial "udet" relying on an old utility
+is now superceded by the tutorial "lruj", see section [B.4](#v9.10.B.4).
+
 * * *
 
 ### **B.** Most noticeable achievements
+
+**B.1** Low-scaling GW and RPA implementations 
+
+A cubic scaling real space imaginary time algorithm for GW and RPA has been implemented.
+See the theory in [[cite:Liu2016]] and related references. It relies on the minimax time-frequency grids
+available in the GreenX library (reference to be provided).
+At present: only norm-conserving pseudopotentials can be used, restriction to non-magnetic materials,
+and without spin-orbit coupling.
+Still, different types of flows and algorithms (including self-consistency) are available, see [[gwr_task]].
+
+Activate it using [[optdriver]]=6, and specify [[gwr_task]].
+
+New input variables : [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
+[[gwr_np_kgts]], [[gwr_ucsc_batch]], [[gwr_ntau]], 
+[[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwa_rpa_ncut]], [[gwr_nstep]], [[gwr_tolqpe]] (replacing the obsolete gw_toldfeig input variable).
+
+Tests are provided in the newly created subdirectory tests/gwr, see [[test:gwr_1]], [[test:gwr_2]], [[test:gwr_3]], 
+[[test:gwr_4]], [[test:gwr_5]], [[test:gwr_6]], [[test:gwr_7]]. 
+
+By M. Giantomassi (MR 875, 907)
+
+
+**B.2** Orbital magnetization 
+
+The computation of the orbital magnetization and chemical shielding (converse method, that is, with a nuclear dipole moment added) has been implemented, 
+as described and tested in [[cite:Zwanziger2023]].
+This implementation works with PAW only, with [[nspinor]]=1 and 2, for insulators (tested) and metals (in principle).
+Lamb shielding is treatedi. Atompaw has been updated accordingly to compute and output the Lamb shielding in xml files.
+
+See [[test:v9_44]] and [[tutorial:nuc_4]], with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
+
+The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to present such computations.
+
+By J. Zwanziger, with some help by M. Torrent and X. Gonze (MR895, 904, 917).
+
+
+**B.3** Natural optical activity tensor, linear response to a vector potential (orbital magnetic field linear response) and other modifications of the longwave driver.
+
+Computation of the natural optical activity tensor can be performed via the input variable [[lw_natopt]].
+This is demonstrated with the test [[test:tutorespfn_lw8]]. 
+The topic [[topic:longwave]] has been upgraded.
+
+In addition, the computation of the linear response to a vector potential in the long-wavelength limit 
+has been implemented via minimal modifications of the routines that calculate second derivatives 
+of wavefunctions with respect to wavevector as explained in [[cite:Zabalo2022]].
+(Are there tests/documentation for this feature ?).
+
+These are by-products of large modifications of the longwave driver, mimicking the structure of the nonlinear one.
+Other improvements related to the large modifications:
+i) the number of source code lines has been reduced.
+ii) the number of i/o operations has been reduced.
+iii) symmetries are now used in order to calculate only linearly independent components of the tensors. This also reduces the number of linear-response functions to precalculate.
+iv) the whole structure is now more general, thus facilitating the implementation of future spatial dispersion quantities.
+
+Also, see the new input variable [[ffnl_lw]] that allows to reduce memory footprint at the expense of CPU time.
+(A test should be provided).
+
+By Miquel Royo, Asier Zabalo and Massimiliano Stengel (MR913).
+
+<a name="v9.10.B.4"></a>
+**B.4** Linear response computation of the U and J parameters
+
+The old utility "ujdet" to compute the U and J parameters in DFT+U with the linear response method [[cite:Cococcioni2005]]
+has been replaced by the new "lruj" utility. The workflow is different.
+A [[tutorial:lruj]] tutorial has been written, with three corresponding tests, [[test:lruj_1]], [[test:lruj_2]], [[test:lruj_3]].
+See also the input variables [[pawujv]]. The tutorial and corresponding tests "ujdet" have been suppressed.
+The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[tests:v9_105]], 
+[[tests:v9_106]], [[tests:v9_107]], [[tests:v9_108]], [[tests:v9_109]], [[tests:v9_110]].
+
+By Lorien Mac Enulty with help from David D. O'Regan (MR905, 912).
+
+**B.5** Cumulant method for spectral function
+
+The computation of the electronic spectral function with electron-phonon coupling included is now enabled using the cumulant method.
+See [[cite:Nery2018]] and [[Abreu2022]] and other related publications.
+
+Activate it using [[eph_task]]=9 when [[optdriver]] == 7.
+New input variable : [[tolcum]].
+See the [[test:v9_60]].
+
+By M. Giantomassi and  J. Abreu (MR 907)
+
+
+**B.6** Support for norm-conserving pseudopotentials in UPF2 format
+
+Abinit now can read NC pseudos in UPF2 format (both scalar and relativistic version) thanks to the UPF parser imported from quantum espresso and an additional
+routine used to convert FR pseudos from (j,kappa) to scalar + SOC term taken from oncvpsp.
+
+The total energy computed with UPF pseudos does not perfectly agree with the one obtained with the corresponding psp8 pseudos.
+Most of the difference originates from the value of epsatm ($ \int[r^2 (V(r)+\frac{Zv}{r}) dr]$ as the local part in the UPF file is tabulated
+on a much larger radial mesh. This should not represent a serious issue as long as total energy calculations are performed with the same pseudos.
+Forces, stress tensor and KS eigenvalues are in much better agreement in the systems investigated so far.
+
+See the [[test:v9_130]] and [[test:v9_131]]
+
+By M. Giantomassi (MR896)
+
+**B.7** Initialization of the wavefunctions using atomic orbitals
+
+For pseudopotentials that contain the information about atomic local orbitals, like the UPF2 format, the wavefunctions
+inside ABINIT can be initialized from the Hilbert space spanned by such set of functions,
+using the input variable [[wfinit]]=2.
+
+See test [[test:v9_130]].
+
+By M. Giantomassi (MR896)
+
+**B.8** Temperature-dependent XC functionals (free energy), using libXC
+
+The following temperature-dependent XC functionals from libXC are now available: 
+LDA T-dependent functionals from [[cite:Karasiev2014]], with [[ixc]]=-269, from [[cite:Karasiev2018]],
+with [[ixc]]=-318, and from [[cite:Groth2017]], with [[ixc]]=-577.
+Previously, the IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]], with [[ixc]]=50
+had been coded, but not documented.
+
+See [[test:libxc_22]
+
+By M. Torrent (MR901)
+
+**B.9** Atomic orbital magnetic moment inside PAW spheres
+
+Implementation of atom orbital magnetization integration inside the PAW spheres. 
+x, y and z components are printed and decomposition on p, d and f orbitals is also done. 
+Works only for PAW+U+SOC (and nspden=4). 
+Works also for orbitals where no U is specified. 
+New input flag [[prt_lorbmag]]. See test [[test:v9_112]]
+
+By A. Sasani & E. Bousquet (MR915).
+
+
+**B.10* High-temperature DFT: Improvements of the Extended First-Principles Molecular Dynamic (ExtFPMD) calculations.
+
+[[useextfpmd]]=1 now computes contributions using Fermi gas DOS (which was found to be more stable for pure and mixtures). 
+Old [[useextfpmd]]=1 is now [[useextfpmd]]=4 (tests were changed accordingly)
+
+[[useextfpmd]]=10 controls the Hybrid Thomas-Fermi / Kohn-Sham scheme see [[cite:Hollebon2022]].
+This model aims at reducing further the needed number of bands at high temperature compared to Extended FPMD. 
+No documentation is available since it is work in progress.
+
+Added a new input variable [[extfpmd_nbdbuf]] which specifies the number of bands to use for the buffer if [[useextfpmd]] /= 0.
+Among the total number of bands, last [[extfpmd_nbdbuf]] bands
+occupation will be set to 0, and ExtFPMD model will take charge of computing
+electronic contributions starting from [[nband]] - [[extfpmd_nbdbuf]].
+In some cases, setting this input variable to a positive number can solve
+convergency problems due to high variations of electron density within the SCF cycle.
+Moreover, setting [[extfpmd_nbdbuf]] = [[nband]] should theoretically give
+access to Fermi gas orbital free calculations (not tested yet).
+This fix has been proposed on the forum by Thomas Gawne (University of Oxford, UK)
+
+By A. Blanchet (MR883 and MR916)
+
+
+**B.11** Interface to coupled-cluster CC4S calculations.
+
+The writing of the file needed as input for computations with the CC4S package, allowing to the coupled-cluster
+calculations (and more) can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
+See test [[test:gwr_07]]
+
+By M. Giantomassi (MR 875, 907)
 
 * * *
 
 ### **C.** Changes for the developers (including information about compilers)
 
+**C.1** Improvement of gfortran handling.
+
+Previously Abinit did not add the specific flags for gfortran 12 because this new version was not anticipated in config/hints/ 
+The logic has been changed in config/hints, the default being the newest version.
+The old gfortran versions 7, 8 and 9 are treated as specific cases.
+So, ABINIT is working with gfortran 12 & 13.
+
+By F Bruneval, with adaptation to gfortran 12 by JM Beuken and to gfortran 13 by M Torrent (MR914, MR919),
+
+**C.2** A new bot for memory profiling has been added to the test farm, named scope_gnu_12.2_mpich .
+
+By JM Beuken (MR888)
+
 * * *
 
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
-**D.YY* Improve developer documentation.
-How to add a new test, commit dabc1b905.
+**D.1** Improved developer documentation, section .
+[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite)
+By X. Gonze (commit dabc1b905)
 
-**D.YY** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.2* Coulomb interaction with 2D cut-off is now working for the total energy and forces.
+This has been tested agains Quantum Espresso impementation. However, stresses are still missing.
+By B. Guster, with help from X. Gonze (MR908).
 
-TO BE UPDATED
-By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843),
-A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
-M. Torrent (MR838 and 873), B. Seddon and X. Gonze (MR839 and 855), L. Baguet (MR857),
-J.-M. Beuken (MR882).
+**D.3** Implement forces and stresses using "gemm" programming model.
+This will later allow computing forces/stresses on GPU.
+By M. Torrent (MR886 and 887)
+
+**D.4**
+Added [[prteig]]=2, in order to print EIG.nc file at each timestep (using already used for other variables TIMx suffix). 
+(No test - should be added).
+By A. Blanchet (MR916)
+
+**D.5**
+Allow for band-by-band decomposition of the STM density, using negative values of [[prtstm]].
+By X. Gonze (MR880)
+
+**D.6**
+Several improvements for recognition of parallel netcdf for macbookpro and the Zenobe Belgian supercomputer.
+By M. Verstraete (MR876)
+
+**D.7**
+Improve the initialization of paral_kgb/wfoptalg/istwfk
+By M. Torrent (MR918)
+
+**D.8**
+New units are recognized by the input file parser : "meV" (for millielectron-volt) ;  "S", "Sec" or "Second" ; "Kelvin".
+By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit XXX)
+
+**D.9** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+By P. Kesteneer (MR910), 
 
 * * *
 
@@ -102,8 +308,8 @@ By X. Gonze
 
 **A.5**
 Correction and cleaning of DFT+U with magnetism ([[nspden]]=4), following the merge 881.
-Introduce "optdcmagpawu" input to control different choices of DC term (for tests and code comparisons, not useful for production).
-Versions before 9.8 is equivalent to optdcmagpawu=1 (no magnetism in the DC term). Now the default is 3 (magnetism in the DC term). Some refs are changed accordingly.
+Introduce [[optdcmagpawu]] input to control different choices of DC term (for tests and code comparisons, not useful for production).
+Versions before 9.8 is equivalent to [[optdcmagpawu]]=1 (no magnetism in the DC term). Now the default is 3 (magnetism in the DC term). Some refs are changed accordingly.
 Change of the tests v9/76,77 and 78 for better precision. Add the tests v9/88 and 89 to tests the combination of PAW+U with different [[pawxcdev]].
 
 By L. Baguet (MR898)

@@ -1621,14 +1621,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
- dtout%gwr_nstep           = dtin%gwr_nstep
  dtout%gw_frqim_inzgrid   = dtin%gw_frqim_inzgrid
  dtout%gw_frqre_inzgrid   = dtin%gw_frqre_inzgrid
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
  dtout%gw_invalid_freq    = dtin%gw_invalid_freq
  dtout%gw_qprange         = dtin%gw_qprange
  dtout%gw_sigxcore        = dtin%gw_sigxcore
- dtout%gwr_tolqpe         = dtin%gwr_tolqpe
 
  dtout%gwls_stern_kmax      = dtin%gwls_stern_kmax
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
@@ -1646,13 +1644,15 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
 
- dtout%gwr_ntau = dtin%gwr_ntau
- dtout%gwr_chi_algo = dtin%gwr_chi_algo
- dtout%gwr_sigma_algo = dtin%gwr_sigma_algo
- dtout%gwr_rpa_ncut = dtin%gwr_rpa_ncut
- dtout%gwr_boxcutmin = dtin%gwr_boxcutmin
- dtout%gwr_max_hwtene = dtin%gwr_max_hwtene
- dtout%gwr_task = dtin%gwr_task
+ dtout%gwr_ntau             = dtin%gwr_ntau
+ dtout%gwr_chi_algo         = dtin%gwr_chi_algo
+ dtout%gwr_sigma_algo       = dtin%gwr_sigma_algo
+ dtout%gwr_rpa_ncut         = dtin%gwr_rpa_ncut
+ dtout%gwr_boxcutmin        = dtin%gwr_boxcutmin
+ dtout%gwr_max_hwtene       = dtin%gwr_max_hwtene
+ dtout%gwr_task             = dtin%gwr_task
+ dtout%gwr_tolqpe           = dtin%gwr_tolqpe
+ dtout%gwr_nstep            = dtin%gwr_nstep
 
  dtout%hyb_mixing         = dtin%hyb_mixing
  dtout%hyb_mixing_sr      = dtin%hyb_mixing_sr
@@ -3305,14 +3305,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  ! XG20200321, please provide testing for eph_np_pqbks
  ! MG: Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
- list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_tols_idelta'
- list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_np_pqbks'
+ list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact'
+ list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extfpmd_nbdbuf extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
@@ -3324,8 +3324,6 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_nimposecoeff fit_rangePower fit_SPCoupling fit_SPC_maxS'
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
- list_vars=trim(list_vars)//' gwr_np_kgts gwr_ucsc_batch gwr_ntau gwr_boxcutmin gwr_max_hwtene gwr_task'
- list_vars=trim(list_vars)//" gwr_chi_algo gwr_sigma_algo gwr_rpa_ncut"
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
@@ -3345,15 +3343,15 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
- list_vars=trim(list_vars)//' gw_invalid_freq'
- list_vars=trim(list_vars)//' gw_icutcoul'
- list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gwr_nstep gw_qlwl'
- list_vars=trim(list_vars)//' gw_sigxcore gwr_tolqpe'
+ list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
+ list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_sigxcore'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
+ list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_np_kgts gwr_nstep gwr_ntau'
+ list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
@@ -3540,7 +3538,7 @@ subroutine chkvars(string)
 !Extra token, also admitted:
 !<ABINIT_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K Kelvin nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ABINIT_UNITS>
 
 !<ABINIT_OPERATORS>
