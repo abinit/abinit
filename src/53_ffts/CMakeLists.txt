@@ -23,6 +23,7 @@ target_compile_definitions(53_ffts
 
 target_link_libraries(53_ffts
   PUBLIC
+  abinit::46_ghc_omp
   abinit::52_fft_mpi_noabirule
   )
 

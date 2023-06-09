@@ -37,6 +37,18 @@ target_link_libraries(45_xgTools
   PUBLIC
   abinit::44_abitypes_defs)
 
+if(OpenMP_FOUND)
+  target_link_libraries(45_xgTools
+    PUBLIC
+    OpenMP::OpenMP_Fortran)
+endif()
+
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(45_xgTools
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
+endif()
+
 if (ABINIT_YAKL_WANTED)
   target_link_libraries(45_xgTools
     PUBLIC
