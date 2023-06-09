@@ -699,11 +699,11 @@ SD_WANNIER90_INIT([optional warn], [-lwannier90])
 SD_XMLF90_INIT([optional warn])
 
 # Init KOKKOS
-SD_KOKKOS_INIT([optional fail])
+#SD_KOKKOS_INIT([optional fail])
 #SD_KOKKOS_INIT([optional warn])
 
 # Init YAKL
-SD_YAKL_INIT([optional fail])
+#SD_YAKL_INIT([optional fail])
 #SD_YAKL_INIT([optional warn])
 
 # ---------------------------------------------------------------------------- #
