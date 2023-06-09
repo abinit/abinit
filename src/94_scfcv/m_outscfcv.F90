@@ -596,6 +596,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Output of the GSR file (except when we are inside mover)
 #ifdef HAVE_NETCDF
+#if 0
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
@@ -626,6 +627,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    NCF_CHECK(nf90_close(ncid))
    !call timab(1195,2,tsec)
  end if
+#endif
 #endif
 
  call timab(1154,2,tsec)
