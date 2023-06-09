@@ -10,6 +10,7 @@ set(66_wfs_SRC
   m_fock_getghc.F90
   m_getchc.F90
   m_getghc.F90
+  m_getghc_ompgpu.F90
   m_getgh1c.F90
   m_getgh2c.F90
   m_prep_kgb.F90
@@ -50,6 +51,7 @@ target_link_libraries(66_wfs
   abinit::43_ptgroups
   abinit::44_abitools
   abinit::44_abitypes_defs
+  abinit::46_ghc_omp
   abinit::56_recipspace
   abinit::62_cg_noabirule
   abinit::66_nonlocal
@@ -59,6 +61,12 @@ if(OpenMP_FOUND)
   target_link_libraries(66_wfs
     PUBLIC
     OpenMP::OpenMP_Fortran)
+endif()
+
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(66_wfs
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
 endif()
 
 if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)

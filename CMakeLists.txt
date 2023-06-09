@@ -270,16 +270,36 @@ endif(MPI_FOUND)
 #
 find_package(OpenMP)
 
-# check for OpenMP collapse clause support
 if(OpenMP_FOUND)
   set(HAVE_OPENMP 1)
 
+  # check for OpenMP collapse clause support
   try_compile(HAVE_OMP_COLLAPSE_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_omp_collapse.F90
     LINK_LIBRARIES OpenMP::OpenMP_Fortran)
 
   if(HAVE_OMP_COLLAPSE_BOOL)
     set(HAVE_OMP_COLLAPSE 1)
   endif()
+
+  if (ABINIT_ENABLE_GPU_CUDA)
+    # check for OpenMP GPU offload support (OpenMP v5 onwards)
+    try_compile(HAVE_OPENMP_OFFLOAD_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_offload.F90
+      LINK_LIBRARIES OpenMP::OpenMP_Fortran)
+
+    if(HAVE_OPENMP_OFFLOAD_BOOL)
+      set(HAVE_OPENMP_OFFLOAD 1)
+
+      include(manage_openmp_target)
+      #FIXME Experimental, only tested with NVHPC through Intel IFX, AMD Flang and GFortran might be handled.
+      # Examples:
+      #get_offload_flags(ARCH   gfx1030 RESULT OFFLOAD_FLAGS)  for AMD GPUs    (Flang > v16.0)
+      #get_offload_flags(TARGET 80      RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC)
+      #get_offload_flags(ARCH   sm_80   RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC > v23.x and Flang > v16.0)
+      #get_offload_flags(TARGET spir64  RESULT OFFLOAD_FLAGS)  for Intel GPUs  (IntelLLVM a.k.a IFX)
+
+      get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}      RESULT OPENMP_OFFLOAD_FLAGS)
+    endif()
+  endif(ABINIT_ENABLE_GPU_CUDA)
 
 endif()
 
@@ -873,6 +893,9 @@ if (ABINIT_ENABLE_GPU_CUDA)
   message("  CUDA toolkit found   : ${CUDAToolkit_FOUND}")
   message("  CUDA toolkit version : ${CUDAToolkit_VERSION}")
   message("  CUDA toolkit nvcc    : ${CUDAToolkit_NVCC_EXECUTABLE}")
+endif()
+if (HAVE_OPENMP_OFFLOAD)
+  message("  OpenMP GPU offload flags : ${OPENMP_OFFLOAD_FLAGS}")
 endif()
 message("")
 

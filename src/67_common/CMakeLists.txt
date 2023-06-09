@@ -60,6 +60,7 @@ target_link_libraries(67_common
   abinit::10_defs
   abinit::16_hideleave
   abinit::44_abitools
+  abinit::46_ghc_omp
   abinit::52_fft_mpi_noabirule
   abinit::56_io_mpi
   abinit::56_mixing
@@ -74,6 +75,12 @@ if(OpenMP_FOUND)
   target_link_libraries(67_common
     PUBLIC
     OpenMP::OpenMP_Fortran)
+endif()
+
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(67_common
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
 endif()
 
 if (ABINIT_YAKL_WANTED)
