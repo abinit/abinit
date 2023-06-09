@@ -918,6 +918,31 @@
 
                        # ------------------------------ #
 
+# Kokkos Core library
+# Website: http://kokkos.org/
+
+# Enable Kokkos Core support (default is no)
+#
+#with_kokkos="yes"
+
+# C++ flags for Kokkos Core (default is unset)
+#
+#KOKKOS_CXXFLAGS="-I/usr/local/include/kokkos"
+
+# Fortran flags for Kokkos Core (default is unset)
+#
+#KOKKOS_FCFLAGS="-I/usr/local/include/kokkos"
+
+# Link flags for Kokkos Core (default is unset)
+#
+#KOKKOS_LDFLAGS=""
+
+# Library flags for Kokkos Core (default is unset)
+#
+#KOKKOS_LIBS="-L/usr/local/lib/kokkos -lkokkoscore"
+
+                       # ------------------------------ #
+
 # Levenberg-Marquardt algorithm
 # Website: http://users.ics.forth.gr/~lourakis/levmar/
 
@@ -1192,6 +1217,28 @@
 # Link flags for the LibPSML library (default is unset)
 #
 #XMLF90_LIBS="-L/usr/local/lib -lxmlf90"
+
+                       # ------------------------------ #
+
+# YAKL (Yet Another Kernel Launcher) library
+# Small C++ framework used in ABINIT for GPU memory pool allocation
+# Website: https://github.com/mrnorman/YAKL
+
+# Enable YAKL support (default is no)
+#
+#with_yakl="yes"
+
+# Fortran flags for YAKL (default is unset)
+#
+#YAKL_FCFLAGS="-I/usr/local/include/yakl"
+
+# Link flags for YAKL (default is unset)
+#
+#YAKL_LDFLAGS=""
+
+# Library flags for YAKL (default is unset)
+#
+#YAKL_LIBS="-L/usr/local/lib/yakl -lyakl_fortran_interface"
 
 # -------------------------------------------------------------------------- #
 # Profiling and performance analysis                                         #
