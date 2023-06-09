@@ -35,6 +35,7 @@ target_link_libraries(79_seqpar_mpi
   abinit::10_defs
   abinit::16_hideleave
   abinit::44_abitypes_defs
+  abinit::46_ghc_omp
   abinit::48_diago
   abinit::62_wvl_wfs
   abinit::66_wfs
@@ -49,6 +50,12 @@ if(OpenMP_FOUND)
   target_link_libraries(79_seqpar_mpi
     PUBLIC
     OpenMP::OpenMP_Fortran)
+endif()
+
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(79_seqpar_mpi
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
 endif()
 
 if (ABINIT_YAKL_WANTED)

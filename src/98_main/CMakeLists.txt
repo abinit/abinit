@@ -31,6 +31,12 @@ macro(abi_build_exe exe_name)
       OpenMP::OpenMP_Fortran)
   endif (OpenMP_FOUND)
 
+  if(HAVE_OPENMP_OFFLOAD)
+    target_link_options(${exe_name}
+      PRIVATE
+      ${OPENMP_OFFLOAD_FLAGS})
+  endif()
+
   if (Libxc_FOUND)
     target_link_libraries(${exe_name}
       PUBLIC
