@@ -11,10 +11,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -28,14 +24,14 @@ module m_qplusg
  use defs_basis
 
  implicit none
- 
- private 
+
+ private
 !!***
-  
+
  public :: cmod_qpg
 !!***
 
-CONTAINS 
+CONTAINS
 !!***
 
 !!****f* m_qplusg/cmod_qpg
@@ -56,14 +52,9 @@ CONTAINS
 !! OUTPUT
 !! qplusg(npwvec)=Norm of q+G vector
 !!
-!! PARENTS
-!!      m_ppmodel,m_vcoul
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
+subroutine cmod_qpg(nq, iq, q, npwvec, gvec, gprimd, qplusg)
 
 !Arguments ------------------------------------
 !scalars
@@ -84,12 +75,12 @@ subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
  ! Compute reciprocal space metrics
  do ii=1,3
    gmet(ii,:)=gprimd(1,ii)*gprimd(1,:)+&
-&             gprimd(2,ii)*gprimd(2,:)+&
-&             gprimd(3,ii)*gprimd(3,:)
+              gprimd(2,ii)*gprimd(2,:)+&
+              gprimd(3,ii)*gprimd(3,:)
  end do
 
- if (ALL(ABS(q(:,iq))<tol3)) then !FIXED<--FIXME avoid this, everything should be under the control of the programmer.
-   ! * Treat q as if it were zero except when G=0
+ if (ALL(ABS(q(:,iq)) < tol3)) then
+   ! Treat q as if it were zero except when G=0
    qplusg(1)=two_pi*SQRT(DOT_PRODUCT(q(:,iq),MATMUL(gmet,q(:,iq))))
    do ig=2,npwvec
      gpq(:)=gvec(:,ig)

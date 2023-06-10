@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -179,13 +175,6 @@ contains
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  rhog(2,nfft)=Fourier transform of total electron/positron density
 !!  rhor(nfft,nspden)=total electron/positron density (el/bohr**3)
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -830,7 +819,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
      call ctocprj(atindx,cg,1,cprj,gmet,gprimd,iatom,0,&
 &      0,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
 &      dtset%mpw,dtset%natom,nattyp,dtset%nband,dtset%natom,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
-&      dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&      dtset%nsppol,dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
 &      xred,ylm,ylmgr)
      call wrtout(std_out,' cprj is computed')
    end if
@@ -916,13 +905,6 @@ end subroutine setup_positron
 !!
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
-!!
-!! PARENTS
-!!      m_outscfcv,m_positron
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1846,13 +1828,6 @@ end subroutine poslifetime
 !!  print a warning if the core wave function is not localized in the PAW sphere
 !!  implement PAW on-site contribution for state-independent scheme
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
-!!
 !! SOURCE
 
 !Macro to go from row-column indexing to combined indexing
@@ -2136,9 +2111,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &       ncor,nphicor(itypat),pawrad(itypat),phicor(itypat)%value,&
 &       filename=filename)
 !      The following arrays are not used anymore
-       ABI_FREE(energycor)
-       ABI_FREE(lcor)
-       ABI_FREE(ncor)
+       if (nphicor(itypat)>0) then
+         ABI_FREE(energycor)
+         ABI_FREE(lcor)
+         ABI_FREE(ncor)
+       end if
      end do
    end if
    if (mpi_enreg%nproc_cell>1) then
@@ -3344,13 +3321,6 @@ end subroutine posdoppler
 !!  rate= annihilation rate of a given core state needed for state dependent scheme for doppler broadening
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_positron
-!!
-!! CHILDREN
-!!      gammapositron,mkdenpos,nderiv_gen,pawdensities,pawxcsum,simp_gen
-!!      xmpi_sum
 !!
 !! SOURCE
 

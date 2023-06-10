@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -92,10 +88,6 @@ contains
 !!  (TO BE DESCRIBED)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -223,7 +215,6 @@ subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,
  ! check dilatmx here and correct if necessary
  if (usewvl == 0) then
    call chkdilatmx(dt_chkdilatmx,dilatmx,rprimd,rprimd_orig,dilatmx_errmsg)
-   _IBM6("dilatxm_errmsg: "//TRIM(dilatmx_errmsg))
    if (LEN_TRIM(dilatmx_errmsg) /= 0) then
      ABI_WARNING(dilatmx_errmsg)
      nerr_dilatmx = nerr_dilatmx+1

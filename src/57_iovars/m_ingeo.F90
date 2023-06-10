@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -128,12 +124,6 @@ contains
 !! The dtset datastructure should NOT be an argument of this routine ... !
 !!
 !! MG: I completely agree. Abinit developers must learn that Fortran does not allow for aliasing!
-!!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
-!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 
@@ -1207,12 +1197,6 @@ end subroutine ingeo
 !! typat(natom)=type integer for each atom in cell
 !! xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!      intagm,metric,sort_dp
-!!
 !! SOURCE
 
 subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
@@ -1860,12 +1844,6 @@ end subroutine ingeobld
 !!  typat(1:natom)=type integer for each atom in cell
 !!  xred(3,1:natom)=reduced dimensionless atomic coordinates
 !!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!      intagm,metric,sort_dp
-!!
 !! SOURCE
 
 subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
@@ -2009,12 +1987,6 @@ end subroutine fillcell
 !!
 !! OUTPUT
 !! vacuum(3)= for each direction, 0 if no vacuum, 1 if vacuum
-!!
-!! PARENTS
-!!      m_invars1,m_invars2
-!!
-!! CHILDREN
-!!      intagm,metric,sort_dp
 !!
 !! SOURCE
 

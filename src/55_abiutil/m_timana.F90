@@ -14,10 +14,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -130,12 +126,6 @@ contains
 !!
 !!    NOTE : the number of fourwf calls is equal to
 !!    the # of nonlop (choice=1) calls + the # of nonlop (choice=2) calls
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      timab,time_accu,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -968,7 +958,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
 
  ! lobpcg2
- names(1650) = 'lobpcgwf2                     '; 
+ names(1650) = 'lobpcgwf2                     ';
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
  names(1653) = 'lobpcg_run                     '
@@ -1096,7 +1086,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1762) = 'chebfi2_amp_f                 '
  names(1763) = 'chebfi2_alltoall              '
 
- names(1780)='ctk_rotate'; basic(1780) = 1
+ names(1780)='ctgk_rotate'; basic(1780) = 1
 
 
  ! DVDB object
@@ -1120,11 +1110,26 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1905)='sigph_bsum_2'; basic(1905) = 1
  names(1906)='sigph_bsum_3'; basic(1906) = 1
  names(1907)='sigph_bsum_4'; basic(1907) = 1
+ names(1908)='sigph_prep_stern'; basic(1908) = 1
+ names(1909)='sigph_stern'; basic(1909) = 1
+ names(1910)='sigph_post_stern'; basic(1910) = 1
 
- !names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
- !names(1905)='splfit'; basic(1905) = 1
- !names(1906)='mkkin'; basic(1906) = 1
+ ! GWR code
+ names(1919)='ugb_from_diago'; basic(1919) = 1
+ names(1920)='gwr_init'; basic(1920) = 1
+ names(1921)='gwr_read_ugb_from_wfk'; basic(1921) = 1
+ names(1922)='gwr_build_green'; basic(1922) = 1
+ names(1923)='gwr_build_tchi'; basic(1923) = 1
+ names(1924)='gwr_build_wc'; basic(1924) = 1
+ names(1925)='gwr_build_sigmac'; basic(1925) = 1
+ names(1926)='gwr_build_sigxme'; basic(1926) = 1
+ names(1927)='gwr_build_head_wings'; basic(1927) = 1
+ names(1928)='gwr_rpa_energy'; basic(1928) = 1
+ !names(1929)='gwr_gk_to_scbox'; basic(1929) = 1
+ !names(1930)='gwr_wcq_to_scbox'; basic(1930) = 1
+ !names(1931)='gsph2box'; basic(1931) = 1
 
+ ! TIMER_SIZE is 1999. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================

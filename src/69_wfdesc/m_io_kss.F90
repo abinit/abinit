@@ -12,10 +12,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -109,12 +105,6 @@ CONTAINS  !===========================================================
 !!
 !! SIDE EFFECTS
 !!  The KSS Header is written on file.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -357,12 +347,6 @@ end subroutine write_kss_header
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
@@ -482,12 +466,6 @@ end subroutine write_vkb
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -611,12 +589,6 @@ end subroutine write_kss_wfgk
 !! NOTES
 !!  1) icg is used only if cg is present.
 !!  2) cg and eig_vec are mutually exclusive. One and only one can be passed to the routine.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -803,12 +775,6 @@ end subroutine k2gamma_centered
 !!  gvec_kss(:,:) = Input: null pointer. Output: gvec_kss(3,npwkss), list of G-vectors (closed shells)
 !!  ierr=Status error
 !!
-!! PARENTS
-!!      m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,prtvol,npwkss,gvec_kss,ierr)
@@ -962,12 +928,6 @@ end subroutine make_gvec_kss
 !!
 !! TODO
 !!  *) Spinorial case is not implemented.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1197,12 +1157,6 @@ end subroutine kss_calc_vkb
 !!
 !! TESTS
 !! * ETSF_IO output is tested in tests/etsf_io/t02.
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1689,7 +1643,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      if (MPI_enreg%proc_distrb(ikpt,1,isppol)==my_rank) then
 
        write(msg,'(2a,i3,3x,a)')ch10,' k-point ',ikpt,stag(isppol)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out, msg)
 
        if (do_diago) then
          ! Direct diagonalization of the KS Hamiltonian.
@@ -2036,12 +1990,6 @@ contains
 !! NOTES
 !! This routine is not available for paw calculations
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,ntypat)
@@ -2164,12 +2112,6 @@ end subroutine memkss
 !!
 !! OUTPUT
 !!  Writes on standard output
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

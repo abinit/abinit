@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -29,7 +25,7 @@ module m_manage_cuda
  use m_alloc_hamilt_gpu
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #endif
 
  implicit none
@@ -39,7 +35,7 @@ module m_manage_cuda
 #if defined HAVE_GPU_CUDA
 !interface
 !  integer(C_INT) function cuda_func() bind(C)
-!    use iso_c_binding, only : C_INT,C_PTR
+!    use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
 !    type(C_PTR) :: ptr
 !  end function cuda_func
 #endif

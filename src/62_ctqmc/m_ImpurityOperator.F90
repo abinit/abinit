@@ -17,12 +17,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #include "defs.h"
@@ -144,12 +138,6 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_init(this, flavors, beta)
@@ -227,12 +215,6 @@ END SUBROUTINE ImpurityOperator_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_reset(this)
@@ -285,12 +267,6 @@ END SUBROUTINE ImpurityOperator_reset
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -359,12 +335,6 @@ END SUBROUTINE ImpurityOperator_computeU
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_setUmat(this, matU)
@@ -410,12 +380,6 @@ END SUBROUTINE ImpurityOperator_setUmat
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_setMu(this, mu)
@@ -456,12 +420,6 @@ END SUBROUTINE ImpurityOperator_setMu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -507,12 +465,6 @@ END SUBROUTINE ImpurityOperator_activateParticle
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -588,12 +540,6 @@ END FUNCTION ImpurityOperator_getAvailableTime
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION ImpurityOperator_getAvailedTime(this, position)
@@ -651,12 +597,6 @@ END FUNCTION ImpurityOperator_getAvailedTime
 !!   this%particles(aF)%list is updated
 !!   this%overlaps  is updated
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -768,12 +708,6 @@ END SUBROUTINE ImpurityOperator_add
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 FUNCTION ImpurityOperator_getSegment(this,position_val)
@@ -837,12 +771,6 @@ END FUNCTION ImpurityOperator_getSegment
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -922,12 +850,6 @@ END SUBROUTINE ImpurityOperator_remove
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION ImpurityOperator_getNewOverlap(this, CdagC_1)
@@ -997,11 +919,6 @@ END FUNCTION ImpurityOperator_getNewOverlap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Ctqmc_tryAddRemove
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1117,12 +1034,6 @@ END FUNCTION ImpurityOperator_getsign
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 FUNCTION ImpurityOperator_getTraceAdd(this, CdagC_1) RESULT(trace)
@@ -1185,12 +1096,6 @@ END FUNCTION ImpurityOperator_getTraceAdd
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1256,12 +1161,6 @@ END FUNCTION ImpurityOperator_getTraceRemove
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1430,12 +1329,6 @@ END FUNCTION ImpurityOperator_overlapSegFlav
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION ImpurityOperator_overlapFlavor(this,flavor)
@@ -1485,12 +1378,6 @@ END FUNCTION ImpurityOperator_overlapflavor
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1550,12 +1437,6 @@ END FUNCTION ImpurityOperator_overlapSwap
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_swap(this,flavor1, flavor2)
@@ -1614,12 +1495,6 @@ END SUBROUTINE ImpurityOperator_swap
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1682,12 +1557,6 @@ END FUNCTION ImpurityOperator_overlapIJ
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_measDE(this,DE)
@@ -1743,12 +1612,6 @@ END SUBROUTINE ImpurityOperator_measDE
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_cleanOverlaps(this)
@@ -1796,12 +1659,6 @@ END SUBROUTINE ImpurityOperator_cleanOverlaps
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1860,12 +1717,6 @@ END FUNCTION ImpurityOperator_measN
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_destroy(this)
@@ -1913,12 +1764,6 @@ END SUBROUTINE ImpurityOperator_destroy
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1979,12 +1824,6 @@ END SUBROUTINE ImpurityOperator_getErrorOverlap
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE ImpurityOperator_doCheck(this,opt_check)
@@ -2024,12 +1863,6 @@ END SUBROUTINE ImpurityOperator_doCheck
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2145,12 +1978,6 @@ END SUBROUTINE ImpurityOperator_checkOverlap
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 DOUBLE PRECISION FUNCTION ImpurityOperator_getError(this)
@@ -2195,12 +2022,6 @@ END FUNCTION ImpurityOperator_getError
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2304,12 +2125,6 @@ END SUBROUTINE ImpurityOperator_printLatex
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

@@ -29,8 +29,8 @@ subroutine xmpi_sum_int(xval,comm,ier)
 
 !Arguments ------------------------------------
  integer, DEV_CONTARRD intent(inout) :: xval(:)
- integer,intent(in) :: comm
- integer,intent(out) :: ier
+ integer,intent(in)                  :: comm
+ integer,intent(out)                 :: ier
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
@@ -62,6 +62,28 @@ subroutine xmpi_sum_int(xval,comm,ier)
 end subroutine xmpi_sum_int
 !!***
 
+!> wrapper arround xmpi_sum_int than can be called in C/CUDA
+subroutine xmpi_sum_int_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_int(xval, comm, ier)
+
+end subroutine xmpi_sum_int_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_intv
@@ -88,7 +110,7 @@ subroutine xmpi_sum_intv(xval,comm,ier)
 
 !Arguments----------------------
  integer,intent(inout) :: xval
- integer,intent(in) :: comm
+ integer,intent(in)    :: comm
  integer,intent(out)   :: ier
 
 !Local variables----------------
@@ -108,6 +130,28 @@ subroutine xmpi_sum_intv(xval,comm,ier)
 #endif
 end subroutine xmpi_sum_intv
 !!***
+
+!> wrapper arround xmpi_sum_intv than can be called in C/CUDA
+subroutine xmpi_sum_intv_c(xval_ptr,comm,ier) bind(c, name="xmpi_sum_intv_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval => null()
+
+  ! convert the c pointer into a fortran variable
+  call c_f_pointer(xval_ptr, xval)
+
+  call xmpi_sum_intv(xval, comm, ier)
+
+end subroutine xmpi_sum_intv_c
+
 
 !----------------------------------------------------------------------
 
@@ -154,6 +198,30 @@ subroutine xmpi_sum_intv2(xval,xsum,comm,ier)
 
 end subroutine xmpi_sum_intv2
 !!***
+
+!> wrapper arround xmpi_sum_intv2 than can be called in C/CUDA
+subroutine xmpi_sum_intv2_c(xval_ptr,xsum_ptr,comm,ier) bind(c, name="xmpi_sum_intv2_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  type(c_ptr),                    intent(inout) :: xsum_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval => null()
+  integer, pointer :: xsum => null()
+
+  ! convert the c pointer into a fortran variable
+  call c_f_pointer(xval_ptr, xval)
+  call c_f_pointer(xsum_ptr, xsum)
+
+  call xmpi_sum_intv2(xval, xsum, comm, ier)
+
+end subroutine xmpi_sum_intv2_c
 
 !!****f* ABINIT/xmpi_sum_intn
 !! NAME
@@ -215,6 +283,29 @@ subroutine xmpi_sum_intn(xval,n1,comm,ier)
 
 end subroutine xmpi_sum_intn
 !!***
+
+!> wrapper arround xmpi_sum_intn than can be called in C/CUDA
+subroutine xmpi_sum_intn_c(xval_ptr,xval_size,n1,comm,ier) bind(c, name="xmpi_sum_intn_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: n1
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_intn(xval, n1, comm, ier)
+
+end subroutine xmpi_sum_intn_c
 
 !----------------------------------------------------------------------
 
@@ -341,6 +432,28 @@ subroutine xmpi_sum_int2d(xval,comm,ier)
 end subroutine xmpi_sum_int2d
 !!***
 
+!> wrapper arround xmpi_sum_int2d than can be called in C/CUDA
+subroutine xmpi_sum_int2d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int2d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(2)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_int2d(xval, comm, ier)
+
+end subroutine xmpi_sum_int2d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_int3d
@@ -417,6 +530,28 @@ subroutine xmpi_sum_int3d(xval,comm,ier)
 
 end subroutine xmpi_sum_int3d
 !!***
+
+!> wrapper arround xmpi_sum_int3d than can be called in C/CUDA
+subroutine xmpi_sum_int3d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int3d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(3)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_int3d(xval, comm, ier)
+
+end subroutine xmpi_sum_int3d_c
 
 !----------------------------------------------------------------------
 
@@ -496,6 +631,28 @@ subroutine xmpi_sum_int4d(xval,comm,ier)
 end subroutine xmpi_sum_int4d
 !!***
 
+!> wrapper arround xmpi_sum_int4d than can be called in C/CUDA
+subroutine xmpi_sum_int4d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_int4d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(4)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  integer, pointer :: xval(:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_int4d(xval, comm, ier)
+
+end subroutine xmpi_sum_int4d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_dp
@@ -558,6 +715,28 @@ subroutine xmpi_sum_dp(xval,comm,ier)
 end subroutine xmpi_sum_dp
 !!***
 
+!> wrapper arround xmpi_sum_dp than can be called in C/CUDA
+subroutine xmpi_sum_dp_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_dp(xval, comm, ier)
+
+end subroutine xmpi_sum_dp_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_dpvt
@@ -617,6 +796,30 @@ subroutine xmpi_sum_dpvt(xval,xsum,comm,ier)
 end subroutine xmpi_sum_dpvt
 !!***
 
+!> wrapper arround xmpi_sum_dpvt than can be called in C/CUDA
+subroutine xmpi_sum_dpvt_c(xval_ptr,xsum_ptr,comm,ier) bind(c, name="xmpi_sum_dpvt_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  type(c_ptr),                    intent(inout) :: xsum_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval => null()
+  real(dp), pointer :: xsum => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval)
+  call c_f_pointer(xsum_ptr, xsum)
+
+  call xmpi_sum_dpvt(xval, xsum, comm, ier)
+
+end subroutine xmpi_sum_dpvt_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_dpv
@@ -667,6 +870,27 @@ subroutine xmpi_sum_dpv(xval,comm,ier)
 
 end subroutine xmpi_sum_dpv
 !!***
+
+!> wrapper arround xmpi_sum_dpv than can be called in C/CUDA
+subroutine xmpi_sum_dpv_c(xval_ptr,comm,ier) bind(c, name="xmpi_sum_dpv_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval)
+
+  call xmpi_sum_dpv(xval, comm, ier)
+
+end subroutine xmpi_sum_dpv_c
 
 !----------------------------------------------------------------------
 
@@ -730,6 +954,29 @@ subroutine xmpi_sum_dpn(xval,n1,comm,ier)
 
 end subroutine xmpi_sum_dpn
 !!***
+
+!> wrapper arround xmpi_sum_dpn than can be called in C/CUDA
+subroutine xmpi_sum_dpn_c(xval_ptr,xval_size,n1,comm,ier) bind(c, name="xmpi_sum_dpn_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t), value, intent(in)    :: xval_size
+  integer(kind=c_int32_t),        intent(in)    :: n1
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, [xval_size])
+
+  call xmpi_sum_dpn(xval, n1, comm, ier)
+
+end subroutine xmpi_sum_dpn_c
 
 !----------------------------------------------------------------------
 
@@ -806,6 +1053,28 @@ subroutine xmpi_sum_sp2d(xval,comm,ier)
 
 end subroutine xmpi_sum_sp2d
 !!***
+
+!> wrapper arround xmpi_sum_sp2d than can be called in C/CUDA
+subroutine xmpi_sum_sp2d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp2d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(2)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp2d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp2d_c
 
 !----------------------------------------------------------------------
 
@@ -884,6 +1153,28 @@ subroutine xmpi_sum_sp3d(xval,comm,ier)
 end subroutine xmpi_sum_sp3d
 !!***
 
+!> wrapper arround xmpi_sum_sp3d than can be called in C/CUDA
+subroutine xmpi_sum_sp3d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp3d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(3)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp3d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp3d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_sp4d
@@ -960,6 +1251,28 @@ subroutine xmpi_sum_sp4d(xval,comm,ier)
 
 end subroutine xmpi_sum_sp4d
 !!***
+
+!> wrapper arround xmpi_sum_sp4d than can be called in C/CUDA
+subroutine xmpi_sum_sp4d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp4d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(4)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp4d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp4d_c
 
 !----------------------------------------------------------------------
 
@@ -1038,6 +1351,28 @@ subroutine xmpi_sum_sp5d(xval,comm,ier)
 
 end subroutine xmpi_sum_sp5d
 !!***
+
+!> wrapper arround xmpi_sum_sp5d than can be called in C/CUDA
+subroutine xmpi_sum_sp5d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp5d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(5)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp5d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp5d_c
 
 !----------------------------------------------------------------------
 
@@ -1118,6 +1453,28 @@ subroutine xmpi_sum_sp6d(xval,comm,ier)
 end subroutine xmpi_sum_sp6d
 !!***
 
+!> wrapper arround xmpi_sum_sp6d than can be called in C/CUDA
+subroutine xmpi_sum_sp6d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp6d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(6)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp6d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp6d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_sp7d
@@ -1128,16 +1485,16 @@ end subroutine xmpi_sum_sp6d
 !!  Combines values from all processes and distribute
 !!  the result back to all processes.
 !!  Target: double precision six-dimensional arrays.
-!!   
-!! INPUTS 
+!!
+!! INPUTS
 !!  comm= MPI communicator
-!!   
-!! OUTPUT 
+!!
+!! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!   
+!!
 !! SOURCE
 subroutine xmpi_sum_sp7d(xval,comm,ier)
 
@@ -1197,6 +1554,27 @@ subroutine xmpi_sum_sp7d(xval,comm,ier)
 end subroutine xmpi_sum_sp7d
 !!***
 
+!> wrapper arround xmpi_sum_sp7d than can be called in C/CUDA
+subroutine xmpi_sum_sp7d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_sp7d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(7)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(sp), pointer :: xval(:,:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_sp7d(xval, comm, ier)
+
+end subroutine xmpi_sum_sp7d_c
 
 
 !----------------------------------------------------------------------
@@ -1275,6 +1653,28 @@ subroutine xmpi_sum_dp2d(xval,comm,ier)
 end subroutine xmpi_sum_dp2d
 !!***
 
+!> wrapper arround xmpi_sum_dp2d than can be called in C/CUDA
+subroutine xmpi_sum_dp2d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp2d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(2)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp2d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp2d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_dp3d
@@ -1351,6 +1751,28 @@ subroutine xmpi_sum_dp3d(xval,comm,ier)
 
 end subroutine xmpi_sum_dp3d
 !!***
+
+!> wrapper arround xmpi_sum_dp3d than can be called in C/CUDA
+subroutine xmpi_sum_dp3d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp3d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(3)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp3d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp3d_c
 
 !----------------------------------------------------------------------
 
@@ -1429,6 +1851,28 @@ subroutine xmpi_sum_dp4d(xval,comm,ier)
 
 end subroutine xmpi_sum_dp4d
 !!***
+
+!> wrapper arround xmpi_sum_dp4d than can be called in C/CUDA
+subroutine xmpi_sum_dp4d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp4d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(4)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp4d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp4d_c
 
 !----------------------------------------------------------------------
 
@@ -1509,6 +1953,28 @@ subroutine xmpi_sum_dp5d(xval,comm,ier)
 end subroutine xmpi_sum_dp5d
 !!***
 
+!> wrapper arround xmpi_sum_dp5d than can be called in C/CUDA
+subroutine xmpi_sum_dp5d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp5d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(5)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp5d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp5d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_dp6d
@@ -1588,6 +2054,28 @@ subroutine xmpi_sum_dp6d(xval,comm,ier)
 end subroutine xmpi_sum_dp6d
 !!***
 
+!> wrapper arround xmpi_sum_dp6d than can be called in C/CUDA
+subroutine xmpi_sum_dp6d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp6d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(6)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp6d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp6d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_dp7d
@@ -1598,16 +2086,16 @@ end subroutine xmpi_sum_dp6d
 !!  Combines values from all processes and distribute
 !!  the result back to all processes.
 !!  Target: double precision six-dimensional arrays.
-!!   
-!! INPUTS 
+!!
+!! INPUTS
 !!  comm= MPI communicator
-!!   
-!! OUTPUT 
+!!
+!! OUTPUT
 !!  ier= exit status, a non-zero value meaning there is an error
 !!
 !! SIDE EFFECTS
 !!  xval= buffer array
-!!   
+!!
 !! SOURCE
 
 subroutine xmpi_sum_dp7d(xval,comm,ier)
@@ -1668,6 +2156,28 @@ subroutine xmpi_sum_dp7d(xval,comm,ier)
 end subroutine xmpi_sum_dp7d
 !!***
 
+!> wrapper arround xmpi_sum_dp7d than can be called in C/CUDA
+subroutine xmpi_sum_dp7d_c(xval_ptr,xval_size,comm,ier) bind(c, name="xmpi_sum_dp7d_c")
+
+  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_int32_t
+  implicit none
+
+  ! dummy args
+  type(c_ptr),                    intent(inout) :: xval_ptr
+  integer(kind=c_int32_t),        intent(in)    :: xval_size(7)
+  integer(kind=c_int32_t),        intent(in)    :: comm
+  integer(kind=c_int32_t),        intent(out)   :: ier
+
+  ! local vars
+  real(dp), pointer :: xval(:,:,:,:,:,:,:) => null()
+
+  ! convert the c pointer into a fortran array
+  call c_f_pointer(xval_ptr, xval, xval_size)
+
+  call xmpi_sum_dp7d(xval, comm, ier)
+
+end subroutine xmpi_sum_dp7d_c
+
 !----------------------------------------------------------------------
 
 !!****f* ABINIT/xmpi_sum_dp2t
@@ -1726,7 +2236,7 @@ end subroutine xmpi_sum_dp2t
 !! FUNCTION
 !!  Combines values from all processes and distribute
 !!  the result back to all processes.
-!!  Target:  double precisions bi-dimensional array 
+!!  Target:  double precisions bi-dimensional array
 !!
 !! INPUTS
 !!  n = total send size
@@ -1913,6 +2423,57 @@ subroutine xmpi_sum_c0dc(xval,comm,ier)
 #endif
 
 end subroutine xmpi_sum_c0dc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_sum_c0sc
+!! NAME
+!!  xmpi_sum_c0sc
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: single-precision complex scalar
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= scalar to be summed.
+!!
+!! SOURCE
+
+subroutine xmpi_sum_c0sc(xval,comm,ier)
+
+!Arguments-------------------------
+ complex(sp),intent(inout) :: xval
+ integer,intent(in) :: comm
+ integer,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: nproc_space_comm
+ complex(sp) :: xsum
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_COMM_SIZE(comm,nproc_space_comm,ier)
+   if (nproc_space_comm /= 1) then
+     ! Accumulate xval on all proc. in comm
+     call MPI_ALLREDUCE(xval,xsum,1,MPI_COMPLEX,MPI_SUM,comm,ier)
+     xval = xsum
+   end if
+ end if
+#endif
+
+end subroutine xmpi_sum_c0sc
 !!***
 
 !----------------------------------------------------------------------

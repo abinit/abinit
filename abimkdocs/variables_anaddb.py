@@ -350,7 +350,7 @@ Frequency-dependent dielectric tensor flag.
         vartype="real",
         topics=['PhononBands_useful'],
         dimensions="scalar",
-        defaultval="4.5E-06 Hartree = 1 cm$^{-1}$",
+        defaultval="0.2 cm$^{-1}$ (about 0.9E-06 Hartree)",
         mnemonics="DOS DELTA in Energy",
         added_in_version="before_v9",
         text=r"""
@@ -365,7 +365,7 @@ grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
         vartype="real",
         topics=['PhononBands_useful'],
         dimensions="scalar",
-        defaultval="4.5E-05 Hartree = 10 cm$^{-1}$",
+        defaultval="1 cm$^{-1}$ (about 4.5E-06 Hartree)",
         mnemonics="DOS SMEARing value",
         characteristics=['[[ENERGY]]'],
         added_in_version="before_v9",
@@ -1115,7 +1115,7 @@ to represent the importance of the eigen mode, is a defined as a function of the
 
   * 0 -->  The unity function, equals to 1 for any energy.
 
-  * 1 --> The Erfc function, $f(\lambda)=\frac{1}{2} erfc(\frac{\lambda-\mu}{\sigma}) $. 
+  * 1 --> The Erfc function, $f(\lambda)=\frac{1}{2} erfc(\frac{\lambda-\mu}{\sigma}) $.
 
   * 2 --> The Gaussian function $f(\lambda) = exp(\frac{-(\lambda-\mu)^2}{\sigma^2})$.
 
@@ -1198,8 +1198,8 @@ The number of Lattice Wannier functions to be constructed.
         mnemonics="Lattice Wannier Function: the PROJECTORs",
         added_in_version="9.8.0",
         text=r"""
-The indices of atomic displacements used as projectors in the construction of Lattice Wannier function with the projected Wannier function method. 
-For each atom, there are three displacements along x, y, and z in the cartesian coordinate. The list of the displacements are thus (atom 1, x), (atoms 1, y), (atom 1, z), (atom 2, x), etc. The lwf_projector option specifies the indices of the se displacement to be used as projectors. The number of the projectors should equal the number of wannier functions. 
+The indices of atomic displacements used as projectors in the construction of Lattice Wannier function with the projected Wannier function method.
+For each atom, there are three displacements along x, y, and z in the cartesian coordinate. The list of the displacements are thus (atom 1, x), (atoms 1, y), (atom 1, z), (atom 2, x), etc. The lwf_projector option specifies the indices of the se displacement to be used as projectors. The number of the projectors should equal the number of wannier functions.
 """,
     ),
 
@@ -1382,7 +1382,7 @@ Should correspond to the grid of points available in the DDB or to a sub-grid.
 This number define the series of grids that will be used for the estimation of
 the phonon DOS. The coarsest will be tried first, then the next, ... then the
 one described by [[anaddb:ng2qpt]]. The intermediate grids are defined for
-igrid=1... [[anaddb:ngrids]], by the numbers 
+igrid=1... [[anaddb:ngrids]], by the numbers
 ngqpt_igrid(ii)=(igrid ng2qpt(ii))/[[anaddb:ngrids]]s
 """,
     ),
@@ -1757,9 +1757,9 @@ must be set to 1 since the interatomic force constants are supposed to be known.
 
 The available options are:
 
-  * 0 --> no output of PHDOS (default);
-  * 1 --> calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]].
-  * 2 --> calculate PHDOS using the tetrahedron method.
+  * 0 --> No output of PHDOS (default);
+  * 1 --> Calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]]. This is the recommended technique, as usually the interpolation q-point grid is very fine.
+  * 2 --> Calculate PHDOS using the tetrahedron method. The tetrahedron DOS has Van Hove singularities, and this might yield problems with further post-treatment of the DOS.
 
 The step of the frequency grid employed to calculate the DOS can be defined
 through the input variable [[anaddb:dosdeltae]].
@@ -1829,7 +1829,7 @@ $$
 
 The nesting factor is calculated for every point of the k-grid employed during the
 previous GS calculation. The values are subsequently interpolated along the
-trajectory in q space defined by [[anaddb:qpath]], and written in the _NEST
+trajectory in q space defined by [[anaddb:qpath]], and written in the `kpluq`
 file using the X-Y format ( **prtnest** =1). It is also possible to analyze
 the behavior of the function in the reciprocal unit cell saving the values in
 the NEST_XSF file that can be read using [XCrySDen](http://www.xcrysden.org) (**prtnest** =2).
@@ -2586,7 +2586,7 @@ instead of the legacy mode based on the files file. Example:
 
     outdata_prefix = "t01_o"
 
-    See also [[outdata_prefix@abinit]]
+See also [[outdata_prefix@abinit]]
 """,
     ),
 

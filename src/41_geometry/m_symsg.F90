@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -68,11 +64,6 @@ contains
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
-!!
-!! PARENTS
-!!      m_spgbuilder
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -556,11 +547,6 @@ end subroutine symsgcube
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
-!! PARENTS
-!!      m_spgbuilder
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
@@ -895,11 +881,6 @@ end subroutine symsghexa
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
-!!
-!! PARENTS
-!!      m_spgbuilder
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1440,11 +1421,6 @@ end subroutine symsgmono
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
-!! PARENTS
-!!      m_spgbuilder
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symsgortho(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,&
@@ -1934,11 +1910,6 @@ end subroutine symsgortho
 !! symrel(3,3,nsym) = 3D matrix containg symmetry operations
 !! tnons(3,nsym) = 2D matrix containing translations associated
 !!
-!! PARENTS
-!!      m_spgbuilder
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
@@ -2384,11 +2355,6 @@ end subroutine symsgtetra
 !!
 !! SIDE EFFECTS
 !! nogen = number of generators, number of operations to be applied onto themselves
-!!
-!! PARENTS
-!!      m_symsg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

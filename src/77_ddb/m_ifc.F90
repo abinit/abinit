@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -32,7 +28,6 @@ MODULE m_ifc
  use m_xmpi
  use m_sort
  use m_cgtools
- use m_lebedev
  use m_nctk
  use m_ddb
  use m_ddb_hdr
@@ -42,12 +37,14 @@ MODULE m_ifc
 #endif
 
  use m_io_tools,    only : open_file
+ use m_numeric_tools, only : arth
  use m_fstrings,    only : ktoa, int2char4, sjoin, itoa, ltoa, ftoa
  use m_symtk,       only : matr3inv
  use m_special_funcs,  only : abi_derfc
  use m_time,        only : cwtime, cwtime_report, timab
  use m_copy,        only : alloc_copy
  use m_pptools,     only : printbxsf
+ use m_lebedev,     only : lebedev_t, lebedev_ngrids
  use m_ewald,       only : ewald9
  use m_crystal,     only : crystal_t
  use m_geometry,    only : phdispl_cart2red, normv, mkrdim
@@ -216,6 +213,12 @@ MODULE m_ifc
     procedure :: fourq => ifc_fourq
      ! Use Fourier interpolation to compute interpolated frequencies w(q) and eigenvectors e(q)
 
+    procedure :: get_dwdq => ifc_get_dwdq
+    !  Compute phonon group velocities at an arbitrary q-point.
+
+    procedure :: get_phmesh => ifc_get_phmesh
+     ! Build linear mesh for phonons.
+
     procedure :: speedofsound => ifc_speedofsound
      ! Compute the speed of sound by averaging phonon group velocities.
 
@@ -231,10 +234,12 @@ MODULE m_ifc
     procedure :: calcnwrite_nana_terms => ifc_calcnwrite_nana_terms
      ! Compute phonons for q--> 0 with LO-TO
 
- end type ifc_type
+    procedure :: init => ifc_init
+     ! Constructor from DDB datatype
 
- public :: ifc_init          ! Constructor from DDB datatype
- public :: ifc_init_fromFile ! Constructor from filename
+    procedure :: from_file => ifc_from_file
+     ! Constructor from filename
+ end type ifc_type
 !!***
 
 !----------------------------------------------------------------------
@@ -250,12 +255,6 @@ CONTAINS  !===========================================================
 !!
 !! FUNCTION
 !!  Deallocate memory for the ifc_type structure
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -337,13 +336,6 @@ end subroutine ifc_free
 !! OUTPUT
 !! Ifc<ifc_type>=Object containing the dynamical matrix and the IFCs.
 !!
-!! PARENTS
-!!      anaddb,m_effective_potential_file,m_eph_driver,m_gruneisen,m_ifc
-!!      m_tdep_abitypes
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
@@ -353,9 +345,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   Ifc_coarse,dipquad,quadquad) ! Optional
 
 !Arguments ------------------------------------
+ class(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
  real(dp),intent(in) :: rifcsph
- type(ifc_type),intent(inout) :: Ifc
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
@@ -398,9 +390,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  call cwtime(cpu, wall, gflops, "start")
 
- ! TODO: This dimension should be encapsulated somewhere. We don't want to
- ! change the entire code if someone adds a new kind of perturbation.
- mpert = Crystal%natom + MPERT_MAX; iout = ab_out
+ mpert = ddb%mpert
+ iout = ab_out
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -431,7 +422,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ! Check if the rprim are coherent with the choice used in the interatomic forces generation
  call chkrp9(Ifc%brav,rprim)
 
- ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997). 
+ ! Compute dyewq0, the correction to be applied to the Ewald, see Eq.(71) of PRB55, 10355 (1997).
  dyewq0 = zero
  if ((Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1).and. (Ifc%asr==1.or.Ifc%asr==2)) then
    ! Calculation of the non-analytical part for q=0
@@ -517,7 +508,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      iq_bz = qmissing(ii)
      qpt = qbz(:,iq_bz)
      ! TODO: check dipdip option and phase, but I think this is correct!
-     call ifc_fourq(Ifc_coarse,Crystal,qpt,phfrq,displ_cart,out_d2cart=out_d2cart)
+     call Ifc_coarse%fourq(Crystal,qpt,phfrq,displ_cart,out_d2cart=out_d2cart)
      Ifc%dynmat(:,:,:,:,:,iq_bz) = out_d2cart
    end do
 
@@ -671,13 +662,13 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call alloc_copy(qdrp_cart, Ifc%qdrp_cart)
  call alloc_copy(ddb%amu, Ifc%amu)
 
- call ifc_free(ifc_tmp)
+ call ifc_tmp%free()
 
  ! Compute min/max ph frequency with ab-initio q-mesh.
  ifc%omega_minmax(1) = huge(one); ifc%omega_minmax(2) = -huge(one)
  do iq_ibz=1,ifc%nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
+   call ifc%fourq(crystal, ifc%qibz(:,iq_ibz), phfrq, displ_cart)
    ifc%omega_minmax(1) = min(ifc%omega_minmax(1), minval(phfrq))
    ifc%omega_minmax(2) = max(ifc%omega_minmax(2), maxval(phfrq))
  end do
@@ -695,7 +686,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out, msg)
    do iqpt=1,nqbz
      qpt(:)=Ifc%qbz(:,iqpt)
-     call ifc_fourq(Ifc,Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
+     call ifc%fourq(Crystal,qpt,phfrq,displ_cart,out_eigvec=eigvec)
 
      ! OmegaSRLR: Perform decomposition of dynamical matrix
      ! MG: FIXME I don't think the implementation is correct when q !=0
@@ -724,9 +715,9 @@ end subroutine ifc_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_ifc/ifc_init_fromFile
+!!****f* m_ifc/ifc_from_file
 !! NAME
-!!  ifc_init_fromFile
+!!  ifc_from_file
 !!
 !! FUNCTION
 !!  Need to be updated
@@ -735,25 +726,19 @@ end subroutine ifc_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_generate_training_set
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
-subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
+subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_ddb,zeff,qdrp_cart,comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(ifc_type),intent(out) :: Ifc
  integer,intent(in) :: nqshift,comm
  integer,intent(inout) :: natom
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: qshift(3,nqshift)
  character(len=*),intent(in) :: filename
- type(ifc_type),intent(out) :: Ifc
  real(dp),intent(inout) :: dielt(3,3)
  real(dp),allocatable,intent(inout) :: zeff(:,:,:)
  real(dp),allocatable,intent(inout) :: qdrp_cart(:,:,:,:)
@@ -766,8 +751,6 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  character(len=500) :: msg
  type(ddb_type) :: ddb
  type(ddb_hdr_type) :: ddb_hdr
-!arrays
- integer,allocatable :: atifc(:)
 
 !******************************************************************
 
@@ -776,16 +759,12 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 
  if (file_exists .eqv. .true.)then
    !Reading the ddb
-   call ddb_hdr_open_read(ddb_hdr,filename,2,DDB_VERSION,comm,dimonly=1)
+   call ddb_hdr%open_read(filename,2,comm,dimonly=1)
 
    natom = ddb_hdr%natom
-   ABI_MALLOC(atifc,(ddb_hdr%natom))
-   do i=1,ddb_hdr%natom
-     atifc(i)=i
-   end do
    call ddb_hdr%free()
 
-   call ddb_from_file(ddb,filename,1,natom,natom,atifc, ddb_hdr, ucell_ddb,comm)
+   call ddb%from_file(filename,1, ddb_hdr, ucell_ddb,comm)
 
  else
    ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
@@ -802,7 +781,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  end if
 
  ABI_MALLOC(qdrp_cart,(3,3,3,natom))
- iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
+ iblok = ddb%get_quadrupoles(ddb_hdr%ddb_version,1,3,qdrp_cart)
 
  ! ifc to be calculated for interpolation
  write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,' Calculation of the interatomic forces ',ch10
@@ -813,14 +792,13 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  else
    dipdip=1
  end if
- call ifc_init(Ifc,ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
+ call ifc%init(ucell_ddb,ddb,1,1,1,dipdip,1,ngqpt,nqshift,qshift,dielt,zeff,qdrp_cart,0,0.0_dp,0,1,comm)
 
  ! Free them all
- ABI_FREE(atifc)
  call ddb%free()
  call ddb_hdr%free()
 
- end subroutine ifc_init_fromFile
+end subroutine ifc_from_file
 !!***
 
 !----------------------------------------------------------------------
@@ -840,20 +818,15 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_print(ifc, header, unit, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(ifc_type),intent(in) :: ifc
  integer,optional,intent(in) :: unit,prtvol
  character(len=*),optional,intent(in) :: header
- class(ifc_type),intent(in) :: ifc
 
 !Local variables-------------------------------
  integer :: unt,my_prtvol,iatom,ii,idir
@@ -936,12 +909,6 @@ end subroutine ifc_print
 !!  [out_displ_red(2*3*natom*3*natom) = The (interpolated) displacement in reduced coordinates.
 !!  [dwdq(3,3*natom)] = Group velocities i.e. d(omega(q))/dq in Cartesian coordinates.
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
@@ -950,8 +917,8 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
 
 !Arguments ------------------------------------
 !scalars
- character(len=*),optional,intent(in) :: nanaqdir
  class(ifc_type),intent(in) :: Ifc
+ character(len=*),optional,intent(in) :: nanaqdir
  type(crystal_t),intent(in) :: Crystal
  integer,optional,intent(in) :: comm
 !arrays
@@ -1024,7 +991,7 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  !call phdispl_cart2red(natom, crystal%gprimd, out_eigvec, out_eigvec_red)
 
  ! Compute group velocities.
- if (present(dwdq)) call ifc_get_dwdq(ifc, crystal, my_qpt, phfrq, eigvec, dwdq, comm_)
+ if (present(dwdq)) call ifc%get_dwdq(crystal, my_qpt, phfrq, eigvec, dwdq, comm_)
 
  call timab(1748, 2, tsec)
 
@@ -1057,19 +1024,13 @@ end subroutine ifc_fourq
 !!
 !!    \nabla_q w(q, nu) = 1/(2 w(q, nu))  <u(q, nu)| \nabla_q D(q) | u(q, nu)>
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
 
 !Arguments ------------------------------------
 !scalars
- type(ifc_type),intent(in) :: ifc
+ class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: comm
 !arrays
@@ -1154,6 +1115,40 @@ end subroutine ifc_get_dwdq
 
 !----------------------------------------------------------------------
 
+!!****f* m_ifc/ifc_get_phmesh
+!! NAME
+!!  ifc_get_phmesh
+!!
+!! FUNCTION
+!!  Build linear mesh for phonons.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ifc_get_phmesh(ifc, ph_wstep, phmesh_size, phmesh)
+
+!Arguments ------------------------------------
+!scalars
+ class(ifc_type),intent(in) :: ifc
+ real(dp),intent(in) :: ph_wstep
+ integer,intent(out) :: phmesh_size
+!arrays
+ real(dp),allocatable,intent(out) :: phmesh(:)
+
+!******************************************************************
+
+ phmesh_size = nint((ifc%omega_minmax(2) - ifc%omega_minmax(1) ) / ph_wstep) + 1
+ ABI_MALLOC(phmesh, (phmesh_size))
+ phmesh = arth(ifc%omega_minmax(1), ph_wstep, phmesh_size)
+
+end subroutine ifc_get_phmesh
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ifc/ifc_speedofsound
 !!
 !! NAME
@@ -1176,19 +1171,14 @@ end subroutine ifc_get_dwdq
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: comm,ncid
  class(ifc_type),intent(in) :: ifc
+ integer,intent(in) :: comm,ncid
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(in) :: qrad_tolkms(2)
@@ -1223,7 +1213,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  ! In this case, indeed, we end up computing derivatives for the wrong branches, the integration becomes
  ! unstable and difficult to converge.
  qred = zero
- call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart,out_eigvec=eigvec)
+ call ifc%fourq(crystal, qred, phfrqs, displ_cart,out_eigvec=eigvec)
  !write(std_out,*)"omega(q==Gamma): ",phfrqs
 
  num_acoustic = 0
@@ -1257,7 +1247,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
    qvers_red = (qred / normv(qred, crystal%gmet, "G"))
    qred = qrad * qvers_red
    !write(std_out,*)"dir",normv(qred, crystal%gmet, "G"), qrad
-   call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
+   call ifc%fourq(crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
 
    do nu=1,3
      vs(ii, nu) = sqrt(sum(dwdq(1:3,asnu(nu)) ** 2)) * Bohr_meter * 0.001_dp / Time_Sec
@@ -1279,7 +1269,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
  ! Spherical average with Lebedev-Laikov grids.
  converged = 0
  do igrid=1,lebedev_ngrids
-   lgrid = lebedev_new(igrid)
+   call lgrid%from_index(igrid)
    npts = lgrid%npts; quad = zero; num_negw = 0; min_negw = zero
    do ii=1,npts
      if (mod(ii, nprocs) /= my_rank) cycle ! mpi-parallelism
@@ -1288,7 +1278,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
      qred = matmul(crystal%rprimd, lgrid%versors(:, ii))
      qred = qrad * (qred / normv(qred, crystal%gmet, "G"))
      !write(std_out,*)"lebe",normv(qred, crystal%gmet, "G"), qrad
-     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
+     call ifc%fourq(crystal, qred, phfrqs, displ_cart, dwdq=dwdq)
      if (any(phfrqs(asnu) < -tol8)) then
        num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs(asnu)))
      end if
@@ -1303,7 +1293,7 @@ subroutine ifc_speedofsound(ifc, crystal, qrad_tolkms, ncid, comm)
    quad = quad * Bohr_meter * 0.001_dp / Time_Sec
    call xmpi_sum(quad, comm, ierr)
    call xmpi_sum(num_negw, comm, ierr)
-   call lebedev_free(lgrid)
+   call lgrid%free()
 
    write(std_out,'(2(a,i6),a,3es12.4,a,es12.4)') &
      " Lebedev-Laikov grid: ",igrid,", npts: ", npts, " vs_sphavg(ac_modes): ",quad, " <vs>: ",sum(quad)/3
@@ -1397,19 +1387,13 @@ end subroutine ifc_speedofsound
 !!    with the last cutoff found by the bisection algorithm applied.
 !!  ifc%atmfrc(2,3,natom,3,natom,nrpt)= ASR-imposed Interatomic Forces
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_autocutoff(ifc, crystal, comm)
 
 !Arguments ------------------------------------
 !scalars
- type(ifc_type),intent(inout) :: ifc
+ class(ifc_type),intent(inout) :: ifc
  type(crystal_t),intent(in) :: crystal
  integer,intent(in) :: comm
 
@@ -1435,7 +1419,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  ABI_CALLOC(ref_phfrq, (3*natom, ifc%nqibz))
  do iq_ibz=1,ifc%nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-   call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), ref_phfrq(:,iq_ibz), displ_cart)
+   call ifc%fourq(crystal, ifc%qibz(:,iq_ibz), ref_phfrq(:,iq_ibz), displ_cart)
  end do
  call xmpi_sum(ref_phfrq, comm, ierr)
 
@@ -1444,7 +1428,8 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  save_wghatm = ifc%wghatm; save_atmfrc = ifc%atmfrc
 
  ABI_MALLOC(cut_phfrq, (3*natom, ifc%nqibz))
- qrad = 0.01; lgrid = lebedev_new(16)
+ qrad = 0.01
+ call lgrid%from_index(16)
 
  if (my_rank == master) then
    write(ab_out, "(a)")" Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere."
@@ -1472,7 +1457,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
    cut_phfrq = zero
    do iq_ibz=1,ifc%nqibz
      if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi-parallelism
-     call ifc_fourq(ifc, crystal, ifc%qibz(:,iq_ibz), cut_phfrq(:,iq_ibz), displ_cart)
+     call ifc%fourq(crystal, ifc%qibz(:,iq_ibz), cut_phfrq(:,iq_ibz), displ_cart)
      !write(std_out,*)cut_phfrq(1,iq_ibz),ref_phfrq(1,iq_ibz)
    end do
    call xmpi_sum(cut_phfrq, comm, ierr)
@@ -1488,7 +1473,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
      end if
      qred_vers = (qred / normv(qred, crystal%gmet, "G"))
      qred = qrad * qred_vers
-     call ifc_fourq(ifc, crystal, qred, phfrqs, displ_cart) !, dwdq=dwdq)
+     call ifc%fourq(crystal, qred, phfrqs, displ_cart) !, dwdq=dwdq)
      if (any(phfrqs < +tol8)) then
        num_negw = num_negw + 1; min_negw = min(min_negw, minval(phfrqs))
      end if
@@ -1517,7 +1502,7 @@ subroutine ifc_autocutoff(ifc, crystal, comm)
  ABI_FREE(cut_phfrq)
  ABI_FREE(save_wghatm)
  ABI_FREE(save_atmfrc)
- call lebedev_free(lgrid)
+ call lgrid%free()
 
 end subroutine ifc_autocutoff
 !!***
@@ -1548,12 +1533,6 @@ end subroutine ifc_autocutoff
 !! wghatm(natom,natom,nrpt) = Weights associated to a pair of atoms and to a R vector
 !!  with the required cutoff applied.
 !! rcut_min=Effective cutoff. Defined by the minimum cutoff radius over the natom sites.
-!!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
 !!
 !! SOURCE
 
@@ -1682,11 +1661,6 @@ end subroutine corsifc9
 !!  2) the code is unreadable and horrible - 3/4 different file formats for the
 !!  same stuff. We should make different subroutines, even if it duplicates some code
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
@@ -1694,9 +1668,9 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
 
 !Arguments -------------------------------
 !scalars
+ class(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: ifcout,ifcana,prt_ifc,ncid
  integer,optional,intent(in) :: unit_out
- class(ifc_type),intent(inout) :: Ifc
 !arrays
  integer,intent(in) :: atifc(Ifc%natom)
 
@@ -1721,7 +1695,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
  iout = ab_out
  if (present(unit_out)) then
    iout = unit_out
- end if   
+ end if
  dielt = ifc%dielt
 
  ! Compute the distances between atoms
@@ -1883,7 +1857,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid, &
      end if
 
      call ifc_getiaf(Ifc,ifcana,ifcout1,iout,ifc%zeff,ia,ra,list,dist,invdlt,&
-&                    detdlt,rsiaf,sriaf,vect,indngb,posngb)
+                     detdlt,rsiaf,sriaf,vect,indngb,posngb)
 
      if (prt_ifc == 1) then
        do ii=1,ifcout1
@@ -2043,12 +2017,6 @@ end subroutine ifc_write
 !! NOTES
 !! This routine should be executed by one processor only
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
@@ -2056,9 +2024,9 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
 
 !Arguments -------------------------------
 !scalars
+ class(ifc_type),intent(inout) :: Ifc
  integer,intent(in) :: ia,ifcana,ifcout,iout
  real(dp), intent(in) :: detdlt
- type(ifc_type),intent(inout) :: Ifc
 !arrays
  real(dp),intent(in) :: invdlt(3,3),ra(3)
  real(dp),intent(in) :: dist(Ifc%natom,Ifc%natom,Ifc%nrpt)
@@ -2362,12 +2330,6 @@ end subroutine ifc_getiaf
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine omega_decomp(amu,natom,ntypat,typat,dynmatfl,dynmatsr,dynmatlr,iqpt,nqpt,eigenvec)
@@ -2556,20 +2518,15 @@ end subroutine omega_decomp
 !! OUTPUT
 !!  only write to file. This routine should be called by a single processor.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
 !Arguments -------------------------------
 !scalars
+ class(ifc_type),intent(in) :: ifc
  integer,intent(in) :: nqshft
  character(len=*),intent(in) :: basename
- class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -2620,7 +2577,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
  do iq_ibz=1,nqibz
    qphon(:)=qibz(:,iq_ibz)
 
-   call ifc_fourq(ifc, cryst, qphon, phfrq, displ, out_d2cart=d2cart)
+   call ifc%fourq(cryst, qphon, phfrq, displ, out_d2cart=d2cart)
 
    write (unit_btrap,'(3E20.10)') qphon
    write (unit_btrap,'(E20.10)') wtq(iq_ibz)
@@ -2668,20 +2625,15 @@ end subroutine ifc_outphbtrap
 !! OUTPUT
 !!  Only write to file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
 !Arguments -------------------------------
 !scalars
+ class(ifc_type),intent(in) :: ifc
  integer,intent(in) :: nqshft,comm
  character(len=*),intent(in) :: path
- class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
 !arrays
  integer,intent(in) :: ngqpt(3)
@@ -2712,7 +2664,7 @@ subroutine ifc_printbxsf(ifc, cryst, ngqpt, nqshft, qshft, path, comm)
 
  do iq_ibz=1,nqibz
    if (mod(iq_ibz, nprocs) /= my_rank) cycle ! mpi parallelism.
-   call ifc_fourq(ifc, cryst, qibz(:,iq_ibz), freqs_qibz(:,iq_ibz), displ_cart)
+   call ifc%fourq(cryst, qibz(:,iq_ibz), freqs_qibz(:,iq_ibz), displ_cart)
  end do
  call xmpi_sum(freqs_qibz, comm, ierr)
 
@@ -2759,20 +2711,15 @@ end subroutine ifc_printbxsf
 !! NOTES:
 !!  This routine should be called by master node and when ifcflag == 1.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dfpt_phfrq,gtdyn9,nctk_defwrite_nonana_terms
-!!
 !! SOURCE
 
 subroutine ifc_calcnwrite_nana_terms(ifc, crystal, nph2l, qph2l, &
                                      qnrml2, ncid, phfrq2l, polarity2l) ! optional arguments
 
 !Arguments ------------------------------------
+ class(ifc_type),intent(in) :: ifc
  integer,intent(in) :: nph2l
  integer,optional,intent(in) :: ncid
- class(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(in) :: qph2l(3, nph2l)

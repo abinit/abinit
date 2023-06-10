@@ -249,18 +249,6 @@ P          mk1mem           8
               qpt4     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt5     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt6     6.66666667E-03  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       2
-          rfatpol6          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -3371,18 +3359,6 @@ P          mk1mem           8
               qpt4     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt5     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt6     6.66666667E-03  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       2
-          rfatpol6          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3

@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -32,9 +28,7 @@ MODULE m_bseinterp
  use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : pseudopotential_type
@@ -123,11 +117,6 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -222,11 +211,6 @@ end subroutine interpolator_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_alloc_work(interpolator, work_size)
@@ -257,11 +241,6 @@ end subroutine int_alloc_work
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_free_work(interpolator)
@@ -272,12 +251,8 @@ subroutine int_free_work(interpolator)
 
 !*****************************************************************************
 
- if( allocated(interpolator%btemp)) then
-   ABI_FREE(interpolator%btemp)
- end if
- if( allocated(interpolator%ctemp)) then
-   ABI_FREE(interpolator%ctemp)
- end if
+ ABI_SFREE(interpolator%btemp)
+ ABI_SFREE(interpolator%ctemp)
 
 end subroutine int_free_work
 !!***
@@ -294,11 +269,6 @@ end subroutine int_free_work
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -476,11 +446,6 @@ end subroutine int_compute_overlaps
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_preprocess_tables(interpolator,double_grid)
@@ -567,11 +532,6 @@ end subroutine int_preprocess_tables
 !! TODO:
 !!  Some operations are faster if we allocate with shape (8,nreh(spin))
 !!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_compute_corresp(interpolator,BSp,double_grid)
@@ -655,11 +615,6 @@ end subroutine int_compute_corresp
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolator_normalize(interpolator)
@@ -714,11 +669,6 @@ end subroutine interpolator_normalize
 !! OUTPUT
 !!
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolator_free(interpolator)
@@ -728,21 +678,10 @@ subroutine interpolator_free(interpolator)
 
 !*****************************************************************************
 
- if( allocated(interpolator%overlaps) ) then
-   ABI_FREE(interpolator%overlaps)
- end if
-
- if (allocated(interpolator%corresp)) then
-   ABI_FREE(interpolator%corresp)
- end if
-
- if (allocated(interpolator%interp_factors)) then
-   ABI_FREE(interpolator%interp_factors)
- end if
-
- if( associated(interpolator%double_grid) ) then
-   nullify(interpolator%double_grid)
- end if
+ ABI_SFREE(interpolator%overlaps)
+ ABI_SFREE(interpolator%corresp)
+ ABI_SFREE(interpolator%interp_factors)
+ if( associated(interpolator%double_grid) ) nullify(interpolator%double_grid)
 
 end subroutine interpolator_free
 !!***

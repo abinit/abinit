@@ -44,11 +44,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine  pinterp(a0,a1,ainterpoled,ndim,nitex,n)
   ! interpolator : a0 for n=0
@@ -86,10 +81,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine  pinterp_nolinear(a0,a1,ainterpoled,ndim,nitex,n)
   ! interpolator : a0 for n=0
@@ -120,11 +111,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!
  !! SOURCE
  subroutine dlvsum(local_pe,npes,sum_local_pe,ndimve)
   !------------------------------------------------------------
@@ -151,10 +137,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
- !!
- !! CHILDREN
- !!
  !! SOURCE
  FUNCTION icf(ix,iy,iz,ic1,ic2,ic3) 
 

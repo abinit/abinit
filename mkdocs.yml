@@ -17,7 +17,7 @@ use_directory_urls: True
 
 #pages:  # TODO Should be replaced by nav but then the search plugin does not work (bug?)
 nav:
-- User Guide:
+- User Guides:
     #- NewUser: guide/new_user.md
     - NewUser: index.md
     - Abinit: guide/abinit.md
@@ -90,6 +90,7 @@ nav:
     - topics/k-points.md
     - topics/LatticeModel.md
     - topics/LatticeWannier.md
+    - topics/LWFModel.md
     - topics/LDAminushalf.md
     - topics/LOTF.md
     - topics/longwave.md
@@ -164,66 +165,67 @@ nav:
     - Aim: variables/aim.md
     - External Parameters: variables/external_parameters.md
     - Statistics: variables/varset_stats.md
-- Tutorial:
+- Tutorials:
     - Overview: tutorial/index.md
-    - Building Abinit: tutorial/compilation.md
-    - Base Tutorials:
-        - Base1: tutorial/base1.md
-        - Base2: tutorial/base2.md
-        - Base3: tutorial/base3.md
-        - Base4: tutorial/base4.md
-        - Spin: tutorial/spin.md
-    - PAW:
-        - PAW1: tutorial/paw1.md
+    - Basic tutorials:
+        - basic1: tutorial/base1.md
+        - basic2: tutorial/base2.md
+        - basic3: tutorial/base3.md
+        - basic4: tutorial/base4.md
+    - ABINIT_build: tutorial/abinit_build.md
+    - PAW1: tutorial/paw1.md
+    - Spin: tutorial/spin.md
+    - Polarization & finite field : tutorial/polarization.md
+    - DFPT1: tutorial/rf1.md
+    - DFPT2: tutorial/rf2.md
+    - parallelism: tutorial/basepar.md
+    - ABINIT postprocessors:
+        - aTDEP1: tutorial/atdep1.md
+        #- aTDEP2: tutorial/atdep2.md
+        - cut3D: tutorial/cut3d.md
+        - fold2bloch: tutorial/fold2bloch.md
+        - optic: tutorial/optic.md
+        - wannier90: tutorial/wannier90.md
+        - Z2pack: tutorial/z2pack.md
+    - DFT beyond basics:
+        - properties at the nucleus: tutorial/nuc.md
+        - DFT+U : tutorial/dftu.md
+        - cRPA U(J): tutorial/ucalc_crpa.md 
+        - Linear Response U(J): tutorial/lruj.md
         - PAW2: tutorial/paw2.md
         - PAW3: tutorial/paw3.md
-    - DFT_PLUS_U:
-        - tutorial/dftu.md
-        - tutorial/udet.md
-        - tutorial/ucalc_crpa.md
-    - DFPT:
-        - RF1: tutorial/rf1.md
-        - RF2: tutorial/rf2.md
-        - Elastic: tutorial/elastic.md
-        - tutorial/ffield.md
-        - tutorial/nlo.md
-        - tutorial/lattice_wannier.md
-    - DMFT: tutorial/dmft.md
-    - EPH:
-        - tutorial/eph_intro.md
-        - tutorial/eph4mob.md
-        - tutorial/eph4zpr.md
-        #- tutorial/eph4isotc.md
-    - EPH-legacy:
-        - tutorial/eph.md
-        - tutorial/tdepes.md
-    - Many-Body:
+        - positron : tutorial/positron.md
+    - Many-Body Theory & excitations:
         - GW1: tutorial/gw1.md
         - GW2: tutorial/gw2.md
         - Bethe-Salpeter: tutorial/bse.md
-    - Parallelism:
-        - Base: tutorial/basepar.md
-        - GSPW: tutorial/paral_gspw.md
-        - GSWVL: tutorial/paral_gswvl.md
-        - DFPT: tutorial/paral_dfpt.md
-        - Images: tutorial/paral_images.md
-        - Many-Body: tutorial/paral_mbt.md
-        - Moldyn: tutorial/paral_moldyn.md
+        #- GWR1: tutorial/gwr1.md
+        - DMFT: tutorial/dmft.md
+        - TDDFT (Casida): tutorial/tddft.md
+    - DFPT & electron-phonon:
+        - elastic: tutorial/elastic.md
+        - nonlinear : tutorial/nlo.md
+        - lattice_wannier : tutorial/lattice_wannier.md
+        - eph_intro : tutorial/eph_intro.md
+        - eph for mobilities : tutorial/eph4mob.md
+        - eph for zero-point renormalization : tutorial/eph4zpr.md
+        #- tutorial/eph4isotc.md
+        - eph_legacy : tutorial/eph_legacy.md
+        - tdepes_legacy : tutorial/eph_tdep_legacy.md
     - Multibinit:
-        - Lattice Model: tutorial/lattice_model.md
+        - introduction to multibinit: tutorial/multibinit.md
+        - lattice_model: tutorial/lattice_model.md
         #- Fit Process: tutorial/fit_process.md
-        - Spin Model: tutorial/spin_model.md
-    - aTDEP: 
-        - ATDEP1: tutorial/atdep1.md
-          #- ATDEP2: tutorial/atdep2.md
+        - spin_model: tutorial/spin_model.md
+        - lwf_model: tutorial/lwf_model.md
+    - Advanced parallelism:
+        - paral_band_PW: tutorial/paral_bandpw.md
+        - paral_wavelets: tutorial/paral_gswvl.md
+        - paral_MD: tutorial/paral_moldyn.md
+        - paral_images: tutorial/paral_images.md
+        - paral_DFPT: tutorial/paral_dfpt.md
+        - paral_MBPT: tutorial/paral_mbt.md
     #- tutorial/abitk.md
-    - tutorial/cut3d.md
-    - tutorial/fold2bloch.md
-    - tutorial/nuc.md
-    - tutorial/optic.md
-    - tutorial/positron.md
-    - tutorial/tddft.md
-    - tutorial/wannier90.md
 - FAQ:
     - Configuration and compilation: faq/configuration_and_compilation.md
     - General questions: faq/general_questions.md
@@ -243,6 +245,7 @@ nav:
     - Documents: theory/documents.md
     - Acknowledgments: theory/acknowledgments.md
     - Bibliography: theory/bibliography.md
+    - Acronyms: theory/acronyms.md
 - Developers:
     - Git and Gitlab: developers/git_and_gitlab.md
     - HowTo for developers: developers/developers_howto.md
@@ -344,7 +347,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.7.4
+    version: 9.11.0
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github

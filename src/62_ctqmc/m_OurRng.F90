@@ -18,12 +18,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #include "defs.h"
@@ -65,12 +59,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

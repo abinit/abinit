@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -57,6 +53,7 @@ module m_rmm_diis
 !!***
 
  public :: rmm_diis
+ public :: subspace_rotation   ! rayleigh-ritz procedure from gs_hamk
 !!***
 
  type,private :: rmm_diis_t
@@ -143,7 +140,7 @@ contains
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  my_nspinor=number of plane waves at this k point
+!!  my_nspinor=number of spinors treated by this MPI proc
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
@@ -160,13 +157,6 @@ contains
 !!  rmm_diis_status(2): Status of the eigensolver.
 !!    The first entry gives the previous accuracy.
 !!    The second entry gives the number of iterations already performed with this level.
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -711,12 +701,6 @@ end subroutine rmm_diis
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_push_iter(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, cg_bk, residv_bk, gsc_bk, tag)
@@ -766,10 +750,6 @@ end subroutine rmm_diis_push_iter
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -863,12 +843,6 @@ end function rmm_diis_exit_iter
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
@@ -921,13 +895,6 @@ end subroutine rmm_diis_print_block
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1012,10 +979,6 @@ end subroutine getghc_eigresid
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol) result(diis)
@@ -1057,12 +1020,6 @@ end function rmm_diis_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_free(diis)
@@ -1096,12 +1053,6 @@ end subroutine rmm_diis_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1193,12 +1144,6 @@ end subroutine rmm_diis_update_block
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
@@ -1260,13 +1205,6 @@ end subroutine rmm_diis_eval_mats
 !! OUTPUT
 !! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine my_pack_matrix(n, mat_in, mat_out)
@@ -1325,13 +1263,6 @@ end subroutine my_pack_matrix
 !!  cg(2,*)=updated wavefunctions
 !!  gsc(2,*)=update <G|S|C>
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor, savemem, enlx, eig, cg, gsc, ghc, gvnlxc)
@@ -1358,8 +1289,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gwork(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:), gsc_bk(:,:)
  real(dp) :: dots(2, nband)
  type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -1391,6 +1321,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  !cplex = 2; if (istwf_k == 2) cplex = 1
 
  ABI_CALLOC(h_ij, (cplex, nband, nband))
+
  ! Allocate full ghc and gvnlxc to be able to rotate residuals and Vnlx matrix elements
  ! after subdiago. More memory but we can save a call to H|psi>.
  if (savemem == 0) then

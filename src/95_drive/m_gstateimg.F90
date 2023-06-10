@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -172,14 +168,6 @@ contains
 !!
 !! TODO
 !! Not yet possible to use restartxf in parallel when localrdwf==0
-!!
-!! PARENTS
-!!      m_driver,m_gwls_sternheimer
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -652,7 +640,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
    if (check_conv) then
      do idynimage=1,ndynimage
-       _IBM6("hello world")
        iimage=list_dynimage(idynimage)
        delta_energy=delta_energy &
 &       +abs(results_img(iimage,itimimage)%results_gs%etotal &
@@ -823,14 +810,6 @@ end subroutine gstateimg
 !!
 !! OUTPUT
 !!  (data written to unit iout)
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1022,14 +1001,6 @@ end subroutine prtimg
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_dynimage,&
@@ -1098,7 +1069,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end if
 
-!Write the msg 
+!Write the msg
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
  if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
@@ -1177,14 +1148,6 @@ end subroutine predictimg
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
@@ -1260,14 +1223,6 @@ end subroutine predict_copy
 !!   results_img(:,:)%xred(3,natom)
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      copy_results_gs,destroy_results_gs,destroy_results_img
-!!      gather_results_img,hist2var,init_results_gs,mkrdim,precpred_1geo
-!!      results_gs_lincomb%yaml_write,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1357,7 +1312,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
  nspden=resimg_all(1)%results_gs%nspden
  nsppol=resimg_all(1)%results_gs%nsppol
  call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
- call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb) 
+ call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb)
  results_gs_lincomb%etotal=etotal
  results_gs_lincomb%entropy=entropy
  results_gs_lincomb%fermie=fermie
@@ -1402,7 +1357,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 & m1geo_param%hmctt,&
 & m1geo_param%icycle,&
 & m1geo_param%iexit,&
-& itimimage_eff,&     
+& itimimage_eff,&
 & m1geo_param%mttk_vars,&
 & m1geo_param%nctime,&
 & m1geo_param%ncycle,&

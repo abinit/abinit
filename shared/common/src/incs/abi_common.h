@@ -42,12 +42,12 @@
  * Remember, indeed, that ISO doesn't define any standard and __FILE__ could expand to the full path name.
  * This can lead to compilation errors if the compiler does not accept statements longer than 132 columns.
  */
-#ifdef HAVE_FC_LONG_LINES 
+#ifdef HAVE_FC_LONG_LINES
 #define _FILE_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #define _FILE_ABIFUNC_LINE_ARGS_    ,file=__FILE__, line=__LINE__
 #else
-#define _FILE_LINE_ARGS_ 
-#define _FILE_ABIFUNC_LINE_ARGS_ 
+#define _FILE_LINE_ARGS_
+#define _FILE_ABIFUNC_LINE_ARGS_
 #endif
 
 /** this does not work with gfort, pgi, **/
@@ -76,7 +76,7 @@
  * but NAG does not like this CPP macro so we cannot use it!
  *
 #define IADD(var, increment) var = var + increment
-*/ 
+*/
 
 /*
  * ABI_  abinit macros.
@@ -88,17 +88,17 @@
 #define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
-#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
 #define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; ABI_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
-#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
+#define ABI_CHECK_DEQ(double1, double2, msg) if (double1 /= double2) ABI_ERROR(sjoin(msg, ": ", ftoa(double1), "vs", ftoa(double2)))
 
 /* Stop execution with message `msg` if int1 > int2 */
-#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_ILEQ(int1, int2, msg) if (int1 > int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
 
 /* Stop execution with message `msg` if int1 < int2 */
-#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) ABI_ERROR(sjoin(msg, itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IGEQ(int1, int2, msg) if (int1 < int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
 
 /* Stop execution with message `msg` if double1 < double2 */
 #define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
@@ -107,7 +107,7 @@
 #define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
 
 #define ABI_CHECK_NOSTOP(expr, msg, ierr) \
-   if (.not. (expr)) then NEWLINE ierr=ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
+   if (.not. (expr)) then NEWLINE ierr = ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif
 
 /* Stop execution with message if MPI call returned error exit code */
 #define ABI_CHECK_MPI(ierr, msg) call check_mpi_ierr(ierr, msg _FILE_LINE_ARGS_)
@@ -139,17 +139,17 @@
 
 #ifdef HAVE_MEM_PROFILING
 
-/* 
+/*
  These macros are used to get the memory address of the objet and the memory allocated.
 
    - loc returns the address and is a language extension supported by gfortran and ifort.
    - storage_size was introduced in F2003 and returns the size in bits.
 
- Both loc and storage_size are polymorphic so one can use it with intrinsic types as well 
+ Both loc and storage_size are polymorphic so one can use it with intrinsic types as well
  as user-defined datatypes. scalar types require a special treatment (MALLOC_SCALAR, FREE_SCALAR)
  because shape == 0 thus it's not possible to discern with ABI_MEM between zero-sized arrays and scalar
 */
-#  define _LOC(x)  int(loc(x), kind=8) 
+#  define _LOC(x)  int(loc(x), kind=8)
 
 /* and now the debugging macros */
 #  define ABI_MALLOC(ARR, SIZE) \
@@ -166,7 +166,7 @@
 
 #  define ABI_FREE(ARR) \
    call abimem_record(0, QUOTE(ARR), _LOC(ARR), "D", - ABI_MEM_BITS(ARR), __FILE__,  __LINE__) NEWLINE \
-   deallocate(ARR) 
+   deallocate(ARR)
 
 #  define ABI_STAT_MALLOC(ARR,SIZE,ierr) \
    allocate(ARR SIZE, stat=ierr) NEWLINE \
@@ -212,10 +212,11 @@
 
 /* Macro used to deallocate memory allocated by Fortran libraries that do not use m_profiling_abi.F90
  * or allocate arrays before calling MOVE_ALLOC.
-   In this case, indeed, we should not count the deallocation 
+   In this case, indeed, we should not count the deallocation
 #define ABI_MALLOC_NOCOUNT(arr, size) allocate(arr size)
 */
 #define ABI_FREE_NOCOUNT(arr) deallocate(arr)
+#define ABI_SFREE_NOCOUNT(arr) if (allocated(arr)) deallocate(arr)
 
 /*
  * Macros to allocate/deallocate depending on the allocation (association) status of the variable (pointer).
@@ -290,13 +291,13 @@
 
 /* Dummy use of unused arguments to silence compiler warnings */
 #define ABI_UNUSED(var) if (.FALSE.) call unused_var(var)
-/* 
- * The method above work for basic types (integer, real, etc...). 
+/*
+ * The method above work for basic types (integer, real, etc...).
  * For types, arrays, we can use associate (F03 feature)
  * Does not work for character(*) with gfortran <=5.x (>7.x is fine. No 6.x data)
  * character with fixed length is fine.
- * */ 
-#define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate 
+ * */
+#define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate
 
 /* Macro to set the default the value of a local variable when optional arguments are used.
 Use if statement instead of Fortran merge. See https://software.intel.com/en-us/forums/intel-fortran-compiler/topic/640598
@@ -324,7 +325,7 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #ifdef HAVE_FC_ASYNC
 #define ABI_ASYNC ,asynchronous
 #else
-#define ABI_ASYNC 
+#define ABI_ASYNC
 #endif
 
 #ifdef HAVE_FC_PRIVATE
@@ -347,8 +348,8 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define ABI_CONTIGUOUS
 #endif
 
-/* 
- * Temporary trick used to pass contiguous array descriptors to F90 routines 
+/*
+ * Temporary trick used to pass contiguous array descriptors to F90 routines
  * Mainly used to avoid copy-in copy-out in m_abi_linalg
 #define DEV_CONTARRD contiguous,
 */
@@ -363,30 +364,21 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #define DFTI_CHECK(status) if (status /= 0) call dfti_check_status(status _FILE_LINE_ARGS_)
 
 
-/* Macros used in the GW code */
+/* Macros used in the GW/GWR code */
 #ifdef HAVE_GW_DPC
 #  define GWPC_CONJG(cvar)  DCONJG(cvar)
 #  define GWPC_CMPLX(re,im) DCMPLX(re,im)
+#  define __slkmat_t matrix_scalapack
 #else
 #  define GWPC_CONJG(cvar)  CONJG(cvar)
 #  define GWPC_CMPLX(re,im) CMPLX(re,im)
+#  define __slkmat_t slkmat_sp_t
 #endif
 
-/* Macros used for particular slaves of the Abinit tests farm */
 
-/* 
- * IBM6 has a very problematic IO. Flushing the IO buffer helps avoid segmentation fault 
- * To disable these tricks, comment the three lines below.
- * */
-#ifdef FC_IBM
-#define HAVE_IBM6
-#endif
-
-#ifdef HAVE_IBM6
-#define _IBM6(message) call wrtout(std_out,message,"COLL",do_flush=.True.)
-#else
-#define _IBM6(message)
-#endif
+/* Temporary hack to use GREENX library
+#define __HAVE_GREENX
+*/
 
 #endif
 /* _ABINIT_COMMON_H */

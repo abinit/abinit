@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -162,7 +158,7 @@ contains
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
 !!  ddk<wfk_t)=struct info DDK file
-!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
+!!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
 !!  with_vectornd = 1 if vectornd allocated
@@ -208,17 +204,6 @@ contains
 !! SIDE EFFECTS
 !!  pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!  rhor1(cplex*nfftf,nspden)=RF electron density in electrons/bohr**3.
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_vtowfk,dfptff_gbefd,dfptff_gradberry,fftpac,getgh1c_setup
-!!      gs_hamkq%free,gs_hamkq%load_spin,init_hamiltonian,init_rf_hamiltonian
-!!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
-!!      pawrhoij_inquire_dim,pawrhoij_mpisum_unpacked,rf_hamk_dir2%free
-!!      rf_hamk_dir2%load_spin,rf_hamkq%free,rf_hamkq%load_spin
-!!      rf_transgrid_and_pack,sqnorm_v,symrhg,timab,transgrid,xmpi_sum
 !!
 !! SOURCE
 
@@ -277,7 +262,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp), intent(out) :: nhat1(cplex*nfftf,dtset%nspden*psps%usepaw)
  real(dp),intent(out) :: resid(mband*nkpt_rbz*nsppol),rhog1(2,nfftf)
  real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),rhor1(cplex*nfftf,nspden)
- real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,dtset%nspden,3)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
@@ -502,7 +487,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      do nddir = 1, 3
        ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
        call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-         & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
+         & rhodum,rhodum,cgrvtrial,vectornd(:,:,nddir))
        call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
          & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
        ABI_FREE(cgrvtrial)
@@ -779,6 +764,14 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !=== MPI communications ==================
  if(xmpi_paral==1)then
    call timab(129,1,tsec)
+
+   ! MG: For the record, buffer1 can be pretty big if we have dense k-meshes e.g. metals
+   ! this is what you get with nband 26 and ngkpt 42**3:
+   !
+   !    [0] <var=buffer1, A@m_dfpt_vtorho.F90:773, addr=0x150d5a59e010, size_mb=401.130>
+   !
+   ! and this can lead to OOM if we have 2Gb per core also because xmpi_sum allocates another array of the same size!
+   ! TODO: Avoid packing rhor1 in buffer
 
 !  Compute buffer size
    buffer_size=9+mbd2kpsp+mbdkpsp

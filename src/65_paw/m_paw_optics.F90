@@ -128,13 +128,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,hdr%free,hdr_fort_read,hdr%ncread
-!!      kramerskronig,matrginv,metric
-!!
 !! SOURCE
 
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
@@ -826,13 +819,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  (only writing in a file)
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,hdr%free,hdr_io,hdr_read_from_fname,initmpi_seq
-!!      kramerskronig,matrginv,metric
-!!
 !! SOURCE
 
  subroutine optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen0,filpsp,hdr,&
@@ -1516,13 +1502,6 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!  This routine is not tested
 !!
-!! PARENTS
-!!      conducti
-!!
-!! CHILDREN
-!!      hdr%free,hdr_io,hdr_read_from_fname,initmpi_seq
-!!      kramerskronig,matrginv,metric,wffopen
-!!
 !! SOURCE
 
  subroutine linear_optics_paw(filnam,filnam_out)
@@ -1855,12 +1834,6 @@ CONTAINS  !=====================================================================
 !! If Phi_j is polarized, the spin component is included in the last dimension of
 !!   phisocphj(iat)%value, i.e. lmn_size_cor=2*lmn_size
 !!
-!! PARENTS
-!! optics_paw,optics_paw_core
-!!
-!! CHILDREN
-!! nderiv_gen,simp_gen,pawrad_deducer0
-!!
 !! SOURCE
 
  subroutine pawnabla_soc_init(phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
@@ -1889,6 +1862,7 @@ CONTAINS  !=====================================================================
  real(dp),parameter :: one_over_fourpi   = one/sqrt(four_pi)
  real(dp),parameter :: sqr_fourpi_over_3 = sqrt(four_pi/3)
  real(dp),parameter :: QuarterFineStruct2=(half/InvFineStruct)**2
+ real(dp),parameter :: hyb_mixing_ = 0.0_dp   ! Fake value to be updated in the future
  integer :: iatom,iatom_tot,itypat,ii,jj,ierr,ipts,ignt,sgnkappa
  integer :: idum,option,usenhat,usekden,usecore,xclevel,nkxc,my_comm_atom
  integer :: mesh_size,mesh_size_cor,lmn_size,lmn2_size,lmn_size_j,lmn_size_cor
@@ -2033,14 +2007,14 @@ CONTAINS  !=====================================================================
    if (pawxcdev/=0) then
      ABI_MALLOC(vxc,(mesh_size,lm_size,nspden))
      vxc=zero
-     call pawxcm(pawtb%coredens,eexc_dum,eexcdc_dum,idum,ixc,kxc_dum,lm_size,&
+     call pawxcm(pawtb%coredens,eexc_dum,eexcdc_dum,idum,hyb_mixing_,ixc,kxc_dum,lm_size,&
 &         lmselect,nhat_dum,nkxc,.false.,mesh_size,nspden,option,pawang,pawrd,&
 &         pawxcdev,rho1,usecore,usenhat,vxc,xclevel,xc_denpos)
      potsph(1:mesh_size)=half*(vxc(1:mesh_size,1,1)+vxc(1:mesh_size,1,nspden))
    else
      ABI_MALLOC(vxc,(mesh_size,pawang%angl_size,nspden))
      vxc=zero
-     call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,ixc,kxc_dum,k3xc_dum,&
+     call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,hyb_mixing_,ixc,kxc_dum,k3xc_dum,&
 &         lm_size,lmselect,nhat_dum,nkxc,nkxc,.false.,mesh_size,nspden,option,pawang,&
 &         pawrd,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,&
 &         coretau=pawtb%coretau,taur=tau1)

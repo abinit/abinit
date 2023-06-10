@@ -256,6 +256,7 @@ type, public :: paw_setup_t
   integer                      :: ngrid
   real(dpxml)                  :: rpaw
   real(dpxml)                  :: ex_cc
+  real(dpxml)                  :: lamb_shielding=0.0D0
   character(len=4)             :: idgrid
   character(len=12)            :: optortho
   type(atom_t)                 :: atom
@@ -340,10 +341,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!  Fills private data in present module.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine paw_begin_element1(namespaceURI,localName,name,attributes)
@@ -911,10 +908,6 @@ end subroutine paw_begin_element1
 !! OUTPUT
 !!  side effect: private data flags in present module are turned to .false.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine paw_end_element1(namespaceURI,localName,name)
 
@@ -1047,12 +1040,6 @@ end subroutine paw_end_element1
 !! SIDE EFFECTS
 !!   Copied and translated into module data (side effect)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
-!!
 !! SOURCE
 subroutine pawdata_chunk(chunk)
 
@@ -1129,13 +1116,6 @@ end subroutine pawdata_chunk
 !!
 !! SIDE EFFECTS
 !!  paw_setup<paw_setup_type>=Datatype gathering information on XML paw setup.
-!!
-!! PARENTS
-!!      m_pspheads,m_pspini
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
 !!
 !! SOURCE
 
@@ -1257,12 +1237,6 @@ end subroutine paw_setup_free
 !! OUTPUT
 !!  paw_setupout<paw_setup_type>=output paw_setup datastructure
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
-!!
 !! SOURCE
 
 subroutine paw_setup_copy(paw_setupin,paw_setupout)
@@ -1286,6 +1260,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%optortho=paw_setupin%optortho
  paw_setupout%rpaw=paw_setupin%rpaw
  paw_setupout%ex_cc=paw_setupin%ex_cc
+ paw_setupout%lamb_shielding=paw_setupin%lamb_shielding
  paw_setupout%atom%tread=paw_setupin%atom%tread
  paw_setupout%atom%symbol=paw_setupin%atom%symbol
  paw_setupout%atom%znucl=paw_setupin%atom%znucl
@@ -1494,13 +1469,6 @@ end subroutine paw_setup_copy
 !!  ierr= error code
 !!  output= (string) value of the keyword
 !!
-!! PARENTS
-!!      m_pawxmlps
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
-!!
 !! SOURCE
 
  subroutine paw_rdfromline(keyword,line,output,ierr)
@@ -1545,13 +1513,6 @@ end subroutine paw_setup_copy
 !!
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
-!!
-!! PARENTS
-!!      m_pspheads
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
 !!
 !! SOURCE
 
@@ -1934,13 +1895,6 @@ end subroutine paw_setup_copy
 !!
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
-!!
-!! PARENTS
-!!      m_pspheads
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
 !!
 !! SOURCE
 
@@ -2673,6 +2627,19 @@ end subroutine paw_setup_copy
      cycle
    end if
 
+   !  --Read Lamb shielding
+   if (line(1:25)=='<lamb_shielding shielding') then
+     call paw_rdfromline(" shielding",line,strg,ierr)
+     if (len(trim(strg))<=30) then
+       strg1=trim(strg)
+       read(unit=strg1,fmt=*) paw_setup%lamb_shielding
+     else
+       read(unit=strg,fmt=*) paw_setup%lamb_shielding
+     end if
+     cycle
+   end if
+
+
 !  --Read orthogonalisation scheme
    if (line(1:18)=='<orthogonalisation') then
      call paw_rdfromline(" scheme",line,strg,ierr)
@@ -2746,13 +2713,6 @@ end subroutine paw_setup_copy
 !!
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
 !!
 !! SOURCE
 

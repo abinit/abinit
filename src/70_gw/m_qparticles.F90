@@ -13,10 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -109,11 +105,6 @@ CONTAINS  !=====================================================================
 !!   | FFT dimensions of the fine grid
 !!   | QP density in real space.
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,ngfftf,Sr,Bst,m_ks_to_qp,rho_qp)
@@ -149,8 +140,7 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
 
  if (nscf >= 0) then
    write(msg,'(3a)')ch10,' writing QP data on file : ',TRIM(fname)
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg)
  end if
 
  if (open_file(fname,msg,newunit=unqps,form='formatted',status='unknown') /= 0) then
@@ -194,11 +184,11 @@ subroutine wrqps(fname,Sigp,Cryst,Kmesh,Psps,Pawtab,Pawrhoij,nspden,nscf,nfftot,
  ABI_FREE(mtmp)
 
  write(msg,'(a,f9.4)')' (wrqps) planewave contribution to nelect: ',SUM(rho_qp(:,1))*Cryst%ucvol/nfftot
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
  if (nspden == 4) then
    write(msg,'(a,3f9.4)')' mx, my, mz: ',&
      SUM(rho_qp(:,2))*Cryst%ucvol/nfftot,SUM(rho_qp(:,3))*Cryst%ucvol/nfftot,SUM(rho_qp(:,4))*Cryst%ucvol/nfftot
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 
  ! Write FFT dimensions and QP density
@@ -263,11 +253,6 @@ end subroutine wrqps
 !!
 !! TODO
 !!  The value of nspden is not reported in the QPS file thus we have a possible undetected error.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -378,7 +363,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
      do ik=1,BSt%nkpt
        read(unqps,*)kibz(:)
        write(msg,'(a,i5,a,3(f6.3,1x),4x,a,i2)')' Reading ik ',ik,')  k = ',kibz(:),' is = ',isppol
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        ltest=(ALL(ABS(kibz(:)-BSt%kptns(:,ik))<0.001))
        ABI_CHECK(ltest,'Wrong k-point read')
        do ib=1,nbandR
@@ -480,7 +465,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
        if (ios/=0) then
          msg="Old version of QPS file found. DO NOT USE rhoqpmix for this run."
          ABI_WARNING(msg)
-         call wrtout(ab_out,msg,"COLL")
+         call wrtout(ab_out,msg)
          ! Init dummy rhoij just to avoid problems in sigma when rhoij is freed.
          call pawrhoij_inquire_dim(nspden_rhoij=nspdenR, nspden=nspden)
          call pawrhoij_alloc(Pawrhoij,1,nspdenR,BSt%nspinor,BSt%nsppol,Cryst%typat,pawtab=Pawtab)
@@ -557,11 +542,6 @@ end subroutine rdqps
 !!
 !! NOTES
 !!  Only master node should call this routine.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -698,11 +678,6 @@ end subroutine show_QP
 !! OUTPUT
 !!   igwene(Bst%mband,Bst%nkpt,Bst%nsppol)= The imaginary part of the QP energies.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_mlwfovlp_qp,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rdgw(Bst,fname,igwene,extrapolate)
@@ -728,7 +703,7 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
 
 !************************************************************************
 
- call wrtout(std_out,'Reading GW corrections from file: '//TRIM(fname),'COLL')
+ call wrtout(std_out,'Reading GW corrections from file: '//TRIM(fname))
  ABI_CHECK(ALL(Bst%nband==Bst%mband),"nband must be constant")
 
  if (open_file(fname,msg,newunit=unt,status='old') /=0) then
@@ -813,10 +788,10 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
         if ( ABS(gwcorr(ib,ik,is)) < tol16) then
           nn=ib-1-nbv
           if (nn>1) then
-            call wrtout(std_out,"Linear extrapolating (conduction) GW corrections beyond the read values","COLL")
+            call wrtout(std_out,"Linear extrapolating (conduction) GW corrections beyond the read values")
             smrt=linfit(nn,Bst%eig(nbv+1:nbv+nn,ik,is),gwcorr(nbv+1:nbv+nn,ik,is),alpha,beta)
           else
-            call wrtout(std_out,"Assuming constant (conduction) GW corrections beyond the read values",'COLL')
+            call wrtout(std_out,"Assuming constant (conduction) GW corrections beyond the read values")
             alpha=zero
             beta =gwcorr(nbv+nn,ik,is)
           end if
@@ -833,10 +808,10 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
         if ( ABS(gwcorr(ib,ik,is)) < tol16) then
          nn=nbv-ib
          if (nn>1) then
-           call wrtout(std_out,"Linear extrapolating (valence) GW corrections beyond the read values","COLL")
+           call wrtout(std_out,"Linear extrapolating (valence) GW corrections beyond the read values")
            smrt=linfit(nn,Bst%eig(nbv-nn+1:nbv,ik,is),gwcorr(nbv-nn+1:nbv,ik,is),alpha,beta)
          else
-           call wrtout(std_out,"Assuming constant (valence) GW corrections beyond the read values","COLL")
+           call wrtout(std_out,"Assuming constant (valence) GW corrections beyond the read values")
            alpha=zero
            beta =gwcorr(nbv,ik,is)
          end if
@@ -851,18 +826,18 @@ subroutine rdgw(Bst,fname,igwene,extrapolate)
      end do !ik
    end do !is
 
-   call wrtout(std_out,' k  s     GW corrections [eV] ','COLL')
+   call wrtout(std_out,' k  s     GW corrections [eV] ')
    do is=1,Bst%nsppol
      do ik=1,Bst%nkpt
        write(msg,'(i3,1x,i3,10f7.2/50(10x,10f7.2/))')ik,is,(Ha_eV*gwcorr(ib,ik,is),ib=1,Bst%mband)
-       call wrtout(std_out,msg,"COLL")
+       call wrtout(std_out,msg)
      end do
    end do
    Bst%eig = Bst%eig + gwcorr
    ABI_FREE(vbik)
  end if
 
- call wrtout(std_out,' k   s    GW eigenvalues [eV]',"COLL")
+ call wrtout(std_out,' k   s    GW eigenvalues [eV]')
  do is=1,Bst%nsppol
    do ik=1,Bst%nkpt
      write(std_out,'(2(i3,1x),7x,10f7.2/50(15x,10f7.2/))')ik,is,(Ha_eV*Bst%eig(ib,ik,is),ib=1,Bst%mband)
@@ -906,11 +881,6 @@ end subroutine rdgw
 !!
 !! NOTES
 !!  Only master node should call this routine.
-!!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

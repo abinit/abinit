@@ -17,12 +17,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #include "defs.h"
@@ -190,12 +184,6 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_init(op, samples, beta,nflavors,iTech,MY_COMM)
@@ -319,12 +307,6 @@ END SUBROUTINE GreenHyboffdiag_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_reset(op)
@@ -362,12 +344,6 @@ END SUBROUTINE GreenHyboffdiag_reset
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -422,12 +398,6 @@ END SUBROUTINE GreenHyboffdiag_clear
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_setOperW(op, Gomega)
@@ -479,12 +449,6 @@ END SUBROUTINE GreenHyboffdiag_setOperW
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -837,12 +801,6 @@ END SUBROUTINE GreenHyboffdiag_measHybrid
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_getHybrid(op)
@@ -894,12 +852,6 @@ END SUBROUTINE GreenHyboffdiag_getHybrid
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -967,12 +919,6 @@ END SUBROUTINE GreenHyboffdiag_setN
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
@@ -1033,9 +979,6 @@ END SUBROUTINE GreenHyboffdiag_setMuD1
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
 !!
 !! CHI
 !!  Will be filled automatically by the parent script
@@ -1098,12 +1041,6 @@ END SUBROUTINE GreenHyboffdiag_setMoments
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1451,12 +1388,6 @@ END SUBROUTINE GreenHyboffdiag_backFourier
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_forFourier(op, Gomega, omega, Wmax)
@@ -1768,12 +1699,6 @@ END SUBROUTINE GreenHyboffdiag_forFourier
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE GreenHyboffdiag_print(op, ostream)
@@ -1837,12 +1762,6 @@ END SUBROUTINE GreenHyboffdiag_print
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

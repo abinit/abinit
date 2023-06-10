@@ -18,23 +18,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect, abimem_init, abinit_doctor, anaddb_dtset_free, anaddb_init
-!!      asrq0%apply, asrq0%free, crystal%free, ddb%free, ddb%get_block, ddb_diel
-!!      ddb_elast, ddb_flexo, ddb_from_file, ddb_hdr%free, ddb_hdr_open_read
-!!      ddb_internalstr, ddb_interpolate, ddb_lw%free, ddb_lw_copy, ddb_piezo
-!!      dfpt_phfrq, dfpt_prtph, electrooptic, elphon, flush_unit, gruns_anaddb
-!!      gtdyn9, harmonic_thermo, herald, ifc%free, ifc%outphbtrap, ifc%print
-!!      ifc%speedofsound, ifc%write, ifc_coarse%free, ifc_init, instrng, int2char4
-!!      inupper, invars9, isfile, mkphbs, mkphdos, nctk_defwrite_nonana_raman_terms
-!!      nctk_defwrite_nonana_terms, nctk_defwrite_raman_terms, outvars_anaddb
-!!      phdos%free, phdos%ncwrite, phdos%print, phdos%print_debye, phdos%print_msqd
-!!      phdos%print_thermo, ramansus, relaxpol, thermal_supercell_free, thmeig
-!!      timab, timein, wrtout, xmpi_bcast, xmpi_init, xmpi_sum
-!!      zacharias_supercell_make, zacharias_supercell_print
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -58,7 +41,7 @@ program anaddb
  use m_phonons
  use m_gruneisen
  use m_supercell
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -122,7 +105,7 @@ program anaddb
  character(len = 500):: msg
  type(args_t):: args
  type(anaddb_dataset_type):: inp
- type(phonon_dos_type):: Phdos
+ type(phdos_t):: Phdos
  type(ifc_type):: Ifc, Ifc_coarse
  type(ddb_type):: ddb
  type(ddb_type):: ddb_lw
@@ -186,7 +169,7 @@ program anaddb
 !******************************************************************
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
- call ddb_hdr_open_read(ddb_hdr, filnam(3), ddbun, DDB_VERSION, comm = comm, dimonly = 1)
+ call ddb_hdr%open_read(filnam(3), ddbun, comm = comm, dimonly = 1)
 
  natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
@@ -241,13 +224,16 @@ program anaddb
    ab_out = dev_null
  end if
 
+ ! Check the value and transform the meaning of atifc (1 and 0 only)
+ call chkin9(inp%atifc,inp%natifc,natom)
+
 !******************************************************************
 !******************************************************************
 ! Read the DDB information, also perform some checks, and symmetrize partially the DDB
  write(msg, '(a, a)' )' read the DDB information and perform some checks',ch10
  call wrtout([std_out, ab_out], msg)
 
- call ddb_from_file(ddb, filnam(3), inp%brav, natom, inp%natifc, inp%atifc, ddb_hdr, Crystal, comm, prtvol = inp%prtvol)
+ call ddb%from_file(filnam(3), inp%brav, ddb_hdr, Crystal, comm, prtvol = inp%prtvol)
  call ddb_hdr%free()
  nsym = Crystal%nsym
 
@@ -320,7 +306,7 @@ program anaddb
    write(msg, '(2a, (80a), 2a)') ch10, ('=',ii = 1, 80)
    call wrtout([ab_out, std_out],msg, 'COLL')
    lwsym = 1
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version,lwsym, 33, qdrp_cart)
  end if
 
  ! The default value is 1. Here we set the flags to zero if Q*is not available.
@@ -445,7 +431,7 @@ program anaddb
  end if
 
 !***************************************************************************
-! Compute non-linear optical susceptibilities and, if inp%nlflag < 3, 
+! Compute non-linear optical susceptibilities and, if inp%nlflag < 3,
 ! First-order change in the linear dielectric susceptibility induced by an atomic displacement
 !***************************************************************************
  if (inp%nlflag > 0) then
@@ -498,31 +484,30 @@ program anaddb
      do ii = 1, 3
        ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
-     call ifc_init(Ifc_coarse, Crystal, ddb, &
+     call Ifc_coarse%init(Crystal, ddb, &
        inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, ngqpt_coarse, inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
        inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, dipquad = inp%dipquad, quadquad = inp%quadquad)
 
      ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
-     call ifc_init(Ifc, Crystal, ddb, &
+     call ifc%init(Crystal, ddb, &
       inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, &
-      & inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
+      inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
       inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, &
-      & Ifc_coarse = Ifc_coarse, dipquad = inp%dipquad, quadquad = inp%quadquad)
+      Ifc_coarse = Ifc_coarse, dipquad = inp%dipquad, quadquad = inp%quadquad)
      call Ifc_coarse%free()
 
    else
-     call ifc_init(Ifc, Crystal, ddb, &
-       inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
+     call ifc%init(Crystal, ddb, &
+       inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, &
+       inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
        inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, dipquad = inp%dipquad, quadquad = inp%quadquad)
    end if
 
    call ifc%print(unit = std_out)
 
    ! Compute speed of sound.
-   if (inp%vs_qrad_tolkms(1) > zero) then
-     call ifc%speedofsound(crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
-   end if
+   if (inp%vs_qrad_tolkms(1) > zero) call ifc%speedofsound(crystal, inp%vs_qrad_tolkms, ana_ncid, comm)
 
    ! Print analysis of the real-space interatomic force constants
    ! TODO: ifc_out should not have side effects
@@ -558,11 +543,10 @@ program anaddb
    phibz_prefix = ""
    !phibz_prefix = "freq_displ" ! Uncomment this line to activate output of PHIBZ
    do
-     call mkphdos(Phdos, Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
-         phibz_prefix, wminmax, count_wminmax, comm, dos_maxmode = inp%dos_maxmode)
+     call Phdos%init(Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
+                     phibz_prefix, wminmax, count_wminmax, comm, dos_maxmode = inp%dos_maxmode)
      if (all(count_wminmax == 0)) exit
-     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
-     wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
+     wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05; wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
      call phdos%free()
      write(msg, "(a, 2f8.5)")"Initial frequency mesh not large enough. Recomputing PHDOS with wmin, wmax: ",wminmax
      call wrtout(std_out, msg)
@@ -637,8 +621,10 @@ program anaddb
 
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
-   call ddb_hdr_open_read(ddb_hdr, filnam(3), ddbun, DDB_VERSION)
+   call ddb_hdr%open_read(filnam(3), ddbun, comm)
    close(ddbun)
+   ddb_hdr%crystal%space_group = Crystal%space_group  ! GA: the space group is not written in the DDB text file.
+
    call ddb_interpolate(Ifc, Crystal, inp, ddb, ddb_hdr, asrq0, filnam(8), comm)
    call ddb_hdr%free()
  end if
@@ -941,7 +927,8 @@ end if  ! condition on nlflag
    call wrtout([std_out, ab_out], msg)
 
    ! Compute and print the contributions to the flexoelectric tensor
-   call ddb_flexo(inp%asr, asrq0%d2asr, ddb, ddb_lw, crystal, filnam(3), inp%flexoflag, inp%prtvol, zeff)
+   call ddb_flexo(inp%asr, asrq0%d2asr, ddb, ddb_lw, ddb_hdr%ddb_version, crystal, &
+       & filnam(3), inp%flexoflag, inp%prtvol, zeff)
  end if
 
 !**********************************************************************

@@ -156,6 +156,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol           1       1
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -177,6 +178,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
    d3e_pert1_phon5          1
    d3e_pert1_phon6          0
    d3e_pert1_phon7          0
+  d3e_pert2_atpol           1       1
     d3e_pert2_dir1          0       0       0
     d3e_pert2_dir2          0       0       0
     d3e_pert2_dir3          0       0       0
@@ -198,6 +200,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
    d3e_pert2_phon5          0
    d3e_pert2_phon6          1
    d3e_pert2_phon7          0
+  d3e_pert3_atpol           1       1
     d3e_pert3_dir1          0       0       0
     d3e_pert3_dir2          0       0       0
     d3e_pert3_dir3          0       0       0
@@ -440,13 +443,8 @@ P          mk1mem7         16
            prtpot6          0
            prtpot7          0
            prtvol           1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       0       0
-            rfdir4          1       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+          rfatpol           1       1         
+            rfdir           1       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -1122,7 +1120,7 @@ tolerances: {tolwfr: 1.00E-18, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1358,7 +1356,7 @@ tolerances: {toldfe: 8.00E-11, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1591,7 +1589,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -1621,7 +1619,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1854,7 +1852,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -1884,7 +1882,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  7 ==================================================================
@@ -2117,7 +2115,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  non-linear optical coefficients may be wrong.
+  non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir.
  
 
   First-order change in the electronic dielectric 
@@ -2147,7 +2145,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
 
  dfptnl_doutput: WARNING -
   matrix of third-order energies incomplete,
-  changes in the dielectric susceptibility may be wrong.
+  changes in the dielectric susceptibility may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2155,6 +2153,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
  -outvars: echo values of variables after computation  --------
             acell      1.0616530850E+01  1.0616530850E+01  1.0616530850E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
+  d3e_pert1_atpol           1       1
     d3e_pert1_dir1          0       0       0
     d3e_pert1_dir2          0       0       0
     d3e_pert1_dir3          0       0       0
@@ -2176,6 +2175,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
    d3e_pert1_phon5          1
    d3e_pert1_phon6          0
    d3e_pert1_phon7          0
+  d3e_pert2_atpol           1       1
     d3e_pert2_dir1          0       0       0
     d3e_pert2_dir2          0       0       0
     d3e_pert2_dir3          0       0       0
@@ -2197,6 +2197,7 @@ P newkpt: treating      4 bands with npw=      43 for ikpt=  16 by node    0
    d3e_pert2_phon5          0
    d3e_pert2_phon6          1
    d3e_pert2_phon7          0
+  d3e_pert3_atpol           1       1
     d3e_pert3_dir1          0       0       0
     d3e_pert3_dir2          0       0       0
     d3e_pert3_dir3          0       0       0
@@ -2457,13 +2458,8 @@ P          mk1mem7         16
            prtpot6          0
            prtpot7          0
            prtvol           1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       0       0
-            rfdir4          1       0       0
-            rfdir5          0       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+          rfatpol           1       1         
+            rfdir           1       0       0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -92,13 +88,6 @@ contains
 !!  of primitive translations
 !! tnons(3,1:msym)=nonsymmorphic translations for each symmetry (would
 !!  be 0 0 0 each for a symmorphic space group)
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
-!!      m_mover_effpot,m_tdep_sym,m_thmeig,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -530,16 +519,14 @@ contains
        if(trialok==0)exit
      end do ! End loop over all classes
 
-!DEBUG
-!    write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
-!    write(std_out,*)' '
-!ENDDEBUG
+     !write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
+     !write(std_out,*)' '
 
      if(trialok==1)then
        nsym=nsym+1
        if(nsym>msym)then
          write(msg,'(a,i0,2a,i0,4a)')&
-         'The number of symmetries (including non-symmorphic translations) is:', nsym, ch10,&
+         'The number of symmetries (including non-symmorphic translations) is: ', nsym, ch10,&
          'is larger than maxnsym: ',msym,ch10,&
          'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
          'or at least smaller than the present one.'
@@ -621,12 +608,6 @@ end subroutine symfind
 !! genafm(3)=magnetic translation generator (in case of Shubnikov group type IV)
 !! ptgroupma = magnetic point group number
 !! spgroup=symmetry space group
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_ingeo,m_mover_effpot,m_phonons,m_tdep_sym,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -829,12 +810,6 @@ end subroutine symanal
 !! ptgroup=symmetry point group
 !! [axis(3)]=Invariant axis in the conventional vector coordinates
 !!   Set to (/0,0,0/) if the lattice belongs to the same holohedry as the lattice+atoms (+electric field + ...).
-!!
-!! PARENTS
-!!      m_esymm,m_symfind
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1207,12 +1182,6 @@ end subroutine symbrav
 !!
 !! For the detailed description of the labelling of the axes,
 !! see symaxes.f and symplanes.f
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1637,13 +1606,6 @@ end subroutine symspgr
 !! center=1        A-face centered
 !! center=2        B-face centered
 !! center=3        C-face centered
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
-!!      m_mover_effpot,m_symfind,m_tdep_sym,m_thmeig,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 

@@ -53,7 +53,7 @@ ALL_BINARIES = [
     "optic",
     "tdep",
     "testtransposer",
-    "ujdet",
+    "lruj",
 ]
 
 
@@ -234,7 +234,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R --langmap=fortran:+.finc.f90 shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90,c:.c.cu shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)
@@ -250,7 +250,7 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc]" "%s" src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp]" "%s" src shared' % pattern
         #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
@@ -435,6 +435,13 @@ def submodules(ctx):
         ctx.run("git submodule update --remote --init", pty=True)
         ctx.run("git submodule update --recursive --remote", pty=True)
 
+
+def run(cmd):
+    cprint(f"Executing: `{cmd}`", color="green")
+    ctx.run(cmd)
+
+
+
 @task
 def branchoff(ctx, start_point):
     """"Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin."""
@@ -442,10 +449,6 @@ def branchoff(ctx, start_point):
         remote, branch = start_point.split("/")
     except:
         remote = "trunk"
-
-    def run(cmd):
-        cprint(f"Executing: `{cmd}`", color="green")
-        ctx.run(cmd)
 
     run(f"git fetch {remote}")
     # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
@@ -455,6 +458,22 @@ def branchoff(ctx, start_point):
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")
     run("git push origin HEAD")
+
+
+@task
+def dryrun_merge(ctx, start_point):
+    """"Merge `remote/branch` in dry-run mode."""
+    run(f"git merge --no-commit --no-ff {start_point}")
+
+    print("""
+To examine the staged changes:
+
+    $ git diff --cached
+
+And you can undo the merge, even if it is a fast-forward merge:
+
+$ git merge --abort
+""")
 
 
 @task

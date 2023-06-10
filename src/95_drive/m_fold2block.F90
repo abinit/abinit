@@ -53,11 +53,6 @@ CONTAINS  !===========================================================
 !! wegihts= Calculated weights of a band in an unfolded state.
 !! Depends on the number of folds the WFK file was structured with.
 !!
-!! PARENTS
-!!      fold2Bloch
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -160,11 +155,6 @@ CONTAINS  !===========================================================
 !! nkval= Array of determined coordinates of unfolded K point locaations.
 !! Depends on the number of folds the WFK file was structured with.
 !!
-!! PARENTS
-!!      fold2Bloch
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine NewK(XX, YY, ZZ, FX, FY, FZ, NKVal)
@@ -247,11 +237,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !! folds: Number of folds in x, y, and z directions.
 !! Returns the folds array filled with each element.
-!!
-!! PARENTS
-!!      fold2Bloch
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -375,11 +360,6 @@ end subroutine getargs
 !!
 !! OUTPUT
 !! Write to screen K point being processed and percent complete.
-!!
-!! PARENTS
-!!      fold2Bloch
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

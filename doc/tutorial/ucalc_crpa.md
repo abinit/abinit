@@ -14,7 +14,7 @@ It might be useful that you already know how to do PAW calculations using
 ABINIT but it is not mandatory (you can follow the two tutorials on PAW in
 ABINIT ([PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2))).
 The DFT+_U_ tutorial in ABINIT ([DFT+U](/tutorial/dftu)) might be useful to know some
-basic variables about correlated orbitals.
+basic variables related to correlated orbitals.
 
 The first GW tutorial in ABINIT ([GW](/tutorial/gw1)) is useful to learn how
 to compute the screening, and how to converge the relevant parameters
@@ -44,7 +44,7 @@ of this method using Projected Local Orbitals Wannier orbitals in ABINIT (The
 implementation of cRPA in ABINIT is described in [[cite:Amadon2014]] and projected
 local orbitals Wannier functions are presented in [[cite:Amadon2008]]). The
 discussion about the localization of Wannier orbitals has some similarities
-with the beginning on the DMFT tutorial (see [here](dmft.md#1) and [there](dmft.md#2))
+with the beginning of the DMFT tutorial (see [here](dmft.md#1) and [there](dmft.md#2))
 
 Several parameters (both physical and technical) are important for the cRPA calculation:
 
@@ -89,18 +89,18 @@ for the other tutorials. Why not Work_crpa?
 In what follows, the name of files are mentioned as if you were in this subdirectory.
 All the input files can be found in the `$ABI_TESTS/tutoparal/Input` directory.*
 
-Copy the files *tucrpa_1.abi* from *ABI_TESTS/tutoparal/Input* to *Work_crpa* with:
+Copy the files *tucalc_crpa_1.abi* from *ABI_TESTS/tutoparal/Input* to *Work_crpa* with:
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input
 mkdir Work_crpa
 cd Work_crpa
-cp ../tucrpa_1.abi .
+cp ../tucalc_crpa_1.abi .
 ```
 
 and run the code with:
 
-    mpirun -n 32 abinit tucrpa_1.abi > log_1  &
+    mpirun -n 32 abinit tucalc_crpa_1.abi > log_1  &
 
 This run should take some time. It is recommended that you use at least 10
 processors (and 32 should be fast). It calculates the LDA ground state of
@@ -121,7 +121,7 @@ end of the calculation. In this calculation, we find 1.E-06, which is large
 it would take more time). When the calculation is finished, you can plot the
 fatbands for Vanadium and *l=2* with
 
-    xmgrace tucrpa_O_DS2_FATBANDS_at0001_V_is1_l0002 -par ../Input/tdmft_fatband.par
+    xmgrace tucalc_crpa_O_DS2_FATBANDS_at0001_V_is1_l0002 -par ../Input/tdmft_fatband.par
 
 The band structure is given in eV.
 
@@ -129,7 +129,7 @@ The band structure is given in eV.
 
 and the fatbands for all Oxygen atoms and *l=1* with
 
-    xmgrace tucrpa_O_DS2_FATBANDS_at0003_O_is1_l0001 tucrpa_O_DS2_FATBANDS_at0004_O_is1_l0001 tucrpa_O_DS2_FATBANDS_at0005_O_is1_l0001 -par ../Input/tdmft_fatband.par
+    xmgrace tucalc_crpa_O_DS2_FATBANDS_at0003_O_is1_l0001 tucalc_crpa_O_DS2_FATBANDS_at0004_O_is1_l0001 tucalc_crpa_O_DS2_FATBANDS_at0005_O_is1_l0001 -par ../Input/tdmft_fatband.par
 
 ![FatbandV](ucalc_crpa_assets/fatbandsO.jpeg)
 
@@ -140,12 +140,12 @@ However, we clearly see an important hybridization. The Fermi level (at 0 eV)
 is in the middle of bands 21-23.
 
 One can easily check that bands 21-23 are mainly _d-t<sub>2g</sub>_ and bands 24-25 are
-mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tucrpa_1.abi* and relaunch the
-calculations. Then the file *tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-2*,
-*tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-1* and
-*tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m1* give you respectively the _xy_, _yz_ and
-_xz_ fatbands (ie _d-t<sub>2g</sub>_) and *tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+0* and
-*tucrpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+2* give the _z<sup>2</sup>_ and _x<sup>2</sup>-y<sup>2</sup>_ fatbands
+mainly _e<sub>g</sub>_: just use [[pawfatbnd]] = 2 in *tucalc_crpa_1.abi* and relaunch the
+calculations. Then the file *tucalc_crpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-2*,
+*tucalc_crpa_O_DS2_FATBANDS_at0001_V_is1_l2_m-1* and
+*tucalc_crpa_O_DS2_FATBANDS_at0001_V_is1_l2_m1* give you respectively the _xy_, _yz_ and
+_xz_ fatbands (ie _d-t<sub>2g</sub>_) and *tucalc_crpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+0* and
+*tucalc_crpa_O_DS2_FATBANDS_at0001_V_is1_l2_m+2* give the _z<sup>2</sup>_ and _x<sup>2</sup>-y<sup>2</sup>_ fatbands
 (ie _e<sub>g</sub>_).
 
 So in conclusion of this study, the Kohn Sham bands which are mainly _t<sub>2g</sub>_
@@ -187,7 +187,7 @@ interactions is carried out, the choice of models is discussed in [[cite:Amadon2
 
 In this section, we will present the input variables and discuss how to
 extract useful information in the log file in the case of the _d-d_ model. The
-input file for a typical cRPA calculation (*tucrpa_2.abi*) contains four datasets
+input file for a typical cRPA calculation (*tucalc_crpa_2.abi*) contains four datasets
 (as usual _GW_ calculations, see the [GW tutorial](gw1.md#1a)): the
 first one is a well converged LDA calculation, the second is non self-consistent calculation
 to compute accurately full and empty states, the third
@@ -198,15 +198,15 @@ datasets in the next four subsections.
 Copy the file in your *Work_crpa* directory with:
 
 ```sh
-cp ../tucrpa_2.abi .
+cp ../tucalc_crpa_2.abi .
 ```
 
-The input file *tucrpa_2.abi* contains standard data to perform a LDA
+The input file *tucalc_crpa_2.abi* contains standard data to perform a LDA
 calculation on SrVO<sub>3</sub>. We focus in the next subsections on some peculiar input
 variables related to the fact that we perform a cRPA calculation. Before
 reading the following section, launch the abinit calculation:
 
-    abinit tucrpa_2.abi > log_2
+    abinit tucalc_crpa_2.abi > log_2
 
 ##### 3.2.1. The first DATASET: A converged LDA calculation
 
@@ -220,7 +220,7 @@ the full interaction matrix described in section 3.2.4 will not be correct.
 Before presenting the input variables for this dataset, we discuss two
 important physical parameters relevant to this dataset.
 
-  * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or _GW_ calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucrpa_1.abi.
+  * Diagonalization of Kohn-Sham Hamiltonian: As in the case of DFT+DMFT or _GW_ calculation, a cRPA calculation requires that the LDA is perfectly converged and the Kohn Sham eigenstates are precisely determined, including the empty states. Indeed these empty states are necessary both to build Wannier functions and to compute the polarizability. For this reason we choose a very low value of [[tolwfr]] in the input file tucalc_crpa_1.abi.
 
   * Wannier functions: Once the calculation is converged, we compute Wannier functions, triggered using the [[plowan_compute]] keyword. In addition to the KS bands (defined using [[plowan_bandi]] and [[plowan_bandf]]), we use the ([PLO-Wannier](/topics/Wannier)) keywords to define on which atom and on which orbital the Wannier functions are calculated.  
 	For this tutorial we will only look at cases with only one orbital for the Wannier functions and thus the cRPA, but note 
@@ -378,9 +378,9 @@ interaction computed on Wannier orbitals.
 
  * First we see that diagonal interactions are larger than off-diagonal terms,
    which is logical, because electron interaction is larger if electrons are located in the same orbital.
- * We recover in these interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry
+ * We recover in this interaction matrix the degeneracy of _d_ orbitals in the cubic symmetry
    (we remind, as listed in [[dmatpawu]], that the order of orbitals in ABINIT are _xy_, _yz_,
-   _z<sup>2<\sup>_, _xy_, _x<sup>2</sup>-y<sup>2</sup>_).
+   _z<sup>2</sup>_, _xy_, _x<sup>2</sup>-y<sup>2</sup>_).
  * We note also that the interaction for _t<sub>2g</sub>_ and _e<sub>g</sub>_ orbitals are not the same.
    This effect is compared in e.g. Appendix C.1 of [[cite:Vaugier2012]] to the usual
    Slater parametrization of interaction matrices.
@@ -421,7 +421,7 @@ interaction computed on Wannier orbitals.
 ```
 
 
-  * Then, the cRPA effective interactions are given for all frequency.
+  * Then, the cRPA effective interactions are given for all frequencies.
      The first frequency is zero and the cRPA interactions are:
 
 ```
@@ -463,7 +463,7 @@ interaction computed on Wannier orbitals.
 
 We give here the results of some convergence studies, than can be made by the
 readers. Some are computationally expensive. It is recommanded to use at least
-32 processors. Input file is provided in *tucrpa_3.abi* for the first case.
+32 processors. Input file is provided in *tucalc_crpa_3.abi* for the first case.
 
 ### 4.1 Cutoff in energy for the polarisability [[ecuteps]]
 
@@ -577,8 +577,8 @@ agreement (within 0.1 or 0.2 eV) with results obtained in Table V of
 [[cite:Amadon2014]] and references cited in this table.
 
 To obtain the results with only the _t<sub>2g</sub>_ orbitals, one must use a specific
-input file, which is tucrpa_4.abi, which uses specific keywords, peculiar to
-this case (compare it with tucrpa_2.abi). In this peculiar case, the most
+input file, which is tucalc_crpa_4.abi, which uses specific keywords, peculiar to
+this case (compare it with tucalc_crpa_2.abi). In this peculiar case, the most
 common definition of J has to be deduced by direct calculation from the
 interaction matrices using the Slater Kanamori expression (see e.g.
 [[cite:Lechermann2006]] or [[cite:Vaugier2012]]) and not using the value of _J_ computed in the code).
@@ -622,7 +622,7 @@ decrease the computational cost.
      freqspmax4 30 eV
      freqspmin4  0 eV
 
-An example of input file can be found in *tucrpa_5.abi*. Note that we have
+An example of input file can be found in *tucalc_crpa_5.abi*. Note that we have
 decreased some parameters to speed-up the calculations. Importantly, however,
 we have increased the number of Kohn Sham bands, because calculation of
 screening at high frequency involves high energy transitions which requires
@@ -631,7 +631,7 @@ time consuming, you can reduce the number of frequencies. The following figure
 has been plotted with 300 frequencies, but using 30 or 60 frequencies is
 sufficient to see the main tendencies. Extract the value of _U_ for the 60 frequencies using:
 
-    grep "U(omega)" -A 60 tucrpa_5.out > Ufreq.dat
+    grep "U(omega)" -A 60 tucalc_crpa_5.out > Ufreq.dat
 
 Remove the first line, and plot the data:
 

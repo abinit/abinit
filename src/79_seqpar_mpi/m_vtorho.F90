@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -88,6 +84,7 @@ module m_vtorho
  use m_cgprj,              only : ctocprj
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
+ use m_inwffil,            only : cg_from_atoms
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -210,7 +207,7 @@ contains
 !!  usecprj=1 if cprj datastructure is stored in memory
 !!  wffnew,unit numbers for wf disk files.
 !!  with_vectornd = 1 if vectornd allocated
-!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
+!!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=INPUT potential Vtrial(r).
 !!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
 !!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
@@ -263,12 +260,6 @@ contains
 !!    cprj(natom,mcprj*usecprj)= wave functions projected with non-local projectors:
 !!                               cprj(n,k,i)=<p_i|Cnk> where p_i is a non-local projector.
 !!  rmm_diis_status= Status of the RMM-DIIS eigensolver. See m_rmm_diis
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
 !!
 !! NOTES
 !!  Be careful to the meaning of nfft (size of FFT grids):
@@ -338,7 +329,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  real(dp), intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: phnonsdiel(2,nfftdiel**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp), intent(in) :: pwnsfac(2,pwind_alloc),rmet(3,3),rprimd(3,3)
- real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,3),vtrial(nfftf,dtset%nspden)
+ real(dp), intent(inout) :: vectornd(with_vectornd*nfftf,dtset%nspden,3),vtrial(nfftf,dtset%nspden)
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp), intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
@@ -364,13 +355,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: level=111,tim_mkrho=2
- integer,save :: nwarning=0
+ !integer,save :: nwarning=0
  integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert,iplex
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
- integer :: mwarning,my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff
+ integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
@@ -447,7 +438,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  me_distrb=xmpi_comm_rank(spaceComm_distrb)
  mpi_comm_sphgrid=mpi_enreg%comm_fft
  if(dtset%usewvl==1) mpi_comm_sphgrid=mpi_enreg%comm_wvl
- if (mpi_enreg%me_img/=0) nwarning=nwarning+1
+ !if (mpi_enreg%me_img/=0) nwarning=nwarning+1
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  if ((psps%usepaw==1.and.pawfgr%nfft/=nfftf).or.(psps%usepaw==0.and.dtset%nfft/=nfftf)) then
@@ -729,7 +720,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(has_vectornd) then
         do idir = 1, 3
           ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,idir))
+          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,:,idir))
           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
           ABI_FREE(cgrvtrial)
         end do
@@ -915,7 +906,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            !Init the arrays
            call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
 &           gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&           gs_hamk%ph3d_k)
+&           gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
          end if
        end if
 
@@ -931,6 +922,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (usefock) call fock_updateikpt(fock%fock_common,ikpt,isppol)
        if (psps%usepaw==1 .and. usefock) then
          if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
+       end if
+
+       ! Here we initialize the wavefunctions with atomic orbitals at the first GS iteration of the first
+       ! relaxation step (if any).
+       ! NB: Not all the cases are presently supported.
+       !print *, "istep, itimes(1), wfinit", istep, itimes(1), dtset%wfinit
+       ! FIXME: This check is not enough as I need to check whether cg have been read from WFK file
+       if (istep == 1 .and. itimes(1) == 0 .and. dtset%wfinit /= 0) then
+         call cg_from_atoms(ikpt, isppol, rprimd, xred, kg_k, cg(:,icg+1:), dtset, psps, eig_k, gs_hamk, &
+                            mpi_enreg, nband_k, npw_k, my_nspinor)
        end if
 
        ABI_NVTX_START_RANGE(NVTX_VTOWFK)
@@ -1205,16 +1206,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute the new occupation numbers from eigen
      call timab(990,1,tsec)
-     ! CP modified
-     !call newocc(doccde,eigen,energies%entropy,energies%e_fermie,dtset%spinmagntarget,&
-!&     dtset%mband,dtset%nband,dtset%nelect,dtset%nkpt,dtset%nspinor,&
-!&     dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%stmbias,dtset%tphysel,&
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
 &     dtset%tsmear,dtset%wtk,&
-&     extfpmd)
-     ! End CP modified
+&     prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
      call timab(990,2,tsec)
 
 
@@ -1712,10 +1708,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !===================================================================
 
 !In the self-consistent case, diagnose lack of unoccupied state (for each spin and k-point).
+
 !Print a warning if the number of such messages already written does not exceed mwarning.
- mwarning=5
- if(nwarning<mwarning .and. iscf>=0)then
-   nwarning=nwarning+1
+! MG: This is not a good idea as this is a typical mistake done by beginners and we should
+! keep on spamming this warning message in the log file.
+ !mwarning=5
+ !if(nwarning<mwarning .and. iscf>=0)then
+   !nwarning=nwarning+1
+
+ if(iscf>=0)then
    bdtot_index=1
    do isppol=1,dtset%nsppol
      do ikpt=1,dtset%nkpt
@@ -1772,7 +1773,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call ctocprj(atindx,cg,1,cprj_tmp,gmet,gprimd,0,0,0,dtset%istwfk,kg,dtset%kptns,&
 &       mcg,mcprj_tmp,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,&
 &       dtset%natom,nattyp,dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,&
-&       npwarr,dtset%nspinor,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
+&       npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,&
 &       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
@@ -1929,12 +1930,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine wvl_nscf_loop()
@@ -2031,12 +2026,6 @@ subroutine wvl_nscf_loop()
 !! OUTPUT
 !!  argout(sizeout)=description
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine wvl_nscf_loop_bigdft()
@@ -2122,12 +2111,6 @@ subroutine wvl_nscf_loop_bigdft()
 !! OUTPUT
 !!  e_eigenvalues= eigenvalues energy
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
@@ -2180,12 +2163,6 @@ subroutine e_eigen(eigen,e_eigenvalues,mband,nband,nkpt,nsppol,occ,wtk)
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
-!!
 !! SOURCE
 
 subroutine wvl_occ()
@@ -2199,8 +2176,8 @@ subroutine wvl_occ()
 !  Compute the new occupation numbers from eigen
    call newocc(doccde_,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,&
 &   dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,&
-&   dtset%nsppol,occ,dtset%occopt,prtvol,&
-&   dtset%stmbias,dtset%tphysel,dtset%tsmear,dtset%wtk)
+&   dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   prtstm=dtset%prtstm,stmbias=dtset%stmbias)
 
 ! Copy occupations and efermi to BigDFT variables
    call wvl_occ_abi2big(dtset%mband,dtset%nkpt,dtset%nsppol,occ,1,wvl%wfs)
@@ -2231,12 +2208,6 @@ subroutine wvl_occ()
 !!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2283,12 +2254,6 @@ subroutine wvl_occ_bigdft()
 !!
 !! NOTES
 !! for the wvlbigdft case, see the routine 'wvl_occ_bigdft'
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 
@@ -2378,12 +2343,6 @@ end subroutine vtorho
 !! TODO
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      timab,xmpi_recv,xmpi_send
 !!
 !! SOURCE
 

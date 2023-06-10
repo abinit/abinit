@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -67,12 +63,6 @@ contains
 !!                 | nzatom   = charge of the nucleus
 !!                 | nelpsp   = the ionic pseudo-charge
 !!                 | natsc    = number of atoms with semicore
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 
@@ -165,12 +155,6 @@ end subroutine wvl_descr_psp_set
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_psp_hgh,m_pspini
-!!
-!! CHILDREN
-!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 
@@ -313,12 +297,6 @@ end subroutine wvl_descr_psp_fill
 !! OUTPUT
 !! wvl <type(wvl_internal_type)>=internal variables for wavelets
 !!
-!! PARENTS
-!!      m_gstate,m_memeval
-!!
-!! CHILDREN
-!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
-!!
 !! SOURCE
 
 subroutine wvl_descr_free(wvl)
@@ -377,12 +355,6 @@ end subroutine wvl_descr_free
 !!                 | iatype   =  types for atoms
 !!                 | lfrztyp  =  flag for the movement of atoms.
 !!                 | natpol   =  integer related to polarisation at the first step
-!!
-!! PARENTS
-!!      m_gstate,m_memeval
-!!
-!! CHILDREN
-!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 
@@ -477,12 +449,6 @@ end subroutine wvl_descr_atoms_set
 !!                 | iatype   =  types for atoms
 !!                 | lfrztyp  =  flag for the movement of atoms.
 !!                 | natpol   =  integer related to polarisation at the first step
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      astruct_set_symmetries,symmetry_set_n_sym,wrtout
 !!
 !! SOURCE
 

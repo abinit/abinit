@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -192,12 +188,6 @@ CONTAINS
 !!                       processors fft
 !! SIDE EFFECTS
 !!  bandfft_kpt_in=<type(bandfft_kpt)>=bandfft_kpt datastructure
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -646,12 +636,6 @@ end subroutine bandfft_kpt_init1
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_bandfft_kpt
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine bandfft_kpt_init2(bandfft_kpt_in,dimffnl,ffnl_gather,ikpt_this_proc,kinpw_gather,&
@@ -727,12 +711,6 @@ end subroutine bandfft_kpt_init2
 !! SIDE EFFECTS
 !!  bandfft_kpt_in=the datastructure to nullify
 !!
-!! PARENTS
-!!      m_positron
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine bandfft_kpt_reset(bandfft_kpt_in)
@@ -766,12 +744,6 @@ end subroutine bandfft_kpt_reset
 !!
 !! SIDE EFFECTS
 !!  bandfft_kpt_in=the datastructure to destroy
-!!
-!! PARENTS
-!!      m_bandfft_kpt,m_positron
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -881,12 +853,6 @@ end subroutine bandfft_kpt_destroy
 !!  bandfft_kpt_in(:)=the array of datastructure to destroy
 !!
 !!
-!! PARENTS
-!!      m_gstate,m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
@@ -949,11 +915,6 @@ end subroutine bandfft_kpt_destroy_array
 !!
 !! OUTPUT
 !!  bandfft_kpt_out=<type(bandfft_kpt_type)>=output bandfft_kpt datastructure
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1160,12 +1121,6 @@ end subroutine bandfft_kpt_copy
 !!
 !! OUTPUT
 !!  ierr=Error status
-!!
-!! PARENTS
-!!      m_positron
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1456,12 +1411,6 @@ end subroutine bandfft_kpt_mpi_send
 !! OUTPUT
 !!  ierr=Error status
 !!  output=# of on proc. sender
-!!
-!! PARENTS
-!!      m_positron
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1805,12 +1754,6 @@ end subroutine bandfft_kpt_mpi_recv
 !!  kpg(:,:)=k+G vector for a given k point
 !!  kinpw(:)=kinetic energy for each plane wave (Hartree)
 !!
-!! PARENTS
-!!      m_dft_energy,m_fock_getghc,m_forstr
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine bandfft_kpt_savetabs(bandfft_kpt_in,ffnl,ph3d,kpg,kinpw)
@@ -1893,12 +1836,6 @@ end subroutine bandfft_kpt_savetabs
 !!
 !! SIDE EFFECTS
 !!  bandfft_kpt_out=<type(bandfft_kpt)>=bandfft_kpt datastructure
-!!
-!! PARENTS
-!!      m_dft_energy,m_fock_getghc,m_forstr
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
@@ -1986,12 +1923,6 @@ end subroutine bandfft_kpt_restoretabs
 !! OUTPUT
 !!  bandfft_kpt_current_ikpt value changed
 !!
-!! PARENTS
-!!      m_bandfft_kpt,m_mkrho,m_vtorho
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
-!!
 !! SOURCE
 
 subroutine bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
@@ -2027,12 +1958,6 @@ end subroutine bandfft_kpt_set_ikpt
 !! OUTPUT
 !!  bandfft_kpt_get_ikpt= current index of bandfft_kpt
 !!
-!! PARENTS
-!!      apply_invovl,chebfi,getghc,make_invovl,prep_fourwf
-!!      prep_getghc,prep_nonlop
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function bandfft_kpt_get_ikpt()
@@ -2062,12 +1987,6 @@ end function bandfft_kpt_get_ikpt
 !!
 !! SIDE EFFECTS
 !!  bandfft_kpt tabs (defined in m_bandfft_kpt module)
-!!
-!! PARENTS
-!!      m_dft_energy,m_fock_getghc,m_forstr,m_vtorho
-!!
-!! CHILDREN
-!!      bandfft_kpt_init2,bandfft_kpt_set_ikpt,mkkpg,timab,xmpi_allgatherv
 !!
 !! SOURCE
 
