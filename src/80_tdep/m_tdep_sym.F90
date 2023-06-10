@@ -25,6 +25,7 @@ module m_tdep_sym
    integer :: nptsym
    integer :: spgroup
    integer, allocatable :: ptsymrel(:,:,:)
+   integer, allocatable :: symrel(:,:,:)
    integer, allocatable :: symrec(:,:,:)
    integer, allocatable :: symafm(:)
    integer, allocatable :: indsym(:,:,:)
@@ -134,15 +135,18 @@ contains
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
   integer :: ptgroupma,isym,jatom,ii,jj,mu
-  integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
+  integer :: iatom_unitcell,jatom_unitcell,iatom
   integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,counter,nzchempot
   integer :: bravais(11)
-  integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
-  integer, allocatable :: symrel(:,:,:),symrel_tmp(:,:,:)
+  integer :: vecti(3),vectj(3)
+  integer, allocatable :: symrel_tmp(:,:,:)
   integer, allocatable :: indsym2(:,:,:,:)
+  integer, allocatable :: vectsym(:,:)
   double precision :: genafm(3),efield(3)
   double precision :: tmpi(3,Invar%natom),tmpj(3,Invar%natom),temp3(3,1),tmp_store(3,Invar%natom_unitcell)
   double precision, allocatable :: spinat(:,:),xred_temp(:,:),tnons_tmp(:,:)
+  double precision, allocatable :: tmp1(:,:)
+  character(len=500) :: message
 
   write(Invar%stdout,*) ' '
   write(Invar%stdout,*) '#############################################################################'
@@ -174,65 +178,92 @@ contains
   nzchempot=0
   ABI_MALLOC(spinat,(3,Invar%natom_unitcell)); spinat(:,:)=0.d0
   use_inversion=1
-  ABI_MALLOC(symrel    ,(3,3,Sym%msym)) ; symrel    (:,:,:)=0
   ABI_MALLOC(symrel_tmp,(3,3,Sym%msym)) ; symrel_tmp(:,:,:)=0
-  ABI_MALLOC(Sym%tnons   ,(3,Sym%msym)) ; Sym%tnons   (:,:)=0.d0
   ABI_MALLOC(Sym%symafm    ,(Sym%msym)) ; Sym%symafm(:)    =1
   ABI_MALLOC(tnons_tmp   ,(3,Sym%msym)) ; tnons_tmp   (:,:)=0.d0
-  call symfind(berryopt,efield,Lattice%gprimd,jellslab,Sym%msym,Invar%natom_unitcell,noncoll,Sym%nptsym,nsym,&
+  call symfind(berryopt,efield,Lattice%gprimd,jellslab,Sym%msym,Invar%natom_unitcell,noncoll,Sym%nptsym,Sym%nsym,&
 &      nzchempot,0,Sym%ptsymrel,spinat,Sym%symafm,symrel_tmp,tnons_tmp,tol8,Invar%typat_unitcell,use_inversion,xred_temp)
   ABI_FREE(spinat)
-  if (Sym%nptsym.eq.nsym) then
-    symrel(:,:,:) =symrel_tmp(:,:,:)
-    Sym%tnons(:,:)=tnons_tmp   (:,:)
-  else
-    write(Invar%stdout,'(a,i4,a,i4)') 'WARNING: nsym=',nsym,' is not equal to nptsym=',Sym%nptsym
+  ABI_MALLOC(Sym%symrel,(3,3,Sym%nsym)) ; Sym%symrel(:,:,:)=0
+  ABI_MALLOC(Sym%tnons   ,(3,Sym%nsym)) ; Sym%tnons   (:,:)=0.d0
+  if (Sym%nsym.ne.Sym%nptsym) then
+    write(message,'(a,i4,a,i4)') 'WARNING: Sym%nsym=',Sym%nsym,' is not equal to nptsym=',Sym%nptsym
+    ABI_WARNING(message)
 !   Warning: EXPERIMENTAL
 !   This case is only useful for testing purpose
 !   when the unitcell is not primitive (chkprim=0)
-    if (nsym.eq.Sym%nptsym*Invar%natom_unitcell) then
+    if (Sym%nsym.eq.Sym%nptsym*Invar%natom_unitcell) then
       write(Invar%stdout,'(a)') 'The unitcell is probably non-primitive, with probably nsym=nptsym*natom_unitcell'
-      do isym=1,Sym%nptsym
-        symrel(:,:,isym)=symrel_tmp(:,:,(isym-1)*Invar%natom_unitcell+1)
-        Sym%tnons(:,isym)=tnons_tmp(:,(isym-1)*Invar%natom_unitcell+1)
-      end do
-    else
+    else if (Sym%nsym.lt.Sym%nptsym) then
+      write(Invar%stdout,'(a)') 'The space group has lower symetries than the point group / lattice'
+    else  
       ABI_ERROR('There is no relationship between nsym and nptsym')
     end if
   end if
-  ABI_FREE(symrel_tmp)
-  ABI_FREE(tnons_tmp)
-  do isym=1,Sym%nptsym
-    counter=0
+  Sym%symrel(:,:,:) =symrel_tmp(:,:,1:Sym%nsym)
+  Sym%tnons(:,:)    =tnons_tmp   (:,1:Sym%nsym)
+  ABI_FREE(Sym%S_ref)
+  ABI_FREE(Sym%S_inv)
+  ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=real(Sym%symrel(:,:,1:Sym%nsym))
+  ABI_MALLOC(Sym%S_inv,(3,3,Sym%nsym,2)) ; Sym%S_inv(:,:,:,1)=zero
+  ABI_MALLOC(tmp1,(3,3)); tmp1(:,:)=0.d0
+  if (MPIdata%iam_master) open(unit=75,file=trim(Invar%output_prefix)//'sym.dat')
+  do isym=1,Sym%nsym
+    if (MPIdata%iam_master) then
+      write(75,*) ' '
+      write(75,*) 'For isym=',isym
+      write(75,*) 'In reduced coordinates:'
+      write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+      write(75,*) 'With tnons:'
+      write(75,'(3(f5.2,1x))') Sym%tnons(1,isym),Sym%tnons(2,isym),Sym%tnons(3,isym)
+    end if
+    call DGEMM('N','N',3,3,3,1.d0,Lattice%rprimdt,3,Sym%S_ref(:,:,isym,1),3,0.d0,tmp1,3)
+    call DGEMM('N','N',3,3,3,1.d0,tmp1,3,Lattice%rprimdtm1,3,0.d0,Sym%S_ref(:,:,isym,1),3)
     do ii=1,3
       do jj=1,3
-        counter=counter+abs(Sym%ptsymrel(ii,jj,isym)-symrel(ii,jj,isym))
+        if (abs(Sym%S_ref(ii,jj,isym,1)).lt.tol8) Sym%S_ref(ii,jj,isym,1)=zero
       end do
     end do
-    if (counter.ne.0) then
-      exit
-    end if
-  end do
-
-  if (counter.ne.0) then
-    do isym=1,nsym
-      write(Invar%stdout,*) ' For sym=',isym
-      write(Invar%stdout,'(a)') ' Symrel='
-      write(Invar%stdout,*) symrel(1,:,isym)
-      write(Invar%stdout,*) symrel(2,:,isym)
-      write(Invar%stdout,*) symrel(3,:,isym)
-      write(Invar%stdout,'(a)') ' Ptsymrel='
-      write(Invar%stdout,*) Sym%ptsymrel(1,:,isym)
-      write(Invar%stdout,*) Sym%ptsymrel(2,:,isym)
-      write(Invar%stdout,*) Sym%ptsymrel(3,:,isym)
+!   Inversion of S_ref (which is equivalent to the transposition)
+    do ii=1,3
+      do jj=1,3
+        Sym%S_inv(ii,jj,isym,1)=Sym%S_ref(jj,ii,isym,1)
+      end do
     end do
-    ABI_ERROR('The symrel and ptsymrel tabs do not correspond')
-  end if
+    if (MPIdata%iam_master) then
+      write(75,*) 'In cartesian coordinates:'
+      write(75,'(3(f5.2,1x))') Sym%S_ref(1,1,isym,1),Sym%S_ref(1,2,isym,1),Sym%S_ref(1,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(2,1,isym,1),Sym%S_ref(2,2,isym,1),Sym%S_ref(2,3,isym,1)
+      write(75,'(3(f5.2,1x))') Sym%S_ref(3,1,isym,1),Sym%S_ref(3,2,isym,1),Sym%S_ref(3,3,isym,1)
+    end if  
+  end do
+  if (MPIdata%iam_master) close(75)
+!  write(Invar%stdout,'(a)') ' See the sym.dat file'
+
+! We verify that S.S^T = Id
+  tmp1(:,:)=zero
+  do isym=1,Sym%nsym
+    call DGEMM('T','N',3,3,3,1.d0,Sym%S_ref(:,:,isym,1),3,Sym%S_ref(:,:,isym,1),3,0.d0,tmp1,3)
+    do ii=1,3
+      do jj=1,3
+        if ((ii/=jj.and.abs(tmp1(ii,jj)).gt.tol8).or.(ii==jj.and.abs(tmp1(ii,jj)-1.d0).gt.tol8)) then
+          write(Invar%stdout,'(a)') ' STOP : the matrix is not orthogonal : '
+          write(Invar%stdout,'(a,1x,i3,1x,i3,1x,f15.10)') ' ii, jj, sym(ii,jj)=',ii,jj,tmp1(ii,jj)
+          ABI_ERROR('The matrix is not orthogonal')
+        end if
+      end do
+    end do
+  end do
+  ABI_FREE(tmp1)
+  ABI_FREE(symrel_tmp)
+  ABI_FREE(tnons_tmp)
 
 !Calcul des symrec
-  ABI_MALLOC(Sym%symrec,(3,3,Sym%nptsym)); Sym%symrec(:,:,:)=0
-  do isym=1,Sym%nptsym
-    call mati3inv(symrel(:,:,isym),Sym%symrec(:,:,isym))
+  ABI_MALLOC(Sym%symrec,(3,3,Sym%nsym)); Sym%symrec(:,:,:)=0
+  do isym=1,Sym%nsym
+    call mati3inv(Sym%symrel(:,:,isym),Sym%symrec(:,:,isym))
   end do
 ! Calcul du spgroup
 !FB  chkprim=1
@@ -240,9 +271,8 @@ contains
   genafm(:)=0.d0
   ptgroupma=0
   Sym%spgroup=0
-  call symanal(bravais,chkprim,genafm,Sym%msym,Sym%nptsym,ptgroupma,Lattice%rprimdt,Sym%spgroup,Sym%symafm,symrel,Sym%tnons,tol8)
-!FB  call symanal(bravais,chkprim,genafm,Sym%msym,Sym%nptsym,ptgroupma,Lattice%rprimd,Sym%spgroup,Sym%symafm,symrel,Sym%tnons,tol8)
-  ABI_FREE(symrel)
+  call symanal(bravais,chkprim,genafm,Sym%msym,Sym%nsym,ptgroupma,Lattice%rprimdt,Sym%spgroup,Sym%symafm,Sym%symrel,Sym%tnons,tol8)
+!FB  call symanal(bravais,chkprim,genafm,Sym%msym,Sym%nptsym,ptgroupma,Lattice%rprimd,Sym%spgroup,Sym%symafm,Sym%symrel,Sym%tnons,tol8)
 
 ! Compute the indsym fundamental quantity
 ! === Obtain a list of rotated atoms ===
@@ -250,8 +280,8 @@ contains
 ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
 ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
   write(Invar%stdout,'(a)') ' Search the matrix transformation going from (k) to (i)...'
-  ABI_MALLOC(Sym%indsym,(4,Sym%nptsym,Invar%natom)); Sym%indsym(:,:,:)=zero
-  call symatm(Sym%indsym(:,:,1:Invar%natom_unitcell),Invar%natom_unitcell,Sym%nptsym,&
+  ABI_MALLOC(Sym%indsym,(4,Sym%nsym,Invar%natom)); Sym%indsym(:,:,:)=zero
+  call symatm(Sym%indsym(:,:,1:Invar%natom_unitcell),Invar%natom_unitcell,Sym%nsym,&
 &   Sym%symrec,Sym%tnons,tol8,Invar%typat_unitcell,xred_temp)
   ABI_FREE(xred_temp)
 
@@ -265,7 +295,7 @@ contains
     do iatom=1,Invar%natom_unitcell
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
-      do isym=1,Sym%nptsym
+      do isym=1,Sym%nsym
         write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
 &         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
       end do
@@ -275,15 +305,16 @@ contains
 
 ! Search the matrix transformation going from (k,l) to (i,j)
   write(Invar%stdout,'(a)') ' Search the matrix transformation going from (k,l) to (i,j)...'
-  ABI_MALLOC(indsym2,(8,Sym%nptsym,Invar%natom,Invar%natom)); indsym2(:,:,:,:)=0
+  ABI_MALLOC(indsym2,(8,Sym%nsym,Invar%natom,Invar%natom)); indsym2(:,:,:,:)=0
   tmpi(:,:)=0.d0
   tmpj(:,:)=0.d0
+  ABI_MALLOC(vectsym,(4,Sym%nsym)); vectsym(:,:)=0.d0
   do iatom=1,Invar%natom
 !   For a single iatom 
     call DGEMV('T',3,3,1.d0,Invar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmpi(:,iatom),1)
     iatom_unitcell=mod(iatom-1,Invar%natom_unitcell)+1
     vecti(:)=nint(tmpi(:,iatom)-tmp_store(:,iatom_unitcell))
-    do isym=1,Sym%nptsym
+    do isym=1,Sym%nsym
       vectsym(:,:)=0
       do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
         vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vecti(1)+Sym%symrec(2,mu,isym)*vecti(2)+Sym%symrec(3,mu,isym)*vecti(3)
@@ -299,7 +330,7 @@ contains
     do iatom=1,Invar%natom
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
-      do isym=1,Sym%nptsym
+      do isym=1,Sym%nsym
         write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
 &         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
       end do
@@ -317,7 +348,7 @@ contains
       call DGEMV('T',3,3,1.d0,Invar%multiplicity(:,:),3,temp3(:,1),1,0.d0,tmpj(:,jatom),1)
       jatom_unitcell=mod(jatom-1,Invar%natom_unitcell)+1
       vectj(:)=nint(tmpj(:,jatom)-tmp_store(:,jatom_unitcell))
-      do isym=1,Sym%nptsym
+      do isym=1,Sym%nsym
         vectsym(:,:)=0
         do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
           vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vectj(1)+Sym%symrec(2,mu,isym)*vectj(2)+Sym%symrec(3,mu,isym)*vectj(3)
@@ -334,7 +365,7 @@ contains
       do jatom=1,Invar%natom
         write(40,*) '  =========================================='
         write(40,'(a,i4,a,3(f10.5,1x))') '  For jatom=',jatom,' with xred (supercell)=',xred_ideal(:,jatom)
-        do isym=1,Sym%nptsym
+        do isym=1,Sym%nsym
           write(40,'(a,i2,a,i4,a,i4,a,3(i4,1x),a,i2,a,3(i4,1x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',&
 &           indsym2(1:3,isym,iatom,jatom),&
 &           '|iat=',indsym2(4,isym,iatom,jatom),'|',indsym2(5:7,isym,iatom,jatom),'|iat=',indsym2(8,isym,iatom,jatom),'|'
@@ -345,6 +376,7 @@ contains
     close(40)
   end if  
   ABI_FREE(indsym2)
+  ABI_FREE(vectsym)
   write(Invar%stdout,'(a)') ' See the Indsym*.dat files (if debug)'
 
  end subroutine tdep_SearchS_1at
@@ -687,8 +719,9 @@ contains
 
   integer :: isym,mu,ii
   integer :: iatom_unitcell,jatom_unitcell
-  integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
+  integer :: vecti(3),vectj(3)
   double precision :: tmpi(3,Invar%natom),tmpj(3,Invar%natom),temp3(3,1),tmp_store(3,Invar%natom_unitcell)
+  integer, allocatable :: vectsym(:,:)
 
 ! Store the positions of the atoms in the motif
   do ii=1,Invar%natom_unitcell
@@ -702,7 +735,7 @@ contains
   call DGEMV('T',3,3,1.d0,Invar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmpi(:,iatom),1)
   iatom_unitcell=mod(iatom-1,Invar%natom_unitcell)+1
   vecti(:)=nint(tmpi(:,iatom)-tmp_store(:,iatom_unitcell))
-  vectsym(:,:)=0
+  ABI_MALLOC(vectsym,(4,Sym%nsym)); vectsym(:,:)=0.d0
   do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
     vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vecti(1)+Sym%symrec(2,mu,isym)*vecti(2)+Sym%symrec(3,mu,isym)*vecti(3)
   end do
@@ -724,6 +757,7 @@ contains
     vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vectj(1)+Sym%symrec(2,mu,isym)*vectj(2)+Sym%symrec(3,mu,isym)*vectj(3)
   end do
   indsym2(5:8)=Sym%indsym(1:4,isym,jatom_unitcell)+vectsym(1:4,isym)
+  ABI_FREE(vectsym)
 !FB  if (Invar%debug) then
 !FB    write(Invar%stdout,'(a,i2,a,i4,a,i4,a,3(i4,x),a,i2,a,3(i4,x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',indsym2(1:3),&
 !FB&     '|iat=',indsym2(4),'|',indsym2(5:7),'|iat=',indsym2(8),'|'
@@ -738,6 +772,7 @@ contains
   type(Symetries_type),intent(inout) :: Sym
 
   ABI_FREE(Sym%ptsymrel)
+  ABI_FREE(Sym%symrel)
   ABI_FREE(Sym%S_ref)
   ABI_FREE(Sym%S_inv)
   ABI_FREE(Sym%xred_zero)
