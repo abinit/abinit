@@ -21,13 +21,6 @@
 !! NOTES
 !! folds= Array of folds in X,Y, and Z directions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,ebands_free
-!!      getargs,newk,progress,prompt,sortc,wfk%close,wfk%read_band_block
-!!      wfk_open_read,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

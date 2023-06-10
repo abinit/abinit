@@ -39,7 +39,7 @@ CONTAINS
 !
 SUBROUTINE libtetrabz_occ(ltetra,bvec,nb,nge,eig,ngw,wght,comm) 
   !
-  USE ISO_C_BINDING
+  use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
   IMPLICIT NONE
   !
@@ -95,7 +95,7 @@ END SUBROUTINE libtetrabz_occ
 !
 SUBROUTINE libtetrabz_fermieng(ltetra,bvec,nb,nge,eig,ngw,wght,ef,nelec,comm) 
   !
-  USE ISO_C_BINDING
+  use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, &
   &                             libtetrabz_mpisum_d, libtetrabz_mpisum_dv
   IMPLICIT NONE

@@ -17,8 +17,8 @@
   kptopt2  3
     nqpt2  1
      qpt2  0.0d0 0.0d0 0.0d0
- rfatpol2  11 11
-   rfdir2  1 0 0
+ rfatpol   11 11
+   rfdir   1 0 0
   rfphon2  1
   toldfe2  1.0d-10
    nstep2  2

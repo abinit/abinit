@@ -269,7 +269,7 @@ The output data are:
 * The interatomic distance is 1.445 Bohr.
 * These are our final data for the local (spin) density approximation.
 
-Witou our choice of pseudopotential, the value of [[ixc]] was -1012, corresponding
+Without our choice of pseudopotential, the value of [[ixc]] was -1012, corresponding
 to the Perdew-Wang [[cite:Perdew1992a]] parameterization of the LDA XC functional.
 It is in principle the same as using [[ixc]] = 1.
 Other expressions for the local (spin) density approximation [[ixc]]=[2, 3 ... 7] are possible.
@@ -283,7 +283,7 @@ We will use the Perdew-Burke-Ernzerhof functional proposed in [[cite:Perdew1996]
 
 For GGA, we use another pseudopotential than for LDA.
 In principle we should redo the [[ecut]] convergence test, possibly coming to the conclusion
-that another value of [[ecut]] should be use.
+that another value of [[ecut]] should be used.
 However, for the special case of Hydrogen, and in general pseudopotentials
 with a very small core (including only the 1s orbital), pseudopotentials
 issued from the LDA and from the GGA are very similar.

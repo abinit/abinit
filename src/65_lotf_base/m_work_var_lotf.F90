@@ -58,12 +58,6 @@ contains
 !! INPUTS
 !!  natom=number of atoms
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine work_var_set()
@@ -100,12 +94,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine work_var_dealloc()
@@ -124,12 +112,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine cutoff_init()
@@ -180,12 +162,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine smallfit(tau0,ndum)

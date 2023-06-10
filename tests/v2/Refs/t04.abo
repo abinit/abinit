@@ -153,8 +153,11 @@ P          mk1mem           4
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+          rfatpol1          1       2
+          rfatpol2          1       2
+          rfatpol3          1       1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          0       0       1
            rfphon1          0
            rfphon2          0
@@ -775,7 +778,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.566344E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -845,8 +848,11 @@ P          mk1mem           4
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+          rfatpol1          1       2
+          rfatpol2          1       2
+          rfatpol3          1       1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          0       0       1
            rfphon1          0
            rfphon2          0

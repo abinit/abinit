@@ -1,7 +1,6 @@
 # Added by runtests.py
 output_file = "t34.abo"
 indata_prefix = "t34i"
-outdata_prefix = "t34o"
 tmpdata_prefix = "t34t"
 # end runtests.py section
 

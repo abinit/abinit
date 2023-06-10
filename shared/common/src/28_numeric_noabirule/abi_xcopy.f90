@@ -25,8 +25,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
   subroutine abi_zcopy(size,tsrc,incsrc,tdest,incdest)
@@ -61,8 +59,6 @@ end subroutine abi_zcopy
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_zcopy_1d(size,tsrc,incsrc,tdest,incdest)
@@ -86,8 +82,6 @@ end subroutine abi_zcopy_1d
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -131,8 +125,6 @@ end subroutine abi_dcopy
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_dcopy_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
@@ -158,8 +150,6 @@ end subroutine abi_dcopy_1d
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -188,8 +178,6 @@ end subroutine abi_dcopy_2d
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_dcopy_0d_1d(size,tsrc,incsrc,tdest,incdest,x_cplx)
@@ -215,8 +203,6 @@ end subroutine abi_dcopy_0d_1d
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine abi_dcopy_1d_0d(size,tsrc,incsrc,tdest,incdest,x_cplx)
@@ -241,8 +227,6 @@ end subroutine abi_dcopy_1d_0d
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -286,8 +270,6 @@ end subroutine abi_d2zcopy_2d
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

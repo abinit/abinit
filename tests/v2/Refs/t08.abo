@@ -107,9 +107,9 @@ P          mk1mem           2
         optdriver2          1
            prtpot1          0
            prtpot2          1
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          0       0       1
            rfphon1          0
            rfphon2          1
@@ -478,7 +478,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.657457E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -527,9 +527,9 @@ P          mk1mem           2
         optdriver2          1
            prtpot1          0
            prtpot2          1
-          rfatpol1          1       1
+          rfatpol1          1       2
           rfatpol2          2       2
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          0       0       1
            rfphon1          0
            rfphon2          1

@@ -20,14 +20,6 @@
 !!     Abinit header with info on the perturbation and the FFT mesh
 !!     potential on the FFT mesh
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,dvdb%free,dvdb%list_perts
-!!      dvdb%open_read,dvdb%print,dvdb%qdownsample,dvdb_merge_files
-!!      dvdb_test_ftinterp,dvdb_test_v1complete,dvdb_test_v1rsym
-!!      get_command_argument,herald,ngfft_seq,prompt,wrtout,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

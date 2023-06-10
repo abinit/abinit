@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -216,12 +212,6 @@ contains
 !!   We perform here the computation of
 !!     delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !!     see PRB 78, 035105 (2008), Eq. (42) [[cite:Audouze2008]]
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1957,12 +1947,6 @@ end subroutine dfpt_nstpaw
 !! TODO
 !!  XG 20141103 The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
@@ -2463,12 +2447,6 @@ end subroutine dfpt_nstwf
 !! OUTPUT
 !!  cwavef_d(2,npw1_k*nspinor)=first order wavefunction for a particular k point
 !!                             in the diagonal gauge
-!!
-!! PARENTS
-!!      m_dfpt_nstwf
-!!
-!! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 

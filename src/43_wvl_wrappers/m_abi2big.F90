@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -102,13 +98,6 @@ contains
 !! NOTES
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_newvtr,m_rhotov,m_setvtr,m_wvl_psi
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_vtrial_abi2big(opt,vtrial,wvl_den)
@@ -191,13 +180,6 @@ end subroutine wvl_vtrial_abi2big
 !! NOTES
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_mklocl,m_newrho,m_vtorho,m_wvl_rho
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_rho_abi2big(opt,rhor,wvl_den)
@@ -274,12 +256,6 @@ end subroutine wvl_rho_abi2big
 !!
 !! NOTES
 !! It uses the generic routine wvl_rhov_abi2big.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -361,13 +337,6 @@ end subroutine wvl_vhartr_abi2big
 !! NOTES
 !! It uses the generic routine wvl_rhov_abi2big.
 !!
-!! PARENTS
-!!      m_wvl_psi
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_vxc_abi2big(opt,vxc,wvl_den)
@@ -423,13 +392,6 @@ end subroutine wvl_vxc_abi2big
 !!
 !! SIDE EFFECTS
 !! occ is copied to wfs%ks%orbs%occup, or viceversa, depending on "opt" (see above).
-!!
-!! PARENTS
-!!      m_afterscfloop,m_gstate,m_vtorho,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -511,13 +473,6 @@ end subroutine wvl_occ_abi2big
 !! SIDE EFFECTS
 !! occ is copied to wfs%ks%orbs%occup, or viceversa, depending on "opt" (see above).
 !!
-!! PARENTS
-!!      m_afterscfloop,m_vtorho
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_eigen_abi2big(mband,nkpt,nsppol,eigen,opt,wvl_wfs)
@@ -597,13 +552,6 @@ end subroutine wvl_eigen_abi2big
 !! NOTES
 !! Several smearing schemes do not exists in both codes such
 !! as the SMEARING_DIST_ERF in BigDFT.
-!!
-!! PARENTS
-!!      m_vtorho,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -696,12 +644,6 @@ end subroutine wvl_occopt_abi2big
 !! SIDE EFFECTS
 !!  At output rhov_abi is copied to rhov_abinit, or viceversa
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_rhov_abi2big_2D_4D(opt,rhov_abi,rhov_big,shift)
@@ -757,12 +699,6 @@ end subroutine wvl_rhov_abi2big_2D_4D
 !! SIDE EFFECTS
 !!  At output rhov_abi is copied to rhov_abinit, or viceversa
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_rhov_abi2big_1D_4D(opt,rhov_abi,rhov_big,shift)
@@ -816,12 +752,6 @@ end subroutine wvl_rhov_abi2big_1D_4D
 !!
 !! SIDE EFFECTS
 !!  At output rhov_abi is copied to rhov_abinit, or viceversa
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -878,12 +808,6 @@ end subroutine wvl_rhov_abi2big_2D_2D
 !! SIDE EFFECTS
 !!  At output rhov_abi is copied to rhov_abinit, or viceversa
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_rhov_abi2big_1D_2D(opt,rhov_abi,rhov_big,shift)
@@ -938,12 +862,6 @@ end subroutine wvl_rhov_abi2big_1D_2D
 !! SIDE EFFECTS
 !!  At output rhov_abi is copied to rhov_abinit, or viceversa
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_rhov_abi2big_2D_1D(opt,rhov_abi,rhov_big,shift)
@@ -993,12 +911,6 @@ end subroutine wvl_rhov_abi2big_2D_1D
 !!
 !! SIDE EFFECTS
 !!  At output rhov_abi is copied to rhov_abinit, or viceversa
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1060,13 +972,6 @@ end subroutine wvl_rhov_abi2big_1D_1D
 !! the same in BigDFT and ABINIT.
 !! In ABINIT: index 1 is for the total spin (spin up + spin down) and index 2 is for spin up.
 !! In BigDFT: indices 1 and 2 are for spin up and down, respectively.
-!!
-!! PARENTS
-!!      m_abi2big
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 
@@ -1212,13 +1117,6 @@ end subroutine wvl_rhov_abi2big_gen
 !!            density and potentials scatterring is allocated and updated).
 !!  dtset <type(dataset_type)>=the FFT grid is changed.
 !!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_setngfft(me_wvl, mgfft, nfft, ngfft, nproc_wvl, n1i, n2i, n3i,n3d)
@@ -1314,13 +1212,6 @@ end subroutine wvl_setngfft
 !!  wvl <type(wvl_internal_type)>=internal variables used by wavelets, describing
 !!                             the box are set.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!
-!! PARENTS
-!!      m_gstate,m_memeval,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      mkrdim,nullify_locreg_descriptors,system_size,wrtout,xcart2xred
-!!      xred2xcart
 !!
 !! SOURCE
 

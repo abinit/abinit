@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -269,13 +265,6 @@ contains
 !!  === if psps%usepaw==1
 !!    pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
-!!
 !! SOURCE
 
 subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
@@ -433,7 +422,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
- real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:),vhartr1(:),vxc1(:,:)
+ real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:,:),vhartr1(:),vxc1(:,:)
  real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),allocatable :: vtrial1_pq(:,:),vtrial1_mq(:,:),rhorfermi_mq(:,:)
@@ -471,8 +460,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  me=mpi_enreg%me_kpt
  paral_atom=(my_natom/=dtset%natom)
  my_atmtab=>mpi_enreg%my_atmtab
-
- _IBM6("XLF in dfpt_scfcv")
 
 !Save some variables from dataset definition
  ecut=dtset%ecut
@@ -705,10 +692,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  if(allocated(vectornd)) then
    ABI_FREE(vectornd)
  end if
- ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
+ ABI_MALLOC(vectornd,(with_vectornd*nfftf,dtset%nspden,3))
  if(with_vectornd .EQ. 1) then
    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,&
-   & ngfftf,dtset%nucdipmom,rprimd,vectornd,xred)
+   & ngfftf,dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
  endif
 
  call timab(154,2,tsec)
@@ -1657,13 +1644,6 @@ end subroutine dfpt_scfcv
 !!      then updated (cannot simply be saved, because set to zero
 !!      at each new call of dfpt_scfcv).
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
-!!
 !! SOURCE
 
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
@@ -1799,13 +1779,6 @@ end subroutine dfpt_etot
 !!  fermie1=derivative of fermi energy wrt perturbation
 !!   at input  : old value
 !!   at output : updated value
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -1996,13 +1969,6 @@ end subroutine newfermie1
 !!    On-site occupancies (rhoij) are stored in (n,mx,my,mz)
 !!    This is compatible provided that the mixing factors for n and m are identical
 !!    and that the residual is not a combination of V_res and rhoij_res (pawoptmix=0).
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -2405,13 +2371,6 @@ end subroutine dfpt_newvtr
 !!       second order derivatives
 !!  d2lo(2,3,mpert,3,mpert)=local contributions to the 2DTEs
 !!  d2nl(2,3,mpert,3,mpert)=non-local contributions to the 2DTEs
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -2821,13 +2780,6 @@ end subroutine dfpt_nselt
 !!  d2nl_k(2,3,mpert)=non-local contributions to
 !!   non-stationary 2DTE, for the present k point, and perturbation idir, ipert
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
-!!
 !! SOURCE
 
 subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1,ikpt,isppol,&
@@ -3080,13 +3032,6 @@ end subroutine dfpt_nsteltwf
 !!
 !! NOTES
 !! Note that the ddk perturbation should not be treated here.
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -3655,13 +3600,6 @@ end subroutine dfpt_nstdy
 !! NOTES
 !!  This routine will NOT work with nspden==4:
 !!    at least the use of fftpac should be modified.
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -4331,13 +4269,6 @@ end subroutine dfpt_rhofermi
 !!  ==== if (gs_hamkq%usepaw==1) ====
 !!    pawrhoijfermi(natom) <type(pawrhoij_type)>= paw rhoij occupancies
 !!       at Fermi level (cumulative, so input as well as output)
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 

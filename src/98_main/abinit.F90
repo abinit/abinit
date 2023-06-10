@@ -60,21 +60,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,bigdft_init_errors
-!!      bigdft_init_timing_categories,chkinp,chkvars,clnmpi_atom,clnmpi_grid
-!!      clnmpi_img,clnmpi_pert,date_and_time,delete_file,destroy_mpi_enreg
-!!      destroy_results_out,driver,dtsets,dump_config,dump_cpp_options
-!!      dump_optim,f_lib_finalize,f_lib_initialize,f_timing_reset,flush_unit
-!!      gather_results_out,get_dtsets_pspheads,herald,init_results_out,iofn1
-!!      libpaw_spmsg_getcount,memory_eval,mpi_setup,nctk_test_mpiio,out_acknowl
-!!      outvars,outxml_finalise,outxml_open,print_kinds,setdevice_cuda
-!!      specialmsg_getcount,testfi,timab,timana,timein,unsetdevice_cuda,wrtout
-!!      wvl_timing,xmpi_init,xmpi_show_info,xmpi_sum,xomp_show_info,xpapi_init
-!!      xpapi_show_info,xpapi_shutdown
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -492,18 +477,14 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 18) Bibliographical recommendations
- if(me==0) then
-   if(test_exit)then
+ if (me == 0) then
+   if (test_exit) then
      write(msg,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
      call wrtout([std_out, ab_out], msg)
    else
-     do ii=1,2
-       if(ii==1)iounit=ab_out
-       if(ii==2)iounit=std_out
-       call out_acknowl(dtsets,iounit,ndtset_alloc,npsp,pspheads)
-     end do
+     call out_acknowl(dtsets, ab_out, ndtset_alloc, npsp, pspheads)
    end if
- end if ! me==0
+ end if
 
 !------------------------------------------------------------------------------
 

@@ -13,11 +13,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!   m_stream_string, m_pair_list
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -99,7 +94,7 @@ module m_yaml
      ! Add a list of real number fields to a document
 
    procedure :: add_paired_real2d => yamldoc_add_paired_real2d
-     !  Add a field containing two 2D array of real numbers with the same shape.
+     ! Add a field containing two 2D array of real numbers with the same shape.
 
    procedure :: add_int => yamldoc_add_int
      ! Add an integer field to a document
@@ -187,12 +182,6 @@ contains
 !!  val=value
 !!  [newline] = set to false to prevent adding newlines after fields
 !!
-!! PARENTS
-!!      m_driver,m_gstateimg,m_mover
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
@@ -254,10 +243,6 @@ end subroutine yaml_iterstart
 !!  [int_fmt]: Default format for integers.
 !!  [real_fmt]: Default format for real.
 !!  [with_iter_state]: True if dict with iteration state should be added. Default: True
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -329,11 +314,6 @@ end function yamldoc_open
 !!  [comment]: optional Yaml comment added after the value
 !!  [ignore]= If present, ignore entry if value is equal to ignore.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width, comment, ignore)
@@ -394,11 +374,6 @@ end subroutine yamldoc_add_real
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
 !!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
 !!  [ignore]= If present, ignore entries whose values is equal to ignore.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -478,11 +453,6 @@ end subroutine yamldoc_add_reals
 !!  [comment]: optional Yaml comment added after the value
 !!  [ignore]= If present, ignore entrie if values is equal to ignore.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width, comment, ignore)
@@ -543,11 +513,6 @@ end subroutine yamldoc_add_int
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
 !!  [multiline_trig] = minimum number of elements before switching to multiline representation
 !!  [ignore]= If present, ignore entrie if values is equal to ignore.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -624,11 +589,6 @@ end subroutine yamldoc_add_ints
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yamldoc_add_string(self, label, val, tag, newline, width)
@@ -656,7 +616,7 @@ subroutine yamldoc_add_string(self, label, val, tag, newline, width)
  end if
 
  call self%stream%push(' ')
- call yaml_print_string(self%stream, val)
+ call yaml_print_string(self%stream, trim(val))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_string
@@ -678,11 +638,6 @@ end subroutine yamldoc_add_string
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [comment]: optional Yaml comment added after the value
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -740,11 +695,6 @@ end subroutine yamldoc_add_real1d
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [comment]: optional Yaml comment added after the value
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -810,11 +760,6 @@ end subroutine yamldoc_add_int1d
 !! OUTPUT
 !!  pl <type(pair_list)>=
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yamldoc_add_dict(self, label, pl, tag, key_size, string_size, key_fmt, &
@@ -878,11 +823,6 @@ end subroutine yamldoc_add_dict
 !!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
 !!  [mode]: "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
 !!  [comment]: optional Yaml comment added after the key.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -975,11 +915,6 @@ end subroutine yamldoc_add_real2d
 !!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
 !!  [mode]: "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
 !!  [comment]: optional Yaml comment added after the key
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -1079,11 +1014,6 @@ end subroutine yamldoc_add_paired_real2d
 !!  [mode] = "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
 !!  [comment]: optional Yaml comment added after the key.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yamldoc_add_int2d(self, label, arr, slist, tag, int_fmt, multiline_trig, newline, width, mode, comment)
@@ -1173,11 +1103,6 @@ end subroutine yamldoc_add_int2d
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yamldoc_add_dictlist(self, label, n, plarr, tag, key_size, string_size, key_fmt, int_fmt, &
@@ -1236,15 +1161,10 @@ end subroutine yamldoc_add_dictlist
 !!
 !! INPUTS
 !!  label = key name
-!!  tag <character(len=*)>=optional  add a tag to the field
+!!  [tag] <character(len=*)>=optional add a tag to the field
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [indent] = optional number of spaces to add to the header
 !!  [comment]: optional Yaml comment added after the value
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -1297,11 +1217,6 @@ end subroutine yamldoc_open_tabular
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [indent] = optional number of spaces to add to the header
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yamldoc_add_tabular_line(self, line, newline, indent)
@@ -1339,10 +1254,6 @@ end subroutine yamldoc_add_tabular_line
 !!  tag <character(len=*)>=optional  add a tag to the field
 !!  newline <logical>=optional  set to false to prevent adding newlines after fields
 !!  indent <integer>=optional number of spaces to add to each line
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1399,11 +1310,6 @@ end subroutine yamldoc_add_tabular_line
 !!
 !! OUTPUT
 !!  pl <type(pair_list)>=
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -1489,11 +1395,6 @@ end subroutine yaml_single_dict
 !!  unit: Unit numver
 !!  [with_iter_state]: True if dict with iteration state should be added. Default: False
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
-!!
 !! SOURCE
 
 subroutine yaml_write_dict(tag, dict_name, dict, unit, with_iter_state)
@@ -1529,11 +1430,6 @@ end subroutine yaml_write_dict
 !!  [newline]= set to False to prevent adding newlines after fields. Default: True
 !!  [firstchar]= Add first char to each line. Useful if the Yaml document must be added after shell comments
 !!    with firstchar="#".
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -1578,11 +1474,6 @@ end subroutine yamldoc_write_unit_and_free
 !!
 !! INPUTS
 !!  [newline]= set to false to prevent adding newlines after fields. Default: True
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 
@@ -1634,11 +1525,6 @@ end subroutine yamldoc_write_units_and_free
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
 !!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      stream%push
 !!
 !! SOURCE
 

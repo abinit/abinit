@@ -134,11 +134,6 @@ CONTAINS  !=====================================================================
 !!    ==== if paw_ij1(:)%has_dijU<2, compute 1st-order Dij_U
 !!      paw_ij1(natom)%diju(cplex_a*lmn2_size)=DFT+U contribution to Dij^(j1)
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nzlmopt_a,nzlmopt_b,&
@@ -486,11 +481,6 @@ end subroutine pawdfptenergy
 !!   In the case of parallelisation over atoms and calculation of dynamical matrix (optgr2=1)
 !!   several data are gathered and no more distributed inside this routine.
 !!
-!! PARENTS
-!!      m_d2frnl,m_forstr,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,my_natom,natom,&
@@ -648,7 +638,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !  dimvtrial=nspden
    dimvtrial=1
    ABI_MALLOC(vtrial_,(nfft,dimvtrial))
-!$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
+!!!$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
    do ic=1,nfft
      vtrial_(ic,1:dimvtrial)=vtrial(ic,1:dimvtrial)-vxc(ic,1:dimvtrial)
    end do
@@ -841,6 +831,8 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
          lm_sizej=pawtab(jtypat)%lcut_size**2
          ABI_MALLOC(prod_nondiag(jatm)%value,(ngrad_nondiag,lm_sizej))
          ABI_MALLOC(prodp_nondiag(jatm)%value,(ngradp_nondiag,lm_sizej))
+         prod_nondiag(jatm)%value=zero
+         prodp_nondiag(jatm)%value=zero
        end do
      end if
 
@@ -1982,11 +1974,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !!  mu4(4) = input : array with index for the second derivative of gylm
 !!           output: the 4 indexes for the calculation of the second derivative of gylm
 !!
-!! PARENTS
-!!      m_paw_dfpt
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
@@ -2070,11 +2057,6 @@ end subroutine pawgrnl
 !! NOTES
 !! This routine assumes that the cprj are not explicitly ordered by
 !! atom type.
-!!
-!! PARENTS
-!!      m_berryphase_new
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

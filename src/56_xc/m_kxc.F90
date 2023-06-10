@@ -29,8 +29,6 @@
 !!   if (new_ixc<0) call libxc_functionals_end()
 !!   if (old_ixc<0) call libxc_functionals_init(old_ixc,nspden)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -100,13 +98,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!  krpa(npw) = the Hartree kernel.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 
@@ -190,13 +181,6 @@ end subroutine kxc_rpa
 !!
 !! OUTPUT
 !!  kxc(2,npwdiel,nspden,npwdiel,nspden) = the matrix of the xc kernel.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 
@@ -386,13 +370,6 @@ end subroutine kxc_local
 !! Current restrictions are:
 !!  a - Spin-polarized case not tested.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
-!!
 !! SOURCE
 
 subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocut,rprimd)
@@ -419,7 +396,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
  integer :: ifft,ikxc,isp,n3xccc,ncut,nk3xc,nkxc,optionrhoxc,tim_fourdp
  logical :: non_magnetic_xc
  real(dp),parameter :: gsqcut=1._dp
- real(dp) :: enxc,rhocuttot,rhomin,vxcavg
+ real(dp) :: el_temp,enxc,rhocuttot,rhomin,vxcavg
  character(len=500) :: message
  type(xcdata_type) :: xcdata
 !arrays
@@ -459,7 +436,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    call libxc_functionals_end()
  end if
  if (ixc<0) then
-   call libxc_functionals_init(ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+   call libxc_functionals_init(ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
 !to be adjusted for the call to rhotoxc
@@ -588,7 +566,8 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
-   call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+   call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
 !Free memory.
@@ -638,13 +617,6 @@ end subroutine kxc_alda
 !! exchange energy is recovered as the zero-G component of the resulting 'khxcg'
 !! (then not the kernel of course). This could help to check convergence
 !! with respect to 'npw'. See +ex_pgg comment.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
 !!
 !! SOURCE
 
@@ -859,13 +831,6 @@ end subroutine kxc_pgg
 !!
 !! WARNINGS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
-!!
 !! SOURCE
 
 subroutine kxc_eok(ixceok,kxcg,mpi_enreg,nfft,ngfft,nspden,rhor,rhocut)
@@ -1015,14 +980,6 @@ end subroutine kxc_eok
 !!  No xc quadrature
 !!  No nl core correction
 !!
-!! PARENTS
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
-!!
 !! SOURCE
 
 subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kxcg,gvec,comm,dbg_mode)
@@ -1043,7 +1000,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
  integer :: cplex,i1,i2,i3,ig,igp,iq,ir,n3xccc,ngfft1,ngfft2,izero
  integer :: ngfft3,nkxc,option,ikxc,nk3xc,my_rank,master,unt_dmp
  logical :: non_magnetic_xc
- real(dp) :: enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
+ real(dp) :: el_temp,enxc,expo,gpqx,gpqy,gpqz,gsqcut,vxcavg
  character(len=500) :: msg,fname
  type(xcdata_type) :: xcdata
  type(MPI_type) :: MPI_enreg_seq
@@ -1117,7 +1074,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_end()
  end if
  if (ixc<0) then
-   call libxc_functionals_init(ixc,Dtset%nspden,xc_tb09_c=Dtset%xc_tb09_c)
+   el_temp=merge(Dtset%tphysel,Dtset%tsmear,Dtset%tphysel>tol8.and.Dtset%occopt/=3.and.Dtset%occopt/=9)
+   call libxc_functionals_init(ixc,Dtset%nspden,el_temp=el_temp,xc_tb09_c=Dtset%xc_tb09_c)
  end if
 
  call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft_tot,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
@@ -1228,7 +1186,8 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
-   call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+   call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
  call destroy_mpi_enreg(MPI_enreg_seq)
@@ -1268,14 +1227,6 @@ end subroutine kxc_driver
 !!  No xc quadrature
 !!  No nl core correction
 !!
-!! PARENTS
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      destroy_mpi_enreg,fourdp,fourdp_6d,hartre,initmpi_seq
-!!      libxc_functionals_end,libxc_functionals_init,printxsf,rhotoxc,wrtout
-!!      xcdata_init
-!!
 !! SOURCE
 
 subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
@@ -1301,7 +1252,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
  integer :: ngfft3,nkxc,option,ikxc,ierr,nproc
  integer :: nk3xc,igrid,iqbz,my_rank,master,unt_dmp,gmgp_idx
  logical :: non_magnetic_xc
- real(dp) :: enxc,gsqcut,ucvol !,rs,Kx,Kc
+ real(dp) :: el_temp,enxc,gsqcut,ucvol !,rs,Kx,Kc
  real(dp) :: vxcavg,kappa,abs_qpg_sq,abs_qpgp_sq
  real(dp) :: difx,dify,difz,inv_kappa_sq
  character(len=500) :: msg,fname
@@ -1435,7 +1386,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_end()
  end if
  if (ixc<0) then
-   call libxc_functionals_init(ixc,Dtset%nspden,xc_tb09_c=Dtset%xc_tb09_c)
+   el_temp=merge(Dtset%tphysel,Dtset%tsmear,Dtset%tphysel>tol8.and.Dtset%occopt/=3.and.Dtset%occopt/=9)
+   call libxc_functionals_init(ixc,Dtset%nspden,el_temp=el_temp,xc_tb09_c=Dtset%xc_tb09_c)
  end if
 
  call hartre(1,gsqcut,3,izero,MPI_enreg_seq,nfft,ngfft,1,zero,rhog,Cryst%rprimd,dummyvgeo,vhartr)
@@ -1685,7 +1637,8 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
-   call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+   el_temp=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+   call libxc_functionals_init(dtset%ixc,dtset%nspden,el_temp=el_temp,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
  call destroy_mpi_enreg(MPI_enreg_seq)

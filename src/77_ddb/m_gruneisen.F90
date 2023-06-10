@@ -116,10 +116,6 @@ contains  !===========================================================
 !!  inp<anaddb_dataset_type>=Anaddb dataset with input variables
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
@@ -131,12 +127,11 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  character(len=*),intent(in) :: ddb_filepaths(:)
 
 !Local variables-------------------------------
- integer,parameter :: natifc0=0,master=0
+ integer,parameter :: master=0
  integer :: ivol,iblock,natom,ddbun, nprocs,my_rank,ierr
  character(len=500) :: msg
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
- integer,allocatable :: atifc0(:)
  real(dp) :: dielt(3,3)
  real(dp),allocatable :: zeff(:,:,:), qdrp_cart(:,:,:,:)
 
@@ -154,17 +149,12 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  ddbun = get_unit()
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr, ddb_filepaths(ivol), ddbun, DDB_VERSION, dimonly=1)
-   natom = ddb_hdr%natom
 
-   call ddb_hdr%free()
-
-   ABI_MALLOC(atifc0, (natom))
-   atifc0 = 0
-   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, &
+   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), inp%brav, &
                       ddb_hdr, new%cryst_vol(ivol), comm)
+   natom = ddb_hdr%natom
    call ddb_hdr%free()
-   ABI_FREE(atifc0)
+
    if (my_rank == master) then
      call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
    end if
@@ -181,7 +171,7 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
      call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
    end if
 
-   call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
+   call new%ifc_vol(ivol)%init(new%cryst_vol(ivol), new%ddb_vol(ivol),&
      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
      qdrp_cart,inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
    ABI_FREE(zeff)
@@ -242,13 +232,6 @@ end function gruns_new
 !!     gamma(q,nu) = - (V / 2 w(q,nu)**2) <u(q,nu)|dD(q)/dV|u(q,nu)>
 !!
 !!  The derivative dD/dV is computed via central finite difference.
-!!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
 !!
 !! SOURCE
 
@@ -335,13 +318,6 @@ end subroutine gruns_fourq
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
 !!
 !! SOURCE
 
@@ -466,13 +442,6 @@ end subroutine gruns_qpath
 !!  comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
 !!
 !! SOURCE
 
@@ -688,13 +657,6 @@ end subroutine gruns_qmesh
 !! FUNCTION
 !!  Free dynamic memory.
 !!
-!! PARENTS
-!!      m_gruneisen
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
-!!
 !! SOURCE
 
 subroutine gruns_free(gruns)
@@ -749,13 +711,6 @@ end subroutine gruns_free
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      cwtime,cwtime_report,gruns%ifc_vol,gruns_free,gruns_qmesh,gruns_qpath
-!!      qpath%free
 !!
 !! SOURCE
 

@@ -63,12 +63,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_pred_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
-!!
 !! SOURCE
 
  subroutine init_lotf(itime,natom,acell,rprimd,xcart)
@@ -202,11 +196,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
-!!
 !! SOURCE
 
  subroutine end_LOTF()
@@ -241,12 +230,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_pred_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
 !! SOURCE
 
@@ -810,12 +793,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
-!!
 !! SOURCE
 
  subroutine  upd_lis(tau0,niter,alpha_dum)
@@ -929,12 +906,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
 !! SOURCE
 
@@ -1061,12 +1032,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_pred_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
-!!
 !! SOURCE
 
  subroutine intparms(itime)
@@ -1107,12 +1072,6 @@ contains
 !!  dphi=parameter to reinatialise bond parameters
 !!  jbo= index array for reordering
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
-!!
  !! SOURCE
  subroutine alpha_update(dphi,jbo,alpha_dum)
   use bond_lotf,only : ibn_tot
@@ -1151,8 +1110,6 @@ contains
 !! FUNCTION
 !!  return true if mod(itime,nitex) == 0
 !! INPUTS
-!! CHILDREN
-!!
 !! SOURCE
 
  function lotf_extrapolation(itime)
@@ -1193,12 +1150,6 @@ contains
 !!
 !! OUTPUTS
 !!  vel_out(3,natom)=new velocity of ions
-!!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
 !! SOURCE
 
@@ -1257,12 +1208,6 @@ contains
 !!  v2gauss=2*kinetic energy
 !!  vtest=pick velocity
 !!
-!! PARENTS
-!!      m_lotf,m_pred_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
-!!
 !! SOURCE
 
  subroutine vel_to_gauss(vel_in,amass,v2gauss,vtest)
@@ -1320,12 +1265,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  vel(3,natom)=velocity of ions
-!!
-!! PARENTS
-!!      m_lotf,m_pred_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
 !! SOURCE
 
@@ -1399,12 +1338,6 @@ contains
 !!  xcart_next(3,natom)=positions of the ions final step
 !!  the following variable are used as work variables:
 !!  vel_nexthalf(3,natom)=velocity of ions in next half step
-!!
-!! PARENTS
-!!      m_pred_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
 !! SOURCE
 
@@ -1497,12 +1430,6 @@ contains
 !!  v2gauss=gauss factor (twice the kinetic energy) (initial and final)
 !!  vel(3,natom)=velocity of ions
 !!  fcart_m(3,natom)=forces on ions in
-!!
-!! PARENTS
-!!      m_pred_lotf
-!!
-!! CHILDREN
-!!      force0,force_to_vel,vel_to_gauss,wrtout
 !!
 !! SOURCE
 

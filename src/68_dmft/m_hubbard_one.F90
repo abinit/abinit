@@ -16,10 +16,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -69,12 +65,6 @@ contains
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      combin,destroy_green,init_green,wrtout
 !!
 !! SOURCE
 
@@ -392,12 +382,6 @@ contains
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hubbard_one
-!!
-!! CHILDREN
-!!      combin,destroy_green,init_green,wrtout
 !!
 !! SOURCE
 
@@ -796,10 +780,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

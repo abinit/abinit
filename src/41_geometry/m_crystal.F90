@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -31,17 +27,18 @@ MODULE m_crystal
  use m_atomdata
  use m_xmpi
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
+ use m_hide_lapack,    only : matrginv
  use m_fstrings,       only : int2char10, sjoin, yesno, itoa, strcat
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
- use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart
+ use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart, normv
  use m_io_tools,       only : open_file
 
  implicit none
@@ -167,7 +164,6 @@ MODULE m_crystal
   ! spinrot(4,nsym)
   ! spinor rotation matrices.
 
-  ! Useful quantities that might be added in the future
   real(dp),allocatable :: amu(:)
   !  amu(ntypat)
   !  mass of the atoms (atomic mass unit)
@@ -242,6 +238,9 @@ MODULE m_crystal
    procedure :: symmetrize_cart_tens33 => crystal_symmetrize_cart_tens33
    ! Symmetrize a cartesian 3x3 tensor
 
+   procedure :: get_redcart_qdirs => get_redcart_qdirs
+   ! Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
+
  end type crystal_t
 
  public :: crystal_init            ! Main Creation method.
@@ -295,20 +294,11 @@ CONTAINS  !=====================================================================
 !!  5) constraints for the relaxation
 !!  6) Likely I will need also info on the electric field and berryopt
 !!
-!! PARENTS
-!!      m_crystal,m_ddb,m_dfpt_looppert,m_effective_potential
-!!      m_effective_potential_file,m_eig2d,m_gwls_hamiltonian,m_hdr,m_outscfcv
-!!      m_precpred_1geo,m_respfn_driver,m_tdep_abitypes,m_unittests,m_vtorho
-!!      optic
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-   zion,znucl,timrev,use_antiferro,remove_inv,title,&
-   symrel,tnons,symafm) ! Optional
+                        zion,znucl,timrev,use_antiferro,remove_inv,title,&
+                        symrel,tnons,symafm) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -456,7 +446,7 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
  tolsym8=tol8
  call symatm(cryst%indsym, natom, Cryst%nsym, Cryst%symrec, Cryst%tnons, tolsym8, Cryst%typat, Cryst%xred)
 
- ! Find list of irreducible atoms by using the indsym
+! Find list of irreducible atoms by using the indsym
  cryst%nirredat = 0
  irredat_tmp = .TRUE.
  do iat = 1,natom
@@ -464,21 +454,21 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
       cryst%nirredat = cryst%nirredat + 1
       do isym = 1,nsym
          if (cryst%indsym(4,isym,iat) /= iat)then
-            if (all(cryst%indsym(:3,isym,iat) == (/0,0,0/)))then
+            !if (all(cryst%indsym(:3,isym,iat) == (/0,0,0/)))then  !Subhadeep!
                irredat_tmp(cryst%indsym(4,isym,iat)) = .FALSE.
-            endif
+            !endif   !Subhadeep
          endif
       enddo
    endif
  enddo
 
- !Write indexes of irreducible atoms
+ ! Write indexes of irreducible atoms
  ABI_MALLOC(cryst%irredatindx,(cryst%nirredat))
  indx = 0
  do iat = 1,natom
-    if(irredat_tmp(iat))then
-        indx = indx + 1
-        cryst%irredatindx(indx) = iat
+    if (irredat_tmp(iat)) then
+      indx = indx + 1
+      cryst%irredatindx(indx) = iat
     endif
  enddo
 
@@ -501,10 +491,6 @@ end subroutine crystal_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -533,11 +519,6 @@ end function crystal_without_symmetries
 !!
 !! FUNCTION
 !!  Destroy the dynamic arrays in a crystal_t data type.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -589,10 +570,6 @@ end subroutine crystal_free
 !!  [header]=Optional header message.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -667,7 +644,7 @@ integer function crystal_compare(self, other, header) result(ierr)
  return
 
  ! Print structure to aid debugging. Caller will handle exit status.
-10 call wrtout(std_out, "Comparing crystal1 and crystal2 for possible differences before returning ierr /= 0!")
+10 call wrtout(std_out, " Comparing crystal1 and crystal2 for possible differences before returning ierr /= 0!")
    call self%print(header="crystal1")
    call wrtout(std_out, "")
    call other%print(header="crystal2")
@@ -694,11 +671,6 @@ end function crystal_compare
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -745,7 +717,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
  else if (Cryst%timrev==2) then
    msg = ' Time-reversal symmetry is present '
  else
-   ABI_BUG('Wrong value for timrev')
+   ABI_BUG(sjoin('Wrong value for timrev:', itoa(cryst%timrev)))
  end if
  call wrtout(my_unt,msg,my_mode)
  if (my_prtvol == -1) return
@@ -792,11 +764,6 @@ end subroutine crystal_print
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -866,13 +833,6 @@ end subroutine crystal_print_abivars
 !! OUTPUT
 !! symbols = array with the symbol of each atoms
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_fit_polynomial_coeff,m_opt_effpot
-!!      m_polynomial_coeff
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
@@ -927,10 +887,6 @@ end subroutine symbols_crystal
 !! FUNCTION
 !!  Return the index of the spatial inversion, 0 if not present
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function idx_spatial_inversion(Cryst) result(inv_idx)
@@ -965,10 +921,6 @@ end function idx_spatial_inversion
 !! FUNCTION
 !!  Returns .TRUE. if space group is symmorphic, i.e. all fractional translations are zero.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function isymmorphic(Cryst) result(ans)
@@ -994,10 +946,6 @@ end function isymmorphic
 !! FUNCTION
 !!  Returns .TRUE. if we are using alchemical pseudopotentials
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure logical function isalchemical(Cryst) result(ans)
@@ -1020,8 +968,6 @@ end function isalchemical
 !!
 !! FUNCTION
 !!  Return atomic data from the itypat index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1047,8 +993,6 @@ end function adata_type
 !!
 !! FUNCTION
 !!  Return the atomic symbol from the itypat index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1080,8 +1024,6 @@ end function symbol_type
 !!
 !! FUNCTION
 !!  Return the atomic symbol from the iatom index
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1118,11 +1060,6 @@ end function symbol_iatom
 !!  ptg_symrel(3,3,ptg_nsym)=Rotations in real space
 !!  ptg_symrec(3,3,ptg_nsym)=Rotations in reciprocal space
 !!  has_inversion=True if spatial inversion is present in the point group.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1220,13 +1157,6 @@ end subroutine crystal_point_group
 !!
 !! NOTES
 !!  Alchemy not treated, since crystal should be initialized at the beginning of the run.
-!!
-!! PARENTS
-!!      anaddb,eig2tot,exc_spectra,dfpt_looppert,m_haydock,m_phonons,m_shirley
-!!      outscfcv,sigma
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1363,10 +1293,6 @@ end function crystal_ncwrite
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function crystal_ncwrite_path(crystal, path) result(ncerr)
@@ -1410,12 +1336,6 @@ end function crystal_ncwrite_path
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1550,12 +1470,6 @@ end subroutine prt_cif
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_crystal
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
-!!
 !! SOURCE
 
 subroutine symrel2string(symrel1, tnon, string)
@@ -1628,12 +1542,6 @@ end subroutine symrel2string
 !!
 !! OUTPUTS
 !!   Only files written
-!!
-!! PARENTS
-!!      m_afterscfloop
-!!
-!! CHILDREN
-!!      atomdata_from_znucl
 !!
 !! SOURCE
 
@@ -1749,12 +1657,8 @@ end subroutine prtposcar
 !!
 !! INPUTS
 !!  v(3)=Vector in Cartesian coordinates.
-!!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
+!!  time_opt=Prefactor that defines how the vectors transforms under TR. Usually +1 or -1
 !!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1804,10 +1708,6 @@ end function crystal_symmetrize_cart_vec3
 !!  time_opt=Prefacator that defines how the vectors transforms under TR. Usually +1 or -1
 !!      Note that TR is used only if cryst%timrev == 2. time_opt = 0 disables TR for testing purposes.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function crystal_symmetrize_cart_tens33(cryst, t, time_opt) result(tsum)
@@ -1841,6 +1741,57 @@ function crystal_symmetrize_cart_tens33(cryst, t, time_opt) result(tsum)
  tsum = tsum / nsym_sum
 
 end function crystal_symmetrize_cart_tens33
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/get_recart_qdirs
+!! NAME
+!!  get_recart_qdirs
+!!
+!! FUNCTION
+!!  Return predefined list of 6 q-versors in reciprocal space reduced coordinates.
+!!  First 3 entries are along the recip. space lattice vectors, then along the Cartesian axis x,y,z.
+!!  The optional qlen argument, can be used to rescale the vectors. Default: 1
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine get_redcart_qdirs(cryst, nq, qdirs, qlen)
+
+ class(crystal_t),intent(in) :: cryst
+ integer,intent(out) :: nq
+ real(dp),allocatable,intent(out) :: qdirs(:,:)
+ real(dp),optional,intent(in) :: qlen
+
+!Local variables-------------------------------
+ integer :: iq
+ real(dp) :: qred2cart(3,3), qcart2red(3,3)
+
+! *************************************************************************
+
+ qred2cart = two_pi * cryst%gprimd
+ qcart2red = qred2cart
+ call matrginv(qcart2red, 3, 3)
+
+ nq = 6
+ ABI_MALLOC(qdirs, (3, nq))
+ qdirs(:,1) = [one, zero, zero]  ! (100)
+ qdirs(:,2) = [zero, one, zero]  ! (010)
+ qdirs(:,3) = [zero, zero, one]  ! (001)
+ qdirs(:,4) = matmul(qcart2red, [one, zero, zero]) ! (x)
+ qdirs(:,5) = matmul(qcart2red, [zero, one, zero]) ! (y)
+ qdirs(:,6) = matmul(qcart2red, [zero, zero, one]) ! (z)
+
+ ! normalization
+ do iq=1,nq
+   qdirs(:,iq) = qdirs(:,iq) / normv(qdirs(:,iq), cryst%gmet, "G")
+ end do
+
+ if (present(qlen)) qdirs = qlen * qdirs
+
+end subroutine get_redcart_qdirs
 !!***
 
 END MODULE m_crystal

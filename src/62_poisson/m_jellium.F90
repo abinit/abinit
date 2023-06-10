@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -73,12 +69,6 @@ contains
 !! SIDE EFFECTS
 !!  (if option==2) rhog(2,nfft), rhor(nfft,nspden)=reciprocal, real space
 !!   updated initial electronic density
-!!
-!! PARENTS
-!!      m_extraprho,m_gstate,m_setvtr
-!!
-!! CHILDREN
-!!      fourdp
 !!
 !! SOURCE
 

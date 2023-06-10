@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -148,12 +144,6 @@ contains
 !! This routine is not yet memory optimized
 !! It might be also rather time-consuming, since there is a
 !! double loop on the number of plane waves.
-!!
-!! PARENTS
-!!      m_elpolariz
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,matr3inv,wrtout,xred2xcart
 !!
 !! SOURCE
 

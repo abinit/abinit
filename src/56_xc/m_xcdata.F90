@@ -14,10 +14,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -139,13 +135,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_dft_energy,m_forstr,m_kxc,m_longwave,m_nonlinear,m_odamix,m_prcref
-!!      m_respfn_driver,m_rhotov,m_scfcv_core,m_setvtr,m_vhxc_me,m_xchybrid
-!!
-!! CHILDREN
-!!      get_xclevel
-!!
 !! SOURCE
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&
@@ -173,7 +162,8 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
    xcdata%hyb_mixing=abs(dtset%hyb_mixing) ! Warning : the absolute value is needed, because of the singular way
                                            ! to define the default values for this input variable.
    xcdata%nelect=dtset%nelect
-   xcdata%tphysel=dtset%tphysel
+   xcdata%tphysel=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
    xcdata%xc_denpos=dtset%xc_denpos
 
  else
@@ -226,12 +216,6 @@ end subroutine xcdata_init
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_invars2,m_sigma_driver,m_xcdata
-!!
-!! CHILDREN
-!!      get_xclevel
-!!
 !! SOURCE
 
 subroutine get_xclevel(ixc,xclevel,usefock)
@@ -279,7 +263,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
            ABI_ERROR(message)
          end if
        end if
-     end if 
+     end if
    end do
  end if
 
@@ -308,12 +292,6 @@ end subroutine get_xclevel
 !!  auxc_ixc= 0 if no need of an auxiliary functional, otherwise, returns the ixc of an auxiliary functional.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_invars2,m_vhxc_me
-!!
-!! CHILDREN
-!!      get_xclevel
 !!
 !! SOURCE
 

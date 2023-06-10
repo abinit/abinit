@@ -46,13 +46,6 @@
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      convert_coortogen,convert_gentocoor,initialize_perm,metric,mkradim
-!!      mkrdim,randomize_parent,sort_dp,swap,symanal,symfind,symlatt
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H

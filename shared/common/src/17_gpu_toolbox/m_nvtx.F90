@@ -17,25 +17,25 @@
 !! SOURCE
 module m_nvtx
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   implicit none
 
   integer,private,parameter :: nbcol=14
-  integer,private :: col(nbcol) = [ &
-       & Z'0000ff00', & ! GREEN
-       & Z'000000ff', & ! BLUE
-       & Z'00ffff00', & ! YELLOW
-       & Z'00ff00ff', & ! PURPLE
-       & Z'0000ffff', & ! CYAN
-       & Z'00ff0000', & ! READ
-       & Z'00ff8000', & ! ORANGE
-       & Z'000080ff', & ! LIGHT BLUE
-       & Z'00ff80ff', & ! PINK
-       & Z'0080ff80', & ! LIGHT GREEN
-       & Z'00b832ff', &
-       & Z'00f9fa7d', & ! LIGHT YELLOW
-       & Z'00f96c56', &
-       & Z'0094b5dc' ]
+  integer(kind=C_INT32_T),private :: col(nbcol) = [ &
+       & int(Z'0000ff00',kind=C_INT32_T), & ! GREEN
+       & int(Z'000000ff',kind=C_INT32_T), & ! BLUE
+       & int(Z'00ffff00',kind=C_INT32_T), & ! YELLOW
+       & int(Z'00ff00ff',kind=C_INT32_T), & ! PURPLE
+       & int(Z'0000ffff',kind=C_INT32_T), & ! CYAN
+       & int(Z'00ff0000',kind=C_INT32_T), & ! READ
+       & int(Z'00ff8000',kind=C_INT32_T), & ! ORANGE
+       & int(Z'000080ff',kind=C_INT32_T), & ! LIGHT BLUE
+       & int(Z'00ff80ff',kind=C_INT32_T), & ! PINK
+       & int(Z'0080ff80',kind=C_INT32_T), & ! LIGHT GREEN
+       & int(Z'00b832ff',kind=C_INT32_T), &
+       & int(Z'00f9fa7d',kind=C_INT32_T), & ! LIGHT YELLOW
+       & int(Z'00f96c56',kind=C_INT32_T), &
+       & int(Z'0094b5dc',kind=C_INT32_T) ]
   character,private,target :: tempName(256)
 
   type, bind(C):: nvtxEventAttributes
@@ -54,13 +54,13 @@ module m_nvtx
   interface nvtxRangePush
      ! push range with custom label and standard color
      subroutine nvtxRangePushA(name) bind(C, name='nvtxRangePushA')
-       use iso_c_binding
+       use, intrinsic :: iso_c_binding
        character(kind=C_CHAR) :: name(256)
      end subroutine nvtxRangePushA
 
      ! push range with custom label and custom color
      subroutine nvtxRangePushEx(event) bind(C, name='nvtxRangePushEx')
-       use iso_c_binding
+       use, intrinsic :: iso_c_binding
        import:: nvtxEventAttributes
        type(nvtxEventAttributes):: event
      end subroutine nvtxRangePushEx
@@ -74,6 +74,9 @@ module m_nvtx
 contains
 
   subroutine nvtxStartRange(name,id)
+
+    implicit none
+
     character(kind=c_char,len=*) :: name
     integer, optional:: id
     type(nvtxEventAttributes):: event

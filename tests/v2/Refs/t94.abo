@@ -273,7 +273,7 @@ P          mk1mem2         64
            prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     5.00000000E-01  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
            rfphon1          0
            rfphon2          1
@@ -649,7 +649,7 @@ tolerances: {tolvrs: 1.00E-11, }
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  2.266589E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -864,7 +864,7 @@ P          mk1mem2         64
            prtpot2          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     5.00000000E-01  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
            rfphon1          0
            rfphon2          1

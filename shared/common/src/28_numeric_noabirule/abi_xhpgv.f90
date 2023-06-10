@@ -28,8 +28,6 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
   subroutine abi_dhpgv(itype,jobz,uplo,n,a,b,w,z,ldz,istwf_k,use_slk)
@@ -70,10 +68,9 @@
  if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
 #if defined HAVE_LINALG_SCALAPACK
    z = zero
-   ! MG: Tbloc is not used here
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
-   call init_matrix_scalapack(sca_b,n,n,slk_processor,istwf_k_, tbloc=10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
+   call sca_a%init(n,n,slk_processor,istwf_k_)
+   call sca_b%init(n,n,slk_processor,istwf_k_)
+   call sca_ev%init(n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
    call matrix_from_global_sym(sca_b,b,istwf_k_)
@@ -128,8 +125,6 @@ end subroutine abi_dhpgv
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !!
@@ -187,8 +182,6 @@ end subroutine abi_chpgv
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

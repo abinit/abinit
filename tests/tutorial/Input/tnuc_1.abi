@@ -5,7 +5,7 @@
 # not appropriate for this calculation.
 
 # here are the two variables needed to trigger computation of the field gradient
-prtefg 2 # PRinT the EFG, value of 2 means to also print its components
+nucefg 2 # NUClear properties EFG, value of 2 means to also print its components
 quadmom 0.0 -0.02558 # quadrupole moments of the nuclei (Si-29, O-17 here)
                      # so that couplings as measured in NMR or NQR are also
                      # reported, in MHz frequency units

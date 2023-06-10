@@ -14,10 +14,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -111,12 +107,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUTS
 !!  hu <type(hu_type)>= U interaction
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -317,12 +307,6 @@ end subroutine init_hu
 !! OUTPUTS
 !!  hu_new <type(hu_type)>= U interaction
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine copy_hu(ntypat,hu,hu_new)
@@ -372,12 +356,6 @@ end subroutine copy_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -431,12 +409,6 @@ end subroutine destroy_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -505,11 +477,6 @@ end subroutine print_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -594,12 +561,6 @@ end subroutine vee2udens_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1080,12 +1041,6 @@ end subroutine rotatevee_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
@@ -1432,12 +1387,6 @@ end subroutine printvee_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine vee2udensatom_hu(ndim,nspinor,udens_atoms,veetemp,basis,prtonly)
@@ -1528,10 +1477,6 @@ end subroutine vee2udensatom_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function reddd(mi,ndim)
@@ -1579,12 +1524,6 @@ end function reddd
 !!  mat_inp_c= Output matrix in Ylm or Slm basis according to option
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1731,12 +1670,6 @@ end subroutine vee_slm2ylm_hu
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine vee_ndim2tndim_hu_r(lcor,mat_inp_c,mat_out_c,option)
@@ -1814,12 +1747,6 @@ end subroutine vee_ndim2tndim_hu_r
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine vee_ndim2tndim_hu(lcor,mat_inp_c,mat_out_c,option)
@@ -1895,12 +1822,6 @@ end subroutine vee_ndim2tndim_hu
 !!
 !! NOTES
 !!  usefull only in ndij==4
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2054,12 +1975,6 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2329,12 +2244,6 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

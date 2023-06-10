@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -96,11 +92,11 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  fixed_occ=true if electronic occupations are fixed (occopt<3)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
-!!  icg=shift to be applied on the location of data in the array cprj
+!!  ibg=shift to be applied on the location of data in the array cprj
 !!  icg=shift to be applied on the location of data in the array cg
 !!  ikpt=number of the k-point
 !!  iscf=(<= 0  =>non-SCF), >0 => SCF
-!!  isppol isppol=1 for unpolarized, 2 for spin-polarized
+!!  isppol= 1 for unpolarized, 2 for spin-polarized
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kinpw(npw_k)=(modified) kinetic energy for each plane wave (Hartree)
 !!  mcg=second dimension of the cg array
@@ -156,17 +152,6 @@ contains
 !!                    (cumulative, so input as well as output). Update only
 !!                    for occopt<3 (fixed occupation numbers)
 !!  rmm_diis_status: Status of the RMM-DIIS eigensolver. See m_rmm_diis.
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      build_h,cg_hprotate_and_get_diag,cg_hrotate_and_get_diag,cgtk_fixphase
-!!      cgwf,cgwf_cprj,chebfi,cprj_rotate,cprj_update,cprj_update_oneband
-!!      cwtime,fourwf,getghc_nucdip,lobpcgwf,lobpcgwf2,meanvalue_g,mksubovl
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
-!!      prep_nonlop,pw_orthon,pw_orthon_cprj,rmm_diis,subdiago
-!!      subdiago_low_memory,timab,wrtout,xmpi_sum
 !!
 !! NOTES
 !!  The cprj are distributed over band and spinors processors.
@@ -558,7 +543,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
    ABI_NVTX_END_RANGE()
 
-!  Print energies
+   !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
      do ii=0,(nband_k-1)/8
        write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
@@ -737,17 +722,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0)
 
      ek_k(iband)=ar
-
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
-       ABI_MALLOC(ghc_vectornd,(2,npw_k))
-       call getghc_nucdip(cwavef,ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
-&        gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
-&        gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
-       end_k(iband)=DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
-         & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
+       ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor))
+       call getghc_nucdip(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         & ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
+         & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
+         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
+       end_k(iband)=DOT_PRODUCT(cg(1,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         &                      ghc_vectornd(1,1:npw_k*my_nspinor))+&
+         &          DOT_PRODUCT(cg(2,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         &                      ghc_vectornd(2,1:npw_k*my_nspinor))
        ABI_FREE(ghc_vectornd)
      end if
-
      if(paw_dmft%use_dmft==1) then
        do iband1=1,nband_k
          call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&

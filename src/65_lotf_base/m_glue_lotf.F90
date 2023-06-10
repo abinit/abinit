@@ -15,10 +15,6 @@
 !!  Parameters for the glue potential
 !!  ref: Ercolessi et al, Phil Mag A 58(1), 213 (1988)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -80,11 +76,6 @@ contains !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine glue_init()
@@ -177,11 +168,6 @@ contains !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_eval_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine glue_pair_devs(alpha_dum,RD,r_au,epot_2,fdum,dfdum)
@@ -257,11 +243,6 @@ contains !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_eval_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine glue_pair(RD,r_au,epot_2,fdum)
@@ -318,11 +299,6 @@ contains !===========================================================
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_eval_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine calc_coord(r_au,coordatom_dum)
@@ -365,11 +341,6 @@ contains !===========================================================
 !! INPUTS
 !!
 !!
-!! PARENTS
-!!      m_eval_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
      subroutine calc_rhop(r_st,rhop_dum)
@@ -409,11 +380,6 @@ contains !===========================================================
 !!
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_eval_lotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -457,11 +423,6 @@ contains !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_eval_lotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -512,11 +473,6 @@ contains !===========================================================
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_eval_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine rhop_value(rst,alpha_d,rhop_dum)
@@ -555,11 +511,6 @@ contains !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine eval_U_n(coordatom_i,epot_dum2,up_dum)
@@ -626,11 +577,6 @@ contains !===========================================================
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine eval_Upp_n(coordatom_i,up_dum,upp_dum)

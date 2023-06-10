@@ -531,16 +531,27 @@ P          mk1mem11         1
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+          rfatpol1          1       1
+          rfatpol2          1       1			
+          rfatpol3          1       1			
+          rfatpol4          1       1			
+          rfatpol5          1       1			
+          rfatpol6          1       2			
+          rfatpol7          1       2			
+          rfatpol8          1       1			
+          rfatpol9          1       2			
+          rfatpol10         1       2			
+          rfatpol11         1       1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
-            rfdir10         0       0       0
+            rfdir9          1       1       1
+            rfdir10         1       1       1
             rfdir11         1       0       0
            rfphon1          0
            rfphon2          0
@@ -1385,7 +1396,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 - -5.514783E+02  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1887,7 +1898,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 -  0.000000E+00  0.000000E+00  6.362153E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  9 ==================================================================
@@ -2461,7 +2472,7 @@ tolerances: {toldfe: 2.00E-12, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  4.501024E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2798,16 +2809,27 @@ P          mk1mem11         1
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+          rfatpol1          1       1
+          rfatpol2          1       1                
+          rfatpol3          1       1                
+          rfatpol4          1       1                
+          rfatpol5          1       1                
+          rfatpol6          1       2                
+          rfatpol7          1       2                
+          rfatpol8          1       1                
+          rfatpol9          1       2                
+          rfatpol10         1       2                
+          rfatpol11         1       1  
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
-            rfdir10         0       0       0
+            rfdir9          1       1       1
+            rfdir10         1       1       1
             rfdir11         1       0       0
            rfphon1          0
            rfphon2          0

@@ -26,22 +26,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      tdep_calc_phi1,tdep_write_phi1
-!!      tdep_calc_phi2,tdep_write_phi2,tdep_calc_phi3ref,tdep_write_phi3
-!!      tdep_calc_phi4ref,tdep_write_phi4,tdep_calc_alpha_gamma
-!!      tdep_calc_constraints,tdep_calc_elastic,tdep_calc_model
-!!      tdep_calc_moorepenrose,tdep_calc_phdos,tdep_calc_phi2fcoeff
-!!      tdep_calc_phi3fcoeff,tdep_calc_phi4fcoeff,tdep_calc_thermo,tdep_destroy_shell
-!!      tdep_destroy_eigen2nd,tdep_init_crystal,tdep_init_ddb
-!!      tdep_init_eigen2nd,tdep_init_ifc,tdep_init_shell2at
-!!      tdep_init_shell3at,tdep_init_shell4at,tdep_make_latt,tdep_make_qptpath
-!!      tdep_make_sym,tdep_matchideal2average,tdep_print_aknowledgments
-!!      tdep_readecho,tdep_write_gruneisen
-!!      xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -57,7 +41,7 @@ program atdep
   use m_phonons
   use m_errors
   use m_abi_linalg
-  use m_xmpi             
+  use m_xmpi
   use m_abihist
   use m_io_tools
   use m_argparse
@@ -66,7 +50,7 @@ program atdep
   use m_crystal,          only : crystal_t, crystal_free
   use m_ddb,              only : ddb_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_init_crystal, tdep_init_ifc, tdep_init_ddb, tdep_write_ddb, &
-&                                tdep_destroy_qbz, tdep_destroy_ddb, tdep_ifc2phi2          
+&                                tdep_destroy_qbz, tdep_destroy_ddb, tdep_ifc2phi2
   use m_tdep_phi4,        only : tdep_calc_phi4fcoeff, tdep_calc_phi4ref, tdep_write_phi4, tdep_calc_ftot4
   use m_tdep_phi3,        only : tdep_calc_phi3fcoeff, tdep_calc_phi3ref, tdep_write_phi3, tdep_calc_ftot3, &
 &                                tdep_calc_alpha_gamma, tdep_write_gruneisen
@@ -100,7 +84,7 @@ program atdep
   double precision, allocatable :: distance(:,:,:),Rlatt_cart(:,:,:),Rlatt4Abi(:,:,:)
   double precision, allocatable :: Phi1Ui(:),Phi2UiUj(:),Phi3UiUjUk(:),Phi4UiUjUkUl(:)
   type(args_t) :: args
-  type(phonon_dos_type) :: PHdos
+  type(phdos_t) :: PHdos
   type(Phi2_type) :: Phi2
   type(Input_type) :: Invar
   type(Lattice_type) :: Lattice
@@ -214,7 +198,7 @@ program atdep
 !FB   if (tab_step(istep).eq.MPIdata%me_step) then
 !FB     data_loc(:,dim2*(ii-1)+1:dim2*ii)=data_tmp(:,dim2*(istep-1)+1:dim2*istep)
 !FB     ii=ii+1
-!FB   end if  
+!FB   end if
 !FB end do
 !FB
 !FB do iproc=1,MPIdata%nproc
@@ -239,7 +223,7 @@ program atdep
 !FB!FB if (MPIdata%me_step.eq.MPIdata%master) write(Invar%stdlog,*) MPIdata%me_step,data_gather(:,:)
 !FB!FB call flush_unit(6)
 !FB!!FBFB
-!FB 
+!FB
 !FB ABI_MALLOC(data_gather,(dim1,Invar%nstep_tot*dim2)); data_gather(:,:)=zero
 !FB call xmpi_allgatherv(data_loc,dim1*Invar%my_nstep,data_gather,dim1*MPIdata%nstep_all,dim1*nstep_acc(1:MPIdata%nproc),MPIdata%comm_step,ierr)
 !FB!FB call xmpi_scatterv(data_gather,MPIdata%nstep_all,nstep_acc,data_loc,Invar%my_nstep,&
@@ -277,7 +261,7 @@ program atdep
 ! Compute all the symmetries coming from the bravais lattice
  call tdep_make_sym(Invar,Lattice,MPIdata,Sym)
 
-! Initialize the Brillouin zone and compute the q-points path 
+! Initialize the Brillouin zone and compute the q-points path
  call tdep_make_qptpath(Invar,Lattice,MPIdata,Qpt)
 
 !==========================================================================================
@@ -396,35 +380,35 @@ program atdep
 !==========================================================================================
 !================= Build fcoeff and compute constraints ===================================
 !==========================================================================================
- ABI_MALLOC(Forces_TDEP,(3*Invar%natom*Invar%my_nstep)); Forces_TDEP(:)=0.d0 
+ ABI_MALLOC(Forces_TDEP,(3*Invar%natom*Invar%my_nstep)); Forces_TDEP(:)=0.d0
  ABI_MALLOC(Fresid     ,(3*Invar%natom*Invar%my_nstep)); Fresid(:)=Forces_MD(:)
- ABI_MALLOC(Phi1Ui      ,(Invar%my_nstep)); Phi1Ui      (:)=0.d0 
- ABI_MALLOC(Phi2UiUj    ,(Invar%my_nstep)); Phi2UiUj    (:)=0.d0 
- ABI_MALLOC(Phi3UiUjUk  ,(Invar%my_nstep)); Phi3UiUjUk  (:)=0.d0 
- ABI_MALLOC(Phi4UiUjUkUl,(Invar%my_nstep)); Phi4UiUjUkUl(:)=0.d0 
+ ABI_MALLOC(Phi1Ui      ,(Invar%my_nstep)); Phi1Ui      (:)=0.d0
+ ABI_MALLOC(Phi2UiUj    ,(Invar%my_nstep)); Phi2UiUj    (:)=0.d0
+ ABI_MALLOC(Phi3UiUjUk  ,(Invar%my_nstep)); Phi3UiUjUk  (:)=0.d0
+ ABI_MALLOC(Phi4UiUjUkUl,(Invar%my_nstep)); Phi4UiUjUkUl(:)=0.d0
  ntotcoeff=CoeffMoore%ncoeff1st  + CoeffMoore%ncoeff2nd  + CoeffMoore%ncoeff3rd  + CoeffMoore%ncoeff4th
  ntotconst=CoeffMoore%nconst_1st + CoeffMoore%nconst_2nd + CoeffMoore%nconst_3rd + CoeffMoore%nconst_4th
  CoeffMoore%ntotcoeff=ntotcoeff
  CoeffMoore%ntotconst=ntotconst
 
-!LOTO 
+!LOTO
 !Remove the supercell contribution (the "LR part") included in total forces
 !before computing the "SR part". The full "LR part" will be added later.
  if (Invar%loto) then
    call tdep_ifc2phi2(Ifc%dipdip,Ifc,Invar,Lattice,Invar%natom_unitcell,1,Phi2,Rlatt_cart,Shell2at,Sym)
-   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%Tot,Phi2UiUj,ucart) 
+   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%Tot,Phi2UiUj,ucart)
    Fresid(:)=Fresid(:)-Forces_TDEP(:)
    Phi1       (:)=0.d0
-   Phi1Ui     (:)=0.d0 
+   Phi1Ui     (:)=0.d0
    Phi2%SR  (:,:)=0.d0
    if (Invar%loto) then
      Phi2%LR  (:,:)=0.d0
      Phi2%Tot (:,:)=0.d0
-   end if  
-   Phi2UiUj   (:)=0.d0 
-   Forces_TDEP(:)=0.d0 
+   end if
+   Phi2UiUj   (:)=0.d0
+   Forces_TDEP(:)=0.d0
  end if
-!LOTO 
+!LOTO
 
  do istep=1,Invar%my_nstep
     do iatom=1,Invar%natom
@@ -435,32 +419,32 @@ program atdep
     end do
  end do
 
- ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*Invar%my_nstep,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0 
+ ABI_MALLOC(CoeffMoore%fcoeff,(3*natom*Invar%my_nstep,ntotcoeff)); CoeffMoore%fcoeff(:,:)=0.d0
  if (Invar%readifc.ne.1) then
    call tdep_calc_phi1fcoeff(CoeffMoore,Invar,proj1st,Shell1at,Sym)
    call tdep_calc_phi2fcoeff(CoeffMoore,Invar,proj2nd,Shell2at,Sym,ucart)
- end if 
+ end if
  if (Invar%order.ge.3) then
    ABI_MALLOC(Phi3_ref,(3,3,3,Shell3at%nshell))  ; Phi3_ref(:,:,:,:)=0.d0
    call tdep_calc_phi3fcoeff(CoeffMoore,Invar,proj3rd,Shell3at,Sym,ucart)
- end if  
+ end if
  if (Invar%order.eq.4) then
    ABI_MALLOC(Phi4_ref,(3,3,3,3,Shell4at%nshell)); Phi4_ref(:,:,:,:,:)=0.d0
    call tdep_calc_phi4fcoeff(CoeffMoore,Invar,proj4th,Shell4at,Sym,ucart)
- end if  
+ end if
  if (Invar%order.eq.2) then
  call tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,Shell1at%nshell,Shell2at%nshell,&
 &                           Shell3at%nshell,Shell4at%nshell,proj1st,proj2nd,&
-&                           Shell1at,Shell2at,Sym) 
+&                           Shell1at,Shell2at,Sym)
  else if (Invar%order.eq.3) then
  call tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,Shell1at%nshell,Shell2at%nshell,&
 &                           Shell3at%nshell,Shell4at%nshell,proj1st,proj2nd,&
-&                           Shell1at,Shell2at,Sym,proj3rd,Shell3at) 
+&                           Shell1at,Shell2at,Sym,proj3rd,Shell3at)
  else if (Invar%order.eq.4) then
  call tdep_calc_constraints(CoeffMoore,distance,Invar,MPIdata,Shell1at%nshell,Shell2at%nshell,&
 &                           Shell3at%nshell,Shell4at%nshell,proj1st,proj2nd,&
-&                           Shell1at,Shell2at,Sym,proj3rd,Shell3at,proj4th,Shell4at) 
- end if 
+&                           Shell1at,Shell2at,Sym,proj3rd,Shell3at,proj4th,Shell4at)
+ end if
 
 !==========================================================================================
 !============= Compute the pseudo inverse using the Moore-Penrose method ==================
@@ -470,10 +454,10 @@ program atdep
 !=================== If all the Orders are solved simultaneously ==========================
 !==========================================================================================
  if (Invar%together.eq.1) then
-   write(stdout,*) '############### (Solve simultaneously all the orders) #######################'  
+   write(stdout,*) '############### (Solve simultaneously all the orders) #######################'
    if (Invar%readifc.ne.1) then
      call tdep_calc_MoorePenrose(CoeffMoore,Fresid,0,Invar,MP_coeff,MPIdata)
-   end if  
+   end if
    ABI_MALLOC(Phi1_coeff,(ncoeff1st,1)); Phi1_coeff(:,:)=MP_coeff(1:ncoeff1st,:)
    ABI_MALLOC(Phi2_coeff,(ncoeff2nd,1)); Phi2_coeff(:,:)=MP_coeff(ncoeff1st+1:ncoeff1st+ncoeff2nd,:)
    if (Invar%readifc.ne.1) then
@@ -484,31 +468,31 @@ program atdep
    ABI_FREE(proj2nd)
    ABI_FREE(Phi1_coeff)
    ABI_FREE(Phi2_coeff)
-   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart) 
-   if (Invar%order.ge.3) then 
+   call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart)
+   if (Invar%order.ge.3) then
      ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
      Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
      call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
      ABI_FREE(proj3rd)
      ABI_FREE(Phi3_coeff)
-     call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
+     call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym)
    end if
-   if (Invar%order.ge.4) then 
+   if (Invar%order.ge.4) then
      ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
      Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
      call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
      ABI_FREE(proj4th)
      ABI_FREE(Phi4_coeff)
-     call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
-   end if  
+     call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym)
+   end if
 
 !==========================================================================================
 !=================== If all the Orders are solved successively ============================
 !==========================================================================================
-!ATTENTION : Le LR semble enleve a l'ordre 2 mais pas a l'ordre 3 et 4. On repart de 
+!ATTENTION : Le LR semble enleve a l'ordre 2 mais pas a l'ordre 3 et 4. On repart de
 !            Forces_MD tout en bas et pas de Fresid (car les ordres 2 et 3 sont supprimes au
  else if (Invar%together.eq.0) then
-   write(stdout,*) '################## (Solve successively each order) ##########################'  
+   write(stdout,*) '################## (Solve successively each order) ##########################'
    do ii=1,Invar%order-1
      write(stdout,*) ' For order=',ii+1
      if (Invar%readifc.eq.1) cycle
@@ -524,22 +508,22 @@ program atdep
        ABI_FREE(proj2nd)
        ABI_FREE(Phi1_coeff)
        ABI_FREE(Phi2_coeff)
-       call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart) 
-     else if (ii.eq.2) then 
+       call tdep_calc_ftot2(Forces_TDEP,Invar,Phi1,Phi1Ui,Phi2%SR,Phi2UiUj,ucart)
+     else if (ii.eq.2) then
        ABI_MALLOC(Phi3_coeff,(ncoeff3rd,1)); Phi3_coeff(:,:)=0.d0
        Phi3_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+1:ncoeff1st+ncoeff2nd+ncoeff3rd,:)
        call tdep_calc_phi3ref(ncoeff3rd,proj3rd,Phi3_coeff,Phi3_ref,Shell3at)
        ABI_FREE(proj3rd)
        ABI_FREE(Phi3_coeff)
-       call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym) 
-     else if (ii.eq.3) then 
+       call tdep_calc_ftot3(Forces_TDEP,Invar,Phi3_ref,Phi3UiUjUk,Shell3at,ucart,Sym)
+     else if (ii.eq.3) then
        ABI_MALLOC(Phi4_coeff,(ncoeff4th,1)); Phi4_coeff(:,:)=0.d0
        Phi4_coeff(:,:)=MP_coeff(ncoeff1st+ncoeff2nd+ncoeff3rd+1:ntotcoeff,:)
        call tdep_calc_phi4ref(ncoeff4th,proj4th,Phi4_coeff,Phi4_ref,Shell4at)
        ABI_FREE(proj4th)
        ABI_FREE(Phi4_coeff)
-       call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym) 
-     end if  
+       call tdep_calc_ftot4(Forces_TDEP,Invar,Phi4_ref,Phi4UiUjUkUl,Shell4at,ucart,Sym)
+     end if
      do istep=1,Invar%my_nstep
        do iatom=1,Invar%natom
          do jj=1,3
@@ -549,8 +533,8 @@ program atdep
          end do ! ii
        end do ! iatom
      end do ! istep
-   end do  
- end if  
+   end do
+ end if
  ABI_FREE(CoeffMoore%const)
  ABI_FREE(CoeffMoore%fcoeff)
  ABI_FREE(Fresid)
@@ -558,23 +542,23 @@ program atdep
  ABI_FREE(ucart)
  call tdep_destroy_shell(natom,1,Shell1at)
 
-!LOTO 
+!LOTO
  if (Invar%loto) then
    Phi2%Tot=Phi2%LR+Phi2%SR
  end if
-!LOTO 
+!LOTO
 
 !==========================================================================================
 !=================== Write the IFC and check the constraints ==============================
 !==========================================================================================
  call tdep_write_phi1(Invar,Phi1)
  call tdep_write_phi2(distance,Invar,MPIdata,Phi2%SR,Shell2at)
- if (Invar%order.ge.3) then 
+ if (Invar%order.ge.3) then
    call tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
- end if  
- if (Invar%order.ge.4) then 
+ end if
+ if (Invar%order.ge.4) then
    call tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
- end if  
+ end if
 
  if (Invar%order.eq.2) then
    call tdep_check_constraints(distance,Invar,Phi2%SR,Phi1,Shell3at%nshell,Shell4at%nshell,Sym)
@@ -586,7 +570,7 @@ program atdep
 &                              Phi3_ref,Shell3at,Phi4_ref,Shell4at)
  end if
  ABI_FREE(Phi1)
-   
+
 !==========================================================================================
 !===================== Compute the phonon spectrum, the DOS, ==============================
 !=====================  the dynamical matrix and write them ===============================
@@ -616,7 +600,7 @@ program atdep
 !=========== Compute U_0, the "free energy" and the forces (from the model) ===============
 !==========================================================================================
  call tdep_calc_model(Forces_MD,Forces_TDEP,Invar,MPIdata,Phi1Ui,Phi2UiUj,&
-&                     Phi3UiUjUk,Phi4UiUjUkUl,U0) 
+&                     Phi3UiUjUk,Phi4UiUjUkUl,U0)
  ABI_FREE(Forces_MD)
  ABI_FREE(Forces_TDEP)
  ABI_FREE(Phi1Ui)
@@ -647,8 +631,8 @@ program atdep
    call tdep_destroy_mpidata(MPIdata)
 
    call tdep_print_Aknowledgments(Invar)
-   call delete_file(Invar%foo,ierr) 
-   call delete_file('fort.8',ierr) 
+   call delete_file(Invar%foo,ierr)
+   call delete_file('fort.8',ierr)
    call flush_unit(stdout)
    close(unit=stdout)
    call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)
@@ -665,7 +649,7 @@ program atdep
 
  if (MPIdata%iam_master) then
    call tdep_write_gruneisen(distance,Eigen2nd_path,Invar,Phi3_ref,Qpt,Rlatt_cart,Shell3at,Sym)
- end if  
+ end if
  call tdep_calc_alpha_gamma(distance,Eigen2nd_MP,Invar,Lattice,MPIdata,Phi3_ref,Qbz,Rlatt_cart,Shell3at,Sym)
 
 !FB Begin Lifetime
@@ -681,7 +665,7 @@ program atdep
  if (Invar%order.eq.4) then
    call tdep_destroy_shell(natom,4,Shell4at)
    ABI_FREE(Phi4_ref)
- end if  
+ end if
  call Ifc%free()
  call crystal_free(Crystal)
  call tdep_destroy_sym(Sym)
@@ -695,8 +679,8 @@ program atdep
 !================= Write the last informations (aknowledgments...)  =======================
 !==========================================================================================
  call tdep_print_Aknowledgments(Invar)
- call delete_file(Invar%foo,ierr) 
- call delete_file('fort.8',ierr) 
+ call delete_file(Invar%foo,ierr)
+ call delete_file('fort.8',ierr)
  call flush_unit(stdout)
  close(unit=stdout)
  call abinit_doctor(trim(Invar%output_prefix), print_mem_report=print_mem_report)

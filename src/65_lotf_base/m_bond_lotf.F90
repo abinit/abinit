@@ -63,11 +63,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_tafit_init(nax)
@@ -95,11 +90,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_atom_init(nneigx,nneig,neighl)
@@ -184,11 +174,6 @@ contains
 !!  allocate imat,ibmat,ibmat_large
 !! INPUTS
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_matrix_alloc(nax,nneigx)
@@ -215,11 +200,6 @@ contains
 !!  Set or update bond matrix imat,ibmat,ibmat_large
 !!  associates the bond to the atom neighlists
 !! INPUTS
-!!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -280,11 +260,6 @@ contains
 !! INPUTS
 !!  nneig
 !!  neighl
-!!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -356,11 +331,6 @@ contains
 !! FUNCTION
 !!  set nfitmax (or control it), ifit,nfit
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine bond_fit_set(nax,nfitdum)
@@ -404,11 +374,6 @@ contains
 !!  deallocate variables
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

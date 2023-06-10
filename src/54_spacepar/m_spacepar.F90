@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -49,7 +45,6 @@ public :: hartre            ! Given rho(G), compute Hartree potential (=FFT of r
 public :: mkunitpawspherepot  ! compute effective potential due to PAW sphere of strength 1, useful for testing
                               ! paw projector completeness
 public :: make_vectornd     ! compute vector potential due to nuclear magnetic dipoles, in real space
-public :: make_vectornd2    ! compute vector potential due to nuclear magnetic dipoles, in real space
 public :: meanvalue_g       ! Compute <wf|op|wf> where op is real and diagonal in G-space.
 public :: laplacian         ! Compute the laplacian of a function defined in real space
 public :: redgr             ! Compute reduced gradients of a real function on the usual unshifted FFT grid.
@@ -65,186 +60,6 @@ public :: rotate_rho
 
 contains
 !!***
-
-!!****f* m_spacepar/make_vectornd2
-!! NAME
-!! make_vectornd2
-!!
-!! FUNCTION
-!! For nuclear dipole moments m, compute vector potential A(r) = (m x (r-R))/|r-R|^3
-!! in r space. This is done by computing A(G) followed by FFT.
-!!
-!! NOTES
-!! This code is copied and modified from m_spacepar/hartre where a very similar loop
-!! over G is done followed by FFT to real space
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
-!! SOURCE
-
-subroutine make_vectornd2(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
-     & rprimd,vectornd,xred)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: cplex,izero,natom,nfft
- real(dp),intent(in) :: gsqcut
- type(MPI_type),intent(in) :: mpi_enreg
-!arrays
- integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
- real(dp),intent(out) :: vectornd(nfft,3)
-
-!Local variables-------------------------------
- !scalars
- integer,parameter :: im=2,re=1
- integer :: i1,i2,i2_local,i23,i3,iatom,id1,id2,id3,ig,ig1max,ig2max,ig3max
- integer :: ig1min,ig2min,ig3min
- integer :: ii,ii1,ing,me_fft,n1,n2,n3,nproc_fft
- real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,gs,phase,ucvol
- complex(dpc) :: prefac,cgr
- !arrays
- integer :: id(3)
- integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
- integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gmet(3,3),gqcart(3),gprimd(3,3),gqred(3),mcgc(3),rmet(3,3)
- real(dp),allocatable :: gq(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
-
-
-! *************************************************************************
-
- call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
- n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
- nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
-
- prefac = -four_pi*j_dpc/(ucvol*two_pi)
-
- ! Get the distrib associated with this fft_grid
- call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
-
- ! Initialize a few quantities
- cutoff=gsqcut*tolfix
-
- ! In order to speed the routine, precompute the components of g+q
- ! Also check if the booked space was large enough...
- ABI_MALLOC(gq,(3,max(n1,n2,n3)))
- do ii=1,3
-   id(ii)=ngfft(ii)/2+2
-   do ing=1,ngfft(ii)
-     ig=ing-(ing/id(ii))*ngfft(ii)-1
-     gq(ii,ing)=ig
-   end do
- end do
- ig1max=-1;ig2max=-1;ig3max=-1
- ig1min=n1;ig2min=n2;ig3min=n3
-
- ABI_MALLOC(work1,(2,nfft))
- ABI_MALLOC(work2,(2,nfft))
- ABI_MALLOC(work3,(2,nfft))
- work1=zero; work2=zero; work3=zero
- id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
-
- ! Triple loop on each dimension
- do i3=1,n3
-   do i2=1,n2
-     if (fftn2_distrib(i2) == me_fft) then
-       i2_local = ffti2_local(i2)
-       i23=n1*(i2_local-1 +(n2/nproc_fft)*(i3-1))
-       ! Do the test that eliminates the Gamma point outside of the inner loop
-       ii1=1
-       !if(i23==0 .and. ig2==0 .and. ig3==0)then
-       !  ii1=2
-       !  work1(re,1+i23)=zero
-       !  work1(im,1+i23)=zero
-       !end if
-
-       ! Final inner loop on the first dimension (note the lower limit)
-       do i1=ii1,n1
-         ii=i1+i23
-
-         gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
-         gqcart(1:3) = MATMUL(gprimd,gqred)
-         gs = DOT_PRODUCT(gqcart,gqcart)
-
-         if( (gs .LE. cutoff) .AND. (gs .gt. tol8) )then
-
-            do iatom = 1, natom
-              if (.NOT. ANY(ABS(nucdipmom(:,iatom)) .GT. tol8 )) cycle
-              phase = -two_pi*DOT_PRODUCT(xred(:,iatom),gqred(:))
-              cgr = cmplx(cos(phase),sin(phase))
-
-              mcgc(1) = nucdipmom(2,iatom)*gqcart(3) - nucdipmom(3,iatom)*gqcart(2)
-              mcgc(2) = nucdipmom(3,iatom)*gqcart(1) - nucdipmom(1,iatom)*gqcart(3)
-              mcgc(3) = nucdipmom(1,iatom)*gqcart(2) - nucdipmom(2,iatom)*gqcart(1)
-
-              mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
-
-              work1(re,ii) = work1(re,ii) + real(prefac*cgr*mcgc(1)/gs)
-              work2(re,ii) = work2(re,ii) + real(prefac*cgr*mcgc(2)/gs)
-              work3(re,ii) = work3(re,ii) + real(prefac*cgr*mcgc(3)/gs)
-
-              work1(im,ii) = work1(im,ii) + aimag(prefac*cgr*mcgc(1)/gs)
-              work2(im,ii) = work2(im,ii) + aimag(prefac*cgr*mcgc(2)/gs)
-              work3(im,ii) = work3(im,ii) + aimag(prefac*cgr*mcgc(3)/gs)
-
-            end do
-          else
-             ! gs>cutoff
-             work1(re,ii)=zero
-             work1(im,ii)=zero
-             work2(re,ii)=zero
-             work2(im,ii)=zero
-             work3(re,ii)=zero
-             work3(im,ii)=zero
-          end if
-
-       end do ! End loop on i1
-     end if
-   end do ! End loop on i2
- end do ! End loop on i3
-
- ABI_FREE(gq)
-
- if ( izero .EQ. 1 ) then
-   ! Set contribution of unbalanced components to zero
-
-    call zerosym(work1,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-    call zerosym(work2,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-    call zerosym(work3,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
-
- end if
-
- ! Fourier Transform
- ABI_MALLOC(ndvecr,(cplex*nfft))
- ndvecr=zero
- call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,1)=ndvecr(:)
- ABI_FREE(work1)
-
- ndvecr=zero
- call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,2) = ndvecr(:)
- ABI_FREE(work2)
-
- ndvecr=zero
- call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,3) = ndvecr(:)
- ABI_FREE(work3)
- ABI_FREE(ndvecr)
-
-end subroutine make_vectornd2
-!!***
-
 
 !!****f* m_spacepar/make_vectornd
 !! NAME
@@ -263,26 +78,20 @@ end subroutine make_vectornd2
 !! OUTPUT
 !!  vectornd(3,nfft)=Vector potential in real space, along Cartesian directions
 !!
-!! PARENTS
-!!      m_dfpt_scfcv,m_orbmag,m_scfcv_core
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
-subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom,&
+subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nspden,nucdipmom,&
      & rprimd,vectornd,xred)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,izero,natom,nfft
+ integer,intent(in) :: cplex,izero,natom,nfft,nspden
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
- real(dp),intent(out) :: vectornd(nfft,3)
+ real(dp),intent(out) :: vectornd(nfft,nspden,3)
 
 !Local variables-------------------------------
  !scalars
@@ -453,21 +262,27 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
 
  end if
 
+ !note nspden effect--the nuclear vector potential conains no electron spin flip operator,
+ ! so vectornd(:,2,:) = vectornd(:,1,:) and vectornd(:,3:4,:) = zero
+ vectornd = zero
  ! Fourier Transform
  ABI_MALLOC(ndvecr,(cplex*nfft))
  ndvecr=zero
  call fourdp(cplex,work1,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,1)=ndvecr(:)
+ vectornd(:,1,1)=ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,1) = ndvecr(:)
  ABI_FREE(work1)
 
  ndvecr=zero
  call fourdp(cplex,work2,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,2) = ndvecr(:)
+ vectornd(:,1,2) = ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,2) = ndvecr(:)
  ABI_FREE(work2)
 
  ndvecr=zero
  call fourdp(cplex,work3,ndvecr,1,mpi_enreg,nfft,1,ngfft,0)
- vectornd(:,3) = ndvecr(:)
+ vectornd(:,1,3) = ndvecr(:)
+ if (nspden .GE. 2) vectornd(:,2,3) = ndvecr(:)
  ABI_FREE(work3)
  ABI_FREE(ndvecr)
 
@@ -488,11 +303,6 @@ end subroutine make_vectornd
 !!
 !! OUTPUT
 !!  vunitpawspherepot(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -632,7 +442,7 @@ subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
          gqred(1) = gq(1,i1); gqred(2) = gq(2,i2); gqred(3) = gq(3,i3)
 
          if(gs<=cutoff)then
-    
+
 
            ! Identify min/max indexes (to cancel unbalanced contributions later)
            ! Count (q+g)-vectors with similar norm
@@ -691,7 +501,7 @@ subroutine mkunitpawspherepot(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,&
    end if
  end if
 
- ! Fourier Transform 
+ ! Fourier Transform
  call fourdp(cplex,work1,vunitpawspherepot,1,mpi_enreg,nfft,1,ngfft,0)
 
  ABI_FREE(work1)
@@ -731,14 +541,6 @@ end subroutine mkunitpawspherepot
 !!
 !! OUTPUT
 !!  vhartr(cplex*nfft)=Hartree potential in real space, either REAL or COMPLEX
-!!
-!! PARENTS
-!!      m_dfpt_rhotov,m_dft_energy,m_fock_getghc,m_forstr,m_kxc,m_nonlinear
-!!      m_odamix,m_pead_nl_loop,m_positron,m_prcref,m_respfn_driver,m_rhotov
-!!      m_setvtr,m_sigma_driver,m_tddft
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -963,12 +765,6 @@ end subroutine hartre
 !! OUTPUT
 !!  ar=mean value
 !!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_dft_energy,m_forstr,m_vtowfk
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,use_ndo,ar_im)
@@ -1181,12 +977,6 @@ end subroutine meanvalue_g
 !!  rdfuncg_out TO BE DESCRIBED SB 090901
 !!  laplacerdfuncg_out TO BE DESCRIBED SB 090901
 !!
-!! PARENTS
-!!      m_frskerker1,m_frskerker2,m_prcref
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine laplacian(gprimd,mpi_enreg,nfft,nfunc,ngfft,rdfuncr,&
@@ -1359,12 +1149,6 @@ end subroutine laplacian
 !! OUTPUT
 !!  frredgr(nfft,3)= reduced gradient of input function (same units as frin)
 !!
-!! PARENTS
-!!      m_dfpt_elt
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine redgr(frin,frredgr,mpi_enreg,nfft,ngfft)
@@ -1508,12 +1292,6 @@ end subroutine redgr
 !! OUTPUT
 !!  vhartr1(nfft)=Inhomogeneous term in strain-perturbation-induced Hartree
 !!   potential in real space,
-!!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -1703,13 +1481,6 @@ end subroutine hartrestr
 !!  must be used, such as to transform (2*up) => (up+down,up)
 !! In spin-polarized, and if there is no symmetry to be
 !! applied on the system, only the total density is generated in G space
-!!
-!! PARENTS
-!!      m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho,m_dvdb,m_mkrho
-!!      m_suscep_stat,m_vtorho,m_vtorhorec,m_vtorhotf,m_wfd
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2226,12 +1997,6 @@ end subroutine symrhg
 !!   grid points and the repetition number for each symmetry class.
 !!  phnons(2,n1*n2*n3,(nspden/nsppol)-3*(nspden/4))=phases associated with nonsymmorphic translations
 !!
-!! PARENTS
-!!      m_ab7_kpoints,m_spacepar,m_wfd
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
@@ -2519,15 +2284,9 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
      end do
    end do
 
-   if (allocated(symafm_used))  then
-     ABI_FREE(symafm_used)
-   end if
-   if (allocated(symrel_used))  then
-     ABI_FREE(symrel_used)
-   end if
-   if (allocated(tnons_used))  then
-     ABI_FREE(tnons_used)
-   end if
+   ABI_SFREE(symafm_used)
+   ABI_SFREE(symrel_used)
+   ABI_SFREE(tnons_used)
 
  end do ! imagn
 
@@ -2613,12 +2372,6 @@ end subroutine irrzg
 !! OUTPUT
 !!  rhog1_eq(2,nfft)= symmetric density in reciprocal space for equivalent perturbation
 !!  rhor1_eq(cplex*nfft,nspden) = symmetric density in real space for equivalent perturbation
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 
@@ -2794,13 +2547,6 @@ end subroutine rotate_rho
 !! NOTES
 !! nsppol and nspden are needed in case of (anti)ferromagnetic symmetry operations
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_dvdb,m_gstate,m_longwave,m_nonlinear
-!!      m_respfn_driver,m_scfcv_core
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
-!!
 !! SOURCE
 
 subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,&
@@ -2895,12 +2641,6 @@ end subroutine setsym
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      dfpt_flexo,dfpt_qdrpole
-!!
-!! CHILDREN
-!!      fourdp,ptabs_fourdp
 !!
 !! SOURCE
 

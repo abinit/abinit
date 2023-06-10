@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -104,6 +100,7 @@ contains
 !! unitdos=unit number of output of the DOS. Not needed if option==1
 !! wtk(nkpt)=k point weights
 !! iB1, iB2 = band min and max between which to calculate the number of electrons
+!! extfpmd_nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
 !!
 !! OUTPUT
 !! doccde(mband*nkpt*nsppol)=derivative of occupancies wrt the energy for each band and k point.
@@ -122,17 +119,11 @@ contains
 !!
 !!       $  E_{phys} = E_{free} - encorr*(E_{int}-E_{free}) + O(tsmear^3)  $
 !!
-!! PARENTS
-!!      m_chi0,m_conducti,m_dfpt_looppert,m_ebands,m_gstate,m_occ
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mband, nband, &
-                  nelect, nkpt, nsppol, occ, occopt, option, tphysel, tsmear, unitdos, wtk, iB1, iB2)
-          ! CP added fermih, iB1 and iB2 in the list of arguments
+                  nelect, nkpt, nsppol, occ, occopt, option, tphysel, tsmear, unitdos, wtk, &
+                  iB1, iB2, extfpmd_nbdbuf) ! optional parameters
 
 !Arguments ------------------------------------
 !scalars
@@ -145,6 +136,7 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
  real(dp),intent(out) :: doccde(mband*nkpt*nsppol)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
  integer, intent(in), optional:: iB1, iB2 !! CP: added optional arguments to get number of electrons between bands iB1 and iB2
+ integer, intent(in), optional :: extfpmd_nbdbuf
  !! Used only when occopt = 9
 
 !Local variables-------------------------------
@@ -185,7 +177,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
  ! Initialize the occupation function and generalized entropy function,
  ! at the beginning, or if occopt changed
 
- ! CP added
  if (occopt==9) then
     low_band_index  = iB1
     high_band_index = iB2
@@ -198,7 +189,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
  ABI_MALLOC(occ_tmp,(number_of_bands))
  ABI_MALLOC(ent_tmp,(number_of_bands))
  ABI_MALLOC(doccde_tmp,(number_of_bands))
- ! End CP addition
 
  ! Just get the number nptsdiv2 and allocate entfun, occfun, smdfun and xgrid accordingly
  nptsdiv2 = nptsdiv2_def
@@ -214,28 +204,12 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
 !---------------------------------------------------------------------
 
  ! write(std_out,*)' getnel : debug  tphysel, tsmear = ', tphysel, tsmear
- ! CP delete
- !bantot=sum(nband(:))
- ! End CP delete
- ! CP modified
- !ABI_MALLOC(arg,(bantot))
- !ABI_MALLOC(derfun,(bantot))
- !ABI_MALLOC(ent,(bantot))
  ABI_MALLOC(arg,(number_of_bands))
  ABI_MALLOC(derfun,(number_of_bands))
  ABI_MALLOC(ent,(number_of_bands))
-! Enc CP modified
  if (option==1) then
    ! normal evaluation of occupations and entropy
 
-   ! CP modified for occopt = 9 option, to account for subset of bands bw iB1 and iB2
-   !! Compute the arguments of the occupation and entropy functions
-   !! HM 20/08/2018 Treat the T --> 0 limit
-   !if (tsmear==0) then
-   !  arg(:)=sign(huge_tsmearinv,fermie-eigen(1:bantot))
-   !else
-   !  arg(:)=(fermie-eigen(1:bantot))*tsmearinv
-   !endif
    index = 0
    index_tot = 0
    do isppol=1,nsppol
@@ -252,7 +226,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
          index_tot = index_tot + nband(ikpt+nkpt*(isppol-1))
       end do
    end do
-   ! End CP modified
 
    ! MG TODO: This part is expensive for dense k-meshes
    ! Compute the values of the occupation function, and the entropy function
@@ -260,44 +233,35 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
    ! and assign to them the value of the closest extremal point,
    ! which is what is needed here.
 
-   ! CP modified
-   !call splfit(xgrid, doccde, occfun, 1, arg, occ, (2*nptsdiv2+1), bantot)
-   !call splfit(xgrid, derfun, entfun, 0, arg, ent, (2*nptsdiv2+1), bantot)
    call splfit(xgrid, doccde_tmp, occfun, 1, arg, occ_tmp, (2*nptsdiv2+1), number_of_bands)
    call splfit(xgrid, derfun, entfun, 0, arg, ent, (2*nptsdiv2+1), number_of_bands)
-   ! End CP modified
 
    ! Normalize occ and ent, and sum number of electrons and entropy
    ! Use different loops for nelect and entropy because bantot may be quite large in the EPH code
    ! when we use very dense k-meshes.
-
-   ! CP modified
-   !ent = ent * maxocc
-   !occ = occ * maxocc
-   !doccde = -doccde * maxocc * tsmearinv
+   
+   ! Manage number of bands in buffer for extfpmd calculation, when extfpmd_nbdbuf not 0.
+   ! Set occupation and entropy of buffered bands to zero.
+   if(present(extfpmd_nbdbuf)) then
+     index=0
+     index_tot=0
+     do isppol=1,nsppol
+        do ikpt=1,nkpt
+           if (occopt == 2) high_band_index=nband(ikpt+nkpt*(isppol-1))
+           do iband=low_band_index,high_band_index
+              index=index+1
+              if (iband>high_band_index-extfpmd_nbdbuf) then
+                ent(index)     = zero
+                occ_tmp(index) = zero
+              end if
+           end do
+           index_tot=index_tot+nband(ikpt+nkpt*(isppol-1))
+        end do
+     end do
+   end if
 
    nelect=zero; entropy=zero
    index=0
-   !do isppol=1,nsppol
-   !  do ikpt=1,nkpt
-   !    wk = wtk(ikpt)
-   !    do iband=1,nband(ikpt+nkpt*(isppol-1))
-   !      index = index  +1
-   !      entropy = entropy + wk * ent(index)
-   !    end do
-   !  end do
-   !end do
-
-   !index=0
-   !do isppol=1,nsppol
-   !  do ikpt=1,nkpt
-   !    wk = wtk(ikpt)
-   !    do iband=1,nband(ikpt+nkpt*(isppol-1))
-   !      index = index  +1
-   !      nelect = nelect + wk * occ(index)
-   !    end do
-   !  end do
-   !end do
    index_tot = 0
    do isppol=1,nsppol
       do ikpt=1,nkpt
@@ -314,7 +278,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
          index_tot = index_tot + nband(ikpt+nkpt*(isppol-1))
       end do
    end do
-   ! End CP modified
 
    !write(std_out,*) ' getnel : debug   wtk, occ, eigen = ', wtk, occ, eigen
    !write(std_out,*)xgrid(-nptsdiv2),xgrid(nptsdiv2)
@@ -334,12 +297,8 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
 
    ! A Similar section is present is dos_calcnwrite. Should move all DOS stuff to m_ebands
    ! Choose the lower and upper energies
-   ! CP modified
-   !enemax=maxval(eigen(1:bantot))+buffer
-   !enemin=minval(eigen(1:bantot))-buffer
    enemax=maxval(eigen(1:number_of_bands))+buffer
    enemin=minval(eigen(1:number_of_bands))-buffer
-   ! End CP modified
 
    ! Extend the range to a nicer value
    enemax=0.1_dp*ceiling(enemax*10._dp)
@@ -355,9 +314,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
    nene=nint((enemax-enemin)/deltaene)+1
 
    ! Write the header of the DOS file, and also decides the energy range and increment
-   ! CP modified to fit new argument list of dos_hdr_write
-   !call dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,mband,nband,nene,&
-   !  nkpt,nsppol,occopt,prtdos1,tphysel,tsmear,unitdos)
    call dos_hdr_write(deltaene,eigen,enemax,enemin,fermie,fermih,mband,nband,nene,&
            nkpt,nsppol,occopt,prtdos1,tphysel,tsmear,unitdos)
    !ABI_MALLOC(dos,(bantot))
@@ -379,24 +335,17 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
      index_start=0
      if(isppol==2)then
        do ikpt=1,nkpt
-   !      index_start=index_start+nband(ikpt)
           if (occopt == 2) high_band_index = nband(ikpt + nkpt*(isppol - 1))
           index_start=index_start + high_band_index - low_band_index + 1
        end do
      end if
-   ! End CP modified
 
      enex=enemin
      do iene=1,nene
 
        ! Compute the arguments of the dos and occupation function
-       ! CP modified
-       ! arg(:)=(enex-eigen(1:bantot))*tsmearinv
        arg(:)=(enex-eigen(1:number_of_bands))*tsmearinv
-       ! End CP modified
 
-       !call splfit(xgrid,derfun,smdfun,0,arg,dos,(2*nptsdiv2+1),bantot)
-       !call splfit(xgrid,derfun,occfun,0,arg,intdos,(2*nptsdiv2+1),bantot)
        call splfit(xgrid,derfun,smdfun,0,arg,dos,(2*nptsdiv2+1),number_of_bands)
        call splfit(xgrid,derfun,occfun,0,arg,intdos,(2*nptsdiv2+1),number_of_bands)
 
@@ -417,18 +366,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
        dosdbletot=zero
        index=index_start
 
-     ! CP modified
-       ! write(std_out,*)' eigen, arg, dos, intdos, doshalf, dosdble'
-       !do ikpt=1,nkpt
-       !  do iband=1,nband(ikpt+nkpt*(isppol-1))
-       !    index=index+1
-       !    dostot=dostot+wtk(ikpt)*maxocc*dos(index)*tsmearinv
-       !    intdostot=intdostot+wtk(ikpt)*maxocc*intdos(index)
-       !    doshalftot=doshalftot+wtk(ikpt)*maxocc*doshalf(index)*tsmearinv*2.0_dp
-       !    dosdbletot=dosdbletot+wtk(ikpt)*maxocc*dosdble(index)*tsmearinv*0.5_dp
-       !  end do
-       !end do
-
        do ikpt=1,nkpt
           if (occopt == 2) high_band_index=nband(ikpt+nkpt*(isppol-1))
           do iband=low_band_index,high_band_index
@@ -439,7 +376,6 @@ subroutine getnel(doccde, dosdeltae, eigen, entropy, fermie, fermih, maxocc, mba
              dosdbletot=dosdbletot+wtk(ikpt)*maxocc*dosdble(index)*tsmearinv*0.5_dp
           end do
        end do
-   ! End CP modified
 
        ! Print the data for this energy
        write(unitdos, '(f8.3,2f14.6,2f14.3)' )enex,dostot,intdostot,doshalftot,dosdbletot
@@ -494,15 +430,15 @@ end subroutine getnel
 !!  mband=maximum number of bands
 !!  nband(nkpt)=number of bands at each k point
 !!  nelect=number of electrons per unit cell
-!!  ne_qFD, nh_qFD=number of thermalized excited electrons (resp. holes) in bands > ivalence (resp. <= ivalence) ! CP added for
-!occopt 9 case
+!!  ne_qFD, nh_qFD=number of thermalized excited electrons (resp. holes) in bands > ivalence (resp. <= ivalence) 
 !!  ivalence= band index of the last valence band ! CP added for occopt 9 case
 !!  nkpt=number of k points
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  occopt=option for occupancies
+!!  prtstm=optional, might govern the band-by-band decomposition of the stm charge density
 !!  prtvol=control print volume and debugging output
-!!  stmbias=if non-zero, compute occupation numbers for STM (non-zero around the Fermi energy)
+!!  stmbias= optional, if non-zero, compute occupation numbers for STM (non-zero around the Fermi energy)
 !!   NOTE: in this case, only fermie and occ are meaningful outputs.
 !!  tphysel="physical" electronic temperature with FD occupations
 !!  tsmear=smearing width (or temperature)
@@ -516,24 +452,20 @@ end subroutine getnel
 !!  fermih= fermi level for thermalized excited holes in bands <= ivalence ! CP added for occopt 9 case
 !!  occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
 !!
-!! PARENTS
-!!      m_ebands,m_gstate,m_respfn_driver,m_vtorho
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarget, mband, nband, &
-  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, stmbias, tphysel, tsmear, wtk, &
-  extfpmd) ! Optional argument
+  nelect, ne_qFD, nh_qFD, nkpt, nspinor, nsppol, occ, occopt, prtvol, tphysel, tsmear, wtk, &
+  prtstm, stmbias, extfpmd) ! Optional argument
   ! CP modified:
 !  added fermih, ivalence, ne_qFD, nh_qFD for occopt 9 case
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,nkpt,nspinor,nsppol,occopt,prtvol
- real(dp),intent(in) :: spinmagntarget,nelect,stmbias,tphysel,tsmear
+ integer,intent(in) :: ivalence,mband,nkpt,nspinor,nsppol,occopt,prtvol
+ integer,intent(in),optional :: prtstm
+ real(dp),intent(in) :: spinmagntarget,nelect,tphysel,tsmear,ne_qFD, nh_qFD
+ real(dp),intent(in),optional :: stmbias
  real(dp),intent(out) :: entropy,fermie,fermih ! CP added fermih
  type(extfpmd_type),pointer,intent(inout),optional :: extfpmd
 !arrays
@@ -541,15 +473,11 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol),wtk(nkpt)
  real(dp),intent(out) :: doccde(mband*nkpt*nsppol)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
- !real(dp),optional,intent(in)
- ! CP added
- real(dp),intent(in) :: ne_qFD, nh_qFD
- integer, intent(in) :: ivalence
- ! End CP added
 
 !Local variables-------------------------------
- integer,parameter :: niter_max = 120, nkpt_max = 2, fake_unit=-666, option1 = 1
- integer :: cnt,cnt2,cnt3,ib,ii,ik,ikpt,is,isppol,nkpt_eff,  sign
+ integer,parameter :: niter_max=120,nkpt_max=2,fake_unit=-666,option1=1
+ integer :: cnt,cnt2,cnt3,ib,iban,ibantot,ii,ik,ikpt,is,isppol,nban,nkpt_eff,sign
+ integer :: extfpmd_nbdbuf=0
  integer,allocatable :: nbandt(:)
  real(dp),parameter :: tol = tol14
  !real(dp),parameter :: tol = tol10
@@ -634,6 +562,13 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
   end if
 ! End CP added
 
+ ! Set extfpmd band buffer if needed
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     extfpmd_nbdbuf=extfpmd%nbdbuf
+   end if
+ end if
+
  ! Use bisection algorithm to find fermi energy
  ! This choice is due to the fact that it will always give sensible
  ! result (because the answer is bounded, even if the smearing function
@@ -647,7 +582,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  dosdeltae = zero  ! the DOS is not computed, with option=1
  fermie_lo = minval(eigen(1:nband(1)*nkpt*nsppol)) - 6.001_dp * tsmear ! CP modified fermi_lo ->fermie_lo
- if (occopt == 3) fermie_lo = fermie_lo - 24.0_dp * tsmear ! CP modified
+ if (occopt == 3 .or. occopt==9) fermie_lo = fermie_lo - 24.0_dp * tsmear ! CP modified
  if(occopt==9)fermih_lo = fermie_lo ! CP added to take into account holes
  !if (present(ef_range) fermilo = ef_range(1)
 
@@ -656,7 +591,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  ! nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
  if(occopt >= 3 .and. occopt <= 8) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_lo,fermie_lo,maxocc,mband,nband,&
-& nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1))
+& nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1),&
+& extfpmd_nbdbuf=extfpmd_nbdbuf)
  else if (occopt == 9) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_lo,fermie_lo,maxocc,mband,nband,&
 & nelectlo,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, ivalence+1, nband(1)) ! Excited electrons
@@ -678,7 +614,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  ! nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
  if (occopt >= 3 .and. occopt <= 8) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_hi,fermie_hi,maxocc,mband,nband,&
-& nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1))
+& nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1),&
+& extfpmd_nbdbuf=extfpmd_nbdbuf)
  else if (occopt == 9) then
     call getnel(doccde,dosdeltae,eigen,entropye,fermie_hi,fermie_hi,maxocc,mband,nband,&
 & nelecthi,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, ivalence+1, nband(1)) ! Excited electrons
@@ -702,16 +639,14 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
 !Prepare fixed moment calculation
  if(abs(spinmagntarget+99.99_dp)>1.0d-10)then
- ! CP added
    if (occopt==9)then
       write(msg,'(a)') 'occopt=9 and spinmagntarget not implemented.'
       ABI_ERROR(msg)
    end if
- ! End CP added
    sign = 1
    do is = 1, nsppol
-     fermie_hit(is) = fermie_hi ! CP modified (name only)
-     fermie_lot(is) = fermie_lo ! CP modified (name only)
+     fermie_hit(is) = fermie_hi 
+     fermie_lot(is) = fermie_lo 
      nelectt(is) = half*(nelect+sign*spinmagntarget)
      sign = -sign
      nelecthit(is) = nelecthi
@@ -732,7 +667,6 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
    ABI_BUG(msg)
  end if
 
-  ! CP added special test for occopt == 9
  if( occopt==9 ) then
     if ((nelect-nh_qFD)<nholeslo .or. (nelect-nh_qFD)>nholeshi) then
        not_enough_bands = .true.
@@ -767,16 +701,14 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
    ! Usual bisection loop
    do ii=1,niter_max
-     fermie_mid = (fermie_hi + fermie_lo) * half ! CP modified (name only)
-     ! CP modified
+     fermie_mid = (fermie_hi + fermie_lo) * half 
      if (occopt == 9) fermih_mid=(fermih_hi+fermih_lo)*half
      ! Produce nelectmid from fermimid
-     !call getnel(doccde,dosdeltae,eigen,entropy,fermimid,maxocc,mband,nband,&
-     !  nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk)
      if (occopt /= 9) then
 
        call getnel(doccde,dosdeltae,eigen,entropye,fermie_mid,fermie_mid,maxocc,mband,nband,&
-&     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, 1, nband(1))
+&     nelectmid,nkpt,nsppol,occ,occopt,option1,tphysel,tsmear,fake_unit,wtk, 1, nband(1),&
+&     extfpmd_nbdbuf=extfpmd_nbdbuf)
 
        ! Compute the number of free electrons of the extfpmd model
        ! with corresponding chemical potential and add to nelect bounds.
@@ -854,16 +786,11 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
           'nholesi = ',nholeshi,', and holeslo = ',nholeslo,'.'
        end if
      end if
-   ! End CP modified
    end do ! End of bisection loop
 
-   fermie = fermie_mid ! CP modified (name only)
-   entropy= entropye ! CP added (necessary because now we have entropy for the electron and hole subsystems)
+   fermie = fermie_mid 
+   entropy= entropye 
 
-   ! CP modified
-   !write(msg, '(2(a,f14.6),3a,f14.6,a,i0)' ) &
-   !' newocc: new Fermi energy is ',fermie," (Ha),", fermie * Ha_eV, " (eV)", ch10,&
-   !'         with nelect: ',nelectmid,', after number of bisections: ',ii
    if (occopt /= 9) then
       write(msg, '(2(a,f14.6),a,i0)' ) &
 &   ' newocc: new Fermi energy is ',fermie,' , with nelect=',nelectmid,', Number of bisection calls: ',ii
@@ -877,35 +804,72 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 &   ' newocc: new Fermi energy for excited holes     is ',fermih,' , with nh_qFD=',nelect-nholesmid,&
 &   ', Number of bisection calls: ',ii
    end if
-   ! End CP modified
    call wrtout(std_out,msg)
 
    !  Compute occupation numbers for prtstm/=0, close to the Fermi energy
-   if (abs(stmbias) > tol10) then
-      ! CP added to prevent use with occopt = 9 so far
-      if (occopt == 9) then
-         write(msg,'(a)') 'Occopt 9 and prtstm /=0 not implemented together. Change occopt or prtstm.'
-         ABI_ERROR(msg)
-      end if
-      ! End CP added
-     fermie_biased = fermie - stmbias ! CP modify name
-     ABI_MALLOC(occt,(mband*nkpt*nsppol))
+   if (present(stmbias)) then
 
-     ! CP modify
-     !call getnel(doccde,dosdeltae,eigen,entropy,fermi_biased,maxocc,mband,nband,&
-     !  nelect_biased,nkpt,nsppol,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
-     call getnel(doccde,dosdeltae,eigen,entropy,fermie_biased,fermie_biased,maxocc,mband,nband,&
-&       nelect_biased,nkpt,nsppol,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1))
-     ! End CP modify
-     occ(:)=occ(:)-occt(:)
-     nelect_biased = abs(nelectmid - nelect_biased)
-     ! Here, arrange to have globally positive occupation numbers, irrespective of the stmbias sign
-     if (-stmbias > tol10) occ(:) = -occ(:)
-     ABI_FREE(occt)
+!DEBUG
+     write(std_out,'(a,es16.6)') ' newocc : inside present(stmbias) section, stmbias= ',stmbias
+!ENDDEBUG
 
-     write(msg,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
-     call wrtout(std_out,msg)
-   end if
+     if (abs(stmbias) > tol10) then
+
+!DEBUG
+       write(std_out,'(a)') ' newocc : inside abs(stmbias) > tol10  section '
+!      stop
+!ENDDEBUG
+
+        ! CP added to prevent use with occopt = 9 so far
+        ! XG220804 : This test is not needed, as prtstm/=0 must be used with occopt==7, as tested in chkinp.F90 .
+        if (occopt == 9) then
+           write(msg,'(a)') 'Occopt 9 and prtstm /=0 not implemented together. Change occopt or prtstm.'
+           ABI_ERROR(msg)
+        end if
+
+       fermie_biased = fermie - stmbias 
+       ABI_MALLOC(occt,(mband*nkpt*nsppol))
+
+       call getnel(doccde,dosdeltae,eigen,entropy,fermie_biased,fermie_biased,maxocc,mband,nband,&
+&         nelect_biased,nkpt,nsppol,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1),&
+&         extfpmd_nbdbuf=extfpmd_nbdbuf)
+       occ(:)=occ(:)-occt(:)
+
+!DEBUG
+     write(std_out,'(a)') ' newocc : before present(prtstm) section '
+!    stop
+!ENDDEBUG
+
+ !     Possibly filter a specific band contribution
+       if (present(prtstm)) then
+         if (prtstm < 0)then
+           ibantot=1
+           do isppol=1,nsppol
+             do ikpt=1,nkpt
+               nban=nband(ikpt+(isppol-1)*nkpt)
+               do iban=1,nban
+                 if(iban/=abs(prtstm)) occ(ibantot)=zero
+                 ibantot=ibantot+1
+               end do ! iban
+             end do ! ikpt
+           end do ! isppol
+         end if ! prtstm < 0
+       end if ! present(prtstm)
+
+!DEBUG
+     write(std_out,'(a)') ' newocc : after present(prtstm) section '
+!    stop
+!ENDDEBUG
+
+       nelect_biased = abs(nelectmid - nelect_biased)
+       ! Here, arrange to have globally positive occupation numbers, irrespective of the stmbias sign
+       if (-stmbias > tol10) occ(:) = -occ(:)
+       ABI_FREE(occt)
+
+       write(msg,'(a,f14.6)')' newocc: the number of electrons in the STM range is nelect_biased=',nelect_biased
+       call wrtout(std_out,msg)
+     end if
+   endif ! present(stmbias)
 
 
  else
@@ -944,19 +908,13 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        end do
 
        ! Produce nelectmid from fermimid
-       ! CP modify
-       ! call getnel(doccdet,dosdeltae,eigent,entropy_tmp,fermimid_tmp,maxocc,mband,nbandt,&
-       !  nelectmid,nkpt,1,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk)
        call getnel(doccdet,dosdeltae,eigent,entropy_tmp,fermie_mid_tmp,fermie_mid_tmp,maxocc,mband,nbandt,&
-         nelectmid,nkpt,1,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1))
+         nelectmid,nkpt,1,occt,occopt,option1,tphysel,tsmear,fake_unit,wtk,1,nband(1),&
+&        extfpmd_nbdbuf=extfpmd_nbdbuf)
 
-       !entropyt(is) = entropy_tmp
-       !fermimidt(is) = fermimid_tmp
-       !fermimid = fermimidt(is)
        entropyet(is) = entropy_tmp
        fermie_midt(is) = fermie_mid_tmp
        fermie_mid = fermie_midt(is)
-       ! End CP modify
 
        ! temporary arrays
        cnt = 0
@@ -970,10 +928,10 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        ! write(std_out,'(a,es24.16,a,es24.16)' )' newocc: from fermi=',fermimid,', getnel gives nelect=',nelectmid
 
        if(nelectmid>=nelect_tmp)then
-         fermie_hi=fermie_mid_tmp ! CP modify name
+         fermie_hi=fermie_mid_tmp 
          nelecthi=nelectmid
        else
-         fermie_lo=fermie_mid_tmp ! CP modify name
+         fermie_lo=fermie_mid_tmp 
          nelectlo=nelectmid
        end if
        if( abs(nelecthi-nelectlo) <= 1.0d-13 .or. abs(fermie_hi-fermie_lo) <= 0.5d-14*abs(fermie_hi+fermie_lo) ) exit
@@ -988,7 +946,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
      cnt2 = cnt2 + nkpt*mband
      entropy = entropy + entropyet(is)
-     fermie=fermie_mid ! CP modify name
+     fermie=fermie_mid 
      write(msg, '(a,i2,a,f14.6,a,f14.6,a,a,i4)' ) &
        ' newocc: new Fermi energy for spin ', is, ' is ',fermie,' , with nelect: ',nelectmid,ch10,&
        '  Number of bisection calls =',ii
@@ -1087,12 +1045,6 @@ end subroutine newocc
 !!
 !! OUTPUT
 !!  argout(sizeout)=description
-!!
-!! PARENTS
-!!      m_occ
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1639,12 +1591,6 @@ end subroutine init_occ_ent
 !! otherwise,
 !!  $ rocceig(m,n)=\frac{1}{2}*(occ_{k,q}(m)-occ_k(n))/(eig0_{k,q}(m)-eig0_k(n))$
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtorho
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,occopt,occ_k,occ_kq,rocceig)
@@ -1736,10 +1682,6 @@ end subroutine occeig
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental real(dp) function occ_fd(ee, kT, mu)
@@ -1792,10 +1734,6 @@ end function occ_fd
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental real(dp) function occ_dfde(ee, kT, mu)
@@ -1840,10 +1778,6 @@ end function occ_dfde
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha (usually zero)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental real(dp) function occ_be(ee, kT, mu)
@@ -1887,10 +1821,6 @@ end function occ_be
 !!   ee=Single particle energy in Ha
 !!   kT=Value of K_Boltzmann x T in Ha.
 !!   mu=Chemical potential in Ha (usually zero)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1951,12 +1881,6 @@ end function occ_dbe
 !!
 !! OUTPUT
 !!   Only writing.
-!!
-!! PARENTS
-!!      m_epjdos,m_occ
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

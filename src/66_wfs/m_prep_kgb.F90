@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -90,11 +86,6 @@ contains
 !! SIDE EFFECTS
 !!  ====== if gs_hamk%usepaw==1
 !!  cwaveprj(natom,my_nspinor*bandpp)= wave functions at k projected with nl projectors
-!!
-!! PARENTS
-!!      m_chebfi,m_dft_energy,m_lobpcgwf,m_lobpcgwf_old,m_rmm_diis
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -603,11 +594,6 @@ end subroutine prep_getghc
 !!                                  only derivatives are computed here and not saved
 !! (if useylm=0, should have cpopt=-1)
 !!
-!! PARENTS
-!!      m_dft_energy,m_forstr,m_invovl,m_lobpcgwf,m_rmm_diis,m_vtowfk
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  cprj (as well as cg) is distributed over band processors.
 !!  Only the mod((iband-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band) projected WFs are stored on each proc.
@@ -904,11 +890,6 @@ end subroutine prep_nonlop
 !!  gwavef=(2,npw*ndat)=matrix elements <G|H|C>.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_mkrho,m_positron,m_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1397,11 +1378,6 @@ end subroutine prep_fourwf
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_prep_kgb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prep_wavef_sym_do(mpi_enreg,bandpp,nspinor,&
@@ -1663,11 +1639,6 @@ end subroutine prep_wavef_sym_do
 !!  gwavef_alltoall     = planewave coefficients of wavefunction
 !!                        ( for of the processor + to send to other processors band)
 !!
-!! PARENTS
-!!      m_prep_kgb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prep_wavef_sym_undo(mpi_enreg,bandpp,nspinor,&
@@ -1887,11 +1858,6 @@ end subroutine prep_wavef_sym_undo
 !! OUTPUT
 !!  index_wavef_band = position of the sorted values
 !!
-!! PARENTS
-!!      m_chebfi,m_prep_kgb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prep_index_wavef_bandpp(nproc_band,bandpp,&
@@ -1973,11 +1939,6 @@ end subroutine prep_index_wavef_bandpp
 !!
 !! OUTPUT
 !!  index_wavef(:)=array containing the sorted indexes (pointer, allocated in this routine)
-!!
-!! PARENTS
-!!      m_prep_kgb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -11,8 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -172,11 +170,6 @@ contains  !=====================================================
 !!   5. Create a scatter array between the points in the fine grid
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -369,11 +362,6 @@ end function eph_double_grid_new
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine eph_double_grid_free(self)
@@ -406,11 +394,6 @@ end subroutine eph_double_grid_free
 !! INPUTS
 !!   kpt=kpoint to be mapped (reduced coordinates)
 !!   opt=Map to the coarse (1) or dense grid (2)
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -464,11 +447,6 @@ end function eph_double_grid_get_index
 !!  bz2ibz: indexes mapping bz to ibz
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_double_grid
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -561,10 +539,6 @@ end subroutine eph_double_grid_bz2ibz
 !!
 !! OUTPUT
 !!  mapping: array with the mapping of k, k+q and q to the BZ and IBZ of the double grid structure
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

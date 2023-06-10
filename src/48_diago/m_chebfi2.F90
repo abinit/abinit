@@ -178,11 +178,6 @@ module m_chebfi2
 !! SIDE EFFECTS
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      chebfi_allocateAll,timab
-!!
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,nproc_band,bandpp,nproc_fft, &
@@ -254,11 +249,6 @@ end subroutine chebfi_init
 !! SIDE EFFECTS
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      chebfi_free,timab,xg_init,xg_setBlock,xmpi_sum
-!!
 !! SOURCE
 
 subroutine chebfi_allocateAll(chebfi)
@@ -327,11 +317,6 @@ end subroutine chebfi_allocateAll
 !! SIDE EFFECTS
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xg_free
-!!
 !! SOURCE
 
 subroutine chebfi_free(chebfi)
@@ -375,10 +360,6 @@ end subroutine chebfi_free
 !!
 !! SIDE EFFECTS
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -478,14 +459,6 @@ end function chebfi_memInfo
 !!  eigen= Full eigenvalues (initial values on entry)
 !!  residu= residuals, i.e. norm of (A-lambdaB)|X>
 !!  X0= Full set of vectors (initial values on entry)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      timab,xgTransposer_constructor,xgTransposer_copy,xgTransposer_transpose
-!!      xgTransposer_free,xg_init,xgBlock_copy,xgBlock_setBlock,xgBlock_reverseMap
-!!      chebfi_rayleighRitzQuotients,chebfi_computeNextOrderChebfiPolynom
-!!      chebfi_rayleighRitz,chebfi_computeResidue,xmpi_min,xmpi_max,xmpi_barrier
 !!
 !! SOURCE
 
@@ -755,11 +728,6 @@ end subroutine chebfi_run
 !!  mineig= lowest eigenvalue
 !!  DivResults= Rayleigh-Ritz quotients
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xg_init,xg_free,xgBlock_colwiseDotProduct,xgBlock_colwiseDivision
-!!
 !! SOURCE
 
 subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
@@ -826,11 +794,6 @@ end subroutine chebfi_rayleighRitzQuotients
 !!
 !! SIDE EFFECTS
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_copy,call xgBlock_scale,xgBlock_saxpy,timab
 !!
 !! SOURCE
 
@@ -906,11 +869,6 @@ end subroutine chebfi_computeNextOrderChebfiPolynom
 !! SIDE EFFECTS
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_setBlock
-!!
 !! SOURCE
 
 subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
@@ -948,11 +906,6 @@ end subroutine chebfi_swapInnerBuffers
 !!
 !! SIDE EFFECTS
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xg_init,xg_free,xgBlock_gemm,xgBlock_scale,xgBlock_setBlock,xgBlock_hegv,xgBlock_hegvd,timab
 !!
 !! SOURCE
 
@@ -1110,11 +1063,6 @@ end subroutine chebfi_rayleighRitz
 !!  residu<type(xgBlock_t)>= vector of residuals
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_colwiseCymax,xgBlock_colwiseNorm2,timab
-!!
 !! SOURCE
 
  real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
@@ -1178,11 +1126,6 @@ end function chebfi_computeResidue
 !! SIDE EFFECTS
 !!  residu<type(xgBlock_t)>= vector of residuals
 !!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgBlock_setBlock,xgBlock_scale,cheb_poly1
 !!
 !! SOURCE
 
@@ -1258,10 +1201,6 @@ end subroutine chebfi_ampfactor
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function cheb_oracle1(xx,aa,bb,tol,nmax) result(nn)
@@ -1320,10 +1259,6 @@ end function cheb_oracle1
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

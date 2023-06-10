@@ -178,7 +178,7 @@ interface xscal
     real(sp) :: sx(*)
   end subroutine sscal
   !
-  subroutine  dscal(n,da,dx,incx)
+  subroutine dscal(n,da,dx,incx)
     use defs_basis
     implicit none
     integer :: incx
@@ -187,7 +187,7 @@ interface xscal
     real(dp):: dx(*)
   end subroutine dscal
   !
-  subroutine  cscal(n,ca,cx,incx)
+  subroutine cscal(n,ca,cx,incx)
     use defs_basis
     implicit none
     integer :: incx
@@ -196,7 +196,7 @@ interface xscal
     complex(spc) :: cx(*)
   end subroutine cscal
   !
-  subroutine  zscal(n,za,zx,incx)
+  subroutine zscal(n,za,zx,incx)
     use defs_basis
     implicit none
     integer :: incx
@@ -561,11 +561,6 @@ CONTAINS  !=====================================================================
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine blas_cholesky_ortho_spc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
@@ -628,11 +623,6 @@ end subroutine blas_cholesky_ortho_spc
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine blas_cholesky_ortho_dpc(vec_size,nvec,iomat,cf_ovlp,use_gemm)
@@ -689,11 +679,6 @@ end subroutine blas_cholesky_ortho_dpc
 !! SIDE EFFECTS
 !!   mat(n,n)=in output, it contains alpha * mat^T.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine sqmat_itranspose_sp(n,mat,alpha)
@@ -740,11 +725,6 @@ end subroutine sqmat_itranspose_sp
 !!
 !! SIDE EFFECTS
 !!   mat(n,n)=in output, it contains alpha * mat^T.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
 !!
 !! SOURCE
 
@@ -793,11 +773,6 @@ end subroutine sqmat_itranspose_dp
 !! SIDE EFFECTS
 !!   mat(n,n)=in output, it contains alpha * mat^T.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine sqmat_itranspose_spc(n,mat,alpha)
@@ -844,11 +819,6 @@ end subroutine sqmat_itranspose_spc
 !!
 !! SIDE EFFECTS
 !!   mat(n,n)=in output, it contains alpha * mat^T.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
 !!
 !! SOURCE
 
@@ -897,11 +867,6 @@ end subroutine sqmat_itranspose_dpc
 !!
 !! OUTPUT
 !!  omat(n,n)=contains alpha * imat^T.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
 !!
 !! SOURCE
 
@@ -952,11 +917,6 @@ end subroutine sqmat_otranspose_sp
 !! OUTPUT
 !!  omat(n,n)=contains alpha * imat^T.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine sqmat_otranspose_dp(n,imat,omat,alpha)
@@ -1005,11 +965,6 @@ end subroutine sqmat_otranspose_dp
 !!
 !! OUTPUT
 !!  omat(n,n)=contains alpha * imat^T.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
 !!
 !! SOURCE
 
@@ -1060,11 +1015,6 @@ end subroutine sqmat_otranspose_spc
 !! OUTPUT
 !!  omat(n,n)=contains alpha * imat^T.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine sqmat_otranspose_dpc(n,imat,omat,alpha)
@@ -1113,11 +1063,6 @@ end subroutine sqmat_otranspose_dpc
 !! SIDE EFFECTS
 !!   mat(n,n)=in output, it contains alpha * CONJG(mat^T).
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine sqmat_iconjgtrans_spc(n,mat,alpha)
@@ -1164,11 +1109,6 @@ end subroutine sqmat_iconjgtrans_spc
 !!
 !! SIDE EFFECTS
 !!   mat(n,n)=in output, it contains alpha * CONJG(mat^T).
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
 !!
 !! SOURCE
 
@@ -1218,11 +1158,6 @@ end subroutine sqmat_iconjgtrans_dpc
 !! OUTPUT
 !!  omat(n,n)=contains alpha * CONJG(imat^T).
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
-!!
 !! SOURCE
 
 subroutine sqmat_oconjgtrans_spc(n, imat, omat, alpha)
@@ -1271,11 +1206,6 @@ end subroutine sqmat_oconjgtrans_spc
 !!
 !! OUTPUT
 !!  omat(n,n)=contains alpha * CONJG(imat^T).
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      mkl_zomatcopy
 !!
 !! SOURCE
 

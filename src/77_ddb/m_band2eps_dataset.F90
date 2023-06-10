@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -103,11 +99,6 @@ contains
 !! INPUTS
 !!  band2eps_dtset = band2eps datastructure
 !!
-!! PARENTS
-!!      band2eps
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -151,11 +142,6 @@ end subroutine band2eps_dtset_free
 !! NOTES
 !! Should be executed by one processor only.
 !!
-!!
-!! PARENTS
-!!      band2eps
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -327,11 +313,6 @@ end subroutine invars11
 !!
 !! NOTES
 !! Should be executed by one processor only.
-!!
-!! PARENTS
-!!      band2eps
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

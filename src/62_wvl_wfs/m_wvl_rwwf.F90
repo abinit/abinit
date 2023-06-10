@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -70,12 +66,6 @@ contains
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      writemywaves,writeonewave,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -193,12 +183,6 @@ end subroutine wvl_read
 !!
 !! SIDE EFFECTS
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      writemywaves,writeonewave,wrtout,xred2xcart
 !!
 !! SOURCE
 

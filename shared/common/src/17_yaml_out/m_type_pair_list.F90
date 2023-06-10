@@ -14,11 +14,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!   m_pair_list
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -26,7 +21,7 @@
 #endif
 
 module m_type_pair_list
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
 ! type c_pair_list
 ! Represent a list of key-value pairs value can be either
 ! integer, double precision real or string.

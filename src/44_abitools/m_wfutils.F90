@@ -63,11 +63,6 @@ contains
 !!  igsc=shift to be applied on the location of data in the array gsc
 !!  blocksize=size of blocks
 !!
-!! PARENTS
-!!      lobpcgwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 subroutine setWFParameter(cplx,me_g0,npw_k,nspinor,icg,igsc,blocksize)
@@ -171,12 +166,6 @@ end function wfindex
 !!
 !! TODO
 !!  Split the two cases so that we can avoid the array descriptors.
-!!
-!! PARENTS
-!!   lobpcgwf
-!!
-!! CHILDREN
-!!   dcopy, zcopy
 !!
 !! SOURCE
 !!

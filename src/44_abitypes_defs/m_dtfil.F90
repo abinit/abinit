@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -165,8 +161,12 @@ module m_dtfil
    ! if dataset mode, and getden/=0 : abo//'_DS'//trim(jgetden)//'PAWDEN'
 
   character(len=fnlen) :: filsigephin
-   ! Filename used to read SIGEPH file.
+   ! Filename used to read SIGEPH.nc file.
    ! Initialize via getsigeph_filepath
+
+  character(len=fnlen) :: filgstorein
+   ! Filename used to read GSTOR.ncE file.
+   ! Initialize via getgstore_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -290,7 +290,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabi_qps
   character(len=fnlen) :: fnameabi_scr            ! SCReening file (symmetrized inverse dielectric matrix)
   character(len=fnlen) :: fnameabi_sus            ! KS independent-particle polarizability file
-  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read     
+  character(len=fnlen) :: fnameabi_chkp_rdm       ! Checkpoint for GW@DFA to read
   character(len=fnlen) :: fnameabo_ddb
   character(len=fnlen) :: fnameabo_den
   character(len=fnlen) :: fnameabo_ks_den         ! KS DEN file at Sigma level
@@ -324,6 +324,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_sig
   character(len=fnlen) :: fnameabo_spcur
   character(len=fnlen) :: fnameabo_sus
+  character(len=fnlen) :: fnameabo_td_ener
   character(len=fnlen) :: fnameabo_vha
   character(len=fnlen) :: fnameabo_vpsp
   character(len=fnlen) :: fnameabo_vso
@@ -428,13 +429,6 @@ contains
 !! using another name. The name filstat will be needed beyond gstate to check
 !! the appearance of the "exit" flag, to make a hasty exit, as well as
 !! in order to output the status of the computation.
-!!
-!! PARENTS
-!!      m_driver,m_gstateimg
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -614,6 +608,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                   getpath=dtset%getsigeph_filepath)
  ! If getsigeph_filepath is not used, will read the output as assumed in the transport driver when called after sigeph
  if (will_read == 0) dtfil%filsigephin = strcat(filnam_ds(4), "_SIGEPH.nc")
+
+ ! According to getgstore_filepath, build _GSTORE file name
+ stringfile='_GSTORE.nc'; stringvar='gstore'
+ call mkfilename(filnam, dtfil%filgstorein, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getgstore_filepath)
+ if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
@@ -804,6 +804,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_sig=trim(dtfil%filnam_ds(4))//'_SIG'
  dtfil%fnameabo_spcur=trim(dtfil%filnam_ds(4))//'_SPCUR'
  dtfil%fnameabo_sus=trim(dtfil%filnam_ds(4))//'_SUS'
+ dtfil%fnameabo_td_ener=trim(dtfil%filnam_ds(4))//'_TDENER'
  dtfil%fnameabo_vha=trim(dtfil%filnam_ds(4))//'_VHA'
  dtfil%fnameabo_vpsp=trim(dtfil%filnam_ds(4))//'_VPSP'
  dtfil%fnameabo_vso=trim(dtfil%filnam_ds(4))//'_VSO'
@@ -967,13 +968,6 @@ end subroutine dtfil_init
 !! dtfil=<type datafiles_type>infos about file names, file unit numbers
 !!  (part of which were initialized previously)
 !!
-!! PARENTS
-!!      m_gstate,m_mover
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine dtfil_init_time(dtfil,iapp)
@@ -1071,13 +1065,6 @@ end subroutine dtfil_init_time
 !! OUTPUT
 !! filapp= filename with appended string
 !!
-!! PARENTS
-!!      m_dtfil
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine fappnd(filapp,filnam,iapp,&
@@ -1158,13 +1145,6 @@ end subroutine fappnd
 !!
 !! SIDE EFFECTS
 !! dtfil=<type datafiles_type>= only getxxx_from_image flags are modified
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1269,13 +1249,6 @@ end subroutine dtfil_init_img
 !! filnam_out=the new file name
 !! will_read=1 if the file must be read ; 0 otherwise (ird and get were zero)
 !!
-!! PARENTS
-!!      m_dtfil,m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,stringvar,will_read, &
@@ -1325,7 +1298,7 @@ subroutine mkfilename(filnam,filnam_out,get,idtset,ird,jdtset_,ndtset,stringfil,
        ABI_ERROR(msg)
      end if
      filnam_out = rmquotes(getpath)
-     write(msg, '(5a)' )' mkfilename: get',trim(stringvar) ," from: ",trim(filnam_out), ch10
+     write(msg, '(5a)')' mkfilename: get', trim(stringvar), " from: ",trim(filnam_out), ch10
      call wrtout([std_out, ab_out], msg)
      ! Check whether file exists taking into account a possible NC file extension.
      if (xmpi_comm_rank(xmpi_world) == 0) then
@@ -1410,14 +1383,6 @@ end subroutine mkfilename
 !! OUTPUT
 !! stops processing if old file does not exist; changes name
 !! and returns new name in redefined filnam if new file already exists.
-!!
-!! PARENTS
-!!      anaddb,m_dtfil,m_effective_potential,m_polynomial_coeff,m_vcoul
-!!      multibinit,ujdet
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1525,7 +1490,7 @@ end subroutine isfile
 !! FUNCTION
 !! Begin by eventual redefinition of unit std_in and std_out
 !! Then, print greetings for interactive user.
-!! Next, Read filenames from unit std_in, AND check that new
+!! Next, read filenames from unit std_in, AND check that new
 !! output file does not already exist.
 !!
 !! INPUTS
@@ -1546,13 +1511,6 @@ end subroutine isfile
 !!  (3) Root name for generic input files (wavefunctions, potential, density ...)
 !!  (4) Root name for generic output files (wavefunctions, potential, density, DOS, hessian ...)
 !!  (5) Root name for generic temporary files (wftmp1,wftmp2,kgunit,status ...)
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      abi_log_status_state,int2char4,intagm,isfile,libpaw_log_flag_set
-!!      parsefile,xmpi_barrier,xmpi_bcast
 !!
 !! SOURCE
 
@@ -1765,6 +1723,10 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      'Action: correct your "file" file.'
      ABI_ERROR(msg)
    end if
+
+   ! TODO: Create directories if needed but I need C routines to be portable.
+   !i = index(filnam(5), "/"); if (i > 0) call mkdir(filnam(5)(1:i-1), ierr)
+   !i = index(filnam(6), "/"); if (i > 0) call mkdir(filnam(6)(1:i-1), ierr)
 
  end if ! master only
 

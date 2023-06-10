@@ -247,15 +247,6 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      nullify_atoms_data,nullify_dft_local_fields,nullify_diis_objects
-!!      nullify_gaussian_basis,nullify_gpu_pointers
-!!      nullify_local_zone_descriptors,nullify_locreg_descriptors
-!!      nullify_orbitals_data,nullify_paw_objects,nullify_rholoc_objects
-!!
 !! SOURCE
 
 subroutine nullify_wvl_data(wvl)

@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,11 +78,6 @@ contains
 !!  Ref.: S. Grimme, Semiempirical GGA-type density functional
 !!        constructed with a long-range dispersion correction,
 !!        J. Comp. Chem. 27, 1787 (2006) [[cite:Grimme2006]]
-!!
-!! PARENTS
-!!      m_respfn_driver,m_setvtr,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -473,7 +464,7 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 &   '      Damping parameter= ',vdw_d,ch10,&
 &   '      Cut-off radius   = ',rcut,' bohr'
    call wrtout(std_out,msg,'COLL')
-   write(msg,'(2a,i8,2a,es14.5,4a)') ch10,&
+   write(msg,'(2a,i14,2a,es14.5,4a)') ch10,&
 &   '      Number of pairs contributing = ',npairs,ch10,&
 &   '      DFT-D2 energy contribution   = ',e_vdw_dftd2,' Ha',ch10,&
 &   '  --------------------------------------------------------------',ch10
@@ -497,11 +488,6 @@ subroutine vdw_dftd2(e_vdw_dftd2,ixc,natom,ntypat,prtvol,typat,rprimd,vdw_tol,xr
 !!
 !! FUNCTION
 !! Convert gradients from cartesian to reduced coordinates
-!!
-!! PARENTS
-!!      m_vdw_dftd2
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

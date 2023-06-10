@@ -227,6 +227,12 @@ MODULE m_pawtab
    ! nproju is the number of projectors for orbitals on which paw+u acts.
    ! Also used for local exact-exchange
 
+  integer :: option_interaction_pawu
+   ! Option for interaction energy (PAW+U) in case of non-collinear magnetism:
+   ! 1: E_int=-J/4.N.(N-2)
+   ! 2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1))    (Nup and Ndn are ill-defined)
+   ! 3: E_int=-J/4.( N.(N-2) + mx^2 + my^2 + mz^2 )
+
   integer :: mesh_size
    ! Dimension of radial mesh for generic arrays contained in this pawtab datastructure
    ! The mesh is usually defined up to the PAW augmentation region boundary
@@ -339,6 +345,9 @@ MODULE m_pawtab
   real(dp) :: jpawu
    ! jpawu
    ! Value of J parameter for paw+u for a given type.
+  
+   real(dp) :: lamb_shielding=0.0D0
+   ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
 
   real(dp) :: rpaw
    ! Radius of PAW sphere
@@ -393,6 +402,7 @@ MODULE m_pawtab
    ! Also used for local exact-exchange
 
   integer, allocatable :: orbitals(:)
+   ! (basis_size)
    ! gives the l quantum number per basis element
 
 !Real (real(dp)) arrays
@@ -646,11 +656,6 @@ CONTAINS !===========================================================
 !!  Pawtab<type(pawtab_type)>=PAW arrays tabulated.
 !!                            Nullified in output
 !!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_nullify_0D(Pawtab)
@@ -702,6 +707,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%lmnmix_sz=0
  Pawtab%lpawu=-1
  Pawtab%nproju=0
+ Pawtab%option_interaction_pawu=0
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
@@ -721,10 +727,6 @@ end subroutine pawtab_nullify_0D
 !!
 !! FUNCTION
 !!  Nullify all pointers in an array of pawtab data structures
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -762,11 +764,6 @@ end subroutine pawtab_nullify_1D
 !! SIDE EFFECTS
 !!  Pawtab<type(pawtab_type)>=PAW arrays tabulated.
 !!  All allocated arrays in Pawtab are deallocated
-!!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -974,6 +971,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%lmnmix_sz=0
  Pawtab%lpawu=-1
  Pawtab%nproju=0
+ Pawtab%option_interaction_pawu=0
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
@@ -993,10 +991,6 @@ end subroutine pawtab_free_0D
 !!
 !! FUNCTION
 !!  Destroy (deallocate) all pointers in an array of pawtab data structures
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1030,10 +1024,6 @@ end subroutine pawtab_free_1D
 !!
 !! FUNCTION
 !!  Set flags controlling optional arrays in a pawtab datastructure
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1090,10 +1080,6 @@ end subroutine pawtab_set_flags_0D
 !!  Set flags controlling optional arrays in an array of pawtab datastructures
 !! if (present(has_tvale))    Pawtab%has_tvale=has_tvale
 
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
@@ -1158,11 +1144,6 @@ end subroutine pawtab_set_flags_1D
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1261,6 +1242,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
     call wrtout(my_unt,msg,my_mode)
     write(msg,'(a,i4)')'  Number of projectors on which U or EXX acts .... ',Pawtab(ityp)%nproju
     call wrtout(my_unt,msg,my_mode)
+    write(msg,'(a,i4)')'  Option interaction for PAW+U (double-counting).. ',Pawtab(ityp)%option_interaction_pawu
+    call wrtout(my_unt,msg,my_mode)
   end if
   write(msg,'(a,i4)')'  Use potential zero ............................. ',Pawtab(ityp)%usepotzero
   call wrtout(my_unt,msg,my_mode)
@@ -1312,6 +1295,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   end if
   write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
+  call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Compensation charge radius (if >rshp, g(r)=0) ...',Pawtab(ityp)%rshp !(if r>rshp, g(r)=zero)
@@ -1361,13 +1346,6 @@ end subroutine pawtab_print
 !!
 !! OUTPUT
 !!   l_size_atm(natom)=output array of l_size values (for each atom)
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_nonlinear
-!!      m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  This function returns an allocatable integer array which may be allocated
@@ -1453,11 +1431,6 @@ end subroutine pawtab_get_lsize
 !! SIDE EFFECTS
 !!  pawtab=<type pawtab_type>=a pawtab datastructure
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
@@ -1512,13 +1485,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
-!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,usespnorb
-   if (full_broadcast) nn_int=nn_int+11
+!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,
+!  option_interaction_pawu,usespnorb
+   if (full_broadcast) nn_int=nn_int+12
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+12
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,lamb_shielding,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+13
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -2022,6 +1996,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=pawtab%lpawu  ;ii=ii+1
      list_int(ii)=pawtab%mqgrid_shp  ;ii=ii+1
      list_int(ii)=pawtab%nproju  ;ii=ii+1
+     list_int(ii)=pawtab%option_interaction_pawu ;ii=ii+1
      list_int(ii)=pawtab%useexexch  ;ii=ii+1
      list_int(ii)=pawtab%usepawu  ;ii=ii+1
      list_int(ii)=pawtab%usepotzero ;ii=ii+1
@@ -2199,6 +2174,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%lpawu=list_int(ii)  ;ii=ii+1
      pawtab%mqgrid_shp=list_int(ii)  ;ii=ii+1
      pawtab%nproju=list_int(ii)  ;ii=ii+1
+     pawtab%option_interaction_pawu=list_int(ii) ;ii=ii+1
      pawtab%useexexch=list_int(ii)  ;ii=ii+1
      pawtab%usepawu=list_int(ii)  ;ii=ii+1
      pawtab%usepotzero=list_int(ii) ;ii=ii+1
@@ -2268,6 +2244,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%dtaucdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%lamb_shielding  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
    list_dpr(ii)=pawtab%rshp  ;ii=ii+1
    list_dpr(ii)=pawtab%rcore  ;ii=ii+1
@@ -2516,6 +2493,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%dtaucdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%lamb_shielding=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
    pawtab%rshp=list_dpr(ii)  ;ii=ii+1
    pawtab%rcore=list_dpr(ii)  ;ii=ii+1
@@ -2965,11 +2943,6 @@ end subroutine pawtab_bcast
 !! SIDE EFFECTS
 !!  wvlpaw<type(wvlpaw_type)>=datastructure to be allocated.
 !!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvlpaw_allocate(wvlpaw)
@@ -3003,11 +2976,6 @@ end subroutine wvlpaw_allocate
 !! SIDE EFFECTS
 !!  wvlpaw<type(wvlpaw_type)>=datastructure to be destroyed.
 !!  All allocated arrays are deallocated.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3054,11 +3022,6 @@ end subroutine wvlpaw_free
 !! SIDE EFFECTS
 !!  wvlpaw=datastructure to be nullified
 !!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvlpaw_nullify(wvlpaw)
@@ -3091,11 +3054,6 @@ end subroutine wvlpaw_nullify
 !! SIDE EFFECTS
 !!  wvlpaw_rholoc<type(wvlpaw_rholoc_type)>=datastructure to be destroyed.
 !!  All allocated arrays are deallocated.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3131,11 +3089,6 @@ end subroutine wvlpaw_rholoc_free
 !!
 !! SIDE EFFECTS
 !!  wvlpaw_rholoc<type(wvlpaw_rholoc_type)>=datastructure to be nullified.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

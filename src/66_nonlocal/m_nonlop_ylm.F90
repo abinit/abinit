@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -345,12 +341,6 @@ contains
 !!
 !! TODO
 !! * Complete implementation of spin-orbit
-!!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -1354,12 +1344,6 @@ end subroutine nonlop_ylm
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine nonlop_ylm_init_counters()
@@ -1380,11 +1364,6 @@ end subroutine nonlop_ylm_init_counters
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine nonlop_ylm_stop_counters()
@@ -1404,12 +1383,6 @@ end subroutine nonlop_ylm_stop_counters
 !! nonlop_ylm_output_counters
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum
 !!
 !! SOURCE
 

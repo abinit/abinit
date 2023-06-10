@@ -13,10 +13,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -87,12 +83,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!  vect(2,npw)=<g|(h-eval)|c_{n,k}>*(polynomial ratio)
-!!
-!! PARENTS
-!!      m_lobpcgwf_old
-!!
-!! CHILDREN
-!!      abi_xcopy,cg_precon_block,cg_zprecon_block,timab
 !!
 !! SOURCE
 

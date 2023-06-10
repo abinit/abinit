@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -153,14 +149,6 @@ contains
 !!  ! Developpers have to be careful when introducing others arrays:
 !!      they have to be stored on the fine FFT grid.
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      constrained_residual,dotprod_vn,hartre,mag_penalty,mean_fftr
-!!      psolver_rhohxc,rhohxcpositron,rhotoxc,sqnorm_v,timab,wvl_psitohpsi
-!!      wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc,xred2xcart
 !!
 !! SOURCE
 

@@ -240,9 +240,6 @@ P          mk1mem30        64
           rfatpol12         1       1
           rfatpol20         1       1
           rfatpol30         1       2
-            rfdir12         1       1       1
-            rfdir20         0       0       0
-            rfdir30         1       1       1
            rfphon12         0
            rfphon20         0
            rfphon30         1
@@ -1604,9 +1601,6 @@ P          mk1mem30        64
           rfatpol12         1       1
           rfatpol20         1       1
           rfatpol30         1       2
-            rfdir12         1       1       1
-            rfdir20         0       0       0
-            rfdir30         1       1       1
            rfphon12         0
            rfphon20         0
            rfphon30         1

@@ -14,10 +14,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -84,12 +80,6 @@ contains
 !!
 !! TODO
 !! Response function not coded yet, but part of it are already present
-!!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
 !!
 !! SOURCE
 

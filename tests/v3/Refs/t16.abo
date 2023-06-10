@@ -247,16 +247,11 @@ P          mk1mem5          5
            prtpot3          1
            prtpot4          0
            prtpot5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          0       0       0
+            rfdir4          1       1       1
+            rfdir5          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -824,7 +819,7 @@ tolerances: {tolwfr: 1.00E-28, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -1741,16 +1736,11 @@ P          mk1mem5          5
            prtpot3          1
            prtpot4          0
            prtpot5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          0       0       0
+            rfdir4          1       1       1
+            rfdir5          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3

@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -66,12 +62,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_hamiltonian
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine set_wf(dv2,nx2,ny2,nz2,nk2,nb2,ng2,cbf2,cf2,cb2)
@@ -104,10 +94,6 @@ end subroutine set_wf
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -140,10 +126,6 @@ end function norm_k
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -175,10 +157,6 @@ end function norm_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -210,10 +188,6 @@ end function scprod_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -260,10 +234,6 @@ end function scprod_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -339,10 +309,6 @@ end function scprod_kc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE

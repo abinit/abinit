@@ -11,11 +11,11 @@
 !!
 !! Note: the behavior is different from the origial version
 !! The value will be overwritten in this version, whereas it is ignored in the
-!! original version if the key is already in the table (why??!!). 
+!! original version if the key is already in the table (why??!!).
 !!
 !! Note2:!!!!!!!!!!!!!!!!! FIXME
 !! It does not handle white space at the end of string correctly. It does not affect
-!! the usage in Multibinit but BE CAREFUL. 
+!! the usage in Multibinit but BE CAREFUL.
 !!
 !! Below is the original Copyright.
 !!=======================================
@@ -46,9 +46,24 @@ MODULE m_hashtable_strval
   use defs_basis
   use m_errors
   use m_abicore
+  use, intrinsic :: iso_c_binding
+  !use, intrinsic :: iso_c_binding, only: c_double, c_int64_t
+  !USE, INTRINSIC :: IEEE_ARITHMETIC
+
+  !use, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_QUIET_NAN
+  !use, intrinsic :: iso_fortran_env, only: real64
 
   IMPLICIT NONE ! Use strong typing
   INTEGER, PARAMETER :: tbl_size = 50
+  !real(real64) :: nan
+  !nan = IEEE_VALUE(nan, IEEE_QUIET_NAN)
+  ! The above one is more standard, but how to make nan a parameter?
+  ! The following is used instead.
+  !real(c_double), parameter :: NAN=IEEE_VALUE(nan, IEEE_QUIET_NAN)
+
+  !real(c_double), parameter :: NAN = TRANSFER(9218868437227405313_c_int64_t, 1._c_double)
+  ! NOTE: this is not NAN really. The correct one is the last line. But NAG compiler does not think it is a valid floating number.
+  ! real(c_double), parameter :: NAN = TRANSFER(921886843722740531_c_int64_t, 1._c_double)
 
   TYPE sllist
      TYPE(sllist), POINTER :: child => NULL()
@@ -76,6 +91,14 @@ MODULE m_hashtable_strval
      PROCEDURE :: sum_val => sum_val_hash_table_t
      PROCEDURE :: print_all => print_all_hash_table_t
      procedure :: print_entry => print_entry_hash_table_t
+     procedure :: has_key
+     procedure :: put_intn
+     procedure :: get_intn
+     procedure :: has_key_intn
+     procedure :: put_int3
+     procedure :: get_int3
+     procedure :: has_key_int3
+
   END TYPE hash_table_t
 
   PUBLIC :: hash_table_t
@@ -115,6 +138,7 @@ CONTAINS
     INTEGER                                      :: vallen
 
     vallen = 0
+    val=MAGIC_UNDEF
     IF (ALLOCATED(list%key) .AND. (list%key == key)) THEN
        val = list%val
     ELSE IF(ASSOCIATED(list%child)) THEN ! keep going
@@ -186,7 +210,7 @@ CONTAINS
     character(len=80) :: msg
 
     if (allocated(self%key)) then
-      write(msg, "(A40, 1X, ES13.5)") self%key, self%val 
+      write(msg, "(A40, 1X, ES13.5)") self%key, self%val
       call wrtout(std_out,msg,'COLL')
       call wrtout(ab_out, msg, 'COLL')
       if(associated(self%child)) then
@@ -276,23 +300,23 @@ CONTAINS
   END SUBROUTINE put_hash_table_t
 
 
-  SUBROUTINE get_hash_table_t(tbl,key,val)
+  function get_hash_table_t(tbl,key) result(val)
     CLASS(hash_table_t),           INTENT(in)    :: tbl
     CHARACTER(len=*),              INTENT(in)    :: key
-    real(dp),                      INTENT(out)   :: val
+    real(dp)                                    :: val
     INTEGER                                      :: hash
 
     hash = MOD(sum_string(key),tbl%vec_len) + 1
     CALL tbl%vec(hash)%get(key=key,val=val)
-  END SUBROUTINE get_hash_table_t
+  END function get_hash_table_t
 
 
   SUBROUTINE free_hash_table_t(tbl)
-    CLASS(hash_table_t), INTENT(inout) :: tbl    
+    CLASS(hash_table_t), INTENT(inout) :: tbl
     INTEGER     :: i, low, high
 
     low  = LBOUND(tbl%vec,dim=1)
-    high = UBOUND(tbl%vec,dim=1) 
+    high = UBOUND(tbl%vec,dim=1)
     IF (ALLOCATED(tbl%vec)) THEN
        DO i=low,high
           CALL tbl%vec(i)%free()
@@ -302,7 +326,13 @@ CONTAINS
     tbl%is_init = .FALSE.
   END SUBROUTINE free_hash_table_t
 
-  
+  function has_key(self, key)
+    class(hash_table_t), intent(in) :: self
+    character(*), intent(in) :: key
+    logical :: has_key
+    has_key=(self%get(key)/=MAGIC_UNDEF)
+  end function has_key
+
   function sum_val_hash_table_t(self, label, prefix) result(s)
     class(hash_table_t), intent(in) :: self
     character(len=*), optional, intent(in) :: label, prefix
@@ -326,7 +356,7 @@ CONTAINS
     class(hash_table_t), intent(in) :: self
     integer :: i, low, high
     low  = LBOUND(self%vec,dim=1)
-    high = UBOUND(self%vec,dim=1) 
+    high = UBOUND(self%vec,dim=1)
 
     if (allocated(self%vec)) then
        do i =low, high
@@ -349,6 +379,60 @@ CONTAINS
     end if
   end subroutine print_entry_hash_table_t
 
+  subroutine put_intn(self, key, val, n)
+    class(hash_table_t), intent(inout) :: self
+    integer :: n
+    integer, intent(in) :: key(n)
+    real(dp) :: val
+    character(len=c_sizeof(key)) :: tmp
+    call self%put(transfer(key, tmp), val)
+  end subroutine put_intn
+
+  function get_intn(self, key,n) result(val)
+    class(hash_table_t), intent(inout) :: self
+    integer, intent(in) :: n
+    integer, intent(in) :: key(n)
+    real(dp) :: val
+    character(len=c_sizeof(key)) :: tmp
+    val = self%get(transfer(key, tmp))
+  end function get_intn
+
+  function has_key_intn(self, key, n) result(val)
+    class(hash_table_t), intent(inout) :: self
+    integer, intent(in) :: n
+    integer, intent(in) :: key(n)
+    logical :: val
+    character(len=c_sizeof(key)) :: tmp
+    val = self%has_key(transfer(key, tmp))
+  end function has_key_intn
+
+
+
+  subroutine put_int3(self, key, val)
+    class(hash_table_t), intent(inout) :: self
+    integer, intent(in) :: key(3)
+    real(dp) :: val
+    character(len=c_sizeof(key)) :: tmp
+    call self%put(transfer(key, tmp), val)
+  end subroutine put_int3
+
+
+  function get_int3(self, key) result(val)
+    class(hash_table_t), intent(inout) :: self
+    integer, intent(in) :: key(3)
+    real(dp) :: val
+    character(len=12) :: tmp
+    val = self%get(transfer(key, tmp))
+  end function get_int3
+
+
+  function has_key_int3(self, key) result(val)
+    class(hash_table_t), intent(inout) :: self
+    integer, intent(in) :: key(3)
+    logical :: val
+    character(len=12) :: tmp
+    val = self%has_key(transfer(key, tmp))
+  end function has_key_int3
 
 
 

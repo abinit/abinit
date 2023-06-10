@@ -1,0 +1,95 @@
+#############################################################################
+# La2CuO4 : Fatbands
+#############################################################################
+
+#############################################################################
+# Structural parameters
+#############################################################################
+acell            3*1
+
+rprim            3.6077606084241   3.6077606084241  -12.478046911766                              
+                -3.6077606084241   3.6077606084241   12.478046911766                          
+                 3.6077606084241  -3.6077606084241   12.478046911766
+       
+natom            7  
+ntypat           3  
+typat            1 1 2 3 3 3 3  
+znucl            57 29 8  
+xcart            0.0000000000  0.0000000000  9.0145301354                                              
+                 3.6077606086  3.6077606086  3.4635167757                                                
+                 0.0000000000  0.0000000000  0.0000000000                                                
+                 0.0000000000  3.6077606086  0.0000000000                                          
+                 3.6077606086  0.0000000000  0.0000000000                                                
+                 0.0000000000  0.0000000000  4.6340316725                                                
+                 3.6077606086  3.6077606086  7.8440152387
+      
+# Two datasets: Ground state and Fatbands
+ndtset           2
+jdtset           1 2
+
+# Shared parameters
+nband            38
+nbdbuf           4     # Extra bands easing convergence
+ecut             10    # Low but sufficient
+pawecutdg        18    # Low but sufficient
+occopt           3     # Metal with partially occupied orbitals
+tsmear           0.01  # Effective temperature
+
+pawprtvol        3
+
+nstep            100
+nline            3
+nnsclo           3
+tolwfr           1.0e-6
+istwfk          *1
+
+#############################################################################
+# First dataset: Ground state
+#############################################################################
+ngkpt1           6 6 6       # Coarse but sufficient
+nshiftk1         1
+shiftk1          0.5 0.5 0.5
+
+#############################################################################
+# Second dataset: Fatbands for orbital characters
+#############################################################################
+getden2         -1       # Use density of the previous dataset
+nshiftk2         1
+shiftk2          0 0 0   # Non shifted grid
+# nbandkss2        2
+# kssform2         3
+pawfatbnd2       2       # Fatbands resolved in L and M
+pawprtdos2       2       # Useful for abipy
+prtdos2          3       # Useful for abipy
+prtdosm2         2       # Useful for abipy
+iscf2           -2       # Non-self-consistent calculation
+kptopt2         -4       # Four paths in the band structure
+ndivk2           10 10 12 3   # Divisions for each paths
+kptbounds2       0.00000000  0.00000000  0.00000000     # Paths                        
+                 0.27456608  0.27456608 -0.27456608                             
+                 0.50000000  0.00000000  0.00000000                             
+                 0.00000000  0.00000000  0.00000000                             
+                -0.25000000  0.25000000  0.25000000
+
+pp_dirpath       "$ABI_PSPDIR"
+pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [paral_info]                                                                
+#%% max_nprocs = 4                                                              
+#%% nprocs_to_test = 4                                                          
+#%% [NCPU_4]
+#%% files_to_test =
+#%%    tw90_5_MPI4.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+#%% [extra_info]
+#%% authors = O. Gingras
+#%% keywords = PAW
+#%% description = Test interface with Wannier90 (PAW pseudopotentials)
+#%%<END TEST_INFO>
+#

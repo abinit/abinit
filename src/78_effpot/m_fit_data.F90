@@ -154,11 +154,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! fit_data<fit_data_type> = fit_data datatype to be initialized
 !!
-!! PARENTS
-!!      m_fit_data
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fit_data_init(fit_data,energy_diff,fcart_diff,natom,ntime,strten_diff,ts)
@@ -224,11 +219,6 @@ end subroutine fit_data_init
 !! fit_data<fit_data_type> = fit_data to be free
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_fit_data,m_fit_polynomial_coeff,m_opt_effpot
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fit_data_free(fit_data)
@@ -283,11 +273,6 @@ end subroutine fit_data_free
 !!
 !! OUTPUT
 !! fit_data<fit_data_type> = fit_data is now filled
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_opt_effpot
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -448,11 +433,6 @@ end subroutine fit_data_compute
 !! OUTPUT
 !! ts<training_set_type> = training set to be initialized
 !!
-!! PARENTS
-!!      m_fit_data
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine training_set_init(ts,displacement,du_delta,natom,ntime,strain,sqomega,ucvol)
@@ -506,11 +486,6 @@ end subroutine training_set_init
 !! INPUTS
 !! training_set<training_set_type> = training_set to be free
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_fit_data
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

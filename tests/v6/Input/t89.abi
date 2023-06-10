@@ -2,6 +2,9 @@
 
  ndtset 5
 
+ rfatpol 1 1
+ rfdir   0 0 1
+
 #GS
  xred1  0.0 0.0  0.1155     0.0 0.0 -0.1155
  xred2  0.0 0.0  0.11545    0.0 0.0 -0.1155
@@ -12,12 +15,12 @@
  getwfk1 0
 
 #RF
- rfphon4 1  rfatpol4 1 1  rfdir4 0 0 1
+ rfphon4 1  
  nqpt4 1    qpt4  0.0 0.0 0.0
  tolvrs4 1.d-10
 
 #RF
- rfphon5 1  rfatpol5 1 1  rfdir5 0 0 1
+ rfphon5 1 
  nqpt5 1    qpt5  0.0 0.0 0.0
  tolvrs5 1.d-10
  frzfermi5 1

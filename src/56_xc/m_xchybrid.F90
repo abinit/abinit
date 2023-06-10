@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -91,13 +87,6 @@ contains
 !!  Note that this is equivalent to
 !!   Vxc=Vx_libXC[rho_val] + Vxc_gga[rho_core+rho_val] - Vx_gga[rho_val]
 !!  but needs one less call to libxc
-!!
-!! PARENTS
-!!      m_forces,m_forstr,m_rhotov,m_setvtr
-!!
-!! CHILDREN
-!!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
-!!      rhohxc
 !!
 !! SOURCE
 
@@ -313,12 +302,6 @@ end subroutine xchybrid_ncpp_cc
 !! WARNINGS
 !! Current restrictions are:
 !!  a - Spin-polarized case not tested.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dtset_copy,dtset_free,libxc_functionals_end,libxc_functionals_init
-!!      rhohxc
 !!
 !! SOURCE
 

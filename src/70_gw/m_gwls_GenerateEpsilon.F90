@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -78,17 +74,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
 !!
 !! SOURCE
 
@@ -169,20 +154,9 @@ end subroutine driver_generate_dielectric_matrix
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
-!!
 !! SOURCE
 
-subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,kmax,output_filename,Lbasis,alpha,beta)
+subroutine GeneratePrintDielectricEigenvalues(epsilon_matrix_function,nseeds,kmax,output_filename,Lbasis,alpha,beta)
 !----------------------------------------------------------------------
 ! This routine computes the Lanczos approximate representation of the
 ! implicit dielectic operator and then diagonalizes the banded
@@ -199,14 +173,14 @@ interface
   end subroutine epsilon_matrix_function
 end interface
 
-integer,       intent(in) :: kmax
+integer,       intent(in) :: nseeds, kmax
 
 character(*),  intent(in) :: output_filename
 
 
-complex(dpc), intent(out) :: Lbasis(npw_k,nseeds*kmax)
-complex(dpc), intent(out) :: alpha(nseeds,nseeds,kmax)
-complex(dpc), intent(out) :: beta (nseeds,nseeds,kmax)
+complex(dpc), intent(out) :: Lbasis(:,:)
+complex(dpc), intent(out) :: alpha(:,:,:)
+complex(dpc), intent(out) :: beta (:,:,:)
 
 
 ! local variables
@@ -392,17 +366,6 @@ end subroutine GeneratePrintDielectricEigenvalues
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
-!!      cpu_time,diagonalize_lanczos_banded
-!!      driver_invert_positive_definite_hermitian_matrix
-!!      generateprintdielectriceigenvalues
-!!      matrix_function_epsilon_model_operator
-!!      set_dielectric_function_frequency,setup_pk_model,write_timing_log,zgemm
-!!      zheevd
-!!
 !! SOURCE
 
 subroutine Driver_GeneratePrintDielectricEigenvalues(dtset)
@@ -493,7 +456,7 @@ call set_dielectric_function_frequency([zero,zero])
 
 call cpu_time(time1)
 output_filename = 'EIGENVALUES_EXACT.dat'
-call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_k, kmax_exact, &
+call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_k, nseeds, kmax_exact, &
 output_filename, Lbasis_exact, alpha_exact, beta_exact)
 
 
@@ -508,8 +471,8 @@ call write_timing_log(timing_string,time)
 call cpu_time(time1)
 call setup_Pk_model(zero,second_model_parameter)
 output_filename = 'EIGENVALUES_MODEL.dat'
-call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_model_operator, kmax_model, output_filename,&
-Lbasis_model, alpha_model, beta_model)
+call GeneratePrintDielectricEigenvalues(matrix_function_epsilon_model_operator, nseeds, kmax_model, &
+&output_filename, Lbasis_model, alpha_model, beta_model)
 call cpu_time(time2)
 time = time2-time1
 write(timing_string,'(A)')  "Time to compute the MODEL Static Dielectric Matrix  :   "

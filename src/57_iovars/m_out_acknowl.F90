@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -62,12 +58,6 @@ contains
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
@@ -90,7 +80,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !Allocate and initialize, for each possible reference, the flag for citation,
 !the priority of the citation, the reference, and the comment.
- nrefs=44
+ nrefs=45
  ABI_MALLOC(cite,(nrefs))
  ABI_MALLOC(ref,(nrefs))
  ABI_MALLOC(comment,(nrefs))
@@ -303,7 +293,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' J.W. Zwanziger, M. Torrent,'// &
   ' Applied Magnetic Resonance 33, 447-456 (2008).'
  comment(21)=&
-  ' Comment: to be cited in case the computation of electric field gradient is used, i.e. prtefg>0 and usepaw=1.'//ch10//&
+  ' Comment: to be cited in case the computation of electric field gradient is used, i.e. nucefg>0 and usepaw=1.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2008'
  priority(21)=20
 
@@ -311,7 +301,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' J.W. Zwanziger, '// &
   ' J. Phys. Conden. Matt. 21, 15024-15036 (2009).'
  comment(22)=' Comment: to be cited in case the computation of Fermi contact'// &
-  ' interactions for isomer shifts, i.e. prtfc=1 and usepaw=1.'//ch10//&
+  ' interactions for isomer shifts, i.e. nucfc=1 and usepaw=1.'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2009'
  priority(22)=20
 
@@ -486,6 +476,15 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#brouwer2021'
  priority(44)=20
 
+ ref(45)=' Orbital magnetism and chemical shielding in the projector augmented-wave formalism.'//ch10//&
+  ' J.W. Zwanziger, M. Torrent, and X. Gonze'// &
+  ' Phys. Rev. B 107, 165157 (2023).'
+ comment(45)=&
+  ' Comment: to be cited in case the computation of orbital magnetism is used, i.e. orbmag>0.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2023'
+ priority(45)=20
+
+
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 
@@ -553,14 +552,17 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If prtnabla/=0, cite Amadon2008
    if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%prtwant==2)cite(20)=1
 
-!  If prtefg/=0, cite Zwanziger2008
-   if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%prtefg>0)cite(21)=1
+!  If nucefg/=0, cite Zwanziger2008
+   if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%nucefg>0)cite(21)=1
 
-!  If prtfc/=0, cite Zwanziger2009
-   if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%prtfc>0)cite(22)=1
+!  If nucfc/=0, cite Zwanziger2009
+   if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%nucfc>0)cite(22)=1
 
 !  If optdriver==1 and usepaw==1, cite Audouze2006 and Audouze2008
    if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%optdriver==1)cite(23)=1
+
+!  If orbmag/=0, cite Zwanziger2023
+   if(dtsets(idtset)%orbmag>0)cite(45)=1
 
 !  If ixc<0, cite Marques2012
    if(dtsets(idtset)%ixc<0 .or. dtsets(idtset)%gwcalctyp>=100)cite(24)=1

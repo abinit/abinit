@@ -123,16 +123,6 @@ _ WF disk file :      0.186 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
             acell      2.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.29897680E+01  3.54527000E+01
            diemac      2.00000000E+00
-  d3e_pert1_atpol11         1       1
-  d3e_pert1_atpol12         1       1
-  d3e_pert1_atpol13         1       1
-  d3e_pert1_atpol14         1       1
-  d3e_pert1_atpol15         1       2
-    d3e_pert1_dir11         0       0       0
-    d3e_pert1_dir12         0       0       0
-    d3e_pert1_dir13         0       0       0
-    d3e_pert1_dir14         0       0       0
-    d3e_pert1_dir15         1       1       1
    d3e_pert1_elfd11         0
    d3e_pert1_elfd12         0
    d3e_pert1_elfd13         0
@@ -143,21 +133,11 @@ _ WF disk file :      0.186 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
    d3e_pert1_phon13         0
    d3e_pert1_phon14         0
    d3e_pert1_phon15         1
-    d3e_pert2_dir11         0       0       0
-    d3e_pert2_dir12         0       0       0
-    d3e_pert2_dir13         0       0       0
-    d3e_pert2_dir14         0       0       0
-    d3e_pert2_dir15         1       1       1
    d3e_pert2_elfd11         0
    d3e_pert2_elfd12         0
    d3e_pert2_elfd13         0
    d3e_pert2_elfd14         0
    d3e_pert2_elfd15         1
-    d3e_pert3_dir11         0       0       0
-    d3e_pert3_dir12         0       0       0
-    d3e_pert3_dir13         0       0       0
-    d3e_pert3_dir14         0       0       0
-    d3e_pert3_dir15         1       1       1
    d3e_pert3_elfd11         0
    d3e_pert3_elfd12         0
    d3e_pert3_elfd13         0
@@ -233,16 +213,6 @@ P          mk1mem           1
            prtpot13         1
            prtpot14         1
            prtpot15         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2
@@ -2006,16 +1976,6 @@ meta: {optdriver: 5, }
             acell      2.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      2.29897680E+01  3.54527000E+01
            diemac      2.00000000E+00
-  d3e_pert1_atpol11         1       1
-  d3e_pert1_atpol12         1       1
-  d3e_pert1_atpol13         1       1
-  d3e_pert1_atpol14         1       1
-  d3e_pert1_atpol15         1       2
-    d3e_pert1_dir11         0       0       0
-    d3e_pert1_dir12         0       0       0
-    d3e_pert1_dir13         0       0       0
-    d3e_pert1_dir14         0       0       0
-    d3e_pert1_dir15         1       1       1
    d3e_pert1_elfd11         0
    d3e_pert1_elfd12         0
    d3e_pert1_elfd13         0
@@ -2026,21 +1986,11 @@ meta: {optdriver: 5, }
    d3e_pert1_phon13         0
    d3e_pert1_phon14         0
    d3e_pert1_phon15         1
-    d3e_pert2_dir11         0       0       0
-    d3e_pert2_dir12         0       0       0
-    d3e_pert2_dir13         0       0       0
-    d3e_pert2_dir14         0       0       0
-    d3e_pert2_dir15         1       1       1
    d3e_pert2_elfd11         0
    d3e_pert2_elfd12         0
    d3e_pert2_elfd13         0
    d3e_pert2_elfd14         0
    d3e_pert2_elfd15         1
-    d3e_pert3_dir11         0       0       0
-    d3e_pert3_dir12         0       0       0
-    d3e_pert3_dir13         0       0       0
-    d3e_pert3_dir14         0       0       0
-    d3e_pert3_dir15         1       1       1
    d3e_pert3_elfd11         0
    d3e_pert3_elfd12         0
    d3e_pert3_elfd13         0
@@ -2128,16 +2078,6 @@ P          mk1mem           1
            prtpot13         1
            prtpot14         1
            prtpot15         0
-          rfatpol11         1       1
-          rfatpol12         1       1
-          rfatpol13         1       1
-          rfatpol14         1       2
-          rfatpol15         1       1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         1       1       1
-            rfdir14         1       1       1
-            rfdir15         0       0       0
            rfelfd11         0
            rfelfd12         0
            rfelfd13         2

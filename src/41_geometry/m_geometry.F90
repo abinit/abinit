@@ -110,10 +110,6 @@ CONTAINS  !===========================================================
 !!  The routine is able to deal both with a single vector as well as arrays of vectors.
 !!  Versions for integer and real vectors are provided.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function normv_rdp_vector(xv,met,space) result(res)
@@ -297,17 +293,11 @@ end function normv_rdp_vector_array
 !! OUTPUT
 !!  res=scalar product of xv and xw
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-function vdotw_rr_vector(xv,xw,met,space) result(res)
+real(dp) function vdotw_rr_vector(xv,xw,met,space) result(res)
 
 !Arguments ------------------------------------
-!scalars
- real(dp) :: res
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3),xw(3)
@@ -315,16 +305,16 @@ function vdotw_rr_vector(xv,xw,met,space) result(res)
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
-&        +met(2,2)* xv(2)*xw(2)                &
-&        +met(3,3)* xv(3)*xw(3)                &
-&        +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
-&        +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
-&        +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
+         +met(2,2)* xv(2)*xw(2)                &
+         +met(3,3)* xv(3)*xw(3)                &
+         +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
+         +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
+         +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
 
  select case (space)
- case ('r','R')
+ case ('r', 'R')
    return
- case ('g','G')
+ case ('g', 'G')
    res= res * (two_pi**2)
  case default
    ABI_BUG('Wrong value for space')
@@ -353,17 +343,11 @@ end function vdotw_rr_vector
 !! OUTPUT
 !!  res=complex scalar product of xv and xw
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-function vdotw_rc_vector(xv,xw,met,space) result(res)
+complex(dp) function vdotw_rc_vector(xv, xw, met, space) result(res)
 
 !Arguments ------------------------------------
-!scalars
- complex(dpc) :: res
  character(len=1),intent(in) :: space
 !arrays
  real(dp),intent(in) :: met(3,3),xv(3)
@@ -372,16 +356,16 @@ function vdotw_rc_vector(xv,xw,met,space) result(res)
 ! *************************************************************************
 
  res = (  met(1,1)* xv(1)*xw(1)                &
-&        +met(2,2)* xv(2)*xw(2)                &
-&        +met(3,3)* xv(3)*xw(3)                &
-&        +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
-&        +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
-&        +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
+         +met(2,2)* xv(2)*xw(2)                &
+         +met(3,3)* xv(3)*xw(3)                &
+         +met(1,2)*(xv(1)*xw(2) + xv(2)*xw(1)) &
+         +met(1,3)*(xv(1)*xw(3) + xv(3)*xw(1)) &
+         +met(2,3)*(xv(2)*xw(3) + xv(3)*xw(2)) )
 
  select case (space)
- case ('r','R')
+ case ('r', 'R')
    return
- case ('g','G')
+ case ('g', 'G')
    res= res * (two_pi**2)
  case default
    ABI_BUG('Wrong value for space')
@@ -405,11 +389,6 @@ end function vdotw_rc_vector
 !!
 !! OUTPUT
 !!   c(3): real(dp) vector = a X b
-!!
-!! PARENTS
-!!      m_abimover,m_pred_delocint,m_symfind
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -444,11 +423,6 @@ end subroutine acrossb
 !!
 !! OUTPUT
 !!   wedge(3,3,3) : 9 basis vectors of rprimd ^ gprimd
-!!
-!! PARENTS
-!!      m_spacepar
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -512,11 +486,6 @@ end subroutine wedge_basis
 !!
 !! OUTPUT
 !!   produv(3) :: real(dp) output vector
-!!
-!! PARENTS
-!!      m_spacepar
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -588,11 +557,6 @@ end subroutine wedge_product
 !! than any of the other points R where R are the translation vectors of the supercell.
 !! In the end npts contains the total number of grid points that have been found in the Wigner-Seitz cell
 !! The number of lattice vectors R along each direction of the supercell is defined by lmax.
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -733,11 +697,6 @@ end subroutine wigner_seitz
 !! OUTPUT
 !!  displ_red(2,3*natom,3*natom)=Phonon displacement in reduded coordinates.
 !!
-!! PARENTS
-!!      m_a2ftr,m_ddb,m_elphon,m_ifc,m_iogkk,m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
@@ -793,22 +752,22 @@ end subroutine phdispl_cart2red
 !! getspinrot
 !!
 !! FUNCTION
-!! From the symmetry matrix symrel_conv expressed in the coordinate system rprimd,
+!! From the symmetry matrix symrel expressed in the coordinate system rprimd,
 !! compute the components of the spinor rotation matrix
 !!
 !! INPUTS
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!! symrel_conv(3,3)=symmetry operation in real space in terms
-!!  of primitive translations rprimd
+!! symrel(3,3)=symmetry operation in real space in terms of primitive translations rprimd
 !!
 !! OUTPUT
-!! spinrot(4)=components of the spinor rotation matrix :
+!! spinrot(4)=components of the spinor rotation matrix:
+!!
 !!  spinrot(1)=$\cos \phi / 2$
 !!  spinrot(2)=$\sin \phi / 2 \times u_x$
 !!  spinrot(3)=$\sin \phi / 2 \times u_y$
 !!  spinrot(4)=$\sin \phi / 2 \times u_z$
-!!  where $\phi$ is the angle of rotation, and
-!!  $(u_x,u_y,u_z)$ is the normalized direction of the rotation axis
+!!
+!!  where $\phi$ is the angle of rotation, and $(u_x,u_y,u_z)$ is the normalized direction of the rotation axis
 !!
 !! NOTES
 !! Only the proper part of the symmetry operation is taken into account:
@@ -817,18 +776,13 @@ end subroutine phdispl_cart2red
 !! The whole collection of symmetry matrices is call symrel(3,3,nsym)
 !! symrel1 contains just one of those matrices symrel1(3,3)
 !!
-!! PARENTS
-!!      m_cgtk,m_crystal,m_inwffil
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine getspinrot(rprimd, spinrot, symrel_conv)
+subroutine getspinrot(rprimd, spinrot, symrel)
 
 !Arguments ------------------------------------
 !arrays
- integer,intent(in) :: symrel_conv(3,3)
+ integer,intent(in) :: symrel(3,3)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(out) :: spinrot(4)
 
@@ -844,110 +798,104 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 
 !**************************************************************************
 
- symrel1(:,:)=symrel_conv(:,:)
+ symrel1(:,:) = symrel(:,:)
 
-!Compute determinant of the matrix
- call mati3det(symrel1,det)
+ ! Compute determinant of the matrix
+ call mati3det(symrel1, det)
 
-!Produce a rotation from an improper symmetry
- if(det==-1)symrel1(:,:)=-symrel1(:,:)
+ ! Produce a rotation from an improper symmetry
+ if (det==-1) symrel1(:,:) = -symrel1(:,:)
 
-!Test the possibility of the unit matrix
- identity(:,:)=0
- identity(1,1)=1 ; identity(2,2)=1 ; identity(3,3)=1
+ ! Test the possibility of the unit matrix
+ identity(:,:)=0; identity(1,1)=1; identity(2,2)=1; identity(3,3)=1
 
- if( sum((symrel1(:,:)-identity(:,:))**2)/=0)then
+ if (sum((symrel1(:,:) - identity(:,:))**2)/=0) then
 
-!  Transform symmetry matrix in the system defined by rprimd
-   call matr3inv(rprimd,rprimd_invt)
+   ! Transform symmetry matrix in the system defined by rprimd
+   call matr3inv(rprimd, rprimd_invt)
    do ii=1,3
      coord(:,ii)=rprimd_invt(ii,:)
    end do
    call matr3inv(coord,coordinvt)
    do ii=1,3
-     matr1(:,ii)=symrel1(:,1)*coord(1,ii)+&
-&     symrel1(:,2)*coord(2,ii)+&
-&     symrel1(:,3)*coord(3,ii)
+     matr1(:,ii) = symrel1(:,1)*coord(1,ii) + symrel1(:,2)*coord(2,ii) + symrel1(:,3)*coord(3,ii)
    end do
    do ii=1,3
-     matr2(:,ii)=coordinvt(1,:)*matr1(1,ii)+&
-&     coordinvt(2,:)*matr1(2,ii)+&
-&     coordinvt(3,:)*matr1(3,ii)
+     matr2(:,ii) = coordinvt(1,:)*matr1(1,ii) + coordinvt(2,:)*matr1(2,ii) + coordinvt(3,:)*matr1(3,ii)
    end do
 
-!  Find the eigenvector with unit eigenvalue of the
-!  rotation matrix in cartesian coordinate, matr2
+   ! Find the eigenvector with unit eigenvalue of the
+   ! rotation matrix in cartesian coordinate, matr2
 
    matr1(:,:)=matr2(:,:)
    matr1(1,1)=matr1(1,1)-one
    matr1(2,2)=matr1(2,2)-one
    matr1(3,3)=matr1(3,3)-one
 
-!  Compute the axis of rotation and the cos and sin of rotation angle
+   !  Compute the axis of rotation and the cos and sin of rotation angle
    if(matr1(1,1)**2 + matr1(2,1)**2 + matr1(3,1)**2 < tol8 )then
-!    The first direction is the axis
+     ! The first direction is the axis
      axis(1)=one ; axis(2)=zero ; axis(3)=zero
      cos_phi=matr2(2,2)
      sin_phi=matr2(3,2)
    else if(matr1(1,2)**2 + matr1(2,2)**2 + matr1(3,2)**2 < tol8 )then
-!    The second direction is the axis
+     ! The second direction is the axis
      axis(1)=zero ; axis(2)=one ; axis(3)=zero
      cos_phi=matr2(3,3)
      sin_phi=matr2(1,3)
    else
-!    In this case, try use the first and second vector to build the
-!    rotation axis : compute their cross product
+     ! In this case, try use the first and second vector to build the
+     ! rotation axis: compute their cross product
      axis(1)=matr1(2,1)*matr1(3,2)-matr1(2,2)*matr1(3,1)
      axis(2)=matr1(3,1)*matr1(1,2)-matr1(3,2)*matr1(1,1)
      axis(3)=matr1(1,1)*matr1(2,2)-matr1(1,2)*matr1(2,1)
-!    Then, try to normalize it
+     ! Then, try to normalize it
      scprod=sum(axis(:)**2)
      if(scprod<tol8)then
-!      The first and second vectors were linearly dependent
-!      Thus, use the first and third vectors
+       ! The first and second vectors were linearly dependent
+       ! Thus, use the first and third vectors
        axis(1)=matr1(2,1)*matr1(3,3)-matr1(2,3)*matr1(3,1)
        axis(2)=matr1(3,1)*matr1(1,3)-matr1(3,3)*matr1(1,1)
        axis(3)=matr1(1,1)*matr1(2,3)-matr1(1,3)*matr1(2,1)
-!      Normalize the vector
+       ! Normalize the vector
        scprod=sum(axis(:)**2)
-       if(scprod<tol8)then
+       if(scprod < tol8)then
          ABI_BUG('Cannot find the rotation axis.')
        end if
      end if
      norminv=one/sqrt(scprod)
      axis(:)=axis(:)*norminv
 
-!    Project the axis vector out of the first unit vector,
-!    and renormalize the projected vector
-!    (the first vector cannot be the axis, as tested before)
+     ! Project the axis vector out of the first unit vector,
+     ! and renormalize the projected vector
+     ! (the first vector cannot be the axis, as tested before)
      vecta(1)=one-axis(1)**2
      vecta(2)=-axis(1)*axis(2)
      vecta(3)=-axis(1)*axis(3)
      scprod=sum(vecta(:)**2)
      norminv=one/sqrt(scprod)
      vecta(:)=vecta(:)*norminv
-!    Rotate the vector A, to get vector B
+     ! Rotate the vector A, to get vector B
      vectb(:)=matr2(:,1)*vecta(1)+matr2(:,2)*vecta(2)+matr2(:,3)*vecta(3)
-!    Get dot product of vectors A and B, giving cos of the rotation angle
+     ! Get dot product of vectors A and B, giving cos of the rotation angle
      cos_phi=sum(vecta(:)*vectb(:))
-!    Compute the cross product of the axis and vector A
+     ! Compute the cross product of the axis and vector A
      vectc(1)=axis(2)*vecta(3)-axis(3)*vecta(2)
      vectc(2)=axis(3)*vecta(1)-axis(1)*vecta(3)
      vectc(3)=axis(1)*vecta(2)-axis(2)*vecta(1)
-!    Get dot product of vectors B and C, giving sin of the rotation angle
+     ! Get dot product of vectors B and C, giving sin of the rotation angle
      sin_phi=sum(vectb(:)*vectc(:))
    end if
 
-!  Get the rotation angle, then the parameters of the spinor rotation
-!  Here, treat possible inaccurate values of the cosine of phi
+   ! Get the rotation angle, then the parameters of the spinor rotation
+   ! Here, treat possible inaccurate values of the cosine of phi
    if(cos_phi>  one-tol8 )cos_phi=  one-tol8
    if(cos_phi<-(one-tol8))cos_phi=-(one-tol8)
    phi=acos(cos_phi)
    if(sin_phi<zero)phi=-phi
-!  Rectify the angle, such that its absolute values corresponds to
-!  180, 120, 90, 60, or 0 degrees
+   ! Rectify the angle, such that its absolute values corresponds to 180, 120, 90, 60, or 0 degrees
    phi=(nint(six*phi/pi))/six*pi
-!  Compute components of the spinor matrix
+   ! Compute components of the spinor matrix
    spinrot(1)=cos(half*phi)
    spinrot(2)=axis(1)*sin(half*phi)
    spinrot(3)=axis(2)*sin(half*phi)
@@ -955,7 +903,7 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 
  else
 
-!  Here, the case of the unit matrix
+   ! Here, the case of the unit matrix
    axis(:)=zero
    phi=zero
    spinrot(1)=one
@@ -967,8 +915,8 @@ subroutine getspinrot(rprimd, spinrot, symrel_conv)
 
 !DEBUG
 !write(std_out,*)' getspinrot :'
-!write(std_out,*)' symrel_conv =',symrel_conv(:,:)
-!write(std_out,*)' symrel =',symrel1(:,:)
+!write(std_out,*)' symre =',symrel(:,:)
+!write(std_out,*)' symrel1 =',symrel1(:,:)
 !write(std_out,*)' rprimd =',rprimd(:,:)
 !write(std_out,*)' matr2 =',matr2(:,:)
 !write(std_out,*)' matr1 =',matr1(:,:)
@@ -986,17 +934,13 @@ end subroutine getspinrot
 !!  spinrot_cmat
 !!
 !! FUNCTION
-!!  Construct 2x2 complex matrix representing rotation operator in spin-space.
+!!  Construct 2x2 complex matrix representing the rotation operator in spin-space.
 !!
 !! INPUTS
 !!  spinrot(4)=components of the spinor rotation matrix computed by getspinrot
 !!
 !! OUTPUT
 !!  spinrot(2,2)=Rotation matrix (complex array)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1008,7 +952,21 @@ pure function spinrot_cmat(spinrot)
 
 ! *************************************************************************
 
+ ! Build rotation matrix from spinrot:
+ !
+ ! ( cos(phi/2) + i n_z sin(phi/2),  (+n_y + i n_x) sin(phi/2)      )
+ ! ( (-n_y + i n_x) sin(phi/2)    ,  cos(phi/2) - i n_z sin(phi/2)  )
+
+ ! spinrot(1)=cos(half*phi)
+ ! spinrot(2)=axis(1)*sin(half*phi)
+ ! spinrot(3)=axis(2)*sin(half*phi)
+ ! spinrot(4)=axis(3)*sin(half*phi)
+
  ! Rotation in spinor space (same equations as in wfconv)
+ ! TODO: Be careful here as wfconv uses symrel^T to map k-points (listkk)
+ ! thus the inverse of the corresponding symrec.
+ ! This may explain why all the terms with sin(phi/2) change sign (phi --> -phi)
+
  spinrot_cmat(1,1) = spinrot(1) + j_dpc*spinrot(4)
  spinrot_cmat(1,2) = spinrot(3) + j_dpc*spinrot(2)
  spinrot_cmat(2,1) =-spinrot(3) + j_dpc*spinrot(2)
@@ -1035,7 +993,7 @@ end function spinrot_cmat
 !! INPUTS
 !!  xaxis(3)= vectors defining the x axis
 !!  zaxis(3)= vectors defining the z axis
-
+!!
 !! OUTPUT
 !!  inversion_flag = flag that indicates that an inversion operation
 !!   on the coordinate system should be done
@@ -1047,11 +1005,6 @@ end function spinrot_cmat
 !! So calling rotmat(x',z') will find the rotation
 !! matrix for the case in which we rotate the x and z
 !! axes from their default values to x' and z'.
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1150,11 +1103,6 @@ end subroutine rotmat
 !! NOTE
 !!  Stops execution with an error message if iatfix breaks symmetry.
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fixsym(iatfix,indsym,natom,nsym)
@@ -1243,28 +1191,9 @@ end function det3r
 !!  rmet(3,3)=real space metric ($\textrm{bohr}^{2}$).
 !!  ucvol=unit cell volume ($\textrm{bohr}^{3}$).
 !!
-!! PARENTS
-!!      cut3d,fftprof,m_ab7_symmetry,m_afterscfloop,m_bader,m_berryphase_new
-!!      m_bethe_salpeter,m_chkinp,m_common,m_conducti,m_crystal,m_cut3d
-!!      m_cutoff_cylinder,m_d2frnl,m_ddb,m_dens,m_dfpt_elt,m_dfpt_looppert
-!!      m_dfpt_scfcv,m_dft_energy,m_dtset,m_effective_potential
-!!      m_effective_potential_file,m_elpolariz,m_extfpmd,m_extraprho,m_fft
-!!      m_fft_prof,m_fit_data,m_fit_polynomial_coeff,m_forces,m_forstr
-!!      m_geometry,m_gstate,m_gstateimg,m_gtermcutoff,m_hamiltonian,m_ingeo
-!!      m_inkpts,m_invars2,m_io_kss,m_ioarr,m_kpts,m_ksdiago,m_memeval,m_mep
-!!      m_mlwfovlp_qp,m_mover,m_mpi_setup,m_newrho,m_newvtr,m_odamix,m_orbmag
-!!      m_paw_dfpt,m_paw_optics,m_pawpwij,m_prcref,m_pred_bfgs,m_pred_delocint
-!!      m_pred_fire,m_pred_isothermal,m_pred_langevin,m_pred_nose
-!!      m_pred_srkna14,m_pred_verlet,m_psolver,m_rhotoxc,m_scfcv_core
-!!      m_screening,m_screening_driver,m_sigma_driver,m_spacepar,m_stress
-!!      m_tdep_latt,m_thmeig,m_use_ga,m_vcoul,m_vdw_dftd2,m_vdw_dftd3,m_wfk
-!!      m_wvl_rho,m_xchybrid,m_xfpack,mkcore_wvl,mrgscr,optic
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
+subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -1366,12 +1295,6 @@ end subroutine metric
 !!  acell(3)=unit cell length scales (bohr)
 !!  rprim(3,3)=dimensionless real space primitive translations
 !!
-!! PARENTS
-!!      m_dvdb,m_gstate,m_gstateimg,m_ingeo,m_memeval,m_pimd,m_pred_steepdesc
-!!      m_predict_pimd,m_use_ga,m_xfpack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkradim(acell,rprim,rprimd)
@@ -1419,10 +1342,6 @@ end subroutine mkradim
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1504,11 +1423,6 @@ end subroutine chkrprimd
 !!                dump dilatmx_errmsg to the main output file.
 !!                handle_error
 !!              end if
-!!
-!! PARENTS
-!!      m_driver,m_precpred_1geo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1608,16 +1522,6 @@ end subroutine chkdilatmx
 !!  rprimd(3,3)=dimensional real space primitive translations (bohr)
 !!              where: rprimd(i,j)=rprim(i,j)*acell(j)
 !!
-!! PARENTS
-!!      m_abi2big,m_bethe_salpeter,m_common,m_ddb,m_dfpt_looppert,m_driver
-!!      m_dtset,m_geometry,m_gstateimg,m_harmonic_thermo,m_ifc,m_ingeo
-!!      m_invars1,m_invars2,m_memeval,m_mpi_setup,m_outvar_o_z,m_parser
-!!      m_phonons,m_pred_bfgs,m_pred_fire,m_pred_isothermal,m_pred_steepdesc
-!!      m_pred_verlet,m_predict_pimd,m_results_img,m_screening_driver
-!!      m_sigma_driver,m_thmeig,m_use_ga,m_xfpack
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mkrdim(acell,rprim,rprimd)
@@ -1662,17 +1566,6 @@ end subroutine mkrdim
 !!
 !! OUTPUT
 !!  xred(3,natom)=dimensionless reduced coordinates of atoms
-!!
-!! PARENTS
-!!      m_abi2big,m_cut3d,m_dens,m_driver,m_dvdb,m_effective_potential
-!!      m_effective_potential_file,m_evdw_wannier,m_generate_training_set
-!!      m_ingeo,m_ipi,m_mep,m_mover,m_mover_effpot,m_parser,m_paw_mkaewf
-!!      m_paw_pwaves_lmn,m_pimd_langevin,m_pimd_nosehoover,m_prcref
-!!      m_pred_delocint,m_pred_diisrelax,m_pred_isokinetic,m_pred_isothermal
-!!      m_pred_langevin,m_pred_lotf,m_pred_moldyn,m_pred_nose,m_pred_srkna14
-!!      m_pred_steepdesc,m_pred_velverlet,m_pred_verlet,m_relaxpol,mkcore_wvl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1723,23 +1616,6 @@ end subroutine xcart2xred
 !! OUTPUT
 !!  xcart(3,natom)=cartesian coordinates of atoms (bohr)
 !!
-!! PARENTS
-!!      cut3d,m_abi2big,m_abihist,m_afterscfloop,m_berryphase,m_berryphase_new
-!!      m_crystal,m_ddb,m_driver,m_effective_potential,m_evdw_wannier
-!!      m_fft_mesh,m_fit_polynomial_coeff,m_forces,m_forstr,m_geometry
-!!      m_gstateimg,m_ingeo,m_memeval,m_mep,m_mklocl,m_mklocl_realspace
-!!      m_mlwfovlp,m_mover,m_mover_effpot,m_multipoles,m_nucprop,m_outqmc
-!!      m_outvar_o_z,m_outxml,m_paw_mkrho,m_paw_nhat,m_pimd_langevin
-!!      m_pimd_nosehoover,m_pred_delocint,m_pred_diisrelax,m_pred_fire
-!!      m_pred_isokinetic,m_pred_isothermal,m_pred_langevin,m_pred_lotf
-!!      m_pred_moldyn,m_pred_nose,m_pred_simple,m_pred_srkna14,m_pred_steepdesc
-!!      m_pred_velverlet,m_pred_verlet,m_results_img,m_rhotov,m_setvtr
-!!      m_spgdata,m_spin_current,m_symfind,m_tdep_abitypes,m_thmeig,m_vtorho
-!!      m_wvl_denspot,m_wvl_projectors,m_wvl_rho,m_wvl_rwwf,m_wvl_wfs
-!!      m_wvl_wfsinp,mkcore_wvl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xred2xcart(natom,rprimd,xcart,xred)
@@ -1787,11 +1663,6 @@ end subroutine xred2xcart
 !!    Unlike gred, fcart has been corrected by enforcing
 !!    the translational symmetry, namely that the sum of force
 !!    on all atoms is zero (except is a slab is used)
-!!
-!! PARENTS
-!!      m_forces,m_mep
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1857,12 +1728,6 @@ end subroutine gred2fcart
 !!  the translational symmetry, namely that the sum of force
 !!  on all atoms is zero.
 !!
-!! PARENTS
-!!      m_abihist,m_effective_potential,m_gstateimg,m_mep,m_mover,m_pred_bfgs
-!!      m_pred_delocint,m_pred_fire,m_pred_simple,m_pred_verlet
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fcart2gred(fcart,gred,rprimd,natom)
@@ -1926,11 +1791,6 @@ end subroutine fcart2gred
 !! NOTES
 !!  The tolerance tol8 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2264,11 +2124,6 @@ end subroutine bonds_lgth_angles
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd,typat,xred,znucl,acell)
@@ -2481,11 +2336,6 @@ end subroutine randomcellpos
 !!  nsh= number of shells
 !!  mult(nat) = number of atoms on shell (only the first nsh entries are relevant)
 !!
-!! PARENTS
-!!      m_paw_uj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
@@ -2619,11 +2469,6 @@ end subroutine shellstruct
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_geometry,m_paw_uj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
@@ -2746,11 +2591,6 @@ end subroutine ioniondist
 !! OUTPUT
 !!  dist2
 !!
-!! PARENTS
-!!  ioniondist
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function dist2(v1,v2,rprimd,option)
@@ -2862,11 +2702,6 @@ end function dist2
 !!  Note the use of pointers, memory is allocated inside the procedure and passed back
 !!  to the caller. Thus memory deallocation is relegated to the caller. To be on the safe side
 !!  the pointers should be nullified before entering.
-!!
-!! PARENTS
-!!      m_crystal,m_io_kss
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2986,11 +2821,6 @@ end subroutine remove_inversion
 !! When aprim=rprimd and bprim=gprimd, the routine operates in real space (on a real space symmetry)
 !! When aprim=gprimd and bprim=rprimd, the routine operates in reciprocal space (on a real space symmetry)
 !!
-!! PARENTS
-!!      m_crystal,m_matlu,m_phonons,m_spacepar
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine symredcart(aprim,bprim,symcart,symred)
@@ -3052,11 +2882,6 @@ end subroutine symredcart
 !!
 !! OUTPUT
 !! rprimd_symm(3,3)= symmetrized primitive vectors
-!!
-!! PARENTS
-!!      m_xfpack
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3134,11 +2959,6 @@ end subroutine strainsym
 !!
 !! SIDE EFFECTS
 !! stress(6)=stress tensor, in cartesian coordinates, in symmetric storage mode
-!!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_forstr,m_geometry,m_paw_dfpt,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3236,11 +3056,6 @@ end subroutine stresssym
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_ipi,m_results_gs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine stress_voigt_to_mat(stress6, stress_mat)
@@ -3284,12 +3099,6 @@ end subroutine stress_voigt_to_mat
 !! "cart" may be same array as "frac".
 !! If rprimd transpose is input instead of gprimd, then convert tensor
 !! in cartesian coordinates to reduced coordinates
-!!
-!! PARENTS
-!!      m_cgprj,m_d2frnl,m_geometry,m_mkcore,m_nonlop_pl,m_nonlop_ylm
-!!      mkcore_wvl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3388,11 +3197,6 @@ end subroutine strconv
 !! symrl1(3,3,nsym1)=corresponding 3x3 matrices of the group symmetries (real space)
 !! tnons1(3,nsym1)=corresponding nonsymmorphic translations of space group in terms
 !!   of real space primitive translations (may be 0)!!
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dtset,m_dvdb,m_iogkk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3571,11 +3375,6 @@ end subroutine littlegroup_pert
 !!   0 for non-target perturbations
 !!   1 for basis perturbations
 !!  -1 for perturbations that can be found from basis perturbations
-!!
-!! PARENTS
-!!      m_dtset,m_dvdb,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

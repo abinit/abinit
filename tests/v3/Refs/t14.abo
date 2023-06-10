@@ -113,6 +113,7 @@ P          mk1mem10         4
         optdriver10         1
            prtpot8          0
            prtpot10         1
+          rfatpol           1       1        
             rfdir           1       0       0
            rfphon8          0
            rfphon10         1
@@ -605,6 +606,7 @@ P          mk1mem10         4
         optdriver10         1
            prtpot8          0
            prtpot10         1
+          rfatpol           1       1        
             rfdir           1       0       0
            rfphon8          0
            rfphon10         1

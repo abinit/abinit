@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -67,12 +63,6 @@ contains
 !!
 !! NOTES
 !!  This routine is a modified version of /src/65_psp/psp7lo.F90
-!!
-!! PARENTS
-!!      m_xc_vdw,test_radsintr
-!!
-!! CHILDREN
-!!      simpson_int
 !!
 !! SOURCE
 

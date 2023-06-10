@@ -243,21 +243,23 @@ static int *indlmn_gpu,*atindx1_gpu,*kgin_gpu;
 static unsigned char *typat,*lmn,*nlmn;
 static unsigned short int *atoms;
 
-//
-static int gpu_initialization=0;
-static int nb_proj_to_compute=0;
-static int m_ham_used=0;
-static int ffnl_ph3d_updated=0;
+//! token variable.
+//! if 0, then GPU memory is not allocated
+//! if 1, then GPU memory is already allocated
+static int gpu_initialized = 0;
+static int nb_proj_to_compute = 0;
+static int m_ham_used = 0;
+static int ffnl_ph3d_updated = 0;
 
 
 //Compute Routine
 extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int *dimenl1,int *dimenl2,int *dimffnlin,int *dimffnlout,
-			    double *enl,double *enlout,double *ffnlin,double *ffnlout,double *gprimd,int *idir,int *indlmn,int *istwf_k,
-			    int *kgin,int *kgout,double *kpgin,double *kpgout,double *kptin,double *kptout,double *lambda,int *lmnmax,int *matblk,int *mgfft,
-			    int *mpi_enreg_me_g0,int *natom,int *nattyp,int *ngfft,int *nkpgin,int *nkpgout,int *nloalg,
-			    int *nnlout,int *npwin,int *npwout,int *nspinor,int *ntypat,int *paw_opt,double *phkxredin,
-			    double *phkxredout,double *ph1d,double *ph3din,double *ph3dout,int *signs,double *sij,double *svectout,
-			    double *pi,double *ucvol,double *vectin,double *vectout)
+                            double *enl,double *enlout,double *ffnlin,double *ffnlout,double *gprimd,int *idir,int *indlmn,int *istwf_k,
+                            int *kgin,int *kgout,double *kpgin,double *kpgout,double *kptin,double *kptout,double *lambda,int *lmnmax,int *matblk,int *mgfft,
+                            int *mpi_enreg_me_g0,int *natom,int *nattyp,int *ngfft,int *nkpgin,int *nkpgout,int *nloalg,
+                            int *nnlout,int *npwin,int *npwout,int *nspinor,int *ntypat,int *paw_opt,double *phkxredin,
+                            double *phkxredout,double *ph1d,double *ph3din,double *ph3dout,int *signs,double *sij,double *svectout,
+                            double *pi,double *ucvol,double *vectin,double *vectout)
 {
 
   //  use defs_basis
@@ -352,7 +354,7 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   }
 
   //GPU allocation
-  if(!gpu_initialization)
+  if(!gpu_initialized)
     alloc_nonlop_gpu_(npwin,npwout,nspinor,
 		      natom,ntypat,lmnmax,
 		      indlmn,nattyp,
@@ -526,14 +528,14 @@ extern "C" void gpu_nonlop_(int *atindx1,int *choice,int *cpopt,double *proj,int
   }
 
   //Impossible
-  if(!gpu_initialization)
+  if(!gpu_initialized)
     free_nonlop_gpu_();
 
 }// end subroutine gpu_nonlop
 
 
 
-//Allocation routine
+//! \brief Allocation routine for computing non local operator (nonlop)
 extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
                                   int *natom,int *ntypat,int *lmnmax,
                                   int *indlmn,int *nattyp,
@@ -544,11 +546,11 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
   //   printf("calling alloc_nonlop_gpu with npw=%d \n",*npwin);
   //   fflush(stdout);
 
-  //Si on avait deja alloue
-  if(gpu_initialization==1)
+  // when memory allocation already done, deallocate first before re-allocating
+  if (gpu_initialized==1)
     free_nonlop_gpu_();
   else
-    gpu_initialization = 1;
+    gpu_initialized = 1;
 
   nb_proj_to_compute=0;
 
@@ -559,7 +561,7 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
     int count_ilmn=0;
     for(int ilmn=0;ilmn<(*lmnmax);ilmn++){
       if(indlmn[2+6*(ilmn + (*lmnmax)*(itypat))] > 0)
-	count_ilmn++;
+        count_ilmn++;
     }
     nlmn[itypat]=count_ilmn;
     nb_proj_to_compute+=count_ilmn*nattyp[itypat];
@@ -605,10 +607,10 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
   for(int itypat=0;itypat<(*ntypat);itypat++){
     for(int iat=0;iat<nattyp[itypat];iat++){
       for(int ilmn=0;ilmn<nlmn[itypat];ilmn++){
-	typat[iproj]=itypat;
-	lmn[iproj]=ilmn;
-	atoms[iproj]=iatom;
-	iproj++;
+        typat[iproj]=itypat;
+        lmn[iproj]=ilmn;
+        atoms[iproj]=iatom;
+        iproj++;
       }
       iatom++;
     }
@@ -630,7 +632,7 @@ extern "C" void alloc_nonlop_gpu_(int *npwin,int *npwout,int *nspinor,
 //Deallocation routine
 extern "C" void free_nonlop_gpu_(){
 
-  gpu_initialization=0;
+  gpu_initialized = 0;
 
   //Free Memory
   CHECK_CUDA_ERROR( cudaFreeHost(nlmn) );

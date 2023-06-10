@@ -24,7 +24,7 @@ module m_time
  use defs_basis
  use m_abicore
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -100,10 +100,6 @@ CONTAINS
 !! FUNCTION
 !!   Build a 24-character string of the following form: 'Sun Jun 20 23:21:05 1993'.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function asctime()
@@ -166,10 +162,6 @@ end function asctime
 !! OUTPUT
 !!   string with time displayed in the form: [days-][hours:][minutes:]seconds
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function sec2str(time_s) result(str)
@@ -218,8 +210,6 @@ end function sec2str
 !!     # "minutes",
 !!     # "minutes:seconds",
 !!     # "hours:minutes:seconds",
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -308,10 +298,6 @@ end function str2sec
 !!  Calls machine-dependent "clock" for "vpp"
 !!  Calls machine-dependent "xclock" for "sr8k"
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function abi_cpu_time() result(cpu)
@@ -372,10 +358,6 @@ end function abi_cpu_time
 !!
 !! OUTPUT
 !!  wall= wall clock time in seconds
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -480,16 +462,6 @@ end function abi_wtime
 !!  ! stop the counters, return cpu- and wall-time spent in do_stuff()
 !!  call cwtime(cpu,wall,gflops,"stop")
 !!
-!! PARENTS
-!!      lapackprof,m_bse_io,m_chi0,m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg
-!!      m_epjdos,m_exc_build,m_exc_itdiago,m_fft,m_fft_prof,m_fstab,m_gkk
-!!      m_gruneisen,m_hide_lapack,m_ifc,m_ioarr,m_iowf,m_phgamma,m_phonons
-!!      m_phpi,m_rmm_diis,m_rta,m_sigc,m_sigmaph,m_sigx,m_skw,m_time
-!!      m_unittests,m_vtowfk,m_wfd,m_wfk
-!!
-!! CHILDREN
-!!      papif_flops,papif_perror,timein
-!!
 !! SOURCE
 
 subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
@@ -518,32 +490,32 @@ subroutine cwtime(cpu, wall, gflops, start_or_stop, msg, comm)
 
  if (present(msg)) call wrtout(std_out, msg)
 
- SELECT CASE (start_or_stop)
- CASE ("start")
- if (use_papi) then
-   call xpapi_flops(real_time,proc_time,flops,mflops,check)
-   cpu = proc_time; wall = real_time; gflops = mflops / 1000
- else
-   cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
- end if
+ select case (start_or_stop)
+ case ("start")
+   if (use_papi) then
+     call xpapi_flops(real_time,proc_time,flops,mflops,check)
+     cpu = proc_time; wall = real_time; gflops = mflops / 1000
+   else
+     cpu = abi_cpu_time(); wall = abi_wtime(); gflops = -one
+   end if
 
- CASE ("stop")
- if (use_papi) then
-   call xpapi_flops(real_time,proc_time,flops,mflops,check)
-   cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
- else
-   cpu = abi_cpu_time() - cpu; wall = abi_wtime() - wall; gflops = -one
- end if
- if (present(comm)) then
-   vals = [cpu, wall, gflops]
-   call xmpi_sum(vals, comm, ierr)
-   vals = vals / xmpi_comm_size(comm)
-   cpu = vals(1); wall = vals(2); gflops = vals(3)
- end if
+ case ("stop")
+   if (use_papi) then
+     call xpapi_flops(real_time,proc_time,flops,mflops,check)
+     cpu = proc_time - cpu; wall = real_time - wall; gflops = mflops / 1000
+   else
+     cpu = abi_cpu_time() - cpu; wall = abi_wtime() - wall; gflops = -one
+   end if
+   if (present(comm)) then
+     vals = [cpu, wall, gflops]
+     call xmpi_sum(vals, comm, ierr)
+     vals = vals / xmpi_comm_size(comm)
+     cpu = vals(1); wall = vals(2); gflops = vals(3)
+   end if
 
- CASE DEFAULT
-   ABI_ERROR("Wrong option for start_or_stop: "//TRIM(start_or_stop))
- END SELECT
+ case default
+   ABI_ERROR("Wrong option for start_or_stop: "//trim(start_or_stop))
+ end select
 
 end subroutine cwtime
 !!***
@@ -566,17 +538,12 @@ end subroutine cwtime
 !!  wall= wall clock time in seconds
 !!  gflops = Gigaflops
 !!
-!! PARENTS
-!!      m_ddk,m_dvdb,m_ebands,m_eph_driver,m_ephwg,m_fstab,m_gruneisen,m_ifc
-!!      m_ioarr,m_iowf,m_phgamma,m_phonons,m_rmm_diis,m_rta,m_sigmaph,m_skw
-!!      m_unittests,m_wfd,m_wfk
-!!
-!! CHILDREN
-!!      papif_flops,papif_perror,timein
+!! OUTPUT
+!!  [out_wall]= Output wall-time.
 !!
 !! SOURCE
 
-subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
+subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -585,6 +552,7 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
  integer,intent(in),optional :: comm
  character(len=*),intent(in) :: tag
  character(len=*),optional,intent(in) :: pre_str, end_str
+ real(dp),optional,intent(out) :: out_wall
 
 !Local variables-------------------------------
 !scalars
@@ -601,9 +569,12 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, comm)
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
 
- call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
-     do_flush=.True.)
+ call wrtout(std_out, sjoin(tag, ", wall:", sec2str(wall), ", cpu:", sec2str(cpu), avg_type), do_flush=.True.)
+
+ !if (present(end_str)) call wrtout(std_out, " ...")
  if (present(end_str)) call wrtout(std_out, end_str)
+ if (present(out_wall)) out_wall = wall
+
  call cwtime(cpu, wall, gflops, "start")
 
  ! Activate this line to get mallinfo section for each checkpoint
@@ -633,13 +604,6 @@ end subroutine cwtime_report
 !!
 !! TODO
 !!  Should be replaced by cwtime
-!!
-!! PARENTS
-!!      abinit,aim,anaddb,conducti,cut3d,m_bader,m_elphon,m_exit,m_time
-!!      m_vtorhorec,mrgddb,mrgscr,multibinit,optic
-!!
-!! CHILDREN
-!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 
@@ -674,12 +638,6 @@ end subroutine timein
 !!  totftimes(2)=accumulated time for accumulator nn evaluated by papi
 !!  totffops =accumulated number of flops for accumulator nn evaluated by papi
 !!  return_ncount gives the number of times that the accumulator has been incremented
-!!
-!! PARENTS
-!!      m_timana,testtransposer
-!!
-!! CHILDREN
-!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 
@@ -727,12 +685,6 @@ end subroutine time_accu
 !! FUNCTION
 !!  Set the value of papiopt
 !!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      papif_flops,papif_perror,timein
-!!
 !! SOURCE
 
 subroutine time_set_papiopt(opt)
@@ -756,10 +708,6 @@ end subroutine time_set_papiopt
 !!
 !! FUNCTION
 !!  Return the value of papiopt
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -808,35 +756,6 @@ end function time_get_papiopt
 !!     tottim is a dummy variable.
 !!    option gives the number of times that the
 !!     accumulator has been incremented
-!!
-!! PARENTS
-!!      abinit,anaddb,m_ab7_mixing,m_afterscfloop,m_atm2fft,m_bandfft_kpt
-!!      m_berryphase_new,m_bethe_salpeter,m_cgprj,m_cgtk,m_cgtools,m_cgwf
-!!      m_cgwf_cprj,m_chebfi,m_chi0,m_cohsex,m_common,m_d2frnl,m_dens
-!!      m_dfpt_cgwf,m_dfpt_elt,m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_mkvxc
-!!      m_dfpt_mkvxcstr,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_dfpt_vtorho
-!!      m_dfpt_vtowfk,m_dfptnl_loop,m_dft_energy,m_dmft,m_driver,m_dvdb
-!!      m_dyson_solver,m_eig2d,m_epjdos,m_exc_build,m_fft,m_fftcore,m_fftw3
-!!      m_fock,m_fock_getghc,m_forces,m_forstr,m_getchc,m_getgh1c,m_getghc
-!!      m_green,m_gstate,m_gstateimg,m_gwls_ComputeCorrelationEnergy
-!!      m_gwls_DielectricArray,m_gwls_QR_factorization,m_gwls_lineqsolver
-!!      m_gwls_model_polarisability,m_gwls_polarisability,m_gwls_sternheimer
-!!      m_haydock,m_hexc,m_ifc,m_inkpts,m_invars2,m_invovl,m_inwffil,m_io_kss
-!!      m_ioarr,m_iowf,m_kpts,m_lobpcg,m_lobpcg2,m_lobpcgwf,m_lobpcgwf_old
-!!      m_mkcore,m_mkffnl,m_mklocl,m_mklocl_realspace,m_mkrho,m_newrho,m_newvtr
-!!      m_nonlinear,m_nonlop,m_nonlop_ylm,m_occ,m_odamix,m_opernla_ylm
-!!      m_opernla_ylm_mv,m_optics_vloc,m_orbmag,m_outscfcv,m_paral_pert
-!!      m_paw_denpot,m_paw_dfpt,m_paw_efield,m_paw_init,m_paw_mkrho,m_paw_nhat
-!!      m_paw_optics,m_pead_nl_loop,m_prcref,m_prep_calc_ucrpa,m_prep_kgb
-!!      m_pspheads,m_pspini,m_rayleigh_ritz,m_rec,m_respfn_driver,m_rf2_init
-!!      m_rhotov,m_rhotoxc,m_rmm_diis,m_rwwf,m_scfcv_core,m_screening_driver
-!!      m_setvtr,m_sg2002,m_sigc,m_sigma_driver,m_sigmaph,m_sigx,m_spacepar
-!!      m_stress,m_suscep_stat,m_symsg,m_tddft,m_timana,m_vtorho,m_vtorhorec
-!!      m_vtorhotf,m_vtowfk,m_wfd,m_wfk_analyze,m_wfutils,m_xctk,m_xg
-!!      m_xgScalapack,m_xgTransposer,mkcore_wvl,testtransposer
-!!
-!! CHILDREN
-!!      papif_flops,papif_perror,timein
 !!
 !! SOURCE
 !!

@@ -49,7 +49,7 @@ module m_spmat_base
   end type base_mat_t
 
   type, public, extends(base_mat_t) ::  base_mat2d_t
-     integer :: nrow, ncol           ! number of rows and columns 
+     integer :: nrow, ncol           ! number of rows and columns
    contains
      procedure :: initialize => base_mat2d_t_initialize
      procedure :: mv => base_mat2d_t_mv         ! matrix vector multiplication

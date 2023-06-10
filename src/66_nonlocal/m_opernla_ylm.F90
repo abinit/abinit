@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -145,12 +141,6 @@ contains
 !!   the standard version is more effifient on one CPU core.
 !! 2-Operate for one type of atom, and within this given type of atom,
 !!   for a subset of at most nincat atoms.
-!!
-!! PARENTS
-!!      m_cgprj,m_nonlop_ylm
-!!
-!! CHILDREN
-!!      timab,xmpi_sum
 !!
 !! SOURCE
 

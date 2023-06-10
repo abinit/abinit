@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -32,7 +28,7 @@ module m_wfd_optic
 
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_hide_lapack,       only : matrginv
- use m_bz_mesh,           only : kmesh_t, get_BZ_item
+ use m_bz_mesh,           only : kmesh_t
  use m_crystal,           only : crystal_t
  use m_vkbr,              only : vkbr_t, vkbr_free, vkbr_init, nc_ihr_comm
  use m_wfd,               only : wfdgw_t, wave_t
@@ -75,13 +71,6 @@ contains
 !!
 !! OUTPUT
 !! opt_cvk(lomo_min:max_band,lomo_min:max_band,nkbz,nsppol)=Matrix elements <c k|e^{+iqr}|v k>
-!!
-!! PARENTS
-!!      m_exc_spectra,m_haydock
-!!
-!! CHILDREN
-!!      get_bz_item,matrginv,pawcprj_alloc,pawcprj_free,vkbr_free,vkbr_init
-!!      wfd%distribute_bbp,wfd%get_cprj,wrtout,xmpi_barrier,xmpi_sum
 !!
 !! SOURCE
 
@@ -239,7 +228,7 @@ subroutine calc_optical_mels(Wfd,Kmesh,KS_Bst,Cryst,Psps,Pawtab,Hur,&
    do ik_bz=1,nkbz
     !
     ! Get ik_ibz, and symmetries index from ik_bz.
-    call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k)
+    call Kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k)
 
     mat_dp = DBLE(Cryst%symrec(:,:,isym_k))
     call matrginv(mat_dp,3,3) ! Invert
@@ -274,8 +263,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 

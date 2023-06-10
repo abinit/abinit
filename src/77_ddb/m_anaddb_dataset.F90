@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -228,12 +224,6 @@ contains
 !! INPUTS
 !!  anaddb_dtset = anaddb datastructure
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -291,12 +281,6 @@ end subroutine anaddb_dtset_free
 !!  variables which need to be allocated depending on the dimensions read in.
 !!  Could be divided into two routines as in abinit.
 !!    FIXME: move checks to chkin9?
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
 !!
 !! SOURCE
 
@@ -436,12 +420,12 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
    ABI_ERROR(message)
  end if
 
- anaddb_dtset%dosdeltae = one/Ha_cmm1
+ anaddb_dtset%dosdeltae = 0.2_dp/Ha_cmm1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dosdeltae',tread, 'DPR')
  if(tread == 1) anaddb_dtset%dosdeltae = dprarr(1)
 
 !FIXME : should probably be smaller
- anaddb_dtset%dossmear = 5.0/Ha_cmm1
+ anaddb_dtset%dossmear = one/Ha_cmm1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dossmear',tread, 'DPR')
  if(tread == 1) anaddb_dtset%dossmear = dprarr(1)
  if(anaddb_dtset%dossmear <= zero)then
@@ -1905,12 +1889,6 @@ end subroutine invars9
 !! NOTES
 !! Should be executed by one processor only.
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
 subroutine outvars_anaddb (anaddb_dtset, nunit)
@@ -2243,12 +2221,6 @@ end subroutine outvars_anaddb
 !!     (6) Root name for electron-phonon file names
 !!     (7) Name of file containing the 3 ddk filenames and the GS wf file name
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
 subroutine anaddb_init(input_path, filnam)
@@ -2372,12 +2344,6 @@ end subroutine anaddb_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_anaddb_dataset
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
 subroutine anaddb_chkvars(string)
@@ -2421,7 +2387,7 @@ subroutine anaddb_chkvars(string)
  list_vars = trim(list_vars)//' kptrlatt kptrlatt_fine'
 !L
 
- list_vars = trim(list_vars)//' lwf_anchor_iband lwf_anchor_qpt lwf_anchor_proj'
+ list_vars = trim(list_vars)//' lwf_anchor_iband lwf_anchor_proj lwf_anchor_qpt'
  list_vars = trim(list_vars)//' lwf_disentangle lwf_mu lwf_ngqpt lwf_nwann lwf_projector lwf_sigma'
  list_vars = trim(list_vars)//' lwfflag'
 !M
@@ -2463,8 +2429,8 @@ subroutine anaddb_chkvars(string)
 
 !Extra token, also admitted:
 !<ANADDB_UNITS>
- list_vars = trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars = trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs T Tesla'
+ list_vars = trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
+ list_vars = trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ANADDB_UNITS>
 
 !<ANADDB_OPERATORS>

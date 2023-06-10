@@ -31,7 +31,7 @@ module m_abi_etsf
  use m_errors
  use m_atomdata
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use m_fstrings,     only : endswith
  use defs_datatypes, only : pseudopotential_type
@@ -73,10 +73,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  Data written in file whose name is filapp//'-etsf.nc'
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -127,10 +123,6 @@ end subroutine abi_etsf_init
 !!
 !! SIDE EFFECTS
 !!  New dimensions and variables are added to the initial NetCDF file.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

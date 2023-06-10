@@ -730,23 +730,13 @@ P          mk1mem10        32
               qpt8     2.50000000E-01  5.00000000E-01  5.00000000E-01
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       2
-          rfatpol7          1       1
-          rfatpol8          1       2
-          rfatpol9          1       1
-          rfatpol10         1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       1       1
-            rfdir5          0       0       0
+            rfdir5          1       1       1
             rfdir6          1       1       1
-            rfdir7          0       0       0
+            rfdir7          1       1       1
             rfdir8          1       1       1
             rfdir9          1       1       1
             rfdir10         1       1       1
@@ -1305,7 +1295,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -4955,23 +4945,13 @@ P          mk1mem10        32
               qpt8     2.50000000E-01  5.00000000E-01  5.00000000E-01
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-          rfatpol6          1       2
-          rfatpol7          1       1
-          rfatpol8          1       2
-          rfatpol9          1       1
-          rfatpol10         1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
             rfdir4          1       1       1
-            rfdir5          0       0       0
+            rfdir5          1       1       1
             rfdir6          1       1       1
-            rfdir7          0       0       0
+            rfdir7          1       1       1
             rfdir8          1       1       1
             rfdir9          1       1       1
             rfdir10         1       1       1

@@ -157,10 +157,6 @@ P          mk1mem2         16
            prtpot1          0
            prtpot2          1
            prtvol          10
-          rfatpol1          1       1
-          rfatpol2          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
            rfstrs1          0
@@ -2957,10 +2953,6 @@ P          mk1mem2         16
            prtpot1          0
            prtpot2          1
            prtvol          10
-          rfatpol1          1       1
-          rfatpol2          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
            rfphon1          0
            rfphon2          1
            rfstrs1          0

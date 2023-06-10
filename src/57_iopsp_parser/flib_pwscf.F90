@@ -13,8 +13,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -39,10 +37,6 @@ module flib_pwscf
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !-----------------------------------------------------------------------
@@ -90,10 +84,6 @@ END FUNCTION matches
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !-----------------------------------------------------------------------
 FUNCTION capital( in_char )
@@ -139,10 +129,6 @@ END FUNCTION capital
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !
 !-----------------------------------------------------------------------
@@ -186,11 +172,6 @@ END FUNCTION lowercase
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      functionals_pwscf,m_read_upf_pwscf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

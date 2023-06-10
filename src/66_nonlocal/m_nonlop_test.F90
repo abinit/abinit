@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -81,13 +77,6 @@ contains
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_afterscfloop
-!!
-!! CHILDREN
-!!      dotprod_g,gs_hamk%free,gs_hamk%load_k,gs_hamk%load_spin
-!!      init_hamiltonian,initylmg,mkffnl,mkkpg,nonlop
 !!
 !! SOURCE
 

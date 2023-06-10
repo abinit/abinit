@@ -177,11 +177,6 @@ contains
 !!
 !! OUTPUT
 !! hist <type(spin_hist_t)()> = spin hist type
-!! PARENTS
-!!      m_spin_hist
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine initialize(self, nspin, mxhist, has_latt)
@@ -229,7 +224,6 @@ contains
 !!***
 
   subroutine reset(self, array_to_zero)
-
     implicit none
     class(spin_hist_t), intent(inout) :: self
     logical :: array_to_zero
@@ -274,11 +268,6 @@ contains
   !!
   !! OUTPUT
   !! hist <type(spin_hist_t)()> = spin hist type
-  !! PARENTS
-!!
-  !! CHILDREN
-!!      self%inc1
-!!
   !! SOURCE
   subroutine set_atomic_structure(self, acell, rprimd, xred, spin_index, ntypat,  typat, znucl)
 
@@ -318,11 +307,6 @@ contains
   !!
   !! OUTPUT
   !! hist <type(spin_hist_t)()> = spin hist type
-  !! PARENTS
-  !!      m_spin_hist
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   
   subroutine set_params(self, spin_nctime, spin_temperature)
@@ -348,11 +332,6 @@ contains
   !!
   !! OUTPUT
   !! hist <type(spin_hist_t)()> = spin hist type
-  !! PARENTS
-  !!      m_spin_hist
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   subroutine finalize(self)
 
@@ -417,11 +396,6 @@ contains
   !! step = index of step. current step is 0. last step is -1. 
   !! OUTPUT
   !! S(3, nspin)=spin orientations at step
-  !! PARENTS
-  !!      m_spin_hist
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   function get_S(self, step) result(S)
     class(spin_hist_t), intent(inout) :: self
@@ -451,11 +425,6 @@ contains
   !!
   !! OUTPUT
   !!   hist <type(spin_hist_t)()> = spin hist type
-  !! PARENTS
-!!
-  !! CHILDREN
-!!      self%inc1
-!!
   !! SOURCE
   subroutine inc1(self)
 
@@ -482,11 +451,6 @@ contains
   !!
   !! OUTPUT
   !!   index: the index of the step in the self%S array.
-  !! PARENTS
-  !!      m_spin_hist
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   function findIndex(self, step) result(index)
 
@@ -531,11 +495,6 @@ contains
   !! inc = whether this step is finished. If true, increment counter.
   !! OUTPUT
   !!   index: the index of the step in the self%S array.
-  !! PARENTS
-  !!      m_spin_hist
-  !!
-  !! CHILDREN
-  !!
   !! SOURCE
   subroutine set_vars(self, S, Snorm, dSdt, Heff, etot, entropy, time, ihist_latt, inc)
 
