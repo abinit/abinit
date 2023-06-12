@@ -110,7 +110,8 @@ contains
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,icutcoul,idir,ipert,&
 &           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
 &           non_magnetic_xc,optene,optres,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
-&           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot)
+&           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,&
+&           rhomag,mshift,emshift)  !Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -120,8 +121,11 @@ contains
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(inout) :: ehart01
  real(dp),intent(out) :: vres2
+ real(dp),optional,intent(in) :: mshift
+ real(dp),optional,intent(out) :: emshift(cplex)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
+ integer,intent(in)   :: ngfft(18)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: vxc(nfft,nspden)
  real(dp),intent(in) :: nhat(nfft,nspden)
@@ -136,6 +140,7 @@ contains
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
  real(dp),intent(in) :: vcutgeo(3)
+ real(dp),optional,intent(in) :: rhomag(2,nspden)
 
 !Local variables-------------------------------
 !scalars
@@ -144,10 +149,10 @@ contains
  logical :: vhartr1_allocated,vxc1_allocated
  real(dp) :: doti,elpsp10
 !arrays
- integer,intent(in)   :: ngfft(18)
- real(dp)             :: tsec(20)
+ real(dp)             :: Bx(cplex),By(cplex),tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
+ real(dp),allocatable :: vmshift(:,:)
 
 ! *********************************************************************
 
@@ -189,6 +194,38 @@ contains
  if(ipert==natom+5)then
    ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
+ end if
+
+!------  Define the magnon shift potential (and energy) -------------------------
+ emshift=zero
+ ABI_MALLOC(vmshift,(cplex*nfft,nspden))
+ vmshift(:,:)=zero
+ if (present(rhomag).and.present(mshift)) then
+
+   if (cplex==1) then
+     emshift(1)=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
+   else if (cplex==2) then
+     emshift(1)=half*mshift*(rhomag(1,2)**2-rhomag(2,2)**2 &
+&                           +rhomag(1,3)**2-rhomag(2,3)**2)
+     emshift(2)=mshift*(rhomag(1,2)*rhomag(2,2) &
+&                      +rhomag(1,3)*rhomag(2,3))
+   end if
+
+   Bx(:)=-mshift*rhomag(:,2)
+   By(:)=-mshift*rhomag(:,3)
+   if (cplex==1) then
+     do ifft=1,nfft
+       vmshift(ifft,3)=Bx(1)
+       vmshift(ifft,4)=By(1)
+     end do
+   else if (cplex==2) then
+     do ifft=1,nfft
+       vmshift(2*ifft-1,3)=Bx(1)+By(2)
+       vmshift(2*ifft  ,3)=Bx(2)-By(1)
+       vmshift(2*ifft-1,4)=-Bx(2)-By(1)
+       vmshift(2*ifft  ,4)=Bx(1)-By(2)
+     end do
+   end if
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -311,14 +348,14 @@ contains
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
+       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+vmshift(ifft,ispden)-vtrial1(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vresid1(ifft,ispden)=vxc1_(ifft,ispden)-vtrial1(ifft,ispden)
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)+vmshift(ifft,ispden)-vtrial1(ifft,ispden)
        end do
      end do
    end if
@@ -337,14 +374,14 @@ contains
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)
+       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+vmshift(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)
+         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)+vmshift(ifft,ispden)
        end do
      end do
    end if
@@ -366,6 +403,8 @@ contains
  if (ipert==natom+5) then
    ABI_FREE(v1zeeman)
  end if
+
+ ABI_FREE(vmshift)
 
  call timab(157,2,tsec)
 

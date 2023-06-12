@@ -1548,7 +1548,7 @@ subroutine dotprod_vn(cplex,dens,dotr,doti,nfft,nfftot,nspden,option,pot,ucvol, 
 &         + bz_re * dens(jfft-1,4) &
 &         + bz_im * dens(jfft  ,4)
 
-         doti=doti v0_re * dens(jfft  ,1)&
+         doti=doti+ v0_re * dens(jfft  ,1)&
 &         - v0_im * dens(jfft-1,1) &
 &         + bx_re * dens(jfft  ,2) &
 &         - bx_im * dens(jfft-1,2) &
