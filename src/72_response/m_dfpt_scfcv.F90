@@ -417,7 +417,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: ngfftmix(18)
  integer,allocatable :: dimcprj(:),pwindall(:,:,:)
  integer,pointer :: my_atmtab(:)
- real(dp) :: dielar(7),emshift(cplex)
+ real(dp) :: dielar(7),emshift
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qphon_mq(3),qred2cart(3,3)
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
@@ -1073,12 +1073,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene = 0 
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
+&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene,&
+&     emshift=emshift)
      call timab(152,1,tsec)
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
-&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
+&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene,&
+&        emshift=emshift)
 
        !Implicictly avoids double counting of SCF and local energies
        etotal=half*(etotal+etotal_mq)
@@ -1153,13 +1155,15 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene = 0 ! use direct scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
+&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene,&
+&     emshift=emshift)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
 &        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
-&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
+&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene,&
+&        emshift=emshift)
 
        !Implicictly avoids double counting of SCF and local energies
        etotal=half*(etotal+etotal_mq)
@@ -1748,7 +1752,8 @@ end subroutine dfpt_scfcv
 
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
 &                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&                end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
+&                end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene,&
+&                emshift)
 
 !Arguments ------------------------------------
 !scalars
@@ -1758,9 +1763,11 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
  real(dp),intent(in) :: evdw,exc1
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,evar
+ real(dp),optional,intent(in) :: emshift
 
 !Local variables-------------------------------
 !scalars
+ real(dp) :: emshift_
 ! character(len=500) :: message
 
 ! *********************************************************************
@@ -1769,6 +1776,8 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
    ABI_BUG('Double-counting scheme not yet allowed!')
  end if
 
+ emshift_=zero; if (present(emshift)) emshift_=emshift
+
  if (optene>-1) then
 
 !  Compute 2nd-order variational energy by direct scheme
@@ -1776,7 +1785,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    Atomic displ. perturbation
      if ( ipert>=1 .and. ipert<=natom  ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+epaw1+elpsp1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+epaw1+elpsp1+emshift_
 
      else if (ipert==natom+1) then
        evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+end0+end1
@@ -1786,7 +1795,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !      For ipert==natom+2, some contributions vanish, noticeably ek1
      else if (ipert==natom+2) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1+emshift_
 
 !      All terms enter for strain perturbation
      else if ( ipert==natom+3 .or. ipert==natom+4 ) then
@@ -1794,7 +1803,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    terms for Zeeman perturbation, SPr 2deb
      else if ( ipert==natom+5 ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emshift_
      end if
    end if
 
