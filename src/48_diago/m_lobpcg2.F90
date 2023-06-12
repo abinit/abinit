@@ -769,14 +769,10 @@ module m_lobpcg2
     end if
 
     if ( nblock > 1 ) then
-      lobpcg%X = X0
-      lobpcg%AX = lobpcg%AllAX0%self
-      lobpcg%BX = lobpcg%AllBX0%self
-      lobpcg%blockdim = blockdim*nblock
       !call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_Xall) ! Do rotate AX
       call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,gpu_option=lobpcg%gpu_option,AX=lobpcg%AllAX0%self) ! Do rotate AX
       !call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,tim_RR_Xall,2*dlamch('E'))
-      call xg_RayleighRitz(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,eigenvaluesN,ierr,lobpcg%prtvol,tim_RR_Xall,&
+      call xg_RayleighRitz(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,eigen,ierr,lobpcg%prtvol,tim_RR_Xall,&
         & gpu_option=lobpcg%gpu_option,tolerance=tolerance)
     end if
 
