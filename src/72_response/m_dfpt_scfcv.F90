@@ -405,7 +405,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
  real(dp) :: end0_mq,end1_mq,enl0_mq,enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
- real(dp) :: eta_mq,etotal_mq,evar_mq,omega_mq
+ real(dp) :: eta_mq,etotal_mq,evar_mq,omega_mq,mshift
  character(len=500) :: msg
  character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
@@ -417,7 +417,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: ngfftmix(18)
  integer,allocatable :: dimcprj(:),pwindall(:,:,:)
  integer,pointer :: my_atmtab(:)
- real(dp) :: dielar(7)
+ real(dp) :: dielar(7),emshift(cplex)
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qphon_mq(3),qred2cart(3,3)
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
@@ -723,6 +723,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    eta_mq=-dtset%rfeta
    qphon_mq(:)=-qphon(:)
  end if
+ mshift=dtset%userra
 
  call timab(154,2,tsec)
 
@@ -1003,14 +1004,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    end if
 
-!TMP
-!   do ifft=1,nfftf
-!     write(201,*) rhor1(2*ifft-1,1), rhor1(2*ifft ,1)
-!     write(202,*) rhor1(2*ifft-1,2), rhor1(2*ifft ,2)
-!     write(203,*) rhor1(2*ifft-1,3), rhor1(2*ifft ,3)
-!     write(204,*) rhor1(2*ifft-1,4), rhor1(2*ifft ,4)
-!     write(205,*) rhog1(1,ifft),  rhog1(2,ifft)
-!   end do
 
    if (dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 &   dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17) then
@@ -1046,6 +1039,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    call dfpt_e1mag(e1mag,rhor1,rhog1);
 !  endif
 
+!  Compute the first-order magnetic moments.
+   prtopt=idir+1;
+   call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&  dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+&  prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+
 !  ######################################################################
 !  Skip out of step loop if non-SCF (completed)
 !  ----------------------------------------------------------------------
@@ -1065,19 +1064,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
-&     rprimd,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
-
-!TMP
-   do ifft=1,nfftf
-!     write(301,*) nvresid1(2*ifft-1,1), nvresid1(2*ifft ,1)
-!     write(302,*) nvresid1(2*ifft-1,2), nvresid1(2*ifft ,2)
-!     write(303,*) nvresid1(2*ifft-1,3), nvresid1(2*ifft ,3)
-!     write(304,*) nvresid1(2*ifft-1,4), nvresid1(2*ifft ,4)
-!     write(305,*) vhartr1(2*ifft-1),vhartr1(2*ifft)
-!     write(306,*) vxc1(2*ifft-1,1),vxc1(2*ifft,1)
-!     write(307,*) vxc1(2*ifft-1,2),vxc1(2*ifft,2)
-   end do
-
+&     rprimd,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,&
+&     vxc,vxc1,xccc3d1,dtset%ixcrot,&
+&     rhomag=rhomag,mshift=mshift,emshift=emshift) !Optional
    end if
 
    if (iscf_mod>=10) then
@@ -1137,7 +1126,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
-&     rprimd,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot)
+&     rprimd,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,&
+&     rhomag=rhomag,mshift=mshift,emshift=emshift) !Optional
    end if
 
 !  ######################################################################
