@@ -122,7 +122,7 @@ contains
  real(dp),intent(inout) :: ehart01
  real(dp),intent(out) :: vres2
  real(dp),optional,intent(in) :: mshift
- real(dp),optional,intent(out) :: emshift(cplex)
+ real(dp),optional,intent(out) :: emshift
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)   :: ngfft(18)
@@ -203,12 +203,10 @@ contains
  if (present(rhomag).and.present(mshift)) then
 
    if (cplex==1) then
-     emshift(1)=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
+     emshift=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
    else if (cplex==2) then
-     emshift(1)=half*mshift*(rhomag(1,2)**2-rhomag(2,2)**2 &
-&                           +rhomag(1,3)**2-rhomag(2,3)**2)
-     emshift(2)=mshift*(rhomag(1,2)*rhomag(2,2) &
-&                      +rhomag(1,3)*rhomag(2,3))
+     emshift=half*mshift*(rhomag(1,2)**2+rhomag(2,2)**2 &
+&                        +rhomag(1,3)**2+rhomag(2,3)**2)
    end if
 
    Bx(:)=-mshift*rhomag(:,2)
