@@ -209,8 +209,8 @@ contains
 &                        +rhomag(1,3)**2+rhomag(2,3)**2)
    end if
 
-   Bx(:)=-mshift*rhomag(:,2)
-   By(:)=-mshift*rhomag(:,3)
+   Bx(:)=mshift*rhomag(:,2)
+   By(:)=mshift*rhomag(:,3)
    if (cplex==1) then
      do ifft=1,nfft
        vmshift(ifft,3)=Bx(1)
@@ -225,10 +225,10 @@ contains
      end do
    end if
 
-   write(msg,'(a,f12.6,a,2(a,2f12.6,a))')'  Magnon shift on ETOT:', emshift, ch10,&
+   write(msg,'(a,f12.6,a,2(a,f12.6,a),a)')'  Magnon shift on ETOT:', emshift, ch10,&
 &  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
-&  '  Magnon shift on vtrial1(4):', By(1),ch10 
-   call wrtout(ab_out,msg,'COLL')
+&  '  Magnon shift on vtrial1(4):', By(1),ch10,ch10 
+   call wrtout(std_out,msg,'COLL')
 
  end if
 
