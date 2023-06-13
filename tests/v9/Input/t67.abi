@@ -1,6 +1,6 @@
 # Calculation of phonon frequencies at gamma.
  ifcflag 1
- ngqpt 2 2 2 
+ ngqpt 2 2 2
  dipdip 0
  nph1l 1
  qph1l

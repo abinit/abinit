@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.8.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Mon 13 Mar 2023.
+- ( at 23h04 )
   
 
 ================================================================================
@@ -39,8 +39,8 @@
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
  Phonon DOS information :
-   dosdeltae  4.55633525E-06
-    dossmear  2.27816763E-05
+   dosdeltae  9.11267051E-07
+    dossmear  4.55633525E-06
  Description of grid 2 (Fourier interp. or BZ sampling):
       ng2qpt        10        10        10
       ngrids         4
@@ -108,7 +108,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.059  and twall      0.060 sec
+-begin at tcpu      0.049  and twall      0.055 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      343
  greater than 80, so only write 20 of them
@@ -249,10 +249,10 @@
 -  1.514377E+02  2.462455E+02  3.483226E+02  3.483226E+02  3.535302E+02
 -  4.679175E+02  5.121605E+02
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.0
+- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.2
 
 ================================================================================
 
-+Total cpu time      7.940  and wall time      7.965 sec
++Total cpu time      9.181  and wall time      9.234 sec
 
  anaddb : the run completed succesfully.

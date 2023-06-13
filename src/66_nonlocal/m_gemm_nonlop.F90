@@ -421,7 +421,7 @@ contains
                   gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
 &                  -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
 &                        +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
-      
+
                   gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
 &                  -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
 &                        +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
@@ -476,6 +476,7 @@ contains
 !! INPUTS
 !!
 !! SOURCE
+
  subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&

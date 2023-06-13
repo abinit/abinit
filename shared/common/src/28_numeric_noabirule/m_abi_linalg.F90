@@ -28,10 +28,10 @@ module m_abi_linalg
  use m_xmpi
  use m_xomp
  use m_slk
- use iso_c_binding
-#ifdef HAVE_LINALG_ELPA
- use m_elpa
-#endif
+ use, intrinsic :: iso_c_binding
+!#ifdef HAVE_LINALG_ELPA
+! use m_elpa
+!#endif
 #ifdef HAVE_LINALG_PLASMA
  use plasma, except_dp => dp, except_sp => sp
 #endif
@@ -374,9 +374,9 @@ CONTAINS  !===========================================================
  ABI_UNUSED(np_slk)
 #endif
 
-#ifdef HAVE_LINALG_ELPA
- call elpa_func_init()
-#endif
+!#ifdef HAVE_LINALG_ELPA
+! call elpa_func_init()
+!#endif
 
 #ifdef HAVE_LINALG_PLASMA
 !Plasma Initialization
@@ -669,9 +669,9 @@ CONTAINS  !===========================================================
  end if
 #endif
 
-#ifdef HAVE_LINALG_ELPA
- call elpa_func_uninit()
-#endif
+!#ifdef HAVE_LINALG_ELPA
+! call elpa_func_uninit()
+!#endif
 
 #ifdef HAVE_LINALG_PLASMA
    call PLASMA_Finalize(info)

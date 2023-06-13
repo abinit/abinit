@@ -84,6 +84,9 @@ _ WF disk file :     27.471 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
+-          iomode1          0
+-          iomode2          3
+-          iomode3          0
             acell      7.4100000000E+00  7.4100000000E+00  7.4100000000E+00 Bohr
               amu      1.95080000E+02
              ecut      1.50000000E+01 Hartree
@@ -470,6 +473,9 @@ P           mkmem3        256
         optdriver1          0
         optdriver2          8
         optdriver3          0
+          prtkbff1          0
+          prtkbff2          1
+          prtkbff3          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -882,6 +888,9 @@ band_energy         : -1.59688819290251E+01
 ================================================================================
   
  -outvars: echo values of variables after computation  --------
+-          iomode1          0
+-          iomode2          3
+-          iomode3          0
             acell      7.4100000000E+00  7.4100000000E+00  7.4100000000E+00 Bohr
               amu      1.95080000E+02
              ecut      1.50000000E+01 Hartree
@@ -1274,6 +1283,9 @@ P           mkmem3        256
         optdriver1          0
         optdriver2          8
         optdriver3          0
+          prtkbff1          0
+          prtkbff2          1
+          prtkbff3          0
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00

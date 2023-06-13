@@ -53,5 +53,5 @@ electronic properties.
 
 ## Tutorials
 
-* [[tutorial:ffield|Tutorial on polarization and finite electric fields]]. Polarization, and responses to finite electric fields for AlAs. In the present topic, it is an example of the definition of several atom types ... 
+* [[tutorial:polarization|Tutorial on polarization and finite electric fields]]. Polarization, and responses to finite electric fields for AlAs. In the present topic, it is an example of the definition of several atom types ... 
 

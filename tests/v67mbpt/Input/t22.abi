@@ -23,9 +23,9 @@ enunit 0   # Units only in Hartrees
 
 #Definition of the unit cell
 acell 3*10.18          # This is equivalent to   10.18 10.18 10.18
-rprim  0.0  0.5  0.5   
-       0.5  0.0  0.5    
-       0.5  0.5  0.0   
+rprim  0.0  0.5  0.5
+       0.5  0.0  0.5
+       0.5  0.5  0.0
 
 #Definition of the atom types
 ntypat 1          # There are two type of atom
@@ -33,11 +33,11 @@ znucl 14          # Si (Silicon)
 
 #Definition of the atoms
 natom 2           # There are four atoms in total (2xZnO)
-typat 1 1 
+typat 1 1
 xred               # This keyword indicate that the location of the atoms
                    # will follow, one triplet of number for each atom
-  -1/8 -1/8 -1/8       
-   1/8  1/8  1/8      
+  -1/8 -1/8 -1/8
+   1/8  1/8  1/8
 
 #Definition of the planewave basis set
 ecut      6.0  Ha   # Maximal kinetic energy cut-off, in Hartree
@@ -73,7 +73,7 @@ shiftk1   0.5 0.5 0.5  # Shift of k-point grid
 
 #Definition of the SCF procedure
 nstep1    10       # Maximal number of SCF cycles
-tolvrs1   1.0d-16   # Stopping criterion on residual of potential 
+tolvrs1   1.0d-16   # Stopping criterion on residual of potential
 diemac1   12.0      # Preconditioning of SCF cycle
 
 #--------------------------------------------------
@@ -106,7 +106,7 @@ tolwfr2   1.0d-21 # For response function calculations
                   # the wavefunctions need to be highly
                   # converged. (10^-21-10^-23)
 #--------------------------------------------------
-                           
+
 #--------------------------------------------------
 # DATASET 3: CALCULATION OF WAVEFUNCTIONS (unshifted k grid)
 #--------------------------------------------------
@@ -137,7 +137,7 @@ tolwfr3   1.0d-21 # For response function calculations
 #--------------------------------------------------
 
 #--------------------------------------------------
-# DATASET 4: CALCULATION OF THE SCREENING (inzgid test) 
+# DATASET 4: CALCULATION OF THE SCREENING (inzgid test)
 #--------------------------------------------------
 optdriver4  3    # Do a standard (one-shot) screening calculation
 gwcalctyp4  2    # Do Contour Deformation integration
@@ -148,7 +148,7 @@ nband4      20   # Number of bands to be read in from _KSS
                  # number of unoccupied bands, so 96-6=90 in this case
                  # Good combinations of processors:
                  # 2 proc: 90/2 = 45 each
-                 # 3 proc: 90/3 = 30 each 
+                 # 3 proc: 90/3 = 30 each
                  # 5 proc: 90/5 = 18 each, etc...
 istwfk4    *1    # No symmetry in wfk storage
 getwfk4     2    # Get KSS file from dataset 2 (SHIFTED k-grid)
@@ -189,7 +189,7 @@ gw_icutcoul4        3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 
 #--------------------------------------------------
-# DATASET 5: CALCULATION OF THE SCREENING (freqim_alpha test) 
+# DATASET 5: CALCULATION OF THE SCREENING (freqim_alpha test)
 #--------------------------------------------------
 optdriver5  3    # Do a standard (one-shot) screening calculation
 gwcalctyp5  2    # Do Contour Deformation integration
@@ -200,7 +200,7 @@ nband5      20   # Number of bands to be read in from _KSS
                  # number of unoccupied bands, so 96-6=90 in this case
                  # Good combinations of processors:
                  # 2 proc: 90/2 = 45 each
-                 # 3 proc: 90/3 = 30 each 
+                 # 3 proc: 90/3 = 30 each
                  # 5 proc: 90/5 = 18 each, etc...
 istwfk5    *1    # No symmetry in wfk storage
 getwfk5     2    # Get KSS file from dataset 2 (SHIFTED k-grid)
@@ -275,7 +275,7 @@ gw_icutcoul6         3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 optdriver7  4      # Do a sigma calculation
 gwcalctyp7  2      # Do Contour Deformation integration
-cd_frqim_method7 2 # Use TRAPEZOID integration  
+cd_frqim_method7 2 # Use TRAPEZOID integration
 
 gwpara7     2    # Use parallellism over bands
 nband7      20   # The *full* number of bands is parallelised over the procs
@@ -313,7 +313,7 @@ gw_icutcoul7         3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 optdriver8  4      # Do a sigma calculation
 gwcalctyp8  2      # Do Contour Deformation integration
-cd_frqim_method8 3 # Use NSPLINE integration  
+cd_frqim_method8 3 # Use NSPLINE integration
 
 gwpara8     2    # Use parallellism over bands
 nband8      20   # The *full* number of bands is parallelised over the procs
@@ -351,7 +351,7 @@ gw_icutcoul8         3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 optdriver9  4      # Do a sigma calculation
 gwcalctyp9  2      # Do Contour Deformation integration
-cd_frqim_method9 4 # Use NSPLINE integration (level 2)  
+cd_frqim_method9 4 # Use NSPLINE integration (level 2)
 
 gwpara9     2    # Use parallellism over bands
 nband9      20   # The *full* number of bands is parallelised over the procs
@@ -391,7 +391,7 @@ gw_icutcoul9         3 # old deprecated value of icutcoul, only used for legacy
 #--------------------------------------------------
 optdriver10  4      # Do a sigma calculation
 gwcalctyp10  2      # Do Contour Deformation integration
-cd_frqim_method10 5 # Use NSPLINE integration (level 3)  
+cd_frqim_method10 5 # Use NSPLINE integration (level 3)
 
 gwpara10     2    # Use parallellism over bands
 nband10      20   # The *full* number of bands is parallelised over the procs
@@ -432,14 +432,14 @@ gw_icutcoul10         3 # old deprecated value of icutcoul, only used for legacy
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t22.abo, tolnlines = 600, tolabs = 1.1e-2, tolrel = 6.0e-2, fld_options =  -medium
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Stankovski
 #%% keywords = GW
-#%% description = 
+#%% description =
 #%%   Test new integration method and grid options for the integral
 #%%   along the imaginary axis in contour deformation calculations.
 #%%<END TEST_INFO>

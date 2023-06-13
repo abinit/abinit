@@ -232,58 +232,9 @@ From this answer on [stackoverflow](https://stackoverflow.com/questions/2171177/
 
 For the treatment of dimensions see **invars0**, **invars1m**
 
-## How to add a new test in the test suite?
+## How to add a new test in the test suite
 
-The following information complements the [testsuite documentation](/developers/testsuite_howto).
-
-In order to introduce a test, one needs to:
-
--  Provide a new input file in e.g. **tests/v8/Input**
-   (or modify an existing one, possibly in another directory, but please do not suppress the existing capability testing!)
-
--  Provide a new reference file in the corresponding **tests/v8/Refs**
-
--  Insert the test in the list of tests to be done, by adding its name in **tests/v8/\_\_init\_\_.py**.
-
--  Document the test by adding a commented section inside the input file
-   (edit an existing input file to follow its style)
-
-- Declare the pseudopotentials, the flow of actions, the files to be analyzed, the tolerances for the test,
-  inside this documentation. For the tolerances, start with
-
-        tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
-
-  The different fields control how strictly the test results will be analysed:
-
-  *  the maximum floating point difference found must be less than tolabs,
-  *  the maximum relative difference less than tolrel, for each line individually,
-  *  **tolnlines** is the maximal number of lines found to be different between the output and reference file
-     (within another tolerance that can be tuned by the option **opt=-medium**, **opt=-easy** or **opt=-ridiculous**,
-     see the added section in other input files).
-
-If this procedure fails, contact the code maintainers in order adjust the test case.
-This might mean modifying the tolerances files.
-Unless you are really expert, let the maintainer do the final adjustment.
-
-!!! important
-
-    Please, try to keep preferably the total time per test case to less than 10 seconds.
-    30 seconds is a maximum for most test cases. Going being this needs exceptional reasons.
-
-Supposing now that you have introduced a new test case.
-It can be used, with the other tests of the ABINIT test suite, through different channels:
-
-*  these tests can be triggered on the test farm Web Page.
-
-*  locally (on your machine), the whole set of sequential tests, or particular tests or series of tests,
-   can be triggered by issuing, in the ABINIT/tests directory, the command *./runtests.py*.
-   (see the many capabilities of this scripts by issuing *./runtests.py --help*).
-   Other sets of calculations can be triggered, as described by issuing *make help*.
-   The result will appear in a new subdirectory *Test_suite*
-
-Last but not least: are you sure that your modifications do not deteriorate the performance of the code
-in the regime where your modifications are not used?
-You should inspect your modifications for both memory use and CPU time.
+Please see the [testsuite documentation](/developers/testsuite_howto/#how-to-add-a-new-test-in-the-test-suite).
 
 ## Code Coverage
 
@@ -300,7 +251,7 @@ We aim that the test suite covers all the functionalities of ABINIT.
 How to trigger a coverage report?
 
 There is one slave dedicated to *on-demand* execution of branches by the developers
-that produces a code coverage report, at present, **higgs_gnu_7.3_cov**.
+that produces a code coverage report, at present, **higgs_gnu_7.5_cov**.
 It can be launched by the general [on-demand interface](https://bbportal.abinit.org)
 (contact Jean-Michel or Xavier if you do not yet have access to it).
 Code coverage reports from recent runs of the tests are available [here](http://coverage.abinit.org).
