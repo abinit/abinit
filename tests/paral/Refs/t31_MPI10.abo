@@ -1,5 +1,5 @@
 
-.Version 9.9.0 of ABINIT 
+.Version 9.9.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 18 Oct 2022.
-- ( at 20h55 )
+.Starting date : Fri 23 Dec 2022.
+- ( at 13h55 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_forstr_gemm/tests/TestBot_MPI10/paral_t31_MPI10/t31.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_merge-9.8/tests/TestBot_MPI10/paral_t31_MPI10/t31.abi
 - output file    -> t31_MPI10.abo
 - root for input  files -> t31_MPI10i
 - root for output files -> t31_MPI10o
@@ -1097,8 +1097,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.12389
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_forstr_gemm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_forstr_gemm/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_merge-9.8/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_merge-9.8/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7458,10 +7458,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         43.2  wall=         43.4
+- Proc.   0 individual time (sec): cpu=         40.2  wall=         40.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        432.5  wall=        433.6
++Overall time at end (sec) : cpu=        402.5  wall=        403.4

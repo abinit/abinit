@@ -94,5 +94,8 @@ The list of input variables for the anaddb input file are presented in the
 [[varset:anaddb]] variable set. In order to discover them, it is easier to use
 the different tutorials: start with the [second DFPT tutorial](/tutorial/rf2), then follow 
 the [tutorial on elasticity and
-piezoelectricity](/tutorial/elastic), the [tutorial on electron-phonon
-interaction](/tutorial/eph), and the [tutorial on non-linear properties](/tutorial/nlo). 
+piezoelectricity](/tutorial/elastic), 
+and the [tutorial on non-linear properties](/tutorial/nlo).
+If you are interested in electron-phonon interaction, use the [new tutorial on electron-phonon
+interaction](/tutorial/eph_intro), while 
+the [legacy tutorial on electron-phonon interaction](/tutorial/eph_legacy) is still available.

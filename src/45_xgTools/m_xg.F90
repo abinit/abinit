@@ -267,7 +267,7 @@ module m_xg
 !! getClocR
 
   function getClocR(rows,cols,array) result(cptr)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     integer, intent(in) :: rows
     integer, intent(in) :: cols
     double precision, target, intent(inout) :: array(rows,cols)
@@ -282,7 +282,7 @@ module m_xg
 !! getClocC
 
   function getClocC(rows,cols,array) result(cptr)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     integer, intent(in) :: rows
     integer, intent(in) :: cols
     complex(kind=8), target, intent(inout) :: array(rows,cols)
@@ -453,7 +453,7 @@ module m_xg
 !! xgBlock_map
 
   subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, intent(inout) :: array(:,:)
     integer   , intent(in   ) :: space
@@ -497,7 +497,7 @@ module m_xg
 !! xgBlock_reverseMap
 
   subroutine xgBlock_reverseMap(xgBlock,array,rows,cols)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, pointer, intent(inout) :: array(:,:)
     integer   , intent(in   ) :: rows
@@ -634,7 +634,7 @@ module m_xg
 !! xg_setBlock
 
   subroutine xg_setBlock(xg,Xgblock, fcol, rows, cols)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xg_t), intent(inout) :: xg
     type(xgBlock_t), intent(inout) :: xgBlock
     integer, intent(in) :: fcol
@@ -675,7 +675,7 @@ module m_xg
 !! xgBlock_setBlock
 
   subroutine xgBlock_setBlock(xgBlockA,xgBlockB, fcol, rows, cols)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
     integer, intent(in) :: fcol
@@ -843,7 +843,7 @@ module m_xg
 !! xgBlock_pack
 
   subroutine xgBlock_pack(xgBlockA,xgBlockB,uplo)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
     character, intent(in) :: uplo
@@ -2301,7 +2301,7 @@ module m_xg
 !! xgBlock_reshape
 
   subroutine xgBlock_reshape(xgBlock,newShape)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlock
     integer        , intent(in   ) :: newShape(2)
     type(c_ptr) :: cptr

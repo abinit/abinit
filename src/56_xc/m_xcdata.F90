@@ -162,7 +162,8 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
    xcdata%hyb_mixing=abs(dtset%hyb_mixing) ! Warning : the absolute value is needed, because of the singular way
                                            ! to define the default values for this input variable.
    xcdata%nelect=dtset%nelect
-   xcdata%tphysel=dtset%tphysel
+   xcdata%tphysel=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
    xcdata%xc_denpos=dtset%xc_denpos
 
  else
@@ -262,7 +263,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
            ABI_ERROR(message)
          end if
        end if
-     end if 
+     end if
    end do
  end if
 

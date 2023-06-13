@@ -1,0 +1,113 @@
+# Linear response function of natural optical activity for SiO2 quartz
+# (M. Royo and A. Zabalo 24.03.2023) 
+
+ndtset 5
+
+#Set 1 : ground state self-consistency
+#*************************************
+getwfk1   0
+kptopt1   1 
+tolvrs1   1.0d-18
+
+#Set 2: Response function calculation of d/dk wave function
+#**********************************************************
+kptopt2   2
+iscf2    -3
+rfelfd2   2
+tolwfr2   1.0d-20
+
+#Set 3: Response function calculation of d2/dkdk wave function
+#*************************************************************
+kptopt3   2
+getddk3   2
+iscf3    -3
+rf2_dkdk3 3
+tolwfr3   1.0d-20
+
+#Set 4 : Response function calculation of electric field
+#*******************************************************
+getddk4   2
+kptopt4   2
+rfelfd4   3
+tolvrs4   1.0d-8 
+prepalw4  4   
+
+#Set 5 : Natural optical activity calculation
+#********************************************
+optdriver5 10 
+kptopt5   2
+get1wf5   4
+get1den5  4
+getddk5   2
+getdkdk5  3
+lw_natopt5 1
+
+#######################################################################
+
+#Common input variables
+#**********************
+getwfk 1
+useylm 1
+
+#Definition of the unit cell
+#***************************
+acell   9.1743786972E+00  9.1743786972E+00  1.0110395292E+01
+rprim  1.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+      -5.0000000000E-01  8.6602540378E-01  0.0000000000E+00
+       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+
+#Definition of the atom types and positions
+#******************************************
+natom   9
+ntypat  2
+znucl   8 14
+typat   2 2 2 1 1 1 1 1 1 
+xred  5.3433698817E-01  5.3433698817E-01 -6.1679056924E-18
+      0.0000000000E+00  4.6566301183E-01  6.6666666667E-01
+      4.6566301183E-01  0.0000000000E+00  3.3333333333E-01
+      2.7438668942E-01  4.1213070497E-01  7.8048904276E-01
+      5.8786929503E-01  8.6225598445E-01  1.1382237610E-01
+      1.3774401555E-01  7.2561331058E-01  4.4715570943E-01
+      4.1213070497E-01  2.7438668942E-01  2.1951095724E-01
+      7.2561331058E-01  1.3774401555E-01  5.5284429057E-01
+      8.6225598445E-01  5.8786929503E-01  8.8617762390E-01
+
+#Gives the number of band, explicitely (do not take the default)
+#***************************************************************
+nband 24
+
+#Definition of the planewave basis set and k-point grid
+#******************************************************
+ecut 6
+ngkpt 2 2 2
+nshiftk 1
+shiftk 0.0 0.0 0.5
+
+#Definition of the SCF procedure
+#*******************************
+nstep 80       
+diemac 12.0
+
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "O_without_nlcc.psp8, Si_without_nlcc.psp8"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  tlw_8.abi
+#%% [files]
+#%% files_to_test = 
+#%%   tlw_8.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Royo and A. Zabalo
+#%% keywords = DFPT, LONGWAVE
+#%% description = Natural optical activity of quartz
+#%% topics = longwave
+#%%<END TEST_INFO>
