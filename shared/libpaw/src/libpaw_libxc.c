@@ -34,6 +34,7 @@
 #  include "xc_config.h"
 #else
 #  define FLOAT double
+#  define XC(func) xc_ ## func
 #endif
 
 /* ===============================================================
@@ -233,8 +234,9 @@ char const *libpaw_xc_get_info_refs(XC(func_type) *xc_func, const int *number)
 #endif
 
 /* ===============================================================
- * Wrapper to xc_func_set_ext_params for backward compatibility
+ * Wrapper to xc_func_set_ext_params
  *    Allows to change the parameters of a XC functional
+ * For backward compatibility
  * ===============================================================
  */
 void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_params)
@@ -282,8 +284,49 @@ void libpaw_xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n
  }
 
 /* ===============================================================
- * Wrapper to xc_func_set_dens_threshold for backward compatibility
- *    Allows to change the zero-density threshold of a XC functional
+ * Wrappers to:
+ *  xc_func_get_ext_params_name: get name of a functional parameter
+ *  xc_func_get_ext_params_description: get description of a parameter
+ *  xc_func_set_ext_params_name: set a functional parameter by name
+ * For backward compatibility
+ * These accessors where not provided before libXC v5
+ * ===============================================================
+ */
+char const *libpaw_xc_func_get_params_name(XC(func_type) *xc_func, const int *number)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+ {if (*number>=0&&*number<xc_func->info->ext_params.n)
+   {return xc_func_info_get_ext_params_name(xc_func->info,*number);}
+  else {return NULL;}}
+#else
+/* ==== Before libXC v5.0, was not available ==== */
+ {return NULL;}
+#endif
+
+char const *libpaw_xc_func_get_params_description(XC(func_type) *xc_func, int *number)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+ {if (*number>=0&&*number<xc_func->info->ext_params.n)
+   {return xc_func_info_get_ext_params_description(xc_func->info,*number);}
+  else {return NULL;}}
+#else
+/* ==== Before libXC v5.0, was not available ==== */
+ {return NULL;}
+#endif
+
+int libpaw_xc_func_set_params_name(XC(func_type) *xc_func, const char *name, double *par)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+  {xc_func_set_ext_params_name(xc_func, name, *par);return 0;}
+#else
+  {return -1;}
+#endif
+
+/* ===============================================================
+ * Wrapper to xc_func_set_dens_threshold
+ *    and xc_func_set_sigma_threshold for backward compatibility
+ *    Allows to change the zero-density (zero-gradient) threshold
+ *    of a XC functional
  *    Only available from libXC v4
  * ===============================================================
  */
@@ -293,6 +336,14 @@ void libpaw_xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_t
    {XC(func_set_dens_threshold)(xc_func, *dens_threshold);}
 #else
    {fprintf(stderr, "WARNING: setting density threshold not available for libXC<4.0!\n");}
+#endif
+
+void libpaw_xc_func_set_sig_threshold(XC(func_type) *xc_func, double *sigma_threshold)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+   {XC(func_set_sigma_threshold)(xc_func, *sigma_threshold);}
+#else
+   {fprintf(stderr, "WARNING: setting sigma threshold not available for libXC<4.0!\n");}
 #endif
 
 /* ===============================================================

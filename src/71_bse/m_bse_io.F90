@@ -28,11 +28,9 @@ MODULE m_bse_io
 #if defined HAVE_MPI2
  use mpi
 #endif
-#if defined HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_hdr
 
  use m_time,           only : cwtime
@@ -1385,7 +1383,6 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  real(dp) :: complex2(2)
  ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  ierr = 1
 
 !1. Create netCDF file
@@ -1442,14 +1439,9 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
    end do
  end do
 
-!7 Close file
-
+ !7 Close file
  NCF_CHECK(nf90_close(ncid))
  ierr = 0
-
-#else
- ierr = -1
-#endif
 
 end subroutine exc_write_optme
 !!***
@@ -1485,7 +1477,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  complex(dpc),target,intent(in) :: diag(hsize)
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: max_nreh, sum_nreh
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)
@@ -1535,10 +1526,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  NCF_CHECK(nf90_put_var(ncid, vid("reduced_coordinates_of_kpoints"), kmesh%bz))
  NCF_CHECK(nf90_put_var(ncid, vid("kpoint_weights"), kmesh%wt))
  NCF_CHECK(ncerr)
-
-#else
- ABI_ERROR("netcdf support is not activated. ")
-#endif
 
 contains
  integer function vid(vname)

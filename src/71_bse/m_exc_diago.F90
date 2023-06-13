@@ -21,7 +21,6 @@
 MODULE m_exc_diago
 
  use defs_basis
-
  use m_bs_defs
  use m_abicore
  use m_errors
@@ -553,8 +552,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    if (do_full_diago) then
      call wrtout(std_out," Performing full diagonalization with scaLAPACK...")
-
-     call slk_mat%pzheev("Vectors","Upper",Slk_vec,exc_ene)
+     call slk_mat%heev("Vectors","Upper",Slk_vec,exc_ene)
    else
      call wrtout(std_out," Performing partial diagonalization with scaLAPACK...")
      il=1; iu=nstates; abstol=zero !ABSTOL = PDLAMCH(comm,'U')
@@ -1579,10 +1577,10 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 
    !call Slk_tmp%init(exc_size,exc_size,Slk_processor,istwfk1)
    !Slk_tmp%buffer_cplx = Slk_vec%buffer_cplx
-   !call slk_pzgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
+   !call slk_pgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
    !call Slk_tmp%free()
 
-   call slk_pzgemm("C","N",Slk_vec,cone,Slk_vec,czero,Slk_ovlp)
+   call slk_pgemm("C","N",Slk_vec,cone,Slk_vec,czero,Slk_ovlp)
 
 !#ifdef DEV_MG_DEBUG_THIS
 !   ABI_MALLOC(exc_ham,(exc_size,exc_size))
@@ -1617,11 +1615,11 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !!END DEBUG
 !
 !#else
-   ! call Slk_ovlp%zdhp_invert(uplo)
+   ! call Slk_ovlp%hpd_invert(uplo)
    ! call hermitianize(Slk_ovlp%buffer_cplx,uplo)
    ! !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
 
-   call Slk_ovlp%zinvert()  ! Version for generic complex matrix.
+   call Slk_ovlp%invert()  ! Version for generic complex matrix.
 !#endif
 
 !#ifdef DEV_MG_DEBUG_THIS
