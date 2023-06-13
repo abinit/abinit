@@ -148,6 +148,7 @@ contains
  integer :: optnc,nkxc_cur
  logical :: vhartr1_allocated,vxc1_allocated
  real(dp) :: doti,elpsp10
+ character(len=500) :: msg
 !arrays
  real(dp)             :: Bx(cplex),By(cplex),tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
@@ -197,7 +198,6 @@ contains
  end if
 
 !------  Define the magnon shift potential (and energy) -------------------------
- emshift=zero
  ABI_MALLOC(vmshift,(cplex*nfft,nspden))
  vmshift(:,:)=zero
  if (present(rhomag).and.present(mshift)) then
@@ -214,7 +214,7 @@ contains
    if (cplex==1) then
      do ifft=1,nfft
        vmshift(ifft,3)=Bx(1)
-       vmshift(ifft,4)=By(1)
+       vmshift(ifft,4)=-By(1)
      end do
    else if (cplex==2) then
      do ifft=1,nfft
@@ -224,6 +224,12 @@ contains
        vmshift(2*ifft  ,4)=Bx(1)-By(2)
      end do
    end if
+
+   write(msg,'(a,f12.6,a,2(a,2f12.6,a))')'  Magnon shift on ETOT:', emshift, ch10,&
+&  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
+&  '  Magnon shift on vtrial1(4):', By(1),ch10 
+   call wrtout(ab_out,msg,'COLL')
+
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
