@@ -638,7 +638,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !  dimvtrial=nspden
    dimvtrial=1
    ABI_MALLOC(vtrial_,(nfft,dimvtrial))
-!$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
+!!!$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
    do ic=1,nfft
      vtrial_(ic,1:dimvtrial)=vtrial(ic,1:dimvtrial)-vxc(ic,1:dimvtrial)
    end do

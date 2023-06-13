@@ -9,7 +9,7 @@ version 6.x.x of Abinit
 
 * Tests 21-30 are related to geometry optimization, molecular dynamics, etc
 
-* Tests 41-49 are related to PAW (excluding response functions,
+* Tests 42-49 are related to PAW (excluding response functions,
     and electronic excitations, both to be placed later).
 
 * Tests 35-40 and 50-99 concern response functions

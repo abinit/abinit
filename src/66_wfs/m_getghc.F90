@@ -1661,6 +1661,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  integer :: spacedim, spacedim_prj
 #ifdef HAVE_OPENMP
  logical :: is_nested
+#ifdef HAVE_FFTW3_THREADS
+ logical ::  fftw3_use_lib_threads_sav
+#endif
 #endif
 
  integer :: select_k_default
@@ -1682,8 +1685,16 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 ! is_nested = omp_get_nested()
  is_nested = .false.
 ! call omp_set_nested(.false.)
+!Ensure that libs are used without threads (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(1)
+#endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+ call openblas_set_num_threads(1)
+#endif
+#ifdef HAVE_FFTW3_THREADS
+ fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
+ call fftw3_use_lib_threads(.false.)
 #endif
 #else
  ithread = 0
@@ -1739,8 +1750,15 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  end if
 #ifdef HAVE_OPENMP
 ! call omp_set_nested(is_nested)
+!Restire libs behavior (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(nthreads)
+#endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+ call openblas_set_num_threads(nthreads)
+#endif
+#ifdef HAVE_FFTW3_THREADS
+ call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
 #endif
 #endif
     !$omp end parallel

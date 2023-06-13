@@ -1,13 +1,67 @@
-## v9.8
+## v9.10
 
-Version 9.8, released on December 9, 2022.
-List of changes with respect to version 9.6.
-<!-- Release notes updated on December 3, 2022. -->
+Version 9.10, released on May 30, 2023.
+List of changes with respect to version 9.8.
+<!-- Release notes updated on May 30, 2023. -->
 
 Many thanks to the contributors to the ABINIT project between
-October 2021 and August 2022, and some late contributions up to December 2022 ! These release notes
+Sptember 2022 and April 2023, and some late contributions up to XXX 2023 ! 
+These release notes
+are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, 911, are taken into account. -->
+
+The list of contributors includes:
+TO BE UPDATED
+B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet,
+F. Bottin, J. Bouchet, E. Bousquet, F. Brieuc, V. Brousseau-Couture, N. Brouwer, F. Bruneval, M. Cote,
+C. Espejo, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, B. Guster, P. Kesterner,
+R. Outerovich, Ch. Paillard, M. Royo, A. Sasani, B. Sataric, M. Schmitt, F. Soubiran,
+M. Torrent, M. Verstraete, He Xu, J. Zwanziger.
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings. 
+
+* * *
+
+### **B.** Most noticeable achievements
+
+* * *
+
+### **C.** Changes for the developers (including information about compilers)
+
+* * *
+
+### **D.**  Other changes (or on-going developments, not yet finalized)
+
+**D.YY* Improve developer documentation.
+How to add a new test, commit dabc1b905.
+
+**D.YY** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+
+TO BE UPDATED
+By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843),
+A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
+M. Torrent (MR838 and 873), B. Seddon and X. Gonze (MR839 and 855), L. Baguet (MR857),
+J.-M. Beuken (MR882).
+
+* * *
+
+
+## v9.8
+
+Version 9.8, released on December 23, 2022.
+List of changes with respect to version 9.6.
+<!-- Release notes updated on March 15, 2023. -->
+
+Many thanks to the contributors to the ABINIT project between
+October 2021 and August 2022, and some late contributions up to April 2023 ! These release notes
 are relative to modifications/improvements of ABINIT v9.8 with respect to v9.6.
-<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, and 894 are taken into account. -->
+<!-- Merge requests up to and including MR874. Also, MR881, 882, 885, 891, 892, 894, 897, 898, 899, 900, 902, 903, 911, are taken into account. -->
 
 The list of contributors includes:
 B. Amadon, G. Antonius, L. Baguet, S. Bandyopadhyay, L. Bastogne, J.-M. Beuken, J. Bieder, A. Blanchet, 
@@ -22,7 +76,7 @@ This might take some time ...
 
 Xavier
 
-### **A.** Important remarks and warnings.
+### **A.** Important remarks and warnings. Also, hotfixes for v9.8.3 (A.4 to A.10).
 
 **A.1** Warning : the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
 
@@ -41,6 +95,45 @@ The default value for [[rfdir]] is now (1 1 1), instead of (0 0 0).
 The one of [[rfatpol]] is now (1 [[natom]]).
 
 By X. Gonze (MR852)
+
+**A.4** The default values of dossmear (@anaddb) and dosdeltae (@anaddb and @atdep) have changed, to smaller values, to improve default accuracy.
+
+By X. Gonze 
+
+**A.5**
+Correction and cleaning of DFT+U with magnetism ([[nspden]]=4), following the merge 881.
+Introduce "optdcmagpawu" input to control different choices of DC term (for tests and code comparisons, not useful for production).
+Versions before 9.8 is equivalent to optdcmagpawu=1 (no magnetism in the DC term). Now the default is 3 (magnetism in the DC term). Some refs are changed accordingly.
+Change of the tests v9/76,77 and 78 for better precision. Add the tests v9/88 and 89 to tests the combination of PAW+U with different [[pawxcdev]].
+
+By L. Baguet (MR898)
+
+**A.6**
+Some users have reported that with the new [[optcell]]=4,5 or 6 option, the calculation
+continues when the criterion should be already reached. For example, with [[optcell]]=5 (relaxing b only), the
+xx component of the stress could still be large but shouldn't be checked. This has been fixed.
+
+By Xu He (MR897)
+
+**A.7**
+More fix on the generation of symmetry-adapted terms in Multibinit. A more complete set of terms are now generated, with improved time and memory performance. 
+
+By Xu He and A. Sasani (MR899)
+
+**A.8**
+m4 detection netcdf(-f) //: AC_RUN_IFELSE hangs with some compilers then switch to AC_LINK_IFELSE
+
+By JM Beuken (MR900)
+
+**A.9**
+Several improvements for external libs: FFTW3 thread safety, openBLAS multithreading, netCDF Fortran parallel
+
+By M. Torrent, with patch from P. Kesteneer (MR902)
+
+**A.10**
+Several fixes, including documentation for icutcoul and related input variables
+
+By. X. Gonze (MR903)
 
 * * *
 
@@ -317,7 +410,23 @@ From E. Bousquet (MR881)
 
 From P. Kestener (MR843 and 869)
 
-**D.26** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
+**D.26** Restructuring of the tutorial index page, doci/tutorial/index.md ..
+
+From X. Gonze
+
+**D.27** A CITATION.cff file has been created. Also, a LICENCE file (pointing toward COPYING).
+
+From X. Gonze
+
+**D.28** Updated the tarball for the fallbacks
+
+From JM Beuken (MR911)
+
+**D.29** Improve the procedure to examine the convergence with respect to ecut and pawecutdg in tutorial PAW1.
+
+From X. Gonze (20230424)
+
+**D.30** Miscellaneous additional bug fixes, typos fixes, or upgrade of build system.
 
 By F. Goudreault (MR816), M. Giantomassi (MR821 and 845), P. Kestener (MR827 and 843), 
 A. Blanchet (MR832), C. Paillard (MR834), M. Verstraete (MR837),
@@ -881,7 +990,7 @@ New input variables: [[brav]], [[dvdb_add_lr]], [[dvdb_qcache_mb]], [[dvdb_qdamp
 
 Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
 Three new tutorials are availables, [[tutorial:eph_intro]], [[tutorial:eph4mob]] and [[tutorial:eph4zpr]], and supercede the legacy tutorials
-[[tutorial:eph]] and [[tutorial:tdepes]].
+[[tutorial:eph_legacy]] and [[tutorial:eph_tdep_legacy]].
 For further details about the implementation and usage, please consult [[cite:Brunin2020b]].
 
 By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
@@ -1328,11 +1437,13 @@ Test tolerance in the new integration weights, tests [[test:v8_52]], [[test:v8_5
 By H. Miranda and M. Giantomassi
 
 **D.7** Test calculation of velocity matrix elements (DDK) with
- optdriver 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]].
+ [[optdriver]] 8 and [[wfk_task]] "wfk_ddk”, see [[test:v8_59]]. By the way, the 
+ other capabilities linked to [[wfk_task]] ("wfk_fullbz", "wfk_einterp", "wfk_optics_fullbz", "wfk_kpts_erange") seem
+ not to have been properly advertised.
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
@@ -1426,7 +1537,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 
@@ -2064,7 +2175,7 @@ By H. Miranda and M. Giantomassi
 
 By M. Giantomassi
 
-**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_bandpw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
@@ -2159,7 +2270,7 @@ By M. Torrent (MR 626)
 
 By X. Gonze (MR628)
 
-**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+**D.29** New input variable [[prtprocar]], see test [[test:v9_108]].
 
 By M. Verstraete (MR630)
 
@@ -2536,8 +2647,8 @@ See the new tests v7#67-72 libxc#44, 45, 72, 73, 74,
 and also the updated tests v4#86, 87, v67mbpt#09, v7#65, libxc#41, 42, 43, paral#09.
 By X. Gonze and F. Jollet, with help by M. Torrent.
 
-D.3 The [[tutorial:tdepes|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
-    See all tests in `tutorespfn/tdepes*`.
+D.3 The [[tutorial:eph_tdep_legacy|tutorial on temperature-dependence of the electronic structure]] has been upgraded, and carefully tested.
+    See all tests in `tutorespfn/teph_tdep_legacy*`.
     By X. Gonze and M. Giantomassi
 
 D.4 Output of interpolated density in the MPI-IO case is now tested, [[test:mpiio_26]] and [[test:mpiio_27]].

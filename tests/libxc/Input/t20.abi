@@ -51,7 +51,7 @@ ixc33 -106159
 
 # GGAs : combined XC functionals
 ixc35  -93
-ixc36  -94 
+# ixc36  -94   ! Not portable: has been changed in libxc 5.1.0
 ixc37  -95
 ixc38  -96
 # ixc39  -97   ! Not portable from libxc v2 to v3 (fix in libxc v3.0)

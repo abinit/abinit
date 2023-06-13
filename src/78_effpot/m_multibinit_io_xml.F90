@@ -24,7 +24,7 @@
 #include "abi_common.h"
 
 module m_multibinit_io_xml
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use m_mathfuncs
   use defs_basis
   use m_abicore

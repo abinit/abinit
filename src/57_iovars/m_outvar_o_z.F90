@@ -218,6 +218,9 @@ contains
  intarr(1,:)=dtsets(:)%optcell
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optcell','INT',0)
 
+ intarr(1,:)=dtsets(:)%optdcmagpawu
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdcmagpawu','INT',0)
+
  intarr(1,:)=dtsets(:)%optdriver
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdriver','INT',0)
 
@@ -645,6 +648,9 @@ contains
    end do ! end loop over ntypat
  end do ! end loop over datasets
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'ptcharge','DPR',0)
+
+ intarr(1,:)=dtsets(:)%prt_lorbmag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt_lorbmag','INT',0)
 
  intarr(1,:)=dtsets(:)%ptgroupma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ptgroupma','INT',0)
@@ -1083,6 +1089,9 @@ contains
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,-3,marr,narr,narrm,ncid,ndtset_alloc,'tnons','DPR',multivals%nsym)
 
+ dprarr(1,:)=dtsets(:)%tolcum
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolcum','DPR',0)
+
  dprarr(1,:)=dtsets(:)%toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldfe','ENE',0)
 
@@ -1352,6 +1361,8 @@ contains
 !###########################################################
 !### 03. Print all the input variables (W)
 !##
+ intarr(1,:)=dtsets(:)%wfinit
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfinit','INT',0)
 
  dprarr(1,:)=dtsets(:)%wfmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfmix','DPR',0)

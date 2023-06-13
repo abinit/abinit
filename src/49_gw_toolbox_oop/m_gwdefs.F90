@@ -55,12 +55,12 @@ module m_gwdefs
  ! non-interacting Green function G0. Above this value, a small purely imaginary
  ! complex shift is added to the denominator during the evaluation of chi0.
 
- real(gwp),public,parameter :: one_gw =1._gwp
- real(gwp),public,parameter :: zero_gw=0._gwp
+ real(gwp),public,parameter :: one_gw  = 1._gwp
+ real(gwp),public,parameter :: zero_gw = 0._gwp
 
- complex(gwpc),public,parameter :: czero_gw=(0._gwp,0._gwp)
- complex(gwpc),public,parameter :: cone_gw =(1._gwp,0._gwp)
- complex(gwpc),public,parameter :: j_gw    =(0._gwp,1._gwp)
+ complex(gwpc),public,parameter :: czero_gw = (0._gwp,0._gwp)
+ complex(gwpc),public,parameter :: cone_gw  = (1._gwp,0._gwp)
+ complex(gwpc),public,parameter :: j_gw     = (0._gwp,1._gwp)
 
 !arrays
  real(dp),public,parameter :: GW_Q0_DEFAULT(3) = [0.00001_dp, 0.00002_dp, 0.00003_dp]
@@ -503,7 +503,6 @@ subroutine sigparams_free(Sigp)
  ABI_SFREE(Sigp%omegasi)
  ABI_SFREE(Sigp%omega_r)
 
-!types
  if (allocated(Sigp%Sigcij_tab)) then
    call sigijtab_free(Sigp%Sigcij_tab)
    ABI_FREE(Sigp%Sigcij_tab)
@@ -671,7 +670,7 @@ end function sigma_needs_ppm
 !!
 !! SOURCE
 
-function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
+function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
 
 !Arguments ------------------------------------
 !scalars
@@ -687,20 +686,24 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 
 !************************************************************************
 
- if (delta_ene**2>tol14) then
-   sgn=SIGN(1.0_dp,delta_ene)
-   !
-   if (opt_poles == 2) then ! Resonant and anti-resonant contributions.
-     if (DABS(REAL(omega))>TOL_W0) then
-       g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut)&
-&              -numerator / (omega - delta_ene + j_dpc*sgn*zcut)
+ if (delta_ene**2 > tol14) then
+   sgn = SIGN(1.0_dp,delta_ene)
+
+   if (opt_poles == 2) then
+     ! Resonant and anti-resonant contributions.
+     if (DABS(REAL(omega)) > TOL_W0) then
+       ! omega on the real axis
+       g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut) &
+               -numerator / (omega - delta_ene + j_dpc*sgn*zcut)
      else
-       g0g0w =  numerator / (omega + delta_ene)&
-&              -numerator / (omega - delta_ene)
+       ! omega on the imag axis (g0g0w is purely real)
+       g0g0w =  numerator / (omega + delta_ene) &
+               -numerator / (omega - delta_ene)
      end if
 
-   else if (opt_poles == 1) then ! Only resonant contribution is included.
-     if (DABS(REAL(omega))>TOL_W0) then
+   else if (opt_poles == 1) then
+     ! Only resonant contribution is included.
+     if (DABS(REAL(omega)) > TOL_W0) then
        g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut)
      else
        g0g0w =  numerator / (omega + delta_ene)
@@ -711,7 +714,8 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
      ABI_ERROR(msg)
    end if ! opt_poles
 
- else ! delta_ene**2<tol14
+ else
+   ! delta_ene**2 < tol14
    g0g0w = czero
  end if
 

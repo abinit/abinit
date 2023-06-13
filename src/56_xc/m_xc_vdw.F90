@@ -27,7 +27,7 @@
 module m_xc_vdw
 
  use defs_basis
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_abicore
  use m_errors
  use libxc_functionals

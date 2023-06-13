@@ -1038,12 +1038,14 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idir,istr
- real(dp) :: fmax,strdiag,fcell
+ real(dp) :: fmax,strdiag!,fcell
  character(len=500) :: msg
 !arrays
  real(dp) :: dstr(6)
 
 ! *************************************************************************
+
+ABI_UNUSED(rprim)
 
 !Compute maximal component of forces, EXCLUDING any fixed components
  fmax=zero
@@ -1077,26 +1079,30 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !  else if(optcell==4 .or. optcell==5 .or. optcell==6)then
 !    if(abs(dstr(optcell-3))*strfact >= fmax ) fmax=abs(dstr(optcell-3))*strfact
  else if(optcell==4) then
-   fcell = dstr(1) * rprim(1,1) + dstr(6) * rprim(2,1) + dstr(5) * rprim(3,1)
-   if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   fcell = dstr(6) * rprim(1,1) + dstr(2) * rprim(2,1) + dstr(4) * rprim(3,1)
-   if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-   fcell = dstr(5) * rprim(1,1) + dstr(4) * rprim(2,1) + dstr(3) * rprim(3,1)
-   if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
- else if(optcell==5) then
-    fcell = dstr(1) * rprim(1,2) + dstr(6) * rprim(2,2) + dstr(5) * rprim(3,2)
-    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    fcell = dstr(6) * rprim(1,2) + dstr(2) * rprim(2,2) + dstr(4) * rprim(3,2)
-    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    fcell = dstr(5) * rprim(1,2) + dstr(4) * rprim(2,2) + dstr(3) * rprim(3,2)
-    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   ! only dstr 1 5 6 are in xfpack_f2vout. The other component shouldn't be checked.
+   !fcell = dstr(1) * rprim(1,1) + dstr(6) * rprim(2,1) + dstr(5) * rprim(3,1)
+   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   !fcell = dstr(6) * rprim(1,1)
+   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   !fcell = dstr(5) * rprim(1,1)
+   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   fmax = maxval(abs(dstr([1, 5, 6])))*strfact
+ else if(optcell==5) then ! 2 4 6
+    !fcell = dstr(5) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell = dstr(6) * rprim(1,2) + dstr(2) * rprim(2,2) + dstr(4) * rprim(3,2)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell = dstr(4) * rprim(2,2)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   fmax = maxval(abs(dstr([2, 4, 6])))*strfact
  else if(optcell==6) then
-    fcell = dstr(1) * rprim(1,3) + dstr(6) * rprim(2,3) + dstr(5) * rprim(3,3)
-    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    fcell = dstr(6) * rprim(1,3) + dstr(2) * rprim(2,3) + dstr(4) * rprim(3,3)
-    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
-    fcell = dstr(5) * rprim(1,3) + dstr(4) * rprim(2,3) + dstr(3) * rprim(3,3)
-    if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell =  dstr(5) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell =  dstr(4) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell = dstr(5) * rprim(1,3) + dstr(4) * rprim(2,3) + dstr(3) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    fmax = maxval(abs(dstr([3, 4, 5])))*strfact
  else if(optcell==7)then
    if(abs(dstr(2))*strfact >= fmax ) fmax=abs(dstr(2))*strfact
    if(abs(dstr(3))*strfact >= fmax ) fmax=abs(dstr(3))*strfact
