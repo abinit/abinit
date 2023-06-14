@@ -171,6 +171,7 @@ ABI_TOPICS = [
     "APPA",
     "Artificial",
     "aTDEP",
+    "AtomCentered",
     "AtomManipulator",
     "AtomTypes",
     "Bader",

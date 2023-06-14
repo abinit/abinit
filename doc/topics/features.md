@@ -139,13 +139,14 @@ due to phonons and their coupling, thus also temperature-dependent properties du
   5. [[topic:Temperature|Temperature dependent properties (free energy, entropy, specific heat, 
      atomic temperature factors, thermal expansion)]]
   6. [[topic:Elastic|Elasticity and piezoelectricity]]
-  7. [[topic:nonlinear|Raman intensities and electro-optic properties]]
-  8. [[topic:ElPhonInt|Electron-phonon interaction]]
-  9. [[topic:PhononWidth|Phonon linewidth due to the electron-phonon interaction]]
-  10. [[topic:ElPhonTransport|Electronic transport properties from electron-phonon interaction 
+  7. [[topic:longwave|Long wave method: quadrupoles, flexoelectricity, optical activity]]
+  8. [[topic:nonlinear|Raman intensities and electro-optic properties]]
+  9. [[topic:ElPhonInt|Electron-phonon interaction]]
+  10. [[topic:PhononWidth|Phonon linewidth due to the electron-phonon interaction]]
+  11. [[topic:ElPhonTransport|Electronic transport properties from electron-phonon interaction 
      (resistivity, superconductivity, thermal)]]
-  11. [[topic:TDepES|Temperature dependence of the electronic structure from electron-phonon interaction]]
-  12. [[topic:ConstrainedPol|Constrained polarization geometry optimization]] (advanced topic)
+  12. [[topic:TDepES|Temperature dependence of the electronic structure from electron-phonon interaction]]
+  13. [[topic:ConstrainedPol|Constrained polarization geometry optimization]] (advanced topic)
 
 
 ## 7 Excited state calculations, and frequency-dependent electronic and optical properties
@@ -206,6 +207,7 @@ see [[prtelf]]). See the list of "printing" input variables in [[topic:printing]
   7. [[topic:STM|Scanning Tunneling Microscopy map]]
   8. [[topic:Wannier|Wannier functions]]
   9. [[topic:Bader|Bader Atom-In-Molecule analysis]]
+  9. [[topic:AtomCentered|Atom centered properties - Charge, Magnetization, etc]]
 
 ## 10 Other physical properties (e.g. positron)
   
