@@ -184,7 +184,7 @@ ABI_TOPICS = [
     "Control",
     "Coulomb",
     "CrossingBarriers",
-    "CRPA",
+    "CalcUJ",
     "crystal",
     "DFT+U",
     "DeltaSCF",

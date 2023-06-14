@@ -1,8 +1,8 @@
 ## v9.10
 
-Version 9.10, released on June 20, 2023.
+Version 9.10, released on June 24, 2023.
 List of changes with respect to version 9.8.
-<!-- Release notes updated on June 8, 2023. -->
+<!-- Release notes updated on June 14, 2023. -->
 
 Many thanks to the contributors to the ABINIT project between
 September 2022 and April 2023 (with some late contributions until June 2023).
@@ -23,17 +23,16 @@ Xavier
 
 ### **A.** Important remarks and warnings. 
 
-**A.1** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1, 
+**A.1** The names of several tutorial files have been changed to make them easier to understand. "gspw" is now "paral_bandpw", "ucrpa" is now "ucalc_crpa",
+"depes" is now "eph_tdep_legacy", "eph" is now "eph_legacy", "ffield" is now "polarization". The tutorial "udet" relying on an old utility
+is now superceded by the tutorial "lruj", see section [B.4](#v9.10.B.4). The name of the topic CRPA has been changed to [[topic:CalcUJ]].
+
+**A.2** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1, 
 and the default value for [[dossmear@anaddb]] has been changed from 5 cm-1 to 1 cm-1.
 Also, the default values for [[dosdeltae@atdep]] has been changed from 4.5d-6 to 0.2 cm-1.
 This is to allow default calculation of thermal expansion using abipy to be more stable numerically.
 
 By S. Rostami and X. Gonze (commit 8b7697502c)
-
-
-**A.2** The names of several tutorial files have been changed to make them easier to understand. "gspw" is now "paral_bandpw", "ucrpa" is now "ucalc_crpa",
-"depes" is now "eph_tdep_legacy", "eph" is now "eph_legacy", "ffield" is now "polarization". The tutorial "udet" relying on an old utility
-is now superceded by the tutorial "lruj", see section [B.4](#v9.10.B.4).
 
 * * *
 

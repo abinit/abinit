@@ -120,7 +120,7 @@ framework. ABINIT enables the following possibilities:
   1. [[topic:Hybrids|Hybrid functionals]]
   2. [[topic:DFT+U|DFT+U approximation]]
   3. [[topic:DMFT|Dynamical Mean Field Theory (DMFT)]]
-  4. [[topic:CRPA|Calculation of the effective Coulomb interaction]]
+  4. [[topic:CalcUJ|Calculation of the Hubbard U and Hund J]]
 
 ## 6 Adiabatic response properties (phonons, low-frequency dielectric, Raman, elasticity, temperature dependence ...)
   
