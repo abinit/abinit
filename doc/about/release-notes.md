@@ -276,7 +276,7 @@ By X. Gonze (commit dabc1b905).
 By P. Kesteneer (MR910). 
 
 **D.12** New topic [[topic:AtomCentered]] created.
-By X. Gonze (commit XX)
+By X. Gonze (commit 425e8c)
 
 * * *
 
