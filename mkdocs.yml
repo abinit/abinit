@@ -45,8 +45,9 @@ nav:
     - topics/Abipy.md
     - topics/APPA.md
     - topics/Artificial.md
-    - topics/AtomManipulator.md
     - topics/aTDEP.md
+    - topics/AtomCentered.md
+    - topics/AtomManipulator.md
     - topics/AtomTypes.md
     - topics/Bader.md
     - topics/Band2eps.md

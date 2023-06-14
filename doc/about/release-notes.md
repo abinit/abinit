@@ -25,7 +25,7 @@ Xavier
 
 **A.1** The names of several tutorial files have been changed to make them easier to understand. "gspw" is now "paral_bandpw", "ucrpa" is now "ucalc_crpa",
 "depes" is now "eph_tdep_legacy", "eph" is now "eph_legacy", "ffield" is now "polarization". The tutorial "udet" relying on an old utility
-is now superceded by the tutorial "lruj", see section [B.4](#v9.10.B.4). The name of the topic CRPA has been changed to [[topic:CalcUJ]].
+is now superceded by the tutorial "lruj", see section [B.3](#v9.10.B.3). The name of the topic CRPA has been changed to [[topic:CalcUJ]].
 
 **A.2** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1, 
 and the default value for [[dossmear@anaddb]] has been changed from 5 cm-1 to 1 cm-1.
@@ -38,7 +38,7 @@ By S. Rostami and X. Gonze (commit 8b7697502c)
 
 ### **B.** Most noticeable achievements
 
-**B.1** Low-scaling GW and RPA implementations 
+<!-- **B.1** Low-scaling GW and RPA implementations 
 
 A cubic scaling real space imaginary time algorithm for GW and RPA has been implemented.
 See the theory in [[cite:Liu2016]] and related references. It relies on the minimax time-frequency grids
@@ -57,13 +57,13 @@ Tests are provided in the newly created subdirectory tests/gwr, see tests 01 to 
 See also test:paral_78 and test:paral_79 (not yet activated).
 
 By M. Giantomassi (MR875, MR907)
+-->
 
-
-**B.2** Orbital magnetization 
+**B.1** Orbital magnetization 
 
 The computation of the orbital magnetization and chemical shielding (converse method, that is, with a nuclear dipole moment added) has been implemented, 
 as described and tested in [[cite:Zwanziger2023]].
-This implementation works with PAW only, with [[nspinor]]=1 and 2, for insulators and metals.
+This implementation works for insulators and metals, with [[nspinor]]=1 and 2. However it works with PAW only, not with NC pseudopotentials. 
 Lamb shielding is treated. The PAW atomic dataset generator "Atompaw" has been updated accordingly to compute and output the Lamb shielding in xml files.
 
 See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[test:nuc_4]],
@@ -74,7 +74,7 @@ The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to pres
 By J. Zwanziger, with some help by M. Torrent and X. Gonze (MR895, 904, 917).
 
 
-**B.3** Natural optical activity tensor, linear response to a vector potential (orbital magnetic field linear response) and other modifications of the longwave driver.
+**B.2** Natural optical activity tensor, linear response to a vector potential (orbital magnetic field linear response) and other modifications of the longwave driver.
 
 Computation of the natural optical activity tensor can be performed via the input variable [[lw_natopt]].
 This is demonstrated with the test [[test:lw_8]]. 
@@ -93,26 +93,26 @@ ii) the number of i/o operations has been reduced.
 iii) symmetries are now used in order to calculate only linearly independent components of the tensors. This also reduces the number of linear-response functions to precalculate.
 iv) the whole structure is now more general, thus facilitating the implementation of future spatial dispersion quantities.
 
-Also, see the new input variable [[ffnl_lw]] that allows to reduce memory footprint at the expense of CPU time.
+Also, the new input variable [[ffnl_lw]] has been introduced. It allows to reduce memory footprint at the expense of CPU time.
 (A test should be provided).
 
 Finally, a bug has been removed (when all KB energies are negative), and a test introduced [[test:v9_145]].
 
 By Miquel Royo, Asier Zabalo and Massimiliano Stengel (MR913).
 
-<a name="v9.10.B.4"></a>
-**B.4** Linear response computation of the U and J parameters
+<a name="v9.10.B.3"></a>
+**B.3** Linear response computation of the U and J parameters
 
 The old utility "ujdet" to compute the U and J parameters in DFT+U with the linear response method [[cite:Cococcioni2005]]
 has been replaced by the new "lruj" utility. The workflow is different.
 The [[tutorial:lruj]] has been written, with three corresponding tests, [[test:lruj_1]], [[test:lruj_2]], [[test:lruj_3]].
 See also the input variables [[pawujv]]. The tutorial and corresponding tests "ujdet" have been suppressed.
 The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]], 
-[[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]].
+[[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]]. This is also documented in [[topic:CalcUJ]].
 
 By Lorien Mac Enulty with help from David D. O'Regan (MR905, 912).
 
-**B.5** Cumulant method for spectral function
+**B.4** Cumulant method for spectral function
 
 The computation of the electronic spectral function with electron-phonon coupling included is now enabled using the cumulant method.
 See [[cite:Nery2018]] and [[cite:Abreu2022]] and other related publications.
@@ -124,7 +124,7 @@ See the [[test:v9_60]].
 By M. Giantomassi and  J. Abreu (MR 907)
 
 
-**B.6** Support for norm-conserving pseudopotentials in UPF2 format
+**B.5** Support for norm-conserving pseudopotentials in UPF2 format
 
 Abinit now can read NC pseudos in UPF2 format (both scalar and relativistic version) thanks to the UPF parser imported from quantum espresso and an additional
 routine used to convert FR pseudos from (j,kappa) to scalar + SOC term taken from oncvpsp.
@@ -138,7 +138,7 @@ See the [[test:v9_130]] and [[test:v9_131]]
 
 By M. Giantomassi (MR896)
 
-**B.7** Initialization of the wavefunctions using atomic orbitals
+**B.6** Initialization of the wavefunctions using atomic orbitals
 
 For pseudopotentials that contain the information about atomic local orbitals, like the UPF2 format, the wavefunctions
 inside ABINIT can be initialized from the Hilbert space spanned by such set of functions,
@@ -148,7 +148,7 @@ See test [[test:v9_130]].
 
 By M. Giantomassi (MR896)
 
-**B.8** Temperature-dependent XC functionals (free energy), using libXC
+**B.7** Temperature-dependent XC functionals (free energy), using libXC
 
 The following temperature-dependent XC functionals from libXC are now available: 
 LDA T-dependent functionals from [[cite:Karasiev2014]], with [[ixc]]=-269, from [[cite:Karasiev2018]],
@@ -160,18 +160,18 @@ See [[test:libxc_22]].
 
 By M. Torrent (MR901)
 
-**B.9** Atomic orbital magnetic moment inside PAW spheres
+**B.8** Atomic orbital magnetic moment inside PAW spheres
 
-Implementation of atom orbital magnetization integration inside the PAW spheres. 
+Implementation of atom-by-atom orbital magnetization integration inside the PAW spheres. 
 x, y and z components are printed. Decomposition on p, d and f orbitals is also done. 
 Works only for PAW+U+SOC (and nspden=4). 
 Works also for orbitals where no U is specified. 
-New input flag [[prt_lorbmag]]. See test [[test:v9_112]].
+New input flag [[prt_lorbmag]]. See test [[test:v9_112]]. Mentioned in [[topic:AtomCentered]].
 
 By A. Sasani & E. Bousquet (MR915).
 
 
-**B.10** High-temperature DFT: Improvements of the Extended First-Principles Molecular Dynamic (ExtFPMD) calculations.
+**B.9** High-temperature DFT: Improvements of the Extended First-Principles Molecular Dynamic (ExtFPMD) calculations.
 
 [[useextfpmd]]=1 now computes contributions using Fermi gas DOS (which was found to be more stable for pure and mixtures). 
 Old [[useextfpmd]]=1 is now [[useextfpmd]]=4 (tests were changed accordingly)
@@ -193,6 +193,7 @@ This fix has been proposed on the forum by Thomas Gawne (University of Oxford, U
 By A. Blanchet (MR883 and MR916)
 
 
+<!--
 **B.11** Interface to coupled-cluster CC4S calculations.
 
 The writing of the file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, 
@@ -200,6 +201,7 @@ allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative tripl
 See test test:gwr_07 (not yet activated)..
 
 By M. Giantomassi (MR 875, 907)
+-->
 
 * * *
 
@@ -222,9 +224,14 @@ By JM Beuken (MR888)
 
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
-**D.1** Improved developer documentation, section .
-[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
-By X. Gonze (commit dabc1b905).
+**D.1** Low-scaling GW and RPA implementations
+The implementation of a cubic scaling real space imaginary time algorithm for GW and RPA is on-going.
+By M. Giantomassi (MR875, MR907)
+
+**D.2** Interface to coupled-cluster CC4S calculations.
+
+The implementation of writing a file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, is on-going.
+By M. Giantomassi (MR 875, 907)
 
 **D.2** Coulomb interaction with 2D cut-off is now working for the total energy and forces.
 This has been tested agains Quantum Espresso implementation. However, stresses are still incorrect.
@@ -261,8 +268,15 @@ By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit 39801af30).
 New tests of the band parallelism in DFPT : [[test:paral_65]] and [[test:paral_66]].
 By M. Giantomassi (commit 31e8aa66d8).
 
-**D.10** Fixed typo in CITATION.cff.
+**D.10** Improved developer documentation, section .
+[How to add a new test](https://docs.abinit.org/developers/developers_howto/#how-to-add-a-new-test-in-the-test-suite).
+By X. Gonze (commit dabc1b905).
+
+**D.11** Fixed typo in CITATION.cff.
 By P. Kesteneer (MR910). 
+
+**D.12** New topic [[topic:AtomCentered]] created.
+By X. Gonze (commit XX)
 
 * * *
 
