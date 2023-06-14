@@ -470,9 +470,6 @@ module m_lobpcg2
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
         STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
-      !call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-      !  lobpcg%nproc_rows,lobpcg%nproc_cols,STATE_LINALG,TRANS_GATHER)
-
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
         lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBX,lobpcg%xgTransposerX,&
@@ -511,8 +508,6 @@ module m_lobpcg2
 
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_COLSROWS)
-        !call xgTransposer_transpose(lobpcg%xgTransposerAX,STATE_COLSROWS)
-        !call xgTransposer_transpose(lobpcg%xgTransposerBX,STATE_COLSROWS)
         lobpcg%xgTransposerAX%state=STATE_COLSROWS
         lobpcg%xgTransposerBX%state=STATE_COLSROWS
       end if
@@ -527,11 +522,9 @@ module m_lobpcg2
       end if
 
       ! B-orthonormalize X, BX and AX
-      !call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_X) ! true to rotate AX as well
       call xg_Borthonormalize(lobpcg%X,lobpcg%BX,ierr,tim_Bortho_X,lobpcg%gpu_option,AX=lobpcg%AX) ! true to rotate AX as well
 
       ! Do first RR on X to get the first eigen values
-      !call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr,tim_RR_X)
       call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvaluesN,ierr,lobpcg%prtvol,tim_RR_X,lobpcg%gpu_option)
 
       compute_residu = .true.
@@ -590,8 +583,6 @@ module m_lobpcg2
 
         if (lobpcg%paral_kgb == 1) then
           call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_COLSROWS)
-          !call xgTransposer_transpose(lobpcg%xgTransposerAW,STATE_COLSROWS)
-          !call xgTransposer_transpose(lobpcg%xgTransposerBW,STATE_COLSROWS)
           lobpcg%xgTransposerAW%state=STATE_COLSROWS
           lobpcg%xgTransposerBW%state=STATE_COLSROWS
         end if
@@ -605,21 +596,15 @@ module m_lobpcg2
           call xgTransposer_transpose(lobpcg%xgTransposerBW,STATE_LINALG)
         end if
 
-        ! B-orthonormalize W, BW
-        !call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
-        !call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.,ierr) ! Do rotate AW
-
         ! DO RR in the correct subspace
         ! if residu starts to be too small, there is an accumulation error in
         ! P with values such as 1e-29 that make the eigenvectors diverge
         if ( iline == 1 .or. minResidu < 1e-27) then
           ! Do RR on XW to get the eigen vectors
-          !call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
           call xg_Borthonormalize(lobpcg%XW,lobpcg%BXW,ierr,tim_Bortho_XW,lobpcg%gpu_option,AX=lobpcg%AXW) ! Do rotate AW
           call xgBlock_zero(lobpcg%P, gpu_option=lobpcg%gpu_option)
           call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
           call xgBlock_zero(lobpcg%BP, gpu_option=lobpcg%gpu_option)
-          RR_eig = eigenvalues2N
           if ( ierr /= 0 ) then
             ABI_COMMENT("B-orthonormalization (XW) did not work.")
           end if
@@ -632,14 +617,9 @@ module m_lobpcg2
           end if
         else
           ! B-orthonormalize P, BP
-          !call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr,tim_Bortho_XWP) ! Do rotate AW
           call xg_Borthonormalize(lobpcg%XWP%self,lobpcg%BXWP%self,ierr,tim_Bortho_XWP,lobpcg%gpu_option,AX=lobpcg%AXWP%self) ! Do rotate AW
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
-            !RR_var = VAR_XWP
-            !RR_tim = tim_RR_XWP
-            !RR_eig = eigenvalues3N%self
-            !call lobpcg_RayleighRitz(lobpcg,RR_var,RR_eig,ierr,RR_tim,tolerance=tolerance)
             call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues3N%self,ierr,lobpcg%prtvol,tim_RR_XWP,lobpcg%gpu_option,&
            & tolerance=tolerance,XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP,XWP=lobpcg%XWP%self)
@@ -649,7 +629,6 @@ module m_lobpcg2
             end if
           else
             ABI_COMMENT("B-orthonormalization (XWP) did not work, try on XW.")
-            !call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
             call xg_Borthonormalize(lobpcg%XW,lobpcg%BXW,ierr,tim_Bortho_XW,lobpcg%gpu_option,AX=lobpcg%AXW) ! Do rotate AW
             if ( ierr /= 0 ) then
               ABI_COMMENT("B-orthonormalization (XW) did not work.")
@@ -658,7 +637,6 @@ module m_lobpcg2
             call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
             call xgBlock_zero(lobpcg%BP, gpu_option=lobpcg%gpu_option)
             nrestart = nrestart + 1
-            !call lobpcg_RayleighRitz(lobpcg,RR_var,RR_eig,ierr,RR_tim,2*dlamch('E'))
             call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
            & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
@@ -667,14 +645,7 @@ module m_lobpcg2
               exit
             end if
           end if
-          !RR_eig = eigenvalues3N%self
         end if
-        !RR_eig = eigenvalues3N%self
-!        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,RR_tim,2*dlamch('E'))
-!        if ( ierr /= 0 ) then
-!          ABI_WARNING("RayleighRitz did not work, but continue anyway.")
-!          exit
-!        end if
 
         ABI_NVTX_END_RANGE()
       end do
@@ -769,11 +740,10 @@ module m_lobpcg2
     end if
 
     if ( nblock > 1 ) then
-      !call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_Xall) ! Do rotate AX
-      call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,gpu_option=lobpcg%gpu_option,AX=lobpcg%AllAX0%self) ! Do rotate AX
-      !call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,tim_RR_Xall,2*dlamch('E'))
+      call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,&
+        & lobpcg%gpu_option,AX=lobpcg%AllAX0%self) ! Do rotate AX
       call xg_RayleighRitz(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,eigen,ierr,lobpcg%prtvol,tim_RR_Xall,&
-        & gpu_option=lobpcg%gpu_option,tolerance=tolerance)
+        & lobpcg%gpu_option,tolerance=tolerance)
     end if
 
     if ( lobpcg%paral_kgb == 1 ) then
