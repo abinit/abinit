@@ -18,8 +18,9 @@ requires a more elaborate calculation, and is triggered by the input
 variable [[orbmag]]. It is implemented following
 the theory outlined in [[cite:Zwanziger2023]].
 
-Input variables for both types of calculation are listed below, as well as
-relevant test files and the tutorial [[tutorial:nuc]].
+Input variables for both types of calculation are listed below, as
+well as relevant test files and the [[tutorial:nuc|tutorial on
+properties at the nucleus]].
 
 ## Related Input Variables
 
