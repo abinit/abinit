@@ -65,6 +65,21 @@ if(OpenMP_FOUND)
     OpenMP::OpenMP_Fortran)
 endif()
 
+if(HAVE_OPENMP_OFFLOAD)
+  target_compile_options(28_numeric_noabirule
+    PRIVATE
+    $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
+endif()
+
+if (ABINIT_YAKL_WANTED)
+  target_link_libraries(28_numeric_noabirule
+    PUBLIC
+    abinit::yakl)
+  target_include_directories(28_numeric_noabirule
+    PUBLIC
+    ${YAKL_BINARY_DIR})
+endif()
+
 if(ABINIT_ENABLE_GPU_CUDA)
   target_link_libraries(28_numeric_noabirule
     PUBLIC
