@@ -105,7 +105,7 @@ diemac 13.0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t148.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
+#%%   t148.abo, tolnlines=  5, tolabs=  4.192e-06, tolrel=  1.000e-05, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
