@@ -45,8 +45,9 @@ nav:
     - topics/Abipy.md
     - topics/APPA.md
     - topics/Artificial.md
-    - topics/AtomManipulator.md
     - topics/aTDEP.md
+    - topics/AtomCentered.md
+    - topics/AtomManipulator.md
     - topics/AtomTypes.md
     - topics/Bader.md
     - topics/Band2eps.md
@@ -59,7 +60,7 @@ nav:
     - topics/Control.md
     - topics/Coulomb.md
     - topics/CrossingBarriers.md
-    - topics/CRPA.md
+    - topics/CalcUJ.md
     - topics/crystal.md
     - topics/DFT+U.md
     - topics/DeltaSCF.md
@@ -85,6 +86,7 @@ nav:
     - topics/Git.md
     - topics/GSintroduction.md
     - topics/GW.md
+    - topics/GWR.md
     - topics/GWls.md
     - topics/Hybrids.md
     - topics/k-points.md

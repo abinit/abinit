@@ -1027,7 +1027,7 @@ end subroutine incomprs
 !!   'DPR'=>real(dp) (no special treatment)
 !!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!       and return in au -atomic units=bohr- )
-!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg)
+!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg, K, Kelvin)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in key_value
 !!
@@ -2084,10 +2084,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        else if(typevarphys=='ENE' .and. b2>=3)then
          if(string(b1+1:b1+3)=='RY ')then
            factor=half
+         else if(string(b1+1:b1+3)=='RYD')then
+           factor=half
          else if(string(b1+1:b1+3)=='EV ')then
            factor=one/Ha_eV
          else if(string(b1+1:b1+4)=='MEV ')then
            factor=one/Ha_meV
+         else if(string(b1+1:b1+7)=='Kelvin ')then
+            factor=kb_HaK
          end if
        else if(typevarphys=='ENE' .and. b2>=2)then
          if(string(b1+1:b1+2)=='K ') factor=kb_HaK
