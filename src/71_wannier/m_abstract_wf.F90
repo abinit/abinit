@@ -952,7 +952,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
        self%has_paw=.True.
     end if
     if(present(cprj)) then
-      print *, "cprj linked"
+      !print *, "cprj linked"
       !print *, "before linked", cprj(1,1)%cp(:,:)
       self%cprj => cprj
       !print *, "after linked", self%cprj(1,1)%cp(:,:)

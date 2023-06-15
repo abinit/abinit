@@ -274,8 +274,6 @@ class(abstract_wf), pointer :: mywfc
 !
  if(rank==master) then
    if(.not. (all(dtset%istwfk(1:nkpt) == 1) .and. all(dtset%wtk(1:nkpt) == dtset%wtk(1))) ) then
-print *, ' istwfk ', dtset%istwfk(:)
-print *, ' dtset%wtk ', dtset%wtk(:)
      write(message, '(a,a,a,a)' ) ch10,&
 &     '   mlwfovlp:  you should give k-point in the full brillouin zone ',ch10,&
 &     '   with explicit k-points (or kptopt=3) and istwfk 1'
