@@ -699,14 +699,14 @@ print *, ' dtset%wtk ', dtset%wtk(:)
      call wrtout(std_out,  message,'COLL')
 !
      call wannier_run(trim(seed_name(isppol)),ngkpt,nkpt,&            !input
-&    real_lattice,recip_lattice,hdr%kptns,num_bands(isppol),& !input
-&    nwan(isppol),nntot,natom,atom_symbols,&                  !input
-&    xcart*Bohr_Ang,gamma_only,M_matrix(:,:,:,:,isppol),A_matrix(:,:,:,isppol),eigenvalues_w(:,:,isppol),& !input
-&    U_matrix(1:nwan(isppol),1:nwan(isppol),:,isppol),& !output
-&    U_matrix_opt(1:num_bands(isppol),1:nwan(isppol),:,isppol),& !output
-&    lwindow_loc=lwindow(1:num_bands(isppol),:,isppol),& !output
-&    wann_centres_loc=wann_centres(:,1:nwan(isppol),isppol),&     !output
-&    wann_spreads_loc=wann_spreads(1:nwan(isppol),isppol),spread_loc=spreadw(:,isppol))                            !output
+&      real_lattice,recip_lattice,hdr%kptns,num_bands(isppol),& !input
+&      nwan(isppol),nntot,natom,atom_symbols,&                  !input
+&      xcart*Bohr_Ang,gamma_only,M_matrix(:,:,:,:,isppol),A_matrix(:,:,:,isppol),eigenvalues_w(:,:,isppol),& !input
+&      U_matrix(1:nwan(isppol),1:nwan(isppol),:,isppol),& !output
+&      U_matrix_opt(1:num_bands(isppol),1:nwan(isppol),:,isppol),& !output
+&      lwindow_loc=lwindow(1:num_bands(isppol),:,isppol),& !output
+&      wann_centres_loc=wann_centres(:,1:nwan(isppol),isppol),&     !output
+&      wann_spreads_loc=wann_spreads(1:nwan(isppol),isppol),spread_loc=spreadw(:,isppol))                            !output
 
 !    ----------------------------------------------------------------------------------------------
 
