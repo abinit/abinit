@@ -2956,7 +2956,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
  ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing
- call timab(260+tim_fourdp,1,tsec)
+ call timab(1260+tim_fourdp,1,tsec)
 
  if (fourdp_counter>=0) then
    fourdp_counter = fourdp_counter + ndat
@@ -3015,7 +3015,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
       fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local,fofg,fofr,comm_fft)
    end if
    ! Accumulate timing and return
-   call timab(260+tim_fourdp,2,tsec); return
+   call timab(1260+tim_fourdp,2,tsec); return
  end if
 
  if (fftalga == FFT_DFTI) then
@@ -3026,7 +3026,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
      ABI_ERROR("MPI fourdp with MKL cluster DFT not implemented")
    end if
    ! Accumulate timing and return
-   call timab(260+tim_fourdp,2,tsec); return
+   call timab(1260+tim_fourdp,2,tsec); return
  end if
 
  ! Here, deal with the new SG FFT, complex-to-complex case
@@ -3263,7 +3263,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
    end do
  end if
 
- 100 call timab(260+tim_fourdp,2,tsec)
+ 100 call timab(1260+tim_fourdp,2,tsec)
 
 end subroutine fourdp
 !!***

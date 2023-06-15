@@ -148,5 +148,5 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% authors = T. Applencourt, B. Amadon, R. Outerovitch
 #%% description = Test the computation of U in CRPA for SrVO3 for t2g and eg orbitals. 
 #%%   Uses KSS and SCR file from tests 23 and 24.
-#%% topics = CRPA
+#%% topics = CalcUJ
 #%%<END TEST_INFO>
