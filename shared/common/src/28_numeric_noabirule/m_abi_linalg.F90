@@ -111,6 +111,12 @@ module m_abi_linalg
  type(c_ptr) :: plasma_work
 #endif
 
+ integer, parameter, public :: ABI_USE_CPU        = 0 ! Should be the default
+ integer, parameter, public :: ABI_USE_GPU_LEGACY = 1
+ integer, parameter, public :: ABI_USE_GPU_OPENMP = 666
+ integer, parameter, public :: ABI_USE_GPU_KOKKOS = 3
+ integer, save, private     :: abi_linalg_gpu_mode = ABI_USE_CPU
+
 !----------------------------------------------------------------------
 !!***
 
@@ -500,7 +506,10 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_GPU_CUDA
 !Cublas initialization
- if (use_gpu_cuda/=0) call gpu_linalg_init()
+ if (use_gpu_cuda/=ABI_USE_CPU) call gpu_linalg_init()
+ ABI_LINALG_CUDA_ISON=.True.
+ abi_linalg_gpu_mode = use_gpu_cuda !FIXME Add a check for this
+ if (use_gpu_cuda == ABI_USE_GPU_OPENMP) ABI_LINALG_OPENMP_OFFLOAD_ISON=.False.
 #endif
 
  if (need_work_space) call abi_linalg_work_allocate()
@@ -777,6 +786,9 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_GPU_CUDA
  if (use_gpu_cuda/=0) call gpu_linalg_shutdown()
+ ABI_LINALG_CUDA_ISON=.False.
+ ABI_LINALG_OPENMP_OFFLOAD_ISON=.False.
+ abi_linalg_gpu_mode = ABI_USE_CPU
 #else
  if (use_gpu_cuda/=0) ABI_BUG("GPU linalg shutdown was requested but ABINIT wasn't built with GPU support!")
 #endif
