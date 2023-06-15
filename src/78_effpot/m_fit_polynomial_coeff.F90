@@ -158,7 +158,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer :: nbound
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff,ia,generateterm_in
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle,ncoeff_tot_tmp
- integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out
+ integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out, ncycle_tot_noduplicate
  integer :: my_ncoeff_start,my_ncoeff_end,my_ncoeff_simple,ncoeff_alone
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr,atom_start,atom_end
  integer :: ncopy_terms
@@ -764,7 +764,6 @@ end block
    ! print *, "ncycle_tot:", ncycle_tot
   end block
 
-
   block
     integer :: i
     do i=1, nbancoeff
@@ -900,13 +899,20 @@ call  xmpi_lor(isselected, comm)
  size_mpi = 5*nproc
 !If some coeff are imposed by the input, we need to fill the arrays
 !with this coeffs and broadcast to the others CPUs :
+
+ block
+ integer :: real_ic
+ real(dp) :: etmp(ntime), ftmp(3, natom_sc, ntime), stmp(6,ntime)
+
+ type(polynomial_coeff_type) :: coeff_tmp
+ real_ic=0
+
  if(ncycle_tot>=1)then
    do icycle = 1,ncycle_tot
      list_coeffs_tmp(icycle) = icycle
      rank_to_send = 0
      do icoeff=1,my_ncoeff
        if((my_coeffindexes(icoeff)==list_coeffs(icycle)))then
-         print *, "DEBUG:        icycle:",icycle, "icoeff:",  list_coeffs(icycle)
          if(need_initialize_data)then
            my_icoeff = icoeff
          else
@@ -919,14 +925,18 @@ call  xmpi_lor(isselected, comm)
 &                                          strten_coeffs,fit_data%training_set%ucvol,&
 &                                          my_coefflist(icoeff),1)
          end if
-         energy_coeffs_tmp(icycle,:)    = energy_coeffs(my_icoeff,:)
-         fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
-         strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
+         !energy_coeffs_tmp(icycle,:)    = energy_coeffs(my_icoeff,:)
+         !fcart_coeffs_tmp(:,:,icycle,:) = fcart_coeffs(:,:,my_icoeff,:)
+         !strten_coeffs_tmp(:,:,icycle)  = strten_coeffs(:,:,my_icoeff)
+
+         etmp(:)    = energy_coeffs(my_icoeff,:)
+         ftmp(:,:,:) = fcart_coeffs(:,:,my_icoeff,:)
+         stmp(:,:)  = strten_coeffs(:,:,my_icoeff)
 
          rank_to_send = my_rank
-         call polynomial_coeff_free(coeffs_tmp(icycle))
+         call polynomial_coeff_free(coeff_tmp)
          call polynomial_coeff_init(coeff_values(icycle),my_coeffs(icoeff)%nterm,&
-           &                                   coeffs_tmp(icycle),my_coeffs(icoeff)%terms,&
+           &                                   coeff_tmp,my_coeffs(icoeff)%terms,&
            &                                   my_coeffs(icoeff)%name,&
            &                                   my_coeffs(icoeff)%isbound,&
            &                                   check=.false.)
@@ -935,13 +945,40 @@ call  xmpi_lor(isselected, comm)
      end do
      !    Boadcast the coefficient
      !    Need to send the rank with the chosen coefficient
+
      call xmpi_sum(rank_to_send, comm, ierr)
-     call xmpi_bcast(energy_coeffs_tmp(icycle,:), rank_to_send, comm, ierr)
-     call xmpi_bcast(fcart_coeffs_tmp(:,:,icycle,:) , rank_to_send, comm, ierr)
-     call xmpi_bcast(strten_coeffs_tmp(:,:,icycle), rank_to_send, comm, ierr)
-     call polynomial_coeff_broadcast(coeffs_tmp(icycle), rank_to_send, comm)
+     call polynomial_coeff_broadcast(coeff_tmp, rank_to_send, comm)
+     block ! check duplicate
+       integer:: ii
+       logical :: found
+       found =.False.
+       do ii=1, real_ic
+         if(terms_compare(coeff_tmp%terms(1), coeffs_tmp(ii)%terms(1))) then
+           found=.True.
+           cycle
+         end if
+         if(terms_compare_inverse(coeff_tmp%terms(1), coeffs_tmp(ii)%terms(1))) then
+           found=.True.
+           cycle
+         end if
+
+       end do
+       if(.not. found) then
+         real_ic = real_ic+1
+         coeffs_tmp(real_ic) = coeff_tmp
+         call xmpi_bcast(etmp, rank_to_send, comm, ierr)
+         call xmpi_bcast(ftmp(:,:, :) , rank_to_send, comm, ierr)
+         call xmpi_bcast(stmp(:,:), rank_to_send, comm, ierr)
+         energy_coeffs_tmp(real_ic,:)    = etmp
+         fcart_coeffs_tmp(:,:,real_ic,:) = ftmp
+         strten_coeffs_tmp(:,:,real_ic)  = stmp
+       end if
+     end block
    end do
  end if
+ nbound=real_ic
+ ncycle_tot=real_ic
+ endblock
 
 !Waiting for all
  if(nproc > 1)  then
@@ -1103,7 +1140,7 @@ call  xmpi_lor(isselected, comm)
          &                                      strten_coeffs_tmp,fit_data%strten_diff,&
          &                                      fit_data%training_set%sqomega,fit_on,int_fit_factors, &
          &                                      nbound=nbound, min_bound_coeff=min_bound_coeff1,  &
-         &                                      ignore_bound=.True.)
+         &                                      ignore_bound=.False.)
 
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
@@ -1230,16 +1267,19 @@ call  xmpi_lor(isselected, comm)
          integer :: i
 
          call MergeSort(allgf, work, allorder, worder)
-         ! at least n_remaining terms should be kept. It reduces to a percentage everytime, but should be larger than 10*ncycle.
+         ! at least n_remaining terms should be kept. It reduces to a percentage everytime, but should be larger than 40*ncycle.
          ! if ncycle*10>ncoeff_tot, use ncoeff_tot
          print *, "n_remaining:----------------------", n_remaining
          n_remaining = max(ceiling(n_remaining * remaining_rate), min(ncycle*40, ncoeff_tot) )
 
+         ! FIXME: Crashes here when fixcoeff.
+         ! check size of coeff. and order are correctly set.
+         ! allorder is gathered from myorder.
          do i=n_remaining+1, ncoeff_tot
            isbanned(allorder(i))=.True.
          end do
          if(my_rank==0) then
-           do i=1, 30 !size(allorder)
+           do i=1, min(30,size(allorder))
              print *, "index=", i, "icoeff=", allorder(i), "  GF=", allgf(i)
            end do
          end if
@@ -2355,7 +2395,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
    block
      real(dp) :: bl(N), bu(N), w(N)
      integer :: istate(N+1), loopa
-    real(dp) :: AC(N-nbound,N-nbound),BC(n-nbound,1)
+     real(dp) :: AC(N-nbound,N-nbound),BC(n-nbound,1)
      AC=A(nbound+1:, nbound+1:)
      BC=B(nbound+1:, :)
      call DSGESV(N-nbound,NRHS,AC,LDA-nbound,IPIV,BC,LDB,coefficients(nbound+1:), &
@@ -2365,7 +2405,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
      bl(nbound+1:)=coefficients(nbound+1:)-abs(coefficients(nbound+1:))*0.1
      bu(nbound+1:)=coefficients(nbound+1:)+abs(coefficients(nbound+1:))*0.1
      bl(:nbound) = min_bound_coeff
-     bu(:nbound) = 1e3_dp
+     bu(:nbound) = 1e5_dp
      coefficients=0.0_dp
      !istate(N+1) = nbound
      CALL bvls(key=0, m=N, n=N, a=A, b=B, bl=bl, bu=bu, x=coefficients, istate&
