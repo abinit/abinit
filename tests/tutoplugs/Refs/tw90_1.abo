@@ -391,9 +391,6 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-   mlwfovlp:  you should give k-point in the full brillouin zone 
-   with explicit k-points (or kptopt=3) and istwfk 1
-
    mlwfovlp :  mlwfovlp_setup done -
 -  see tw90_1o_DS2_w90.wout for details.
 
