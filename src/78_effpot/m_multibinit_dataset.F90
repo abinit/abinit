@@ -3319,6 +3319,7 @@ call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
    end do
  end do
 
+ multibinit_dtset%dipdip_range=0
  do ii=1,3
    if(multibinit_dtset%dipdip_range(ii) < multibinit_dtset%ncell(ii)) then
      write(message,'(4a,3I3,3a,3I3,6a)') ch10,&
@@ -3328,22 +3329,21 @@ call invars10scup(multibinit_dtset%scup_dtset,lenstr,string)
 &                       multibinit_dtset%ncell(:),')',ch10,&
 &                 '     dipdip_range is set to ncell.',ch10,&
 &                 ' ---',ch10
-    multibinit_dtset%dipdip_range(:) =  multibinit_dtset%ncell(:)
+    multibinit_dtset%dipdip_range(ii) =  multibinit_dtset%ncell(ii)
      call wrtout(std_out,message,'COLL')
-     exit
    end if
-   if(multibinit_dtset%dipdip_range(ii) < multibinit_dtset%bound_cell(ii)) then
-     write(message,'(4a,3I3,3a,3I3,6a)') ch10,&
-&                 ' --- !WARNING',ch10,&
-&                 '     The range of dipdip_range (',multibinit_dtset%dipdip_range(:),')',ch10,&
-&                 '     But the range of the cell for the simulation is',&
-&                       multibinit_dtset%ncell(:),')',ch10,&
-&                 '     dipdip_range is set to bound_cell.',ch10,&
-&                 ' ---',ch10
-     multibinit_dtset%dipdip_range(:) =  multibinit_dtset%ncell(:)
-     call wrtout(std_out,message,'COLL')
-     exit
-   end if
+!   if(multibinit_dtset%dipdip_range(ii) < multibinit_dtset%bound_cell(ii)) then
+!     write(message,'(4a,3I3,3a,3I3,6a)') ch10,&
+!&                 ' --- !WARNING',ch10,&
+!&                 '     The range of dipdip_range (',multibinit_dtset%dipdip_range(:),')',ch10,&
+!&                 '     But the range of the cell for the simulation is',&
+!&                       multibinit_dtset%ncell(:),')',ch10,&
+!&                 '     dipdip_range is set to bound_cell.',ch10,&
+!&                 ' ---',ch10
+!     multibinit_dtset%dipdip_range(:) =  multibinit_dtset%ncell(:)
+!     call wrtout(std_out,message,'COLL')
+!     exit
+!   end if
  end do
 
 !Check if only one tolerance is specify
