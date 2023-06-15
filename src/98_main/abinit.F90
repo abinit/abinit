@@ -368,7 +368,7 @@ program abinit
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
    if (dtsets(ii)%use_gpu_cuda/=0) then
-     use_gpu_cuda=1
+     use_gpu_cuda=dtsets(ii)%use_gpu_cuda
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
    if (dtsets(ii)%use_nvtx==1) then
@@ -378,8 +378,8 @@ program abinit
 #ifdef HAVE_GPU
  call setdevice_cuda(gpu_devices,use_gpu_cuda)
 #else
- if (use_gpu_cuda==1) then
-   write(msg,'(a)'), 'Use of GPU is requested but ABINIT was not built with GPU support.'
+ if (use_gpu_cuda/=0) then
+   write(msg,'(a)')ch10,'Use of GPU is requested but ABINIT was not built with GPU support.'
    ABI_ERROR(msg)
  end if
 #endif
