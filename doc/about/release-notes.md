@@ -15,7 +15,7 @@ J. Abreu, J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Go
 L. Mac Enulty, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
-It is worth to read carefully all the modifications that are mentioned in the present file,
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
 This might take some time ...
 
@@ -61,17 +61,21 @@ By M. Giantomassi (MR875, MR907)
 
 **B.1** Orbital magnetization 
 
-The computation of the orbital magnetization and chemical shielding (converse method, that is, with a nuclear dipole moment added) has been implemented, 
-as described and tested in [[cite:Zwanziger2023]].
-This implementation works for insulators and metals, with [[nspinor]]=1 and 2. However it works with PAW only, not with NC pseudopotentials. 
-Lamb shielding is treated. The PAW atomic dataset generator "Atompaw" has been updated accordingly to compute and output the Lamb shielding in xml files.
+The computation of the orbital magnetization and chemical shielding
+(in the converse method, that is, with a nuclear dipole moment added)
+has been implemented, as described and tested in
+[[cite:Zwanziger2023]].  This implementation works for insulators and
+metals, with [[nspinor]]=1 and 2. However it works with PAW only, not
+with NC pseudopotentials.  Lamb shielding is treated. The PAW atomic
+dataset generator "Atompaw" has been updated accordingly to compute
+and output the Lamb shielding in xml files.
 
 See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[test:nuc_4]],
-(NOTE : description to be provided in the .abi file)  with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
+(NOTE : descriptions provided in the *.abi files)  with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
 
 The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to present such computations.
 
-By J. Zwanziger, with some help by M. Torrent and X. Gonze (MR895, 904, 917).
+By J. Zwanziger, M. Torrent and X. Gonze (MR895, 904, 917).
 
 
 **B.2** Natural optical activity tensor, linear response to a vector potential (orbital magnetic field linear response) and other modifications of the longwave driver.
