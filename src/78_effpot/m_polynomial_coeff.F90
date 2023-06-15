@@ -47,6 +47,7 @@ module m_polynomial_coeff
  implicit none
  private
 
+ ! symmetric pairs and information about it.
  type,public :: SymPairs_t
    integer :: ncoeff_sym,nstr_sym
    integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:)
@@ -702,8 +703,6 @@ subroutine polynomial_coeff_broadcast(coefficients, source, comm)
       call xmpi_bcast(coefficients%terms(ii)%power_strain, source, comm, ierr)
       call xmpi_bcast(coefficients%terms(ii)%strain, source, comm, ierr)
   end do
-
-
 end subroutine polynomial_coeff_broadcast
 !!***
 
@@ -2482,7 +2481,7 @@ if(need_compute_symmetric)then
 &                                        ncoeff_symsym,nstr_sym,nstrain, &
 &                                        compatibleCoeffs,compute_sym,comm, &
 &                                        only_even=need_only_even_power, max_nbody=max_nbody, &
-&                                        irred_combinations=irred_combinations)
+&                                        irred_combinations=irred_combinations, cell=cell)
 
      end associate
     enddo
@@ -2543,6 +2542,7 @@ if(iam_master)then
   ncombination = size(list_combination_tmp,2)
   !ABI_MALLOC(index_irred,(1))
   !index_irred = 1
+  !============ Strain phonon coupling===================
   if(need_spcoupling)then !Check irreducibility of strain-phonon terms
    if(need_verbose)then
      write(message,'(1a)')' Reduce reducible Strain-Phonon combinations on master'
@@ -2555,7 +2555,7 @@ if(iam_master)then
      do i=1, ncombination
        if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
          irreducible=irred_combinations%add_irr(list_combination_tmp(:,i), &
-           & list_symcoeff, list_symstr, ncoeff_symsym, nsym, power_disps(2))
+           & list_symcoeff, list_symstr, ncoeff_symsym, nsym, power_disps(2),cell)
          if(.not. irreducible) list_combination_tmp(:,i) = 0
        endif
      end do
@@ -3406,7 +3406,7 @@ end subroutine symlist_free
 subroutine computeSymmetricCombinations(array_combination, &
   & list_symcoeff, list_symstr, ndisp, nsym, index_coeff_in,  &
   & ndisp_max,  ncoeff, nsym_str, nstrain, &
-  &  compatibleCoeffs,  compute, comm, only_even, max_nbody , irred_combinations )
+  &  compatibleCoeffs,  compute, comm, only_even, max_nbody , irred_combinations , cell)
 
   integer,intent(in)    :: ndisp,nsym,ndisp_max, ncoeff,nstrain,nsym_str
   integer,intent(in)    :: comm
@@ -3418,7 +3418,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   type(int2d_array_type), intent(inout) :: array_combination ! list_combination(ndisp_max, nirred*nsym**(ndisp-1))
   integer,intent(in)    :: list_symcoeff(6,ncoeff,nsym),index_coeff_in(ndisp+nstrain)
   integer,intent(in)    :: list_symstr(6,nsym,2),compatibleCoeffs(ncoeff+nsym_str,ncoeff+nsym_str)
-  integer, intent(in)   :: max_nbody(:)
+  integer, intent(in)   :: max_nbody(:), cell(:, :)
   type(IrreducibleCombinations_T), intent(inout) :: irred_combinations
   type(symlist_t), target :: symlist
   !Local variables-------------------------------
@@ -3553,7 +3553,7 @@ subroutine computeSymmetricCombinations(array_combination, &
       end if
 
        if(.not. (all(index_coeff_tmp == 0) .and. nstrain==0)) then
-          irreducible=irred_combinations%add_irr(comb_to_test, list_symcoeff, list_symstr, ncoeff, nsym, ndisp_max)
+          irreducible=irred_combinations%add_irr(comb_to_test, list_symcoeff, list_symstr, ncoeff, nsym, ndisp_max, cell)
        endif
     end if ! need compute
   end do
@@ -3733,8 +3733,6 @@ subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndi
    call polynomial_term_init(atindx,cells,dir_int,ndisp,nstrain,terms(nterm),power_disps,&
 &                            power_strain,strain,weight,check=.true.)
  end do!end do sym
-
-
 end subroutine generateTermsFromList
 !!***
 
@@ -4443,15 +4441,13 @@ subroutine SymPairs_t_init(self, crystal, sc_size, fit_iatom_in, cutoff_in)
   else
     self%cutoff=get_crystal_cutoff(crystal)
   end if
-
-  call prepare_for_getList(crystal, sc_size, self%dist, self%cell, self%natom, self%nsym, self%nrpt, self%range_ifc, self%symbols)
+  call prepare_for_getList(crystal, sc_size, self%dist, self%cell, &
+    & self%natom, self%nsym, self%nrpt, self%range_ifc, self%symbols)
   call polynomial_coeff_getList(self%cell,self%crystal,self%dist, &
     &self%list_symcoeff,self%list_symstr,&
     &self%natom,self%nstr_sym,self%ncoeff_sym,self%nrpt, &
     &self%range_ifc,self%cutoff,sc_size=self%sc_size,&
     &fit_iatom=fit_iatom_in)
-
-
 end subroutine SymPairs_t_init
 
 subroutine SymPairs_t_free(self)
@@ -4502,18 +4498,18 @@ subroutine IrreducibleCombinations_reset_array(self)
 end subroutine IrreducibleCombinations_Reset_Array
 
 
-
 function IrreducibleCombinations_add_irr(self, combination, list_symcoeff, &
-  & list_symstr, ncoeff_sym, nsym, ndisp ) result(irreducible)
+  & list_symstr, ncoeff_sym, nsym, ndisp, cell ) result(irreducible)
   class(IrreducibleCombinations_t), intent(inout) :: self
   integer, intent(inout) :: combination(:)
   integer,intent(in) :: ncoeff_sym,ndisp,nsym
   integer,intent(in) :: list_symcoeff(6,ncoeff_sym,nsym)
-  integer,intent(in) :: list_symstr(6,nsym,2)
+  integer,intent(in) :: list_symstr(6,nsym,2), cell(:, :)
 
   integer :: combination_cmp_tmp(ndisp), combination_sorted(ndisp)
   logical :: irreducible
   integer :: n, isym
+  integer :: rcomb(size(combination))
   ! check if the combination, or its symmetry equivalent are already in the
   ! table. If not, add it to the table.
   irreducible=.True.
@@ -4528,9 +4524,18 @@ function IrreducibleCombinations_add_irr(self, combination, list_symcoeff, &
     do while(isym <= nsym)
       call symcomb(combination_sorted, combination_cmp_tmp, isym)
       call sort_combination(combination_cmp_tmp,size(combination_cmp_tmp))
-      if ( self%table%has_key_intn(combination_cmp_tmp, n)) then
+      !rcomb=reverse(combination, isym, cell)
+      !call sort_combination(rcomb,size(rcomb))
+      !if(rcomb(1)/=0) then
+      !  print  *, "comb:", combination_cmp_tmp
+      !  print  *, "rcomb:", rcomb
+      !end if
+      if (self%table%has_key_intn(combination_cmp_tmp, n)) then
         irreducible=.False.
         return
+      !else if(self%table%has_key_intn(rcomb, n)) then
+      !  irreducible=.False.
+      !  return
       else
         isym = isym + 1
       end if
@@ -4542,6 +4547,26 @@ function IrreducibleCombinations_add_irr(self, combination, list_symcoeff, &
 
 
 contains
+
+  function reverse(combination, isym, cell) result(rcomb)
+    integer :: combination(:), isym, cell(:, :)
+    integer :: rcomb(size(combination))
+    integer :: ia, ib, irpt, weight, idisp
+    do idisp=1,ndisp
+      if(combination(idisp) /= 0 .and. combination(idisp) <= ncoeff_sym)then
+        ia   = list_symcoeff(3,combination(idisp),isym)
+        ib   = list_symcoeff(2,combination(idisp),isym)
+        irpt = list_symcoeff(4,combination(idisp),isym)
+        irpt = find_opposite_irpt(cell, irpt)
+        rcomb(idisp)=getCoeffFromList(list_symcoeff, ia, ib, irpt, weight, ncoeff_sym)
+        print *, "idisp", idisp, "ia", ia, "ib", ib, irpt
+      else
+        rcomb(idisp)=combination(idisp)
+      end if
+    end do
+  end function reverse
+
+  ! get the symmetry equivalent combination with symmetry index isym.
   subroutine symcomb(combination, combination_cmp_tmp, isym)
     integer :: combination(:), combination_cmp_tmp(:), isym
     integer :: idisp, istrain
