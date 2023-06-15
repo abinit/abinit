@@ -225,9 +225,13 @@ contains
      end do
    end if
 
-   write(msg,'(a,f12.6,a,2(a,f12.6,a),a)')'  Magnon shift on ETOT:', emshift, ch10,&
-&  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
-&  '  Magnon shift on vtrial1(4):', By(1),ch10,ch10 
+!   write(msg,'(a,f12.6,a,2(a,f12.6,a))')'  Magnon shift on ETOT:', emshift, ch10,&
+!&  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
+!&  '  Magnon shift on vtrial1(4):', By(1),ch10 
+!   call wrtout(std_out,msg,'COLL')
+   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
+&  ' 1-\bar{e}*alpha :', one-mshift*two*rhomag(1,idir+1),ch10,&
+&  ' Correct  e: ', two*rhomag(1,idir+1)/(one-mshift*two*rhomag(1,idir+1)),ch10 
    call wrtout(std_out,msg,'COLL')
 
  end if
