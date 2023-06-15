@@ -40,6 +40,10 @@ module m_abi_linalg
  use m_gpu_toolbox
 #endif
 
+#if defined HAVE_YAKL
+ use gator_mod, only: gator_allocate, gator_deallocate
+#endif
+
 #if defined HAVE_MPI1
  include 'mpif.h'
 #endif
@@ -117,6 +121,21 @@ module m_abi_linalg
  integer, parameter, public :: ABI_USE_GPU_KOKKOS = 3
  integer, save, private     :: abi_linalg_gpu_mode = ABI_USE_CPU
 
+#ifdef HAVE_GPU
+ integer,                       allocatable,save,private,target :: i_work(:)
+ real(kind=c_double),           allocatable,save,private,target :: r_work(:)
+ complex(kind=c_double_complex),allocatable,save,private,target :: c_work(:)
+
+ !FIXME *_managed arrays are only used with YAKL, in place of previous ones
+ integer(kind=c_int32_t),        ABI_CONTIGUOUS pointer,save,private :: i_work_managed(:) => null()
+ real(kind=c_double),            ABI_CONTIGUOUS pointer,save,private :: r_work_managed(:) => null()
+ complex(kind=c_double_complex), ABI_CONTIGUOUS pointer,save,private :: c_work_managed(:) => null()
+
+ integer, save, private :: r_work_len = 0
+ integer, save, private :: c_work_len = 0
+ integer, save, private :: i_work_len = 0
+#endif
+
 !----------------------------------------------------------------------
 !!***
 
@@ -134,6 +153,100 @@ module m_abi_linalg
     module procedure abi_zgemm_2d
     module procedure abi_d2zgemm
  end interface abi_xgemm
+
+ interface abi_gpu_xgemm
+    module procedure abi_gpu_xgemm_cptr
+    module procedure abi_gpu_xgemm_d
+    module procedure abi_gpu_xgemm_z
+    module procedure abi_gpu_xgemm_2d
+    module procedure abi_gpu_xgemm_2z
+ end interface abi_gpu_xgemm
+
+ interface abi_gpu_xgemm_strided
+    module procedure abi_gpu_xgemm_strided_cptr
+    module procedure abi_gpu_xgemm_strided_d
+    module procedure abi_gpu_xgemm_strided_z
+    module procedure abi_gpu_xgemm_strided_2d
+    module procedure abi_gpu_xgemm_strided_2z
+ end interface abi_gpu_xgemm_strided
+
+ interface abi_gpu_xsymm
+    module procedure abi_gpu_xsymm_cptr
+    module procedure abi_gpu_xsymm_d
+    module procedure abi_gpu_xsymm_z
+    module procedure abi_gpu_xsymm_2d
+    module procedure abi_gpu_xsymm_2z
+ end interface abi_gpu_xsymm
+
+ interface abi_gpu_zhemm
+    module procedure abi_gpu_zhemm_cptr
+    module procedure abi_gpu_zhemm_d
+    module procedure abi_gpu_zhemm_z
+    module procedure abi_gpu_zhemm_2d
+    module procedure abi_gpu_zhemm_2z
+ end interface abi_gpu_zhemm
+
+ interface abi_gpu_xscal
+    module procedure abi_gpu_xscal_cptr
+    module procedure abi_gpu_xscal_d
+    module procedure abi_gpu_xscal_z
+    module procedure abi_gpu_xscal_2d
+    module procedure abi_gpu_xscal_2z
+ end interface abi_gpu_xscal
+
+ interface abi_gpu_xaxpy
+    module procedure abi_gpu_xaxpy_cptr
+    module procedure abi_gpu_xaxpy_d
+    module procedure abi_gpu_xaxpy_z
+    module procedure abi_gpu_xaxpy_2d
+    module procedure abi_gpu_xaxpy_2z
+ end interface abi_gpu_xaxpy
+
+ interface abi_gpu_xheevd
+    module procedure abi_gpu_xheevd_cptr
+    module procedure abi_gpu_xheevd_d
+    module procedure abi_gpu_xheevd_z
+    module procedure abi_gpu_xheevd_2d
+    module procedure abi_gpu_xheevd_2z
+ end interface abi_gpu_xheevd
+
+ interface abi_gpu_xhegvd
+    module procedure abi_gpu_xhegvd_cptr
+    module procedure abi_gpu_xhegvd_d
+    module procedure abi_gpu_xhegvd_z
+    module procedure abi_gpu_xhegvd_2d
+    module procedure abi_gpu_xhegvd_2z
+ end interface abi_gpu_xhegvd
+
+ interface abi_gpu_xtrsm
+    module procedure abi_gpu_xtrsm_cptr
+    module procedure abi_gpu_xtrsm_d
+    module procedure abi_gpu_xtrsm_z
+    module procedure abi_gpu_xtrsm_2d
+    module procedure abi_gpu_xtrsm_2z
+ end interface abi_gpu_xtrsm
+
+ interface abi_gpu_xpotrf
+    module procedure abi_gpu_xpotrf_cptr
+    module procedure abi_gpu_xpotrf_d
+    module procedure abi_gpu_xpotrf_z
+    module procedure abi_gpu_xpotrf_2d
+    module procedure abi_gpu_xpotrf_2z
+ end interface abi_gpu_xpotrf
+
+ interface abi_gpu_xcopy
+    module procedure abi_gpu_xcopy_cptr
+    module procedure abi_gpu_xcopy_d
+    module procedure abi_gpu_xcopy_z
+    module procedure abi_gpu_xcopy_2d
+    module procedure abi_gpu_xcopy_2z
+ end interface abi_gpu_xcopy
+
+ interface abi_gpu_work_resize
+    module procedure abi_gpu_work_resizeI
+    module procedure abi_gpu_work_resizeR
+    module procedure abi_gpu_work_resizeC
+ end interface abi_gpu_work_resize
 
  public :: abi_zgemm
  public :: abi_zgemm_2d
@@ -294,6 +407,8 @@ module m_abi_linalg
 
 #else
  !dummy routines replace gpu helper routines
+ public :: gpu_device_synchronize
+ public :: check_gpu_mem
  public :: alloc_on_gpu
  public :: copy_from_gpu
  public :: copy_on_gpu
@@ -316,6 +431,18 @@ module m_abi_linalg
  public :: gpu_allocated
 
  public :: gpu_xorthonormalize
+
+ public :: abi_gpu_xgemm
+ public :: abi_gpu_xgemm_strided
+ public :: abi_gpu_xsymm
+ public :: abi_gpu_zhemm
+ public :: abi_gpu_xscal
+ public :: abi_gpu_xaxpy
+ public :: abi_gpu_xcopy
+ public :: abi_gpu_xtrsm
+ public :: abi_gpu_xhegvd
+ public :: abi_gpu_xheevd
+ public :: abi_gpu_xpotrf
 
  logical,external :: LSAME
 
@@ -507,9 +634,7 @@ CONTAINS  !===========================================================
 #ifdef HAVE_GPU_CUDA
 !Cublas initialization
  if (use_gpu_cuda/=ABI_USE_CPU) call gpu_linalg_init()
- ABI_LINALG_CUDA_ISON=.True.
  abi_linalg_gpu_mode = use_gpu_cuda !FIXME Add a check for this
- if (use_gpu_cuda == ABI_USE_GPU_OPENMP) ABI_LINALG_OPENMP_OFFLOAD_ISON=.False.
 #endif
 
  if (need_work_space) call abi_linalg_work_allocate()
@@ -785,9 +910,10 @@ CONTAINS  !===========================================================
 #endif
 
 #ifdef HAVE_GPU_CUDA
- if (use_gpu_cuda/=0) call gpu_linalg_shutdown()
- ABI_LINALG_CUDA_ISON=.False.
- ABI_LINALG_OPENMP_OFFLOAD_ISON=.False.
+ if (use_gpu_cuda/=0) then
+   call abi_gpu_work_finalize()
+   call gpu_linalg_shutdown()
+ end if
  abi_linalg_gpu_mode = ABI_USE_CPU
 #else
  if (use_gpu_cuda/=0) ABI_BUG("GPU linalg shutdown was requested but ABINIT wasn't built with GPU support!")
