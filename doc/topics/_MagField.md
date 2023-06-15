@@ -15,8 +15,11 @@ orbital motion (orbital term).  Input variables to deal with these two
 situations are decoupled in ABINIT.  [[zeemanfield]] gives access to
 the Zeeman coupling.  The coupling to the electronic orbital motion
 requires a more elaborate calculation, and is triggered by the input
-variable [[orbmag]]. It is implemented following
-the theory outlined in [[cite:Zwanziger2023]].
+variable [[orbmag]]. It is implemented following the theory outlined
+in [[cite:Zwanziger2023]]. For insulators, this calculation would
+typically be used in conjunction with an imposed nuclear magnetic
+dipole, see [[nucdipmom]], in order to compute the chemical shielding
+as observed in NMR.
 
 Input variables for both types of calculation are listed below, as
 well as relevant test files and the [[tutorial:nuc|tutorial on
@@ -32,6 +35,6 @@ properties at the nucleus]].
 
 ## Tutorials
 
-* [[tutorial:nuc|The tutorial on properties at the nucleus]] describes the use of [[orbmag]] to compute the
-chemical shielding at a nuclear site, as measured in NMR spectroscopy.
+* [[tutorial:nuc|The tutorial on properties at the nucleus]] describes the use of [[orbmag]]
+and [[nucdipmom]] to compute the chemical shielding at a nuclear site.
 
