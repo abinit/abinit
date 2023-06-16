@@ -31,6 +31,7 @@ module m_dfpt_rhotov
  use m_spacepar,    only : hartrestr, hartre
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
+ use m_dens,        only : calcdenmagsph
 
  implicit none
 
@@ -61,6 +62,7 @@ contains
 !!  ixc= choice of exchange-correlation scheme
 !!  kxc(nfft,nkxc)=exchange-correlation kernel
 !!  mpi_enreg=information about MPI parallelization
+!!  magpen=energy shift to apply on the spin degrees of freedom
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -102,6 +104,7 @@ contains
 !!    ehart1=1st-order Hartree part of 2nd-order total energy
 !!    exc1=1st-order exchange-correlation part of 2nd-order total energy
 !!    elpsp1=1st-order local pseudopot. part of 2nd-order total energy.
+!!    emagpen1
 !!  ==== if optres==0
 !!    vresid1(cplex*nfft,nspden)=potential residual
 !!    vres2=square of the norm of the residual
@@ -112,8 +115,8 @@ contains
 !!
 !! SOURCE
 
- subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen,gsqcut,icutcoul,idir,ipert,&
-&           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
+ subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,icutcoul,idir,ipert,&
+&           ixc,kxc,magpen,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
 &           non_magnetic_xc,optene,optres,qphon,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
 &           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred)
 
@@ -122,7 +125,7 @@ contains
  integer,intent(in) :: cplex,icutcoul,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
  integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot
  logical,intent(in) :: non_magnetic_xc
- real(dp),intent(in) :: gsqcut,ratsm,ucvol
+ real(dp),intent(in) :: gsqcut,magpen,ratsm,ucvol
  real(dp),intent(inout) :: ehart01
  real(dp),intent(out) :: vres2
  type(MPI_type),intent(in) :: mpi_enreg
@@ -138,7 +141,7 @@ contains
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),vpsp1(cplex*nfft)
  real(dp),intent(in) :: xccc3d1(cplex*n3xccc)
- real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1,elmag1,emagpen
+ real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1,elmag1,emagpen1
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
  real(dp),intent(in) :: vcutgeo(3)
@@ -155,7 +158,7 @@ contains
  real(dp)             :: Bx(cplex),By(cplex),tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
- real(dp),allocatable :: vmshift(:,:)
+ real(dp),allocatable :: vmagpen1(:,:)
 
 ! *********************************************************************
 
@@ -193,21 +196,26 @@ contains
    rhor1_ => rhor1
  end if
 
-
  if(ipert==natom+5)then
    ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end if
 
+ if (abs(magpen) > tol6) then
+   ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
+   call dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,nspden, &
+& ntypat,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
+ end if
+
 !!------  Define the magnon shift potential (and energy) -------------------------
-! ABI_MALLOC(vmshift,(cplex*nfft,nspden))
-! vmshift(:,:)=zero
+! ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
+! vmagpen1(:,:)=zero
 ! if (present(rhomag).and.present(mshift)) then
 !
 !   if (cplex==1) then
-!     emshift=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
+!     emagpen=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
 !   else if (cplex==2) then
-!     emshift=half*mshift*(rhomag(1,2)**2+rhomag(2,2)**2 &
+!     emagpen=half*mshift*(rhomag(1,2)**2+rhomag(2,2)**2 &
 !&                        +rhomag(1,3)**2+rhomag(2,3)**2)
 !   end if
 !
@@ -215,19 +223,19 @@ contains
 !   By(:)=mshift*rhomag(:,3)
 !   if (cplex==1) then
 !     do ifft=1,nfft
-!       vmshift(ifft,3)=Bx(1)
-!       vmshift(ifft,4)=-By(1)
+!       vmagpen1(ifft,3)=Bx(1)
+!       vmagpen1(ifft,4)=-By(1)
 !     end do
 !   else if (cplex==2) then
 !     do ifft=1,nfft
-!       vmshift(2*ifft-1,3)=Bx(1)+By(2)
-!       vmshift(2*ifft  ,3)=Bx(2)-By(1)
-!       vmshift(2*ifft-1,4)=-Bx(2)-By(1)
-!       vmshift(2*ifft  ,4)=Bx(1)-By(2)
+!       vmagpen1(2*ifft-1,3)=Bx(1)+By(2)
+!       vmagpen1(2*ifft  ,3)=Bx(2)-By(1)
+!       vmagpen1(2*ifft-1,4)=-Bx(2)-By(1)
+!       vmagpen1(2*ifft  ,4)=Bx(1)-By(2)
 !     end do
 !   end if
 !
-!!   write(msg,'(a,f12.6,a,2(a,f12.6,a))')'  Magnon shift on ETOT:', emshift, ch10,&
+!!   write(msg,'(a,f12.6,a,2(a,f12.6,a))')'  Magnon shift on ETOT:', emagpen, ch10,&
 !!&  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
 !!&  '  Magnon shift on vtrial1(4):', By(1),ch10 
 !!   call wrtout(std_out,msg,'COLL')
@@ -358,14 +366,14 @@ contains
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+vmshift(ifft,ispden)-vtrial1(ifft,ispden)
+       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+vmagpen1(ifft,ispden)-vtrial1(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vresid1(ifft,ispden)=vxc1_(ifft,ispden)+vmshift(ifft,ispden)-vtrial1(ifft,ispden)
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)+vmagpen1(ifft,ispden)-vtrial1(ifft,ispden)
        end do
      end do
    end if
@@ -384,14 +392,14 @@ contains
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+vmshift(ifft,ispden)
+       vtrial1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+vmagpen1(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)+vmshift(ifft,ispden)
+         vtrial1(ifft,ispden)=vxc1_(ifft,ispden)+vmagpen1(ifft,ispden)
        end do
      end do
    end if
@@ -414,7 +422,7 @@ contains
    ABI_FREE(v1zeeman)
  end if
 
-! ABI_FREE(vmshift)
+ ABI_SFREE(vmagpen1)
 
  call timab(157,2,tsec)
 
@@ -556,6 +564,85 @@ subroutine dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end select !cplex
 
 end subroutine dfpt_v1zeeman
+!!***
+
+!!****f* ABINIT/dfpt_v1magpen
+!! NAME
+!!  dfpt_v1magpen
+!!
+!! FUNCTION
+!!  Calculate a 1st order penalty potential and energy in order to
+!!  harden the spin degrees of freedom.
+!!
+!! INPUTS
+!!  cplex  = complex or real density matrix
+!!  idir   = direction of the perturbing field in Cartesian frame
+!!  magpen=energy shift to apply on the spin degrees of freedom
+!!  mpi_enreg=information about MPI parallelization
+!!  natom=number of atoms in cell.
+!!  nfft   = numbder of fft grid points
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  nspden = number of density matrix components
+!!  ntypat=number of atom types
+!!           1: along x
+!!           2: along y
+!!           3: along z
+!!  ratsm=smearing width for ratsph
+!!  ratsph(ntypat)=radius of spheres around atoms
+!!  rhor1(nfft,nspden)=array for first-order electron density.
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  typat(natom)=type of each atom
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!
+!! OUTPUT
+!!  vmagpen1(nfft*cplex,nspden)= 1st order magnetic penalty potential
+!!  emagpen1= magnetic penalty energy contribution to second-order energy
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!  The definition of components of the potential matrix differ depending on cplex:
+!!  For cplex=1, the potential is defined as (V_upup,V_dndn,Re[V_updn],Im[V_updn])
+!!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
+!!  
+!!  If magpen < 0 the penalty field is defined from the cell-integrated magnetic moments along the directions given by mpdir
+!!  IF magpen > 0 the penalty field is defined from the atom spheres-integrated magnetic moments as given by mpatpol and mpdir
+!!
+!! SOURCE
+
+subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,nspden, &
+& ntypat,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
+
+!Arguments 
+!scalars:
+ integer , intent(in) :: cplex,idir,natom,nfft,nspden,ntypat
+ real(dp),intent(in) :: magpen,ratsm
+ real(dp), intent(out) :: emagpen1 
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays:
+ integer,intent(in) :: ngfft(18),typat(natom)
+ real(dp),intent(in) :: ratsph(ntypat),rhor1(cplex*nfft,nspden),rprimd(3,3)
+ real(dp),intent(in) :: xred(3,natom)
+ real(dp), intent(out) :: vmagpen1(cplex*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars:
+ integer :: ifft,prtopt
+!character(len=500) :: msg
+!arrays:
+ real(dp) :: intgden(cplex,nspden,natom)
+ real(dp) :: dentot(nspden)
+ real(dp) :: rhomag(2,nspden)
+
+! *************************************************************************
+
+!Compute the first-order magnetic moments. 
+ prtopt=1;
+ call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
+&  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
+&  prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+
+end subroutine dfpt_v1magpen
 !!***
 
 end module m_dfpt_rhotov
