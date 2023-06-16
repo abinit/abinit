@@ -971,9 +971,9 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
    min2f=min(min2, min2_cell)
    min3f=min(min3, min3_cell)
 
-   max1f=min(max1, max1_cell)
-   max2f=min(max2, max2_cell)
-   max3f=min(max3, max3_cell)
+   max1f=max(max1, max1_cell)
+   max2f=max(max2, max2_cell)
+   max3f=max(max3, max3_cell)
 
    full_nrpt= (max1f-min1f+1) * (max2f-min2f+1) * (max3f-min3f+1)
 
