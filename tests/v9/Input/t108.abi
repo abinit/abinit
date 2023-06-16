@@ -92,5 +92,5 @@
 #%%   The BCC structure is slightly distorted, in order to decrease the symmetry 
 #%%   and the degeneracies, and allow better portability.
 #%%   (perhaps PROCAR file could be tested again).
-#%% topics = DFT+U
+#%% topics = DFT+U, AtomCentered
 #%%<END TEST_INFO>
