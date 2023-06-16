@@ -677,6 +677,8 @@ type, public :: dataset_type
  integer :: jfielddir(3)
  integer :: kptrlatt(3,3)
  integer :: kptrlatt_orig(3,3)=0
+ integer :: mpatpol(2)
+ integer :: mpdir(3)
  integer :: qptrlatt(3,3)
  integer :: ga_rules(30)
  integer :: gpu_devices(5)
@@ -795,6 +797,7 @@ type, public :: dataset_type
  real(dp) :: kptnrm
  real(dp) :: kptrlen
  real(dp) :: magcon_lambda
+ real(dp) :: magpen
  real(dp) :: maxestep
  real(dp) :: mbpt_sciss = zero
  real(dp) :: mdf_epsinf = zero
@@ -2042,6 +2045,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%jfielddir(:)       = dtin%jfielddir(:)
  dtout%kptrlatt(:,:)      = dtin%kptrlatt(:,:)
  dtout%kptrlatt_orig      = dtin%kptrlatt_orig
+ dtout%mpatpol(:)         = dtin%mpatpol(:)
+ dtout%mpdir(:)           = dtin%mpdir(:)
  dtout%qptrlatt(:,:)      = dtin%qptrlatt(:,:)
  dtout%ngfft(:)           = dtin%ngfft(:)
  dtout%ngfftdg(:)         = dtin%ngfftdg(:)
@@ -2096,6 +2101,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_model_parameter = dtin%gwls_model_parameter
  dtout%kptnrm             = dtin%kptnrm
  dtout%kptrlen            = dtin%kptrlen
+ dtout%magpen             = dtin%magpen
  dtout%maxestep           = dtin%maxestep
  dtout%bmass              = dtin%bmass
  dtout%magcon_lambda      = dtin%magcon_lambda
@@ -3397,9 +3403,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' lwf_temperature_nstep lwf_var_temperature'
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
- list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
+ list_vars=trim(list_vars)//' magconon magcon_lambda magpen mbpt_sciss'
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
- list_vars=trim(list_vars)//' mqgrid mqgriddg'
+ list_vars=trim(list_vars)//' mpatpol mpdir mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'

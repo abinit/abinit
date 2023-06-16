@@ -621,8 +621,20 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%rfatpol(2)=dtset%natom
  endif
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mpatpol',tread,'INT')
+ if(tread==1) dtset%mpatpol(1:2)=intarr(1:2)
+ if(dtset%mpatpol(1)==-1)then
+   dtset%mpatpol(1)=1
+ endif
+ if(dtset%mpatpol(2)==-1)then
+   dtset%mpatpol(2)=dtset%natom
+ endif
+
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rfdir',tread,'INT')
  if(tread==1) dtset%rfdir(1:3)=intarr(1:3)
+
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'mpdir',tread,'INT')
+ if(tread==1) dtset%mpdir(1:3)=intarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfddk',tread,'INT')
  if(tread==1) dtset%rfddk=intarr(1)
@@ -914,6 +926,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfeta',tread,'ENE')
  if(tread==1) dtset%rfeta=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'magpen',tread,'ENE')
+ if(tread==1) dtset%magpen=dprarr(1)
 
 !LONG WAVE integer input variables
 !FIXME

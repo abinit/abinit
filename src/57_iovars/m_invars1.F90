@@ -2405,6 +2405,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
+   dtsets(idtset)%magpen = zero
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
    dtsets(idtset)%mdwall=10000_dp
@@ -2414,6 +2415,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
+   dtsets(idtset)%mpatpol(1:2)=0 
+   dtsets(idtset)%mpdir(1:3)=0
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
    dtsets(idtset)%mqgriddg=0
