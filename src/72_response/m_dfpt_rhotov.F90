@@ -155,7 +155,7 @@ contains
  real(dp) :: doti,elpsp10
  character(len=500) :: msg
 !arrays
- real(dp)             :: Bx(cplex),By(cplex),tsec(20)
+ real(dp)             :: tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
  real(dp),allocatable :: vmagpen1(:,:)
@@ -206,45 +206,6 @@ contains
    call dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,nspden, &
 & ntypat,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
  end if
-
-!!------  Define the magnon shift potential (and energy) -------------------------
-! ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
-! vmagpen1(:,:)=zero
-! if (present(rhomag).and.present(mshift)) then
-!
-!   if (cplex==1) then
-!     emagpen=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
-!   else if (cplex==2) then
-!     emagpen=half*mshift*(rhomag(1,2)**2+rhomag(2,2)**2 &
-!&                        +rhomag(1,3)**2+rhomag(2,3)**2)
-!   end if
-!
-!   Bx(:)=mshift*rhomag(:,2)
-!   By(:)=mshift*rhomag(:,3)
-!   if (cplex==1) then
-!     do ifft=1,nfft
-!       vmagpen1(ifft,3)=Bx(1)
-!       vmagpen1(ifft,4)=-By(1)
-!     end do
-!   else if (cplex==2) then
-!     do ifft=1,nfft
-!       vmagpen1(2*ifft-1,3)=Bx(1)+By(2)
-!       vmagpen1(2*ifft  ,3)=Bx(2)-By(1)
-!       vmagpen1(2*ifft-1,4)=-Bx(2)-By(1)
-!       vmagpen1(2*ifft  ,4)=Bx(1)-By(2)
-!     end do
-!   end if
-!
-!!   write(msg,'(a,f12.6,a,2(a,f12.6,a))')'  Magnon shift on ETOT:', emagpen, ch10,&
-!!&  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
-!!&  '  Magnon shift on vtrial1(4):', By(1),ch10 
-!!   call wrtout(std_out,msg,'COLL')
-!   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
-!&  ' 1-\bar{e}*alpha :', one-mshift*two*rhomag(1,idir+1),ch10,&
-!&  ' Correct  e: ', two*rhomag(1,idir+1)/(one-mshift*two*rhomag(1,idir+1)),ch10 
-!   call wrtout(std_out,msg,'COLL')
-!
-! end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
  call hartre(cplex,gsqcut,icutcoul,0,mpi_enreg,nfft,ngfft,1,zero,rhog1,rprimd,vcutgeo,vhartr1_,qpt=qphon)
@@ -628,8 +589,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,n
 !Local variables-------------------------------
 !scalars:
  integer :: ifft,prtopt
-!character(len=500) :: msg
+ character(len=500) :: msg
 !arrays:
+ real(dp) :: Bx(cplex),By(cplex)
  real(dp) :: intgden(cplex,nspden,natom)
  real(dp) :: dentot(nspden)
  real(dp) :: rhomag(2,nspden)
@@ -641,6 +603,39 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,n
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
 &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
 &  prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+
+
+!Compute magnetic penalty from cell-integrated magnetic moments
+ if (magpen < zero) then
+   if (cplex==1) then
+     emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(1,3)**2)
+   else if (cplex==2) then
+     emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(2,2)**2 &
+                        & + rhomag(1,3)**2+rhomag(2,3)**2)
+   end if
+
+   Bx(:)=-magpen*rhomag(:,2)
+   By(:)=-magpen*rhomag(:,3)
+   if (cplex==1) then
+     do ifft=1,nfft
+       vmagpen1(ifft,3)=Bx(1)
+       vmagpen1(ifft,4)=-By(1)
+     end do
+   else if (cplex==2) then
+     do ifft=1,nfft
+       vmagpen1(2*ifft-1,3)=Bx(1)+By(2)
+       vmagpen1(2*ifft  ,3)=Bx(2)-By(1)
+       vmagpen1(2*ifft-1,4)=-Bx(2)-By(1)
+       vmagpen1(2*ifft  ,4)=Bx(1)-By(2)
+     end do
+   end if
+
+   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
+&  ' 1-\bar{e}*alpha :', one+magpen*two*rhomag(1,idir+1),ch10,&
+&  ' Correct  e: ', two*rhomag(1,idir+1)/(one+magpen*two*rhomag(1,idir+1)),ch10 
+   call wrtout(std_out,msg,'COLL')
+
+ end if
 
 end subroutine dfpt_v1magpen
 !!***
