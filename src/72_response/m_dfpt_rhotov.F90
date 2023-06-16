@@ -71,23 +71,28 @@ contains
 !!  nkxc=second dimension of the array kxc, see rhotoxc.f for a description
 !!  non_magnetic_xc= if true, handle density/potential as non-magnetic (even if it is)
 !!  nspden=number of spin-density components
+!!  ntypat=number of atom types
 !!  n3xccc=dimension of xccc3d1 ; 0 if no XC core correction is used
 !!  optene=0: the contributions to the 2nd order energy are not computed
 !!         1: the contributions to the 2nd order energy are computed
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
 !!         1: the new value of the trial potential is computed in place of the input value
 !!  qphon(3)=reduced coordinates for the phonon wavelength
+!!  ratsm=smearing width for ratsph
+!!  ratsph(ntypat)=radius of spheres around atoms
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
 !!  rhog1(2,nfft)=RF electron density in reciprocal space
 !!  rhor(nfft,nspden)=array for GS electron density in electrons/bohr**3.
 !!  rhor1(cplex*nfft,nspden)=RF electron density in real space (electrons/bohr**3).
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  typat(natom)=type of each atom
 !!  ucvol=unit cell volume in ($\textrm{bohr}^{3}$)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  vcutgeo(3)= array to describe the geometry of the Coulomb cutoff
 !!  vpsp1(cplex*nfft)=first-order derivative of the ionic potential
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
 !!  vhartr1(cplex*nfft)=1-order Hartree potential (not output if size=0)
@@ -107,40 +112,37 @@ contains
 !!
 !! SOURCE
 
- subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,icutcoul,idir,ipert,&
-&           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,n3xccc,&
-&           non_magnetic_xc,optene,optres,qphon,rhog,rhog1,rhor,rhor1,rprimd,ucvol,&
-&           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,&
-&           rhomag,mshift,emshift)  !Optional
+ subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen,gsqcut,icutcoul,idir,ipert,&
+&           ixc,kxc,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
+&           non_magnetic_xc,optene,optres,qphon,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
+&           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,icutcoul,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
- integer,intent(in) :: optene,optres,usepaw,usexcnhat,ixcrot
+ integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot
  logical,intent(in) :: non_magnetic_xc
- real(dp),intent(in) :: gsqcut,ucvol
+ real(dp),intent(in) :: gsqcut,ratsm,ucvol
  real(dp),intent(inout) :: ehart01
  real(dp),intent(out) :: vres2
- real(dp),optional,intent(in) :: mshift
- real(dp),optional,intent(out) :: emshift
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in)   :: ngfft(18)
+ integer,intent(in)   :: ngfft(18),typat(natom)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: vxc(nfft,nspden)
  real(dp),intent(in) :: nhat(nfft,nspden)
  real(dp),intent(in) :: nhat1(cplex*nfft,nspden)  !vz_d
  real(dp),intent(in) :: nhat1gr(cplex*nfft,nspden,3*nhat1grdim)
- real(dp),intent(in) :: qphon(3),rhog(2,nfft)
+ real(dp),intent(in) :: qphon(3),ratsph(ntypat),rhog(2,nfft)
  real(dp),intent(in) :: rhog1(2,nfft)
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),vpsp1(cplex*nfft)
  real(dp),intent(in) :: xccc3d1(cplex*n3xccc)
- real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1,elmag1
+ real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1,elmag1,emagpen
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
  real(dp),intent(in) :: vcutgeo(3)
- real(dp),optional,intent(in) :: rhomag(2,nspden)
+ real(dp),intent(in) :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
@@ -197,44 +199,44 @@ contains
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end if
 
-!------  Define the magnon shift potential (and energy) -------------------------
- ABI_MALLOC(vmshift,(cplex*nfft,nspden))
- vmshift(:,:)=zero
- if (present(rhomag).and.present(mshift)) then
-
-   if (cplex==1) then
-     emshift=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
-   else if (cplex==2) then
-     emshift=half*mshift*(rhomag(1,2)**2+rhomag(2,2)**2 &
-&                        +rhomag(1,3)**2+rhomag(2,3)**2)
-   end if
-
-   Bx(:)=mshift*rhomag(:,2)
-   By(:)=mshift*rhomag(:,3)
-   if (cplex==1) then
-     do ifft=1,nfft
-       vmshift(ifft,3)=Bx(1)
-       vmshift(ifft,4)=-By(1)
-     end do
-   else if (cplex==2) then
-     do ifft=1,nfft
-       vmshift(2*ifft-1,3)=Bx(1)+By(2)
-       vmshift(2*ifft  ,3)=Bx(2)-By(1)
-       vmshift(2*ifft-1,4)=-Bx(2)-By(1)
-       vmshift(2*ifft  ,4)=Bx(1)-By(2)
-     end do
-   end if
-
-!   write(msg,'(a,f12.6,a,2(a,f12.6,a))')'  Magnon shift on ETOT:', emshift, ch10,&
-!&  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
-!&  '  Magnon shift on vtrial1(4):', By(1),ch10 
+!!------  Define the magnon shift potential (and energy) -------------------------
+! ABI_MALLOC(vmshift,(cplex*nfft,nspden))
+! vmshift(:,:)=zero
+! if (present(rhomag).and.present(mshift)) then
+!
+!   if (cplex==1) then
+!     emshift=half*mshift*(rhomag(1,2)**2+rhomag(1,3)**2)
+!   else if (cplex==2) then
+!     emshift=half*mshift*(rhomag(1,2)**2+rhomag(2,2)**2 &
+!&                        +rhomag(1,3)**2+rhomag(2,3)**2)
+!   end if
+!
+!   Bx(:)=mshift*rhomag(:,2)
+!   By(:)=mshift*rhomag(:,3)
+!   if (cplex==1) then
+!     do ifft=1,nfft
+!       vmshift(ifft,3)=Bx(1)
+!       vmshift(ifft,4)=-By(1)
+!     end do
+!   else if (cplex==2) then
+!     do ifft=1,nfft
+!       vmshift(2*ifft-1,3)=Bx(1)+By(2)
+!       vmshift(2*ifft  ,3)=Bx(2)-By(1)
+!       vmshift(2*ifft-1,4)=-Bx(2)-By(1)
+!       vmshift(2*ifft  ,4)=Bx(1)-By(2)
+!     end do
+!   end if
+!
+!!   write(msg,'(a,f12.6,a,2(a,f12.6,a))')'  Magnon shift on ETOT:', emshift, ch10,&
+!!&  '  Magnon shift on vtrial1(3):', Bx(1),ch10,&
+!!&  '  Magnon shift on vtrial1(4):', By(1),ch10 
+!!   call wrtout(std_out,msg,'COLL')
+!   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
+!&  ' 1-\bar{e}*alpha :', one-mshift*two*rhomag(1,idir+1),ch10,&
+!&  ' Correct  e: ', two*rhomag(1,idir+1)/(one-mshift*two*rhomag(1,idir+1)),ch10 
 !   call wrtout(std_out,msg,'COLL')
-   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
-&  ' 1-\bar{e}*alpha :', one-mshift*two*rhomag(1,idir+1),ch10,&
-&  ' Correct  e: ', two*rhomag(1,idir+1)/(one-mshift*two*rhomag(1,idir+1)),ch10 
-   call wrtout(std_out,msg,'COLL')
-
- end if
+!
+! end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
  call hartre(cplex,gsqcut,icutcoul,0,mpi_enreg,nfft,ngfft,1,zero,rhog1,rprimd,vcutgeo,vhartr1_,qpt=qphon)
@@ -412,7 +414,7 @@ contains
    ABI_FREE(v1zeeman)
  end if
 
- ABI_FREE(vmshift)
+! ABI_FREE(vmshift)
 
  call timab(157,2,tsec)
 

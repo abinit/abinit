@@ -1633,6 +1633,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !     end if
 !   end if
 
+!  magpen
+   if(dt%magpen/=zero)then
+     cond_string(1)='magpen' ; cond_values(1)=dt%magpen
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',dt%nspden,1,(/4/),iout)
+   end if
+
 !  macro_uj
    if(dt%macro_uj/=0) then
      if (dt%ionmov/=0) then
@@ -1734,6 +1740,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
+
+!  mpatpol
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'mpatpol(1)',dt%mpatpol(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'mpatpol(2)',dt%mpatpol(2),natom,iout)
 
 !  natom
    if(dt%prtgeo>0)then
