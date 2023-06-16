@@ -35,6 +35,7 @@ module m_wfk_analyze
  use m_dtfil
  use m_distribfft
 
+ use m_io_tools,        only : iomode_from_fname
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
@@ -146,7 +147,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
- integer :: ierr,usexcnhat
+ integer :: ierr,usexcnhat,iomode
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
@@ -429,8 +430,9 @@ case (WFK_TASK_WANNIER)
 
       ABI_FREE(keep_ur)
       ABI_FREE(bks_mask)
-
-      call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+      iomode=IO_MODE_MPI
+      iomode= iomode_from_fname(wfk0_path)
+      call wfd%read_wfk(wfk0_path, iomode)
 
       call wfd_run_wannier(cryst=cryst, ebands=ebands,&
            & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
@@ -496,7 +498,8 @@ subroutine read_wfd()
    ABI_FREE(keep_ur)
    ABI_FREE(bks_mask)
 
-   call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+   !call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+   call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
    !call wfd%test_ortho(cryst, pawtab)
 
  end subroutine read_wfd
