@@ -154,7 +154,7 @@ The following temperature-dependent XC functionals from libXC are now available:
 LDA T-dependent functionals from [[cite:Karasiev2014]], with [[ixc]]=-269, from [[cite:Karasiev2018]],
 with [[ixc]]=-318, and from [[cite:Groth2017]], with [[ixc]]=-577.
 Previously, the IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]], with [[ixc]]=50
-had been coded, but not documented.
+had been coded, but not documented. This has been fixed in the present release.
 
 See [[test:libxc_22]].
 
