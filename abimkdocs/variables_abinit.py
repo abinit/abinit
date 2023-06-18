@@ -12727,8 +12727,8 @@ Variable(
     text=r"""
 Places an array of nuclear magnetic dipole moments on the atomic
 positions, useful for computing the magnetization in the presence of
-nuclear dipoles and thus the chemical shielding by the converse method (see [[orbmag]] and
-[[cite:Thonhauser2009]]). The presence of these dipoles breaks time
+nuclear dipoles and thus the chemical shielding by the converse method (see [[orbmag]],
+[[cite:Thonhauser2009]] and [[cite:Zwanziger2023]]). The presence of these dipoles breaks time
 reversal symmetry and lowers the overall spatial symmetry.  The dipole
 moment values are entered in atomic units, as vectors in the Cartesian (not crystallographic)
 coordinate frame. For reference, note that
