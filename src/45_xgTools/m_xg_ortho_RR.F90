@@ -130,7 +130,8 @@ module m_xg_ortho_RR
 !!
 !! NAME
 !! xg_RayleighRitz
-  subroutine xg_RayleighRitz(X,AX,BX,eigenvalues,info,prtvol,timer,gpu_option,tolerance,XW,AW,BW,P,AP,BP,WP,AWP,BWP,XWP)
+  subroutine xg_RayleighRitz(X,AX,BX,eigenvalues,info,prtvol,timer,gpu_option,&
+    & tolerance,XW,AW,BW,P,AP,BP,WP,AWP,BWP,XWP,solve_ax_bx)
 
     use m_time
     integer        , intent(in   ) :: timer
@@ -154,6 +155,7 @@ module m_xg_ortho_RR
     type(xgBlock_t), intent(inout),optional :: BWP
     type(xgBlock_t), intent(inout),optional :: XWP
     ! End LOBPCG only
+    logical, intent(in),optional :: solve_ax_bx
     integer :: var
     integer :: spacedim
     integer :: blockdim
@@ -179,9 +181,15 @@ module m_xg_ortho_RR
 #ifdef HAVE_LINALG_OPENBLAS_THREADS
     integer :: openblas_get_num_threads
 #endif
+    logical :: solve_ax_bx_
 
 !    call timab(tim_RR, 1, tsec)
     call timab(timer , 1, tsec)
+
+    solve_ax_bx_ = .false.
+    if (present(solve_ax_bx)) then
+      solve_ax_bx_ = solve_ax_bx
+    end if
 
     var = VAR_X
     call xgBlock_check(X,AX)
@@ -241,11 +249,8 @@ module m_xg_ortho_RR
     abstol = 0d0 ; if ( present(tolerance) ) abstol = tolerance
 
     call xg_init(subA,Xspace,subdim,subdim,spacecom,gpu_option=gpu_option)
-    !call xgBlock_zero(subA%self)
-    if ( var /= VAR_X ) then
+    if ( solve_ax_bx_ .or. var /= VAR_X ) then
       call xg_init(subB,Xspace,subdim,subdim,spacecom,gpu_option=gpu_option)
-      !call xgBlock_zero(subB%self)
-      !call xgBlock_one(subB%self)
     end if
 
     if ( eigenSolver == EIGENVX .or. eigenSolver == EIGENPVX ) then
@@ -265,7 +270,7 @@ module m_xg_ortho_RR
     call xg_setBlock(subA,subsub,1,blockdim,blockdim)
     call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub,gpu_option=gpu_option)
 
-    if ( var /= VAR_X ) then
+    if ( solve_ax_bx_ .or. var /= VAR_X ) then
       call xg_setBlock(subB,subsub,1,blockdim,blockdim)
       call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub,gpu_option=gpu_option)
     endif
@@ -294,7 +299,7 @@ module m_xg_ortho_RR
 
     if ( EIGPACK(eigenSolver) ) then
       call xgBlock_pack(subA%self,subA%self,'u')
-      if ( var /= VAR_X ) then
+      if ( solve_ax_bx_ .or. var /= VAR_X ) then
         call xgBlock_pack(subB%self,subB%self,'u')
       end if
     end if
@@ -309,7 +314,7 @@ module m_xg_ortho_RR
 
     call timab(tim_hegv,1,tsec)
     tsec(2) = abi_wtime()
-    if ( var == VAR_X ) then
+    if ( .not.solve_ax_bx_ .and. var == VAR_X ) then
       ABI_NVTX_START_RANGE(NVTX_RR_HEEV)
     ! Solve Hermitian eigen problem
       select case (eigenSolver)

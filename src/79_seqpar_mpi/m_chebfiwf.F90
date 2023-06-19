@@ -261,7 +261,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! Local variables-------------------------------
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
- integer :: ipw,space,blockdim,nline,total_spacedim,ierr,nthreads
+ integer :: ipw,space,blockdim,nline,total_spacedim,ierr
  real(dp) :: cputime,walltime,localmem
  type(c_ptr) :: cptr
  type(chebfi_t) :: chebfi
@@ -287,8 +287,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !######################################################################
 
   call timab(tim_chebfiwf2,1,tsec)
-  cputime = abi_cpu_time()
-  walltime = abi_wtime()
 
 !Set module variables
  l_paw = (gs_hamk%usepaw==1)
@@ -399,20 +397,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 ! ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*l_nband_filter))
  call timab(tim_chebfiwf2,2,tsec)
 
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
-
- nthreads = xomp_get_num_threads(open_parallel = .true.)
-
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
-
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
@@ -470,20 +454,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !######################################################################
 
  call timab(tim_chebfiwf2,2,tsec)
-
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
-
- nthreads = xomp_get_num_threads(open_parallel = .true.)
-
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
 
  DBG_EXIT("COLL")
 
