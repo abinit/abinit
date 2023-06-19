@@ -106,34 +106,6 @@ contains
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
 #ifdef HAVE_OPENMP_OFFLOAD
 
- !FIXME We should use routine from abi_gpu_linalg... but those don't work well with some OpenMP GPU compilers (LLVM at least)
- !Therefore, we define custom routines for adressing GEMM nonlop-ish needs here.
- !With CUDA/NVHPC, using abi_gpu_linalg seems fine so we call gpu_xgemm here.
- subroutine ompgpu_blas_init()
-
- end subroutine ompgpu_blas_init
-
-
- subroutine ompgpu_blas_xgemm(cplex,transa,transb,m,n,k,alpha,a_gpu,lda,b_gpu,ldb,beta,c_gpu,ldc)
-
-  !Arguments ------------------------------------
-  integer,intent(in) :: cplex,lda,ldb,ldc,m,n,k
-  complex(dpc),intent(in) :: alpha,beta
-  character(len=1),intent(in) :: transa,transb
-  type(c_ptr),intent(in) :: a_gpu,b_gpu
-  type(c_ptr),intent(out) :: c_gpu
-  character(len=500) :: msg
-  ! *********************************************************************
-#ifdef HAVE_GPU_CUDA
-  call   gpu_xgemm(cplex, transa, transb, m, n, k, alpha, &
-&                a_gpu, lda,&
-&                b_gpu, ldb, beta, c_gpu, ldc)
-#endif
-  call gpu_device_synchronize()
-
- end subroutine ompgpu_blas_xgemm
-!!***
-
  subroutine refresh_gemm_nonlop_kpt(ikpt)
   integer,intent(in) :: ikpt
 
@@ -338,7 +310,6 @@ contains
     gemm_nonlop_kpt(ikpt)%ngrads = -1
   end do
   mod__nkpt=nkpt
-  call ompgpu_blas_init()
 
  end subroutine init_gemm_nonlop_ompgpu
 !!***
@@ -702,17 +673,13 @@ contains
     if(cplex == 2) then
 
 #ifdef HAVE_GPU_CUDA
-      !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs,vectin)
-      call ompgpu_blas_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
-&                c_loc(current_ikpt_projs), npwin,&
-&                c_loc(vectin), npwin, czero, c_loc(projections_ptr), nprojs)
-      !$OMP END TARGET DATA
+      call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
+&                current_ikpt_projs, npwin,&
+&                vectin, npwin, czero, projections_ptr, nprojs)
       if(signs==1.and.ngrads>0) then
-        !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs,vectin)
-        call   ompgpu_blas_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-                 c_loc(current_ikpt_dprojs), npwin,&
-                 c_loc(vectin), npwin, czero, c_loc(dprojections), ngrads*nprojs)
-        !$OMP END TARGET DATA
+        call   abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
+                 current_ikpt_dprojs, npwin,&
+                 vectin, npwin, czero, dprojections, ngrads*nprojs)
       end if
 #endif
 
@@ -732,17 +699,13 @@ contains
           temp_realvec_r(1+(idat-1)*npwin) = temp_realvec_r(1+(idat-1)*npwin)/2
         end do
       end if
-      !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_r,projections_ptr,current_ikpt_projs_r)
-      call ompgpu_blas_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
-&                c_loc(current_ikpt_projs_r), npwin, &
-&                c_loc(temp_realvec_r), npwin, czero, c_loc(projections_ptr), nprojs)
-      !$OMP END TARGET DATA
+      call abi_gpu_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
+&                current_ikpt_projs_r, npwin, &
+&                temp_realvec_r, npwin, czero, projections_ptr, nprojs)
       if(signs==1.and.ngrads>0) then
-        !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_r,dprojections,current_ikpt_dprojs_r)
-        call ompgpu_blas_xgemm(cplex, 'T', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-&                  c_loc(current_ikpt_dprojs_r), npwin, &
-&                  c_loc(temp_realvec_r), npwin, czero, c_loc(dprojections), ngrads*nprojs)
-        !$OMP END TARGET DATA
+        call abi_gpu_xgemm(cplex, 'T', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
+&                  current_ikpt_dprojs_r, npwin, &
+&                  temp_realvec_r, npwin, czero, dprojections, ngrads*nprojs)
       end if
 
       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
@@ -760,11 +723,9 @@ contains
         end do
       end if
 
-      !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_i,projections_ptr,current_ikpt_projs_i)
-      call ompgpu_blas_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
-&                c_loc(current_ikpt_projs_i), npwin, &
-&                c_loc(temp_realvec_i), npwin, cone , c_loc(projections_ptr), nprojs)
-      !$OMP END TARGET DATA
+      call abi_gpu_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
+               current_ikpt_projs_i, npwin, &
+               temp_realvec_i, npwin, cone , projections_ptr, nprojs)
 
       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
       !!$OMP TARGET LOOP &
@@ -776,11 +737,9 @@ contains
       end do
 
       if(signs==1.and.ngrads>0) then
-        !$OMP TARGET DATA USE_DEVICE_PTR(temp_realvec_i,dprojections,current_ikpt_dprojs_i)
-        call ompgpu_blas_xgemm(cplex, 'T', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-&                  c_loc(current_ikpt_dprojs_i), npwin, &
-&                  c_loc(temp_realvec_i), npwin, cone , c_loc(dprojections), ngrads*nprojs)
-        !$OMP END TARGET DATA
+        call abi_gpu_xgemm(cplex, 'T', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
+                  current_ikpt_dprojs_i, npwin, &
+                  temp_realvec_i, npwin, cone , dprojections, ngrads*nprojs)
 
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
         !!$OMP TARGET LOOP &
@@ -876,22 +835,16 @@ contains
       if(paw_opt == 3 .or. paw_opt == 4) then
         ! Get svectout from s_projections
         if(cplex == 2) then
-#ifdef HAVE_GPU_CUDA
-          !$OMP TARGET DATA USE_DEVICE_PTR(current_ikpt_projs,s_projections,svectout)
-          call ompgpu_blas_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                  c_loc(current_ikpt_projs), npwout,&
-&                  c_loc(s_projections), nprojs, czero, c_loc(svectout), npwout)
-          !$OMP END TARGET DATA
-#endif
+          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                  current_ikpt_projs, npwout,&
+                  s_projections, nprojs, czero, svectout, npwout)
         else
-          !$OMP TARGET DATA USE_DEVICE_PTR(current_ikpt_projs_r,current_ikpt_projs_i,s_projections,temp_realvec_r,temp_realvec_i)
-          call ompgpu_blas_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                    c_loc(current_ikpt_projs_r), npwout, &
-&                    c_loc(s_projections), nprojs, czero, c_loc(temp_realvec_r), npwout)
-          call ompgpu_blas_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                    c_loc(current_ikpt_projs_i), npwout,&
-&                    c_loc(s_projections), nprojs, czero, c_loc(temp_realvec_i), npwout)
-          !$OMP END TARGET DATA
+          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                    current_ikpt_projs_r, npwout, &
+                    s_projections, nprojs, czero, temp_realvec_r, npwout)
+          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                    current_ikpt_projs_i, npwout,&
+                    s_projections, nprojs, czero, temp_realvec_i, npwout)
 
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
           !!$OMP TARGET LOOP &
@@ -914,22 +867,16 @@ contains
       if(paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4) then
         ! Get vectout from vnl_projections
         if(cplex_fac == 2) then
-#ifdef HAVE_GPU_CUDA
-          !$OMP TARGET DATA USE_DEVICE_PTR(current_ikpt_projs,vnl_projections,vectout)
-          call ompgpu_blas_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                      c_loc(current_ikpt_projs), npwout, &
-&                      c_loc(vnl_projections), nprojs, czero, c_loc(vectout), npwout)
-          !$OMP END TARGET DATA
-#endif
+          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                  current_ikpt_projs, npwout, &
+                  vnl_projections, nprojs, czero, vectout, npwout)
         else
-          !$OMP TARGET DATA USE_DEVICE_PTR(current_ikpt_projs_r,current_ikpt_projs_i,vnl_projections,temp_realvec_r,temp_realvec_i)
-          call ompgpu_blas_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                  c_loc(current_ikpt_projs_r), npwout, &
-&                  c_loc(vnl_projections), nprojs, czero, c_loc(temp_realvec_r), npwout)
-          call ompgpu_blas_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-&                  c_loc(current_ikpt_projs_i), npwout, &
-&                  c_loc(vnl_projections), nprojs, czero, c_loc(temp_realvec_i), npwout)
-          !$OMP END TARGET DATA
+          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                  current_ikpt_projs_r, npwout, &
+                  vnl_projections, nprojs, czero, temp_realvec_r, npwout)
+          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                  current_ikpt_projs_i, npwout, &
+                  vnl_projections, nprojs, czero, temp_realvec_i, npwout)
 
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
           !!$OMP TARGET LOOP &
