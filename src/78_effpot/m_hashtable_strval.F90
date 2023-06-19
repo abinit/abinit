@@ -65,6 +65,16 @@ MODULE m_hashtable_strval
   ! NOTE: this is not NAN really. The correct one is the last line. But NAG compiler does not think it is a valid floating number.
   ! real(c_double), parameter :: NAN = TRANSFER(921886843722740531_c_int64_t, 1._c_double)
 
+  ! NB: We have to use SIZEOF_INT CPP macro giving the size of `int', as computed by sizeof.
+  !     to declare the length of char buffers as in:
+  !
+  !  character(len=SIZEOF_INT * n) :: tmp
+  !
+  ! as cray-intel ftn and NAG do not support declaratations like:
+  !
+  !character(len=c_sizeof(key)) :: tmp
+
+
   TYPE sllist
      TYPE(sllist), POINTER :: child => NULL()
      CHARACTER(len=:), ALLOCATABLE :: key
@@ -103,8 +113,6 @@ MODULE m_hashtable_strval
 
   PUBLIC :: hash_table_t
 
-
-  integer(c_size_t),parameter,private :: size_int = c_sizeof(1)
 
 CONTAINS
 
@@ -388,7 +396,7 @@ CONTAINS
     integer, intent(in) :: key(n)
     real(dp) :: val
     !character(len=c_sizeof(key)) :: tmp
-    character(len=size_int * n) :: tmp
+    character(len=SIZEOF_INT * n) :: tmp
     call self%put(transfer(key, tmp), val)
   end subroutine put_intn
 
@@ -398,7 +406,7 @@ CONTAINS
     integer, intent(in) :: key(n)
     real(dp) :: val
     !character(len=c_sizeof(key)) :: tmp
-    character(len=size_int * n) :: tmp
+    character(len=SIZEOF_INT * n) :: tmp
     val = self%get(transfer(key, tmp))
   end function get_intn
 
@@ -408,7 +416,7 @@ CONTAINS
     integer, intent(in) :: key(n)
     logical :: val
     !character(len=c_sizeof(key)) :: tmp
-    character(len=size_int * n) :: tmp
+    character(len=SIZEOF_INT * n) :: tmp
     val = self%has_key(transfer(key, tmp))
   end function has_key_intn
 
@@ -418,7 +426,7 @@ CONTAINS
     class(hash_table_t), intent(inout) :: self
     integer, intent(in) :: key(3)
     real(dp) :: val
-    character(len=size_int * 3) :: tmp
+    character(len=SIZEOF_INT * 3) :: tmp
     !character(len=c_sizeof(key)) :: tmp
     call self%put(transfer(key, tmp), val)
   end subroutine put_int3
