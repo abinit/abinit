@@ -36,6 +36,7 @@ module m_chebfi2
  use m_cgtools
  use m_xg
  use m_xgTransposer
+ use m_xg_ortho_RR
  use m_xgScalapack
 
  use m_xmpi
@@ -527,7 +528,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  integer :: neigenpairs
  integer :: nline,nline_max
  integer :: iline, iband, ierr
-! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of ABinit, to be saved
+! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of Abinit, to be saved
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
  real(dp) :: mineig, mineig_global
@@ -708,6 +709,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)
  call timab(tim_amp_f,2,tsec)
 
+ call xg_free(DivResults)
+ ABI_FREE(nline_bands)
+
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
  if (chebfi%paral_kgb == 1) then
    call xmpi_barrier(chebfi%spacecom)
@@ -720,7 +724,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
      call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
-  end if
+   end if
  else
    call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
    call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
@@ -729,34 +733,37 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  ABI_NVTX_END_RANGE()
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
- call timab(tim_RR, 1, tsec)
- call chebfi_rayleighRitz(chebfi, nline)
- call timab(tim_RR, 2, tsec)
+ call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,chebfi%gpu_option,solve_ax_bx=.true.)
  ABI_NVTX_END_RANGE()
 
  call timab(tim_residu, 1, tsec)
- maximum =  chebfi_computeResidue(chebfi, residu, pcond)
+ if (chebfi%paw) then
+   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
+ else
+   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
+ end if
+
+ call timab(tim_pcond,1,tsec)
+ call pcond(chebfi%AX%self)
+ call timab(tim_pcond,2,tsec)
+
+ call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
- ABI_FREE(nline_bands)
-
- if (xmpi_comm_size(chebfi%spacecom) > 1) then
-   call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1, chebfi%gpu_option)    !copy cannot be avoided :(
+ call xgBlock_copy(chebfi%X,X0,1, 1, chebfi%gpu_option)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
      call gpu_device_synchronize()
    end if
 #endif
- end if
 
- call xg_free(DivResults)
+ call xgBlock_copy(chebfi%X,X0)
 
  if (chebfi%paral_kgb == 1) then
    call xgTransposer_free(chebfi%xgTransposerX)
    call xgTransposer_free(chebfi%xgTransposerAX)
    call xgTransposer_free(chebfi%xgTransposerBX)
-
-!   !Reset communicators to original ABinit values for rest of ABinit
+!   !Reset communicators to original Abinit values for rest of ABinit
 !   mpi_enreg%comm_fft = comm_fft_save
 !   mpi_enreg%comm_band = comm_band_save
  end if

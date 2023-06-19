@@ -194,14 +194,18 @@ module m_xg_ortho_RR
     var = VAR_X
     call xgBlock_check(X,AX)
     call xgBlock_check(X,BX)
-!    eigenSolver = EIGENEV
-    eigenSolver = EIGENEVD
-!    if(gpu_option==ABI_GPU_OPENMP) eigenSolver = EIGENEVD
+    if (.not.solve_ax_bx_) then
+!      eigenSolver = EIGENEV
+      eigenSolver = EIGENEVD
+!      if(gpu_option==ABI_GPU_OPENMP) eigenSolver = EIGENEVD
 !#ifdef HAVE_LINALG_MKL_THREADS
-!    if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
+!      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
 !#elif HAVE_LINALG_OPENBLAS_THREADS
-!    if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
+!      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
 !#endif
+    else
+      eigenSolver = EIGENVD
+    end if
     spacedim = rows(X)
     blockdim = cols(X)
     Xspace   = space(X)
@@ -231,7 +235,6 @@ module m_xg_ortho_RR
       subdim = 2*blockdim
       if (present(XWP)) then
         var = VAR_XWP
-        !TODO Do checks on other optional arguments
         call xgBlock_check(X,XWP,fact_col=3)
         subdim = 3*blockdim
       end if
