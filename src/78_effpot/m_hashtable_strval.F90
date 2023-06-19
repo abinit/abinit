@@ -103,6 +103,9 @@ MODULE m_hashtable_strval
 
   PUBLIC :: hash_table_t
 
+
+  integer(c_size_t),parameter,private :: size_int = c_sizeof(1)
+
 CONTAINS
 
   RECURSIVE SUBROUTINE put_sll(list,key,val)
@@ -384,7 +387,8 @@ CONTAINS
     integer :: n
     integer, intent(in) :: key(n)
     real(dp) :: val
-    character(len=c_sizeof(key)) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
+    character(len=size_int * n) :: tmp
     call self%put(transfer(key, tmp), val)
   end subroutine put_intn
 
@@ -393,7 +397,8 @@ CONTAINS
     integer, intent(in) :: n
     integer, intent(in) :: key(n)
     real(dp) :: val
-    character(len=c_sizeof(key)) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
+    character(len=size_int * n) :: tmp
     val = self%get(transfer(key, tmp))
   end function get_intn
 
@@ -402,7 +407,8 @@ CONTAINS
     integer, intent(in) :: n
     integer, intent(in) :: key(n)
     logical :: val
-    character(len=c_sizeof(key)) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
+    character(len=size_int * n) :: tmp
     val = self%has_key(transfer(key, tmp))
   end function has_key_intn
 
@@ -412,7 +418,8 @@ CONTAINS
     class(hash_table_t), intent(inout) :: self
     integer, intent(in) :: key(3)
     real(dp) :: val
-    character(len=c_sizeof(key)) :: tmp
+    character(len=size_int * 3) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
     call self%put(transfer(key, tmp), val)
   end subroutine put_int3
 
