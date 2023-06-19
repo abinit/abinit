@@ -41,7 +41,7 @@ module m_wfk_analyze
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
- use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq, init_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free
  use m_ddk,             only : ddkstore_t
  use m_pawang,          only : pawang_type
@@ -433,11 +433,17 @@ case (WFK_TASK_WANNIER)
       iomode= iomode_from_fname(wfk0_path)
       call wfd%read_wfk(wfk0_path, iomode)
 
+
+      call destroy_mpi_enreg(mpi_enreg)
+      call init_mpi_enreg(mpi_enreg)
+      call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
+      call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+
       call wfd_run_wannier(cryst=cryst, ebands=ebands,&
            & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
            & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
            & dtset=dtset, dtfil=dtfil,  &
-           & pawang=pawang,  pawrad=pawrad, &
+           & pawang=pawang, pawrad=pawrad, &
            & pawtab=pawtab, psps=psps )
    else
       call wfd_mlwfovlp(cryst, ebands, wfk0_hdr, mpi_enreg, &
