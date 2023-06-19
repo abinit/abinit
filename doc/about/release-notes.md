@@ -30,7 +30,7 @@ is now superceded by the tutorial "lruj", see section [B.3](#v9.10.B.3). The nam
 **A.2** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1, 
 and the default value for [[dossmear@anaddb]] has been changed from 5 cm-1 to 1 cm-1.
 Also, the default values for [[dosdeltae@atdep]] has been changed from 4.5d-6 to 0.2 cm-1.
-This is to allow default calculation of thermal expansion using abipy to be more stable numerically.
+This is to allow default calculations of thermal expansion using abipy to be more stable numerically.
 
 By S. Rostami and X. Gonze (commit 8b7697502c)
 
@@ -71,7 +71,7 @@ dataset generator "Atompaw" has been updated accordingly to compute
 and output the Lamb shielding in xml files.
 
 See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[test:nuc_4]],
-(NOTE : descriptions provided in the *.abi files)  with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
+(NOTE: descriptions provided in the *.abi files)  with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
 
 The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to present such computations.
 
@@ -93,7 +93,7 @@ Related test [[test:v9_147]].
 These are by-products of large modifications of the longwave driver, mimicking the structure of the nonlinear one.
 Other improvements related to the large modifications:
 i) the number of source code lines has been reduced.
-ii) the number of i/o operations has been reduced.
+ii) the number of I/O operations has been reduced.
 iii) symmetries are now used in order to calculate only linearly independent components of the tensors. This also reduces the number of linear-response functions to precalculate.
 iv) the whole structure is now more general, thus facilitating the implementation of future spatial dispersion quantities.
 
@@ -122,15 +122,15 @@ The computation of the electronic spectral function with electron-phonon couplin
 See [[cite:Nery2018]] and [[cite:Abreu2022]] and other related publications.
 
 Activate it using [[eph_task]]=9 when [[optdriver]] == 7.
-New input variable : [[tolcum]].
+New input variable: [[tolcum]].
 See the [[test:v9_60]].
 
-By M. Giantomassi and  J. Abreu (MR 907)
+By J. Abreu with help from M. Giantomassi (MR 907)
 
 
 **B.5** Support for norm-conserving pseudopotentials in UPF2 format
 
-Abinit now can read NC pseudos in UPF2 format (both scalar and relativistic version) thanks to the UPF parser imported from quantum espresso and an additional
+Abinit can now read NC pseudos in UPF2 format (both scalar and relativistic version) thanks to the UPF parser imported from quantum espresso and an additional
 routine used to convert FR pseudos from (j,kappa) to scalar + SOC term taken from oncvpsp.
 
 The total energy computed with UPF pseudos does not perfectly agree with the one obtained with the corresponding psp8 pseudos.
@@ -265,11 +265,11 @@ Improve the initialization of paral_kgb/wfoptalg/istwfk.
 By M. Torrent (MR918).
 
 **D.8**
-New units are recognized by the input file parser : "meV" (for millielectron-volt) ;  "S", "Sec" or "Second" ; "Kelvin".
+New units are recognized by the input file parser: "meV" (for millielectron-volt);  "S", "Sec" or "Second"; "Kelvin".
 By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit 39801af30).
 
 **D.9**
-New tests of the band parallelism in DFPT : [[test:paral_65]] and [[test:paral_66]].
+New tests of the band parallelism in DFPT: [[test:paral_65]] and [[test:paral_66]].
 By M. Giantomassi (commit 31e8aa66d8).
 
 **D.10** Improved developer documentation, section .
@@ -311,7 +311,7 @@ Xavier
 
 ### **A.** Important remarks and warnings. Also, hotfixes for v9.8.3 (A.4 to A.10).
 
-**A.1** Warning : the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
+**A.1** Warning: the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
 
 By J. Zwanziger (MR850)
 
