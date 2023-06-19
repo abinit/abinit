@@ -430,7 +430,6 @@ case (WFK_TASK_WANNIER)
 
       ABI_FREE(keep_ur)
       ABI_FREE(bks_mask)
-      iomode=IO_MODE_MPI
       iomode= iomode_from_fname(wfk0_path)
       call wfd%read_wfk(wfk0_path, iomode)
 
