@@ -1522,7 +1522,6 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
         end do
      end do
 
-     call gpu_device_synchronize()
   else ! block_sliced = 0
 
     shift = 1
@@ -1543,7 +1542,6 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
       shift = shift + nlmn*ham%nattyp(itypat)
     end do
 
-    call gpu_device_synchronize()
   end if
 
 end subroutine apply_block_ompgpu
