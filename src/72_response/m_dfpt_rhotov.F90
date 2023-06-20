@@ -63,6 +63,8 @@ contains
 !!  kxc(nfft,nkxc)=exchange-correlation kernel
 !!  mpi_enreg=information about MPI parallelization
 !!  magpen=energy shift to apply on the spin degrees of freedom
+!!  mpatpol(2)=initial and final atomic positions whose local magnetic moments will be penalized
+!!  mpdir(3)=directions of the magnetic moments to be penalized
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -116,7 +118,7 @@ contains
 !! SOURCE
 
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,icutcoul,idir,ipert,&
-&           ixc,kxc,magpen,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
+&           ixc,kxc,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
 &           non_magnetic_xc,optene,optres,qphon,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
 &           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred)
 
@@ -131,6 +133,7 @@ contains
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in)   :: ngfft(18),typat(natom)
+ integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),intent(in) :: vxc(nfft,nspden)
  real(dp),intent(in) :: nhat(nfft,nspden)
@@ -203,7 +206,7 @@ contains
 
  if (abs(magpen) > tol6) then
    ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
-   call dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,nspden, &
+   call dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nspden, &
 & ntypat,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
  end if
 
@@ -548,6 +551,8 @@ end subroutine dfpt_v1zeeman
 !!  cplex  = complex or real density matrix
 !!  idir   = direction of the perturbing field in Cartesian frame
 !!  magpen=energy shift to apply on the spin degrees of freedom
+!!  mpatpol(2)=initial and final atomic positions whose local magnetic moments will be penalized
+!!  mpdir(3)=directions of the magnetic moments to be penalized
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft   = numbder of fft grid points
@@ -580,7 +585,7 @@ end subroutine dfpt_v1zeeman
 !!
 !! SOURCE
 
-subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,nspden, &
+subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nspden, &
 & ntypat,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
 
 !Arguments 
@@ -591,16 +596,17 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,n
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays:
  integer,intent(in) :: ngfft(18),typat(natom)
+ integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: ratsph(ntypat),rhor1(cplex*nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
  real(dp), intent(out) :: vmagpen1(cplex*nfft,nspden)
 
 !Local variables-------------------------------
 !scalars:
- integer :: ifft,prtopt
+ integer :: i,ifft,prtopt
  character(len=500) :: msg
 !arrays:
- real(dp) :: Bx(cplex),By(cplex)
+ real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
  real(dp) :: intgden(cplex,nspden,natom)
  real(dp) :: dentot(nspden)
  real(dp) :: rhomag(2,nspden)
@@ -617,22 +623,33 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,n
 !Compute magnetic penalty from cell-integrated magnetic moments
  vmagpen1=zero
  if (magpen < zero) then
+   do i=1,3 
+     if (mpdir(i)==0) rhomag(:,1+i) = zero
+   end do
    if (cplex==1) then
-     emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(1,3)**2)
+     emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(1,3)**2+rhomag(1,4)**2)
    else if (cplex==2) then
      emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(2,2)**2 &
-                        & + rhomag(1,3)**2+rhomag(2,3)**2)
+                        & + rhomag(1,3)**2+rhomag(2,3)**2 &
+                        & + rhomag(1,4)**2+rhomag(2,4)**2 )
    end if
 
    Bx(:)=-magpen*rhomag(:,2)
    By(:)=-magpen*rhomag(:,3)
+   By(:)=-magpen*rhomag(:,4)
    if (cplex==1) then
      do ifft=1,nfft
+       vmagpen1(ifft,1)=Bz(1)
+       vmagpen1(ifft,2)=-Bz(1)
        vmagpen1(ifft,3)=Bx(1)
        vmagpen1(ifft,4)=-By(1)
      end do
    else if (cplex==2) then
      do ifft=1,nfft
+       vmagpen1(2*ifft-1,1)=Bz(1)
+       vmagpen1(2*ifft  ,1)=Bz(2)
+       vmagpen1(2*ifft-1,2)=-Bz(1)
+       vmagpen1(2*ifft  ,2)=-Bz(2)
        vmagpen1(2*ifft-1,3)=Bx(1)+By(2)
        vmagpen1(2*ifft  ,3)=Bx(2)-By(1)
        vmagpen1(2*ifft-1,4)=-Bx(2)-By(1)
@@ -640,9 +657,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,n
      end do
    end if
 
-   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
-&  ' 1-\bar{e}*alpha :', one+magpen*two*rhomag(1,idir+1),ch10,&
-&  ' Correct  e: ', two*rhomag(1,idir+1)/(one+magpen*two*rhomag(1,idir+1)),ch10 
+!   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
+!&  ' 1-\bar{e}*alpha :', one+magpen*two*rhomag(1,idir+1),ch10,&
+!&  ' Correct  e: ', two*rhomag(1,idir+1)/(one+magpen*two*rhomag(1,idir+1)),ch10 
    call wrtout(std_out,msg,'COLL')
 
  end if

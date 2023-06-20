@@ -820,7 +820,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    ----------------------------------------------------------------------
      option=1;optene=0;if (iscf_mod==-2) optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
-&     dtset%ixc,kxc,dtset%magpen,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
+&     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
 &     nkxc,nspden,dtset%ntypat,n3xccc,nmxc,optene,option,dtset%qptn,dtset%ratsm,dtset%ratsph,&
 &     rhog,rhog1,rhor,rhor1,rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
@@ -1055,7 +1055,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (.not.kramers_deg.and.ipert<dtset%natom+10) then
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
-&     dtset%ixc,kxc,dtset%magpen,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+&     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
 &     rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,&
 &     vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
@@ -1116,7 +1116,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (kramers_deg.and.ipert<dtset%natom+10) then
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
-&     dtset%ixc,kxc,dtset%magpen,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
+&     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
 &     rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
    end if
