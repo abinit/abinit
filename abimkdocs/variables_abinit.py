@@ -15003,8 +15003,10 @@ Variable(
     text=r"""
 **In plasmon-pole calculations**
 
-Usually only effective if GW corrections are evaluated using the plasmon-pole
+Relevant only if GW corrections are evaluated using the plasmon-pole
 model of Godby-Needs ([[ppmodel]] == 1).
+The default value is automatically replaced by the Drude plasma frequency,
+computed from the valence charge density (echoed in the main output file as omega_plasma)..
 
 In the present status of the GW code, the convolution in frequency space
 defining the self-energy operator can be evaluated using two different
@@ -15017,7 +15019,7 @@ Alternatively, it is possible to approximate the dynamical behaviour of the
 screened interaction through simple analytical expressions, the so-called
 plasmon-pole models. In the plasmon-pole model proposed by Godby-Needs
 ([[ppmodel]] = 1), the screening must be available at zero frequency, as well as
-at another imaginary frequency, of the order of the plasmon frequency (the
+at another imaginary frequency, on the order of the plasmon frequency (the
 peak in the EELS spectrum). This information is used to model the behaviour of
 the dielectric matrix for all frequencies. During the calculation of the
 screening, [[ppmfrq]] defines the imaginary frequency where the dielectric
