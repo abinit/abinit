@@ -1536,7 +1536,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    prtopt=1
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
- & prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+ & 1,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
    call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
  end if
 
@@ -1546,7 +1546,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      prtopt=idir+1;
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+&     1,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
      call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
      !debug: write out the vtk first-order density components
 !    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)

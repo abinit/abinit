@@ -974,7 +974,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
    ABI_MALLOC(intgden,(nspden,natom))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-&   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+&   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,1,cplex1,intgden=intgden,rhomag=rhomag)
 !  for rhomag:
 !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
 !    in non collinear case component 1 is total density, and 2:4 are the magnetization vector
