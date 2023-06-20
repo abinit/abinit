@@ -784,7 +784,13 @@ subroutine abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,
 
   call gpu_xgemm(cplx,transa,transb,m,n,k,alpha,&
       a,lda,b,ldb,beta,c,ldc)
-  call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -1006,7 +1012,13 @@ subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,strid
 
   call gpu_xgemm_strided_batched(cplx,transa,transb,m,n,k,alpha,&
       a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount)
-  call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -1233,7 +1245,13 @@ subroutine abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
   call gpu_xsymm(cplx,side,uplo,m,n,alpha,&
       a,lda,b,ldb,beta,c,ldc)
-  call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -1454,7 +1472,13 @@ subroutine abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
   call gpu_zhemm(side,uplo,m,n,alpha,&
       a,lda,b,ldb,beta,c,ldc)
-  call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -1656,7 +1680,13 @@ subroutine abi_gpu_xscal_cptr(cplx, size, alpha, x, incrx)
 #ifdef HAVE_GPU
 
  call gpu_xscal(cplx, size, alpha, x, incrx)
- call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -1830,7 +1860,13 @@ subroutine abi_gpu_xaxpy_cptr(cplx, size, alpha, x, incrx, y, incry)
 #ifdef HAVE_GPU
 
   call gpu_xaxpy(cplx, size, alpha, x, incrx, y, incry)
-  call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -2010,7 +2046,13 @@ subroutine abi_gpu_xcopy_cptr(cplx, size, x, incrx, y, incry)
 #ifdef HAVE_GPU
 
   call gpu_xcopy(cplx, size, x, incrx, y, incry)
-  call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -2218,7 +2260,13 @@ subroutine abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 #ifdef HAVE_GPU
 
   call gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
-  call gpu_device_synchronize()
+
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -2674,7 +2722,12 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
                  W, &
                  gpu_ptr, bufferSize, devInfo)
 
-  call gpu_device_synchronize()
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -2963,7 +3016,12 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
                  W, &
                  gpu_ptr, bufferSize, devInfo)
 
-  call gpu_device_synchronize()
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled
@@ -3223,7 +3281,12 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
                  A, lda, &
                  gpu_ptr, bufferSize, devInfo)
 
-  call gpu_device_synchronize()
+  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
+    ! Therefore, we issue a stream sync here to avoid
+    !potential mistakes in calling context.
+    call gpu_linalg_stream_synchronize()
+  end if
 
 #else
   ! Unused if GPU code disabled

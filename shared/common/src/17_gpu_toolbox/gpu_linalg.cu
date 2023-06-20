@@ -16,6 +16,7 @@
 
 cublasHandle_t cublas_handle;
 cusolverDnHandle_t cusolverDn_handle;
+static cudaStream_t stream_compute;
 
 //! utility function for compatiblity between cublas v1/v2 API
 cublasOperation_t select_cublas_op(const char *c)
@@ -123,6 +124,9 @@ extern "C" void gpu_linalg_init_()
 {
   CUDA_API_CHECK( cublasCreate(&cublas_handle) );
   CUDA_API_CHECK( cusolverDnCreate(&cusolverDn_handle) );
+  CUDA_API_CHECK( cudaStreamCreate(&stream_compute) );
+  CUDA_API_CHECK( cusolverDnSetStream(cusolverDn_handle,stream_compute) );
+  CUDA_API_CHECK( cublasSetStream(cublas_handle,stream_compute) );
 }
 
 /*=========================================================================*/
@@ -138,6 +142,21 @@ extern "C" void gpu_linalg_shutdown_()
 {
   CUDA_API_CHECK( cublasDestroy(cublas_handle) );
   CUDA_API_CHECK( cusolverDnDestroy(cusolverDn_handle) );
+  CUDA_API_CHECK( cudaStreamDestroy(stream_compute) );
+}
+
+/*=========================================================================*/
+// NAME
+//  gpu_linalg_stream_synchronize
+//
+// FUNCTION
+//  Wait for any linalg operations still running on stream
+//
+/*=========================================================================*/
+
+extern "C" void gpu_linalg_stream_synchronize_()
+{
+  CUDA_API_CHECK( cudaStreamSynchronize(stream_compute) );
 }
 
 /*=========================================================================*/
