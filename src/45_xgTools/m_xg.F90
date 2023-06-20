@@ -1405,22 +1405,17 @@ contains
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
         if (l_use_gpu_cuda==1) then
           ! CPU waits for GPU to finish before doing MPI communications
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
           call gpu_device_synchronize()
-#endif
         else if (l_use_gpu_cuda==666) then
-          ! CPU waits for GPU to finish before doing MPI communications
-          !Retrieving data back on host to perform MPI Sum.
           !FIXME We should avoid that copy using GPU Direct on systems that allow it.
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-          call gpu_device_synchronize()
           call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
-#endif
         end if
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
         call nvtxStartRange("MPI_Sum",8) !FIXME Debug only, to be removed
 #endif
+
         call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
         call nvtxEndRange() !FIXME Debug only, to be removed
 #endif
@@ -1440,7 +1435,6 @@ contains
           xgBlockB%vecC, xgBlockB%LDim, &
           cbeta, &
           xgBlockW%vecC, xgBlockW%LDim)
-        call gpu_device_synchronize() !FIXME For timings only
       else
         call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
@@ -1453,17 +1447,10 @@ contains
       if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
         if (l_use_gpu_cuda==1) then
           ! CPU waits for GPU to finish before doing MPI communications
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
           call gpu_device_synchronize()
-#endif
         else if (l_use_gpu_cuda==666) then
-          ! CPU waits for GPU to finish before doing MPI communications
-          !Retrieving data back on host to perform MPI Sum.
           !FIXME We should avoid that copy using GPU Direct on systems that allow it.
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-          call gpu_device_synchronize()
           call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
-#endif
         end if
         call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
         if (l_use_gpu_cuda==666) then
@@ -1540,22 +1527,17 @@ contains
     if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
       if (l_use_gpu_cuda==1) then
         ! CPU waits for GPU to finish before doing MPI communications
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
         call gpu_device_synchronize()
-#endif
       else if (l_use_gpu_cuda==666) then
-        ! CPU waits for GPU to finish before doing MPI communications
-        !Retrieving data back on host to perform MPI Sum.
         !FIXME We should avoid that copy using GPU Direct on systems that allow it.
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-        call gpu_device_synchronize()
         call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
-#endif
       end if
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
       call nvtxStartRange("MPI_Sum",8)
 #endif
+
       call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
       call nvtxEndRange()
 #endif
@@ -1602,11 +1584,10 @@ contains
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xpotrf(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
-        call gpu_device_synchronize()
       case (SPACE_C)
         call abi_gpu_xpotrf(2,uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
-        call gpu_device_synchronize()
       end select
+      if(l_use_gpu_cuda==1) call gpu_device_synchronize()
     else
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
@@ -1717,17 +1698,15 @@ contains
             xgBlockA%vecR,xgBlockA%LDim, &
             xgBlockW%vecR,info)
 
-        call gpu_device_synchronize()
-
       case (SPACE_C)
 
         call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
             xgBlockA%vecC,xgBlockA%LDim, &
             xgBlockW%vecR,info)
 
-        call gpu_device_synchronize()
-
       end select
+
+      if(l_use_gpu_cuda==1) call gpu_device_synchronize()
 
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
@@ -2097,8 +2076,6 @@ contains
           &             xgBlockW%vecR, &
           &             info)
 
-        call gpu_device_synchronize() !FIXME for timings only
-
       case (SPACE_C)
 
         !call xgBlock_prefetch_async(xgBlockA, 0)
@@ -2112,9 +2089,9 @@ contains
           &             xgBlockW%vecR, &
           &             info)
 
-        call gpu_device_synchronize()
-
       end select
+
+      if(l_use_gpu_cuda==1) call gpu_device_synchronize()
 
     else
 
