@@ -316,9 +316,9 @@ the density in the unit cell.
 - Number of bands treated by each node ~56
 ```
 
-With the valence density, one can obtain the classical Drude plasmon
+With the valence density, one can obtain the classical Drude plasma
 frequency. The next lines calculate the average density of the system, and
-evaluate the Wigner radius $r_s$, then compute the Drude plasmon frequency.
+evaluate the Wigner radius $r_s$, then compute the Drude plasma frequency, reported as omega_plasma.
 
 ```
  Number of electrons calculated from density =    7.9999; Expected =    8.0000
@@ -328,7 +328,8 @@ evaluate the Wigner radius $r_s$, then compute the Drude plasmon frequency.
 ```
 
 
-This is the value used by default for [[ppmfrq]]. It is in fact the second frequency
+This omega_plasma is the value used when the default for [[ppmfrq]], namely 0.0, is specified. 
+It is in fact the second frequency
 where the code calculates the dielectric matrix to adjust the plasmon-pole
 model parameters.
 
