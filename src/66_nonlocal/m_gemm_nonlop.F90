@@ -1431,7 +1431,7 @@ contains
      if(cplex == 2) then
 
        ! projections_gpu = projs * vectin_gpu
-       call gpu_xgemm(cplex, 'C', 'N', &
+       call abi_gpu_xgemm(cplex, 'C', 'N', &
          &            nprojs, ndat*nspinor, npwin, &                                                ! M,N,K
          &            cone, &                                                                       ! alpha
          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwin, & ! A, LDA
@@ -1457,7 +1457,7 @@ contains
          call fix_realvec(temp_realvec_gpu, npwin, ndat*nspinor, fix_realvec_divide_by_2)
        end if
 
-       call gpu_xgemm(cplex, 'T', 'N', &
+       call abi_gpu_xgemm(cplex, 'T', 'N', &
          &            nprojs, ndat*nspinor, npwin, &                                                  ! M,N,K
          &            cone, &                                                                         ! alpha
          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwin, & ! A, LDA
@@ -1474,7 +1474,7 @@ contains
          ! end do
          call fix_realvec(temp_realvec_gpu, npwin, ndat*nspinor, fix_realvec_zero_out)
        end if
-       call gpu_xgemm(cplex, 'T', 'N', &
+       call abi_gpu_xgemm(cplex, 'T', 'N', &
          &            nprojs, ndat*nspinor, npwin, &
          &            cone, &
          &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwin, &
@@ -1655,7 +1655,7 @@ contains
         ! Get svectout from s_projections
         if(cplex == 2) then
 
-          call gpu_xgemm(cplex, 'N', 'N', &
+          call abi_gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
             &            cone, &                                                                        ! alpha
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, & ! A, LDA
@@ -1669,7 +1669,7 @@ contains
             ABI_ERROR("Please provide memory allocation for temp_realvec_gpu array")
           end if
 
-          call gpu_xgemm(cplex, 'N', 'N', &
+          call abi_gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
             &            cone, &                                                                        ! alpha
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, & ! A, LDA
@@ -1679,7 +1679,7 @@ contains
           !svectout(1,1:npwout*nspinor*ndat) = temp_realvec_gpu(1:npwout*nspinor*ndat)
           call insert_real_part(C_LOC(svectout(1,1)), temp_realvec_gpu, npwout*nspinor*ndat)
 
-          call gpu_xgemm(cplex, 'N', 'N', &
+          call abi_gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
             &            cone, &                                                                        ! alpha
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout,& ! A, LDA
@@ -1697,7 +1697,7 @@ contains
           ! this a axpy operation with x => vectin_gpu, y => svectout_gpu and alpha=1
           ! please remember that svectout_gpu and vectin_gpu have same size when paw_opt >= 3 and paw_opt<6
           ! this is the case here
-          call gpu_xaxpy(1, &                                  ! real
+          call abi_gpu_xaxpy(1, &                              ! real
             &            2*npwin*nspinor*ndat, &               ! size
             &            cone, &                               ! alpha
             &            C_LOC(vectin), 1, &                   ! X, incrx
@@ -1719,7 +1719,7 @@ contains
         ! Get vectout from vnl_projections
         if (cplex_fac == 2) then
 
-          call gpu_xgemm(cplex, 'N', 'N', &
+          call abi_gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                                ! M,N,K
             &            cone, &                                                                        ! alpha
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs, npwout, & ! A, LDA
@@ -1733,7 +1733,7 @@ contains
             ABI_ERROR("Please provide memory allocation for temp_realvec_gpu array")
           end if
 
-          call gpu_xgemm(cplex, 'N', 'N', &
+          call abi_gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                               ! M,N,K
             &            cone, &                                                                       ! alpha
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_r, npwout, &  ! A, LDA
@@ -1743,7 +1743,7 @@ contains
           ! vectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
           call insert_real_part(C_LOC(vectout), temp_realvec_gpu, npwout*nspinor*ndat)
 
-          call gpu_xgemm(cplex, 'N', 'N', &
+          call abi_gpu_xgemm(cplex, 'N', 'N', &
             &            npwout, ndat*nspinor, nprojs, &                                               ! M,N,K
             &            cone, &                                                                       ! alpha
             &            gemm_nonlop_kpt_gpu(gemm_nonlop_ikpt_this_proc_being_treated)%projs_i, npwout, & ! A, LDA
