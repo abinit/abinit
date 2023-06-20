@@ -327,14 +327,14 @@ contains
 !$OMP PARALLEL DO COLLAPSE(2)
    do ispden=1,min(nspden,2)
      do ifft=1,cplex*nfft
-       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)+vmagpen1(ifft,ispden)-vtrial1(ifft,ispden)
+       vresid1(ifft,ispden)=vhartr1_(ifft)+vxc1_(ifft,ispden)+vpsp1(ifft)-vtrial1(ifft,ispden)
      end do
    end do
    if(nspden==4)then
 !$OMP PARALLEL DO COLLAPSE(2)
      do ispden=3,4
        do ifft=1,cplex*nfft
-         vresid1(ifft,ispden)=vxc1_(ifft,ispden)+vmagpen1(ifft,ispden)-vtrial1(ifft,ispden)
+         vresid1(ifft,ispden)=vxc1_(ifft,ispden)-vtrial1(ifft,ispden)
        end do
      end do
    end if
@@ -342,6 +342,11 @@ contains
    if (ipert==natom+5) then
      vresid1 = vresid1 + v1zeeman
    end if
+
+   if (abs(magpen) > tol6) then
+     vresid1 = vresid1 + vmagpen1
+   end if
+
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(cplex,nfft,vres2,nspden,optres,vresid1)
 
@@ -367,6 +372,10 @@ contains
 
    if (ipert==natom+5) then
      vtrial1 = vtrial1 + v1zeeman
+   end if
+
+   if (abs(magpen) > tol6) then
+     vtrial1 = vtrial1 + vmagpen1
    end if
 
  end if
@@ -606,6 +615,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpi_enreg,natom,nfft,ngfft,n
 
 
 !Compute magnetic penalty from cell-integrated magnetic moments
+ vmagpen1=zero
  if (magpen < zero) then
    if (cplex==1) then
      emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(1,3)**2)

@@ -505,7 +505,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  eloc0=zero ; elpsp1=zero ; end0=zero; end1=zero;
  enl0=zero ; enl1=zero ; eovl1=zero; exc1=zero
  deltae=zero ; fermie1=zero ; epaw1=zero ; eberry=zero ; elmag1=zero
- elast_mq=zero
+ elast_mq=zero ; emagpen1=zero
  dbl_nnsclo_mq=0
 !This might be taken away later
  edocc_mq=zero ; eeig0_mq=zero ; ehart01_mq=zero ; ehart1_mq=zero ; ek0_mq=zero ; ek1_mq=zero
@@ -1038,14 +1038,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    call dfpt_e1mag(e1mag,rhor1,rhog1);
 !  endif
 
-!  Compute the first-order magnetic moments to apply a magnetic penalty term.
-   if (abs(dtset%magpen) > tol10) then
-     prtopt=1;
-     call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-   & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-   & prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
-   end if 
-
 !  ######################################################################
 !  Skip out of step loop if non-SCF (completed)
 !  ----------------------------------------------------------------------
@@ -1072,15 +1064,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (iscf_mod>=10) then
      optene = 0 
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
-&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene,&
-&     emagpen1=emagpen1)
+&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,emagpen1,&
+&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
-&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene,&
-&        emagpen1=emagpen1)
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,emagpen1,&
+&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
        !Implicictly avoids double counting of SCF and local energies
        etotal=half*(etotal+etotal_mq)
@@ -1153,16 +1143,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      optene = 0 ! use direct scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
-&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene,&
-&     emagpen1=emagpen1)
+&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,emagpen1,&
+&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,&
-&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene,&
-&        emagpen1=emagpen1)
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,emagpen1,&
+&        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
        !Implicictly avoids double counting of SCF and local energies
        etotal=half*(etotal+etotal_mq)
@@ -1723,6 +1711,7 @@ end subroutine dfpt_scfcv
 !!  eii=2nd derivative of pseudopotential core energy (hartree)
 !!  eloc0=0th-order local (psp+vxc+Hart) part of 2nd-order total energy
 !!  elpsp1=1st-order local pseudopot. part of 2nd-order total energy.
+!!  emagpen1= Magnetic penalty term entering the 2nd-onder total energy.
 !!  end0=0th-order nuclear dipole energy part of 2nd-order total energy.
 !!  end1=1st-order nuclear dipole energy part of 2nd-order total energy.
 !!  enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
@@ -1750,23 +1739,20 @@ end subroutine dfpt_scfcv
 !! SOURCE
 
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
-&                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&                end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene,&
-&                emagpen1)
+&                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,emagpen1,&
+&                end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ipert,natom,optene
  real(dp),intent(in) :: eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1
- real(dp),intent(in) :: efrx2,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,epaw1
+ real(dp),intent(in) :: efrx2,ehart1,eii,ek0,ek1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1,epaw1
  real(dp),intent(in) :: evdw,exc1
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,evar
- real(dp),optional,intent(in) :: emagpen1
 
 !Local variables-------------------------------
 !scalars
- real(dp) :: emagpen1_
 ! character(len=500) :: message
 
 ! *********************************************************************
@@ -1775,8 +1761,6 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
    ABI_BUG('Double-counting scheme not yet allowed!')
  end if
 
- emagpen1_=zero; if (present(emagpen1)) emagpen1_=emagpen1
-
  if (optene>-1) then
 
 !  Compute 2nd-order variational energy by direct scheme
@@ -1784,7 +1768,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    Atomic displ. perturbation
      if ( ipert>=1 .and. ipert<=natom  ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+epaw1+elpsp1+emagpen1_
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+epaw1+elpsp1+emagpen1
 
      else if (ipert==natom+1) then
        evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+end0+end1
@@ -1794,7 +1778,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !      For ipert==natom+2, some contributions vanish, noticeably ek1
      else if (ipert==natom+2) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1+emagpen1_
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+ek1+epaw1+emagpen1
 
 !      All terms enter for strain perturbation
      else if ( ipert==natom+3 .or. ipert==natom+4 ) then
@@ -1802,7 +1786,7 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    terms for Zeeman perturbation, SPr 2deb
      else if ( ipert==natom+5 ) then
-       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1_
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1
      end if
    end if
 

@@ -2415,7 +2415,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%mgfft = -1
    dtsets(idtset)%mgfftdg = -1
    dtsets(idtset)%mixesimgf(:)=zero
-   dtsets(idtset)%mpatpol(1:2)=0 
+   dtsets(idtset)%mpatpol(1:2)=-1 
    dtsets(idtset)%mpdir(1:3)=0
    dtsets(idtset)%mpw = -1
    dtsets(idtset)%mqgrid=0
