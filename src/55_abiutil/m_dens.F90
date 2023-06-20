@@ -49,6 +49,8 @@ MODULE m_dens
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
  public :: calcdenmagsph           ! Compute integral of total density  and magnetization inside spheres around atoms.
  public :: prtdenmagsph            ! Print integral of total density and magnetization inside spheres around atoms.
+ public :: fatsph_recip            ! Compute atom centered spheres in reciprocal space
+
 !!***
 
 !----------------------------------------------------------------------
@@ -671,7 +673,7 @@ end subroutine add_atomic_fcts
    ABI_MALLOC(rhor_dum,(nfftf,nspden))
    rhor_dum(:,:)=zero
    call calcdenmagsph(mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
-&    ratsm,ratsph,rhor_dum,rprimd,typat,xred,0,cplex1,intgf2=intgf2)
+&    ratsm,ratsph,rhor_dum,rprimd,typat,xred,1,0,cplex1,intgf2=intgf2)
    ABI_FREE(rhor_dum)
  else
    intgf2=zero
@@ -844,7 +846,7 @@ end subroutine constrained_dft_free
  ABI_MALLOC(gr_intgden,(3,nspden,natom))
  ABI_MALLOC(strs_intgden,(6,nspden,natom))
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,&
-&  xred,1,cplex1,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
+&  xred,1,1,cplex1,intgden=intgden,gr_intgden=gr_intgden,rhomag=rhomag,strs_intgden=strs_intgden)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !DEBUG
@@ -855,7 +857,7 @@ end subroutine constrained_dft_free
  ABI_MALLOC(intgres_tmp,(nspden,natom))
  intgres_tmp(:,:)=zero
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,11,cplex1,intgden=intgres_tmp,rhomag=rhomag)
+&  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,1,11,cplex1,intgden=intgres_tmp,rhomag=rhomag)
 
 !DEBUG
 !write(std_out,*) ' intgres_tmp(1:nspden,1:natom)=',intgres_tmp(1:nspden,1:natom)
@@ -1234,7 +1236,7 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
 
 !We need the integrated magnetic moments and the smoothing function
  call calcdenmagsph(mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !Loop over atoms
@@ -1382,7 +1384,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 !We need the integrated magnetic moments
  cplex1=1
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-& 1,cplex1,intgden=intgden,rhomag=rhomag)
+& 1,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,ratsm,ratsph,rhomag,typat)
 
  Epen=0
@@ -1490,6 +1492,8 @@ end subroutine mag_penalty_e
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of atom types
+!!  optfshp= if 1 the atomic spheres are defined in real space
+!!           if 2 the atomic spheres are dfined in reciprocal space and then Fourier transformed
 !!  option = if not larger than 10, then a density is input , if larger than 10 then a potential residual is input.
 !!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radius of spheres around atoms
@@ -1510,18 +1514,20 @@ end subroutine mag_penalty_e
 !!    In collinear case component 1 is total density and 2 is _magnetization_ up-down
 !!    In non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  strs_intgden(6,nspden,natom)=stress contribution due to constrained integrated density (magnetization...), due to each atom. Optional arg
+!!  fatsph(nfft,natom)= functions defining the atomic spheres of integration in real space
 !!  Rest is printing
 !!
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden)
+&    optfshp,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in)        :: natom,nfft,nspden,ntypat
  real(dp),intent(in)       :: ratsm
  type(MPI_type),intent(in) :: mpi_enreg
+ integer ,intent(in)       :: optfshp
  integer ,intent(in)       :: option
  integer, intent(in)       :: cplex
 !arrays
@@ -1534,6 +1540,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(out),optional  :: intgf2(natom,natom)
  real(dp),intent(out),optional  :: rhomag(2,nspden)
  real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)   
+ real(dp),intent(out),optional  :: fatsph(nfft,natom)   
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndir=3,ishift=5
@@ -1623,6 +1630,10 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  if(.not.(grid_found)) then
    ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
+
+ if (optfshp==2) then
+   call fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rprimd,typat,ucvol,xred,fatsph) 
+ end if 
 
 !Loop over atoms
 !-------------------------------------------
@@ -2685,6 +2696,140 @@ subroutine printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,fname)
  end if
 
 end subroutine printmagvtk
+!!***
+
+!!****f* m_dens/fatsph_recip
+!! NAME
+!! fatsph_recip
+!!
+!! FUNCTION
+!!  Compute the atomic spheres functions in reciprocal space as a product of 
+!!  a Bessel function times a Gaussian smearing for the boundary. The functions 
+!!  are subsequently Fourier transformed to real space. 
+!!
+!! INPUTS
+!!  mpi_enreg=information about MPI parallelization
+!!  natom=number of atoms in cell.
+!!  nfft=(effective) number of FFT grid points (for this processor)
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ntypat=number of atom types
+!!  ratsm=smearing width for ratsph
+!!  ratsph(ntypat)=radius of spheres around atoms
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  typat(natom)=type of each atom
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!
+!! OUTPUT
+!!  fatsph(nfft,natom)= functions defining the atomic spheres of integration in real space
+!!
+!! SOURCE
+
+subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rprimd,typat,ucvol,xred,fatsph) 
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in)        :: natom,nfft,ntypat
+ real(dp),intent(in)       :: ratsm,ucvol
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in)  :: ngfft(18),typat(natom)
+ real(dp),intent(in) :: gmet(3,3),ratsph(ntypat),rprimd(3,3)
+ real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(out):: fatsph(nfft,natom)   
+
+!Local variables ------------------------------
+!scalars
+ integer :: iatom,ifft
+ integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3
+ real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
+ real(dp) :: gsquar,gmag,gmagrad,rad,widthsq
+!arrays
+ integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
+ integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
+ real(dp) :: gq(3)
+ real(dp) :: work1(2,nfft)
+
+!******************************************************************
+
+!Geometric parameters
+ n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
+ id1=n1/2+2
+ id2=n2/2+2
+ id3=n3/2+2
+ widthsq=(pi/ratsm)**2
+
+!Get the distrib associated with this fft_grid
+ call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
+
+ do iatom=1, natom
+
+   ii=0
+   work1(:)=zero
+   !G=0 term
+   rad=ratsph(typat(iatom))
+   work1(1)=four_pi*rad/(three*ucvol)
+   do i3=1,n3
+     ig3=i3-(i3/id3)*n3-1
+     gq3=dble(ig3)
+     gq(3)=gq3
+     do i2=1,n2
+       if (fftn2_distrib(i2)==mpi_enreg%me_fft) then
+         ig2=i2-(i2/id2)*n2-1
+         gq2=dble(ig2)
+         gq(2)=gq2
+
+!        Note the lower limit of the next loop
+         ii1=1
+         if(i3==1 .and. i2==1 .and. ig2==0 .and. ig3==0)then
+           ii1=2
+           ii=ii+1
+         end if
+         do i1=ii1,n1
+           ig1=i1-(i1/id1)*n1-1
+           gq1=dble(ig1)
+           gq(1)=gq1
+           ii=ii+1
+
+           gsquar=gsq_vl3(gq1,gq2,gq3)
+           gmag=sqrt(gsquar)
+           gcube=gmag*gsquar
+           gmagrad=gmag*rad
+           arg1=-gsquar/(four*widthsq)
+           arg2=-dot_product(xred(:,iatom),gq)
+  
+           fac1=four_pi/(gcube*ucvol)
+           fac2=sin(gmagrad)-gmagrad*cos(gmagrad)
+           fac3=exp(arg1+arg2)
+
+           work1(ii)=fac1*fac2*fac3
+
+         end do
+       end if
+     end do
+   end do
+
+!  Transform to real space
+   call fourdp(1,work1,fatsph(:,iatom),1,mpi_enreg,nfft,1,ngfft,0)
+
+   do ifft=1,nfft
+     write(100+iatom,*) fatsph(ifft,iatom)
+   end do
+
+ end do !iatom
+
+ contains
+
+ function gsq_vl3(g1,g2,g3)
+
+ real(dp) :: gsq_vl3
+ real(dp),intent(in) :: g1,g2,g3 ! Note that they are real, unlike in other similar function definitions
+!Define G^2 based on G space metric gmet.
+   gsq_vl3=g1*g1*gmet(1,1)+g2*g2*gmet(2,2)+&
+&   g3*g3*gmet(3,3)+2.0_dp*g1*g2*gmet(1,2)+&
+&   2.0_dp*g2*g3*gmet(2,3)+2.0_dp*g3*g1*gmet(3,1)
+ end function gsq_vl3
+
+end subroutine fatsph_recip
 !!***
 
 end module m_dens

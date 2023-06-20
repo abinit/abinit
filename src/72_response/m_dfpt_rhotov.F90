@@ -603,7 +603,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 
 !Local variables-------------------------------
 !scalars:
- integer :: i,ifft,prtopt
+ integer :: i,ifft,prtopt,optfsph
  character(len=500) :: msg
 !arrays:
  real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
@@ -614,18 +614,19 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 ! *************************************************************************
 
 !Compute the first-order magnetic moments. 
- prtopt=1;
+ prtopt=1; optfsph=2;
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
 &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
-&  prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
-
+&  optfsph,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
 
 !Compute magnetic penalty from cell-integrated magnetic moments
  vmagpen1=zero
  if (magpen < zero) then
+
    do i=1,3 
      if (mpdir(i)==0) rhomag(:,1+i) = zero
    end do
+
    if (cplex==1) then
      emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(1,3)**2+rhomag(1,4)**2)
    else if (cplex==2) then
