@@ -750,14 +750,14 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
+ call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,tim_RR_XNP_reset,chebfi%gpu_option)
+
  call xgBlock_copy(chebfi%X,X0,1, 1, chebfi%gpu_option)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
      call gpu_device_synchronize()
    end if
 #endif
-
- call xgBlock_copy(chebfi%X,X0)
 
  if (chebfi%paral_kgb == 1) then
    call xgTransposer_free(chebfi%xgTransposerX)

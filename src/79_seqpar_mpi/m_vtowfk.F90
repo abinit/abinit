@@ -576,7 +576,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =========================================================================
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
-   do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
+   do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg .and. .not. newchebfi
    if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
 
    ABI_NVTX_START_RANGE(NVTX_SUB_SPC_DIAGO)
@@ -634,6 +634,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ! The orthogonalization is completely disabled with ortalg<=-10.
    ! This option is usefull for testing only and is not documented.
    do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
+   if (newlobpcg.or.newchebfi) do_ortho = .false.
    if (use_rmm_diis) do_ortho = .False.
 
    if (do_ortho) then
@@ -663,7 +664,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      !call wrtout(std_out, "Calling cgtk_fixphase")
       if ( (.not.newlobpcg) .and. (.not.newchebfi) .and. (.not.has_cprj_in_memory) ) then
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
-     else if (newlobpcg .or. newchebfi) then
+     else if ( (newlobpcg .or. newchebfi) .and. (.not.has_cprj_in_memory) ) then
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calculated in my lobpcg, we don't care about the phase of gsc !
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
