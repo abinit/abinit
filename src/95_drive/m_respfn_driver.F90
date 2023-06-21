@@ -3896,6 +3896,10 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 
 ! *************************************************************************
 
+ if(nspden==4 .and. usepaw==1)then
+   ABI_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for norm-conserving psp! (no paw support yet)')
+ end if
+
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
 
  if (usepaw==1 .or. psps%nc_xccc_gspace==1) then
