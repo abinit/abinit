@@ -282,6 +282,9 @@ By P. Kesteneer (MR910).
 **D.12** New topic [[topic:AtomCentered]] created.
 By X. Gonze (commit 425e8c)
 
+**D.13** Improvements of tutorials base3.md and gw1.md in order to better avoid students to commit mistakes.
+By X. Gonze (commits 1d56e983f and dfd207458) 
+
 * * *
 
 
