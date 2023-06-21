@@ -190,7 +190,10 @@ plasmon frequency for the plasmon-pole model to work well. Plasmons
 frequencies are usually close to 0.5 Hartree. The parameters for the screening
 calculation are not far from the ones that give converged Electron Energy Loss Function
 ($-\mathrm{Im} \epsilon^{-1}_{00}$) spectra, so that one can start up by using indications
-from EELS calculations existing in literature.
+from EELS calculations existing in literature. Alternatively, ABINIT can compute
+an approximate plasmon frequency using the Drude formula. This is activated
+by letting [[ppmfrq]] to its default value. It is actually safer to use the Drude value
+than to use blindly a value like 16.7 eV for other materials than silicon.
 
 ### 1.d Computing the GW energies.
 
