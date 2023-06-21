@@ -746,6 +746,8 @@ module m_lobpcg2
         & lobpcg%gpu_option,tolerance=tolerance)
     end if
 
+    call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,lobpcg%gpu_option)
+
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_free(lobpcg%xgTransposerX)
       call xgTransposer_free(lobpcg%xgTransposerAX)
