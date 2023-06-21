@@ -2742,12 +2742,12 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  integer :: iatom,ifft
  integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3
  real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
- real(dp) :: gsquar,gmag,gmagrad,rad,widthsq
+ real(dp) :: gsquar,gmag,gmagrad,rad,sfr,sfi,widthsq,norm
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
- real(dp) :: work1(2,nfft)
+ real(dp) :: work1(2,nfft),work2(nfft)
 
 !******************************************************************
 
@@ -2756,7 +2756,9 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  id1=n1/2+2
  id2=n2/2+2
  id3=n3/2+2
- widthsq=(pi/ratsm)**2
+ widthsq=(one/ratsm)**2
+! widthsq=ratsm**2
+!  widthsq=one
 
 !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -2764,10 +2766,10 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  do iatom=1, natom
 
    ii=0
-   work1(:)=zero
+   work1(:,:)=zero
    !G=0 term
    rad=ratsph(typat(iatom))
-   work1(1)=four_pi*rad/(three*ucvol)
+   work1(1,1)=two*rad/(two_pi**2*three*ucvol)
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
      gq3=dble(ig3)
@@ -2793,15 +2795,18 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
            gsquar=gsq_vl3(gq1,gq2,gq3)
            gmag=sqrt(gsquar)
            gcube=gmag*gsquar
-           gmagrad=gmag*rad
-           arg1=-gsquar/(four*widthsq)
-           arg2=-dot_product(xred(:,iatom),gq)
+           gmagrad=two_pi*gmag*rad
+           arg1=-gsquar*pi**2/widthsq
+           arg2=two_pi*dot_product(xred(:,iatom),gq)
   
-           fac1=four_pi/(gcube*ucvol)
+           fac1=two/(two_pi**2*gcube*ucvol)
            fac2=sin(gmagrad)-gmagrad*cos(gmagrad)
-           fac3=exp(arg1+arg2)
+           fac3=exp(arg1)
+           sfr=cos(arg2)
+           sfi=-sin(arg2)
 
-           work1(ii)=fac1*fac2*fac3
+           work1(1,ii)=fac1*fac2*fac3*sfr
+           work1(2,ii)=fac1*fac2*fac3*sfi
 
          end do
        end if
@@ -2809,11 +2814,15 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
    end do
 
 !  Transform to real space
-   call fourdp(1,work1,fatsph(:,iatom),1,mpi_enreg,nfft,1,ngfft,0)
+   call fourdp(1,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
+   fatsph(1:nfft,iatom)=work2(1:nfft)
 
+   norm=0
    do ifft=1,nfft
-     write(100+iatom,*) fatsph(ifft,iatom)
+     norm=norm+work2(ifft)
+   !  write(100+iatom,*) work2(ifft)
    end do
+   write(100+iatom,*) 'Norms:', norm/(nfft*ucvol),two*rad/(two_pi**2*three*ucvol)
 
  end do !iatom
 
