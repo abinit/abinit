@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin20.3.0_gnu8.2 computer) 
+.Version 9.8.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 May 2022.
-- ( at 00h44 )
+.Starting date : Wed 21 Dec 2022.
+- ( at 21h09 )
   
-- input  file    -> /Users/gmatteo/git_repos/abinit/_build/tests/Test_suite/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6/teph4isotc_6.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_6.abi
 - output file    -> teph4isotc_6.abo
 - root for input  files -> teph4isotc_6i
 - root for output files -> teph4isotc_6o
@@ -381,8 +381,8 @@ meta: {optdriver: 7, eph_task: 11, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
 - Mg    ONCVPSP-3.3.0  r_core=   2.31813   2.10714
 - 12.00000   2.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -395,8 +395,8 @@ meta: {optdriver: 7, eph_task: 11, }
              1    4.197993    0.757155
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
-- pspatm: opening atomic psp file    /Users/gmatteo/git_repos/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
 - B     ONCVPSP-3.3.0  r_core=   1.20849   1.20849
 -  5.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -695,10 +695,10 @@ P           mkmem         370
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         37.3  wall=         38.2
+- Proc.   0 individual time (sec): cpu=        366.1  wall=        367.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.3  wall=         38.2
++Overall time at end (sec) : cpu=        366.1  wall=        367.4

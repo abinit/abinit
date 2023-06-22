@@ -281,7 +281,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  type(ebands_t) :: bstruct,ebands
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
- type(hdr_type) :: hdr,hdr_den
+ type(hdr_type) :: hdr, hdr_den, hdr_kfull
  type(extfpmd_type),pointer :: extfpmd => null()
  type(macro_uj_type) :: dtpawuj(1)
  type(paw_dmft_type) :: paw_dmft
@@ -680,6 +680,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
 &     "to decrease the memory requirements. Consider also OpenMP threads."
+!     ii = 0
      ABI_ERROR_NOSTOP(msg,ii)
      write (msg,'(5(a,i0), 2a)')&
 &     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
@@ -853,15 +854,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize (eventually) extfpmd object
  if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
-   if(dtset%useextfpmd/=1.and.dtset%mband<dtset%extfpmd_nbcut) then
-     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate extfpmd routines.",ch10,&
-     & "nband=",dtset%mband," < extfpmd_nbcut=",dtset%extfpmd_nbcut,".",ch10,&
-     & "Action: Increase nband or decrease extfpmd_nbcut."
+   if(dtset%useextfpmd/=1.and.dtset%extfpmd_nbcut>dtset%mband) then
+     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
+&     "extfpmd_nbcut = ",dtset%extfpmd_nbcut," should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&     "Action: Increase nband or decrease extfpmd_nbcut."
      ABI_ERROR(msg)
    else
+     if(dtset%useextfpmd/=1.and.(dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut)>dtset%mband) then
+       write(msg,'(a,i0,a,i0,a,i0,2a,i0,3a)') "(extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf," + extfpmd_nbcut = ",&
+&       dtset%extfpmd_nbcut,") = ",dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut,ch10,&
+&       "should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     else if(dtset%extfpmd_nbdbuf>dtset%mband) then
+       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
+&       " should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     end if
      ABI_MALLOC(extfpmd,)
-     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,nfftf,&
-&     dtset%nspden,rprimd,dtset%useextfpmd)
+     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+&     dtset%nfft,dtset%nspden,rprimd,dtset%useextfpmd)
    end if
  end if
 
@@ -886,19 +901,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
-! CP modified
-!   call newocc(doccde,eigen,results_gs%energies%entropy,&
-!&   results_gs%energies%e_fermie,&
-!&   dtset%spinmagntarget,dtset%mband,dtset%nband,&
-!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-!&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
    call newocc(doccde,eigen,results_gs%energies%entropy,&
 &   results_gs%energies%e_fermie,results_gs%energies%e_fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk,&
-&   extfpmd)
-! End CP modified
+&   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_FREE(doccde)
@@ -1017,7 +1025,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,pawang,dtset%pawprtvol,&
+&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
  end if
 
@@ -1135,14 +1143,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
        if (rdwrpaw/=0) then
-         ! CP modified
-         !call hdr%update(bantot,etot,fermie,residm,&
-         !  rprimd,occ,pawrhoij,xred,args_gs%amu,&
-         !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
          call hdr%update(bantot,etot,fermie,fermih,residm,&
            rprimd,occ,pawrhoij,xred,args_gs%amu,&
            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-         ! End CP modified
        end if
 
        ! Read kinetic energy density
@@ -1475,7 +1478,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (me == master .and. dtset%prtwf == 1 .and. dtset%prtwf_full == 1 .and. dtset%nqpt == 0) then
    wfkfull_path = strcat(dtfil%filnam_ds(4), "_FULL_WFK")
    if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-   call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
+   call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
+   call hdr_kfull%free()
    call cryst%free()
  end if
 
@@ -1574,9 +1578,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call ddb%set_etotal(results_gs%etotal, 2)
    end if
 
-   ! Write the DDB
-   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
-   call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
+   if (dtset%prtddb==1) then
+    ! Write the DDB
+    ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+    call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
+   endif  
 
    ! Deallocate
    call ddb_hdr%free()
@@ -2033,7 +2039,7 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 #if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
      filename=trim(fnameabo_eig)//'.nc'
-     call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
+     call write_eig(eigen,fermie,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
 #endif
  end if
@@ -2513,9 +2519,10 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  real(dp) :: ures
  !character(len=500) :: msg
 !arrays
- real(dp),allocatable :: cgstart(:,:)
+ !real(dp),allocatable :: cgstart(:,:)
  type(macro_uj_type),allocatable,target :: dtpawuj(:)
 ! *********************************************************************
+
 
  DBG_ENTER("COLL")
 
@@ -2524,41 +2531,34 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end if
 
  ABI_MALLOC(dtpawuj,(0:ndtpawuj))
- ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
+ !ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
 
  call pawuj_ini(dtpawuj,ndtpawuj)
 
- cgstart=scfcv_args%cg
+ !cgstart=scfcv_args%cg
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
    dtpawuj(iuj)%pawprtvol=dtset%pawprtvol
    dtpawuj(iuj)%diemix=dtset%diemix
+   dtpawuj(iuj)%diemixmag=dtset%diemixmag
    dtpawuj(iuj)%pawujat=dtset%pawujat
    dtpawuj(iuj)%nspden=dtset%nspden
    dtpawuj(iuj)%rprimd=dtset%rprimd_orig(1:3,1:3,1)
+   dtpawuj(iuj)%dmatpuopt=dtset%dmatpuopt
  end do
 
-!allocate(dtpawuj(0)%vsh(0,0),dtpawuj(0)%occ(0,0))
+ iuj=1 !LMac Flag to collect occupancies for unperturbed calculation
+ dtpawuj(iuj)%iuj=iuj
 
- do iuj=1,2
-   if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
+ scfcv_args%ndtpawuj=>ndtpawuj
+ scfcv_args%dtpawuj=>dtpawuj
 
-   dtpawuj(iuj*2-1)%iuj=iuj*2-1
-
-   scfcv_args%ndtpawuj=>ndtpawuj
-   scfcv_args%dtpawuj=>dtpawuj
-
-   !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
-!&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   itimes(1)=itime0 ; itimes(2)=1
-   call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-
-   scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
- end do
+ itimes(1)=itime0 ; itimes(2)=1
+ call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 !Calculate Hubbard U (or J)
- call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv_args%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
+ call pawuj_det(dtpawuj, ndtpawuj, dtset, scfcv_args%dtfil, ures, scfcv_args%mpi_enreg%comm_cell)
  dtset%upawu(dtset%typat(dtset%pawujat),1)=ures/Ha_eV
 
 !Deallocations
@@ -2567,7 +2567,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end do
 
  ABI_FREE(dtpawuj)
- ABI_FREE(cgstart)
+ !ABI_FREE(cgstart)
 
  DBG_EXIT("COLL")
 

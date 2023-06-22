@@ -638,7 +638,7 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 !  dimvtrial=nspden
    dimvtrial=1
    ABI_MALLOC(vtrial_,(nfft,dimvtrial))
-!$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
+!!!$OMP PARALLEL DO PRIVATE(ic) SHARED(nfft,vtrial,vtrial_,vxc)
    do ic=1,nfft
      vtrial_(ic,1:dimvtrial)=vtrial(ic,1:dimvtrial)-vxc(ic,1:dimvtrial)
    end do
@@ -831,6 +831,8 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
          lm_sizej=pawtab(jtypat)%lcut_size**2
          ABI_MALLOC(prod_nondiag(jatm)%value,(ngrad_nondiag,lm_sizej))
          ABI_MALLOC(prodp_nondiag(jatm)%value,(ngradp_nondiag,lm_sizej))
+         prod_nondiag(jatm)%value=zero
+         prodp_nondiag(jatm)%value=zero
        end do
      end if
 

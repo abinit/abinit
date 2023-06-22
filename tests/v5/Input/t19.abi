@@ -90,5 +90,5 @@ dmatpawu  1.0 0.0 0.0 0.0 0.0 0.0 0.0
 #%%   FCC Gadolinium. PAW + U calculation
 #%%   Test the imposition of the density matrix (10 first steps) and related variables.
 #%%   Test of partial DOS is also done (through the diff of DOS_AT0001)
-#%% topics = DFT+U
+#%% topics = DFT+U, AtomCentered
 #%%<END TEST_INFO>

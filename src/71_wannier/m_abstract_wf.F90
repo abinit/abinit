@@ -5,7 +5,8 @@
 !!  m_abstract_wf
 !!
 !! FUNCTION
-!!  Interface with Wannier90
+!!  Interface with Wannier90. 
+!!  This module contains the abstract type abstract_wf and its children.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2005-2022 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
@@ -76,6 +77,8 @@ module m_abstract_wf
 
 
 !!***
+
+
  type, public:: wann_ksetting_t
    logical :: has_ovikp =  .False.
    type(crystal_t), pointer :: cryst => null()
@@ -178,7 +181,6 @@ module m_abstract_wf
  public :: init_mywfc, compute_iwav, write_cg_and_cprj
 
 contains
-!!***
 
 
   subroutine wann_ksetting_init(self, cryst, nkpt, mband, &
@@ -951,10 +953,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
        self%has_paw=.True.
     end if
     if(present(cprj)) then
-      print *, "cprj linked"
-      print *, "before linked", cprj(1,1)%cp(:,:)
+      !print *, "before linked", cprj(1,1)%cp(:,:)
       self%cprj => cprj
-      print *, "after linked", self%cprj(1,1)%cp(:,:)
+      !print *, "after linked", self%cprj(1,1)%cp(:,:)
     end if
     ABI_MALLOC(self%iwav,(self%nspinor, self%mband,self%nkpt,self%nsppol))
     call compute_iwav(MPI_enreg, dtset, hdr, self%iwav, nprocs, rank)
@@ -980,6 +981,14 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     call self%abstract_wf%free()
   end subroutine cg_cprj_free
 
+  ! return one entry of cg. 
+  ! parameters:
+  ! icplx: 1 for real part, 2 for imaginary part
+  ! ig: index of G vector
+  ! ispinor: index of spinor
+  ! iband: index of band
+  ! ikpt: index of k point
+  ! isppol: index of spin
   function cg_elem(self, icplx, ig, ispinor, iband, ikpt, isppol ) result(res)
     class(cg_cprj), intent(inout) :: self
     integer, intent(in) :: icplx, ig, ispinor, iband, ikpt, isppol
@@ -991,6 +1000,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
 
 
 
+  ! return one entry of cg in complex form.
+  ! Parameters:
+  ! same as cg_elem, except that icplx is not needed.
   function cg_elem_complex(self, ig,ispinor, iband, ikpt, isppol) result(res)
     class(cg_cprj), intent(inout) :: self
     integer, intent(in) ::  ig, ispinor, iband, ikpt, isppol
@@ -1000,12 +1012,14 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     res=CMPLX(self%cg(1,ind),  self%cg(2,ind), kind=dp)
   end function cg_elem_complex
 
+  !return a pointer to the cg array in the cg_cprj object.
   function cg_cprj_get_cg_ptr(self) result(cg)
     class(cg_cprj), target, intent(inout) :: self
     real(dp), pointer :: cg(:,:)
     cg=> self%cg
   end function cg_cprj_get_cg_ptr
 
+  !return a pointer to the cprj array in the cg_cprj object.
   function cg_cprj_get_cprj_ptr(self) result(cprj)
     class(cg_cprj), target, intent(inout) :: self
     type(pawcprj_type), pointer :: cprj(:, :)

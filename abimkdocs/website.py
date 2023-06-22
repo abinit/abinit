@@ -296,7 +296,7 @@ class Website(object):
             "atompaw", "cut3d",
             #"multibinit",
             "mrgddb", "mrggkk", "band2eps",
-            #"ujdet",
+            #"lruj",
             "fold2Bloch", "fftprof",
             #"conducti",
             "mrgscr",
@@ -1193,7 +1193,7 @@ The full bibtex file is available [here](../abiref.bib).
                 if a.text is None: a.text = "%s varset" % name
 
             elif namespace == "test":
-                # Handle [[test:libxc_41]] (syntax for suite) [[test:gspw_01]] (syntax for subsuite)
+                # Handle [[test:libxc_41]] (syntax for suite) [[test:gswvl_01]] (syntax for subsuite)
                 tokens = name.split("_")
                 prefix, tnum = "_".join(tokens[:-1]), tokens[-1]
                 if prefix in self.abinit_tests.all_subsuite_names:

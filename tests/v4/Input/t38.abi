@@ -91,4 +91,5 @@ diemac 12.0
 #%% description = 
 #%%   Test the computation of the partial DOS, using the linear tetrahedron method.
 #%%   2 Silicon atoms, in a diamond structure.
+#%% topics = AtomCentered
 #%%<END TEST_INFO>
