@@ -610,6 +610,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
  real(dp) :: intgden(cplex,nspden,natom)
  real(dp) :: dentot(nspden)
  real(dp) :: rhomag(2,nspden)
+ real(dp) :: fatsph(nfft,natom)
 
 ! *************************************************************************
 
@@ -617,7 +618,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
  prtopt=1; optfsph=2;
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
 &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
-&  optfsph,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+&  optfsph,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
+&  fatsph=fatsph)
 
 !Compute magnetic penalty from cell-integrated magnetic moments
  vmagpen1=zero
