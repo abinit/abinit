@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.8.3 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Mon 13 Mar 2023.
+- ( at 23h04 )
   
 
 ================================================================================
@@ -39,8 +39,8 @@
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
  Phonon DOS information :
-   dosdeltae  4.55633525E-06
-    dossmear  2.27816763E-05
+   dosdeltae  9.11267051E-07
+    dossmear  4.55633525E-06
  Description of grid 2 (Fourier interp. or BZ sampling):
       ng2qpt         9         9         1
       ngrids         4
@@ -105,7 +105,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.039  and twall      0.040 sec
+-begin at tcpu      0.033  and twall      0.041 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      144
  greater than 80, so only write 20 of them
@@ -143,12 +143,12 @@
 -                                 =     0.7852488976E+01 (THz)
 -Debye temperature from partial sums:     0.3768595860E+03 (K)
 
- Average speed of sound:     0.3176510165E-03 (at units) 
--                      =           0.6949 [km/s]
+ Average speed of sound:     0.1857634414E-03 (at units) 
+-                      =           0.4064 [km/s]
 
- Debye frequency from DOS:     0.1597329850E-03 (Ha) 
--                        =     0.1050992553E+01 (THz)
--Debye temperature from DOS:     0.5043962743E+02 (K)
+ Debye frequency from DOS:     0.9341241629E-04 (Ha) 
+-                        =     0.6146241735E+00 (THz)
+-Debye temperature from DOS:     0.2949727306E+02 (K)
 
 
 ================================================================================
@@ -229,10 +229,10 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.559219E+02  4.559219E+02
 -  5.048500E+02  5.048500E+02  6.952030E+02  7.146489E+02
 -
-- Proc.   0 individual time (sec): cpu=         22.5  wall=         22.5
+- Proc.   0 individual time (sec): cpu=         20.4  wall=         20.5
 
 ================================================================================
 
-+Total cpu time     22.467  and wall time     22.529 sec
++Total cpu time     20.390  and wall time     20.474 sec
 
  anaddb : the run completed succesfully.

@@ -145,11 +145,13 @@ Variable(
     vartype="integer",
     topics=['aTDEP_expert'],
     dimensions="scalar",
-    defaultval="4.5d-6",
+    defaultval="0.2 cm$^{-1}$",
     mnemonics="DOS delta Energy",
     added_in_version="before_v9",
     text="""
 OPTIONAL: Defines the smearing used for the phonon Density Of State calculation.
+
+Prior to v9.10, the default was 4.5d-6.
 """,
 ),
 

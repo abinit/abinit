@@ -727,7 +727,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !Add extfpmd free electrons contribution to density
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
+     if(extfpmd%version==1.or.extfpmd%version==2.or.extfpmd%version==3.or.extfpmd%version==4) then
+       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
+     else if(extfpmd%version==10) then
+       do ispden=1,dtset%nspden
+         do ifft=1,dtset%nfft
+           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
+         end do
+       end do
+     end if
      rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if
  end if
@@ -1623,8 +1631,6 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !            if(iitems==5) write(message,'(a)')' Magnetization (spin up - spin down) [el/Bohr^4]'
 !            if(iitems==6) write(message,'(a)')' Relative magnetization (=zeta, between -1 and 1)   '
          end if
-
-
        end select
 
        call wrtout(iout,message,'COLL')

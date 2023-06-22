@@ -740,6 +740,10 @@ class(abstract_wf), pointer :: mywfc
        if (.not. all(lwindow(:,:,isppol))) have_disentangled_spin(isppol) = 1
      end do
 
+     print *, "abiwan_fname", abiwan_fname
+     print *, "ncid", ncid
+     print *, "self", xmpi_comm_self
+     print *, fform_from_ext("ABIWAN")
      NCF_CHECK(nctk_open_create(ncid, abiwan_fname, xmpi_comm_self))
      NCF_CHECK(hdr%ncwrite(ncid, fform_from_ext("ABIWAN"), nc_define=.True.))
      NCF_CHECK(crystal%ncwrite(ncid))

@@ -126,10 +126,10 @@ contains
 !!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (bohr^3)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!
 !! OUTPUT
 !!  energies <type(energies_type)>=all part of total energy.
@@ -157,18 +157,18 @@ contains
 !!  vxcavg=mean of the vxc potential
 !!
 !! SIDE EFFECTS
-!!  [electronpositron <type(electronpositron_type)>]=quantities for the electron-positron annihilation (optional argument)
 !!  moved_atm_inside=1 if the atomic positions were moved inside the SCF loop.
 !!  vhartr(nfft)=Hartree potential (Hartree)
 !!  vpsp(nfft)=local psp (Hartree)
 !!  vtrial(nfft,nspden)= trial potential (Hartree)
 !!  vxc(nfft,nspden)= xc potential (Hartree)
+!!  [electronpositron <type(electronpositron_type)>]=quantities for the electron-positron annihilation (optional argument)
 !!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
 !!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!    kinetic energy density (metaGGA cases) (optional output)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
-!!  [xccctau3d(n3xccc)]=3D core electron kinetic energy density for XC core correction, bohr^-3
+!!  [xcctau3d(n3xccc*usekden)]=3D core electron kinetic energy density for XC core correction, bohr^-3
 !!
 !! NOTES
 !!  In case of PAW calculations:
@@ -280,7 +280,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (ipositron/=1) then
    lewald = .true.
    if (present(calc_ewald)) lewald=calc_ewald
-   if (lewald) then 
+   if (lewald) then
       if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
 !       Periodic system, need to compute energy and forces due to replica and
 !       to correct the shift in potential calculation.

@@ -656,7 +656,7 @@ end function kpts_map
 !! FUNCTION
 !!  Print the symmetry table bz2ibz associated to the BZ bz and the IBZ ibz
 !!  to a list of units with header. Mode correspons to the value passed to kpts_map
-!!  If prtvol is 0, max 200 entries are printed.
+!!  If prtvol is 0, max 20 entries are printed. Use prtvol > 0 to print all k-points.
 !!
 !! SOURCE
 
@@ -667,8 +667,6 @@ subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
  character(len=*),intent(in) :: header, mode
  integer,intent(in) :: prtvol, units(:), bz2ibz(:,:)
  real(dp),intent(in) :: bz(:,:), ibz(:,:)
- !class(crystal_t),intent(in) :: cryst
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -696,8 +694,8 @@ subroutine kpts_map_print(units, header, mode, bz, ibz, bz2ibz, prtvol)
  call wrtout(units, msg)
 
  do ik_bz=1,size(bz2ibz, dim=2)
-   if (prtvol == 0 .and. ik_bz > 200) then
-     call wrtout(units, "prtvol = 0, max 200 points are written"); exit
+   if (prtvol == 0 .and. ik_bz > 20) then
+     call wrtout(units, "prtvol = 0, max 20 points are written"); exit
    end if
    ik_ibz = bz2ibz(1, ik_bz); isym_k = bz2ibz(2, ik_bz)
    trev_k = bz2ibz(6, ik_bz); g0_k = bz2ibz(3:5, ik_bz)
@@ -798,7 +796,7 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
 
 ! *************************************************************************
 
- call timab(1021, 1, tsec)
+ call timab(1091, 1, tsec)
  !call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1069,6 +1067,25 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
        ABI_BUG(msg)
      end if
 
+     ! DEBUG SECTION
+     !if (dksqmn > tol5) then
+     !   if (present(use_symrec)) then
+     !     if (use_symrec) then
+     !       kpt1a(:) = MATMUL(symmat(:,:,jsym),kptns1(:,jkpt1))
+     !     else
+     !       kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,jsym)),kptns1(:,jkpt1))
+     !     end if
+     !   else
+     !     kpt1a(:) = MATMUL(TRANSPOSE(symmat(:,:,jsym)),kptns1(:,jkpt1))
+     !   end if
+     !   kpt1a(:)=(1-2*jtime)*kpt1a(:)
+     !   print *, "Cannot find k2: ", k2(:)
+     !   print *, "Rotated TS(k1): ", kpt1a(:)
+     !   print *, "with k1:        ", kptns1(:, jkpt1)
+     !   print *, "dksqmn:         ", dksqmn
+     !end if
+     !END DEBUG
+
      !write(std_out,'(a,i6,i2,2x,i6,5i3,es24.14)' )' listkk: ikpt2,isppol,indkk(isk,:)=',ikpt2,isppol,indkk(isk,:),dksqmn
    end do ! ikpt2
  end do ! isppol
@@ -1085,7 +1102,7 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
    call xmpi_max(dksqmn, dksqmax, comm, ierr)
  end if
 
- call timab(1021, 2, tsec)
+ call timab(1091, 2, tsec)
  !call cwtime_report(" listkk_end", cpu, wall, gflops)
 
 end subroutine listkk
