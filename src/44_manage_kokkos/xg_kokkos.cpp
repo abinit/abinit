@@ -1,4 +1,4 @@
-#include "m_xg_kokkos.h"
+#include "xg_kokkos.h"
 
 /**
  * Helper utility routine to compute the prefered number of teams of threads

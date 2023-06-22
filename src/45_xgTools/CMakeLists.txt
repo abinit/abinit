@@ -1,21 +1,14 @@
 #
 # 45_xgTools
 #
-set(66_wfs_SRC
+set(45_xgTools_SRC
   m_xg.F90
   m_xgScalapack.F90
   m_xgTransposer.F90
   )
 
-if (ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
-  LIST(APPEND 66_wfs_SRC
-    m_xg_kokkos.cpp
-    m_xg_kokkos.h
-    m_xg_kokkos.F90)
-endif()
-
 add_library(45_xgTools STATIC
-  ${66_wfs_SRC})
+  ${45_xgTools_SRC})
 
 set_target_properties(45_xgTools
   PROPERTIES
@@ -36,6 +29,13 @@ target_compile_definitions(45_xgTools
 target_link_libraries(45_xgTools
   PUBLIC
   abinit::44_abitypes_defs)
+
+if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
+  target_link_libraries(45_xgTools
+    PUBLIC
+    abinit::44_manage_kokkos
+  )
+endif()
 
 if(OpenMP_FOUND)
   target_link_libraries(45_xgTools

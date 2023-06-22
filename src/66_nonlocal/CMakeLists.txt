@@ -28,11 +28,6 @@ set(66_nonlocal_SRC
   m_opernld_ylm.F90
   )
 
-if (ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
-  LIST(APPEND 66_nonlocal_SRC
-    m_opernlc_ylm_allwf_kokkos.cpp)
-endif()
-
 add_library(66_nonlocal STATIC
   ${66_nonlocal_SRC})
 
@@ -69,6 +64,13 @@ target_link_libraries(66_nonlocal
   abinit::65_paw
   )
 
+if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
+  target_link_libraries(66_nonlocal
+    PUBLIC
+    abinit::44_manage_kokkos
+  )
+endif()
+
 if(OpenMP_FOUND)
   target_link_libraries(66_nonlocal
     PUBLIC
@@ -79,13 +81,6 @@ if(ABINIT_ENABLE_GPU_CUDA)
   target_link_libraries(66_nonlocal
     PUBLIC
     abinit::46_manage_cuda
-    )
-endif()
-
-if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
-  target_link_libraries(66_nonlocal
-    PUBLIC
-    Kokkos::kokkos
     )
 endif()
 

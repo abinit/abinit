@@ -150,6 +150,8 @@ AC_DEFUN([SD_KOKKOS_INIT], [
     sd_kokkos_libs=""
   fi
 
+  AM_CONDITIONAL(DO_BUILD_44_MANAGE_KOKKOS,[test "${sd_kokkos_enable}" = "yes"])
+
   # Display configuration
   _SD_KOKKOS_DUMP_CONFIG
 
@@ -203,7 +205,7 @@ AC_DEFUN([SD_KOKKOS_DETECT], [
         sd_kokkos_ldflags=""
         sd_kokkos_libs=""
       else
-        if test "${sd_netcdf_policy}" = "fail"; then
+        if test "${sd_kokkos_policy}" = "fail"; then
               AC_MSG_FAILURE([invalid Kokkos core libraries configuration])
         else
               AC_MSG_WARN([invalid Kokkos core libraries configuration])
@@ -253,8 +255,8 @@ AC_DEFUN([_SD_KOKKOS_CHECK_USE], [
 #      Kokkos::abort("Testing purposes");
 #    ]])], [sd_kokkos_cxx_ok="yes"], [sd_kokkos_cxx_ok="no"])
 #  AC_LANG_POP([C++])
-#  FIXME Kokkos is actually used with a wrapper on NVCC rather than any C++ compiler
-#  Hence we only check for library presence and run no link check.
+#  FIXME Kokkos is actually used with a wrapper on NVCC and C++ compiler.
+#  It's complicate, hence we only check for library presence and run no link check (WCGW?).
   sd_kokkos_cxx_ok="no"
   if test -e "${with_kokkos}/lib64/libkokkoscore.${abi_so_ext}"; then
     sd_kokkos_cxx_ok="yes"

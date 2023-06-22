@@ -18,12 +18,6 @@ set(66_wfs_SRC
   m_rmm_diis.F90
   )
 
-if (ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
-  LIST(APPEND 66_wfs_SRC
-    add_array_kokkos.cpp
-    assemble_energy_contrib_kokkos.cpp)
-endif()
-
 add_library(66_wfs STATIC
   ${66_wfs_SRC})
 
@@ -57,6 +51,13 @@ target_link_libraries(66_wfs
   abinit::66_nonlocal
   )
 
+if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
+  target_link_libraries(66_wfs
+    PUBLIC
+    abinit::44_manage_kokkos
+  )
+endif()
+
 if(OpenMP_FOUND)
   target_link_libraries(66_wfs
     PUBLIC
@@ -67,13 +68,6 @@ if(HAVE_OPENMP_OFFLOAD)
   target_compile_options(66_wfs
     PRIVATE
     $<$<COMPILE_LANGUAGE:Fortran>:${OPENMP_OFFLOAD_FLAGS}>)
-endif()
-
-if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
-  target_link_libraries(66_wfs
-    PUBLIC
-    Kokkos::kokkos
-    )
 endif()
 
 add_library(abinit::66_wfs ALIAS 66_wfs)

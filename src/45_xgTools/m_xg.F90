@@ -45,9 +45,10 @@ module m_xg
 
 #if defined(HAVE_GPU_CUDA)
   use m_gpu_toolbox
+#endif
+
 #if defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
   use m_xg_kokkos
-#endif
 #endif
 
 #if defined HAVE_YAKL
