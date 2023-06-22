@@ -137,6 +137,12 @@ else()
   set(DO_BUILD_46_MANAGE_CUDA FALSE)
 endif()
 
+if (ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
+  set(DO_BUILD_44_MANAGE_KOKKOS TRUE)
+else()
+  set(DO_BUILD_44_MANAGE_KOKKOS FALSE)
+endif()
+
 
 option(ABINIT_ENABLE_LIBPAW_INTERNAL "Enable building libpaw as part of abinit build (default ON)" ON)
 if (ABINIT_ENABLE_LIBPAW_INTERNAL)
