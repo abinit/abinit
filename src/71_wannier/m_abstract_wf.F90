@@ -669,6 +669,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       call ebands_expandk(inb=ebands, cryst=cryst, ecut_eff=ecut_eff, &
         & force_istwfk1=.True., dksqmax=dksqmax, &
         & bz2ibz=self%bz2ibz, outb=self%ebands_bz)
+! TODO: test if force_istwfk1 is not set to True, force rotate
       if (dksqmax > tol12) then
         write(msg, '(3a,es16.6,4a)' )&
           'At least one of the k points could not be generated from a symmetrical one.',ch10,&
