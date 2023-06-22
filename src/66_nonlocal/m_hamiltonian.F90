@@ -283,7 +283,11 @@ module m_hamiltonian
    ! gbound_kp(2*mgfft+8,2)
    ! G sphere boundary, for each plane wave at k^prime
 
+#if defined HAVE_GPU && defined HAVE_YAKL
   integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
+#else
+  integer, pointer :: kg_k(:,:) => null()
+#endif
    ! kg_k(3,npw_fft_k)
    ! G vector coordinates with respect to reciprocal lattice translations
    ! at k
