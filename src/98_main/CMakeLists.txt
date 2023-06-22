@@ -156,6 +156,10 @@ if(TARGET 17_gpu_toolbox)
   target_sources(abinit_lib PUBLIC $<TARGET_OBJECTS:17_gpu_toolbox>)
 endif()
 
+if(TARGET 44_manage_kokkos)
+  target_sources(abinit_lib PUBLIC $<TARGET_OBJECTS:44_manage_kokkos>)
+endif()
+
 if(TARGET 46_manage_cuda)
   target_sources(abinit_lib PUBLIC $<TARGET_OBJECTS:46_manage_cuda>)
 endif()
