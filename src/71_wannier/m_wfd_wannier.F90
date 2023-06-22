@@ -129,11 +129,15 @@ contains
     !print *, "Starting WFD Wannier"
     !print *, "============================================================"
 
-    spaceComm=MPI_enreg%comm_cell
-    nprocs=xmpi_comm_size(spaceComm)
+    !spaceComm=MPI_enreg%comm_cell
+    !nprocs=xmpi_comm_size(spaceComm)
     !rank=xmpi_comm_self
     ! TODO: is MPI_enreg  initialized?
-    rank=MPI_enreg%me_kpt
+    !rank=MPI_enreg%me_kpt
+    spaceComm=xmpi_world
+    nprocs = xmpi_comm_size(spaceComm)
+    rank=xmpi_comm_self
+
     master=0
 
     mgfftc=dtset%mgfft
