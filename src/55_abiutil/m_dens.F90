@@ -29,7 +29,7 @@ MODULE m_dens
  use m_splines
 
  use defs_abitypes,   only : MPI_type
- use m_fft,           only : fourdp
+ use m_fft,           only : fourdp,fftpac
  use m_time,          only : timab
  use m_numeric_tools, only : wrap2_zero_one
  use m_io_tools,      only : open_file
@@ -1631,7 +1631,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
- if (optfshp==2) then
+ if (optfshp==2.and.present(fatsph)) then
    call fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rprimd,typat,ucvol,xred,fatsph) 
  end if 
 
@@ -2739,6 +2739,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
 
 !Local variables ------------------------------
 !scalars
+ integer :: n1Cr,n2Cr,n3Cr
  integer :: iatom,ifft
  integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3
  real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
@@ -2748,6 +2749,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
  real(dp) :: work1(2,nfft),work2(nfft)
+ real(dp),allocatable :: fatsph3i(:,:,:)
 
 !******************************************************************
 
@@ -2756,7 +2758,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  id1=n1/2+2
  id2=n2/2+2
  id3=n3/2+2
- widthsq=(one/ratsm)**2
+ widthsq=(pi/ratsm)**2*1.d10
 ! widthsq=ratsm**2
 !  widthsq=one
 
@@ -2815,16 +2817,20 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
 
 !  Transform to real space
    call fourdp(1,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
-   fatsph(1:nfft,iatom)=work2(1:nfft)
-
-   norm=0
-   do ifft=1,nfft
-     norm=norm+work2(ifft)
-   !  write(100+iatom,*) work2(ifft)
-   end do
-   write(100+iatom,*) 'Norms:', norm/(nfft*ucvol),two*rad/(two_pi**2*three*ucvol)
+   fatsph(:,iatom)=work2(:)
 
  end do !iatom
+
+ allocate(fatsph3i(n1,n2,n3))
+ call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph(:,1),fatsph3i,2)
+ n1Cr=nint(xred(1,1)*n1)
+ n2Cr=nint(xred(2,1)*n2)
+ n3Cr=nint(xred(3,1)*n3)
+ do i1=1,n1
+   ig1=i1-(i1/id1)*n1-1
+   write(100,*) ig1, fatsph3i(i1,n2Cr,n3Cr)
+!   write(100,*) ig1, fatsph3i(i1,1,1)
+ end do
 
  contains
 
