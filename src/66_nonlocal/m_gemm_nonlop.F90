@@ -42,7 +42,6 @@ module m_gemm_nonlop
 
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm, only : opernlc_ylm
- use m_opernlc_ylm_gpu, only : opernlc_ylm_gpu
  use m_opernlc_ylm_allwf_cpu, only : opernlc_ylm_allwf_cpu
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
@@ -1556,17 +1555,6 @@ contains
 
           ibeg = shift+1
           iend = shift+nattyp(itypat)*nlmn
-
-          !   ! TODO - PK - old version - to be removed soon
-          ! do idat = 1,ndat
-          !   call opernlc_ylm_gpu(atindx1, cplex, cplex_enl, cplex_fac, &
-          !     &                  dimenl1, dimenl2, dimekbq, enl, &
-          !     &                  projections_cpu(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat), &
-          !     &                  vnl_projections_cpu(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat), &
-          !     &                  s_projections_cpu(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat), &
-          !     &                  iatm, indlmn(:,:,itypat), itypat, lambda(idat), mpi_enreg, natom, &
-          !     &                  nattyp(itypat), nlmn, nspinor, nspinortot, paw_opt, sij_typ)
-          ! end do ! idat
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
           ! TODO - PK
