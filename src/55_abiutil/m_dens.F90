@@ -2757,7 +2757,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
 
 !Local variables ------------------------------
 !scalars
-! integer :: n1Cr,n2Cr,n3Cr
+ integer :: n1Cr,n2Cr,n3Cr
  integer :: iatom,ifft
  integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3
  real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
@@ -2767,7 +2767,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
  real(dp) :: work1(2,nfft),work2(nfft)
-! real(dp),allocatable :: fatsph3i(:,:,:)
+ real(dp),allocatable :: fatsph3i(:,:,:)
 
 !******************************************************************
 
@@ -2787,7 +2787,8 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
    work1(:,:)=zero
    !G=0 term
    rad=ratsph(typat(iatom))
-   work1(1,1)=two*rad/(two_pi**2*three*ucvol)
+   work1(1,1)=two*rad**3/(two_pi**2*three*ucvol)
+!   work1(1,1)=four*pi*rad**3/(three*ucvol)
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
      gq3=dble(ig3)
@@ -2837,15 +2838,15 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
 
  end do !iatom
 
-! ABI_MALLOC(fatsph3i,(n1,n2,n3))
-! call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph(:,1),fatsph3i,2)
-! n1Cr=nint(xred(1,1)*n1)
-! n2Cr=nint(xred(2,1)*n2)
-! n3Cr=nint(xred(3,1)*n3)
-! do i1=1,n1
-!   ig1=i1-(i1/id1)*n1-1
-!   write(100,*) ig1, fatsph3i(i1,n2Cr,n3Cr)
-! end do
+ ABI_MALLOC(fatsph3i,(n1,n2,n3))
+ call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph(:,1),fatsph3i,2)
+ n1Cr=nint(xred(1,1)*n1)
+ n2Cr=nint(xred(2,1)*n2)
+ n3Cr=nint(xred(3,1)*n3)
+ do i1=1,n1
+   ig1=i1-(i1/id1)*n1-1
+   write(100,*) ig1, fatsph3i(i1,n2Cr,n3Cr)
+ end do
 
  contains
 
