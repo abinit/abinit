@@ -2739,7 +2739,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
 
 !Local variables ------------------------------
 !scalars
- integer :: n1Cr,n2Cr,n3Cr
+! integer :: n1Cr,n2Cr,n3Cr
  integer :: iatom,ifft
  integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3
  real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
@@ -2749,7 +2749,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
  real(dp) :: work1(2,nfft),work2(nfft)
- real(dp),allocatable :: fatsph3i(:,:,:)
+! real(dp),allocatable :: fatsph3i(:,:,:)
 
 !******************************************************************
 
@@ -2758,9 +2758,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  id1=n1/2+2
  id2=n2/2+2
  id3=n3/2+2
- widthsq=(pi/ratsm)**2*1.d10
-! widthsq=ratsm**2
-!  widthsq=one
+ widthsq=ratsm**2
 
 !Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -2798,7 +2796,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
            gmag=sqrt(gsquar)
            gcube=gmag*gsquar
            gmagrad=two_pi*gmag*rad
-           arg1=-gsquar*pi**2/widthsq
+           arg1=-gsquar*pi**2*widthsq
            arg2=two_pi*dot_product(xred(:,iatom),gq)
   
            fac1=two/(two_pi**2*gcube*ucvol)
@@ -2821,16 +2819,15 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
 
  end do !iatom
 
- allocate(fatsph3i(n1,n2,n3))
- call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph(:,1),fatsph3i,2)
- n1Cr=nint(xred(1,1)*n1)
- n2Cr=nint(xred(2,1)*n2)
- n3Cr=nint(xred(3,1)*n3)
- do i1=1,n1
-   ig1=i1-(i1/id1)*n1-1
-   write(100,*) ig1, fatsph3i(i1,n2Cr,n3Cr)
-!   write(100,*) ig1, fatsph3i(i1,1,1)
- end do
+! ABI_MALLOC(fatsph3i,(n1,n2,n3))
+! call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph(:,1),fatsph3i,2)
+! n1Cr=nint(xred(1,1)*n1)
+! n2Cr=nint(xred(2,1)*n2)
+! n3Cr=nint(xred(3,1)*n3)
+! do i1=1,n1
+!   ig1=i1-(i1/id1)*n1-1
+!   write(100,*) ig1, fatsph3i(i1,n2Cr,n3Cr)
+! end do
 
  contains
 
