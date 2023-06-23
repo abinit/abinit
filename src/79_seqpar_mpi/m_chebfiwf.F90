@@ -775,7 +775,7 @@ subroutine getBm1X(X,Bm1X,transposer)
 
    ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
-       spacedim, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
+       spacedim/l_nspinor, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
    ABI_NVTX_END_RANGE()
  else
    gsm1hc_filter(:,:) = ghc_filter(:,:)
