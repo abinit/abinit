@@ -503,8 +503,8 @@ subroutine read_wfd()
    ABI_FREE(keep_ur)
    ABI_FREE(bks_mask)
 
-   call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
-   !call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
+   !call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+   call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
    !call wfd%test_ortho(cryst, pawtab)
 
  end subroutine read_wfd
