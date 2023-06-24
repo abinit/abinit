@@ -955,12 +955,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1528)='fock_getghc(clean k loop)       '
 
 !Partitioning in small blocs without fourXX and nonlop. One has to add 1521, 1523, 1527, 1528
- names(1541)='fock_getghc(init wo fourwf)     '; related to 1505
- names(1542)='fock_getghc(j loop wo fourwf)   '; related to 1522  
- names(1544)='fock_getghc(calc_rhor_munu wo fo'; related to 1524  
- names(1545)='fock_getghc(calc_vloc wo fourXX)'; related to 1525  
- names(1546)='fock_getghc(calc_dij_fock_hat wo'; related to 1526
- names(1547)='fock_getghc(calc_ghc wo fourXX  '; related to 1507
+ names(1541)='fock_getghc(init wo fourwf)     '; !related to 1505
+ names(1542)='fock_getghc(j loop wo fourwf)   '; !related to 1522  
+ names(1544)='fock_getghc(calc_rhor_munu wo fo'; !related to 1524  
+ names(1545)='fock_getghc(calc_vloc wo fourXX)'; !related to 1525  
+ names(1546)='fock_getghc(calc_dij_fock_hat wo'; !related to 1526
+ names(1547)='fock_getghc(calc_ghc wo fourXX  '; !related to 1507
 
 
  names(1560)='fock2ACE                        '
@@ -1310,8 +1310,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:24)=&
 &     (/14, 270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292/)
    case(18)
-!      Estimate the complement of getghc (non fourwf, non nonlop)
-     tslots(:4)=(/-98, 200,-841,-221/)
+!      Estimate the complement of getghc (non fourwf, non fourdp, non nonlop)
+     tslots(:9)=(/-98, 200,-221,-235,-236,-237,-841,-850,-1270/)
    case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
      tslots(:6)=(/-40, 22,530,1300,-201,-211/)
