@@ -134,10 +134,9 @@ contains
     !rank=xmpi_comm_self
     ! TODO: is MPI_enreg  initialized?
     !rank=MPI_enreg%me_kpt
-    spaceComm=xmpi_world
-    nprocs = xmpi_comm_size(spaceComm)
-    rank=xmpi_comm_self
-
+    spaceComm=MPI_enreg%comm_world
+    nprocs = MPI_enreg%nproc
+    rank= MPI_enreg%me
     master=0
 
     mgfftc=dtset%mgfft
