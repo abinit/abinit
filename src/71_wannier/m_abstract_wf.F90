@@ -82,7 +82,8 @@ module m_abstract_wf
  type, public:: wann_ksetting_t
    logical :: has_ovikp =  .False.
    type(crystal_t), pointer :: cryst => null()
-   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0,rank, comm, nprocs
+   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0
+   integer :: rank=-999, comm=-999, nprocs=-999
    integer, allocatable :: ovikp(:, :)
    integer :: my_nspin,  my_nkpt, my_nkpt_pnn
    integer, allocatable :: my_spins(:), my_ikpts(:), my_ikpts_pnn(:)
@@ -111,7 +112,7 @@ module m_abstract_wf
     type(ebands_t), pointer :: ebands => null()
     type(wann_ksetting_t) :: kset
     integer :: natom=0, nspinor=0, nsppol=0, mband=0, &
-         & mkmem=0, nkpt=0, rank=0, nprocs=0, comm=0
+         & mkmem=0, nkpt=0, rank=-999, nprocs=-999, comm=-999
   contains
     !procedure :: init => abstract_wf_init
     procedure :: abstract_init
@@ -195,8 +196,6 @@ contains
     self%cryst=>cryst
     self%nkpt=nkpt
     self%mband=mband
-    self%rank=rank
-    self%nprocs=nprocs
     self%nsppol=nsppol
     self%my_nspin = nsppol
     self%kkpts=> kkpts
@@ -212,6 +211,7 @@ contains
     if (self%has_ovikp) then
       ABI_ERROR("ovikp already set!")
     end if
+    !print *, "set_ovikp"
     self%has_ovikp = .True.
     self%nntot = nntot
     self%num_nnmax=num_nnmax
@@ -244,12 +244,13 @@ contains
     integer :: ikpt, inn, ik_me, ik_nn, ispin
     logical :: belongs(self%nkpt)
     integer :: counter
-
-    !write(std_out,*) "Distribute mpi:", self%rank
     MPI_enreg%comm_cell=self%comm
     mpi_enreg%me=self%rank
     mpi_enreg%me_kpt=self%rank
+    mpi_enreg%nproc = self%nprocs
     MPI_enreg%paral_spinor=0
+    !write(std_out,*) "Distributed mpi:", "rank:",  self%rank, "comm", self%comm
+    !write(std_out,*) "nprocs:", self%nprocs, "me:", mpi_enreg%me, "me_kpt:", mpi_enreg%me_kpt
     if (.not. allocated(mpi_enreg%proc_distrb))then
       ABI_MALLOC(mpi_enreg%proc_distrb, (self%nkpt, self%mband, self%nsppol) )
     end if
@@ -599,6 +600,11 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
 
 
     self%expanded=(dtset%kptopt==1 .or. dtset%kptopt==2)
+
+    self%comm=comm
+    self%rank=rank
+    self%nprocs=nprocs
+    !print *, "set mpi info to wfd_wf", "self%comm", "self%rank", "self%nprocs"
 
     if (self%expanded) then
       self%expanded=.True.
