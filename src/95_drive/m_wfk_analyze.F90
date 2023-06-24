@@ -436,7 +436,6 @@ case (WFK_TASK_WANNIER)
 
       call destroy_mpi_enreg(mpi_enreg)
       call init_mpi_enreg(mpi_enreg)
-      print *, "mpi_enreg:", mpi_enreg%comm_world, mpi_enreg%me, mpi_enreg%nproc
       call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
       call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
@@ -504,8 +503,8 @@ subroutine read_wfd()
    ABI_FREE(keep_ur)
    ABI_FREE(bks_mask)
 
-   !call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
-   call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
+   call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+   !call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
    !call wfd%test_ortho(cryst, pawtab)
 
  end subroutine read_wfd
