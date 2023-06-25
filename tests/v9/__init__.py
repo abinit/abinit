@@ -163,6 +163,7 @@ inp_files = [
     "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
     "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
     "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
+    "t148.abi",  # test flexoelectric tensor calculation with ffnl_lw=1
 
     # write_files behaviour
     "t150.abi",  # test the behaviour of supravariable write_files
