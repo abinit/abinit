@@ -1,5 +1,5 @@
 
-.Version 9.8.1 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Dec 2022.
-- ( at 21h26 )
+.Starting date : Sun 25 Jun 2023.
+- ( at 08h48 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/wannier90_t11/t11.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/TestBot_MPI1/wannier90_t11/t11.abi
 - output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
@@ -191,8 +191,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.07656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -407,14 +407,14 @@ force_length_stats: {min: null, max: null, mean: null, }
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (  -0.564065  -0.000000 ,   0.713618   0.000000 ,  -0.162127  -0.000000 ,    )
+;   (  -0.564064  -0.000000 ,   0.713618   0.000000 ,  -0.162127  -0.000000 ,    )
 ;   (  -0.113957   0.000004 ,   0.133402   0.000003 ,   0.920953   0.000000 ,    )
 ;   (  -0.691829   0.000001 ,  -0.471620  -0.000001 ,  -0.049542  -0.000005 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.707927   0.000000 ,   0.707927   0.000000 ,   0.707927   0.000000 ,    )
+;   (   0.707927   0.000000 ,   0.707927  -0.000000 ,   0.707927  -0.000000 ,    )
 ;   (   0.000007   0.846607 ,  -0.000011   0.308638 ,   0.000002   0.005981 ,    )
 ;   (  -0.000010   0.432303 ,   0.000012   0.420279 ,  -0.000000  -1.272907 ,    )
 
@@ -644,10 +644,10 @@ P           mkmem2          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.1
++Overall time at end (sec) : cpu=          1.2  wall=          1.2
