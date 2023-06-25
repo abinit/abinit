@@ -29,7 +29,7 @@ module m_fock_getghc
 
  use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
- use m_time,         only : timab
+ use m_time,         only : timab, time_accu
  use m_symtk,        only : matr3inv
  use m_cgtools,      only : dotprod_g
  use m_kg,           only : mkkpg
@@ -106,16 +106,19 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
+ integer, save :: ncount=0
+ integer :: return_ncount
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
  real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,occ,wtk
+ real(dp) :: lflops
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! Arrays
  integer :: ngfft(18),ngfftf(18)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
- real(dp) :: rhodum0(0,1,1),str(3,3)
+ real(dp) :: rhodum0(0,1,1),str(3,3),ftsec(2)
  real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
  real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
@@ -128,6 +131,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 ! *************************************************************************
 !return
+ 
+ ncount=ncount+1
+
  call timab(1504,1,tsec) ; call timab(1505,-1,tsec) ; call timab(1515,-1,tsec) ; call timab(1541,-1,tsec)
 
  ABI_CHECK(associated(gs_ham%fockcommon),"fock_common must be associated!")
@@ -307,11 +313,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! =================================================
    do jband=1,nband_k
 
-     call timab(1522,1,tsec) ; call timab(1542,-1,tsec)
-
 !*   occ = occupancy of jband at this k point
      occ=fockbz%occ_bz(jband+bdtot_jindex,my_jsppol)
      if(occ<tol8) cycle
+
+!    This timing is placed after the cycle ...
+     call timab(1522,1,tsec) ; call timab(1542,-1,tsec)
 
 ! ==============================================
 ! === Get cwaveocc_r in real space using FFT ===
@@ -336,7 +343,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* rhor_munu will contain the overlap density matrix.
 ! vfock=-int{conj(cwaveocc_r)*cwavef_r*dr'/|r-r'|}
 
-     call timab(1522,2,tsec) ; call timab(1542,-2,tsec) ; call timab(1523,1,tsec)
+     call timab(1522,2,tsec) ; call timab(1542,-2,tsec) ; call timab(1523,-1,tsec)
 
      ind=0
      do i3=1,n3f
@@ -357,8 +364,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === Add compensation charge density in the PAW case ===
 ! =======================================================
 
-     call timab(1524,-1,tsec)
-     call timab(1544,-1,tsec)
+     call timab(1524,-1,tsec) ; call timab(1544,-1,tsec)
 
      if (fockcommon%usepaw==1) then
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
@@ -387,6 +393,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
          if (allocated(fockbz%cgocc)) then
            ABI_FREE(cwaveocc_r)
          end if
+         call timab(1524,2,tsec) ; call timab(1544,-2,tsec)
          cycle
        end if
      end if
@@ -569,7 +576,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === End of loop : update of shifts and deallocations ===
 ! ==============================:=========================
 !* Update of the shifts to be applied (reminder : mkmem is not 0, nspinor=1)
-   call timab(1528,-1,tsec)
+   call timab(1528,1,tsec)
    jcg=jcg+npwj*nband_k
    jbg=jbg+nband_k
    bdtot_jindex=bdtot_jindex+nband_k
@@ -589,7 +596,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === After loop                                       ===
 ! ========================================================
 
- call timab(1506,2,tsec) ; call timab(1507,-1,tsec) ; call timab(1547,-1,tsec)
+ call timab(1506,2,tsec) ; call timab(1507,1,tsec) ; call timab(1547,-1,tsec)
 
  if (fockcommon%usepaw==1) then
    if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
@@ -642,92 +649,94 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &   npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
 
 !   if (fockcommon%ieigen/=0) fockcommon%ieigen=0
-   return
- end if
 
-!*Restore gs_ham datastructure
+ else
+ 
+!  *Restore gs_ham datastructure
 
- if (associated(gs_ham%ph3d_kp)) then
-   ABI_MALLOC(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
- end if
- call gs_ham%load_kprime(kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
-& npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
-
-!* Perform an FFT using fourwf to get ghc1 = FFT^-1(vlocpsi_r)
- ABI_MALLOC(psilocal,(cplex_fock*n4f,n5f,n6f))
- call fftpac(1,mpi_enreg,nspden_fock,cplex_fock*n1f,n2f,n3f,cplex_fock*n4f,n5f,n6f,ngfft,vlocpsi_r,psilocal,2)
-
- call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1547,-1,tsec)
- call fourwf(0,rhodum0,rhodum,ghc1,psilocal,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
-& mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf_fock_getghc,weight1,weight1,&
-& use_gpu_cuda=gs_ham%use_gpu_cuda)
- call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1547,-2,tsec)
- ABI_FREE(psilocal)
-
- ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
-
-!* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
- ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
-
- call xmpi_sum(ghc,mpi_enreg%comm_hf,ier)
-
-! ===============================
-! === Deallocate local PAW arrays ===
-! ===============================
- if (fockcommon%usepaw==1) then
-   ABI_FREE(gvnlxc)
-   ABI_FREE(grnhat12)
-   if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
-     ABI_FREE(forikpt)
-     ABI_FREE(forout)
+   if (associated(gs_ham%ph3d_kp)) then
+     ABI_MALLOC(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
    end if
-   if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-     ABI_FREE(strout)
-   end if
-   ABI_FREE(grnhat_12)
- end if
- if(fockcommon%usepaw==1.or.fockcommon%optstr) then
-   ABI_FREE(gboundf)
- end if
-! ============================================
-! === Calculate the contribution to energy ===
-! ============================================
-!* Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
-!* at each convergence step. (consistent definition with the definition of hartree energy)
- if (fockcommon%ieigen/=0) then
-   eigen=zero
-!* Dot product of cwavef and ghc
-!* inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
-   if(gs_ham%istwf_k==2) then
-     eigen=half*cwavef(1,1)*ghc1(1,1)
-   else
-     eigen=cwavef(1,1)*ghc1(1,1)+cwavef(2,1)*ghc1(2,1)
-   end if
-   do ipw=2,npw
-     eigen=eigen+cwavef(1,ipw)*ghc1(1,ipw)+cwavef(2,ipw)*ghc1(2,ipw)
-   end do
-   if(gs_ham%istwf_k>=2) eigen=two*eigen
-   call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
-   fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
-   if(fockcommon%use_ACE==0) fockcommon%ieigen = 0
- end if
+   call gs_ham%load_kprime(kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
+&   npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
 
-! ===============================
-! === Deallocate local arrays ===
-! ===============================
- ABI_FREE(cwavef_r)
- ABI_FREE(ghc1)
- ABI_FREE(ghc2)
- ABI_FREE(rhor_munu)
- ABI_FREE(rhog_munu)
- ABI_FREE(vlocpsi_r)
- ABI_FREE(dummytab)
- ABI_FREE(vfock)
- ABI_FREE(vqg)
+!  * Perform an FFT using fourwf to get ghc1 = FFT^-1(vlocpsi_r)
+   ABI_MALLOC(psilocal,(cplex_fock*n4f,n5f,n6f))
+   call fftpac(1,mpi_enreg,nspden_fock,cplex_fock*n1f,n2f,n3f,cplex_fock*n4f,n5f,n6f,ngfft,vlocpsi_r,psilocal,2)
+
+   call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1547,-2,tsec)
+   call fourwf(0,rhodum0,rhodum,ghc1,psilocal,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
+&   mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf_fock_getghc,weight1,weight1,&
+&   use_gpu_cuda=gs_ham%use_gpu_cuda)
+   call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1547,-1,tsec)
+   ABI_FREE(psilocal)
+
+   ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
+
+!  * If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
+   ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
+
+   call xmpi_sum(ghc,mpi_enreg%comm_hf,ier)
+
+!   ===============================
+!   === Deallocate local PAW arrays ===
+!   ===============================
+   if (fockcommon%usepaw==1) then
+     ABI_FREE(gvnlxc)
+     ABI_FREE(grnhat12)
+     if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
+       ABI_FREE(forikpt)
+       ABI_FREE(forout)
+     end if
+     if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
+       ABI_FREE(strout)
+     end if
+     ABI_FREE(grnhat_12)
+   end if
+   if(fockcommon%usepaw==1.or.fockcommon%optstr) then
+     ABI_FREE(gboundf)
+   end if
+!   ============================================
+!   === Calculate the contribution to energy ===
+!   ============================================
+!  * Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
+!  * at each convergence step. (consistent definition with the definition of hartree energy)
+   if (fockcommon%ieigen/=0) then
+     eigen=zero
+!  * Dot product of cwavef and ghc
+!  * inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
+     if(gs_ham%istwf_k==2) then
+       eigen=half*cwavef(1,1)*ghc1(1,1)
+     else
+       eigen=cwavef(1,1)*ghc1(1,1)+cwavef(2,1)*ghc1(2,1)
+     end if
+     do ipw=2,npw
+       eigen=eigen+cwavef(1,ipw)*ghc1(1,ipw)+cwavef(2,ipw)*ghc1(2,ipw)
+     end do
+     if(gs_ham%istwf_k>=2) eigen=two*eigen
+     call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
+     fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
+     if(fockcommon%use_ACE==0) fockcommon%ieigen = 0
+   end if
+
+!   ===============================
+!   === Deallocate local arrays ===
+!   ===============================
+   ABI_FREE(cwavef_r)
+   ABI_FREE(ghc1)
+   ABI_FREE(ghc2)
+   ABI_FREE(rhor_munu)
+   ABI_FREE(rhog_munu)
+   ABI_FREE(vlocpsi_r)
+   ABI_FREE(dummytab)
+   ABI_FREE(vfock)
+   ABI_FREE(vqg)
+ 
+ endif
 
  call timab(1504,2,tsec) ; call timab(1507,-2,tsec) ; call timab(1515,-2,tsec) ; call timab(1547,-2,tsec)
 
-end subroutine fock_getghc
+ end subroutine fock_getghc
 !!***
 
 !!****f* ABINIT/fock2ACE
@@ -885,8 +894,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !LOOP OVER SPINS
  bdtot_index=0;ibg=0;icg=0
- call timab(1561,2,tsec)
- call timab(1562,3,tsec)
+ call timab(1561,2,tsec) ; call timab(1562,-1,tsec)
 
  do isppol=1,nsppol
    fockcommon%isppol=isppol
@@ -1031,11 +1039,11 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
          if (gs_hamk%usepaw==1) then
            cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
          end if
-         call timab(1562,2,tsec)
+         call timab(1562,2,tsec) ; call timab(1563,-1,tsec)
          call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
 &         wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
          mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
-         call timab(1562,1,tsec)
+         call timab(1563,2,tsec) ; call timab(1562,-1,tsec)
          fockcommon%e_fock0=fockcommon%e_fock0+half*weight(iblocksize)*fockcommon%eigen_ikpt(fockcommon%ieigen)
          if (fockcommon%optfor) then
            fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)

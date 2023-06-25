@@ -271,7 +271,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(95)='tddft                           '
  names(96)='dieltcel                        '; basic(96)=1
  names(97)='nonlop(total)                   '
- names(98)='getghc-other                    '; basic(98)=1
 
  names(101)='abinit(init,iofn1,herald)      '; basic(101)=1
  names(102)='get_dtsets_pspheads            '; basic(102)=1
@@ -342,6 +341,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(206)='getghc%prep_getghc              '
  names(207)='getghc%other lobpcg             '
  names(208)='getghc%update_mmat              '
+ names(209)='getghc(/=fourXX,nonlop)         '; basic(209)=1
 
  names(210)='projbd                          '; basic(210)=1;    ndata(210)=npwnbdmean
  names(211)='projbd%cgwf                     '
@@ -731,13 +731,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(914)='forstr(stress)                  '
 
  names(920)='forstrnps                       '
- names(921)='forstrnps(bef.loop spin)        '
+ names(921)='forstrnps(bef.loop k spin)      '
  names(922)='forstrnps(bef.loop band)        '
  names(923)='forstrnps(copy)                 '
- names(924)='forstrnps(kinetic contr)        '
- names(925)='forstrnps(aft.loop kptsp        '
- names(926)='forstrnps(nonlop+prep_ba        '
- names(927)='forstrnps(bef.loop kpt)         '
+ names(924)='forstrnps(nonlop+prep_ba        '
+ names(925)='forstrnps(kinetic contr)        '
+ names(926)='forstrnps(fock_getghc)          '
+ names(927)='forstrnps(aft.loop band block)  '
+ names(928)='forstrnps(aft.loop k spin)      '
 
  names(933)='outkss                          '
  names(934)='outkss(Gsort+hd)                '
@@ -937,7 +938,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1504)='fock_getghc                     '; !1504 = 1505 + 1506 + 1507 
  names(1505)='fock_getghc(init)               '; ! 100 % nested inside 1504
- names(1506)='fock_getghc-kmu_loop            '; ! 100 % nested inside 1504 1506 = 1521+ ... 1528
+ names(1506)='fock_getghc-kmu_loop            '; ! 100 % nested inside 1504, 1506 = 1521+ ... 1528
  names(1507)='fock_getghc(calc_ghc)           '; ! 100 % nested inside 1504
  names(1512)='fock_getghc(fourwf)             ' 
  names(1513)='fock_getghc(fourdp)             ' 
@@ -957,7 +958,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Partitioning in small blocs without fourXX and nonlop. One has to add 1521, 1523, 1527, 1528
  names(1541)='fock_getghc(init wo fourwf)     '; !related to 1505
  names(1542)='fock_getghc(j loop wo fourwf)   '; !related to 1522  
- names(1544)='fock_getghc(calc_rhor_munu wo fo'; !related to 1524  
+ names(1544)='fock_getghc(calc_rhog_munu wo fo'; !related to 1524  
  names(1545)='fock_getghc(calc_vloc wo fourXX)'; !related to 1525  
  names(1546)='fock_getghc(calc_dij_fock_hat wo'; !related to 1526
  names(1547)='fock_getghc(calc_ghc wo fourXX  '; !related to 1507
@@ -966,7 +967,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1560)='fock2ACE                        '
  names(1561)='fock2ACE(init)                  '; basic(1561)=1
  names(1562)='fock2ACE(main/=fock_getghc)     '; basic(1562)=1
- names(1565)='fock2ACE(finalize)              '; basic(1563)=1
+ names(1563)='fock2ACE(fock_getghc)           '
+ names(1565)='fock2ACE(finalize)              '; basic(1565)=1
 
  names(1580)='fockACE_getghc                  '; basic(1580)=1
 
@@ -1311,7 +1313,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 &     (/14, 270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292/)
    case(18)
 !      Estimate the complement of getghc (non fourwf, non fourdp, non nonlop)
-     tslots(:9)=(/-98, 200,-221,-235,-236,-237,-841,-850,-1270/)
+     tslots(:6)=(/-209, 200,-221,-235,-236,-841/)
    case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
      tslots(:6)=(/-40, 22,530,1300,-201,-211/)
@@ -1543,8 +1545,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    do ilist=1,nlist
      isort = list(ilist)
 
-     if ( (times(1,isort)*cpunm  > percent_limit .and. &
-           times(2,isort)*wallnm > percent_limit) .and. ncount(isort) /= 0) then ! Timing analysis
+     if ( ((times(1,isort)*cpunm  > percent_limit .and.       &
+            times(2,isort)*wallnm > percent_limit      ).or.  &
+!          Also print the name of routines with anomalous negative timing. This is to help debugging.
+            (times(1,isort)*cpunm  < -tol3 .or.                &
+             times(2,isort)*wallnm < -tol3              ))     &
+           .and. ncount(isort) /= 0) then ! Timing analysis
 
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
@@ -1700,7 +1706,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(15)
          list(:8)=(/122,140,202,197,212,227,228,844/)                ; msg='dfpt_cgwf '
        case(16)
-         list(:4)=(/200,841,221,98/)                                 ; msg='getghc '
+         list(:6)=(/200,841,221,209,235,236/)                        ; msg='getghc '
        case(17)
          list(:21)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,880/)
          msg='fourwf (upwards partitioning)'
@@ -1751,7 +1757,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(40)
          list(:5)=(/ (ii,ii=910,914,1) /)                            ; msg='forstr '
        case(41)
-         list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; msg='forstrnps '
+         list(:9)=(/920,921,922,923,924,925,926,927,928/)            ; msg='forstrnps '
        case(42)
          list(:4)=(/670,671,672,673/)                                ; msg='exc_build_ham '
        case(43)
@@ -1765,7 +1771,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(47)
          list(:9)=(/ (ii,ii=1001,1009,1) /)                          ; msg='initberry '
        case(50)
-         list(:5)=(/1560,1561,1562,1504,1565/)                       ; msg='fock2ACE '
+         list(:5)=(/1560,1561,1562,1563,1565/)                       ; msg='fock2ACE '
        case(51)
          list(:5)=(/1504,1515,850,1270,237/)                         ; msg='fock_getghc -original'
        case(52)
@@ -1860,8 +1866,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            end if
            if(ncount(isort)/=0)then
              ! Do not write a slot if the wall time ratio is below a threshold
-             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then
-               if ( times(2,isort) < 0.0001 ) times(2,isort) = -1.d0
+             ! However, also identifies when the wall time of a slot (here, a complement) is negative
+             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1 .or. times(2,isort)*wallnm<-tol3)then
+               if((times(2,isort)*wallnm>0.02d0.or.ilist==1).and.times(2,isort) < 0.0001)times(2,isort)=-1.d0
                write(ount,format01040)names(isort),&
                  times(1,isort),times(1,isort)*cpunm,&
                  times(2,isort),times(2,isort)*wallnm,ncount(isort), &
