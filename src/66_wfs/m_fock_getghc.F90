@@ -107,18 +107,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,paw_opt,signs,tim_nonlop
  integer, save :: ncount=0
- integer :: return_ncount
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
  real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,occ,wtk
- real(dp) :: lflops
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! Arrays
  integer :: ngfft(18),ngfftf(18)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
- real(dp) :: rhodum0(0,1,1),str(3,3),ftsec(2)
+ real(dp) :: rhodum0(0,1,1),str(3,3)
  real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:)
  real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
