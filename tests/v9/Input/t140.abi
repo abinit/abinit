@@ -89,7 +89,7 @@ pseudos="P.xml, Al.xml"
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW
-#%% description = 
-#%% topics = DFPT
+#%% description = Calculate chemical shielding in solid AlP
+#%% topics = MagField
 #%%<END TEST_INFO>
       

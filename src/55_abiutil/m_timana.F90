@@ -195,9 +195,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Channels 700 to 799 are for optdriver=0 (again ...)
 !Channels 800 to 899 are for the detailed analysis of fourwf
 !Channels 900 to 1499 are for optdriver=0 (again ...)
-!Channels 1500 to 1519 are for Hartree-Fock.
+!Channels 1500 to 1599 are for Hartree-Fock.
 !Channels 1700 to 1747 are for GWLS.
-!Channels 1520 and beyond are not yet attributed.
 
  names(1:TIMER_SIZE)='***                             '
 !Basic slots are not overlapping. Their sum should cover most of the code.
@@ -272,7 +271,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(95)='tddft                           '
  names(96)='dieltcel                        '; basic(96)=1
  names(97)='nonlop(total)                   '
- names(98)='getghc-other                    '; basic(98)=1
 
  names(101)='abinit(init,iofn1,herald)      '; basic(101)=1
  names(102)='get_dtsets_pspheads            '; basic(102)=1
@@ -343,6 +341,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(206)='getghc%prep_getghc              '
  names(207)='getghc%other lobpcg             '
  names(208)='getghc%update_mmat              '
+ names(209)='getghc(/=fourXX,nonlop)         '; basic(209)=1
 
  names(210)='projbd                          '; basic(210)=1;    ndata(210)=npwnbdmean
  names(211)='projbd%cgwf                     '
@@ -732,13 +731,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(914)='forstr(stress)                  '
 
  names(920)='forstrnps                       '
- names(921)='forstrnps(bef.loop spin)        '
+ names(921)='forstrnps(bef.loop k spin)      '
  names(922)='forstrnps(bef.loop band)        '
  names(923)='forstrnps(copy)                 '
- names(924)='forstrnps(kinetic contr)        '
- names(925)='forstrnps(aft.loop kptsp        '
- names(926)='forstrnps(nonlop+prep_ba        '
- names(927)='forstrnps(bef.loop kpt)         '
+ names(924)='forstrnps(nonlop+prep_ba        '
+ names(925)='forstrnps(kinetic contr)        '
+ names(926)='forstrnps(fock_getghc)          '
+ names(927)='forstrnps(aft.loop band block)  '
+ names(928)='forstrnps(aft.loop k spin)      '
 
  names(933)='outkss                          '
  names(934)='outkss(Gsort+hd)                '
@@ -935,25 +935,42 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1501)='fock_init                       '; basic(1501)=1
  names(1502)='fock_updatecwaveocc             '; basic(1502)=1
  names(1503)='fock_updatecwaveocc(MPI)        '; ! 100 % nested inside 1502
- names(1504)='fock_getghc                     '; !1504 = 1505 + 1506 + 1511 + extra_loops
+
+ names(1504)='fock_getghc                     '; !1504 = 1505 + 1506 + 1507 
  names(1505)='fock_getghc(init)               '; ! 100 % nested inside 1504
- names(1506)='fock_getghc-kmu_loop            '; ! 1506 = 1508 + 1509 + 1510 + 1507 + extra_loops
- names(1507)='fock_getghc(calc_vlocpsi)       '; ! 100 % nested inside 1506
- names(1508)='fock_getghc(mult-cwf*cwocc)     '; ! 100 % nested inside 1506
- names(1509)='fock_getghc(calc_rhog_munu)     '; ! 100 % nested inside 1506
- names(1510)='fock_getghc(calc_vloc)          '; ! 100 % nested inside 1506
- names(1511)='fock_getghc(calc_ghc)           '; ! 100 % nested inside 1504
- names(1512)='fock_getghc(fourwf)             '; 
- names(1513)='fock_getghc(fourdp)             '; 
- names(1514)='fock_getghc(nonlop)             '; 
+ names(1506)='fock_getghc-kmu_loop            '; ! 100 % nested inside 1504, 1506 = 1521+ ... 1528
+ names(1507)='fock_getghc(calc_ghc)           '; ! 100 % nested inside 1504
+ names(1512)='fock_getghc(fourwf)             ' 
+ names(1513)='fock_getghc(fourdp)             ' 
+ names(1514)='fock_getghc(nonlop)             ' 
  names(1515)='fock_getghc(/=fourXX,nonlop)    ';  basic(1515)=1  ! ulterior slot for test
 
- names(1520)='fock2ACE                        '
- names(1521)='fock2ACE(init)                  '; basic(1521)=1
- names(1522)='fock2ACE(main/=fock_getghc)     '; basic(1522)=1
- names(1525)='fock2ACE(finalize)              '; basic(1523)=1
+!Partitioning of the loop on k points inside fock_getghc (1506)
+ names(1521)='fock_getghc(init k loop)        '   
+ names(1522)='fock_getghc(j loop fourwf)      '   
+ names(1523)='fock_getghc(calc_rhor_munu)     '  
+ names(1524)='fock_getghc(calc_rhog_munu)     '  
+ names(1525)='fock_getghc(calc_vloc)          '  
+ names(1526)='fock_getghc(calc_dij_fock_hat)  '
+ names(1527)='fock_getghc(calc_vlocpsi)       '
+ names(1528)='fock_getghc(clean k loop)       '
 
- names(1530)='fockACE_getghc                  '; basic(1530)=1
+!Partitioning in small blocs without fourXX and nonlop. One has to add 1521, 1523, 1527, 1528
+ names(1541)='fock_getghc(init wo fourwf)     '; !related to 1505
+ names(1542)='fock_getghc(j loop wo fourwf)   '; !related to 1522  
+ names(1544)='fock_getghc(calc_rhog_munu wo fo'; !related to 1524  
+ names(1545)='fock_getghc(calc_vloc wo fourXX)'; !related to 1525  
+ names(1546)='fock_getghc(calc_dij_fock_hat wo'; !related to 1526
+ names(1547)='fock_getghc(calc_ghc wo fourXX  '; !related to 1507
+
+
+ names(1560)='fock2ACE                        '
+ names(1561)='fock2ACE(init)                  '; basic(1561)=1
+ names(1562)='fock2ACE(main/=fock_getghc)     '; basic(1562)=1
+ names(1563)='fock2ACE(fock_getghc)           '
+ names(1565)='fock2ACE(finalize)              '; basic(1565)=1
+
+ names(1580)='fockACE_getghc                  '; basic(1580)=1
 
  ! Chebfi
  names(1600) = 'chebfi                        '
@@ -1112,44 +1129,44 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
 
  ! DVDB object
- names(1800)='dvdb_new'; basic(1800) = 1
- names(1801)='dvdb_qcache_read'; basic(1801) = 1
- names(1802)='dvdb_readsym_qbz'; basic(1802) = 1
- names(1803)='dvdb_rotate_fqg'; basic(1803) = 1
- names(1804)='v1phq_rotate'; basic(1804) = 1
- names(1805)='dvdb_readsym_allv1'; basic(1805) = 1
- names(1806)='dvdb_collect_v1_3natom'; basic(1806) = 1
- names(1807)='dvdb_qcache_update'; basic(1807) = 1
- names(1808)='dvdb_ftqcache_build'; basic(1808) = 1
- names(1809)='dvdb_get_ftqbz'; basic(1809) = 1
+ names(1800)='dvdb_new                        '; basic(1800) = 1
+ names(1801)='dvdb_qcache_read                '; basic(1801) = 1
+ names(1802)='dvdb_readsym_qbz                '; basic(1802) = 1
+ names(1803)='dvdb_rotate_fqg                 '; basic(1803) = 1
+ names(1804)='v1phq_rotate                    '; basic(1804) = 1
+ names(1805)='dvdb_readsym_allv1              '; basic(1805) = 1
+ names(1806)='dvdb_collect_v1_3natom          '; basic(1806) = 1
+ names(1807)='dvdb_qcache_update              '; basic(1807) = 1
+ names(1808)='dvdb_ftqcache_build             '; basic(1808) = 1
+ names(1809)='dvdb_get_ftqbz                  '; basic(1809) = 1
 
  ! SIGEPH
- !names(1900)='sigph_pre_qloop'; basic(1900) = 1
- !names(1901)='sigph_qloop_preamble'; basic(1901) = 1
- !names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
- names(1903)='sigph_bsum'; basic(1903) = 1
- names(1904)='sigph_bsum_1'; basic(1904) = 1
- names(1905)='sigph_bsum_2'; basic(1905) = 1
- names(1906)='sigph_bsum_3'; basic(1906) = 1
- names(1907)='sigph_bsum_4'; basic(1907) = 1
- names(1908)='sigph_prep_stern'; basic(1908) = 1
- names(1909)='sigph_stern'; basic(1909) = 1
- names(1910)='sigph_post_stern'; basic(1910) = 1
+ !names(1900)='sigph_pre_qloop                '; basic(1900) = 1
+ !names(1901)='sigph_qloop_preamble           '; basic(1901) = 1
+ !names(1902)='sigph_qloop_cg_and_h1          '; basic(1902) = 1
+ names(1903)='sigph_bsum                      '; basic(1903) = 1
+ names(1904)='sigph_bsum_1                    '; basic(1904) = 1
+ names(1905)='sigph_bsum_2                    '; basic(1905) = 1
+ names(1906)='sigph_bsum_3                    '; basic(1906) = 1
+ names(1907)='sigph_bsum_4                    '; basic(1907) = 1
+ names(1908)='sigph_prep_stern                '; basic(1908) = 1
+ names(1909)='sigph_stern                     '; basic(1909) = 1
+ names(1910)='sigph_post_stern                '; basic(1910) = 1
 
  ! GWR code
- names(1919)='ugb_from_diago'; basic(1919) = 1
- names(1920)='gwr_init'; basic(1920) = 1
- names(1921)='gwr_read_ugb_from_wfk'; basic(1921) = 1
- names(1922)='gwr_build_green'; basic(1922) = 1
- names(1923)='gwr_build_tchi'; basic(1923) = 1
- names(1924)='gwr_build_wc'; basic(1924) = 1
- names(1925)='gwr_build_sigmac'; basic(1925) = 1
- names(1926)='gwr_build_sigxme'; basic(1926) = 1
- names(1927)='gwr_build_head_wings'; basic(1927) = 1
- names(1928)='gwr_rpa_energy'; basic(1928) = 1
- !names(1929)='gwr_gk_to_scbox'; basic(1929) = 1
- !names(1930)='gwr_wcq_to_scbox'; basic(1930) = 1
- !names(1931)='gsph2box'; basic(1931) = 1
+ names(1919)='ugb_from_diago                  '; basic(1919) = 1
+ names(1920)='gwr_init                        '; basic(1920) = 1
+ names(1921)='gwr_read_ugb_from_wfk           '; basic(1921) = 1
+ names(1922)='gwr_build_green                 '; basic(1922) = 1
+ names(1923)='gwr_build_tchi                  '; basic(1923) = 1
+ names(1924)='gwr_build_wc                    '; basic(1924) = 1
+ names(1925)='gwr_build_sigmac                '; basic(1925) = 1
+ names(1926)='gwr_build_sigxme                '; basic(1926) = 1
+ names(1927)='gwr_build_head_wings            '; basic(1927) = 1
+ names(1928)='gwr_rpa_energy                  '; basic(1928) = 1
+ !names(1929)='gwr_gk_to_scbox                '; basic(1929) = 1
+ !names(1930)='gwr_wcq_to_scbox               '; basic(1930) = 1
+ !names(1931)='gsph2box                       '; basic(1931) = 1
 
  ! TIMER_SIZE is 1999. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
@@ -1296,7 +1313,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 &     (/14, 270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292/)
    case(18)
 !      Estimate the complement of getghc (non fourwf, non fourdp, non nonlop)
-     tslots(:9)=(/-98, 200,-221,-235,-236,-237,-841,-850,-1270/)
+     tslots(:6)=(/-209, 200,-221,-235,-236,-841/)
    case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
      tslots(:6)=(/-40, 22,530,1300,-201,-211/)
@@ -1528,8 +1545,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    do ilist=1,nlist
      isort = list(ilist)
 
-     if ( (times(1,isort)*cpunm  > percent_limit .and. &
-           times(2,isort)*wallnm > percent_limit) .and. ncount(isort) /= 0) then ! Timing analysis
+     if ( ((times(1,isort)*cpunm  > percent_limit .and.       &
+            times(2,isort)*wallnm > percent_limit      ).or.  &
+!          Also print the name of routines with anomalous negative timing. This is to help debugging.
+            (times(1,isort)*cpunm  < -tol3 .or.                &
+             times(2,isort)*wallnm < -tol3              ))     &
+           .and. ncount(isort) /= 0) then ! Timing analysis
 
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
@@ -1685,7 +1706,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(15)
          list(:8)=(/122,140,202,197,212,227,228,844/)                ; msg='dfpt_cgwf '
        case(16)
-         list(:4)=(/200,841,221,98/)                                 ; msg='getghc '
+         list(:6)=(/200,841,221,209,235,236/)                        ; msg='getghc '
        case(17)
          list(:21)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,880/)
          msg='fourwf (upwards partitioning)'
@@ -1736,7 +1757,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(40)
          list(:5)=(/ (ii,ii=910,914,1) /)                            ; msg='forstr '
        case(41)
-         list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; msg='forstrnps '
+         list(:9)=(/920,921,922,923,924,925,926,927,928/)            ; msg='forstrnps '
        case(42)
          list(:4)=(/670,671,672,673/)                                ; msg='exc_build_ham '
        case(43)
@@ -1750,15 +1771,22 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(47)
          list(:9)=(/ (ii,ii=1001,1009,1) /)                          ; msg='initberry '
        case(50)
-         list(:5)=(/1520,1521,1522,1504,1525/)                       ; msg='fock2ACE '
+         list(:5)=(/1560,1561,1562,1563,1565/)                       ; msg='fock2ACE '
        case(51)
          list(:5)=(/1504,1515,850,1270,237/)                         ; msg='fock_getghc -original'
        case(52)
          list(:5)=(/1504,1515,1512,1513,1514/)                       ; msg='fock_getghc -tight'
+       case(53)
+         list(:4)=(/1504,1505,1506,1507/)                            ; msg='fock_getghc big blocs'
+       case(54)
+         list(:11)=(/1504,1505,(ii,ii=1521,1528,1),1507/)            ; msg='fock_getghc small blocs'
+       case(55)
+         list(:14)=(/1504,1512,1513,1514,1541,1521,1542,1523,1544,1545,1546,1527,1528,1547/) 
+                                                                       msg='fock_getghc small blocs + fourXX and nonlop '
        case(60)
-         list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
+         list(:13)=(/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
        case(61)
-         list(:3) = (/1620,1621,1622/)                               ; msg = 'mkinvovl'
+         list(:3)=(/1620,1621,1622/)                                 ; msg = 'mkinvovl'
        case(70)
          list(:5)=(/1701,1702,1703,1721,1722/)                       ; msg='gwls GW code'
        case(71)
@@ -1838,8 +1866,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            end if
            if(ncount(isort)/=0)then
              ! Do not write a slot if the wall time ratio is below a threshold
-             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then
-               if ( times(2,isort) < 0.0001 ) times(2,isort) = -1.d0
+             ! However, also identifies when the wall time of a slot (here, a complement) is negative
+             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1 .or. times(2,isort)*wallnm<-tol3)then
+               if((times(2,isort)*wallnm>0.02d0.or.ilist==1).and.times(2,isort) < 0.0001)times(2,isort)=-1.d0
                write(ount,format01040)names(isort),&
                  times(1,isort),times(1,isort)*cpunm,&
                  times(2,isort),times(2,isort)*wallnm,ncount(isort), &
