@@ -837,6 +837,9 @@ class(abstract_wf), pointer :: mywfc
 contains
 !!***
 
+!--------------------------------------------------------------------------------
+!> van der Waals interaction energy using MLWFs
+!--------------------------------------------------------------------------------
   subroutine evaluate_vdw_with_mlwf()
 #ifdef HAVE_WANNIER90
     integer :: ii, jj, ikpt, iband, kk
