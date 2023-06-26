@@ -2787,7 +2787,7 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
    work1(:,:)=zero
    !G=0 term
    rad=ratsph(typat(iatom))
-   work1(1,1)=two*rad/(two_pi**2*three*ucvol)
+   work1(1,1)=four_pi*rad**3/(three*ucvol)
    do i3=1,n3
      ig3=i3-(i3/id3)*n3-1
      gq3=dble(ig3)
