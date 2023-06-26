@@ -24,12 +24,7 @@
 
 module m_xg_kokkos
 
-  use defs_basis
   use, intrinsic :: iso_c_binding
-
-#if defined HAVE_YAKL
- use gator_mod
-#endif
 
   implicit none
 

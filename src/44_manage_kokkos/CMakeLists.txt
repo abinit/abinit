@@ -32,21 +32,6 @@ target_compile_definitions(44_manage_kokkos
 
 target_link_libraries(44_manage_kokkos
   PUBLIC
-  abinit::12_hide_mpi
-  abinit::17_gpu_toolbox
-  )
-
-if (ABINIT_YAKL_WANTED)
-  target_link_libraries(44_manage_kokkos
-    PUBLIC
-    abinit::yakl)
-  target_include_directories(44_manage_kokkos
-    PUBLIC
-    ${YAKL_BINARY_DIR})
-endif()
-
-target_link_libraries(44_manage_kokkos
-  PUBLIC
   Kokkos::kokkos
   )
 
