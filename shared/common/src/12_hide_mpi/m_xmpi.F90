@@ -40,14 +40,6 @@ module m_xmpi
 #endif
  use m_clib, only : clib_ulimit_stack !, clib_getpid !, clib_usleep
 
-#ifdef HAVE_KOKKOS
-use m_kokkos_utils
-#endif
-
-#ifdef HAVE_YAKL
- use gator_mod
-#endif
-
  implicit none
 
  private
@@ -830,23 +822,6 @@ subroutine xmpi_init()
    end if
  end if
 
-#ifdef HAVE_KOKKOS
- ! initialize kokkos
- if (xmpi_comm_rank(xmpi_world) == 0) then
-   write(std_out,*)'initializing kokkos in MPI process ', xmpi_comm_rank(xmpi_world)
- end if
- call kokkos_initialize()
-
- ! only master MPI process print kokkos config
- if (xmpi_comm_rank(xmpi_world) == 0) then
-    call abinit_kokkos_print_config()
- endif
-#endif
-
-#if HAVE_YAKL
- call gator_init()
-#endif
-
 end subroutine xmpi_init
 !!***
 
@@ -920,19 +895,6 @@ subroutine xmpi_end()
  integer :: mpierr
 
 ! *************************************************************************
-
-#ifdef HAVE_YAKL
- write(std_out,*)'calling yakl gator_finalize'
- call gator_finalize()
- write(std_out,*)'yakl gator finalized'
-#endif
-
-#ifdef HAVE_KOKKOS
- ! finalize kokkos
- write(std_out,*)'calling kokkos_finalize'
- call kokkos_finalize()
- write(std_out,*)'kokkos finalized'
-#endif
 
  mpierr=0
 #ifdef HAVE_MPI

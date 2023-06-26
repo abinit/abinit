@@ -28,11 +28,6 @@ set(12_hide_mpi_SRC
   xmpi_scatterv.finc
   xmpi_land_lor.finc)
 
-if (ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
-  LIST(APPEND 12_hide_mpi_SRC
-    kokkos-utils.cpp m_kokkos_utils.F90)
-endif()
-
 add_library(12_hide_mpi STATIC
   ${12_hide_mpi_SRC})
 
@@ -67,20 +62,6 @@ if(OpenMP_FOUND)
   target_link_libraries(12_hide_mpi
     PUBLIC
     OpenMP::OpenMP_Fortran)
-endif()
-
-if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)
-  target_link_libraries(12_hide_mpi
-    PUBLIC
-    Kokkos::kokkos
-    )
-endif()
-
-if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_YAKL_WANTED)
-  target_link_libraries(12_hide_mpi
-    PRIVATE
-    abinit::yakl
-    )
 endif()
 
 add_library(abinit::12_hide_mpi ALIAS 12_hide_mpi)
