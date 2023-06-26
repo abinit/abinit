@@ -4547,7 +4547,7 @@ Variable(
     defaultval=0,
     mnemonics="NonLocal Form Factors in LongWave calculation",
     characteristics=['[[DEVELOP]]'],
-    added_in_version="v9",
+    added_in_version="v9.9",
     text=r"""
 In a longwave calculation, the nonlocal form factors and their derivatives are
 by default computed for all k points and atom types at an initial step and then 
@@ -6399,7 +6399,7 @@ Variable(
     text=r"""
 Sets a tolerance for absolute differences of QP energies between to consecutive iterations
 that will cause the self-consistent GWR cycle to stop.
-Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
+Can be specified in Ha (the default), Ry, eV or Kelvin, since **gwr_tolqpe** has
 the [[ENERGY]] characteristics (1 Ha = 27.2113845 eV)
 """,
 ),
@@ -7258,7 +7258,7 @@ Variable(
     abivarname="iatsph",
     varset="gstate",
     vartype="integer",
-    topics=['printing_prdos', 'ElecBandStructure_useful', 'ElecDOS_useful'],
+    topics=['printing_prdos', 'ElecBandStructure_useful', 'ElecDOS_useful', 'AtomCentered_compulsory'],
     dimensions=['[[natsph]]'],
     defaultval=Range(start=1, stop='[[natsph]]'),
     mnemonics="Index for the ATomic SPHeres of the atom-projected density-of-states",
@@ -9893,7 +9893,7 @@ This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
 ddk, d2_dkdk, electric fields. The number of linear-response calculations 
 to be explicitly precomputed can be reduced via symmetry arguments  
-selecting the appropiate value of the [[prepalw]] variable.
+selecting the appropriate value of the [[prepalw]] variable.
 """,
 ),
 
@@ -10564,7 +10564,7 @@ Variable(
     abivarname="natsph",
     varset="gstate",
     vartype="integer",
-    topics=['printing_prdos', 'ElecBandStructure_useful', 'ElecDOS_useful'],
+    topics=['printing_prdos', 'ElecBandStructure_useful', 'ElecDOS_useful','AtomCentered_compulsory'],
     dimensions="scalar",
     defaultval="[[natom]]",
     mnemonics="Number of ATomic SPHeres for the atom-projected density-of-states",
@@ -10583,7 +10583,7 @@ Variable(
     abivarname="natsph_extra",
     varset="gstate",
     vartype="integer",
-    topics=['printing_prdos'],
+    topics=['printing_prdos','AtomCentered_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of ATomic SPHeres for the l-projected density-of-states in EXTRA set",
@@ -13376,6 +13376,7 @@ The choice is among:
   * 3 --> susceptibility and dielectric matrix calculation (SCR), routine *screening*
   * 4 --> self-energy calculation (SIG), routine *sigma*.
   * 5 --> non-linear response functions (NONLINEAR), using the 2n+1 theorem, routine *nonlinear*.
+  * 6 --> GW real space imaginary time driver (GWR), using the [[cite:Liu2016]] algorithm, routine *gwr_driver*, see [[gwr_task]].
   * 7 --> electron-phonon coupling (EPH), see also [[eph_task]] input variable.
   * 8 --> Post-processing of WFK file, routine *wfk_analyze*. See also [[wfk_task]] input variable.
   * 10 --> longwave response functions (LONGWAVE), routine *longwave*. See also [[lw_flexo]],  [[lw_qdrpl]] or [[lw_natopt]] input variables.
@@ -13717,14 +13718,14 @@ Variable(
     abivarname="pawfatbnd",
     varset="paw",
     vartype="integer",
-    topics=['PAW_useful', 'ElecBandStructure_useful'],
+    topics=['PAW_useful', 'ElecBandStructure_useful', 'AtomCentered_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PAW: print band structure in the FAT-BaND representation",
     requires="[[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
-For Ground-State calculations and non self-consistent calculations only.
+For Ground-State calculations using PAW and non self-consistent calculations only.
 This option can be used to plot band structure. For each atom (specified by
 [[natsph]] and [[iatsph]]), each angular momentum, and each spin polarisation,
 the band structure is written in files (such as e.g.
@@ -14040,7 +14041,7 @@ Variable(
     abivarname="pawprtdos",
     varset="paw",
     vartype="integer",
-    topics=['PAW_useful', 'ElecDOS_useful'],
+    topics=['PAW_useful', 'ElecDOS_useful', 'AtomCentered_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PAW: PRinT partial DOS contributions",
@@ -15452,7 +15453,7 @@ Variable(
     abivarname="prtdos",
     varset="files",
     vartype="integer",
-    topics=['printing_prdos', 'ElecDOS_basic'],
+    topics=['printing_prdos', 'ElecDOS_basic', 'AtomCentered_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the Density Of States",
@@ -15536,7 +15537,7 @@ Variable(
     abivarname="prtdosm",
     varset="files",
     vartype="integer",
-    topics=['printing_prdos', 'ElecDOS_basic'],
+    topics=['printing_prdos', 'ElecDOS_basic', 'AtomCentered_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the Density Of States with M decomposition",
@@ -16098,11 +16099,14 @@ If set to 1, provide output of the electron density in real
 space rho(r), made only from the electrons close to the Fermi energy, in a
 range of energy (positive or negative), determined by the (positive or
 negative, but non-zero) value of the STM bias [[stmbias]].
+
 Specifying a non-zero negative value is also allowed, and will produce also
 the output of an electron density in real space, like the above, but moreover
 will additionally filter it to have the contribution of one band only,
 whose number is the absolute value of [[prtstm]]. Obviously abs([[prtstm]])
 must be smaller or equal to [[nband]].
+This allow one to perform a detailed band-by-band
+analysis.
 
 The electron density obtained from [[prtstm]]=1,
 is a very approximate way to obtain STM profiles: one can choose an
@@ -16114,9 +16118,6 @@ independent transfer matrix elements between the tip and the surface.
 The charge density is provided in units of electrons/Bohr^3. The name of the
 STM density file will be the root output name, followed by _STM. Like a _DEN
 file, it can be analyzed by cut3d.
-
-The negative values of [[prtstm]] allows one to perform a detailed band-by-band
-analysis of the [[prtstm]]=1 result.
 
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 For the STM charge density to be generated, one must give, as an input file,
@@ -16558,7 +16559,7 @@ Variable(
     abivarname="prt_lorbmag",
     varset="gstate",
     vartype="integer",
-    topics=['printing_prden'],
+    topics=['printing_prden', 'AtomCentered_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT L ORBital MAGnetic moment inside PAW spheres",
@@ -16959,7 +16960,7 @@ Variable(
     abivarname="ratsph",
     varset="gstate",
     vartype="real",
-    topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful', 'ConstrainedDFT_basic'],
+    topics=['printing_prdos', 'MagMom_useful', 'ElecBandStructure_useful', 'ElecDOS_useful', 'ConstrainedDFT_basic', 'AtomCentered_basic'],
     dimensions=['[[ntypat]]'],
     defaultval=ValueWithConditions({'[[usepaw]] == 1': '[[AUTO_FROM_PSP]]', 'defaultval': 2.00}),
     mnemonics="Radii of the ATomic SPHere(s)",
@@ -17006,7 +17007,7 @@ Variable(
     abivarname="ratsph_extra",
     varset="gstate",
     vartype="real",
-    topics=['printing_prdos'],
+    topics=['printing_prdos','AtomCentered_useful'],
     dimensions="scalar",
     defaultval=ValueWithUnit(units='Bohr', value=2.0),
     mnemonics="Radii of the ATomic SPHere(s) in the EXTRA set",
@@ -19445,7 +19446,7 @@ Variable(
     abivarname="ucrpa",
     varset="gw",
     vartype="integer",
-    topics=['CRPA_compulsory'],
+    topics=['CalcUJ_compulsory'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="calculation of the screened interaction U with the Constrained RPA method",
@@ -19482,7 +19483,7 @@ Variable(
     abivarname="ucrpa_bands",
     varset="gw",
     vartype="integer",
-    topics=['CRPA_basic'],
+    topics=['CalcUJ_basic'],
     dimensions=[2],
     defaultval=[-1, -1],
     mnemonics="For the calculation of U with the Constrained RPA method, gives correlated BANDS",
@@ -19497,7 +19498,7 @@ Variable(
     abivarname="ucrpa_window",
     varset="gw",
     vartype="real",
-    topics=['CRPA_basic'],
+    topics=['CalcUJ_basic'],
     dimensions=[2],
     defaultval=[-1, -1],
     mnemonics="For the calculation of U with the Constrained RPA method, gives energy WINDOW",
@@ -21104,7 +21105,7 @@ Variable(
     abivarname="wfinit",
     varset="gstate",
     vartype="integer",
-    topics=['TuningSpeedMem_useful','SCFAlgorithms_useful'],
+    topics=['TuningSpeedMem_useful','SCFAlgorithms_useful','PseudosPAW_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="WaveFunctions INITialization",
@@ -21590,7 +21591,7 @@ Variable(
     abivarname="xredsph_extra",
     varset="gstate",
     vartype="real",
-    topics=['printing_prdos'],
+    topics=['printing_prdos','AtomCentered_useful'],
     dimensions=[3, '[[natsph_extra]]'],
     defaultval=MultipleValue(number=None, value=0.0),
     mnemonics="X(position) in REDuced coordinates of the SPHeres for dos projection in the EXTRA set",
@@ -23699,7 +23700,10 @@ Variable(
     requires="[[usepaw]] == 1, [[usepawu]] == 1 or 4, and [[nspden]] == 4",
     added_in_version="9.8.2",
     text=r"""
-This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), it defines how the double counting term in the PAW+U formalism is computed. The default is 3, but Abinit versions before 9.8 correspond to 1.
+This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), 
+it defines how the magnetism is treated in the double counting term in the PAW+U formalism.
+Abinit versions before 9.8 correspond to [[optdcmagpawu]]=1, without magnetism in the DC term,
+while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is currently the default.
 """,
 ),
 

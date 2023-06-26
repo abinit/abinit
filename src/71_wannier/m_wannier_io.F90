@@ -171,7 +171,9 @@ contains
   end subroutine write_Amn
 
 
-
+   !-----------------------------------------------------------------------
+   !@brief  Write down the unk matrix
+   !-----------------------------------------------------------------------
   subroutine compute_and_write_unk(wfnname, usepaw, w90prtunk, &
        & mpi_enreg, ngfft, nsppol, nspinor,  &
        & nkpt, mband,  mpw, mgfftc, mkmem,  nprocs, rank, npwarr, &
@@ -327,6 +329,10 @@ contains
   end subroutine compute_and_write_unk
 
 
+!-----------------------------------------------------------------------
+!     This subroutine writes the eigenvalues in the w90 format
+!     (see w90io.F90 in w90 package)
+!-----------------------------------------------------------------------
   subroutine write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w, &
        & nsppol, nkpt, mband,  dtset, rank, master )
     integer, intent(in) ::  nsppol, nkpt, mband, rank, master
@@ -382,6 +388,10 @@ contains
   end subroutine write_eigenvalues
 
 
+!-----------------------------------------------------------------------
+!     This subroutine writes the overlap matrix in the w90 format
+!     (see w90io.F90 in w90 package)
+!-----------------------------------------------------------------------
   subroutine write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, &
        &  nkpt, nsppol,  nntot, mband, num_bands,  message, iam_master)
     ! input and output vars

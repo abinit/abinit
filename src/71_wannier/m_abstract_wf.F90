@@ -7,6 +7,8 @@
 !! FUNCTION
 !!  Interface with Wannier90. 
 !!  This module contains the abstract type abstract_wf and its children.
+!!  The abstract_wf type is used to store the wavefunctions either in wfd or wfk format.
+!!  And it provide the common interface for both format.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2005-2022 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
@@ -71,7 +73,7 @@ module m_abstract_wf
  use m_fft,            only : fourwf
  use m_wfd, only: wfd_t, wfd_init, wave_t, WFD_STORED
 
- implicit none
+ implicit none 
 
  private
 
@@ -79,13 +81,36 @@ module m_abstract_wf
 !!***
 
 
+!type wann_ksetting_t:
+!  This type is used to store the information about the kpoints
+!  and the MPI distribution of the kpoints.
+!  It is used in the wannier90 interface.
  type, public:: wann_ksetting_t
-   logical :: has_ovikp =  .False.
-   type(crystal_t), pointer :: cryst => null()
-   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0,rank, comm, nprocs
+   logical :: has_ovikp =  .False.  !.True. if ovikp is allocated
+   type(crystal_t), pointer :: cryst => null()  ! crystal structure
+   !nkpt: number of kpoints
+    !mband: number of bands
+    !num_nnmax: maximum number of nearest neighbors
+    !nntot: total number of nearest neighbors
+    !nsppol: number of spin polarizations
+   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0 
+   !rank: rank of the current process
+    !comm: communicator
+    !nprocs: number of processes
+   integer :: rank=-999, comm=-999, nprocs=-999
+   !ovikp: array of size (nkpt, num_nnmax) containing the indices of the nearest neighbors
    integer, allocatable :: ovikp(:, :)
+   !my_nspin: number of spin polarizations for the current process
+    !my_nkpt: number of kpoints for the current process
+    !my_nkpt_pnn: number of kpoints for the current process including the nearest neighbors
    integer :: my_nspin,  my_nkpt, my_nkpt_pnn
+   !my_spins: array of size (my_nspin) containing the spin indices for the current process
+    !my_ikpts: array of size (my_nkpt) containing the indices of the kpoints for the current process
+    !my_ikpts_pnn: array of size (my_nkpt_pnn) containing the indices of the kpoints for the current process including the nearest neighbors
    integer, allocatable :: my_spins(:), my_ikpts(:), my_ikpts_pnn(:)
+   !kkpts: array of size (nkpt, 3) containing the kpoints
+   !my_kkpts: array of size (my_nkpt, 3) containing the kpoints for the current process
+   !my_kkpts_pnn: array of size (my_nkpt_pnn, 3) containing the kpoints for the current process including the nearest neighbors
    real(dp), pointer :: kkpts(:, :)=> null()
    real(dp), allocatable :: my_kkpts(:, :), my_kkpts_pnn(:, :)
  contains
@@ -99,19 +124,38 @@ module m_abstract_wf
 
 
 
+!type abstract_wf:
+!  This type is used to store the information about the wavefunctions
+!  and the MPI distribution of the wavefunctions.
+!  It provide the common interface for the wavefunctions.
  type, public :: abstract_wf
+ !has_paw: .True. if the wavefunctions are PAW wavefunctions
    logical :: has_paw = .True.
+   !cryst: crystal structure
     type(crystal_t), pointer :: cryst => null()
     type(datafiles_type),pointer :: dtfil => null()
     type(dataset_type),pointer :: dtset => null()
+    !hdr: header, it contains the information about the wavefunctions
     type(hdr_type), pointer :: hdr => null()
+    !MPI_enreg: MPI type for the wavefunctions
     type(mpi_type), pointer :: MPI_enreg => null()
+    !psps: pseudopotential information
     type(pseudopotential_type), pointer :: psps => null()
+    !pawtab: PAW tabulated data
     type(pawtab_type),pointer :: pawtab(:) => null()
+    !ebands: eigenvalues
     type(ebands_t), pointer :: ebands => null()
+    !kset: kpoints information
     type(wann_ksetting_t) :: kset
+    !natom: number of atoms
+    !nspinor: number of spinors
+    !nsppol: number of spin polarizations
+    !mband: number of bands
+    !mkmem: number of kpoints in this process
+    !nkpt: number of kpoints
+    
     integer :: natom=0, nspinor=0, nsppol=0, mband=0, &
-         & mkmem=0, nkpt=0, rank=0, nprocs=0, comm=0
+         & mkmem=0, nkpt=0, rank=-999, nprocs=-999, comm=-999
   contains
     !procedure :: init => abstract_wf_init
     procedure :: abstract_init
@@ -128,16 +172,21 @@ module m_abstract_wf
  end type abstract_wf
 
 
+!type cg_cprj:
+!  This type is used to store the information about the wavefunctions
+!  and the MPI distribution of the wavefunctions.
+!  It is a child of the abstract_wf type and it provides the interface
+!  for the wavefunctions in the CG and CPRJ format.
  type, public,extends(abstract_wf) ::  cg_cprj
     real(dp), pointer :: cg(:, :)=>null()
     type(pawcprj_type), pointer :: cprj(:,:)=>null()
     integer, pointer :: iwav(:,:,:, :)=>null()
     integer, allocatable :: icprj(:, :, :)
   contains
-    procedure :: init => cg_cprj_init
-    procedure :: free => cg_cprj_free
-    procedure :: compute_index_cprj
-    procedure :: cg_elem
+    procedure :: init => cg_cprj_init !initialize the cg_cprj type
+    procedure :: free => cg_cprj_free !free the cg_cprj type
+    procedure :: compute_index_cprj !compute the index of the cprj
+    procedure :: cg_elem 
     procedure :: cg_elem_complex
     procedure :: cprj_elem
     procedure :: get_cg_ptr => cg_cprj_get_cprj_ptr
@@ -145,12 +194,15 @@ module m_abstract_wf
     procedure :: write_cg_and_cprj_tmpfile
     procedure :: remove_tmpfile
     procedure :: load_cg
- end type cg_cprj
+ end type cg_cprj 
 
 
+!type wfd_t: 
+!  wavefunctions in the WFD format.
  type, public, extends(abstract_wf) :: wfd_wf
    ! The working wfd, ebands, etc
     type(wfd_t), pointer :: wfd => null()
+
     type(wave_t), pointer :: waveprt => null()
 
     ! if wfd is in IBZ, expand to fullBZ
@@ -182,7 +234,18 @@ module m_abstract_wf
 
 contains
 
-
+  !-----------------------------------------------------------------------------
+  !> Initialize the wann_ksetting_t type
+  !> @param self: the wann_ksetting_t type
+  !> @param cryst: the crystal structure
+  !> @param nkpt: number of kpoints
+  !> @param mband: number of bands
+  !> @param nsppol: number of spin polarizations
+  !> @param kkpts: the kpoints
+  !> @param comm: MPI communicator
+  !> @param nprocs: number of processes
+  !> @param rank: rank of the process
+  !-----------------------------------------------------------------------------
   subroutine wann_ksetting_init(self, cryst, nkpt, mband, &
     & nsppol, kkpts, comm, nprocs, rank)
     class(wann_ksetting_t), intent(inout) :: self
@@ -195,8 +258,6 @@ contains
     self%cryst=>cryst
     self%nkpt=nkpt
     self%mband=mband
-    self%rank=rank
-    self%nprocs=nprocs
     self%nsppol=nsppol
     self%my_nspin = nsppol
     self%kkpts=> kkpts
@@ -204,6 +265,14 @@ contains
 
 
 
+  !-----------------------------------------------------------------------------
+  !> compute the ovikp array (the overlap information of the kpoints)
+  !> @param self: the wann_ksetting_t type
+  !> @param ovikp: the overlap information of the kpoints
+  !> @param nntot: number of nearest neighbors
+  !> @param num_nnmax: maximum number of nearest neighbors
+  !> @param mpi_enreg: MPI information
+  !-----------------------------------------------------------------------------
   subroutine wann_ksetting_set_ovikp(self,  ovikp, nntot, num_nnmax, mpi_enreg)
     class(wann_ksetting_t), intent(inout) :: self
     integer, intent(in) ::  nntot, num_nnmax
@@ -221,6 +290,10 @@ contains
   end subroutine wann_ksetting_set_ovikp
 
 
+  !-----------------------------------------------------------------------------
+  !> free the wann_ksetting_t type
+  !> @param self: the wann_ksetting_t type
+  !-----------------------------------------------------------------------------
   subroutine wann_ksetting_free(self)
     class(wann_ksetting_t), intent(inout) :: self
     nullify(self%cryst)
@@ -233,23 +306,27 @@ contains
       ABI_FREE(self%my_ikpts_pnn)
       ABI_FREE(self%my_kkpts_pnn)
     end if
-
-
   end subroutine wann_ksetting_free
 
 
+  !-----------------------------------------------------------------------------
+  !> set the mpi distribution using the information in the wann_ksetting_t type
+  !> @param self: the wann_ksetting_t type
+  !> @param mpi_enreg: MPI information
+  !-----------------------------------------------------------------------------
   subroutine wann_ksetting_distribute_mpi(self, mpi_enreg)
     class(wann_ksetting_t), intent(inout) :: self
     type(MPI_type), intent(inout) :: mpi_enreg
     integer :: ikpt, inn, ik_me, ik_nn, ispin
     logical :: belongs(self%nkpt)
     integer :: counter
-
-    !write(std_out,*) "Distribute mpi:", self%rank
     MPI_enreg%comm_cell=self%comm
     mpi_enreg%me=self%rank
     mpi_enreg%me_kpt=self%rank
+    mpi_enreg%nproc = self%nprocs
     MPI_enreg%paral_spinor=0
+    !write(std_out,*) "Distributed mpi:", "rank:",  self%rank, "comm", self%comm
+    !write(std_out,*) "nprocs:", self%nprocs, "me:", mpi_enreg%me, "me_kpt:", mpi_enreg%me_kpt
     if (.not. allocated(mpi_enreg%proc_distrb))then
       ABI_MALLOC(mpi_enreg%proc_distrb, (self%nkpt, self%mband, self%nsppol) )
     end if
@@ -301,6 +378,16 @@ contains
 
   end subroutine wann_ksetting_distribute_mpi
 
+  !-----------------------------------------------------------------------------
+  !> using the kpoint information in the wann_ksetting_t type, set the
+  !> bks_mask and keep_ur arrays.
+  !> @param self: the wann_ksetting_t type
+  !> @param bks_mask: the bks_mask array
+  !> @param keep_ur: the keep_ur array
+  !> @param nband: the number of bands
+  !> @param nsppol: the number of spins
+  !> @param keep_ur_value: the value to set the keep_ur array to
+  !-----------------------------------------------------------------------------
   subroutine wann_ksetting_get_bks_mask(self, bks_mask, keep_ur, nband, nsppol, keep_ur_value)
     class(wann_ksetting_t), intent(inout) :: self
     integer, intent(in) :: nband, nsppol
@@ -328,6 +415,14 @@ contains
   end subroutine wann_ksetting_get_bks_mask
 
 
+!-----------------------------------------------------------------------------
+!> using the kpoint information in the wann_ksetting_t type, set the
+!> ecut, mpw, and gmax values.
+!> @param self: the wann_ksetting_t type
+!> @param ecut: the ecut value
+!> @param mpw: the mpw value
+!> @param gmax: the gmax array
+!-----------------------------------------------------------------------------
  subroutine wann_ksetting_get_mpw_gmax(self, ecut, mpw, gmax)
    class(wann_ksetting_t), intent(inout) :: self
    real(dp),intent(in) :: ecut
@@ -381,8 +476,26 @@ contains
 end subroutine wann_ksetting_get_mpw_gmax
 
 
-
-
+!-----------------------------------------------------------------------------
+!> Initialize the abstract_wf type, depending on the type of wavefunction
+!> If the optional wfd, cg/cprj input are present, then the abstract_wf
+!> is initialized as the wfd_wf type or the cg_cprj_wf type.
+!> @param mywfc: the abstract_wf type
+!> @param ebands: the ebands type
+!> @param wfd: the wfd type (optional)
+!> @param cg: the cg array (optional)
+!> @param cprj: the cprj array (optional)
+!> @param cryst: the crystal_t type
+!> @param dtset: the dataset_type type
+!> @param dtfil: the datafiles_type type
+!> @param hdr: the header_type type
+!> @param MPI_enreg: the mpi_type type
+!> @param nprocs: the number of processors
+!> @param psps: the psps_type type
+!> @param pawtab: the pawtab_type type
+!> @param rank: the rank of the processor
+!> @param comm: the communicator
+!-----------------------------------------------------------------------------
 subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   & dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
     class(abstract_wf), pointer, intent(inout) :: mywfc
@@ -415,6 +528,21 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     end select
   end subroutine init_mywfc
 
+!-----------------------------------------------------------------------------
+!> Initialize the abstract_wf type, common part for both wfd_wf and cg_cprj
+!> @param self: the abstract_wf type
+!> @param ebands: the ebands type
+!> @param cryst: the crystal_t type
+!> @param dtset: the dataset_type type
+!> @param dtfil: the datafiles_type type
+!> @param hdr: the header_type type
+!> @param MPI_enreg: the mpi_type type
+!> @param nprocs: the number of processors
+!> @param psps: the psps_type type
+!> @param pawtab: the pawtab_type type
+!> @param rank: the rank of the processor
+!> @param comm: the communicator
+!-----------------------------------------------------------------------------
   subroutine abstract_init(self, ebands, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
     class(abstract_wf), intent(inout) :: self
     type(crystal_t), target, intent(in) :: cryst
@@ -445,6 +573,17 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     self%comm=comm
   end subroutine abstract_init
 
+!-----------------------------------------------------------------------------
+!> get one element of the wavefunction for any abstract_wf type
+!> @param self: the abstract_wf type
+!> @param icplx: the complex flag
+!> @param ig: the index of the G vector
+!> @param ispinor: the index of the spinor
+!> @param iband: the index of the band
+!> @param ikpt: the index of the k point
+!> @param isppol: the index of the spin polarization
+!> @return: the element of the wavefunction
+!-----------------------------------------------------------------------------
   function abstract_wf_cg_elem(self, icplx, ig, ispinor, iband, ikpt, isppol ) result(res)
     class(abstract_wf), intent(inout) :: self
     integer, intent(in) :: icplx, ig, ispinor, iband, ikpt, isppol
@@ -460,6 +599,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     ABI_ERROR("Function should be overrided:")
   end function abstract_wf_cg_elem
 
+!-----------------------------------------------------------------------------
+!> get one element of the wavefunction for any abstract_wf type, complex version
+!-----------------------------------------------------------------------------
   function abstract_wf_cg_elem_complex(self,  ig, ispinor, iband, ikpt, isppol ) result(res)
     class(abstract_wf), intent(inout) :: self
     integer, intent(in) ::  ig, ispinor, iband, ikpt, isppol
@@ -474,6 +616,14 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     ABI_ERROR("Function should be overrided:")
   end function abstract_wf_cg_elem_complex
 
+!-----------------------------------------------------------------------------
+!> get a block of the wavefunction for any abstract_wf type. 
+!> It should be overrided for each type.
+!> @param self: the abstract_wf type
+!> @param ikpt2: the index of the k point
+!> @param isppol: the index of the spin polarization
+!> @param cg_read: the wavefunction block
+!-----------------------------------------------------------------------------
   subroutine abstract_wf_load_cg(self, ikpt2, isppol, cg_read)
     class(abstract_wf), intent(inout) :: self
     integer, intent(in) :: ikpt2, isppol
@@ -487,7 +637,18 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
 
 
 
-
+!-----------------------------------------------------------------------------
+!> get one cprj element of the wavefunction for any abstract_wf type, complex version,
+!> @param self: the abstract_wf type
+!> @param icplx: the complex flag
+!> @param ispinor: the index of the spinor
+!> @param iband: the index of the band
+!> @param ikpt: the index of the k point
+!> @param isppol: the index of the spin polarization
+!> @param iatom: the index of the atom
+!> @param ilmn: the index of the lmn
+!> @return: the element of the wavefunction
+!-----------------------------------------------------------------------------
   function abstract_wf_cprj_elem(self,icplx,ispinor, iband, ikpt, isppol, iatom, ilmn) result(res)
     class(abstract_wf), intent(inout) :: self
     integer, intent(in) :: icplx, ispinor, iband, ikpt, isppol, ilmn, iatom
@@ -504,6 +665,12 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     ABI_ERROR("Function should be overrided:")
   end function abstract_wf_cprj_elem
 
+!-----------------------------------------------------------------------------
+!> get a pointer to the cg part of wavefunction for any abstract_wf type.
+!> It should be overrided for each type.
+!> @param self: the abstract_wf type
+!> @return: the pointer to the wavefunction block, in the form of a 2D array.
+!-----------------------------------------------------------------------------
   function abstract_wf_get_cg_ptr(self) result(cg)
     class(abstract_wf), target, intent(inout) :: self
     real(dp), pointer :: cg(:,:)
@@ -512,6 +679,12 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     ABI_ERROR("The function abstract_wf%get_cg_ptr is not implemented")
   end function abstract_wf_get_cg_ptr
 
+!-----------------------------------------------------------------------------
+!> get a pointer to the cprj part of wavefunction for any abstract_wf type.
+!> It should be overrided for each type.
+!> @param self: the abstract_wf type
+!> @return: the pointer to the wavefunction block, in the form of a 2D array.
+!-----------------------------------------------------------------------------
   function abstract_wf_get_cprj_ptr(self) result(cprj)
     class(abstract_wf), target, intent(inout) :: self
     type(pawcprj_type), pointer :: cprj(:, :)
@@ -520,6 +693,11 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     ABI_ERROR("The function abstract_wf%get_cg_ptr is not implemented")
   end function abstract_wf_get_cprj_ptr
 
+!-----------------------------------------------------------------------------
+!> get a pointer to the kg of wavefunction for any abstract_wf type.
+!> @param self: the abstract_wf type
+!> @return: the pointer to the kg, in the form of a 2D array.
+!-----------------------------------------------------------------------------
   subroutine abstract_wf_get_kgs(self, ptr_kg)
     class(abstract_wf), intent(inout) :: self
     integer,  intent(inout) :: ptr_kg(:, :)
@@ -543,7 +721,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   end subroutine abstract_wf_get_kgs
 
 
-
+!-----------------------------------------------------------------------------
+!> free the memory of the abstract_wf type
+!-----------------------------------------------------------------------------
   subroutine abstract_wf_free(self)
     class(abstract_wf), intent(inout) :: self
     call self%kset%free()
@@ -566,6 +746,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   !   print *, "====end showing wf info=============="
   ! end subroutine show_info
 
+!-----------------------------------------------------------------------------
+!> free the memory of the wfd_wf type
+!-----------------------------------------------------------------------------
   subroutine wfd_wf_free(self)
     class(wfd_wf), intent(inout) :: self
     ! TODO reenable this
@@ -584,6 +767,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   end subroutine wfd_wf_free
 
 
+!-----------------------------------------------------------------------------
+!> Initialize the wfd_wf type
+!-----------------------------------------------------------------------------
   subroutine wfd_wf_init(self, ebands, wfd,cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
     class(wfd_wf), target, intent(inout) :: self
     type(ebands_t), target, intent(in) :: ebands
@@ -599,6 +785,11 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
 
 
     self%expanded=(dtset%kptopt==1 .or. dtset%kptopt==2)
+
+    self%comm=comm
+    self%rank=rank
+    self%nprocs=nprocs
+    !print *, "set mpi info to wfd_wf", "self%comm", "self%rank", "self%nprocs"
 
     if (self%expanded) then
       self%expanded=.True.
@@ -631,6 +822,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     end if
   contains
 
+!-----------------------------------------------------------------------------
+!> subsubroutine of wfd_wf_init
+!> set the ovikp of the kset. fake means that all the kpoints are assumed to be neighbors
+!-----------------------------------------------------------------------------
     subroutine set_fake_ovikp()
       integer :: ovikp(self%hdr%nkpt, 1), i
       do i=1, self%hdr%nkpt
@@ -641,6 +836,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
 
 
 
+!-----------------------------------------------------------------------------
+!> subsubroutine of wfd_wf_init
+!> expand the kpoints to the full BZ
+!-----------------------------------------------------------------------------
     subroutine dtset_expandk()
       integer :: nkpt
       self%dtset_bz = dtset%copy()
@@ -661,6 +860,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       self%dtset_bz%mkmem = self%kset%my_nkpt
     end subroutine dtset_expandk
 
+!-----------------------------------------------------------------------------
+!> subsubroutine of wfd_wf_init
+!> expand the ebands and hdr to the full BZ
+!-----------------------------------------------------------------------------
     subroutine ebands_and_hdr_expandk()
       real(dp) :: ecut_eff, dksqmax
       type(wvl_internal_type) :: dummy_wvl
@@ -671,6 +874,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       call ebands_expandk(inb=ebands, cryst=cryst, ecut_eff=ecut_eff, &
         & force_istwfk1=.True., dksqmax=dksqmax, &
         & bz2ibz=self%bz2ibz, outb=self%ebands_bz)
+  ! Note: test if force_istwfk1 is not set to True, force rotate
       if (dksqmax > tol12) then
         write(msg, '(3a,es16.6,4a)' )&
           'At least one of the k points could not be generated from a symmetrical one.',ch10,&
@@ -692,6 +896,12 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       if (psps%usepaw == 1) call pawrhoij_copy(hdr%pawrhoij, self%hdr_bz%pawrhoij)
     end subroutine ebands_and_hdr_expandk
 
+!-----------------------------------------------------------------------------
+!> subsubroutine of wfd_wf_init
+!> whether the kpoint is irreducible
+!@param[in] ik the index of the kpoint in the full BZ
+!@return true if the kpoint is irreducible
+!-----------------------------------------------------------------------------
     logical  function isirr(ik)
       integer, intent(in) :: ik
       integer :: isym, itimrev, g0(3)
@@ -703,6 +913,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     end function isirr
 
 
+!-----------------------------------------------------------------------------
+!> subsubroutine of wfd_wf_init
+!> expand the wavefunctions to the full BZ
+!-----------------------------------------------------------------------------
     subroutine wfd_expandk()
       integer, allocatable :: istwfk(:)
       integer :: ik, spin, band
@@ -722,7 +936,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       !mpw = maxval(self%hdr_bz%npwarr)
       mband = self%hdr_bz%mband
       !call gstore%get_mpw_gmax(ecut, mpw, gmax)
-      gmax = gmax + 4 ! FIXME: this is to account for umklapp
+      gmax = gmax + 4 ! FIXME: this is to account for umklapp 
       gmax = 2*gmax + 1
       call ngfft_seq(work_ngfft, gmax)
 
@@ -731,10 +945,6 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       ABI_MALLOC(kg_kbz, (3, mpw))
       ABI_MALLOC(cg_kbz, (2, mpw*self%hdr_bz%nspinor, self%hdr_bz%mband))
 
-
-      !print *, "nband:", ebands%nband
-      !print *, "mband", dtset%mband
-      !print *, "mband", self%hdr_bz%nspinor
 
       call self%kset%get_bks_mask( bks_mask=self%bks_mask, keep_ur=self%keep_ur, &
         & nband=self%hdr_bz%mband, nsppol=hdr%nsppol, keep_ur_value=.False.)
@@ -791,13 +1001,6 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
           end do
       end do
 
-      !print *, "Norm of wfd"
-      !call wfd_print_norm(wfd)
-      !print *, "Norm of wfd_bz"
-      !call wfd_print_norm(self%wfd_bz)
-
-
-      !print *, "free cg_kbz, kg_kbz"
       ABI_FREE(cg_kbz)
       ABI_FREE(kg_kbz)
       ABI_FREE(work)
@@ -850,6 +1053,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   ! end subroutine wfd_wf_ug
 
 
+!---------------------------------------------------------------------
+!> get one element of the wavefunction in the wfd_Wf object
+!> override the abstract_wf method
+!---------------------------------------------------------------------
   function wfd_cg_elem(self, icplx, ig, ispinor, iband, ikpt, isppol ) result(res)
     class(wfd_Wf), intent(inout) :: self
     integer, intent(in) :: icplx, ig, ispinor, iband, ikpt, isppol
@@ -883,6 +1090,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
        end select
   end function wfd_cg_elem
 
+!---------------------------------------------------------------------
+!> get one element of the wavefunction in the wfd_Wf object, complex version
+!> override the abstract_wf method
+!---------------------------------------------------------------------
   function wfd_cg_elem_complex(self,  ig, ispinor, iband, ikpt, isppol ) result(res)
     class(wfd_wf), intent(inout) :: self
     integer, intent(in) ::  ig, ispinor, iband, ikpt, isppol
@@ -901,6 +1112,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     res = wave%ug(ig+self%hdr%npwarr(ik_ibz)*(ispinor-1))
   end function wfd_cg_elem_complex
 
+!---------------------------------------------------------------------
+!> get a block of the wavefunction in the wfd_Wf object
+!> override the abstract_wf method
+!---------------------------------------------------------------------
   subroutine wfd_load_cg(self, ikpt2, isppol, cg_read)
     class(wfd_wf), intent(inout) :: self
     integer, intent(in) :: ikpt2, isppol
@@ -916,6 +1131,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
 
 
 
+!---------------------------------------------------------------------
+!> get one cprj element of the wavefunction in the wfd_Wf object
+!> override the abstract_wf method
+!---------------------------------------------------------------------
   function wfd_cprj_elem(self,icplx,ispinor, iband, ikpt, isppol, iatom, ilmn) result(res)
     class(wfd_wf), intent(inout) :: self
     integer, intent(in) :: icplx, ispinor, iband, ikpt, isppol, ilmn, iatom
@@ -932,7 +1151,10 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   end function wfd_cprj_elem
 
 
-
+!---------------------------------------------------------------------
+!> get one cpaw element of the wavefunction in the wfd_Wf object, complex version
+!> override the abstract_wf method
+!---------------------------------------------------------------------
   subroutine cg_cprj_init(self, ebands, cg, cprj, cryst, dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
     class(cg_cprj), intent(inout) :: self
     type(crystal_t), target, intent(in) :: cryst
@@ -966,7 +1188,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     !call self%show_info()
   end subroutine cg_cprj_init
 
-
+  !---------------------------------------------------------------------
+  !> free the cg_cprj object ant the temporary files
+  !---------------------------------------------------------------------
   subroutine cg_cprj_free(self)
     class(cg_cprj), intent(inout) :: self
     if(self%nprocs>1) then
@@ -1026,6 +1250,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     cprj=>self%cprj
   end function cg_cprj_get_cprj_ptr
 
+  !---------------------------------------------------------------------
+  !> compute the index of the cprj array.
+  !---------------------------------------------------------------------
   subroutine compute_index_cprj(self)
     ! FIXME:hexu: this is modified from the m_mlwfovlp,
     !     but I think it should be carefully checked.
@@ -1069,6 +1296,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     res= self%cprj(iatom, ig)%cp(icplx, ilmn)
   end function cprj_elem
 
+!---------------------------------------------------------------------
+!> write cg and cprj to tmpfile
+!---------------------------------------------------------------------
   subroutine write_cg_and_cprj_tmpfile(self)
     class(cg_cprj), intent(inout) :: self
     call write_cg_and_cprj(self%dtset, self%cg, self%cprj, self%dtfil, self%iwav, &
@@ -1077,6 +1307,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
          & self%rank, self%psps, self%pawtab)
   end subroutine write_cg_and_cprj_tmpfile
 
+!---------------------------------------------------------------------
+!> remove tmpfile of cg and cprj
+!---------------------------------------------------------------------
   subroutine remove_tmpfile(self)
     class(cg_cprj), intent(inout) :: self
     integer :: isppol, ikpt, ierr
@@ -1107,7 +1340,12 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   end subroutine remove_tmpfile
 
 
-
+  !---------------------------------------------------------------------
+  !> read cg from tmpfile
+  !@param[in] ikpt2 index of kpt
+  !@param[in] isppol index of spin
+  !@param[out] cg_read cg read from tmpfile
+  !---------------------------------------------------------------------
   subroutine load_cg(self, ikpt2, isppol, cg_read)
     class(cg_cprj), intent(inout) :: self
     integer, intent(in) :: ikpt2, isppol
@@ -1139,6 +1377,9 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   end subroutine load_cg
 
 
+  !---------------------------------------------------------------------
+  !> compute the index of the wavefunctions in the cg array
+  !---------------------------------------------------------------------
   subroutine compute_iwav(MPI_enreg, dtset, hdr, iwav, nprocs, rank)
     type(mpi_type), intent(in) :: MPI_enreg
     type(dataset_type), intent(in) :: dtset
@@ -1196,7 +1437,11 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     !Shifts computed.
   end subroutine compute_iwav
 
-
+  !---------------------------------------------------------------------
+  !> write the cg and cprj arrays into a list of files
+  !> The name of the files are given by dtset%fnametmp_cg and dtset%fnametmp_cprj
+  !> The files are written in unformatted format
+  !---------------------------------------------------------------------
  subroutine write_cg_and_cprj(dtset, cg, cprj, dtfil, iwav, npwarr, mband, natom, &
       &nsppol, nkpt,  MPI_enreg, rank, psps, pawtab)
 

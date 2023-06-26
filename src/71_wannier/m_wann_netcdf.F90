@@ -33,6 +33,12 @@ module m_wann_netcdf
   implicit none
   private
 
+!---------------------------------------------------------------------
+! wrapper for netcdf file for wannier function
+! This is different for the wannier90 netcdf file in abinit.
+! It is used for the lattice Wannier function.
+! TODO: make it more similar to the electron Wannier nc file?
+!--------------------------------------------------------------------- 
   type, public:: IOWannNC
      ! id of netcdf file
      integer:: ncid
@@ -55,6 +61,9 @@ module m_wann_netcdf
 
   contains
 
+!---------------------------------------------------------------------
+! initialize wannier netcdf file
+!---------------------------------------------------------------------
   subroutine initialize(self, filename)
     class(IOwannNC), intent(inout):: self
     character(len=*), intent(in):: filename
@@ -67,12 +76,28 @@ module m_wann_netcdf
 #endif
   end subroutine initialize
 
+!---------------------------------------------------------------------
+! write wannier function information to netcdf file
+!---------------------------------------------------------------------
   subroutine write_header(self)
     class(IOWannNC), intent(inout):: self
     !TODO what information should be written in the header?
     ABI_UNUSED_A(self)
   end subroutine write_header
 
+!---------------------------------------------------------------------
+!> write wannier function information to netcdf file
+!@param self instance of IOWannNC
+!@param nR number of R vectors
+!@param ndim dimension of R vectors
+!@param nwann number of Wannier functions
+!@param nbasis number of basis functions
+!@param Rlist list of R vectors
+!@param WannR Wannier function in real space
+!@param HwannR Wannier Hamiltonian in real space
+!@param wannR_unit unit of Wannier function
+!@param HwannR_unit unit of Wannier Hamiltonian
+!---------------------------------------------------------------------
   subroutine write_wann( self,  nR, ndim, nwann, nbasis, Rlist, WannR, HwannR, wannR_unit,  HwannR_unit)
     class(IOwannNC), intent(inout):: self
     integer, intent(in):: nR, ndim, nwann, nbasis, Rlist(:,:)
@@ -143,6 +168,9 @@ module m_wann_netcdf
 
   end subroutine write_wann
 
+!---------------------------------------------------------------------
+!@brief close the wannier netcdf file
+!---------------------------------------------------------------------
   subroutine close_file(self)
     class(IOwannNC), intent(inout):: self
     integer:: ncerr
@@ -155,6 +183,9 @@ module m_wann_netcdf
 
   end subroutine close_file
 
+!---------------------------------------------------------------------
+!@brief write the Amnk matrix in the wannier netcdf file
+!---------------------------------------------------------------------
   subroutine write_Amnk(self, nkpt, nband, nwann, kpoints, Amnk)
     class(IOwannNC), intent(inout):: self
     real(dp), intent(in):: kpoints(:, :)
@@ -211,6 +242,14 @@ module m_wann_netcdf
 
   end subroutine write_Amnk
 
+!---------------------------------------------------------------------
+!@brief write the structure information in the wannier netcdf file
+!@param natom number of atoms
+!@param cell the cell vectors
+!@param numbers the atomic numbers
+!@param masses the atomic masses
+!@param xred the reduced coordinates of the atoms
+!---------------------------------------------------------------------
   subroutine write_atoms(self, natom, cell, numbers, masses, xred)
     class(IOwannNC), intent(inout):: self
     integer, intent(in):: natom

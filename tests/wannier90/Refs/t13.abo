@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h38 )
+.Starting date : Sun 25 Jun 2023.
+- ( at 08h48 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/wannier90_t13/t13.in
-- output file    -> t13.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/TestBot_MPI1/wannier90_t13/t13.abi
+- output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
 
@@ -51,7 +51,7 @@ _ WF disk file :      0.416 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           8
        mpw =        1807          nfft =       46656          nkpt =           8
 ================================================================================
-P This job should need less than                       9.694 Mbytes of memory.
+P This job should need less than                       9.966 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.884 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
@@ -195,8 +195,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.000   => boxcut(ratio)=   2.13258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -436,8 +436,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 
  vdw_xc : 14
- van der Waals correction(Ha):   -0.024984
- van der Waals correction(eV):   -0.679837
+ van der Waals correction(Ha):   -0.024985
+ van der Waals correction(eV):   -0.679871
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -604,7 +604,7 @@ P           mkmem2          8
 -
 - [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -658,10 +658,10 @@ P           mkmem2          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.2
+.Delivered   4 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.0  wall=          2.1
