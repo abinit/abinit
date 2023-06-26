@@ -121,8 +121,8 @@ for bin in main_bins:
     if ( lib_opt == "yes" ):
       bin_make = "\nendif" + bin_make
     if ( lib == "44_manage_kokkos" ):
-        bin_make = "\n\tcd %s && cmake . && $(MAKE) %s @SET_MAKE@" % \
-          (lib_dir,lib_tgt) + bin_make
+        bin_make = "\n\tcd %s && cmake .  -Wno-dev -DCMAKE_C_FLAGS=\"${CFLAGS}\" -DCMAKE_Fortran_FLAGS=\"${FCFLAGS}\" -DCMAKE_CXX_FLAGS=\"${CXXFLAGS}\" -DCMAKE_CUDA_COMPILER=${NVCC} -DCMAKE_C_COMPILER=${CC} -DCMAKE_CXX_COMPILER=${CXX} -DCMAKE_Fortran_COMPILER=${FC} && $(MAKE)  @SET_MAKE@" % \
+          (lib_dir) + bin_make
     else:
         bin_make = "\n\tcd %s && $(MAKE) %s @SET_MAKE@" % \
           (lib_dir,lib_tgt) + bin_make
