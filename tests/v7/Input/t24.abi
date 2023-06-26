@@ -149,5 +149,5 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% keywords = GW, DMFT, cRPA
 #%% authors = T. Applencourt, B. Amadon, R. Outerovitch
 #%% description = Test the calculation of dielectric function in constrained RPA for SrVO3. Uses KSS file from test 23
-#%% topics = CRPA
+#%% topics = CalcUJ
 #%%<END TEST_INFO>

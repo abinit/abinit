@@ -39,11 +39,13 @@ A much more flexible and powerful file format (PSML) has been recently proposed 
 The format is supported by Abinit via the psml library that must be activated by user during 
 the configuration of the package.
 
-!!! important
+Abinit can read NC pseudos in different formats, including the psp8 format and  
+the UPF1 and UPF2 formats. The ONCVPSP generator can produce pseudopotentials in these different formats.
+THe UPF2 format has the advantage that is contains atomic orbitals, from which ABINIT can compute a 
+initial Hamiltonian, diagonalize it, and thus, generate a rather good starting density and potential.
+Activate this using [[wfinit]]=2 .
 
-    Abinit can read NC pseudos in UPF1 format but not pseudos written following the 
-    more recent UPF2 specifications.
-    Also, ultrasoft or PAW pseudos in UPF1/UPF2 format are not supported.
+However, ultrasoft or PAW pseudos in UPF1/UPF2 format are not supported.
 
 **PAW atomic data tables**
 

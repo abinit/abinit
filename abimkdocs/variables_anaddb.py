@@ -356,6 +356,8 @@ Frequency-dependent dielectric tensor flag.
         text=r"""
 The input variable **dosdeltae** is used to define the step of the frequency
 grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
+
+Prior to v9.10, the default was 1 cm$^{-1}$.
 """,
     ),
 
@@ -372,6 +374,8 @@ grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
         text=r"""
 **dossmear** defines the gaussian broadening used to calculate the phonon
 density of states when [[anaddb:prtdos]] = 1.
+
+Prior to v9.10, the default was 5 cm$^{-1}$.
 """,
     ),
 

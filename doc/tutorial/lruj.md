@@ -4,12 +4,12 @@ authors: LMac and DJA
 
 # Hubbard U and Hund's J Parameters with Cococcioni and de Gironcoli's approach
 
-## 1 How to determine U(J) for DFT+U($\texrm{\pm}$J) via Linear Response
+## 1 How to determine U(J) for DFT+U(+J) via Linear Response
 
 This tutorial aims to demonstrate the operations and functionalities of the Abinit post-processing
 utility called Linear Response Hubbard U and Hund's J (lruj), designed to determine the 
 first-principles Hubbard U and/or Hund's J parameters for particular atomic subspaces. Once obtained,
-these parameters may then be applied via the DFT+U($\texrm{\pm}$J)-like Hubbard functionals to 
+these parameters may then be applied via the DFT+U(+J)-like Hubbard functionals to 
 address self-interaction and static correlation errors.
 
 In this tutorial, you will learn how to run perturbative calculations in Abinit and

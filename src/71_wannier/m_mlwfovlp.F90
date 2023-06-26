@@ -841,6 +841,9 @@ class(abstract_wf), pointer :: mywfc
 contains
 !!***
 
+!--------------------------------------------------------------------------------
+!> van der Waals interaction energy using MLWFs
+!--------------------------------------------------------------------------------
   subroutine evaluate_vdw_with_mlwf()
 #ifdef HAVE_WANNIER90
     integer :: ii, jj, ikpt, iband, kk
@@ -1494,7 +1497,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  me=MPI_enreg%me_kpt
 
  if(nprocs>1) then
-   ABI_MALLOC(cg_read,(2,nspinor*mpw*mband))
+   ABI_MALLOC(cg_read,(2,nspinor*mpw *mband))
  end if
 
 
@@ -1731,6 +1734,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
                      if(lfile) then
                         ! TODO: hexu: It seems there is only ispinor1=ispinor2.
                         ! the spinor off-diagonal is not inclucded??
+  
 
 !                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
 ! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)&
@@ -1755,6 +1759,10 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))&
 !&                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))
 
+! TODO: Here it is very inefficient.
+! Could be replaced with the fftbox and dotproduct. 
+! cgtk_rotate. sphere. 
+! 
                         cm1(1,iband1,iband2,intot,ikpt1,isppol)=&
                              & cm1(1,iband1,iband2,intot,ikpt1,isppol) &
                              & + mywfc%cg_elem(1,  igk1, ispinor,iband1, ikpt1, isppol) &

@@ -83,6 +83,25 @@ module m_wfd_wannier
 contains
 
 
+!-----------------------------------------------------------------------------
+!> @brief The high level wfd_t inteface for building wannier functions
+!> @param[in] cryst: crystal_t type,  crystal structure
+!> @param[inout] ebands: ebands_t type,   eigenvalues and eigenvectors
+!> @param[inout] hdr: hdr_type type,   header
+!> @param[in] mpi_enreg: mpi_type type,   MPI information
+!> @param[in] ngfftc: integer,   FFT grid for coarse grid
+!> @param[in] ngfftf: integer,   FFT grid for fine grid
+!> @param[in] wfd: wfd_t type,   wavefunction data
+!> @param[in] dtset: dataset_type type,   dataset
+!> @param[in] dtfil: datafiles_type type,   datafiles
+!> @param[in] pawang: pawang_type type,   PAW angular momentum
+!> @param[in] pawrad: pawrad_type type,   PAW radial functions
+!> @param[in] pawtab: pawtab_type type,   PAW tabulated functions
+!> @param[in] psps: pseudopotential_type type,   pseudopotential
+!> @param[in] kg: real(dp),   FFT grid, shouldn't be used
+!> @param[in] cg: complex(dp),   wavefunction coefficients, shouldn't be used
+!> @param[in] cprj: complex(dp),   wavefunction coefficients, shouldn't be used
+!-----------------------------------------------------------------------------
   subroutine wfd_run_wannier(cryst, ebands, hdr, mpi_enreg, &
        & ngfftc, ngfftf,  wfd, dtset, dtfil,  &
        & pawang,  pawrad, pawtab, psps , kg, cg, cprj)
@@ -129,11 +148,9 @@ contains
     !print *, "Starting WFD Wannier"
     !print *, "============================================================"
 
-    spaceComm=MPI_enreg%comm_cell
-    nprocs=xmpi_comm_size(spaceComm)
-    !rank=xmpi_comm_self
-    ! TODO: is MPI_enreg  initialized?
-    rank=MPI_enreg%me_kpt
+    spaceComm=MPI_enreg%comm_world
+    nprocs = MPI_enreg%nproc
+    rank= MPI_enreg%me
     master=0
 
     mgfftc=dtset%mgfft
