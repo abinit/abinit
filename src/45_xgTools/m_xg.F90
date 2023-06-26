@@ -47,7 +47,7 @@ module m_xg
   use m_gpu_toolbox
 #endif
 
-#if defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+#if defined(HAVE_KOKKOS)
   use m_xg_kokkos
 #endif
 
