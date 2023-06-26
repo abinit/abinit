@@ -120,8 +120,12 @@ for bin in main_bins:
 
     if ( lib_opt == "yes" ):
       bin_make = "\nendif" + bin_make
-    bin_make = "\n\tcd %s && $(MAKE) %s @SET_MAKE@" % \
-      (lib_dir,lib_tgt) + bin_make
+    if ( lib == "44_manage_kokkos" ):
+        bin_make = "\n\tcd %s && cmake . && $(MAKE) %s @SET_MAKE@" % \
+          (lib_dir,lib_tgt) + bin_make
+    else:
+        bin_make = "\n\tcd %s && $(MAKE) %s @SET_MAKE@" % \
+          (lib_dir,lib_tgt) + bin_make
     if ( lib_opt == "yes" ):
       bin_make = "\nif DO_BUILD_%s" % (lib.upper()) + bin_make
 
