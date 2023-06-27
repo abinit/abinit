@@ -30,9 +30,10 @@ set_target_properties(44_manage_kokkos
 target_include_directories(44_manage_kokkos
   PRIVATE
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}/../../shared/common/src/incs
-  ${CMAKE_SOURCE_DIR}/../../src/incs
-  ${CMAKE_SOURCE_DIR}/../..
+  ${CMAKE_BINARY_DIR}/../..
+  ${ABINIT_SRC_DIR}/shared/common/src/incs
+  ${ABINIT_SRC_DIR}/src/incs
+  ${ABINIT_SRC_DIR}/../..
   PUBLIC
   ${CMAKE_CURRENT_BINARY_DIR}/../../src/mods
   )
