@@ -8,7 +8,7 @@ Many thanks to the contributors to the ABINIT project between
 September 2022 and April 2023 (with some late contributions until June 2023).
 These release notes
 are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
-<!-- Merge requests up to and including MR919. Also, MR XYZ are taken into account. -->
+<!-- Merge requests up to and including MR919. Also, MR923 to MR925 are taken into account. -->
 
 The list of contributors includes:
 J. Abreu, J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
@@ -71,7 +71,7 @@ dataset generator "Atompaw" has been updated accordingly to compute
 and output the Lamb shielding in xml files.
 
 See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[test:nuc_4]],
-(NOTE: descriptions provided in the *.abi files)  with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
+with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
 
 The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to present such computations.
 
@@ -98,7 +98,6 @@ iii) symmetries are now used in order to calculate only linearly independent com
 iv) the whole structure is now more general, thus facilitating the implementation of future spatial dispersion quantities.
 
 Also, the new input variable [[ffnl_lw]] has been introduced. It allows to reduce memory footprint at the expense of CPU time.
-(A test should be provided).
 
 Finally, a bug has been removed (when all KB energies are negative), and a test introduced [[test:v9_145]].
 
@@ -158,7 +157,7 @@ The following temperature-dependent XC functionals from libXC are now available:
 LDA T-dependent functionals from [[cite:Karasiev2014]], with [[ixc]]=-269, from [[cite:Karasiev2018]],
 with [[ixc]]=-318, and from [[cite:Groth2017]], with [[ixc]]=-577.
 Previously, the IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]], with [[ixc]]=50
-had been coded, but not documented. This has been fixed in the present release.
+had been coded, but not documented. Documentation is delivered in the present release.
 
 See [[test:libxc_22]].
 
@@ -234,7 +233,8 @@ By M. Giantomassi (MR875, MR907)
 
 **D.2** Interface to coupled-cluster CC4S calculations.
 
-The implementation of writing a file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, is on-going.
+The implementation of writing a file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, 
+is working, but not yet in production.
 By M. Giantomassi (MR 875, 907)
 
 **D.2** Coulomb interaction with 2D cut-off is now working for the total energy and forces.
