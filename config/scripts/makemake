@@ -329,6 +329,8 @@ if ( opts.run_clean ):
         "find %s -name Makefile -exec rm -f {} \;" % dcln)
       run_script(my_name, "Removing CmakeCache.txt files in %s/" % dcln,
         "find %s -name CMakeCache.txt -exec rm -rf {} \;" % dcln)
+      run_script(my_name, "Removing CmakeFiles files in %s/" % dcln,
+        "find %s -name CMakeFiles -type d -exec rm -rf {} \;" % dcln, stop_on_error=False)
       run_script(my_name, "Removing object files in %s/" % dcln,
         "find %s -name '*.o' -exec rm {} \;" % dcln)
       run_script(my_name, "Removing libraries files in %s/" % dcln,
