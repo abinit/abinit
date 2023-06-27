@@ -54,6 +54,10 @@ MODULE m_invovl
   use m_gpu_toolbox
 #endif
 
+#ifdef HAVE_KOKKOS
+ use m_manage_kokkos, only : add_array_kokkos
+#endif
+
  implicit none
 
  private
@@ -247,16 +251,6 @@ end type invovl_kpt_type
      integer(kind=c_int32_t), value, intent(in) :: cplx
      integer(kind=c_int32_t), value, intent(in) :: block_sliced
    end subroutine f_solve_inner_gpu
-
-   !> add arrays on GPU, array already on device (managed memory)
-   subroutine add_array_kokkos(array1_ptr, array2_ptr, array_size) &
-     & bind(c, name='add_array_kokkos_cpp')
-     use, intrinsic :: iso_c_binding
-     implicit none
-     type(c_ptr)            , value             :: array1_ptr
-     type(c_ptr)            , value             :: array2_ptr
-     integer(kind=c_int32_t), value, intent(in) :: array_size
-   end subroutine add_array_kokkos
 
  end interface
 

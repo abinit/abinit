@@ -16,6 +16,7 @@ set(44_manage_kokkos_SRC
   xg_kokkos.cpp
   xg_kokkos.h
   m_kokkos_utils.F90
+  m_manage_kokkos.F90
   m_xg_kokkos.F90
   )
 

@@ -57,6 +57,10 @@ module m_getghc
  use m_nvtx_data
 #endif
 
+#ifdef HAVE_KOKKOS
+ use m_manage_kokkos, only : assemble_energy_contribution_kokkos
+#endif
+
  implicit none
 
  private
@@ -68,45 +72,6 @@ module m_getghc
  public :: multithreaded_getghc
  public :: getghc_nucdip ! compute <G|H_nucdip|C> for input vector |C> expressed in recip space
 !!***
-
- !!
- !! GPU/Kokkos interface
- !!
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-
-  interface
-
-    !> assemble energy contributions into ghc / gsc array
-    subroutine assemble_energy_contribution_kokkos(ghc_ptr, &
-      &                                            gsc_ptr, &
-      &                                            kinpw_k2_ptr, &
-      &                                            cwavef_ptr, &
-      &                                            gvnlxc_ptr, &
-      &                                            ndat, &
-      &                                            my_nspinor, &
-      &                                            npw_k2, &
-      &                                            sij_opt, &
-      &                                            k1_eq_k2, &
-      &                                            hugevalue) &
-      & bind(c, name='assemble_energy_contribution_kokkos_cpp')
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr)            , value             :: ghc_ptr
-      type(c_ptr)            , value             :: gsc_ptr
-      type(c_ptr)            , value             :: kinpw_k2_ptr
-      type(c_ptr)            , value             :: cwavef_ptr
-      type(c_ptr)            , value             :: gvnlxc_ptr
-      integer(kind=c_int32_t), value, intent(in) :: ndat
-      integer(kind=c_int32_t), value, intent(in) :: my_nspinor
-      integer(kind=c_int32_t), value, intent(in) :: npw_k2
-      integer(kind=c_int32_t), value, intent(in) :: sij_opt
-      logical(kind=c_bool),    value, intent(in) :: k1_eq_k2
-      real(kind=c_double),     value, intent(in) :: hugevalue
-    end subroutine assemble_energy_contribution_kokkos
-
-  end interface
-
-#endif
 
 contains
 !!***

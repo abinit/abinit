@@ -52,6 +52,10 @@ module m_gemm_nonlop
   use m_alloc_hamilt_gpu, only : gemm_nonlop_kokkos
 #endif
 
+#ifdef HAVE_KOKKOS
+ use m_manage_kokkos, only : opernlc_ylm_allwf_kokkos
+#endif
+
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding, only : c_ptr, c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
 #endif
@@ -230,49 +234,6 @@ module m_gemm_nonlop
      integer(kind=c_int32_t), value, intent(in)    :: ndat_nspinor
      integer(kind=c_int32_t), value, intent(in)    :: option
    end subroutine fix_realvec
-
-#if defined(HAVE_KOKKOS)
-
-    subroutine opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
-      &                                 dimenl1, dimenl2, dimekbq, &
-      &                                 iatm, itypat, ntypat, nprojs, &
-      &                                 natom, nincat, nspinor, &
-      &                                 nspinortot, paw_opt, &
-      &                                 nlmn, lmnmax, &
-      &                                 enl_gpu, &
-      &                                 gx_gpu, &
-      &                                 gxfac_gpu, &
-      &                                 gxfac2_gpu, &
-      &                                 gxfac_sij_gpu, &
-      &                                 shift_spinor, ndat, &
-      &                                 atindx1_gpu, &
-      &                                 indlmn_gpu, &
-      &                                 lambda_gpu, &
-      &                                 sij_typ_gpu, &
-      &                                 shift_proj, &
-      &                                 nattyp_max) bind(c, name='opernlc_ylm_allwf_kokkos_cpp')
-      use, intrinsic :: iso_c_binding
-      implicit none
-      integer(kind=c_int32_t), value, intent(in)    :: cplex, cplex_enl, cplex_fac
-      integer(kind=c_int32_t), value, intent(in)    :: dimenl1, dimenl2, dimekbq
-      integer(kind=c_int32_t), value, intent(in)    :: iatm, itypat, ntypat, nprojs
-      integer(kind=c_int32_t), value, intent(in)    :: natom, nincat, nspinor
-      integer(kind=c_int32_t), value, intent(in)    :: nspinortot, paw_opt
-      integer(kind=c_int32_t), value, intent(in)    :: nlmn, lmnmax
-      type(c_ptr),             value                :: enl_gpu ! (dimenl1, dimenl2, nspinortot**2, dimekbq)
-      type(c_ptr),             value                :: gx_gpu ! (cplex,nlmn,nincat,nspinor*ndat)
-      type(c_ptr),             value                :: gxfac_gpu ! (cplex_fac,nlmn,nincat,nspinor*ndat)
-      type(c_ptr),             value                :: gxfac2_gpu ! (cplex_fac,nlmn,nincat,nspinor*ndat)
-      type(c_ptr),             value                :: gxfac_sij_gpu !(cplex,nlmn,nincat,nspinor*ndat*(paw_opt/3))
-      integer(kind=c_int32_t), value, intent(in)    :: shift_spinor, ndat
-      type(c_ptr),             value                :: atindx1_gpu ! (natom)
-      type(c_ptr),             value                :: indlmn_gpu  ! (6,nlmn)
-      type(c_ptr),             value                :: lambda_gpu ! (ndat)
-      type(c_ptr),             value                :: sij_typ_gpu ! (((paw_opt+1)/3)*nlmn*(nlmn+1)/2)
-      integer(kind=c_int32_t), value, intent(in)    :: shift_proj, nattyp_max
-    end subroutine opernlc_ylm_allwf_kokkos
-
-#endif
 
  end interface
 
