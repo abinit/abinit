@@ -604,7 +604,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 
 !Local variables-------------------------------
 !scalars:
- integer :: i,ifft,prtopt
+ integer :: i,iatom,ifft,prtopt
  character(len=500) :: msg
 !arrays:
  real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
@@ -623,7 +623,6 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 &  fatsph=fatsph)
 
 !Compute magnetic penalty from cell-integrated magnetic moments
- vmagpen1=zero
  if (magpen < zero) then
 
    do i=1,3 
@@ -663,6 +662,25 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 
 !Compute magnetic penalty from atom shperes-integrated magnetic moments
  else if (magpen > zero) then
+   emagpen1=zero
+   vmagpen1=zero
+
+   do iatom=mpatpol(1),mpatpol(2)
+
+     do i=1,3 
+       if (mpdir(i)==0) intgden(:,1+i,iatom) = zero
+     end do
+
+     if (cplex==1) then
+       emagpen1=emagpen1-half*magpen*(intgden(1,2,iatom)**2+ &
+                                    & intgden(1,3,iatom)**2+ &
+                                    & intgden(1,4,iatom)**2)
+     else if (cplex==2) then
+       emagpen1=emagpen1-half*magpen*(intgden(1,2,iatom)**2+intgden(2,2,iatom)**2 &
+                          & + intgden(1,3,iatom)**2+intgden(2,3,iatom)**2 &
+                          & + intgden(1,4,iatom)**2+intgden(2,4,iatom)**2 )
+     end if
+   end do 
 
  end if
 
