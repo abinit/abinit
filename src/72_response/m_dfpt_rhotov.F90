@@ -82,6 +82,8 @@ contains
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
 !!         1: the new value of the trial potential is computed in place of the input value
 !!  qphon(3)=reduced coordinates for the phonon wavelength
+!!  ratopt=1: spheres around atoms are build in real space
+!!         2: spheres around atoms are build in reciprocal space
 !!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radius of spheres around atoms
 !!  rhog(2,nfft)=array for Fourier transform of GS electron density
@@ -119,13 +121,13 @@ contains
 
  subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,icutcoul,idir,ipert,&
 &           ixc,kxc,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
-&           non_magnetic_xc,optene,optres,qphon,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
+&           non_magnetic_xc,optene,optres,qphon,ratopt,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
 &           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,icutcoul,idir,ipert,ixc,n3xccc,natom,nfft,nhat1grdim,nkxc,nspden
- integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot
+ integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot,ratopt
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: gsqcut,magpen,ratsm,ucvol
  real(dp),intent(inout) :: ehart01
@@ -207,7 +209,7 @@ contains
  if (abs(magpen) > tol6) then
    ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
    call dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nspden, &
-& ntypat,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
+& ntypat,ratopt,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -559,9 +561,8 @@ end subroutine dfpt_v1zeeman
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden = number of density matrix components
 !!  ntypat=number of atom types
-!!           1: along x
-!!           2: along y
-!!           3: along z
+!!  ratopt=1: spheres around atoms are build in real space
+!!         2: spheres around atoms are build in reciprocal space
 !!  ratsm=smearing width for ratsph
 !!  ratsph(ntypat)=radius of spheres around atoms
 !!  rhor1(nfft,nspden)=array for first-order electron density.
@@ -586,11 +587,11 @@ end subroutine dfpt_v1zeeman
 !! SOURCE
 
 subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nspden, &
-& ntypat,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
+& ntypat,ratopt,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
 
 !Arguments 
 !scalars:
- integer , intent(in) :: cplex,idir,natom,nfft,nspden,ntypat
+ integer , intent(in) :: cplex,idir,natom,nfft,nspden,ntypat,ratopt
  real(dp),intent(in) :: magpen,ratsm
  real(dp), intent(out) :: emagpen1 
  type(MPI_type),intent(in) :: mpi_enreg
@@ -603,7 +604,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 
 !Local variables-------------------------------
 !scalars:
- integer :: i,ifft,prtopt,optfsph
+ integer :: i,ifft,prtopt
  character(len=500) :: msg
 !arrays:
  real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
@@ -615,10 +616,10 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 ! *************************************************************************
 
 !Compute the first-order magnetic moments. 
- prtopt=1; optfsph=2;
+ prtopt=1; 
  call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
 &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
-&  optfsph,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
+&  ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
 &  fatsph=fatsph)
 
 !Compute magnetic penalty from cell-integrated magnetic moments
@@ -660,10 +661,8 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
      end do
    end if
 
-!   write(msg,'(3(a,e24.16,a))')'  \bar{e}:', two*rhomag(1,idir+1), ch10,&
-!&  ' 1-\bar{e}*alpha :', one+magpen*two*rhomag(1,idir+1),ch10,&
-!&  ' Correct  e: ', two*rhomag(1,idir+1)/(one+magpen*two*rhomag(1,idir+1)),ch10 
-   call wrtout(std_out,msg,'COLL')
+!Compute magnetic penalty from atom shperes-integrated magnetic moments
+ else if (magpen > zero) then
 
  end if
 

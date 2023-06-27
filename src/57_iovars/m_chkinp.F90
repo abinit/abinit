@@ -3177,6 +3177,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  random_atpos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'random_atpos',dt%random_atpos,5,(/0,1,2,3,4/),iout)
 
+!  ratopt
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ratopt',dt%ratopt,2,(/1,2/),iout)
+
 !  ratsph
 !  If PAW and (prtdos==3 or dt%prtdensph==1), must be greater than PAW radius
    if(usepaw==1.and.(dt%prtdos==3.or.dt%prtdensph==1))then
