@@ -2573,6 +2573,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%quadmom(:) = zero
 !  R
    dtsets(idtset)%random_atpos=0
+   dtsets(idtset)%ratopt=1
    dtsets(idtset)%ratsm=zero
    if (any(dtsets(idtset)%constraint_kind(1:dtsets(idtset)%ntypat)>0)) dtsets(idtset)%ratsm=0.05_dp
    dtsets(idtset)%ratsph_extra=two

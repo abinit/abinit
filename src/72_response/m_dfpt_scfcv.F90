@@ -821,7 +821,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      option=1;optene=0;if (iscf_mod==-2) optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
-&     nkxc,nspden,dtset%ntypat,n3xccc,nmxc,optene,option,dtset%qptn,dtset%ratsm,dtset%ratsph,&
+&     nkxc,nspden,dtset%ntypat,n3xccc,nmxc,optene,option,dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,&
 &     rhog,rhog1,rhor,rhor1,rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
 
@@ -1056,7 +1056,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
+&     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
 &     rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,&
 &     vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
    end if
@@ -1117,7 +1117,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
-&     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
+&     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
 &     rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
    end if
 
@@ -1536,7 +1536,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    prtopt=1
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
- & 1,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+ & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
    call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
  end if
 
@@ -1546,7 +1546,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      prtopt=idir+1;
      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
 &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-&     1,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+&     dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
      call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
      !debug: write out the vtk first-order density components
 !    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)

@@ -562,6 +562,7 @@ type, public :: dataset_type
  integer :: quadquad = 1
 !R
  integer :: random_atpos
+ integer :: ratopt
  integer :: recgratio
  integer :: recnpath
  integer :: recnrec
@@ -1924,6 +1925,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%qptopt             = dtin%qptopt
  dtout%quadquad           = dtin%quadquad
  dtout%random_atpos       = dtin%random_atpos
+ dtout%ratopt             = dtin%ratopt
  dtout%recgratio          = dtin%recgratio
  dtout%recnpath           = dtin%recnpath
  dtout%recnrec            = dtin%recnrec
@@ -3453,7 +3455,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' q1shft qmass qprtrb qpt qptdm qptnrm qph1l'
  list_vars=trim(list_vars)//' qptopt quadquad qptrlatt quadmom'
 !R
- list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
+ list_vars=trim(list_vars)//' random_atpos randomseed ratopt ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfeta rfmagn rfmeth rfomega rfphon'

@@ -1492,7 +1492,7 @@ end subroutine mag_penalty_e
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden=number of spin-density components
 !!  ntypat=number of atom types
-!!  optfshp= if 1 the atomic spheres are defined in real space
+!!  ratopt= if 1 the atomic spheres are defined in real space
 !!           if 2 the atomic spheres are dfined in reciprocal space and then Fourier transformed
 !!  option = if not larger than 10, then a density is input , if larger than 10 then a potential residual is input.
 !!  ratsm=smearing width for ratsph
@@ -1520,14 +1520,14 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    optfshp,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph)
+&    ratopt,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in)        :: natom,nfft,nspden,ntypat
  real(dp),intent(in)       :: ratsm
  type(MPI_type),intent(in) :: mpi_enreg
- integer ,intent(in)       :: optfshp
+ integer ,intent(in)       :: ratopt
  integer ,intent(in)       :: option
  integer, intent(in)       :: cplex
 !arrays
@@ -1631,11 +1631,11 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
- if (optfshp==2.and.present(fatsph)) then
+ if (ratopt==2.and.present(fatsph)) then
    ABI_MALLOC(fatsph3i,(n1,n2,n3,natom))
    call fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,&
 &  ratsph,rprimd,typat,ucvol,xred) 
- else if (optfshp==1.and.present(fatsph)) then
+ else if (ratopt==1.and.present(fatsph)) then
    ABI_MALLOC(fatsph3i,(n1,n2,n3,natom))
    fatsph3i=zero
  end if 
@@ -1704,9 +1704,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 
            call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
 
-           if (optfshp==1.and.present(fatsph)) then
+           if (ratopt==1.and.present(fatsph)) then
              fatsph3i(i1,i2,i3,iatom)=fsm
-           else if (optfshp==2.and.present(fatsph)) then
+           else if (ratopt==2.and.present(fatsph)) then
              fsm=fatsph3i(i1,i2,i3,iatom)
            end if
 
@@ -1747,7 +1747,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      end if
    end do
 
-   if (optfshp==1.and.present(fatsph)) then
+   if (ratopt==1.and.present(fatsph)) then
      call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph3i(:,:,:,iatom),fatsph(:,iatom),1)
    end if
 
