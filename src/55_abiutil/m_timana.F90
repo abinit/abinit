@@ -1176,7 +1176,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  spaceworld= mpi_enreg%comm_world
  nproc     = mpi_enreg%nproc
  me        = mpi_enreg%me
+ nthreads  = 1
  nthreads  = xomp_get_num_threads(open_parallel=.true.)
+ if(nthreads<1) nthreads=1
 
  call timab(49,2,tsec)
 
@@ -1552,10 +1554,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
              times(2,isort)*wallnm < -tol3              ))     &
            .and. ncount(isort) /= 0) then ! Timing analysis
 
+       times(2,isort)=times(2,isort)+tol14
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
          times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
-
      else
        nothers=nothers+1
        other_cpu=other_cpu+times(1,isort)
@@ -1566,8 +1568,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      subwal=subwal+times(2,isort)
    end do
 
-   other_wal = other_wal + tol14
    write(entry_name,"(a,i0,a)")"others (",nothers,")"
+   other_wal = other_wal + tol14
    write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0, &
      other_cpu/other_wal,other_cpu/other_wal/nthreads
    write(ount,"(a)")"-<END_TIMER>"
@@ -1637,6 +1639,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      isort = list(ilist)
      if( (times(1,isort)*cpunm > percent_limit .and. times(2,isort)*wallnm> percent_limit) .and. ncount(isort)/=0 )then
 
+       times(2,isort)=times(2,isort)+tol14
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
          times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
@@ -1869,6 +1872,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
              ! However, also identifies when the wall time of a slot (here, a complement) is negative
              if(times(2,isort)*wallnm>0.02d0 .or. ilist==1 .or. times(2,isort)*wallnm<-tol3)then
                if((times(2,isort)*wallnm>0.02d0.or.ilist==1).and.times(2,isort) < 0.0001)times(2,isort)=-1.d0
+               times(2,isort)=times(2,isort)+tol14
                write(ount,format01040)names(isort),&
                  times(1,isort),times(1,isort)*cpunm,&
                  times(2,isort),times(2,isort)*wallnm,ncount(isort), &
@@ -1919,10 +1923,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            isort = list(ilist)
 !
            if (ncount(isort)/=0) then
+             times(2,isort)=times(2,isort)+tol14
              write(ount,format01040)names(isort),&
               times(1,isort),times(1,isort)*cpunm,&
               times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-              times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(times(2,isort)+tol14)/nthreads
+              times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
 
              if(ilist/=1)then
                subcpu=subcpu+times(1,isort)
@@ -1948,9 +1953,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            write(ount, '(/,a)' ) ' Additional information'
            flag_write=0
          end if
+         times(2,isort)=times(2,isort)+tol14
          write(ount,format01040)names(isort),&
            times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-           times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
+           times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
        end if
      end do
 
@@ -1964,9 +1970,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            write(ount, '(/,a)' ) ' Additional information about PAW segments'
            flag_write=0
          end if
+         times(2,isort)=times(2,isort)+tol14
          write(ount,format01040)names(isort),&
            times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-           times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
+           times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
        end if
      end do
 
