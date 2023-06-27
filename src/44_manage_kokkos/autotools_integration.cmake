@@ -7,10 +7,6 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.12)
   cmake_policy(SET CMP0074 NEW)
 endif()
 
-project(manage_kokkos_sublib
-  LANGUAGES C CXX Fortran
-  DESCRIPTION "manage_kokkos_sublib is a CMake project aiming to integrate Kokkos code within abinit autotools buildsystem.")
-
 #
 # check if already installed kokkos exists
 #
