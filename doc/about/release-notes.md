@@ -11,7 +11,7 @@ are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
 <!-- Merge requests up to and including MR919. Also, MR923 to MR925 are taken into account. -->
 
 The list of contributors includes:
-J. Abreu, J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
 L. Mac Enulty, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
@@ -284,6 +284,11 @@ By X. Gonze (commit 425e8c)
 
 **D.13** Improvements of tutorials base3.md and gw1.md in order to better avoid students to commit mistakes.
 By X. Gonze (commits 1d56e983f and dfd207458) 
+
+**D.14** In m_phgamma.F90, spin-resolved calculations for the case prteliash==3 did not work correctly 
+since phonon linewidths were calculated for spin=1 only. spin>=2 values are filled by NaNs. This small addition fixes the issue.
+Also, a minot format fix.
+By F. Akhmetov (Radioteddy on Github). commit bd76768 on abinit github, but directly ported to the trunk/release-9.10 branch.
 
 * * *
 
