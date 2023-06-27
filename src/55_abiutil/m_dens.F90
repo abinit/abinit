@@ -1559,7 +1559,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
- real(dp), allocatable :: fsm_atom(:,:)
+ real(dp), allocatable :: fsm_atom(:,:),fatsph3i(:,:,:,:) 
 
 !real(dp) :: rprimd_mod(3,3),strain
 
@@ -1632,7 +1632,12 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  end if
 
  if (optfshp==2.and.present(fatsph)) then
-   call fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rprimd,typat,ucvol,xred,fatsph) 
+   ABI_MALLOC(fatsph3i,(n1,n2,n3,natom))
+   call fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,&
+&  ratsph,rprimd,typat,ucvol,xred) 
+ else if (optfshp==1.and.present(fatsph)) then
+   ABI_MALLOC(fatsph3i,(n1,n2,n3,natom))
+   fatsph3i=zero
  end if 
 
 !Loop over atoms
@@ -1699,6 +1704,12 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 
            call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
 
+           if (optfshp==1.and.present(fatsph)) then
+             fatsph3i(i1,i2,i3,iatom)=fsm
+           else if (optfshp==2.and.present(fatsph)) then
+             fsm=fatsph3i(i1,i2,i3,iatom)
+           end if
+
            ifft_local=1+ix+n1*(iy+n2*izloc)
 
            if(present(intgf2))then
@@ -1735,6 +1746,10 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        end do
      end if
    end do
+
+   if (optfshp==1.and.present(fatsph)) then
+     call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph3i(:,:,:,iatom),fatsph(:,iatom),1)
+   end if
 
    if(present(intgf2) .and. neighbor_overlap==0)then
      intgf2(iatom,iatom)=intgf2(iatom,iatom)*ucvol/dble(nfftot)
@@ -1937,6 +1952,8 @@ if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
    call printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,'DEN.vtk')
  endif
 !ENDDEBUG
+
+ ABI_SFREE(fatsph3i)
 
 end subroutine calcdenmagsph
 !!***
@@ -2739,10 +2756,12 @@ end subroutine printmagvtk
 !!
 !! OUTPUT
 !!  fatsph(nfft,natom)= functions defining the atomic spheres of integration in real space
+!!  fatsphi3(n1,n2,n3,natom)= Same functions with triple indexing
 !!
 !! SOURCE
 
-subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rprimd,typat,ucvol,xred,fatsph) 
+subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
+& ratsm,ratsph,rprimd,typat,ucvol,xred) 
 
 !Arguments ------------------------------------
 !scalars
@@ -2753,11 +2772,11 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: gmet(3,3),ratsph(ntypat),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
- real(dp),intent(out):: fatsph(nfft,natom)   
+ real(dp),intent(out):: fatsph(nfft,natom)
+ real(dp),intent(out):: fatsph3i(ngfft(1),ngfft(2),ngfft(3),natom)   
 
 !Local variables ------------------------------
 !scalars
- integer :: n1Cr,n2Cr,n3Cr
  integer :: iatom,ifft
  integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3
  real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
@@ -2766,8 +2785,10 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
- real(dp) :: work1(2,nfft),work2(nfft)
- real(dp),allocatable :: fatsph3i(:,:,:)
+ real(dp) :: work1(2,nfft),work2(nfft),work3(ngfft(1),ngfft(2),ngfft(3))
+
+!debugg
+! integer :: np1,np2,np3
 
 !******************************************************************
 
@@ -2834,18 +2855,19 @@ subroutine fatsph_recip(gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,ratsph,rpri
 !  Transform to real space
    call fourdp(1,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
    fatsph(:,iatom)=work2(:)
+ 
+   call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,work2,work3,2)
+   fatsph3i(:,:,:,iatom)=work3(:,:,:)
 
  end do !iatom
 
- ABI_MALLOC(fatsph3i,(n1,n2,n3))
- call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph(:,1),fatsph3i,2)
- n1Cr=nint(xred(1,1)*n1)
- n2Cr=nint(xred(2,1)*n2)
- n3Cr=nint(xred(3,1)*n3)
- do i1=1,n1
-   ig1=i1-(i1/id1)*n1-1
-   write(100,*) ig1, fatsph3i(i1,n2Cr,n3Cr)
- end do
+! np1=nint(xred(1,1)*n1)
+! np2=nint(xred(2,1)*n2)
+! np3=nint(xred(3,1)*n3)
+! do i1=1,n1
+!   ig1=i1-(i1/id1)*n1-1
+!   write(100,*) ig1, fatsph3i(i1,np2,np3,1)
+! end do
 
  contains
 
