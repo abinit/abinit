@@ -608,6 +608,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
  character(len=500) :: msg
 !arrays:
  real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
+ real(dp) :: Blocx(cplex*nfft),Blocy(cplex*nfft),Blocz(cplex*nfft)
  real(dp) :: intgden(cplex,nspden,natom)
  real(dp) :: dentot(nspden)
  real(dp) :: rhomag(2,nspden)
@@ -663,7 +664,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 !Compute magnetic penalty from atom shperes-integrated magnetic moments
  else if (magpen > zero) then
    emagpen1=zero
-   vmagpen1=zero
+   Blocx=zero
+   Blocy=zero
+   Blocz=zero
 
    do iatom=mpatpol(1),mpatpol(2)
 
@@ -672,15 +675,53 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
      end do
 
      if (cplex==1) then
-       emagpen1=emagpen1-half*magpen*(intgden(1,2,iatom)**2+ &
+       emagpen1=emagpen1+half*magpen*(intgden(1,2,iatom)**2+ &
                                     & intgden(1,3,iatom)**2+ &
                                     & intgden(1,4,iatom)**2)
      else if (cplex==2) then
-       emagpen1=emagpen1-half*magpen*(intgden(1,2,iatom)**2+intgden(2,2,iatom)**2 &
+       emagpen1=emagpen1+half*magpen*(intgden(1,2,iatom)**2+intgden(2,2,iatom)**2 &
                           & + intgden(1,3,iatom)**2+intgden(2,3,iatom)**2 &
                           & + intgden(1,4,iatom)**2+intgden(2,4,iatom)**2 )
      end if
+
+     if (cplex==1) then
+       do ifft=1,nfft
+         Blocx(ifft)=Blocx(ifft)+magpen*intgden(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(ifft)=Blocy(ifft)+magpen*intgden(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(ifft)=Blocz(ifft)+magpen*intgden(1,4,iatom)*fatsph(ifft,iatom)
+       end do
+     else if (cplex==2) then
+       do ifft=1,nfft
+         Blocx(2*ifft-1)=Blocx(2*ifft-1)+magpen*intgden(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft-1)=Blocy(2*ifft-1)+magpen*intgden(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft-1)=Blocz(2*ifft-1)+magpen*intgden(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft)=Blocx(2*ifft)+magpen*intgden(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft)=Blocy(2*ifft)+magpen*intgden(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft)=Blocz(2*ifft)+magpen*intgden(2,4,iatom)*fatsph(ifft,iatom)
+       end do
+     end if
+
    end do 
+
+   if (cplex==1) then
+     do ifft=1,nfft
+       vmagpen1(ifft,1)=Blocz(ifft)
+       vmagpen1(ifft,2)=-Blocz(ifft)
+       vmagpen1(ifft,3)=Blocx(ifft)
+       vmagpen1(ifft,4)=-Blocy(ifft)
+     end do
+   else if (cplex==2) then
+     do ifft=1,nfft
+       vmagpen1(2*ifft-1,1)=Blocz(2*ifft-1)
+       vmagpen1(2*ifft  ,1)=Blocz(2*ifft)
+       vmagpen1(2*ifft-1,2)=-Blocz(2*ifft-1)
+       vmagpen1(2*ifft  ,2)=-Blocz(2*ifft)
+       vmagpen1(2*ifft-1,3)=Blocx(2*ifft-1)+Blocy(2*ifft)
+       vmagpen1(2*ifft  ,3)=Blocx(2*ifft)-Blocy(2*ifft-1)
+       vmagpen1(2*ifft-1,4)=-Blocx(2*ifft)-Blocy(2*ifft-1)
+       vmagpen1(2*ifft  ,4)=Blocx(2*ifft-1)-Blocy(2*ifft)
+     end do
+   end if
 
  end if
 
