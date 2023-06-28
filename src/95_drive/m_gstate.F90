@@ -41,6 +41,7 @@ module m_gstate
  use m_bandfft_kpt
  use m_invovl
  use m_gemm_nonlop
+ use m_gemm_nonlop_gpu
  use m_gemm_nonlop_ompgpu
  use m_wfk
  use m_nctk
@@ -1799,8 +1800,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if(dtset%use_gpu_cuda == 666) then
    call destroy_gemm_nonlop_ompgpu()
    gemm_nonlop_use_gemm = .false.
- end if
- if(gemm_nonlop_use_gemm) then
+ else if(gemm_nonlop_use_gemm) then
+   if(dtset%use_gpu_cuda==1) then
+     call destroy_gemm_nonlop_gpu(dtset%nkpt)
+   end if
    call destroy_gemm_nonlop(dtset%nkpt)
    gemm_nonlop_use_gemm = .false.
  end if
