@@ -120,7 +120,7 @@ for bin in main_bins:
 
     if ( lib_opt == "yes" ):
       bin_make = "\nendif" + bin_make
-    if ( lib == "44_manage_kokkos" ):
+    if ( lib in ["16_kokkos_toolbox", "44_manage_kokkos"] ):
       bin_make = "\n\tcd %s && cmake ${abs_top_srcdir}/%s/. -Wno-dev " % (lib_dir,lib_dir) \
           + " -DUSE_AUTOTOOLS_BUILD_COMPAT=ON -DABINIT_SRC_DIR=${abs_top_srcdir} " \
           + " -DCMAKE_C_FLAGS=\"${CFLAGS}\" -DCMAKE_Fortran_FLAGS=\"${FCFLAGS}\" " \

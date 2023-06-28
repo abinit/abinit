@@ -50,6 +50,13 @@ export(
   NAMESPACE abinit::
   APPEND FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
 
+if (ABINIT_KOKKOS_WANTED)
+  export(
+    TARGETS 16_kokkos_toolbox
+    NAMESPACE abinit::
+    APPEND FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
+endif()
+
 if (ABINIT_ENABLE_GPU_CUDA)
   export(
     TARGETS 17_gpu_toolbox
@@ -81,6 +88,16 @@ install(
   LIBRARY DESTINATION ${INSTALL_LIBDIR} COMPONENT lib
   RUNTIME DESTINATION ${INSTALL_BINDIR} COMPONENT bin
   )
+
+if (ABINIT_KOKKOS_WANTED)
+  install(
+    TARGETS 16_kokkos_toolbox
+    EXPORT ${targets_export_name}
+    ARCHIVE DESTINATION ${INSTALL_LIBDIR} COMPONENT lib
+    LIBRARY DESTINATION ${INSTALL_LIBDIR} COMPONENT lib
+    RUNTIME DESTINATION ${INSTALL_BINDIR} COMPONENT bin
+    )
+endif()
 
 if (ABINIT_ENABLE_GPU_CUDA)
   install(

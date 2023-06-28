@@ -150,6 +150,7 @@ AC_DEFUN([SD_KOKKOS_INIT], [
     sd_kokkos_libs=""
   fi
 
+  AM_CONDITIONAL(DO_BUILD_16_KOKKOS_TOOLBOX,[test "${sd_kokkos_enable}" = "yes"])
   AM_CONDITIONAL(DO_BUILD_44_MANAGE_KOKKOS,[test "${sd_kokkos_enable}" = "yes"])
 
   # Display configuration
