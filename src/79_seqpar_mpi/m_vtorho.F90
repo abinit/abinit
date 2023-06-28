@@ -971,9 +971,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            !FIXME Settle this
            if ( dtset%use_gpu_cuda /= 666) then
              call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&             gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,dtset%use_gemm_nonlop_gpu,&
-&             compute_grad_atom=(optforces>0))
+                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,dtset%use_gpu_cuda,&
+                 compute_grad_atom=(optforces>0))
            else if ( dtset%use_gpu_cuda == 666) then
              if(dtset%paral_kgb==0) then
                call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
@@ -985,8 +985,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
                ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
              end if
              call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&             gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
+                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
+                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
            end if
          end if
        end if

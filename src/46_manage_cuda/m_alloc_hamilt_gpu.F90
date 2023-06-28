@@ -172,7 +172,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
      &                   dimekb2_max)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
-   if (dtset%use_gemm_nonlop_gpu == 1) then
+   if (dtset%use_gpu_cuda == 1 .and. dtset%use_gemm_nonlop == 1) then
 
      call alloc_nonlop_kokkos(dtset, &
        &                      psps, &
