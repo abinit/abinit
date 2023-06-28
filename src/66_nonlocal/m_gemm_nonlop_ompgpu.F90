@@ -430,7 +430,7 @@ contains
 ! *************************************************************************
 
   call make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                            ph3d_k,kpt_k,kg_k,kpg_k,0, &
+&                            ph3d_k,kpt_k,kg_k,kpg_k, &
 &                            compute_grad_strain=compute_grad_strain,compute_grad_atom=compute_grad_atom)
   call refresh_gemm_nonlop_kpt(ikpt)
 
