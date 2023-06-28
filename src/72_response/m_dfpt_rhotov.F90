@@ -640,7 +640,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 
    Bx(:)=-magpen*rhomag(:,2)
    By(:)=-magpen*rhomag(:,3)
-   By(:)=-magpen*rhomag(:,4)
+   Bz(:)=-magpen*rhomag(:,4)
    if (cplex==1) then
      do ifft=1,nfft
        vmagpen1(ifft,1)=Bz(1)
