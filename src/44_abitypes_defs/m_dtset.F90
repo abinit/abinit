@@ -2553,8 +2553,9 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 ! *************************************************************************
 
 !Define the set of admitted perturbations
- mpert=dtset%natom+6
+ mpert=dtset%natom+7
  if(dtset%natom+10/=0.or.dtset%natom+11/=0) mpert=dtset%natom+11
+ if(dtset%rfmagn==2) mpert=2*dtset%natom+11
 
  ABI_MALLOC(symrec,(3,3,dtset%nsym))
 !Get the symmetry matrices in terms of reciprocal basis
@@ -2592,6 +2593,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
+ if(dtset%rfmagn==2) rfpert(dtset%natom+11+dtset%mpatpol(1):dtset%natom+11+dtset%mpatpol(2))=1
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
