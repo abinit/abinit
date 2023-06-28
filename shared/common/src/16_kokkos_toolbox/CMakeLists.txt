@@ -1,5 +1,5 @@
 #
-# 44_manage_kokkos
+# 16_kokkos_toolbox
 #
 
 cmake_minimum_required(VERSION 3.18)
@@ -10,9 +10,9 @@ set(USE_AUTOTOOLS_BUILD_COMPAT OFF CACHE
 
 #####################################################################
 if(USE_AUTOTOOLS_BUILD_COMPAT)
-  project(manage_kokkos_sublib
+  project(kokkos_toolbox_sublib
     LANGUAGES C CXX Fortran
-    DESCRIPTION "manage_kokkos_sublib is a CMake project aiming to integrate Kokkos code within ABINIT autotools buildsystem.")
+    DESCRIPTION "kokkos_toolbox_sublib is a CMake project aiming to integrate Kokkos code within ABINIT autotools buildsystem.")
 
   if(NOT DEFINED ABINIT_SRC_DIR)
     message(FATAL_ERROR "Using CMake within ABINIT autotools buildsystem but ABINIT_SRC_DIR variable wasn't provided!")
@@ -23,40 +23,34 @@ if(USE_AUTOTOOLS_BUILD_COMPAT)
 endif()
 #####################################################################
 
-set(44_manage_kokkos_SRC
-  abi_common_kokkos.h
-  add_array_kokkos.cpp
-  assemble_energy_contrib_kokkos.cpp
-  opernlc_ylm_allwf_kokkos.cpp
-  xg_kokkos.cpp
-  xg_kokkos.h
-  m_manage_kokkos.F90
-  m_xg_kokkos.F90
+set(16_kokkos_toolbox_SRC
+  kokkos_utils.cpp
+  m_kokkos_utils.F90
   )
 
-add_library(44_manage_kokkos STATIC
-  ${44_manage_kokkos_SRC})
+add_library(16_kokkos_toolbox STATIC
+  ${16_kokkos_toolbox_SRC})
 
 #####################################################################
 # Set paths for integration with autotools buildsystem
 if(USE_AUTOTOOLS_BUILD_COMPAT)
 
-  set_target_properties(44_manage_kokkos
+  set_target_properties(16_kokkos_toolbox
     PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../../src/mods)
 
-  target_include_directories(44_manage_kokkos
+  target_include_directories(16_kokkos_toolbox
     PRIVATE
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/../..
+    ${CMAKE_BINARY_DIR}/../../../..
     ${ABINIT_SRC_DIR}/shared/common/src/incs
     ${ABINIT_SRC_DIR}/src/incs
-    ${ABINIT_SRC_DIR}/../..
+    ${ABINIT_SRC_DIR}/../../../..
     PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}/../../src/mods
     )
 
-  INSTALL(TARGETS 44_manage_kokkos DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  INSTALL(TARGETS 16_kokkos_toolbox DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 endif()
 #####################################################################
@@ -64,28 +58,30 @@ endif()
 # Set paths properly for CMake buildsystem
 if(NOT USE_AUTOTOOLS_BUILD_COMPAT)
 
-  set_target_properties(44_manage_kokkos
+  set_target_properties(16_kokkos_toolbox
     PROPERTIES
     Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/modules)
 
-  target_include_directories(44_manage_kokkos
+  target_include_directories(16_kokkos_toolbox
     PRIVATE
     ${CMAKE_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}/shared/common/src/incs
-    ${CMAKE_SOURCE_DIR}/src/incs
+    ${CMAKE_SOURCE_DIR}/shared/common/src/incs)
+
+  target_include_directories(16_kokkos_toolbox
     PUBLIC
-    ${CMAKE_CURRENT_BINARY_DIR}/modules
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules;${CMAKE_CURRENT_SOURCE_DIR}>"
+    $<INSTALL_INTERFACE:include/libpaw>
     )
 
 endif()
 
-target_compile_definitions(44_manage_kokkos
+target_compile_definitions(16_kokkos_toolbox
   PRIVATE
   HAVE_CONFIG_H)
 
-target_link_libraries(44_manage_kokkos
+target_link_libraries(16_kokkos_toolbox
   PUBLIC
   Kokkos::kokkos
   )
 
-add_library(abinit::44_manage_kokkos ALIAS 44_manage_kokkos)
+add_library(abinit::16_kokkos_toolbox ALIAS 16_kokkos_toolbox)

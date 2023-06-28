@@ -127,14 +127,6 @@ program abinit
  &                         f_timing_initialize,f_timing_reset,wvl_timing => timing
 #endif
 
-#ifdef HAVE_KOKKOS
-use m_kokkos_utils
-#endif
-
-#ifdef HAVE_YAKL
- use gator_mod
-#endif
-
  use m_common, only : get_dtsets_pspheads
 
  implicit none
@@ -384,25 +376,6 @@ use m_kokkos_utils
    end if
  end do
 #ifdef HAVE_GPU
-
- !FIXME Should only happen when use_gpu_cuda asks explicitly for Kokkos+YAKL
-#ifdef HAVE_KOKKOS
- ! initialize kokkos
- if (xmpi_comm_rank(xmpi_world) == 0) then
-   write(std_out,*)'initializing kokkos in MPI process ', xmpi_comm_rank(xmpi_world)
- end if
- call kokkos_initialize()
-
- ! only master MPI process print kokkos config
- if (xmpi_comm_rank(xmpi_world) == 0) then
-    call abinit_kokkos_print_config()
- endif
-#endif
-
-#if HAVE_YAKL
- call gator_init()
-#endif
-
  call setdevice_cuda(gpu_devices,use_gpu_cuda)
 #else
  if (use_gpu_cuda/=0) then
@@ -649,19 +622,7 @@ use m_kokkos_utils
  ABI_FREE(pspheads)
 
 #if defined HAVE_GPU_CUDA
-#if defined(HAVE_KOKKOS)
- ! don't do anything, cuda context will be destroyed in Kokkos::finalize
-#ifdef HAVE_YAKL
- call gator_finalize()
-#endif
-
-#ifdef HAVE_KOKKOS
- call kokkos_finalize()
-#endif
-
-#else
  call unsetdevice_cuda(use_gpu_cuda)
-#endif
 #endif
 
  call xpapi_shutdown()
