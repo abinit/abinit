@@ -626,7 +626,6 @@ type, public :: dataset_type
  integer :: usefock
  integer :: usekden
  integer :: use_gemm_nonlop
- integer :: use_gemm_nonlop_gpu
  integer :: use_nonscf_gkk
  integer :: usepaw
  integer :: usepawu
@@ -1982,7 +1981,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
- dtout%use_gemm_nonlop_gpu = dtin%use_gemm_nonlop_gpu
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
  dtout%use_gpu_cuda_in_fourwf = dtin%use_gpu_cuda_in_fourwf
  dtout%use_gpu_openmp_threads = dtin%use_gpu_openmp_threads
@@ -3527,7 +3525,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gemm_nonlop_gpu'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
  list_vars=trim(list_vars)//' use_gpu_cuda use_gpu_cuda_in_fourwf use_gpu_openmp_threads use_kokkos use_nvtx'
  list_vars=trim(list_vars)//' use_slk useextfpmd use_yaml'
  list_vars=trim(list_vars)//' use_oldchi'

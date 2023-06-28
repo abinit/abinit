@@ -436,24 +436,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call init_invovl(dtset%nkpt)
  end if
 
- if(dtset%use_gemm_nonlop == 1) then
-   ! set global variable
+ ! Handling GEMM nonlop use
+ ! Not enabled by default for CPU and CUDA implementations
+ ! Enabled if using OpenMP GPU offload
+ gemm_nonlop_use_gemm = .false.
+ ! CUDA case
+ if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda ==1 ) then
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%nkpt)
- else
-   gemm_nonlop_use_gemm = .false.
- end if
-
- if(dtset%use_gemm_nonlop_gpu == 1 .and. dtset%use_gpu_cuda ==1 ) then
-#if defined HAVE_GPU_CUDA
-   ! set global variable
-   gemm_nonlop_use_gemm_gpu = .true.
    call init_gemm_nonlop_gpu(dtset%nkpt)
-#else
-   ABI_ERROR("abinit was not compiled with GPU support")
-#endif
- else
-   gemm_nonlop_use_gemm_gpu = .false.
+ ! OpenMP GPU offload case
+ else if(dtset%use_gpu_cuda == 666) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop_ompgpu(dtset%nkpt)
+ ! CPU case
+ else if(dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop(dtset%nkpt)
  end if
 
  if(dtset%use_kokkos == 1) then
@@ -461,12 +460,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  else
    gemm_nonlop_use_kokkos = .false.
  endif
-
- !TODO OpenMP GPU GEMM nonlop "poses" as regular CPU GEMM nonlop, are we fine with it ?
- if(dtset%use_gpu_cuda == 666) then
-   gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop_ompgpu(dtset%nkpt)
- end if
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then

@@ -352,7 +352,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer :: ii,ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm,ndat_left_
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
  logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated
- logical :: use_gemm_nonlop,use_gemm_nonlop_gpu
+ logical :: use_gemm_nonlop
  character(len=500) :: msg
 !arrays
  integer :: nlmn_atm(1),nloalg_(3)
@@ -670,7 +670,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !But there are several restrictions
 
  use_gemm_nonlop=.false.
- use_gemm_nonlop_gpu=.false.
  if (gemm_nonlop_use_gemm) then
    use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
    use_gemm_nonlop= ( use_gemm_nonlop .or. &
@@ -682,67 +681,46 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
  end if
 
- ! TODO : check if we can refactor the following, to avoid code duplication
- ! since use_gemm_nonlop and use_gemm_nonlop_gpu can be controlled completely separatedly
- if (gemm_nonlop_use_gemm_gpu) then
-   !use_gemm_nonlop_gpu = use_gemm_nonlop
-   use_gemm_nonlop_gpu = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
-   use_gemm_nonlop_gpu = ( use_gemm_nonlop_gpu .or. &
-     &      ( signs == 2 .and. paw_opt /= 2 .and. &
-     &        cpopt < 3 .and. hamk%useylm /= 0 .and. &
-     &        (choice < 2 .or. choice == 7) ) )
-   use_gemm_nonlop_gpu = ( use_gemm_nonlop_gpu .or. &
-     &      ( choice==2 .and. signs==1 .and. hamk%useylm/=0 .and. &
-     &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
- end if
-
- ! if(gemm_nonlop_use_gemm_gpu) then
- !   call wrtout(std_out, "Calling gemm_nonlop with GPU activated")
- ! else
- !   call wrtout(std_out, "Calling gemm_nonlop with GPU not activated")
- ! end if
-
  if(use_gemm_nonlop) then
 
    !FIXME Settle this
    if(hamk%use_gpu_impl==666) then
+
      call gemm_nonlop_ompgpu(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
-&      dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
-&      idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
-&      hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
-&      natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
-&      nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
-&      phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-&      tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
+         dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
+         idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+         hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
+         natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+         nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
+         phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
 
-   else if ( .not. use_gemm_nonlop_gpu) then
-
-     !call wrtout(std_out, "Calling gemm_nonlop")
-     call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
-       &   dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
-       &   idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
-       &   hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
-       &   natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
-       &   nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
-       &   phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-       &   tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_impl)
-
-   else
+   else if (hamk%use_gpu_impl==1) then
 
 #if defined HAVE_GPU_CUDA
-     !call wrtout(std_out, "Calling gemm_nonlop_gpu")
      call gemm_nonlop_gpu(atindx1_, choice, cpopt, cprjin_, dimenl1, dimenl2_, dimekbq, &
-       &                  dimffnlin, dimffnlout, &
-       &                  enl_, indlmn_, istwf_k, &
-       &                  lambda, hamk%lmnmax, matblk_, &
-       &                  mpi_enreg, natom_, nattyp_, ndat, nkpgin, nkpgout, &
-       &                  nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
-       &                  sij_, svectout, &
-       &                  hamk%useylm, vectin, vectout, &
-       &                  hamk%use_gpu_impl)
+        dimffnlin, dimffnlout, &
+        enl_, indlmn_, istwf_k, &
+        lambda, hamk%lmnmax, matblk_, &
+        mpi_enreg, natom_, nattyp_, ndat, nkpgin, nkpgout, &
+        nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
+        sij_, svectout, &
+        hamk%useylm, vectin, vectout, &
+        hamk%use_gpu_impl)
 #else
    ABI_ERROR("abinit was not compiled with GPU support")
 #endif
+
+   else
+
+     call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
+        dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
+        idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+        hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
+        natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+        nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
+        phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
+        tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_impl)
 
    end if
 
