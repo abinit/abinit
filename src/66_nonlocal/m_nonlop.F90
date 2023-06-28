@@ -682,6 +682,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      use_gemm_nonlop= ( use_gemm_nonlop .and. &
 &      ( choice==2 .and. hamk%useylm/=0 .and. &
 &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
+     !FIXME signs==1 not handled in CUDA GEMM nonlop
+     use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%use_gpu_impl/=1 )
    end if
  end if
 
