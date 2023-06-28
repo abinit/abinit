@@ -672,13 +672,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  use_gemm_nonlop=.false.
  if (gemm_nonlop_use_gemm) then
    use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
-   use_gemm_nonlop= ( use_gemm_nonlop .or. &
-&      ( signs == 2 .and. paw_opt /= 2 .and. &
+   if(signs==2) then
+     use_gemm_nonlop= ( use_gemm_nonlop .and. &
+&      ( paw_opt /= 2 .and. &
 &        cpopt < 3 .and. hamk%useylm /= 0 .and. &
 &        (choice < 2 .or. choice == 7) ) )
-   use_gemm_nonlop= ( use_gemm_nonlop .or. &
-&      ( choice==2.and.signs==1 .and. hamk%useylm/=0 .and. &
+   end if
+   if(signs==1) then
+     use_gemm_nonlop= ( use_gemm_nonlop .and. &
+&      ( choice==2 .and. hamk%useylm/=0 .and. &
 &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
+   end if
  end if
 
  if(use_gemm_nonlop) then
