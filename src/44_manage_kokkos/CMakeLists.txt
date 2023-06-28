@@ -14,7 +14,12 @@ if(USE_AUTOTOOLS_BUILD_COMPAT)
     LANGUAGES C CXX Fortran
     DESCRIPTION "manage_kokkos_sublib is a CMake project aiming to integrate Kokkos code within ABINIT autotools buildsystem.")
 
-  include(autotools_integration.cmake)
+  if(NOT DEFINED ABINIT_SRC_DIR)
+    message(FATAL_ERROR "Using CMake within ABINIT autotools buildsystem but ABINIT_SRC_DIR variable wasn't provided!")
+  endif()
+  # Including path of CMake modules to be used with autotools buildsystem
+  list(INSERT CMAKE_MODULE_PATH 0 "${ABINIT_SRC_DIR}/config/cmake")
+  include(detect_kokkos)
 endif()
 #####################################################################
 
