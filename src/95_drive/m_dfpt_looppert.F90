@@ -911,7 +911,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &      ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &      dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &      dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&      ipert==dtset%natom+5.or.dtset%prtfull1wf==1) timrev_pert=0
+&      ipert==dtset%natom+5.or.ipert>dtset%natom+11.or.dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
 
      !MR: Modified to agree with longwave driver
@@ -1760,7 +1760,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      rhor1(:,:)=zero ; rhog1(:,:)=zero
 !    PAW: rhoij have been set to zero in call to pawrhoij_alloc above
 
-     init_rhor1 = ((ipert>=1 .and. ipert<=dtset%natom).or.ipert==dtset%natom+5)
+     init_rhor1 = ((ipert>=1 .and. ipert<=dtset%natom).or.ipert==dtset%natom+5 &
+&    .or.ipert==dtset%natom+7)
      ! This section is needed in order to maintain the old behavior and pass the automatic tests
      if (psps%usepaw == 0) then
        init_rhor1 = init_rhor1 .and. all(psps%nctab(:ntypat)%has_tvale)
@@ -2903,6 +2904,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 & berryopt==14.or.berryopt==16.or.berryopt==17)
  if (ipert==natom+1) nn=8
  if (ipert==natom+5) nn=8
+ if (ipert==natom+7) nn=8
  if (ipert==natom+2) nn=7
  if (ipert>=1.and.ipert<=natom) nn=13
  if (ipert==natom+3.or.ipert==natom+4) nn=17
