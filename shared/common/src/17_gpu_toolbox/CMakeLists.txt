@@ -38,6 +38,13 @@ target_link_libraries(17_gpu_toolbox
   abinit::14_hidewrite
   )
 
+if (ABINIT_KOKKOS_WANTED)
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    abinit::16_kokkos_toolbox
+  )
+endif()
+
 if(ABINIT_ENABLE_GPU_CUDA)
   target_link_libraries(17_gpu_toolbox
     PUBLIC
@@ -45,6 +52,15 @@ if(ABINIT_ENABLE_GPU_CUDA)
     CUDA::cusolver
     CUDA::nvToolsExt
     )
+endif()
+
+if (ABINIT_YAKL_WANTED)
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    abinit::yakl)
+  target_include_directories(17_gpu_toolbox
+    PUBLIC
+    ${YAKL_BINARY_DIR})
 endif()
 
 add_library(abinit::17_gpu_toolbox ALIAS 17_gpu_toolbox)

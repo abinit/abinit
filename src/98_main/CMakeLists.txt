@@ -152,6 +152,10 @@ add_library(abinit_lib STATIC
   $<TARGET_OBJECTS:95_drive>
   )
 
+if(TARGET 16_kokkos_toolbox)
+  target_sources(abinit_lib PUBLIC $<TARGET_OBJECTS:16_kokkos_toolbox>)
+endif()
+
 if(TARGET 17_gpu_toolbox)
   target_sources(abinit_lib PUBLIC $<TARGET_OBJECTS:17_gpu_toolbox>)
 endif()
