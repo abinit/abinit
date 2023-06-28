@@ -7,6 +7,7 @@ set(66_nonlocal_SRC
   m_contract.F90
   m_fock.F90
   m_gemm_nonlop_ompgpu.F90
+  m_gemm_nonlop_gpu.F90
   m_gemm_nonlop.F90
   m_hamiltonian.F90
   m_metstr.F90
