@@ -911,7 +911,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &      ipert==dtset%natom+10.or.ipert==dtset%natom+11.or. &
 &      dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.  &
 &      dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17.or.  &
-&      ipert==dtset%natom+5.or.ipert>dtset%natom+11.or.dtset%prtfull1wf==1) timrev_pert=0
+&      ipert==dtset%natom+5.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11).or. &
+&      dtset%prtfull1wf==1) timrev_pert=0
      timrev_kpt = timrev_pert
 
      !MR: Modified to agree with longwave driver
@@ -2987,6 +2988,8 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+5)then
+     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+   else if(ipert>natom+11.and.ipert<=2*natom+11)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    end if
    enl1_effective=enl1
