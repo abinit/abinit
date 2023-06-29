@@ -317,13 +317,13 @@ The different values are:
   * 1 --> The number of processors per parallelization level is determined by mean of a simple
     (but relatively efficient) heuristic method. A scaling factor is attributed to each level and an simple
     speedup factor is computed. The selected parameters are those giving the best speedup factor.
-    Possibly concerned parameters: [[npimage]], [[npkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
+    Possibly concerned parameters: [[npimage]], [[np_spkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
 
   * 2 --> The number of processors per parallelization level is first determined by mean of a simple
     (but relatively efficient) heuristic method (see 1 above). Then the code performs a series of
     small benchmarks using the scheme applied for the LOBPCG algorithm (see [[wfoptalg]] = 4 or 14).
     The parallel distribution is then changed according to the benchmarks.
-    Possibly concerned parameters: [[npimage]], [[npkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
+    Possibly concerned parameters: [[npimage]], [[np_spkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
 
   * 3 --> Same as *autoparal* = 1, plus automatic determination of Linear Algebra routines parameters.
     In addition, the code performs a series of small benchmarks using the Linear
@@ -11987,10 +11987,10 @@ Variable(
     text=r"""
 Relevant only for the band/FFT parallelisation (see the [[paral_kgb]] input variable).
 [[npband]] gives the number of processors among which the work load over the
-band level is shared. [[npband]], [[npfft]], [[npkpt]] and [[npspinor]] are
+band level is shared. [[npband]], [[npfft]], [[np_spkpt]] and [[npspinor]] are
 combined to give the total number of processors (nproc) working on the
 band/FFT/k-point parallelisation.
-See [[npfft]], [[npkpt]], [[npspinor]] and [[paral_kgb]] for the additional
+See [[npfft]], [[np_spkpt]], [[npspinor]] and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation. [[npband]] has to
 be a divisor or equal to [[nband]]
 Note: an optimal value for this parameter can be automatically found by using
@@ -12012,10 +12012,10 @@ Variable(
 Relevant only for the band/FFT/k-point parallelisation (see the [[paral_kgb]]
 input variable).
 [[npfft]] gives the number of processors among which the work load over the
-FFT level is shared. [[npfft]], [[npkpt]], [[npband]] and [[npspinor]] are
+FFT level is shared. [[npfft]], [[np_spkpt]], [[npband]] and [[npspinor]] are
 combined to give the total number of processors (nproc) working on the
 band/FFT/k-point parallelisation.
-See [[npband]], [[npkpt]], [[npspinor]], and [[paral_kgb]] for the additional
+See [[npband]], [[np_spkpt]], [[npspinor]], and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
 
 Note: [[ngfft]] is automatically adjusted to [[npfft]]. If the number of
@@ -12039,7 +12039,7 @@ Variable(
 Relevant only for the k-point/fock parallelisation (option [[paral_kgb]] input
 variable).
 [[nphf]] gives the number of processors among which the work load over the
-occupied states level is shared. [[nphf]] and [[npkpt]] are combined to give
+occupied states level is shared. [[nphf]] and [[np_spkpt]] are combined to give
 the total number of processors (nproc) working on the parallelisation.
 
 Note: [[nphf]] should be a divisor or equal to the number of k-point times
@@ -12066,13 +12066,13 @@ available for ground-state calculations.
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
 
-See [[paral_kgb]], [[npkpt]], [[npband]], [[npfft]] and [[npspinor]] for the
+See [[paral_kgb]], [[np_spkpt]], [[npband]], [[npfft]] and [[npspinor]] for the
 additional information on the use of k-point/band/FFT parallelisation.
 """,
 ),
 
 Variable(
-    abivarname="npkpt",
+    abivarname="np_spkpt",
     varset="paral",
     vartype="integer",
     topics=['parallelism_useful'],
@@ -12084,15 +12084,15 @@ Variable(
     text=r"""
 Relevant only for the band/FFT/k-point parallelisation (see the [[paral_kgb]]
 input variable).
-[[npkpt]] gives the number of processors among which the work load over the
-k-point/spin-component level is shared. [[npkpt]], [[npfft]], [[npband]] and
+[[np_spkpt]] gives the number of processors among which the work load over the
+k-point/spin-component level is shared. [[np_spkpt]], [[npfft]], [[npband]] and
 [[npspinor]] are combined to give the total number of processors (nproc)
 working on the band/FFT/k-point parallelisation.
 See [[npband]], [[npfft]], [[npspinor]] and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
 
-[[npkpt]] should be a divisor or equal to with the number of k-point/spin-
-components ([[nkpt]] $\times$ [[nsppol]]) in order to have the better load-balancing
+[[np_spkpt]] should be a divisor of or equal to the number of k-point/spin-
+components ([[nkpt]] $\times$ [[nsppol]]) in order to have a good load-balancing
 and efficiency.
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
@@ -12178,12 +12178,12 @@ Relevant only for the band/FFT/k-point parallelisation (see the [[paral_kgb]]
 input variable).
 [[npspinor]] gives the number of processors among which the work load over the
 spinorial components of wave-functions is shared. [[npspinor]], [[npfft]],
-[[npband]] and [[npkpt]] are combined to give the total number of processors
+[[npband]] and [[np_spkpt]] are combined to give the total number of processors
 (nproc) working on the band/FFT/k-point parallelisation.
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
 
-See [[npkpt]], [[npband]], [[npfft]], and [[paral_kgb]] for the additional
+See [[np_spkpt]], [[npband]], [[npfft]], and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
 """,
 ),
@@ -13544,16 +13544,16 @@ Variable(
 **If paral_kgb is not explicitely put in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
-been sent and calculates values of [[npkpt]], [[npfft]], [[npband]],
+been sent and calculates values of [[np_spkpt]], [[npfft]], [[npband]],
 [[bandpp]], [[npimage]] and [[npspinor]] that are compatible with the number
 of processors. It then set **paral_kgb** to 0 or 1 (see hereunder) and launches the job.
 
 **If paral_kgb = 0**, the parallelization over k-points only is activated. In
-this case, [[npkpt]], [[npspinor]], [[npfft]] and [[npband]] are ignored.
+this case, [[np_spkpt]], [[npspinor]], [[npfft]] and [[npband]] are ignored.
 Require compilation option --enable-mpi="yes".
 
 **If paral_kgb = 1**, the parallelization over bands, FFTs, and k-point/spin-
-components is activated (see [[npkpt]], [[npfft]] [[npband]] and possibly
+components is activated (see [[np_spkpt]], [[npfft]] [[npband]] and possibly
 [[npspinor]]). With this parallelization, the work load is split over four
 levels of parallelization (three level of parallelisation (kpt-band-fft )+
 spin) The different communications almost occur along one dimension only.
@@ -13561,7 +13561,7 @@ Require compilation option --enable-mpi="yes".
 
 HOWTO fix the number of processors along one level of parallelisation:
 At first, try to parallelise over the k point and spin (see
-[[npkpt]],[[npspinor]]). Otherwise, for unpolarized calculation at the gamma
+[[np_spkpt]],[[npspinor]]). Otherwise, for unpolarized calculation at the gamma
 point, parallelise over the two other levels: the band and FFT ones. For nproc $\leq$ 50, the best speed-up is achieved for [[npband]] = nproc and [[npfft]] = 1
 (which is not yet the default). For nproc $\geq$ 50, the best speed-up is achieved
 for [[npband]] $\geq$ 4 $\times$ [[npfft]].
@@ -13573,7 +13573,7 @@ Suggested acknowledgments:
 [[cite:Bottin2008]], also available on arXiv, http://arxiv.org/abs/0707.3405.
 
 If the total number of processors used is compatible with the four levels of
-parallelization, the values for [[npkpt]], [[npspinor]], [[npfft]], [[npband]]
+parallelization, the values for [[np_spkpt]], [[npspinor]], [[npfft]], [[npband]]
 and [[bandpp]] will be filled automatically, although the repartition may not
 be optimal. To optimize the repartition use:
 
@@ -13586,7 +13586,7 @@ processors as possible). The code will then stop after the printing. This test
 can be done as well with a sequential as with a parallel version of the code.
 The user can then choose the adequate number of processor on which he can run
 his job. He must put again paral_kgb = 1 in the input file and put the
-corresponding values for [[npkpt]], [[npfft]], [[npband]],[[bandpp]] and
+corresponding values for [[np_spkpt]], [[npfft]], [[npband]],[[bandpp]] and
 possibly [[npspinor]] in the input file.
 """,
 ),
@@ -22238,7 +22238,7 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 
     Note also that the EPH code implements its own MPI-algorithm and [[eph_np_pqbks]] is
     the **only variable** that should be used to change the default behaviour.
-    Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    Other variables such as [[nppert]], [[npband]], [[npfft]], [[np_spkpt]] and [[paral_kgb]]
     are **not used** in the EPH subdriver.
 """,
 ),
@@ -22965,7 +22965,7 @@ paral_kgb 1
 rmm_diis  1
 ```
 
-in the input file and then select the value of [[npkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
+in the input file and then select the value of [[np_spkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
 
 !!! tip
 
@@ -23395,7 +23395,7 @@ and the basic dimensions of the job computed at runtime.
 
     Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_kgts]] is
     the **only variable** that should be used to change the default behaviour.
-    Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    Other variables such as [[npband]], [[npfft]], [[np_spkpt]] and [[paral_kgb]]
     are **not used** in the GWR subdriver.
 """,
 ),
