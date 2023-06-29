@@ -115,7 +115,7 @@ module m_abi_linalg
  type(c_ptr) :: plasma_work
 #endif
 
- integer, save, private     :: abi_linalg_gpu_mode = ABI_USE_CPU
+ integer, save, private     :: abi_linalg_gpu_mode = ABI_GPU_DISABLED
 
 #ifdef HAVE_GPU
  integer,                       allocatable,save,private,target :: i_work(:)
@@ -629,7 +629,7 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_GPU_CUDA
 !Cublas initialization
- if (use_gpu_cuda/=ABI_USE_CPU) call gpu_linalg_init()
+ if (use_gpu_cuda/=ABI_GPU_DISABLED) call gpu_linalg_init()
  abi_linalg_gpu_mode = use_gpu_cuda !FIXME Add a check for this
 #endif
 
@@ -910,7 +910,7 @@ CONTAINS  !===========================================================
    call abi_gpu_work_finalize()
    call gpu_linalg_shutdown()
  end if
- abi_linalg_gpu_mode = ABI_USE_CPU
+ abi_linalg_gpu_mode = ABI_GPU_DISABLED
 #else
  if (use_gpu_cuda/=0) ABI_BUG("GPU linalg shutdown was requested but ABINIT wasn't built with GPU support!")
 #endif

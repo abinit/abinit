@@ -776,7 +776,7 @@ subroutine abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -785,7 +785,7 @@ subroutine abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,
   call gpu_xgemm(cplx,transa,transb,m,n,k,alpha,&
       a,lda,b,ldb,beta,c,ldc)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -814,17 +814,17 @@ subroutine abi_gpu_xgemm_d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -852,17 +852,17 @@ subroutine abi_gpu_xgemm_z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ldc
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -890,17 +890,17 @@ subroutine abi_gpu_xgemm_2d(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -928,17 +928,17 @@ subroutine abi_gpu_xgemm_2z(cplx,transa,transb,m,n,k,alpha,a,lda,b,ldb,beta,c,ld
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -1004,7 +1004,7 @@ subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,strid
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -1013,7 +1013,7 @@ subroutine abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,a,lda,strid
   call gpu_xgemm_strided_batched(cplx,transa,transb,m,n,k,alpha,&
       a,lda,strideA,b,ldb,strideB,beta,c,ldc,strideC,batchCount)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -1044,17 +1044,17 @@ subroutine abi_gpu_xgemm_strided_d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,strideA,&
         c_loc(b),ldb,strideB,&
         beta,&
         c_loc(c),ldc,strideC,batchCount)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -1083,17 +1083,17 @@ subroutine abi_gpu_xgemm_strided_z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA,
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,strideA,&
         c_loc(b),ldb,strideB,&
         beta,&
         c_loc(c),ldc,strideC,batchCount)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -1122,17 +1122,17 @@ subroutine abi_gpu_xgemm_strided_2d(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,strideA,&
         c_loc(b),ldb,strideB,&
         beta,&
         c_loc(c),ldc,strideC,batchCount)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -1161,17 +1161,17 @@ subroutine abi_gpu_xgemm_strided_2z(cplx,transa,transb,m,n,k,alpha,a,lda,strideA
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
         c_loc(a),lda,strideA,&
         c_loc(b),ldb,strideB,&
         beta,&
         c_loc(c),ldc,strideC,batchCount)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xgemm_strided_cptr(cplx,transa,transb,m,n,k,alpha,&
@@ -1237,7 +1237,7 @@ subroutine abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -1246,7 +1246,7 @@ subroutine abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
   call gpu_xsymm(cplx,side,uplo,m,n,alpha,&
       a,lda,b,ldb,beta,c,ldc)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -1275,17 +1275,17 @@ subroutine abi_gpu_xsymm_d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
@@ -1313,17 +1313,17 @@ subroutine abi_gpu_xsymm_z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
@@ -1351,17 +1351,17 @@ subroutine abi_gpu_xsymm_2d(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
@@ -1389,17 +1389,17 @@ subroutine abi_gpu_xsymm_2z(cplx,side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_xsymm_cptr(cplx,side,uplo,m,n,alpha,&
@@ -1464,7 +1464,7 @@ subroutine abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -1473,7 +1473,7 @@ subroutine abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
   call gpu_zhemm(side,uplo,m,n,alpha,&
       a,lda,b,ldb,beta,c,ldc)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -1502,17 +1502,17 @@ subroutine abi_gpu_zhemm_d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
@@ -1540,17 +1540,17 @@ subroutine abi_gpu_zhemm_z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
@@ -1578,17 +1578,17 @@ subroutine abi_gpu_zhemm_2d(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
@@ -1616,17 +1616,17 @@ subroutine abi_gpu_zhemm_2z(side,uplo,m,n,alpha,a,lda,b,ldb,beta,c,ldc)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
         c_loc(a),lda,&
         c_loc(b),ldb,&
         beta,&
         c_loc(c),ldc)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b,c)
     call abi_gpu_zhemm_cptr(side,uplo,m,n,alpha,&
@@ -1673,7 +1673,7 @@ subroutine abi_gpu_xscal_cptr(cplx, size, alpha, x, incrx)
 
 ! *************************************************************************
 
- if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+ if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
  end if
 
@@ -1681,7 +1681,7 @@ subroutine abi_gpu_xscal_cptr(cplx, size, alpha, x, incrx)
 
  call gpu_xscal(cplx, size, alpha, x, incrx)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -1709,13 +1709,13 @@ subroutine abi_gpu_xscal_d(cplx, size, alpha, x, incrx)
 
 ! *************************************************************************
 
- if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+ if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
  end if
 
- if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+ if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
- else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+ else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET DATA USE_DEVICE_PTR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
@@ -1739,13 +1739,13 @@ subroutine abi_gpu_xscal_z(cplx, size, alpha, x, incrx)
 
 ! *************************************************************************
 
- if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+ if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
  end if
 
- if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+ if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
- else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+ else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET DATA USE_DEVICE_PTR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
@@ -1769,13 +1769,13 @@ subroutine abi_gpu_xscal_2d(cplx, size, alpha, x, incrx)
 
 ! *************************************************************************
 
- if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+ if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
  end if
 
- if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+ if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
- else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+ else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET DATA USE_DEVICE_PTR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
@@ -1799,13 +1799,13 @@ subroutine abi_gpu_xscal_2z(cplx, size, alpha, x, incrx)
 
 ! *************************************************************************
 
- if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+ if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
    ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
  end if
 
- if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+ if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
- else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+ else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET DATA USE_DEVICE_PTR(x)
    call abi_gpu_xscal_cptr(cplx, size, alpha, c_loc(x), incrx)
@@ -1853,7 +1853,7 @@ subroutine abi_gpu_xaxpy_cptr(cplx, size, alpha, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -1861,7 +1861,7 @@ subroutine abi_gpu_xaxpy_cptr(cplx, size, alpha, x, incrx, y, incry)
 
   call gpu_xaxpy(cplx, size, alpha, x, incrx, y, incry)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -1891,13 +1891,13 @@ subroutine abi_gpu_xaxpy_d(cplx, size, alpha, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
@@ -1923,13 +1923,13 @@ subroutine abi_gpu_xaxpy_z(cplx, size, alpha, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
@@ -1955,13 +1955,13 @@ subroutine abi_gpu_xaxpy_2d(cplx, size, alpha, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
@@ -1987,13 +1987,13 @@ subroutine abi_gpu_xaxpy_2z(cplx, size, alpha, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xaxpy_cptr(cplx, size, alpha, c_loc(x), incrx, c_loc(y), incry)
@@ -2039,7 +2039,7 @@ subroutine abi_gpu_xcopy_cptr(cplx, size, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -2047,7 +2047,7 @@ subroutine abi_gpu_xcopy_cptr(cplx, size, x, incrx, y, incry)
 
   call gpu_xcopy(cplx, size, x, incrx, y, incry)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -2075,13 +2075,13 @@ subroutine abi_gpu_xcopy_d(cplx, size, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
@@ -2106,13 +2106,13 @@ subroutine abi_gpu_xcopy_z(cplx, size, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
@@ -2137,13 +2137,13 @@ subroutine abi_gpu_xcopy_2d(cplx, size, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
@@ -2168,13 +2168,13 @@ subroutine abi_gpu_xcopy_2z(cplx, size, x, incrx, y, incry)
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(x,y)
     call abi_gpu_xcopy_cptr(cplx, size, c_loc(x), incrx, c_loc(y), incry)
@@ -2253,7 +2253,7 @@ subroutine abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -2261,7 +2261,7 @@ subroutine abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
   call gpu_xtrsm(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -2290,14 +2290,14 @@ subroutine abi_gpu_xtrsm_d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
@@ -2322,14 +2322,14 @@ subroutine abi_gpu_xtrsm_z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
@@ -2354,14 +2354,14 @@ subroutine abi_gpu_xtrsm_2d(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
@@ -2386,14 +2386,14 @@ subroutine abi_gpu_xtrsm_2z(cplx,side,uplo,transa,diag,m,n,alpha,a,lda,b,ldb)
 
 ! *********************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
       diag,m,n,alpha,c_loc(a),lda,c_loc(b),ldb)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(a,b)
     call abi_gpu_xtrsm_cptr(cplx,side,uplo,transa,&
@@ -2421,7 +2421,7 @@ subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
 
 #ifdef HAVE_YAKL
     if ( current_dim < asked_dim  ) then
@@ -2433,7 +2433,7 @@ subroutine abi_gpu_work_resizeI(array,array_managed,current_dim,asked_dim)
     end if
 #endif
 
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 
 #ifdef HAVE_OPENMP_OFFLOAD
     if ( current_dim < asked_dim  ) then
@@ -2475,7 +2475,7 @@ subroutine abi_gpu_work_resizeR(array,array_managed,current_dim,asked_dim)
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
 
 #ifdef HAVE_YAKL
     if ( current_dim < asked_dim  ) then
@@ -2487,7 +2487,7 @@ subroutine abi_gpu_work_resizeR(array,array_managed,current_dim,asked_dim)
     end if
 #endif
 
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 
 #ifdef HAVE_OPENMP_OFFLOAD
     if ( current_dim < asked_dim  ) then
@@ -2529,7 +2529,7 @@ subroutine abi_gpu_work_resizeC(array,array_managed,current_dim,asked_dim)
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
 
 #ifdef HAVE_YAKL
     if ( current_dim < asked_dim  ) then
@@ -2541,7 +2541,7 @@ subroutine abi_gpu_work_resizeC(array,array_managed,current_dim,asked_dim)
     end if
 #endif
 
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 
 #ifdef HAVE_OPENMP_OFFLOAD
     if ( current_dim < asked_dim  ) then
@@ -2573,7 +2573,7 @@ subroutine abi_gpu_work_finalize()
 
 #ifdef HAVE_GPU
   !FIXME Assuming managed here ?
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
 
 #ifdef HAVE_YAKL
     if ( associated(i_work_managed) ) then
@@ -2587,7 +2587,7 @@ subroutine abi_gpu_work_finalize()
     end if
 #endif
 
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 
 #ifdef HAVE_OPENMP_OFFLOAD
     if ( allocated(i_work) ) then
@@ -2673,7 +2673,7 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -2694,10 +2694,10 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
     call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
 
     ! retrieve work pointer to use
-    if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY &
-          .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(r_work_managed)
-    else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
     end if
   case (2)
@@ -2706,10 +2706,10 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
     call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
 
     ! retrieve work pointer to use
-    if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY &
-          .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(c_work_managed)
-    else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
     end if
   end select
@@ -2722,7 +2722,7 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
                  W, &
                  gpu_ptr, bufferSize, devInfo)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -2760,14 +2760,14 @@ subroutine abi_gpu_xhegvd_d(cplx, itype, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(B), ldb, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
@@ -2806,14 +2806,14 @@ subroutine abi_gpu_xhegvd_z(cplx, itype, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(B), ldb, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
@@ -2850,14 +2850,14 @@ subroutine abi_gpu_xhegvd_2d(cplx, itype, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(B), ldb, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
@@ -2894,14 +2894,14 @@ subroutine abi_gpu_xhegvd_2z(cplx, itype, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(B), ldb, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,B,W)
     call abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, &
@@ -2969,7 +2969,7 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -2989,10 +2989,10 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
     call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
 
     ! retrieve work pointer to use
-    if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY &
-          .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(r_work_managed)
-    else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
     end if
   case (2)
@@ -3001,10 +3001,10 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
     call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
 
     ! retrieve work pointer to use
-    if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY &
-          .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(c_work_managed)
-    else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
     end if
   end select
@@ -3016,7 +3016,7 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
                  W, &
                  gpu_ptr, bufferSize, devInfo)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -3050,13 +3050,13 @@ subroutine abi_gpu_xheevd_d(cplx, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
@@ -3090,13 +3090,13 @@ subroutine abi_gpu_xheevd_z(cplx, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
@@ -3129,13 +3129,13 @@ subroutine abi_gpu_xheevd_2d(cplx, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
@@ -3168,13 +3168,13 @@ subroutine abi_gpu_xheevd_2z(cplx, jobz, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  c_loc(W), &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A,W)
     call abi_gpu_xheevd_cptr(cplx, jobz, uplo, &
@@ -3236,7 +3236,7 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if (abi_linalg_gpu_mode == ABI_USE_CPU) then
+  if (abi_linalg_gpu_mode == ABI_GPU_DISABLED) then
     ABI_BUG("You requested to run on CPU to a GPU wrapper :/")
   end if
 
@@ -3255,10 +3255,10 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
     call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
 
     ! retrieve work pointer to use
-    if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY &
-          .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(r_work_managed)
-    else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
     end if
   case (2)
@@ -3267,10 +3267,10 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
     call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
 
     ! retrieve work pointer to use
-    if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY &
-          .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+    if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
+          .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(c_work_managed)
-    else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+    else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
     end if
   end select
@@ -3281,7 +3281,7 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
                  A, lda, &
                  gpu_ptr, bufferSize, devInfo)
 
-  if (abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  if (abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
     ! CUDA/HIP linalg calls are run asynchronously and OpenMP is unaware of them.
     ! Therefore, we issue a stream sync here to avoid
     !potential mistakes in calling context.
@@ -3312,12 +3312,12 @@ subroutine abi_gpu_xpotrf_d(cplx, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
@@ -3347,12 +3347,12 @@ subroutine abi_gpu_xpotrf_z(cplx, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
@@ -3381,12 +3381,12 @@ subroutine abi_gpu_xpotrf_2d(cplx, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
@@ -3415,12 +3415,12 @@ subroutine abi_gpu_xpotrf_2z(cplx, uplo, A_nrows, &
 
 ! *************************************************************************
 
-  if(abi_linalg_gpu_mode == ABI_USE_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_USE_GPU_KOKKOS) then
+  if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
                  A_nrows, &
                  c_loc(A), lda, &
                  devInfo)
-  else if(abi_linalg_gpu_mode == ABI_USE_GPU_OPENMP) then
+  else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     !$OMP TARGET DATA USE_DEVICE_PTR(A)
     call abi_gpu_xpotrf_cptr(cplx, uplo, &
