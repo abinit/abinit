@@ -581,6 +581,9 @@ subroutine nctk_test_mpiio(print_warning)
  nctk_has_mpiio = .False.
  my_print_warning=.true. ; if (present(print_warning)) my_print_warning=print_warning
 
+!FIXME nf90create fails when using NVHPC
+! This might be due to my environment, maybe not, need to investigate this...
+#ifndef FC_NVHPC
 #ifdef HAVE_NETCDF_MPI
  if (xmpi_comm_rank(xmpi_world) == master) then
    ! Try to open a file with hdf5.
@@ -615,6 +618,7 @@ subroutine nctk_test_mpiio(print_warning)
       "Action: install a netcdf4+HDF5 library with MPI-IO support."
    ABI_WARNING(msg)
  end if
+#endif
 #endif
 
 #ifdef HAVE_NETCDF_DEFAULT
