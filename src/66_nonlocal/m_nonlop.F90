@@ -680,11 +680,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &        (choice < 2 .or. choice == 7) ) )
    end if
    if(signs==1) then
-     use_gemm_nonlop= ( use_gemm_nonlop .and. &
-&      ( choice==2 .and. hamk%useylm/=0 .and. &
-&        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
-     !FIXME signs==1 not handled in CUDA GEMM nonlop
-     use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%use_gpu_impl/=1 )
+     use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
+       ! Forces and stress (forstr)
+&      ( ((choice >= 1 .and. choice <= 3) .or. choice == 23) .and. &
+&        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0 ) .or. &
+       ! Rho ij
+&      choice == 0  )
+     !FIXME forces and constraints computation not handled in CUDA GEMM nonlop
+     if(choice > 0 .and. hamk%use_gpu_impl==1) use_gemm_nonlop=.false.
    end if
  end if
 
