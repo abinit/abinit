@@ -115,10 +115,6 @@ module m_abi_linalg
  type(c_ptr) :: plasma_work
 #endif
 
- integer, parameter, public :: ABI_USE_CPU        = 0 ! Should be the default
- integer, parameter, public :: ABI_USE_GPU_LEGACY = 1
- integer, parameter, public :: ABI_USE_GPU_OPENMP = 666
- integer, parameter, public :: ABI_USE_GPU_KOKKOS = 3
  integer, save, private     :: abi_linalg_gpu_mode = ABI_USE_CPU
 
 #ifdef HAVE_GPU
