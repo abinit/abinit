@@ -483,7 +483,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  need_fermie1=((qzero==1.and.dtset%frzfermi==0.and.nstep>0).and.&
 & (dtset%occopt>=3.and.dtset%occopt<=8).and. &
-& (ipert<=dtset%natom.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or.ipert==dtset%natom+5))
+& (ipert<=dtset%natom.or.ipert==dtset%natom+3.or.ipert==dtset%natom+4.or.&
+& ipert==dtset%natom+5.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11)))
 
 !The value of iscf must be modified if ddk perturbation, see dfpt_looppert.f
  if (ipert==dtset%natom+1.or.ipert==dtset%natom+10.or.ipert==dtset%natom+11) iscf_mod=-3
@@ -1786,6 +1787,10 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
 
 !    terms for Zeeman perturbation, SPr 2deb
      else if ( ipert==natom+5 ) then
+       evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1
+
+!    terms for atomic-spheres local Zeeman perturbation, SPr 2deb
+     else if ( ipert>natom+11.and.ipert<=2*natom+11 ) then
        evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+epaw1+emagpen1
      end if
    end if
