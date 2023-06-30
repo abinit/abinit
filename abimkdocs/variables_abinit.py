@@ -12072,15 +12072,34 @@ additional information on the use of k-point/band/FFT parallelisation.
 ),
 
 Variable(
+    abivarname="npkpt",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Number of Processors at the SPin and K-Point Level",
+    requires="[[paral_kgb]] == 1",
+    added_in_version="before_v9",
+    text=r"""
+This input variable has been superceded by [[np_spkpt]].
+For the time being, for backward compatibility with AbiPy, 
+[[npkpt]] is still recognized, with the same meaning than [[np_spkpt]],
+despite the incorrect lack of mention of the spin parallelism in the name [[npkpt]]. 
+Please, stop using [[npkpt]] as soon as possible.
+""",
+),
+
+Variable(
     abivarname="np_spkpt",
     varset="paral",
     vartype="integer",
     topics=['parallelism_useful'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="Number of Processors at the K-Point Level",
+    mnemonics="Number of Processors at the SPin and K-Point Level",
     requires="[[paral_kgb]] == 1",
-    added_in_version="before_v9",
+    added_in_version="9.4.0",
     text=r"""
 Relevant only for the band/FFT/k-point parallelisation (see the [[paral_kgb]]
 input variable).
@@ -12090,6 +12109,8 @@ k-point/spin-component level is shared. [[np_spkpt]], [[npfft]], [[npband]] and
 working on the band/FFT/k-point parallelisation.
 See [[npband]], [[npfft]], [[npspinor]] and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
+
+Previously, this input variable was called [[npkpt]].
 
 [[np_spkpt]] should be a divisor of or equal to the number of k-point/spin-
 components ([[nkpt]] $\times$ [[nsppol]]) in order to have a good load-balancing
