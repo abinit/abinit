@@ -609,7 +609,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
                      &                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                      &                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
-                     &                 use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
+                     &                 use_gpu_cuda=dtset%use_gpu_cuda)
 
 
                    if(dtset%nspinor==2)then
@@ -625,7 +625,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                          &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
                          &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                          &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
-                         &                     use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
+                         &                     use_gpu_cuda=dtset%use_gpu_cuda)
 
 
                      else if(dtset%nspden==4) then
@@ -662,19 +662,19 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                          &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
                          &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                          &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
-                         &                     use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
+                         &                     use_gpu_cuda=dtset%use_gpu_cuda)
 
                        call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
                          &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
                          &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                          &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,&
-                         &                     use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
+                         &                     use_gpu_cuda=dtset%use_gpu_cuda)
 
                        call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
                          &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
                          &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                          &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&
-                         &                     use_gpu_cuda=dtset%use_gpu_cuda_in_fourwf)
+                         &                     use_gpu_cuda=dtset%use_gpu_cuda)
 
 
 #if defined HAVE_GPU && defined HAVE_YAKL
