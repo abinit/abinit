@@ -1545,7 +1545,8 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !scalars
  integer,parameter :: ndir=3,ishift=5
  integer :: i1,i2,i3,iatom,ierr,ifft_local,ii,isp,ispden,ix,iy,iz,izloc,jatom,n1,n1a,n1b,n2,ifft
- integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot
+ integer :: neighbor_overlap,n2a,n2b,n3,n3a,n3b,nfftot,n4,n5,n6
+ integer :: n1c, n2c, n3c
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
@@ -1559,13 +1560,14 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
- real(dp), allocatable :: fsm_atom(:,:),fatsph3i(:,:,:,:) 
+ real(dp), allocatable :: fsm_atom(:,:),fatsph3i(:,:,:,:),work2(:,:),work3(:,:,:,:) 
 
 !real(dp) :: rprimd_mod(3,3),strain
 
 ! *************************************************************************
 
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
+ n4=ngfft(4);n5=ngfft(5);n6=ngfft(6)
  nfftot=n1*n2*n3
  intgden_=zero
  if(present(intgden))then
@@ -1705,9 +1707,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
 
            if (ratopt==1.and.present(fatsph)) then
-             fatsph3i(i1,i2,i3,iatom)=fsm
+             fatsph3i(ix+1,iy+1,iz+1,iatom)=fsm
            else if (ratopt==2.and.present(fatsph)) then
-             fsm=fatsph3i(i1,i2,i3,iatom)
+             fsm=fatsph3i(ix+1,iy+1,iz+1,iatom)
            end if
 
            ifft_local=1+ix+n1*(iy+n2*izloc)
@@ -1747,9 +1749,27 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      end if
    end do
 
+
    if (ratopt==1.and.present(fatsph)) then
-     call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,fatsph3i(:,:,:,iatom),fatsph(:,iatom),1)
+     ABI_MALLOC(work3,(n1,n2,n3,1))
+     ABI_MALLOC(work2,(nfft,1))
+     work3(:,:,:,1)=fatsph3i(:,:,:,iatom)
+     call fftpac(1,mpi_enreg,1,n1,n2,n3,n4,n5,n6,ngfft,work2,work3,1)
+     fatsph(:,iatom)=work2(:,1)
+     ABI_FREE(work3)
+     ABI_FREE(work2)
    end if
+
+!DEBUG
+!   n1c=(n1b+n1a)/2
+!   n2c=(n2b+n2a)/2
+!   do i3= n3a-5,n3b+5
+!     n1c=mod(n1c+ishift*n1,n1)
+!     n2c=mod(n2c+ishift*n2,n2)
+!     iz=mod(i3+ishift*n3,n3)
+!     write(100+iatom,*) iz+1 ,fatsph3i(n1c,n2c,iz+1,iatom)
+!   end do 
+!ENDDEBUG
 
    if(present(intgf2) .and. neighbor_overlap==0)then
      intgf2(iatom,iatom)=intgf2(iatom,iatom)*ucvol/dble(nfftot)
@@ -2778,22 +2798,20 @@ subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
 !Local variables ------------------------------
 !scalars
  integer :: iatom,ifft
- integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3
+ integer :: i1,i2,i3,id1,id2,id3,ig1,ig2,ig3,ii,ii1,n1,n2,n3,n4,n5,n6
  real(dp) :: arg1,arg2,fac1,fac2,fac3,gq1,gq2,gq3,gcube
  real(dp) :: gsquar,gmag,gmagrad,rad,sfr,sfi,widthsq,norm
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  real(dp) :: gq(3)
- real(dp) :: work1(2,nfft),work2(nfft),work3(ngfft(1),ngfft(2),ngfft(3))
-
-!debugg
-! integer :: np1,np2,np3
+ real(dp) :: work1(2,nfft),work2(nfft,1),work3(ngfft(1),ngfft(2),ngfft(3),1)
 
 !******************************************************************
 
 !Geometric parameters
  n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
+ n4=ngfft(4);n5=ngfft(5);n6=ngfft(6)
  id1=n1/2+2
  id2=n2/2+2
  id3=n3/2+2
@@ -2854,20 +2872,12 @@ subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
 
 !  Transform to real space
    call fourdp(1,work1,work2,1,mpi_enreg,nfft,1,ngfft,0)
-   fatsph(:,iatom)=work2(:)
+   fatsph(:,iatom)=work2(:,1)
  
    call fftpac(1,mpi_enreg,1,n1,n2,n3,n1,n2,n3,ngfft,work2,work3,2)
-   fatsph3i(:,:,:,iatom)=work3(:,:,:)
+   fatsph3i(:,:,:,iatom)=work3(:,:,:,1)
 
  end do !iatom
-
-! np1=nint(xred(1,1)*n1)
-! np2=nint(xred(2,1)*n2)
-! np3=nint(xred(3,1)*n3)
-! do i1=1,n1
-!   ig1=i1-(i1/id1)*n1-1
-!   write(100,*) ig1, fatsph3i(i1,np2,np3,1)
-! end do
 
  contains
 
