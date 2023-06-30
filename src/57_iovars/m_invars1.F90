@@ -598,17 +598,6 @@ end do
  end do
 #endif
 
- dtsets(:)%use_gpu_cuda_in_fourwf=0
-#if defined HAVE_GPU_CUDA
- do idtset=1,ndtset_alloc
-   dtsets(idtset)%use_gpu_cuda_in_fourwf=dtsets(idtset)%use_gpu_cuda
-
-   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda_in_fourwf',tread,'INT')
-   if(tread==1) dtsets(idtset)%use_gpu_cuda_in_fourwf=intarr(1)
- end do
-#endif
-
  dtsets(:)%use_gpu_openmp_threads=1
 #if defined HAVE_GPU_CUDA
  do idtset=1,ndtset_alloc
