@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h48 )
   
 
 ================================================================================
@@ -55,20 +55,27 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.9400000  3.9400000  G(1)= -0.1269036  0.1269036  0.1269036
  R(2)=  3.9400000  0.0000000  3.9400000  G(2)=  0.1269036 -0.1269036  0.1269036
  R(3)=  3.9400000  3.9400000  0.0000000  G(3)=  0.1269036  0.1269036 -0.1269036
  Unit cell volume ucvol=  1.2232597E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
-
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   V
+    2)    0.5000000  0.5000000  0.5000000   N
+ 
+ DDB file with 18 blocks has been read.
+ 
 ================================================================================
-
+ 
  Calculation of the interatomic forces 
-
--begin at tcpu      0.036  and twall      0.037 sec
+ 
+-begin at tcpu      0.049  and twall      0.637 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      108
  greater than 80, so only write 20 of them
@@ -87,19 +94,19 @@
  13)   3.33333333E-01  0.00000000E+00  3.33333333E-01
  14)   3.33333333E-01  1.66666667E-01  5.00000000E-01
  15)   3.33333333E-01  3.33333333E-01  6.66666667E-01
- 16)   3.33333333E-01 -3.33333333E-01 -3.33066907E-16
+ 16)   3.33333333E-01 -3.33333333E-01 -5.55111512E-17
  17)   3.33333333E-01 -1.66666667E-01  1.66666667E-01
  18)   5.00000000E-01  0.00000000E+00  5.00000000E-01
  19)   5.00000000E-01  1.66666667E-01  6.66666667E-01
  20)   5.00000000E-01 -1.66666667E-01  3.33333333E-01
-
+ 
  The interatomic forces have been obtained
-
+ 
 ================================================================================
-
+ 
  Treat the first list of vectors 
-
-
+ 
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  2.208018E-03  2.208018E-03
@@ -107,21 +114,21 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.846040E+02  4.846040E+02
 -  4.846040E+02
-
+ 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -0.0 -1.0 -1.0 -1.0 -0.0  0.0  0.0  1.0 -1.0 -1.0 -0.0  1.0  1.0  1.0  0.0
- -0.0  1.0 -1.0 -0.0 -1.0  1.0 -1.0 -1.0 -3.0  0.0  1.0  1.0  1.0  0.0 -0.0 -0.0
- -1.0  1.0  1.0  0.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0  1.0  0.0  1.0 -1.0  1.0  1.0
+  3.0  0.0 -1.0 -1.0 -1.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  0.0  1.0  1.0  1.0  0.0
+  0.0  1.0 -1.0 -0.0 -1.0  1.0 -1.0 -1.0 -3.0 -0.0  1.0  1.0  1.0  0.0 -0.0  0.0
+ -1.0  1.0  1.0 -0.0 -1.0 -1.0 -1.0 -0.0 -0.0 -1.0  1.0  0.0  1.0 -1.0  1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0  0.0 -1.0 -1.0 -1.0  0.0 -0.0 -0.0  1.0 -1.0 -1.0  0.0  1.0  1.0  1.0 -0.0
-  0.0  1.0 -1.0 -0.0 -1.0  1.0 -1.0 -1.0 -3.0 -0.0  1.0  1.0  1.0 -0.0  0.0  0.0
- -1.0  1.0  1.0 -0.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0  1.0  0.0  1.0 -1.0  1.0  1.0
-
+  3.0 -0.0 -1.0 -1.0 -1.0 -0.0  0.0  0.0  1.0 -1.0 -1.0 -0.0  1.0  1.0  1.0  0.0
+ -0.0  1.0 -1.0  0.0 -1.0  1.0 -1.0 -1.0 -3.0  0.0  1.0  1.0  1.0  0.0 -0.0 -0.0
+ -1.0  1.0  1.0  0.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0  1.0 -0.0  1.0 -1.0  1.0  1.0
+ 
   Phonon wavevector (reduced coordinates) :  0.37500  0.37500  0.75000
  Phonon energies in Hartree :
   -8.173872E-04 -7.050620E-04 -2.274598E-04  2.474796E-03  2.493010E-03
@@ -129,7 +136,7 @@
  Phonon frequencies in cm-1    :
 - -1.793958E+02 -1.547432E+02 -4.992165E+01  5.431549E+02  5.471525E+02
 -  5.717606E+02
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  1.00000
  Phonon energies in Hartree :
   -8.245779E-04 -5.814703E-04 -5.814703E-04  2.480723E-03  2.480723E-03
@@ -137,7 +144,7 @@
  Phonon frequencies in cm-1    :
 - -1.809739E+02 -1.276180E+02 -1.276180E+02  5.444558E+02  5.444558E+02
 -  5.946942E+02
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    8.590688E-04  8.590688E-04  9.821447E-04  2.327622E-03  2.327622E-03
@@ -145,7 +152,7 @@
  Phonon frequencies in cm-1    :
 -  1.885438E+02  1.885438E+02  2.155559E+02  5.108541E+02  5.108541E+02
 -  5.772289E+02
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.25000  0.75000
  Phonon energies in Hartree :
   -9.363381E-04 -9.363381E-04  2.970748E-04  2.401750E-03  2.558998E-03
@@ -153,12 +160,12 @@
  Phonon frequencies in cm-1    :
 - -2.055025E+02 -2.055025E+02  6.520037E+01  5.271231E+02  5.616351E+02
 -  5.616351E+02
-
+ 
 ================================================================================
-
+ 
  Treat the second list of vectors 
-
-
+ 
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -168,10 +175,10 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.846040E+02  4.846040E+02
 -  4.846040E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
-
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          1.3
+ 
 ================================================================================
-
-+Total cpu time      0.068  and wall time      0.070 sec
-
+ 
++Total cpu time      0.103  and wall time      1.343 sec
+ 
  anaddb : the run completed succesfully.

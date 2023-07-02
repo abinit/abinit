@@ -150,8 +150,8 @@ type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
 
-   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), inp%brav, &
-                      ddb_hdr, new%cryst_vol(ivol), comm)
+   call new%ddb_vol(ivol)%from_file(ddb_filepaths(ivol), ddb_hdr, new%cryst_vol(ivol), comm)
+   call new%ddb_vol(ivol)%set_brav(inp%brav)
    natom = ddb_hdr%natom
    call ddb_hdr%free()
 
