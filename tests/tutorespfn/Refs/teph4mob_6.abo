@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 03h32 )
+.Starting date : Wed 31 May 2023.
+- ( at 18h36 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
 - output file    -> teph4mob_6.abo
 - root for input  files -> teph4mob_6i
 - root for output files -> teph4mob_6o
@@ -409,13 +409,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
  R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
  Unit cell volume ucvol=  2.9859750E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
@@ -531,8 +538,8 @@ meta: {optdriver: 7, eph_task: -4, }
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -544,8 +551,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -827,13 +834,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
  R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
  Unit cell volume ucvol=  2.9859750E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
@@ -1214,13 +1228,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
  R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
  Unit cell volume ucvol=  2.9859750E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
@@ -1601,13 +1622,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
  R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
  Unit cell volume ucvol=  2.9859750E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
@@ -2038,13 +2066,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
  R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
  Unit cell volume ucvol=  2.9859750E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
@@ -2500,13 +2535,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 4.424758E-08 to input nelect: 8.000000E+00
  Old fermi level:     1.134753E-01, with nelect:     8.000000E+00
  New fermi level:     1.134753E-01, with nelect:     8.000000E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
  R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
  Unit cell volume ucvol=  2.9859750E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
@@ -3117,10 +3159,44 @@ P           mkmem         413
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         44.6        0.74      0.012
+- Total wall clock time (s,m,h):         44.8        0.75      0.012
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           44.6, wall_time =           44.8
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- ifc_fourq                        22.366  50.2        22.405  50.1           6540      -1.00        1.00       1.00
+- invars2                           3.366   7.6         3.369   7.5              6      -1.00        1.00       1.00
+- abinit(2)                         3.162   7.1         3.165   7.1              1      -1.00        1.00       1.00
+- dvdb_get_ftqbz                    1.420   3.2         1.415   3.2            996      -1.00        1.00       1.00
+- fourdp                            0.437   1.0         0.434   1.0          12948      -1.00        1.01       1.01
+- others (147)                      0.467   1.0         0.427   1.0             -1      -1.00        1.09       1.09
+-<END_TIMER>
+-
+- subtotal                         31.217  70.1        31.215  69.7                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          44.6, wall_time =          44.8
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- ifc_fourq                        22.366  50.2        22.405  50.1           6540      -1.00        1.00       1.00
+- invars2                           3.366   7.6         3.369   7.5              6      -1.00        1.00       1.00
+- abinit(2)                         3.162   7.1         3.165   7.1              1      -1.00        1.00       1.00
+- dvdb_get_ftqbz                    1.420   3.2         1.415   3.2            996      -1.00        1.00       1.00
+- fourdp                            0.437   1.0         0.434   1.0          12948      -1.00        1.01       1.01
+- others (147)                      0.467   1.0         0.427   1.0             -1      -1.00        1.09       1.09
+-<END_TIMER>
 
+- subtotal                         31.217  70.1        31.215  69.7                                  1.00       1.00
 
 ================================================================================
 
@@ -3210,10 +3286,10 @@ P           mkmem         413
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         40.6  wall=         41.1
+- Proc.   0 individual time (sec): cpu=         44.6  wall=         44.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         40.6  wall=         41.1
+.Delivered  44 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=         44.6  wall=         44.8

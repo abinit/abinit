@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Wed 31 May 2023.
+- ( at 18h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t44.in
-- output file    -> t44.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/v8_t41-t42-t43-t44/t44.abi
+- output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
 
@@ -34,7 +34,7 @@
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.106 Mbytes of memory.
+P This job should need less than                       5.336 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.106 Mbytes of memory.
+P This job should need less than                       5.336 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.106 Mbytes of memory.
+P This job should need less than                       5.336 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.106 Mbytes of memory.
+P This job should need less than                       5.336 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          54        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       5.106 Mbytes of memory.
+P This job should need less than                       5.336 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      2.164 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           8
        mpw =         328          nfft =        8000          nkpt =           8
 ================================================================================
-P This job should need less than                       3.641 Mbytes of memory.
+P This job should need less than                       3.870 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.803 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -390,13 +390,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
@@ -424,8 +431,8 @@ meta: {optdriver: 7, eph_task: 4, }
 - Writing phonon DOS to netcdf file: t44o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -766,13 +773,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
@@ -1123,13 +1137,20 @@ meta: {optdriver: 7, eph_task: 5, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
@@ -1195,13 +1216,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
@@ -1555,13 +1583,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
@@ -1900,13 +1935,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t44o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t44o_DS20_DDB
@@ -2473,10 +2515,42 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         82.6        1.38      0.023
+- Total wall clock time (s,m,h):         82.9        1.38      0.023
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           82.6, wall_time =           82.9
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- sigph_stern                       8.047   9.7         8.058   9.7           1008      -1.00        1.00       1.00
+- fourwf%(pot)                      1.856   2.2         1.893   2.3          17955      -1.00        0.98       0.98
+- sigph_bsum                        0.760   0.9         0.771   0.9             86      -1.00        0.99       0.99
+- sigph_bsum_4                      0.670   0.8         0.680   0.8           3930      -1.00        0.99       0.99
+- others (148)                     -0.640  -0.8        -0.714  -0.9             -1      -1.00        0.90       0.90
+-<END_TIMER>
+-
+- subtotal                         10.693  12.9        10.688  12.9                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          82.6, wall_time =          82.9
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- sigph_stern                       8.047   9.7         8.058   9.7           1008      -1.00        1.00       1.00
+- fourwf%(pot)                      1.856   2.2         1.893   2.3          17955      -1.00        0.98       0.98
+- sigph_bsum                        0.760   0.9         0.771   0.9             86      -1.00        0.99       0.99
+- sigph_bsum_4                      0.670   0.8         0.680   0.8           3930      -1.00        0.99       0.99
+- others (148)                     -0.640  -0.8        -0.714  -0.9             -1      -1.00        0.90       0.90
+-<END_TIMER>
 
+- subtotal                         10.693  12.9        10.688  12.9                                  1.00       1.00
 
 ================================================================================
 
@@ -2560,10 +2634,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        102.5  wall=        102.9
+- Proc.   0 individual time (sec): cpu=         82.6  wall=         82.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        102.5  wall=        102.9
+.Delivered  38 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         82.6  wall=         82.9

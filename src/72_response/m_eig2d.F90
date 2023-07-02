@@ -38,6 +38,7 @@ MODULE m_eig2d
  use m_dtset
  use m_dtfil
  use m_ddb_hdr
+ use m_ddb
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
@@ -1196,7 +1197,9 @@ end subroutine eig2stern
 !!  eig2nkq(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= diagonal part of the
 !!            second-order eigenvalues: E^{(2),diag}_{k,q,j}.
 !!  eigbrd(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= OPTIONAL, array containing the
-!!            electron lifetimes.
+!!            the contribution of each perturbations pair
+!!            to the eigenstate broadening (inverse lifetime)
+!!            computed statically (without phonon frequencies). 
 !!
 !! SOURCE
 
@@ -1232,11 +1235,11 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !tolerance for non degenerated levels
 !scalars
  integer :: band2tot_index,band_index,bantot,bandtot_index,iband,idir1,idir2
- integer :: ikpt,ipert1,ipert2,isppol,jband,nkpt_sub,ikpt2,unitout,ncid
+ integer :: ikpt,ipert1,ipert2,isppol,jband,nkpt_sub,ikpt2,ncid
 !integer :: ipw
  character(len=fnlen) :: dscrpt,fname
  integer :: master,me,spaceworld,ierr
- integer :: mband_mem
+ integer :: mband_mem, mpert_
 ! real(dp),parameter :: etol=1.0d-6
  real(dp),parameter :: etol=1.0d-7
 !real(dp),parameter :: etol=zero
@@ -1247,11 +1250,13 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  logical :: remove_inv,test_do_band
  type(crystal_t) :: Crystal
  type(ebands_t)  :: Bands
- type(eigr2d_t)  :: eigr2d,eigi2d
+ !type(eigr2d_t)  :: eigr2d,eigi2d
  type(fan_t)     :: fan2d
  type(gkk_t)     :: gkk2d
  type(ddb_hdr_type) :: ddb_hdr
+ type(ddb_type) :: ddb
 !arrays
+ integer,allocatable :: flg(:,:,:,:)
  integer, allocatable :: nband_rbz(:)
  integer,pointer      :: kpt_fine_sub(:)
  real(dp)             :: tsec(2)
@@ -1585,30 +1590,54 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    ABI_FREE(center)
  end if
 
- master=0
- if (me==master) then
-!  print _EIGR2D file for this perturbation in the case of ieig2rf 3 or 4 or 5
    if (ieig2rf == 3 .or. ieig2rf == 4 .or. ieig2rf == 5) then
 
-     dscrpt=' Note : temporary (transfer) database '
-     unitout = dtfil%unddb
+       mpert_ = dtset%natom
 
-     call ddb_hdr%init(dtset,psps,pawtab,dscrpt,&
-&     1,xred=xred,occ=occ_rbz)
+       ! Initialize perturbation flags
+       ABI_MALLOC(flg,(3,mpert_,3,mpert_))
+       flg = one
 
-     call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, unitout)
-     call ddb_hdr%free()
+       ! Initialize ddb object
+       call ddb%init(dtset, 1, mpert_, &
+                    mband=bdeigrf,&
+                    nkpt=nkpt_rbz,&
+                    kpt=dtset%kptns(1:3,1:nkpt_rbz),&
+                    with_d2eig=.true.)
+
+       ! Create the ddb header
+       dscrpt=' Note : temporary (transfer) database '
+       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
+                         mpert=mpert_,&
+                         xred=xred,occ=occ_rbz,&
+                         mband=bdeigrf / dtset%nsppol,&
+                         nkpt=nkpt_rbz,&
+                         kpt=dtset%kptns(:,1:nkpt_rbz))
+
+       ! Set d2eig data
+       call ddb%set_qpt(1, dtset%qptn)
+       call ddb%set_d2eig_reshape(1, eig2nkq, flg)
+
+       ! Open the file and write header
+       call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
+
+       ! Write d2eig data block
+       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1)
+       call ddb%write_d2eig(ddb_hdr, 1)
+
+       ! close and free memory
+       call ddb_hdr%close()
+       call ddb_hdr%free()
+       call ddb%free()
+
+       ABI_FREE(flg)
+
    end if
 
-   if(ieig2rf == 3 ) then
-     call outbsd(bdeigrf,dtset,eig2nkq,dtset%natom,nkpt_rbz,unitout)
-   end if
-   if(ieig2rf == 4 .or. ieig2rf == 5 ) then
-     call outbsd(bdeigrf,dtset,eig2nkq_tmp,dtset%natom,nkpt_rbz,unitout)
-   end if
-!  Output of the EIGR2D.nc file.
-   fname = strcat(dtfil%filnam_ds(4),"_EIGR2D.nc")
-!  Crystalline structure.
+!  print _FAN file for this perturbation. Note that the Fan file will only be produced if
+!  abinit is compiled with netcdf.
+
+!  Initialize crystal structure for FAN.nc and GKK.nc files
    remove_inv=.false.
    if(dtset%nspden==4 .and. dtset%usedmft==1) remove_inv=.true.
    call crystal_init(dtset%amu_orig(:,1),Crystal,dtset%spgroup,dtset%natom,dtset%npsp,psps%ntypat, &
@@ -1617,39 +1646,13 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &   dtset%symrel,dtset%tnons,dtset%symafm)
 !  Electronic band energies.
    bantot= dtset%mband*dtset%nkpt*dtset%nsppol
-   ! CP modified
-!   call ebands_init(bantot,Bands,dtset%nelect,doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
-!&   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
-!&   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
-!&   hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
-!&   hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
    call ebands_init(bantot,Bands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
 &   doccde,eigen0,hdr0%istwfk,hdr0%kptns,&
 &   hdr0%nband, hdr0%nkpt,hdr0%npwarr,hdr0%nsppol,hdr0%nspinor,&
 &   hdr0%tphysel,hdr0%tsmear,hdr0%occopt,hdr0%occ,hdr0%wtk,&
 &   hdr0%cellcharge, hdr0%kptopt, hdr0%kptrlatt_orig, hdr0%nshiftk_orig, hdr0%shiftk_orig, &
 &   hdr0%kptrlatt, hdr0%nshiftk, hdr0%shiftk)
-   ! End CP modified
-
-!  Second order derivative EIGR2D (real and Im)
-   if(ieig2rf == 3 ) then
-     call eigr2d_init(eig2nkq,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-   end if
-   if(ieig2rf == 4 .or. ieig2rf == 5 ) then
-     call eigr2d_init(eig2nkq_tmp,eigr2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-   end if
-#ifdef HAVE_NETCDF
-   NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGR2D file")
-   NCF_CHECK(crystal%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(Bands, ncid))
-   call eigr2d_ncwrite(eigr2d,dtset%qptn(:),dtset%wtq,ncid)
-   NCF_CHECK(nf90_close(ncid))
-#else
-   ABI_UNUSED(ncid)
-#endif
-
-!  print _FAN file for this perturbation. Note that the Fan file will only be produced if
-!  abinit is compiled with netcdf.
+!
    if(ieig2rf == 4 ) then
 !    Output of the Fan.nc file.
 #ifdef HAVE_NETCDF
@@ -1686,36 +1689,45 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      ABI_FREE(gkk)
      ABI_FREE(eig2nkq_tmp)
    end if
+
 !  print _EIGI2D file for this perturbation
    if (ieig2rf /= 5 ) then
      if(smdelta>0) then
-       unitout = dtfil%unddb
+
+       ABI_MALLOC(flg,(3,mpert_,3,mpert_))
+       flg = one
+       call ddb%init(dtset, 1, mpert_, &
+                    mband=bdeigrf,&
+                    nkpt=nkpt_rbz,&
+                    kpt=dtset%kptns(:,1:nkpt_rbz),&
+                    with_d2eig=.true.)
+
+       ! Create the ddb header
        dscrpt=' Note : temporary (transfer) database '
+       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
+                         mpert=mpert_,&
+                         xred=xred,occ=occ_rbz,&
+                         mband=bdeigrf / dtset%nsppol,&
+                         nkpt=nkpt_rbz,&
+                         kpt=dtset%kptns(:,1:nkpt_rbz))
 
-       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,&
-&       1,xred=xred,occ=occ_rbz)
+       call ddb%set_qpt(1, dtset%qptn)
+       call ddb%set_d2eig_reshape(1, eigbrd, flg, blktyp=BLKTYP_d2eig_im)
 
-       call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, unitout)
+       call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
+
+       call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, with_psps=1)
+       call ddb%write_d2eig(ddb_hdr, 1)
+
+       call ddb_hdr%close()
        call ddb_hdr%free()
+       call ddb%free()
 
-       call outbsd(bdeigrf,dtset,eigbrd,dtset%natom,nkpt_rbz,unitout)
+       ABI_FREE(flg)
 
-!      Output of the EIGI2D.nc file.
-       fname = strcat(dtfil%filnam_ds(4),"_EIGI2D.nc")
-!      Broadening EIGI2D (real and Im)
-       call eigr2d_init(eigbrd,eigi2d,dtset%mband,hdr0%nsppol,nkpt_rbz,dtset%natom)
-#ifdef HAVE_NETCDF
-       NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EIGI2D file")
-       NCF_CHECK(crystal%ncwrite(ncid))
-       NCF_CHECK(ebands_ncwrite(Bands, ncid))
-       call eigr2d_ncwrite(eigi2d,dtset%qptn(:),dtset%wtq,ncid)
-       NCF_CHECK(nf90_close(ncid))
-#else
-       ABI_UNUSED(ncid)
-#endif
      end if !smdelta
    end if
- end if
+ !end if  ! master
 
  if (allocated(fan)) then
    ABI_FREE(fan)
@@ -1729,11 +1741,8 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 
  call crystal%free()
  call ebands_free(Bands)
- call eigr2d_free(eigr2d)
- call eigr2d_free(eigi2d)
  call fan_free(fan2d)
  call gkk_free(gkk2d)
-
 
  call timab(148,2,tsec)
 
@@ -1757,6 +1766,9 @@ end subroutine eig2tot
 !!
 !! OUTPUTS
 !!  to file
+!!
+!! NOTE
+!!  This function is deprecated. One should write through ddb object instead.
 !!
 !! SOURCE
 

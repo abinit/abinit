@@ -47,8 +47,9 @@ module m_phonons
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
- use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec, &
-                               phangmom_from_eigvec
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, &
+                               pheigvec_normalize, massmult_and_breaksym, &
+                               phdispl_from_eigvec, phangmom_from_eigvec
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type

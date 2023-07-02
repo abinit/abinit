@@ -2721,7 +2721,8 @@ class AnaddbTest(BaseTest):
         if self.input_ddb:
             # Use output DDB of a previous run.
             iddb_fname = os.path.join(self.workdir, self.input_ddb)
-            if not os.path.isfile(iddb_fname):
+            if (not os.path.isfile(iddb_fname) 
+                and not os.path.isfile(iddb_fname + '.nc')):
                 self.exceptions.append(self.Error(
                     "%s no such DDB file: " % iddb_fname))
         return iddb_fname
@@ -2731,11 +2732,13 @@ class AnaddbTest(BaseTest):
         input_gkk = self.id + ".gkk"
         if self.input_gkk:
             input_gkk = os.path.join(self.workdir, self.input_gkk)  # Use output GKK of a previous run.
-            if not os.path.isfile(input_gkk):
+            if (not os.path.isfile(input_gkk)
+                and not os.path.isfile(input_gkk + '.nc')):
                 self.exceptions.append(self.Error(
                     "%s no such GKK file: " % input_gkk))
 
-        if not os.path.isfile(input_gkk):
+        if (not os.path.isfile(input_gkk)
+            and not os.path.isfile(input_gkk + '.nc')):
             input_gkk = ""
         return input_gkk
 
