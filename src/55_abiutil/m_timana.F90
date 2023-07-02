@@ -1321,7 +1321,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:6)=(/-40, 22,530,1300,-201,-211/)
    case(20)
 !      Estimate the complement of dfpt_cgwf (non getghc,projbd,nonlop,fourwf)
-     tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)
+!    tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)  ! 197 includes some nonlop and fourwf, so there is double counting ...
+     tslots(:7)=(/-140, 122,-202,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
 !      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))

@@ -190,7 +190,9 @@ integer,parameter :: useoverlap=0,tim_getcsc=3
 
  cwavef_bands => cg(:,1+icg:nband*npw*nspinor+icg)
 
- if (cprj_update_lvl==-2)  call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
+ if (cprj_update_lvl==-2)then
+   call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getcprj)
+ endif
 
  isubh=1
  isubh0=1
