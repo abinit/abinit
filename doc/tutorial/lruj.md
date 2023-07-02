@@ -12,6 +12,9 @@ first-principles Hubbard U and/or Hund's J parameters for particular atomic subs
 these parameters may then be applied via the DFT+U(+J)-like Hubbard functionals to 
 address self-interaction and static correlation errors.
 
+Note that there is another methodology to compute _U_ and _J_, see the 
+[cRPA U(J)](/tutorial/ucalc_crpa) tutorial.
+
 In this tutorial, you will learn how to run perturbative calculations in Abinit and
 generate input data to successfully execute the lruj post-processing utility.
 We strongly encourage you to read the [PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2)
