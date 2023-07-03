@@ -1560,7 +1560,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
- real(dp), allocatable :: fsm_atom(:,:),fatsph3i(:,:,:,:),work2(:,:),work3(:,:,:,:) 
+ real(dp), allocatable :: fsm_atom(:,:),fatsph3i(:,:,:,:)
 
 !real(dp) :: rprimd_mod(3,3),strain
 
@@ -1749,15 +1749,18 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      end if
    end do
 
-
    if (ratopt==1.and.present(fatsph)) then
-     ABI_MALLOC(work3,(n1,n2,n3,1))
-     ABI_MALLOC(work2,(nfft,1))
-     work3(:,:,:,1)=fatsph3i(:,:,:,iatom)
-     call fftpac(1,mpi_enreg,1,n1,n2,n3,n4,n5,n6,ngfft,work2,work3,1)
-     fatsph(:,iatom)=work2(:,1)
-     ABI_FREE(work3)
-     ABI_FREE(work2)
+     ifft=0
+     do i3=1,n3
+       if (fftn3_distrib(i3)==mpi_enreg%me_fft) then
+         do i2=1,n2
+           do i1=1,n1
+             ifft=ifft+1
+             fatsph(ifft,iatom)=fatsph3i(i1,i2,i3,iatom)
+           end do
+         end do
+       end if
+     end do
    end if
 
 !DEBUG
@@ -1770,6 +1773,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !     write(100+iatom,*) iz+1 ,fatsph3i(n1c,n2c,iz+1,iatom)
 !   end do 
 !ENDDEBUG
+    
 
    if(present(intgf2) .and. neighbor_overlap==0)then
      intgf2(iatom,iatom)=intgf2(iatom,iatom)*ucvol/dble(nfftot)
@@ -1863,6 +1867,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    endif
 
  end do ! iatom
+
 !-------------------------------------------
 !
 ! In case intgf2 must be computed, while the atoms overlap, a double loop over atoms is needed
