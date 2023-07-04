@@ -1062,7 +1062,7 @@ subroutine getgh1c_setup(gs_hamkq, rf_hamkq, dtset, psps, kpoint, kpq, idir, ipe
    if (ipert==natom+4) istr=idir+3
    ider=1;idir0=-istr
  !-- Magnetic field perturbation ( SPr, Zeeman )
- else if(ipert==natom+5)then
+ else if(ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11))then
    ider=0;idir0=0
  end if
 

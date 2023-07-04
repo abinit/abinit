@@ -155,7 +155,7 @@ contains
 !Local variables-------------------------------
 !scalars
  integer :: ifft,ispden,nfftot,option
- integer :: optnc,nkxc_cur
+ integer :: optnc,nkxc_cur,prtopt
  logical :: vhartr1_allocated,vxc1_allocated
  real(dp) :: doti,elpsp10
  character(len=500) :: msg
@@ -163,7 +163,7 @@ contains
  real(dp)             :: tsec(20)
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
- real(dp),allocatable :: vmagpen1(:,:)
+ real(dp),allocatable :: fatsph(:,:),intgden(:,:,:),rhomag(:,:),vmagpen1(:,:)
 
 ! *********************************************************************
 
@@ -206,10 +206,30 @@ contains
    call dfpt_v1zeeman(nspden,nfft,cplex,idir,v1zeeman)
  end if
 
+
+!Constrained DFPT
+ if((ipert>natom+11.and.ipert<=2*natom+11).or.abs(magpen)>tol6) then
+
+  !Compute the first-order magnetic moments. 
+   prtopt=1 
+   ABI_MALLOC(intgden,(cplex,nspden,natom))
+   ABI_MALLOC(rhomag,(2,nspden))
+   ABI_MALLOC(fatsph,(nfft,natom))
+   call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
+  &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
+  &  ratopt,prtopt,cplex,intgden=intgden,rhomag=rhomag,fatsph=fatsph)
+ end if
+
+ if(ipert>natom+11.and.ipert<=2*natom+11)then
+   ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
+   call dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,natom,nfft,nspden,&
+&  rhomag,v1zeeman)
+ end if
+
  if (abs(magpen) > tol6) then
    ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
-   call dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nspden, &
-& ntypat,ratopt,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
+   call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,nspden, &
+& rhomag,vmagpen1)
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -264,7 +284,7 @@ contains
    if (usepaw==0) then
      call dotprod_vn(cplex,rhor1,elpsp10,doti,nfft,nfftot,nspden,1,vxc1_,ucvol)
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
-     if (ipert==natom+5) then
+     if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
      end if
    else
@@ -344,7 +364,7 @@ contains
      end do
    end if
 
-   if (ipert==natom+5) then
+   if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
      vresid1 = vresid1 + v1zeeman
    end if
 
@@ -375,7 +395,7 @@ contains
      end do
    end if
 
-   if (ipert==natom+5) then
+   if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
      vtrial1 = vtrial1 + v1zeeman
    end if
 
@@ -393,11 +413,14 @@ contains
    ABI_FREE(vxc1_)
  end if
 
- if (ipert==natom+5) then
+ if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
    ABI_FREE(v1zeeman)
  end if
 
  ABI_SFREE(vmagpen1)
+ ABI_SFREE(intgden)
+ ABI_SFREE(rhomag)
+ ABI_SFREE(fatsph) 
 
  call timab(157,2,tsec)
 
@@ -551,24 +574,12 @@ end subroutine dfpt_v1zeeman
 !!
 !! INPUTS
 !!  cplex  = complex or real density matrix
-!!  idir   = direction of the perturbing field in Cartesian frame
 !!  magpen=energy shift to apply on the spin degrees of freedom
 !!  mpatpol(2)=initial and final atomic positions whose local magnetic moments will be penalized
 !!  mpdir(3)=directions of the magnetic moments to be penalized
 !!  mpi_enreg=information about MPI parallelization
-!!  natom=number of atoms in cell.
 !!  nfft   = numbder of fft grid points
-!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden = number of density matrix components
-!!  ntypat=number of atom types
-!!  ratopt=1: spheres around atoms are build in real space
-!!         2: spheres around atoms are build in reciprocal space
-!!  ratsm=smearing width for ratsph
-!!  ratsph(ntypat)=radius of spheres around atoms
-!!  rhor1(nfft,nspden)=array for first-order electron density.
-!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  typat(natom)=type of each atom
-!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
 !!  vmagpen1(nfft*cplex,nspden)= 1st order magnetic penalty potential
@@ -586,21 +597,21 @@ end subroutine dfpt_v1zeeman
 !!
 !! SOURCE
 
-subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nspden, &
-& ntypat,ratopt,ratsm,ratsph,rhor1,rprimd,typat,vmagpen1,xred)
+subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,nspden, &
+& rhomag,vmagpen1)
 
 !Arguments 
 !scalars:
- integer , intent(in) :: cplex,idir,natom,nfft,nspden,ntypat,ratopt
- real(dp),intent(in) :: magpen,ratsm
- real(dp), intent(out) :: emagpen1 
+ integer,intent(in) :: cplex,natom,nfft,nspden
+ real(dp),intent(in) :: magpen
+ real(dp),intent(out) :: emagpen1 
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays:
- integer,intent(in) :: ngfft(18),typat(natom)
- integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: ratsph(ntypat),rhor1(cplex*nfft,nspden),rprimd(3,3)
- real(dp),intent(in) :: xred(3,natom)
- real(dp), intent(out) :: vmagpen1(cplex*nfft,nspden)
+ integer,intent(in)    :: mpatpol(2),mpdir(3)
+ real(dp),intent(in)   :: fatsph(nfft,natom)
+ real(dp),intent(in)   :: intgden(cplex,nspden,natom)
+ real(dp),intent(in)   :: rhomag(2,nspden)
+ real(dp),intent(out)  :: vmagpen1(cplex*nfft,nspden)
 
 !Local variables-------------------------------
 !scalars:
@@ -609,38 +620,29 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 !arrays:
  real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
  real(dp) :: Blocx(cplex*nfft),Blocy(cplex*nfft),Blocz(cplex*nfft)
- real(dp) :: intgden(cplex,nspden,natom)
- real(dp) :: dentot(nspden)
- real(dp) :: rhomag(2,nspden)
- real(dp) :: fatsph(nfft,natom)
+ real(dp) :: rhomag_eff(2,nspden),intgden_eff(cplex,nspden,natom)
 
 ! *************************************************************************
-
-!Compute the first-order magnetic moments. 
- prtopt=1; 
- call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-&  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
-&  ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
-&  fatsph=fatsph)
 
 !Compute magnetic penalty from cell-integrated magnetic moments
  if (magpen < zero) then
 
+   rhomag_eff=rhomag
    do i=1,3 
-     if (mpdir(i)==0) rhomag(:,1+i) = zero
+     if (mpdir(i)==0) rhomag_eff(:,1+i) = zero
    end do
 
    if (cplex==1) then
-     emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(1,3)**2+rhomag(1,4)**2)
+     emagpen1=-half*magpen*(rhomag_eff(1,2)**2+rhomag_eff(1,3)**2+rhomag_eff(1,4)**2)
    else if (cplex==2) then
-     emagpen1=-half*magpen*(rhomag(1,2)**2+rhomag(2,2)**2 &
-                        & + rhomag(1,3)**2+rhomag(2,3)**2 &
-                        & + rhomag(1,4)**2+rhomag(2,4)**2 )
+     emagpen1=-half*magpen*(rhomag_eff(1,2)**2+rhomag_eff(2,2)**2 &
+                        & + rhomag_eff(1,3)**2+rhomag_eff(2,3)**2 &
+                        & + rhomag_eff(1,4)**2+rhomag_eff(2,4)**2 )
    end if
 
-   Bx(:)=-magpen*rhomag(:,2)
-   By(:)=-magpen*rhomag(:,3)
-   Bz(:)=-magpen*rhomag(:,4)
+   Bx(:)=-magpen*rhomag_eff(:,2)
+   By(:)=-magpen*rhomag_eff(:,3)
+   Bz(:)=-magpen*rhomag_eff(:,4)
    if (cplex==1) then
      do ifft=1,nfft
        vmagpen1(ifft,1)=Bz(1)
@@ -668,36 +670,37 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
    Blocy=zero
    Blocz=zero
 
+   intgden_eff=intgden
    do iatom=mpatpol(1),mpatpol(2)
 
      do i=1,3 
-       if (mpdir(i)==0) intgden(:,1+i,iatom) = zero
+       if (mpdir(i)==0) intgden_eff(:,1+i,iatom) = zero
      end do
 
      if (cplex==1) then
-       emagpen1=emagpen1+half*magpen*(intgden(1,2,iatom)**2+ &
-                                    & intgden(1,3,iatom)**2+ &
-                                    & intgden(1,4,iatom)**2)
+       emagpen1=emagpen1+half*magpen*(intgden_eff(1,2,iatom)**2+ &
+                                    & intgden_eff(1,3,iatom)**2+ &
+                                    & intgden_eff(1,4,iatom)**2)
      else if (cplex==2) then
-       emagpen1=emagpen1+half*magpen*(intgden(1,2,iatom)**2+intgden(2,2,iatom)**2 &
-                          & + intgden(1,3,iatom)**2+intgden(2,3,iatom)**2 &
-                          & + intgden(1,4,iatom)**2+intgden(2,4,iatom)**2 )
+       emagpen1=emagpen1+half*magpen*(intgden_eff(1,2,iatom)**2+intgden_eff(2,2,iatom)**2 &
+                          & + intgden_eff(1,3,iatom)**2+intgden_eff(2,3,iatom)**2 &
+                          & + intgden_eff(1,4,iatom)**2+intgden_eff(2,4,iatom)**2 )
      end if
 
      if (cplex==1) then
        do ifft=1,nfft
-         Blocx(ifft)=Blocx(ifft)+magpen*intgden(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(ifft)=Blocy(ifft)+magpen*intgden(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(ifft)=Blocz(ifft)+magpen*intgden(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(ifft)=Blocx(ifft)+magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(ifft)=Blocy(ifft)+magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(ifft)=Blocz(ifft)+magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
        end do
      else if (cplex==2) then
        do ifft=1,nfft
-         Blocx(2*ifft-1)=Blocx(2*ifft-1)+magpen*intgden(1,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft-1)=Blocy(2*ifft-1)+magpen*intgden(1,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft-1)=Blocz(2*ifft-1)+magpen*intgden(1,4,iatom)*fatsph(ifft,iatom)
-         Blocx(2*ifft)=Blocx(2*ifft)+magpen*intgden(2,2,iatom)*fatsph(ifft,iatom)
-         Blocy(2*ifft)=Blocy(2*ifft)+magpen*intgden(2,3,iatom)*fatsph(ifft,iatom)
-         Blocz(2*ifft)=Blocz(2*ifft)+magpen*intgden(2,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft-1)=Blocx(2*ifft-1)+magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft-1)=Blocy(2*ifft-1)+magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft-1)=Blocz(2*ifft-1)+magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx(2*ifft)=Blocx(2*ifft)+magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy(2*ifft)=Blocy(2*ifft)+magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz(2*ifft)=Blocz(2*ifft)+magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
        end do
      end if
 
@@ -727,6 +730,153 @@ subroutine dfpt_v1magpen(cplex,emagpen1,idir,magpen,mpatpol,mpdir,mpi_enreg,nato
 
 end subroutine dfpt_v1magpen
 !!***
+
+!!****f* ABINIT/dfpt_v1zeeman_atsph
+!! NAME
+!!  dfpt_v1zeeman_atsph
+!!
+!! FUNCTION
+!!  Calculate 1st order potential due to a local Zeeman field inside an
+!!  atom centered sphere= -vec{\sigma}.\vec{b}*f_i(r), where
+!!  sigma is the vector of Pauli matrices, \vec{b}(r) is the unit
+!!  vector indicating the perturbing field direction and f_i(r) is the 
+!!  real-space function defining the sphere around atom i.
+!!
+!! INPUTS
+!!  nspden = number of density matrix components
+!!  nfft   = numbder of fft grid points
+!!  cplex  = complex or real density matrix
+!!  idir   = direction of the perturbing field in Cartesian frame
+!!           1: along x
+!!           2: along y
+!!           3: along z
+!!           4: identity matrix at each fft point is returned (for density-density response)
+!!
+!! OUTPUT
+!!  v1zeeman(nfft*cplex,nspden)= 1st order Zeeman potential, or Identity matrix (electrostatic potential) for idir=4
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!  The definition of components of the potential matrix differ depending on cplex
+!!  for nspden=4:
+!!  For cplex=1, the potential is defined as (V_upup,V_dndn,Re[V_updn],Im[V_updn])
+!!  For cplex=2, the definition is (V_upup,V_dndn,V_updn,i.V_updn)
+!!
+!! SOURCE
+
+subroutine dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,natom,nfft,nspden,&
+& rhomag,v1zeeman)
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)    :: idir,ipert,nfft,cplex,natom,nspden
+ real*8, intent(in)     :: magpen  
+ type(MPI_type), intent(in) :: mpi_enreg
+!arrays
+ real(dp), intent(in)   :: fatsph(nfft,natom)
+ real(dp), intent(in)   :: intgden(cplex,nspden,natom)
+ real(dp), intent(in)   :: rhomag(2,nspden)
+ real(dp), intent(inout) :: v1zeeman(cplex*nfft,nspden)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ifft,iatom
+ character(len=500) :: msg
+!arrays
+ real(dp) :: Bloc(cplex*nfft)
+
+! *************************************************************************
+
+ iatom=ipert-natom-11
+
+ !Define the local magnetic field
+ if (cplex==1) then
+   do ifft=1,nfft
+     Bloc(ifft)=-magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
+   end do
+ else if (cplex==2) then
+   do ifft=1,nfft
+     Bloc(2*ifft-1)=magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
+     Bloc(2*ifft  )=magpen*intgden(2,idir+1,iatom)*fatsph(ifft,iatom)
+   end do
+ end if
+
+ !Build the first-order potential
+ select case(cplex)
+ case(1)
+   if (nspden==4) then
+     if(idir==3)then       ! Zeeman field along the 3rd axis (z)
+       do ifft=1,nfft
+         v1zeeman(ifft,1)=Bloc(ifft)
+         v1zeeman(ifft,2)=-Bloc(ifft)
+         v1zeeman(ifft,3)= 0.0d0
+         v1zeeman(ifft,4)= 0.0d0
+       end do
+     else if(idir==2)then  ! Zeeman field along the 2nd axis (y)
+       do ifft=1,nfft
+         v1zeeman(ifft,1)= 0.0d0
+         v1zeeman(ifft,2)= 0.0d0
+         v1zeeman(ifft,3)= 0.0d0
+         v1zeeman(ifft,4)=-Bloc(ifft)
+       end do
+     else                  ! Zeeman field along the 1st axis (x)
+       do ifft=1,nfft
+         v1zeeman(ifft,1)= 0.0d0
+         v1zeeman(ifft,2)= 0.0d0
+         v1zeeman(ifft,3)=Bloc(ifft)
+         v1zeeman(ifft,4)= 0.0d0
+       end do
+     end if
+   else 
+     write(msg,*) 'Response to local Zeeman fields only implemented for nspden=4'
+     ABI_BUG(msg)
+   end if
+ case(2)
+   if (nspden==4) then
+     select case(idir)
+     case(1) !along x, v1=-sigma_x
+       do ifft=1,nfft
+         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1zeeman(2*ifft-1,3)= Bloc(2*ifft-1) !Re[V^12]
+         v1zeeman(2*ifft  ,3)= Bloc(2*ifft) !Im[V^12]
+         v1zeeman(2*ifft-1,4)=-Bloc(2*ifft) !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,4)= Bloc(2*ifft-1) !Im[i.V^21]=Re[V^12]
+       end do
+     case(2) !along y, v1 = -sigma_y
+       do ifft=1,nfft
+         v1zeeman(2*ifft-1,1)= 0.0e0 !Re[V^11]
+         v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
+         v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
+         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1zeeman(2*ifft-1,3)= Bloc(2*ifft)  !Re[V^12]
+         v1zeeman(2*ifft  ,3)=-Bloc(2*ifft-1) !Im[V^12]
+         v1zeeman(2*ifft-1,4)=-Bloc(2*ifft-1) !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,4)=-Bloc(2*ifft)  !Im[i.V^21]=Re[V^12]
+       end do
+     case(3)
+       do ifft=1,nfft
+         v1zeeman(2*ifft-1,1)= Bloc(2*ifft-1) !Re[V^11]
+         v1zeeman(2*ifft  ,1)= Bloc(2*ifft)   !Im[V^11]
+         v1zeeman(2*ifft-1,2)=-Bloc(2*ifft-1) !Re[V^22]
+         v1zeeman(2*ifft  ,2)=-Bloc(2*ifft)   !Im[V^22]
+         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
+         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]
+       end do
+     end select
+   else
+     write(msg,*) 'Response to local Zeeman fields only implemented for nspden=4'
+     ABI_BUG(msg)
+   end if
+ end select !cplex
+end subroutine dfpt_v1zeeman_atsph
+!!***
+
 
 end module m_dfpt_rhotov
 !!***
