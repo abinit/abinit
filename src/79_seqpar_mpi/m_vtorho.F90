@@ -40,14 +40,16 @@ module m_vtorho
  use m_extfpmd
  use m_ompgpu_utils
  use m_xg_nonlop
+ use m_ebands
 
- use defs_datatypes,       only : pseudopotential_type
+ use defs_datatypes,       only : pseudopotential_type, ebands_t
  use defs_abitypes,        only : MPI_type
  use m_fstrings,           only : sjoin, itoa
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
  use m_occ,                only : newocc
  use m_pawang,             only : pawang_type
+ use m_pawrad,             only : pawrad_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
  use m_pawfgrtab,          only : pawfgrtab_type
@@ -63,7 +65,8 @@ module m_vtorho
  use m_paw_correlations,   only : setnoccmmp
  use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
- use m_crystal,            only : crystal_t
+ use m_crystal,            only : crystal_init, crystal_t
+ use m_results_gs,         only : results_gs_type, results_gs_ncwrite
  use m_oper,               only : oper_type,init_oper,destroy_oper
  use m_io_tools,           only : flush_unit
  use m_abi2big,            only : wvl_occ_abi2big, wvl_rho_abi2big, wvl_occopt_abi2big, wvl_eigen_abi2big
@@ -88,6 +91,11 @@ module m_vtorho
  use m_inwffil,            only : cg_from_atoms
  use m_gemm_nonlop_projectors, only : set_gemm_nonlop_ikpt, reset_gemm_nonlop, gemm_nonlop_use_gemm, &
                                       gemm_nonlop_block_size, gemm_nonlop_is_distributed
+ use m_mlwfovlp,           only : mlwfovlp
+#if defined HAVE_PYTHON_INVOCATION
+ use INVOKE_PYTHON
+#endif
+ use ISO_C_BINDING
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -197,6 +205,8 @@ contains
 !!  pawang <type(pawang)>=paw angular mesh and related data
 !!  pawfgr <type(pawfgr_type)>=fine grid parameters and related data
 !!  pawfgrtab(my_natom*usepaw) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and
+!!     related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  phnons(2,nfft**(1-1/nsym),(nspden/nsppol)-3*(nspden/4))=nonsymmorphic translation phases
 !!                                    nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
@@ -212,6 +222,9 @@ contains
 !!  pwind_alloc = first dimension of pwind
 !!  pwnsfac(2,pwind_alloc) = phase factors for non-symmorphic translations
 !!                           (see initberry.f)
+!!  results_gs <type(results_gs_type)>=results (energy and its components,
+!!     forces and its components, the stress tensor) of a ground-state
+!!     computation (should be made a pure output quantity)
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive vectors
 !!  symrec(3,3,nsym)=symmetry operations in reciprocal space
@@ -299,9 +312,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           istep,istep_mix,itimes,kg,kg_diel,kxc,lmax_diel,mcg,mcprj,mgfftdiel,mpi_enreg,&
 &           my_natom,natom,nattyp,nfftf,nfftdiel,ngfftdiel,nhat,nkxc,&
 &           npwarr,npwdiel,nres2,ntypat,nvresid,occ,optforces,&
-&           optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
+&           optres,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
-&           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
+&           pwind,pwind_alloc,pwnsfac,results_gs,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
 &           ucvol,usecprj,usevxctau,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,&
 &           xg_nonlop,xred,ylm,ylmgr,ylmdiel, rmm_diis_status)
@@ -325,6 +338,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(pawang_type), intent(in) :: pawang
  type(pawfgr_type), intent(in) :: pawfgr
  type(pseudopotential_type), intent(in) :: psps
+ type(results_gs_type),intent(inout) :: results_gs
  type(fock_type),pointer, intent(inout) :: fock
  type(wffile_type), intent(inout) :: wffnew
  type(wvl_data), intent(inout) :: wvl
@@ -363,6 +377,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(pawcprj_type),pointer,intent(inout) :: cprj(:,:)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
+ type(pawrad_type), intent(in)  :: pawrad(psps%ntypat*psps%usepaw)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
  type(pawtab_type),intent(inout) :: pawtab(ntypat*psps%usepaw)
 
@@ -371,7 +386,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 ! integer,parameter :: level=111
  integer,parameter :: tim_mkrho=2
  !integer,save :: nwarning=0
- integer :: bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
+ integer :: bantot,bdtot_index,counter,cplex,cplex_rhoij,dimffnl,enunit,iband,iband1,ibdkpt
  integer :: ibg,icg,ider,idir,ierr,ifft,ifor,ifor1,ii,ikg,ikpt
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
@@ -437,6 +452,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
  real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
+ type(ebands_t) :: ebands
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
@@ -1341,6 +1357,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,2,tsec)
 
 !    !=========  DMFT call begin ============================================
+!    ! Also not sure what to do for Wannier90 DMFT
      dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
        call timab(991,1,tsec)
@@ -1493,6 +1510,90 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call destroy_oper(dft_occup)
        end if ! dmft_dftocc
        call timab(991,2,tsec)
+
+     else if (dtset%usedmft == 10) then
+        ! xcryst_struct
+        remove_inv=.false.
+        call crystal_init(dtset%amu_orig(:,1),cryst_struc,dtset%spgroup,natom,dtset%npsp,ntypat, &
+         dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,1,&
+         dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+         dtset%symrel,dtset%tnons,dtset%symafm)
+
+        ! ebands
+        bantot = dtset%mband*dtset%nkpt*dtset%nsppol
+        call ebands_init(bantot,ebands,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%ivalence,&
+          doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
+          hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+          hdr%cellcharge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+          hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+        ebands%fermie = results_gs%energies%e_fermie
+        ebands%fermih = results_gs%energies%e_fermih
+        ebands%entropy = results_gs%energies%entropy
+
+        ! hdr       : OK, in func args
+        ! atindx1   : OK, in func args
+        ! cg        : OK, in func args
+        ! cprj      : OK, in func args
+        ! dtset     : OK, in func args
+        ! dtfil     : OK, in func args
+        ! eigen     : OK, in func args
+        ! gprimd    : OK, in func args
+        ! kg        : OK, in func args
+        ! mband     : OK, from dtset
+        ! mcg       : OK, in func args
+        ! mcprj     : OK, in func args
+        ! mgfftc    : OK, from dtset called mgfft
+        ! mkmem     : OK, from dtset
+        ! mpi_enreg : OK, in func args
+        ! mpw       : OK, from dtset
+        ! natom     : OK, from dtset
+        ! nattyp    : OK, in func args
+        ! nfft      : OK, from dtset
+        ! ngfft     : OK, from dtset
+        ! nkpt      : OK, from dtset
+        ! npwarr    : OK, was added to vtorho func
+        ! nsppol    : OK, from dtset
+        ! ntypat    : OK, from dtset
+        ! occ       : OK, in func args
+        ! pawang    : OK, in func args
+        ! pawrad    : OK, was added to func's args
+        ! pawtab    : OK, in func args
+        ! prtvol    : OK, from dtset
+        ! psps      : OK, in func args
+        ! rprimd    : OK, in func args
+        ! ucvol     : OK, in func args
+        ! xred      : OK, in func args
+
+        ! Call Wannier90 and print the _hr.dat file with the Hamiltonian
+        write(msg,'(6a)') &
+        & ch10, ' ======================================================'&
+        & ,ch10,' =====  Calling Wannier90                      ========'&
+        & ,ch10,' ======================================================'
+        call wrtout(std_out,msg,'COLL')
+        call mlwfovlp(cryst_struc, ebands, hdr, atindx1, cg, cprj, dtset, dtfil, &
+         eigen, gprimd, kg, dtset%mband, mcg, mcprj, dtset%mgfft, dtset%mkmem, mpi_enreg, &
+         dtset%mpw, dtset%natom, nattyp, dtset%nfft, dtset%ngfft, dtset%nkpt, &
+         npwarr, dtset%nsppol, dtset%ntypat, occ, pawang, pawrad, pawtab, dtset%prtvol, &
+         psps, rprimd, ucvol, xred)
+        call xmpi_barrier(spaceComm_distrb)
+
+        ! Perform DMFT. No need for most of the pipeline in dmft_solve.
+        ! We directly call the python_invocation.
+        write(msg,'(6a)') &
+        & ch10, ' ======================================================'&
+        & ,ch10,' =====  DMFT starts here                       ========'&
+        & ,ch10,' ======================================================'
+        call wrtout(std_out,msg,'COLL')
+
+        ! Invoking python to execute the script
+        write(msg,'(2a)') "paw_dmft%myproc: ", paw_dmft%myproc
+        call wrtout(std_out,msg,'COLL')
+        write(msg,'(2a)') "dtfil%filnam_ds(3): ", dtfil%filnam_ds(3)
+        call wrtout(std_out,msg,'COLL')
+        call flush_unit(std_out)
+        call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char)
+        call xmpi_barrier(paw_dmft%spacecomm)
+        call flush_unit(std_out)
 
      end if ! usedmft
 

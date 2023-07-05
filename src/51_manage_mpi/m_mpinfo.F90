@@ -1065,6 +1065,7 @@ subroutine initmpi_atom(dtset,mpi_enreg)
    msg=''
    if (dtset%usepaw==0)  msg= 'Parallelisation over atoms not compatible with usepaw=0 !'
    if (dtset%usedmft==1) msg=' Parallelisation over atoms not compatible with usedmft=1 !'
+   if (dtset%usedmft==10) msg=' Parallelisation over atoms not compatible with usedmft=10 !'
    if (dtset%usewvl==1)  msg= 'Parallelisation over atoms not compatible with usewvl=1 !'
    if (dtset%prtden>1.and.dtset%paral_kgb<=0) &
 &   msg= 'Parallelisation over atoms not compatible with prtden>1 (PAW AE densities) !'

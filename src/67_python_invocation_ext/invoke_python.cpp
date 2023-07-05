@@ -141,8 +141,10 @@ void invoke_python_triqs(int rank, char* filapp_in) {
 	triqs_python_path = "./" + triqs_python_path;
 
 	// Check whether python_lib exists
+    if (rank == 0) fprintf(stdout, "Checking python library at %s\n", triqs_python_path.c_str());
 	if (!ifstream(triqs_python_path.c_str())) {
-		throw invalid_argument("The _PY_INVOCATION_python_lib file does not exist! Python cannot be called.");
+	    string msg = triqs_python_path.c_str();
+		throw invalid_argument(msg);
 		exit(0);
 	}
 

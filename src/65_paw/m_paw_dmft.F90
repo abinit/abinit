@@ -663,13 +663,13 @@ CONTAINS  !=====================================================================
 !!
 !! INPUTS
 !! dtset <type(dataset_type)>=all input variables for this dataset
+!! mpsang = highest angular momentum + 1
+!! paw_dmft <type(paw_dmft_type)>= paw+dmft related data
 !! gprimd(3,3) = dimensional reciprocal space primitive translations
 !! kg(3,mpw*mkmem) = reduced planewave coordinates.
 !! mpi_enreg = information about MPI parallelization
-!! mpsang = highest angular momentum + 1
 !! npwarr(nkpt) = number of planewaves in basis at this k point
 !! occ = DFT occupations
-!! paw_dmft <type(paw_dmft_type)>= paw+dmft related data
 !! pawang <type(pawang)>=paw angular mesh and related data
 !! pawrad <type(pawrad_type)>=paw radial mesh and related data
 !! pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
@@ -841,16 +841,51 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  paw_dmft%dmft_nominal => dtset%dmft_nominal(:)
  paw_dmft%npwarr => npwarr(:)
 
+!  Spin related variables and check
+ paw_dmft%nsppol      => dtset%nsppol
+ paw_dmft%nspinor     => dtset%nspinor
+ paw_dmft%nspden      => dtset%nspden
+! TODO: Make it work for usedmdft = -1 (interface with Wannier90 needs spinor
+! generalization)
+ if(nspinor==2.and.nspden==1.and.use_dmft==10) then
+   message = ' nspinor==2 and nspden =1 and usedmft=10 is not implemented yet'
+   ABI_ERROR(message)
+ endif
+
  paw_dmft%band_in(:) = .false.
  paw_dmft%occnd(:,:,:,:,:) = zero
+ paw_dmft%use_dmft    = use_dmft
 
- icb = 0
+ ! if (bandkss/=0) then
+ !   paw_dmft%use_sc_dmft = 0
+ ! else
+ !   paw_dmft%use_sc_dmft = use_sc_dmft
+ ! endif
+ ! paw_dmft%dmft_read_occnd = dmft_read_occnd
+ ! paw_dmft%idmftloop=0
+ ! paw_dmft%mbandc  = 0
+ if(use_dmft == 10) then
+  ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*0))
+  ABI_MALLOC(paw_dmft%band_in,(mband*0))
+  ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*0))
+  ABI_MALLOC(paw_dmft%exclude_bands,(mband*0))
+ ! else
+ !  ABI_MALLOC(paw_dmft%occnd,(2,mband,mband,nkpt,nsppol*use_dmft))
+ !  ABI_MALLOC(paw_dmft%band_in,(mband*use_dmft))
+ !  ABI_MALLOC(paw_dmft%include_bands,((dmftbandf-dmftbandi+1)*use_dmft))
+ ! ABI_MALLOC(paw_dmft%exclude_bands,(mband*use_dmft))
+ endif
+! allocate(paw_dmft%ph0phiiint()
+
+
+ icb=0
  mbandc = 0
- do iband=1,mband
+ if(use_dmft /= 10) then
+  do iband=1, mband
    if (iband >= dmftbandi .and. iband <= dmftbandf) then
-     paw_dmft%band_in(iband) = .true.
-     mbandc = mbandc + 1
-     paw_dmft%include_bands(mbandc) = iband
+    paw_dmft%band_in(iband)=.true.
+    mbandc = mbandc + 1
+    paw_dmft%include_bands(mbandc) = iband
    else
      icb = icb + 1
      paw_dmft%exclude_bands(icb) = iband
@@ -873,7 +908,7 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
    call init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
  end if
 
- if (mbandc /= dmftbandf-dmftbandi+1) then
+ if (mbandc /= dmftbandf-dmftbandi+1 .and. paw_dmft%use_dmft /= 10) then
    write(message,'(5a)') ' BUG init_sc_dmft',ch10,&
     & '  number of bands in dmft is not correctly computed ',ch10, &
     & '  Action : check the code'
@@ -910,30 +945,36 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
   & ch10," ******************************************"
  call wrtout([std_out,ab_out],message,'COLL')
 
- if (dmft_solv == 0) then
-   write(message,'(2a)') ch10,' DMFT check: no solver and U=J=0'
- else if (dmft_solv == 1) then
-   write(message,'(2a)') ch10,' DMFT check: static solver'
- else if (dmft_solv == -1) then
-   write(message,'(2a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
- else if (dmft_solv == 2) then
-   write(message,'(2a)') ch10,' DMFT uses the Hubbard one solver'
- else if (dmft_solv == 4) then
-   write(message,'(2a)') ch10,' DMFT uses the Hirsch Fye solver'
- else if (dmft_solv == 5) then
-   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
- else if (dmft_solv == 6) then
-   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
-     &(with density density interactions)'
- else if (dmft_solv == 7) then
-   write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
-     &(with rotationally invariant interactions)'
- else if (dmft_solv == 9) then
-   write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
-     & give your personal script'
- end if ! dmft_solv
+ if (use_dmft /= 10) then
+   if (dmft_solv == 0) then
+     write(message,'(2a)') ch10,' DMFT check: no solver and U=J=0'
+   else if (dmft_solv == 1) then
+     write(message,'(2a)') ch10,' DMFT check: static solver'
+   else if (dmft_solv == -1) then
+     write(message,'(2a)') ch10,' DMFT check: static solver without renormalization of projectors: should recover DFT+U'
+   else if (dmft_solv == 2) then
+     write(message,'(2a)') ch10,' DMFT uses the Hubbard one solver'
+   else if (dmft_solv == 4) then
+     write(message,'(2a)') ch10,' DMFT uses the Hirsch Fye solver'
+   else if (dmft_solv == 5) then
+     write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of ABINIT'
+   else if (dmft_solv == 6) then
+     write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
+       &(with density density interactions)'
+   else if (dmft_solv == 7) then
+     write(message,'(2a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS &
+       &(with rotationally invariant interactions)'
+   else if (dmft_solv == 9) then
+     write(message,'(2a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
+       & give your personal script'
+   end if ! dmft_solv
+ else if(use_dmft == 10) then
+   write(message, '(a,a)') ch10,' DMFT uses the python invocation and orbitals constructed using Wannier90 '
+ endif
  call wrtout([std_out,ab_out],message,'COLL')
 
+ ! OG: What is all that? Something as moved? START
+ if (use_dmft /= 10) then
  if (dmft_dc == 1) then
    dc_string = "Magnetic FLL (Full Localized Limit)"
  else if (dmft_dc == 2) then
@@ -1430,6 +1471,9 @@ subroutine init_sc_dmft(dtset,mpsang,paw_dmft,gprimd,kg,mpi_enreg,npwarr,occ,paw
  ABI_FREE(lcycle)
 
  call init_paral_dmft(paw_dmft,paw_dmft%distrib,paw_dmft%dmft_nwlo)
+
+ ! OG: What is all that? Something as moved? START
+ endif
 
 end subroutine init_sc_dmft
 !!***

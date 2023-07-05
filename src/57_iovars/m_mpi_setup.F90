@@ -1067,6 +1067,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (dtsets(idtset)%usepaw==0) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%usewvl/=0) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%usedmft==1) dtsets(idtset)%paral_atom=0
+   if (dtsets(idtset)%usedmft==10) dtsets(idtset)%paral_atom=0
    if (optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_RESPFN.and.optdriver/=RUNL_GWLS) dtsets(idtset)%paral_atom=0
    if (dtsets(idtset)%macro_uj/=0) dtsets(idtset)%paral_atom=0
 

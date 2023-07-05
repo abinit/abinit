@@ -964,12 +964,27 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 !### 10. PAW related operations
 
-!Initialize paw_dmft, even if neither dmft not paw are used
+!Initialize paw_dmft, even if neither dmft nor paw are used
 !write(std_out,*) "dtset%usedmft",dtset%usedmft
  use_sc_dmft=dtset%usedmft
 ! if(dtset%paral_kgb>0) use_sc_dmft=0
+<<<<<<< HEAD
  !Should be done inside init_sc_dmft
  if ( dtset%usedmft /= 0 .and. dtset%dmft_entropy > 0) then
+=======
+ call init_sc_dmft(dtset%nbandkss,dtset%dmftbandi,dtset%dmftbandf,dtset%dmft_read_occnd,dtset%mband,&
+& dtset%nband,dtset%nkpt,dtset%nspden, &
+& dtset%nspinor,dtset%nsppol,occ,dtset%usedmft,paw_dmft,use_sc_dmft,dtset%dmft_solv,mpi_enreg)
+ if (paw_dmft%use_dmft==1.and.me==0) then
+   call readocc_dmft(paw_dmft,dtfil%filnam_ds(3),dtfil%filnam_ds(4))
+ else if (paw_dmft%use_dmft==10.and.me==0) then
+     write(msg, '(a,a)' )ch10,&
+&     ' Cannot restart calculation from previous DMFT occupations.'
+     call wrtout(std_out, msg)
+ end if
+ !Should be done inside init_sc_dmft
+ if ( dtset%usedmft /= 0 .and. dtset%usedmft /= 10) then
+>>>>>>> a728fb87e8 (Added an option to run DFT+DMFT. Now, one can use Wannier90 to construct localized orbitals and call the impurity solver using the python invocation scheme. Added the options and flags to make it possible. Not done yet: going back to DFT from the impurity solver.)
    call data4entropyDMFT_init(paw_dmft%forentropyDMFT,&
    dtset%natom,&
    dtset%typat,&
