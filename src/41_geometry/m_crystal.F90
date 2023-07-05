@@ -1567,7 +1567,7 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  integer :: natoms_this_type(ntypat)
  character(len=2) :: symbol
  character(len=7) :: natoms_this_type_str
- character(len=100) :: chem_formula, natoms_all_types
+ character(len=100) :: chem_formula, natoms_all_types, atomsstring_all_types
  character(len=500) :: msg
 
 !************************************************************************
@@ -1585,6 +1585,7 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  end do
 
  chem_formula = ""
+ atomsstring_all_types = "  "
  do itypat=1, ntypat
    call atomdata_from_znucl(atom, znucl(itypat))
    symbol = atom%symbol
@@ -1596,14 +1597,17 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
      write (natoms_this_type_str, '(I3)') natoms_this_type(itypat)
    end if
    chem_formula = trim(chem_formula) // symbol // trim(natoms_this_type_str)
+   atomsstring_all_types = trim(atomsstring_all_types) // "  " // symbol
  end do
 
- write (iout,'(2a)') "ABINIT generated POSCAR file. Title string - should be chemical formula... ",trim(chem_formula)
+ write (iout,'(3a,E24.14)') "ABINIT generated POSCAR file. Chemical formula is ",trim(chem_formula), "  Volume (AA^3) = ", ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
 
- write (iout,'(E24.14)') -ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
+ write (iout,'(E10.1)')  1.0_dp
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,1) ! (angstr? bohr?)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,2)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,3)
+
+ write (iout, '(a)') atomsstring_all_types
 
  natoms_all_types = "   "
  do itypat=1, ntypat
