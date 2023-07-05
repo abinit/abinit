@@ -218,7 +218,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type), intent(inout) :: psps
  integer, intent(in) :: atindx(dtset%natom),indsym(4,nsym,dtset%natom)
- integer, intent(in) :: nattyp(dtset%ntypat),pertsy(3,dtset%natom+6)
+ integer, intent(in) :: nattyp(dtset%ntypat),pertsy(3,mpert)
  integer, intent(in) :: rfpert(mpert),rf2_dirs_from_rfpert_nl(3,3),symq(4,2,nsym),symrec(3,3,nsym)
  integer, intent(out) :: ddkfil(3)
  integer, intent(inout) :: blkflg(3,mpert,3,mpert)
@@ -507,10 +507,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !Determine existence of pertubations and of pertubation symmetries
 !Create array with pertubations which have to be calculated
- ABI_MALLOC(pert_tmp,(3,3*(dtset%natom+6)+18))
+ ABI_MALLOC(pert_tmp,(3,3*(dtset%natom+6)+18+3*dtset%natom))
  ipert_cnt=0
  do ipert=1,mpert
-   if (ipert<dtset%natom+10) then
+   if (ipert<dtset%natom+10.or.ipert>dtset%natom+11) then
      maxidir = 3
      rfdir(1:3) = dtset%rfdir(:)
      rfdir(4:9) = 0
@@ -520,7 +520,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    end if
    do idir=1,maxidir
      to_compute_this_pert = 0
-     if(ipert<dtset%natom+10 .and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
+     if(ipert<dtset%natom+10.and. rfpert(ipert)==1 .and. rfdir(idir) == 1 ) then
        if ((pertsy(idir,ipert)==1).or.&
 &       ((dtset%prepanl == 1).and.(ipert == dtset%natom+2)).or.&
 &       ((dtset%prepgkk == 1).and.(ipert <= dtset%natom))  ) then
@@ -560,6 +560,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        else if (idir>=7.and.idir<=9) then
          if (rfdir(idir) == 1 .or. rfdir(idir-3) == 1) to_compute_this_pert = 1
        end if
+     else if (ipert>dtset%natom+11 .and. ipert<=2*dtset%natom+11 .and. &
+&             rfpert(ipert)==1 .and. rfdir(idir) == 1) then
+       to_compute_this_pert = 1
      end if
      if (to_compute_this_pert /= 0) then
        ipert_cnt = ipert_cnt+1;
@@ -568,8 +571,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !      Store "pertcase" in pert_tmp(3,ipert_cnt)
        if (ipert<dtset%natom+10) then
          pert_tmp(3,ipert_cnt) = idir + (ipert-1)*3
-       else
+       else if (ipert==dtset%natom+10.or.ipert<=dtset%natom+11) then
          pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-10)*9 + (dtset%natom+6)*3
+       else if (ipert>dtset%natom+11 .and. ipert<=2*dtset%natom+11) then
+         pert_tmp(3,ipert_cnt) = idir + (ipert-dtset%natom-12)*3 + (dtset%natom+6)*3+18
        end if
      end if
    end do ! idir
@@ -766,6 +771,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
         '  This corresponds to a calculation without local fields.'
        call wrtout([std_out, ab_out], msg)
      end if
+   else if(ipert==dtset%natom+5)then
+     write(msg, '(a,i4)' )' Perturbation : homogeneous Zeeman magnetic field along direction',idir
+     call wrtout([std_out, ab_out], msg)
    else if(ipert==dtset%natom+10.or.ipert==dtset%natom+11)then
      call rf2_getidirs(idir,idir1,idir2)
      if(ipert==dtset%natom+10)then
@@ -801,12 +809,27 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        cycle
      end if
      ABI_FREE(occ_pert)
-   else if(ipert>dtset%natom+11 .or. ipert<=0 )then
+   else if(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11)then
+     write(msg, '(a,i4,a,i4)' )' Perturbation : local Zeeman magnetic field from atom', ipert-dtset%natom+11,&
+&    'along direction', idir
+     call wrtout([std_out, ab_out], msg)
+   else if(ipert>2*dtset%natom+11 .or. ipert<=0 )then
      write(msg, '(a,i0,3a)' ) &
-      'ipert= ',ipert,' is outside the [1,dtset%natom+11] interval.',ch10,&
+      'ipert= ',ipert,' is outside the [1,2*natom+11] interval.',ch10,&
       'This perturbation is not (yet) allowed.'
      ABI_BUG(msg)
    end if
+
+   if (abs(dtset%magpen) > tol6) then
+     if (dtset%magpen<zero) then
+       write(msg, '(a,3f10.6)' ) ' Homogeneous Zeeman magnetic penalty term is applied.'
+       call wrtout([std_out, ab_out],msg)
+     else 
+       write(msg, '(a,3f10.6)' ) ' Local Zeeman magnetic penalty term from atomic spheres is applied.'
+       call wrtout([std_out, ab_out],msg)
+     end if
+   end if
+
 !  Initialize the diverse parts of energy :
    eew=zero ; evdw=zero ; efrloc=zero ; efrnl=zero ; efrx1=zero ; efrx2=zero
    efrhar=zero ; efrkin=zero
