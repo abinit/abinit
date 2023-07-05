@@ -1794,12 +1794,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    endif
 
-!DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : before inkpts'
-!call flush(std_out)
-!ENDDEBUG
-
-
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
      kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_filepath, &
@@ -2068,7 +2062,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ucrpa',tread,'INT')
  if(tread==1) dtset%ucrpa=intarr(1)
 
- if (dtset%ucrpa > 0 .and. dtset%usedmft > 0) then
+ if (dtset%ucrpa > 0 .and. dtset%usedmft /= 10) then
    write(msg, '(9a)' )&
    'usedmft and ucrpa are both activated in the input file ',ch10,&
    'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
@@ -2092,7 +2086,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
  dtset%optdcmagpawu=3
- if (dtset%usepawu/=0.or.dtset%usedmft>0) then
+ if (dtset%usepawu/=0.or.(dtset%usedmft>0.and.dtset%usedmft/=10)) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
@@ -2671,7 +2665,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%occ_orig(:,:)=zero
    dtsets(idtset)%optcell=0
    dtsets(idtset)%optforces=2
-   if(dtsets(idtset)%usedmft>0) dtsets(idtset)%optforces=0
+   if(dtsets(idtset)%usedmft/=0) dtsets(idtset)%optforces=0
    dtsets(idtset)%optstress=1
    dtsets(idtset)%optnlxccc=1
    dtsets(idtset)%oracle_factor=0.1_dp

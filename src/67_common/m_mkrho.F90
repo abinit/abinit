@@ -211,6 +211,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    ioption=option
  end if
 
+! Not sure what to do for Wannier90 DMFT
  if(ioption/=0.and.paw_dmft%use_sc_dmft==1) then
    ABI_ERROR('option argument value of this routines should be 0 if usedmft=1.')
  end if
