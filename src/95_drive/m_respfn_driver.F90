@@ -1120,13 +1120,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
 !Determine the symmetrical perturbations
- ABI_MALLOC(pertsy,(3,natom+6))
- call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
+ ABI_MALLOC(pertsy,(3,mpert))
+ call irreducible_set_pert(indsym,mpert,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
 
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout([std_out, ab_out] ,message)
  ii=1
- do ipert=1,natom+6
+ do ipert=1,mpert
    do idir=1,3
      if(rfpert(ipert)==1.and.rfdir(idir)==1)then
        if( pertsy(idir,ipert)==1 )then
