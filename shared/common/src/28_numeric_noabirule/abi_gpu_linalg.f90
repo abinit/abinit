@@ -3515,17 +3515,19 @@ subroutine gpu_xorthonormalize(blockvectorx_gpu,blockvectorbx_gpu,blocksize,spac
 
  call gpu_xgemm(x_cplx,tr,'n',blocksize,blocksize,vectsize, &
 & cone,blockvectorx_gpu,vectsize,blockvectorbx_gpu,vectsize,czero,sqgram_gpu,blocksize)
+ call gpu_device_synchronize()
+   size=x_cplx*dp*blocksize*blocksize
 
  if ( x_cplx == 1 ) then
-   call copy_from_gpu(C_LOC(d_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
+   call copy_from_gpu(d_sqgram, sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
    call xmpi_sum(d_sqgram,spaceComm,ierr)
    call abi_xpotrf('u',blocksize,d_sqgram,blocksize,info)
-   call copy_on_gpu(C_LOC(d_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
+   call copy_on_gpu(d_sqgram, sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
  else
-   call copy_from_gpu(C_LOC(z_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
+   call copy_from_gpu(z_sqgram, sqgram_gpu, size)
    call xmpi_sum(z_sqgram,spaceComm,ierr)
    call abi_xpotrf('u',blocksize,z_sqgram,blocksize,info)
-   call copy_on_gpu(C_LOC(z_sqgram(1,1)), sqgram_gpu, INT(x_cplx, c_size_t)*dp*blocksize*blocksize)
+   call copy_on_gpu(z_sqgram, sqgram_gpu, size)
  end if
 
  if (info /= 0 ) then

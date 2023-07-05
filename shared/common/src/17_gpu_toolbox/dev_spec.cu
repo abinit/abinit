@@ -359,9 +359,9 @@ extern "C" void dealloc_on_gpu_(void **gpu_ptr)
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void copy_on_gpu_(void **cpu_ptr, void **gpu_ptr, const size_t* size)
+extern "C" void copy_on_gpu_(void *cpu_ptr, void **gpu_ptr, const size_t* size)
 {
-  if (cudaMemcpy(*gpu_ptr, *cpu_ptr, *size, cudaMemcpyHostToDevice) != cudaSuccess)
+  if (cudaMemcpy(*gpu_ptr, cpu_ptr, *size, cudaMemcpyHostToDevice) != cudaSuccess)
   {
     fprintf(stderr, "ERROR: copy_on_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stderr);
@@ -386,9 +386,9 @@ extern "C" void copy_on_gpu_omp_(void *ptr, void *gpu_ptr,int* size){
 /*  cpu_ptr = host memory location (LOC of an allocated array)                */
 /*============================================================================*/
 
-extern "C" void copy_from_gpu_(void **cpu_ptr, void **gpu_ptr, const size_t* size)
+extern "C" void copy_from_gpu_(void *cpu_ptr, void **gpu_ptr, const size_t* size)
 {
-  if (cudaMemcpy(*cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost) != cudaSuccess)
+  if (cudaMemcpy(cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost) != cudaSuccess)
   {
     fprintf(stderr, "ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stderr);

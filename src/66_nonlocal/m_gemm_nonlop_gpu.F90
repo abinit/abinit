@@ -344,12 +344,12 @@ module m_gemm_nonlop_gpu
 
   ! upload data to gpu memory
   if(istwf_k <= 1) then
-    call copy_on_gpu(c_loc(gemm_nonlop_kpt(ikpt)%projs(1,1,1)), gemm_nonlop_kpt_gpu(ikpt)%projs, INT(2, c_size_t)*npw*nprojs*dp)
+    call copy_on_gpu(gemm_nonlop_kpt(ikpt)%projs, gemm_nonlop_kpt_gpu(ikpt)%projs, INT(2, c_size_t)*npw*nprojs*dp)
     ! TODO : gradients
   else
-    call copy_on_gpu(c_loc(gemm_nonlop_kpt(ikpt)%projs_r(1,1,1)), gemm_nonlop_kpt_gpu(ikpt)%projs_r, &
+    call copy_on_gpu(gemm_nonlop_kpt(ikpt)%projs_r, gemm_nonlop_kpt_gpu(ikpt)%projs_r, &
       &                    INT(1, c_size_t)*npw*nprojs*dp)
-    call copy_on_gpu(c_loc(gemm_nonlop_kpt(ikpt)%projs_i(1,1,1)), gemm_nonlop_kpt_gpu(ikpt)%projs_i, &
+    call copy_on_gpu(gemm_nonlop_kpt(ikpt)%projs_i, gemm_nonlop_kpt_gpu(ikpt)%projs_i, &
       &                    INT(1, c_size_t)*npw*nprojs*dp)
   end if
 
@@ -475,7 +475,7 @@ module m_gemm_nonlop_gpu
   !ABI_MALLOC_CUDA( vectout_gpu, INT(2, c_size_t) * npwout*nspinor*ndat * dp)
   !ABI_MALLOC_CUDA(svectout_gpu, INT(2, c_size_t) * npwout*nspinor*ndat*(paw_opt/3) * dp)
 
-  !call copy_on_gpu(C_LOC(vectin(1,1)), gemm_nonlop_kokkos%vectin_gpu, INT(2, c_size_t)*npwin*nspinor*ndat*dp)
+  !call copy_on_gpu(vectin, gemm_nonlop_kokkos%vectin_gpu, INT(2, c_size_t)*npwin*nspinor*ndat*dp)
   vectin_size = 2*npwin*nspinor*ndat*dp
   call gpu_data_prefetch_async(C_LOC(vectin), vectin_size)
 
@@ -486,23 +486,23 @@ module m_gemm_nonlop_gpu
   !! gpu alloc and init : enl_gpu
   enl_size_bytes = dimenl1 * dimenl2 * nspinortot**2 * dimekbq * dp
   ABI_MALLOC_CUDA( enl_gpu, enl_size_bytes )
-  call copy_on_gpu( C_LOC(enl(1,1,1,1)) , enl_gpu, enl_size_bytes )
+  call copy_on_gpu(enl, enl_gpu, enl_size_bytes )
 
   !! gpu alloc and init atindx1_gpu
   sizeof_int = 4
   atindx1_size_bytes = natom * sizeof_int
   ABI_MALLOC_CUDA( atindx1_gpu,  atindx1_size_bytes )
-  call copy_on_gpu( C_LOC(atindx1(1)) , atindx1_gpu, atindx1_size_bytes )
+  call copy_on_gpu(atindx1, atindx1_gpu, atindx1_size_bytes )
 
   !! gpu alloc and init indlmn_gpu
   indlmn_size_bytes = 6*lmnmax*ntypat * sizeof_int
   ABI_MALLOC_CUDA( indlmn_gpu,  indlmn_size_bytes )
-  call copy_on_gpu( C_LOC(indlmn(1,1,1)) , indlmn_gpu, indlmn_size_bytes )
+  call copy_on_gpu(indlmn, indlmn_gpu, indlmn_size_bytes )
 
   !! gpu alloc and init lambda_gpu
   lambda_size_bytes =  ndat * dp
   ABI_MALLOC_CUDA( lambda_gpu, lambda_size_bytes )
-  call copy_on_gpu( C_LOC(lambda(1)) , lambda_gpu, lambda_size_bytes )
+  call copy_on_gpu(lambda, lambda_gpu, lambda_size_bytes )
 
   if(nprojs == 0) then
     ! TODO check if this is correct
@@ -542,7 +542,7 @@ module m_gemm_nonlop_gpu
     end do
 
     ! copy from HOST projections_cpu to GPU projections_gpu
-    call copy_on_gpu(C_LOC(projections_cpu(1,1,1)), gemm_nonlop_kokkos%projections_gpu,&
+    call copy_on_gpu(projections_cpu, gemm_nonlop_kokkos%projections_gpu,&
         INT(cplex, c_size_t) * nprojs * nspinor*ndat * dp)
 
   else ! cpopt < 2
@@ -609,12 +609,12 @@ module m_gemm_nonlop_gpu
 
 !     call xmpi_sum(projections,mpi_enreg%comm_fft,ierr)
 
-    call copy_from_gpu(C_LOC(  projections_cpu(1,1,1)),   gemm_nonlop_kokkos%projections_gpu,&
+    call copy_from_gpu(  projections_cpu,   gemm_nonlop_kokkos%projections_gpu,&
         INT(cplex, c_size_t) * nprojs * nspinor*ndat * dp)
 
     if(cpopt >= 0) then
       ! copy from GPU projections_gpu to HOST projections_cpu
-      call copy_from_gpu(C_LOC(projections_cpu(1,1,1)), gemm_nonlop_kokkos%projections_gpu,&
+      call copy_from_gpu(projections_cpu, gemm_nonlop_kokkos%projections_gpu,&
           INT(cplex, c_size_t) * nprojs * nspinor*ndat * dp)
 
       ! store in cprjin
@@ -670,7 +670,7 @@ module m_gemm_nonlop_gpu
 
             end if
 
-            call copy_on_gpu( C_LOC(sij_typ(1)) , sij_typ_gpu, sij_typ_size_bytes )
+            call copy_on_gpu(sij_typ, sij_typ_gpu, sij_typ_size_bytes )
 
           end if ! paw_opt>=2
 
@@ -741,9 +741,9 @@ module m_gemm_nonlop_gpu
         else
           ! TO BE REMOVED LATTER
           ! upload s_projections and vnl_projections to GPU
-          call copy_on_gpu(C_LOC(  s_projections_cpu(1,1,1)), gemm_nonlop_kokkos%  s_projections_gpu, &
+          call copy_on_gpu(  s_projections_cpu, gemm_nonlop_kokkos%  s_projections_gpu, &
             &              INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
-          call copy_on_gpu(C_LOC(vnl_projections_cpu(1,1,1)), gemm_nonlop_kokkos%vnl_projections_gpu, &
+          call copy_on_gpu(vnl_projections_cpu, gemm_nonlop_kokkos%vnl_projections_gpu, &
             &              INT(cplex_fac, c_size_t) * nprojs * nspinor*ndat * dp)
         end if
 
@@ -815,7 +815,7 @@ module m_gemm_nonlop_gpu
         endif
 
         ! copy back results on host
-        !call copy_from_gpu(C_LOC(svectout(1,1)), gemm_nonlop_kokkos%svectout_gpu,&
+        !call copy_from_gpu(svectout, gemm_nonlop_kokkos%svectout_gpu,&
         !  & INT(2, c_size_t)*npwout*nspinor*(paw_opt/3)*ndat * dp)
 
         ! reminder : a call to cudaDeviceSynchronize is needed so that svectout can be re-used safely on host
@@ -865,7 +865,7 @@ module m_gemm_nonlop_gpu
         end if  ! cplex_fac == 2
 
         ! copy back results on host
-        !call copy_from_gpu(C_LOC(vectout(1,1)), gemm_nonlop_kokkos%vectout_gpu, INT(2, c_size_t)*npwout*nspinor*ndat * dp)
+        !call copy_from_gpu(vectout, gemm_nonlop_kokkos%vectout_gpu, INT(2, c_size_t)*npwout*nspinor*ndat * dp)
 
       end if ! (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4)
 

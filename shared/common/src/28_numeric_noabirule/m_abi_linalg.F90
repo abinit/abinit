@@ -347,22 +347,6 @@ module m_abi_linalg
       type(c_ptr),                    intent(inout)  :: gpu_ptr
     end subroutine dealloc_on_gpu
 
-    subroutine copy_on_gpu(cpu_ptr, gpu_ptr, size_in_bytes) bind(c, name="copy_on_gpu_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr),                    intent(in)    :: cpu_ptr
-      type(c_ptr),                    intent(inout) :: gpu_ptr
-      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
-    end subroutine copy_on_gpu
-
-    subroutine copy_from_gpu(cpu_ptr, gpu_ptr, size_in_bytes) bind(c, name="copy_from_gpu_")
-      use, intrinsic :: iso_c_binding
-      implicit none
-      type(c_ptr),                    intent(in)    :: cpu_ptr
-      type(c_ptr),                    intent(inout) :: gpu_ptr
-      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
-    end subroutine copy_from_gpu
-
     subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_")
       use, intrinsic :: iso_c_binding
       implicit none
