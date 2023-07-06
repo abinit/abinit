@@ -3714,12 +3714,8 @@ contains
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       !$OMP TARGET UPDATE TO(xgBlock%vecR)
-      !size=xgBlock%LDim*xgBlock%cols*dp
-      !call copy_on_gpu_omp(xgBlock%vecR, xgBlock%vecR_gpu, size)
     case (SPACE_C)
       !$OMP TARGET UPDATE TO(xgBlock%vecC)
-      !size=xgBlock%LDim*xgBlock%cols*dpc*2
-      !call copy_on_gpu_omp(xgBlock%vecC, xgBlock%vecC_gpu, size)
     end select
 #else
     ABI_UNUSED_A(xgBlock)
@@ -3740,12 +3736,8 @@ contains
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       !$OMP TARGET UPDATE FROM(xgBlock%vecR)
-      !size=xgBlock%LDim*xgBlock%cols*dp
-      !call copy_from_gpu_omp(xgBlock%vecR, xgBlock%vecR_gpu, size)
     case (SPACE_C)
       !$OMP TARGET UPDATE FROM(xgBlock%vecC)
-      !size=xgBlock%LDim*xgBlock%cols*dpc*2
-      !call copy_from_gpu_omp(xgBlock%vecC, xgBlock%vecC_gpu, size)
     end select
 #else
     ABI_UNUSED_A(xgBlock)
