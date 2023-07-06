@@ -369,14 +369,6 @@ extern "C" void copy_on_gpu_(void *cpu_ptr, void **gpu_ptr, const size_t* size)
   }
 }
 
-extern "C" void copy_on_gpu_omp_(void *ptr, void *gpu_ptr,int* size){
-  if(cudaMemcpy(gpu_ptr,ptr,*size,cudaMemcpyHostToDevice)!=cudaSuccess){
-    fprintf(stderr, "ERROR: copy_on_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
-    fflush(stderr);
-    abi_cabort();
-  }
-}
-
 /*============================================================================*/
 /* Copy size byte from gpu pointer to cpu pointer.                            */
 /* INPUTS                                                                     */
@@ -390,14 +382,6 @@ extern "C" void copy_from_gpu_(void *cpu_ptr, void **gpu_ptr, const size_t* size
 {
   if (cudaMemcpy(cpu_ptr, *gpu_ptr, *size, cudaMemcpyDeviceToHost) != cudaSuccess)
   {
-    fprintf(stderr, "ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
-    fflush(stderr);
-    abi_cabort();
-  }
-}
-
-extern "C" void copy_from_gpu_omp_(void *ptr,void *gpu_ptr,int* size){
-  if(cudaMemcpy(ptr,gpu_ptr,*size,cudaMemcpyDeviceToHost)!=cudaSuccess){
     fprintf(stderr, "ERROR: copy_from_gpu failed : %s\n",cudaGetErrorString(cudaGetLastError()));
     fflush(stderr);
     abi_cabort();
