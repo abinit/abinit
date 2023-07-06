@@ -793,12 +793,15 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,
  !Define the local magnetic field
  if (cplex==1) then
    do ifft=1,nfft
-     Bloc(ifft)=-magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
+!     Bloc(ifft)=-magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
+     Bloc(ifft)=-magpen*0.5*fatsph(ifft,iatom)
    end do
  else if (cplex==2) then
    do ifft=1,nfft
-     Bloc(2*ifft-1)=magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
-     Bloc(2*ifft  )=magpen*intgden(2,idir+1,iatom)*fatsph(ifft,iatom)
+!     Bloc(2*ifft-1)=magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
+!     Bloc(2*ifft  )=magpen*intgden(2,idir+1,iatom)*fatsph(ifft,iatom)
+     Bloc(2*ifft-1)=magpen*0.5*fatsph(ifft,iatom)
+     Bloc(2*ifft  )=magpen*0.5*fatsph(ifft,iatom)
    end do
  end if
 

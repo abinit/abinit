@@ -826,6 +826,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rhog,rhog1,rhor,rhor1,rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,&
 &     nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
 
+!     write(101,*) vtrial1(:,1)
+!     write(102,*) vtrial1(:,2)
+!     write(103,*) vtrial1(:,3)
+!     write(104,*) vtrial1(:,4)
+
      !Compute vtrial1 at (+q,+omega) and (-q,-omega) with specific local part if q/=0
      if (.not.kramers_deg) then
        call dfpt_vtrial1_mq(cplex,nfftf,dtset%nspden,nvresid1,nvresid1_mq,vtrial1,vtrial1_mq)
@@ -3795,7 +3800,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  DBG_ENTER('COLL')
 
 !Check arguments validity
- if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5) then
+ if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5.and. &
+&    (ipert>natom+11.and.ipert<2*natom+11)) then
    ABI_BUG('wrong ipert argument!')
  end if
  if (cplex/=1) then
@@ -4012,7 +4018,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
        if (ipert==natom+3) istr=idir
        if (ipert==natom+4) istr=idir+3
        ider=1;idir0=-istr
-     else if (ipert==natom+5) then !SPr deb rfmagn
+     else if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then !SPr deb rfmagn
        ider=0;idir0=0
      end if
      dimffnl1=1+ider;if (ider==1.and.idir0==0) dimffnl1=dimffnl1+2*psps%useylm
@@ -4421,7 +4427,8 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  DBG_ENTER('COLL')
 
 !Check arguments validity
- if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4.and.ipert/=gs_hamkq%natom+5) then !SPr rfmagn deb
+ if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4 & 
+& .and.ipert/=gs_hamkq%natom+5 .and. (ipert>gs_hamkq%natom+11.and.ipert<=2*gs_hamkq%natom+11)) then !SPr rfmagn deb
    ABI_BUG('wrong ipert argument !')
  end if
  if (cplex/=1) then
@@ -4462,6 +4469,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  berryopt=0;usevnl=0;sij_opt=-gs_hamkq%usepaw;tim_getgh1c=3
  optlocal=0;optnl=1;opt_gvnlx1=0
  if(ipert==gs_hamkq%natom+5) optnl=0;    ! no 1st order NL in H(1), also no kin, but this will be taken into account later
+ if(ipert>gs_hamkq%natom+11.and.ipert<=2*gs_hamkq%natom+11) optnl=0;
 !if(ipert==gs_hamkq%natom+5) optlocal=0; ! 1st order LOCAL potential present
 
 !Arguments of the dfpt_accrho routine

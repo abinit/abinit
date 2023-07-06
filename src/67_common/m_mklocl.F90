@@ -820,7 +820,8 @@ subroutine dfpt_vlocal(atindx,cplex,gmet,gsqcut,icutcoul,idir,ipert,&
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 & 
+& .or. iatom==natom+5 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1(1:cplex*nfft)=zero
@@ -1424,7 +1425,8 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
+& .or. iatom==natom+5 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1dq(1:cplex*nfft)=zero
@@ -1682,7 +1684,8 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 
  iatom=ipert
 
- if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 .or. iatom==natom+5)then
+ if(iatom==natom+1 .or. iatom==natom+2 .or. iatom==natom+10  .or. iatom==natom+11 &
+& .or. iatom==natom+5 .or. (iatom>natom+11.and.iatom<=2*natom+11))then
 
 !  (In case of d/dk or an electric field, or magnetic (Zeeman) field->[natom+5] SPr deb )
    vpsp1dqdq(1:cplex*nfft)=zero
