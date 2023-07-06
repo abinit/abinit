@@ -810,8 +810,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      end if
      ABI_FREE(occ_pert)
    else if(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11)then
-     write(msg, '(a,i4,a,i4)' )' Perturbation : local Zeeman magnetic field from atom', ipert-dtset%natom+11,&
-&    'along direction', idir
+     write(msg, '(a,i4,a,i4)' )' Perturbation : local Zeeman magnetic field from atom', ipert-dtset%natom-11,&
+&    '  along direction', idir
      call wrtout([std_out, ab_out], msg)
    else if(ipert>2*dtset%natom+11 .or. ipert<=0 )then
      write(msg, '(a,i0,3a)' ) &
