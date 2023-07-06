@@ -848,7 +848,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 #endif
 
-   if (gs_ham%use_gpu_impl == 0) then
+   if (gs_ham%use_gpu_impl /= ABI_GPU_KOKKOS) then
      !  Assemble modified kinetic, local and nonlocal contributions
      !  to <G|H|C(n,k)>. Take also into account build-in debugging.
      if(prtvol/=-level)then
