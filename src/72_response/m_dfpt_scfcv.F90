@@ -1058,7 +1058,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !  For tim1rev=0 we need to compute the SCF energies from the physically 
 !  meaningful first-order density
-   if (.not.kramers_deg.and.ipert<dtset%natom+10) then
+   if (.not.kramers_deg.and.(ipert<dtset%natom+10.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11))) then
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
@@ -1119,7 +1119,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  Compute the new 1st-order potential from the 1st-order density
 !  ----------------------------------------------------------------------
 
-   if (kramers_deg.and.ipert<dtset%natom+10) then
+   if (kramers_deg.and.(ipert<dtset%natom+10.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11))) then
      optene=1
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
