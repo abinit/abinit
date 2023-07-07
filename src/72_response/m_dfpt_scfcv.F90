@@ -237,7 +237,9 @@ contains
 !!  ek0=0th-order kinetic energy part of 2nd-order total energy.
 !!  ek1=1st-order kinetic energy part of 2nd-order total energy.
 !!  eloc0=0th-order local (psp+vxc+Hart) part of 2nd-order total energy
+!!  elmag1=1st-order Zeeman part of 2nd-order total energy.
 !!  elpsp1=1st-order local pseudopot. part of 2nd-order total energy.
+!!  emagpen1=1st-order magnetic penalty part of 2nd-order total energy.
 !!  end0=0th-order nuclear dipole part of 2nd-order total energy
 !!  end1=1st-order nuclear dipole part of 2nd-order total energy
 !!  enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
@@ -270,7 +272,7 @@ contains
 subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &  dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset,&
 &  d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
+&  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elmag1,elpsp1,emagpen1,&
 &  end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,indkpt1,&
 &  indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &  kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem,mkqmem,mk1mem,&
@@ -313,7 +315,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer,intent(in) :: symaf1(nsym1),symrc1(3,3,nsym1),symrl1(3,3,nsym1)
  integer,intent(out) :: conv_retcode
  real(dp),intent(in) :: cpus,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,eii
- real(dp),intent(out) :: eberry,edocc,eeig0,ehart01,ehart1,ek0,ek1,eloc0,elpsp1,end0,end1
+ real(dp),intent(out) :: eberry,edocc,eeig0,ehart01,ehart1,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1
  real(dp),intent(out) :: enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,residm
  real(dp),optional,intent(out) :: residm_mq       !-q duplicate
  real(dp),intent(inout) :: fermie
@@ -401,7 +403,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: wtime_step,now,prev
  real(dp) :: born,born_bar,boxcut,deltae,diffor,diel_q,dum,ecut,ecutf,elast
  real(dp) :: epawdc1_dum,eta,evar,fe1fixed,fermie1,gsqcut,omega,qphon_norm,maxfor,renorm,res2,res3,residm2
- real(dp) :: ucvol,vxcavg,elmag1
+ real(dp) :: ucvol,vxcavg
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
  real(dp) :: end0_mq,end1_mq,enl0_mq,enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
@@ -417,7 +419,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: ngfftmix(18)
  integer,allocatable :: dimcprj(:),pwindall(:,:,:)
  integer,pointer :: my_atmtab(:)
- real(dp) :: dielar(7),emagpen1
+ real(dp) :: dielar(7)
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qphon_mq(3),qred2cart(3,3)
  real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
@@ -820,7 +822,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !    Set initial guess for 1st-order potential
 !    ----------------------------------------------------------------------
      option=1;optene=0;if (iscf_mod==-2) optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elmag1,elpsp1,emagpen1,exc1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,&
 &     nkxc,nspden,dtset%ntypat,n3xccc,nmxc,optene,option,dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,&
 &     rhog,rhog1,rhor,rhor1,rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,&
@@ -1060,7 +1062,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  meaningful first-order density
    if (.not.kramers_deg.and.(ipert<dtset%natom+10.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11))) then
      optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elmag1,elpsp1,emagpen1,exc1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
 &     rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,&
@@ -1070,12 +1072,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    if (iscf_mod>=10) then
      optene = 0 
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
-&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,emagpen1,&
+&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,elmag1,eloc0,elpsp1,emagpen1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,emagpen1,&
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,elmag1,eloc0_mq,elpsp1,emagpen1,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
        !Implicictly avoids double counting of SCF and local energies
@@ -1121,7 +1123,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    if (kramers_deg.and.(ipert<dtset%natom+10.or.(ipert>dtset%natom+11.and.ipert<=2*dtset%natom+11))) then
      optene=1
-     call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,dtset%icutcoul,idir,ipert,&
+     call dfpt_rhotov(cplex,ehart01,ehart1,elmag1,elpsp1,emagpen1,exc1,gsqcut,dtset%icutcoul,idir,ipert,&
 &     dtset%ixc,kxc,dtset%magpen,dtset%mpatpol,dtset%mpdir,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,dtset%ntypat,n3xccc,nmxc,optene,optres,dtset%qptn,dtset%ratopt,dtset%ratsm,dtset%ratsph,rhog,rhog1,rhor,rhor1,&
 &     rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
@@ -1149,13 +1151,13 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
      optene = 0 ! use direct scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
-&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,emagpen1,&
+&     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,elmag1,eloc0,elpsp1,emagpen1,&
 &     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,dtset%natom,optene)
 !&     enl0,enl1,epaw1,etotal,evar,evdw,exc1,elmag1,ipert,dtset%natom,optene)
 !    !debug: compute the d2E/d-qd+q energy, should be equal to the one from previous line
      if(.not.kramers_deg) then
        call dfpt_etot(dtset%berryopt,deltae_mq,eberry_mq,edocc_mq,eeig0_mq,eew,efrhar,efrkin,&
-&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1,emagpen1,&
+&        efrloc,efrnl,efrx1,efrx2,ehart1,ek0_mq,ek1_mq,eii,elast_mq,elmag1,eloc0_mq,elpsp1,emagpen1,&
 &        end0_mq,end1_mq,enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1,ipert,dtset%natom,optene)
 
        !Implicictly avoids double counting of SCF and local energies
@@ -1715,6 +1717,7 @@ end subroutine dfpt_scfcv
 !!  ek0=0th-order kinetic energy part of 2nd-order total energy.
 !!  ek1=1st-order kinetic energy part of 2nd-order total energy.
 !!  eii=2nd derivative of pseudopotential core energy (hartree)
+!!  elmag1=1st-order Zeeman part of 2nd-order total energy.
 !!  eloc0=0th-order local (psp+vxc+Hart) part of 2nd-order total energy
 !!  elpsp1=1st-order local pseudopot. part of 2nd-order total energy.
 !!  emagpen1= Magnetic penalty term entering the 2nd-onder total energy.
@@ -1745,14 +1748,14 @@ end subroutine dfpt_scfcv
 !! SOURCE
 
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
-&                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,emagpen1,&
+&                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,elmag1,eloc0,elpsp1,emagpen1,&
 &                end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,exc1,ipert,natom,optene)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ipert,natom,optene
  real(dp),intent(in) :: eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1
- real(dp),intent(in) :: efrx2,ehart1,eii,ek0,ek1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1,epaw1
+ real(dp),intent(in) :: efrx2,ehart1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1,epaw1
  real(dp),intent(in) :: evdw,exc1
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,evar

@@ -276,8 +276,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: ncerr,ncid
 #endif
  real(dp) :: boxcut,dosdeltae,eberry,ecore,ecut_eff,ecutf,edocc,eei,eeig0,eew,efrhar,efrkin,efrloc
- real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,eloc0
- real(dp) :: elpsp1,enl,enl0,enl1,end0,end1,entropy,enxc,eovl1,epaw1,evdw,exc1,fsum,gsqcut,maxocc,nelectkq
+ real(dp) :: efrnl,efrx1,efrx2,ehart,ehart01,ehart1,eii,ek,ek0,ek1,ek2,elmag1,eloc0
+ real(dp) :: elpsp1,emagpen1,enl,enl0,enl1,end0,end1,entropy,enxc,eovl1,epaw1,evdw,exc1,fsum,gsqcut,maxocc,nelectkq
  real(dp) :: residm,tolwfr,tolwfr_save,toldfe_save,toldff_save,tolrff_save,tolvrs_save
  real(dp) :: ucvol, eig1_r, eig1_i
  real(dp) :: residm_mq !+/-q duplicates
@@ -1941,7 +1941,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
 &       d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
+&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,&
 &       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
 &       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &       kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
@@ -1960,7 +1960,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
 &       d2bbb,d2lo,d2nl,d2ovl,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
+&       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,&
 &       end0,end1,enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr_mq,idir,&
 &       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
 &       kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
@@ -2254,7 +2254,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Print the energies
    if (dtset%nline/=0 .or. dtset%nstep/=0)then
      call dfpt_prtene(dtset%berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&     ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,eovl1,epaw1,evdw,exc1,ab_out,&
+&     ehart01,ehart1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1,eovl1,epaw1,evdw,exc1,ab_out,&
 &     ipert,dtset%natom,psps%usepaw,usevdw)
    end if
 
@@ -2870,8 +2870,10 @@ end subroutine getcgqphase
 !! eii=pseudopotential core part of 2nd-order total energy
 !! ek0=0th-order kinetic energy part of 2nd-order total energy.
 !! ek1=1st-order kinetic energy part of 2nd-order total energy.
+!! elmag1=1st-order Zeeman part of 2nd-order total energy.
 !! eloc0=0th-order local (psp+vxc+Hart) part of 2nd-order total energy
 !! elpsp1=1st-order local pseudopot. part of 2nd-order total energy.
+!! emagpen1=1st-order magnetic penalty part of 2nd-order total energy.
 !! end0=0th-order nuclear dipole part of 2nd-order total energy.
 !! end1=1st-order nuclear dipole part of 2nd-order total energy.
 !! enl0=0th-order nonlocal pseudopot. part of 2nd-order total energy.
@@ -2896,14 +2898,14 @@ end subroutine getcgqphase
 !! SOURCE
 
 subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1,efrx2,&
-&  ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,eovl1,epaw1,evdw,exc1,iout,&
+&  ehart01,ehart1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1,eovl1,epaw1,evdw,exc1,iout,&
 &  ipert,natom,usepaw,usevdw)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: berryopt,iout,ipert,natom,usepaw,usevdw
  real(dp),intent(in) :: eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1
- real(dp),intent(in) :: efrx2,ehart01,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1
+ real(dp),intent(in) :: efrx2,ehart01,ehart1,eii,ek0,ek1,elmag1,eloc0,elpsp1,emagpen1,end0,end1,enl0,enl1
  real(dp),intent(in) :: eovl1,epaw1,evdw,exc1
 
 !Local variables -------------------------
@@ -2927,13 +2929,15 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  berry_activated=(berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. &
 & berryopt==14.or.berryopt==16.or.berryopt==17)
  if (ipert==natom+1) nn=8
- if (ipert==natom+5) nn=8
+ if (ipert==natom+5) nn=7
  if (ipert==natom+7) nn=8
  if (ipert==natom+2) nn=7
  if (ipert>=1.and.ipert<=natom) nn=13
  if (ipert==natom+3.or.ipert==natom+4) nn=17
  if (ipert==natom+2.and.berry_activated) nn=nn+1
  if (ipert==natom+10.or.ipert==natom+11) nn=1 ! means nothing,
+ if (ipert>natom+11.and.ipert<=2*natom+11) nn=7
+ if (emagpen1>tol8) nn=nn+1
 ! because we do not compute derivatives of the energy in this case
  if (usepaw==1) nn=nn+1
  if (usevdw==1) nn=nn+1
@@ -2962,7 +2966,7 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 & ' ',trim(numb),': 1st-order hamiltonian combined with 1st and 0th-order wfs'
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
- if(ipert/=natom+1.and.ipert/=natom+2)then
+ if(ipert/=natom+1.and.ipert/=natom+2.and.ipert/=natom+5.and.ipert<natom+11)then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
 &   ' loc psp =',elpsp1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
 &   ' note that "loc psp" includes a xc core correction that could be resolved'
@@ -2977,6 +2981,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  else if(ipert==natom+2) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &   '    dotwf=',enl1,  '  Hartree=',ehart1,'     xc=',exc1
+ else if(ipert==natom+5.or.(ipert>natom+1.and.ipert<=2*natom+11)) then
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a)' ) &
+&   '    Zeeman=',elmag1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
+&   ' note that "loc psp" includes a xc core correction that could be resolved'
  end if
  if(ipert==natom+3 .or. ipert==natom+4) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,a,es17.8)' ) &
@@ -2991,6 +2999,13 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
  write(msg, '(5a,es17.8,a,es17.8,a,es17.8)' )&
 & ' ',trim(numb),': eventually, occupation + non-local contributions',ch10,&
 & '    edocc=',edocc,'     enl0=',enl0,'   enl1=',enl1_effective
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
+
+ if (emagpen1>tol8) then
+   write(msg,'(a,es17.8)') &
+&   '     Magnetic penalty contribution=', emagpen1   
+ end if 
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
@@ -3011,10 +3026,11 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+5)then
-     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    else if(ipert>natom+11.and.ipert<=2*natom+11)then
-     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
+     erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1+elmag1
    end if
+   if (emagpen1>tol8) erelax=erelax+emagpen1
    enl1_effective=enl1
    if (ipert==natom+1.or.ipert==natom+2) then
      if (1.0_dp+enl1/10.0_dp==1.0_dp) enl1_effective=zero

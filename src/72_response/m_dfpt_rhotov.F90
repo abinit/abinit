@@ -119,7 +119,7 @@ contains
 !!
 !! SOURCE
 
- subroutine dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,emagpen1,gsqcut,icutcoul,idir,ipert,&
+ subroutine dfpt_rhotov(cplex,ehart01,ehart1,elmag1,elpsp1,emagpen1,exc1,gsqcut,icutcoul,idir,ipert,&
 &           ixc,kxc,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,ngfft,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,nspden,ntypat,n3xccc,&
 &           non_magnetic_xc,optene,optres,qphon,ratopt,ratsm,ratsph,rhog,rhog1,rhor,rhor1,rprimd,typat,ucvol,&
 &           usepaw,usexcnhat,vcutgeo,vhartr1,vpsp1,vresid1,vres2,vtrial1,vxc,vxc1,xccc3d1,ixcrot,xred)
@@ -794,14 +794,14 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,
  if (cplex==1) then
    do ifft=1,nfft
 !     Bloc(ifft)=-magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
-     Bloc(ifft)=-magpen*0.5*fatsph(ifft,iatom)
+     Bloc(ifft)=-0.5*fatsph(ifft,iatom)
    end do
  else if (cplex==2) then
    do ifft=1,nfft
-!     Bloc(2*ifft-1)=magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
-!     Bloc(2*ifft  )=magpen*intgden(2,idir+1,iatom)*fatsph(ifft,iatom)
-     Bloc(2*ifft-1)=magpen*0.5*fatsph(ifft,iatom)
-     Bloc(2*ifft  )=magpen*0.5*fatsph(ifft,iatom)
+!     Bloc(2*ifft-1)=-magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
+!     Bloc(2*ifft  )=-magpen*intgden(2,idir+1,iatom)*fatsph(ifft,iatom)
+     Bloc(2*ifft-1)=-0.5*fatsph(ifft,iatom)
+     Bloc(2*ifft  )=-0.5*fatsph(ifft,iatom)
    end do
  end if
 
