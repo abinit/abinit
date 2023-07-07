@@ -2209,8 +2209,16 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
   ABI_MALLOC(blkval,(2,3,mpert,3,mpert,nblok))
+  print *, "size blkval:", size(blkval), "after allocation"
+  print *, "sizeof blkval:", sizeof(blkval), "after allocation"
   blkval = 0
+  if(size(ddb%val) /= 2*3*mpert*3*mpert*nblok ) then
+    ABI_BUG("Size of ddb%val is not consistent.")
+  endif
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
+
+  print *, "size ddbval:", size(ddb%val)
+  print *, "size blkval:", size(blkval), "after reshape"
 
 !**********************************************************************
 ! Transfert crystal values
@@ -2789,6 +2797,8 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   end if
 !-------------------------------------------------------------------------------------
 ! DEALLOCATION OF ARRAYS
+  print *, "size blkval:", size(blkval), "deallocation"
+  print *, "sizeof blkval:", sizeof(blkval), "deallocation"
   ABI_FREE(blkval)
   ABI_FREE(zeff)
   ABI_FREE(qdrp_cart)
@@ -3379,7 +3389,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
  real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
  character(len=500) :: msg
- type(abihist) :: hist_tmp
+! type(abihist) :: hist_tmp
 ! *************************************************************************
 
 !Set optional values
@@ -3566,6 +3576,9 @@ end do  ! ia
    end if
 
 ! Allocate hist datatype
+print *, "natom_hist", natom_hist
+block
+type(abihist) :: hist_tmp
    call abihist_init(hist_tmp,natom_hist,nstep_hist,.false.,.false.)
 ! copy all the information
    do ia=1,nstep_hist
@@ -3603,6 +3616,7 @@ end do  ! ia
      iatfix = iatfix_tmp
      ABI_FREE(iatfix_tmp)
    end if
+ end block
  end if !need map
 
 !deallocation

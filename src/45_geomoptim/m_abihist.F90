@@ -189,6 +189,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  logical,intent(in) :: isVUsed,isARused
  type(abihist),intent(inout) :: hist
 
+
 ! ***************************************************************
 
 !Initialize indexes
@@ -203,6 +204,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 !Allocate all the histories
  ABI_MALLOC(hist%acell,(3,mxhist))
  ABI_MALLOC(hist%rprimd,(3,3,mxhist))
+
  ABI_MALLOC(hist%xred,(3,natom,mxhist))
  ABI_MALLOC(hist%fcart,(3,natom,mxhist))
  ABI_MALLOC(hist%strten,(6,mxhist))
