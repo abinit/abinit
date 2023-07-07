@@ -24,7 +24,7 @@
 
 #if defined HAVE_MPI
 using namespace std;
-// #include <mpi.h>
+#include <mpi.h>
 
 #include "invoke_python.hpp"
 
@@ -123,15 +123,16 @@ int close_python_interpreter() {
  * ****************/
 
 // Function to invoke python and run the script
-// void invoke_python_triqs(int rank, char* filapp_in, MPI_Fint *MPI_world_ptr) {
-void invoke_python_triqs(int rank, char* filapp_in) {
-	// MPI_Comm comm;
-	// comm = MPI_Comm_f2c(*MPI_world_ptr );
+void invoke_python_triqs(int rank, char* filapp_in, MPI_Fint *MPI_world_ptr) {
+// void invoke_python_triqs(int rank, char* filapp_in) {
+	MPI_Comm comm;
+	comm = MPI_Comm_f2c(*MPI_world_ptr );
 
 	// int ierr, rank;
-	// ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	int ierr;
+	ierr = MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	// MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
 
 	if (rank == 0) fprintf(stdout, "invoke_python_triqs: beginning\n");
 
@@ -161,18 +162,26 @@ void invoke_python_triqs(int rank, char* filapp_in) {
 		exit(0);
 	}
 
+    fflush(stdout);
 	execute_python_file(triqs_filename.c_str());
+    fflush(stdout);
 	if (rank == 0) fprintf(stdout, "invoke_python_triqs: script runned\n");
 
-	// int final;
-	// MPI_Finalized(&final);
-	// if (final) {
-	// 	fprintf(stderr, "MPI is finalized on node %i\n", rank);
-	// }
+	int final;
+	MPI_Finalized(&final);
+	if (final) {
+		fprintf(stderr, "MPI is finalized on node %i\n", rank);
+	}
 
 	// Close python
+    // if (rank == 0) fprintf(stdout, "Closing the interpreter\n");
 	// close_python_interpreter();
-	// MPI_Barrier(MPI_COMM_WORLD);
+    // Because of module problems, one cannot Py_Finalize and then Py_Initialize. Thus, we could not do more
+    // than 1 step that way... We will simply keep the interpreter open. For the future, there could be a
+    // Py_Initialize at the beginning of the program, and a Py_Finalize at the end, but it doesn't seem to be
+    // a huge deal to keep open. At the exit of the program, the memory is released anyway. There might
+    // be more usage of memory though, by not Finalizing. But CTQMC here is more about walltime than memory.
+	MPI_Barrier(MPI_COMM_WORLD);
 }
 #else
 void invoke_python_triqs(int rank, char* filapp_in) {
