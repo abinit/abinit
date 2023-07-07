@@ -989,8 +989,6 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !   else
 !     full_cell = eff_pot%harmonics_terms%ifcs%cell
 !   end if
-   !FIXME: full_cell construction.
-   !TODO: Check if the order is correct (if there is any predifined order.)
    irpt=1
    do i1=min1f, max1f
      do i2= min2f, max2f
@@ -1027,7 +1025,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !  Count the rpt inferior to the tolerance
    irpt2 = 0
    do irpt=1,full_nrpt
-     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol5))then
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol8))then
        irpt2 = irpt2 + 1
      end if
    end do
@@ -1049,7 +1047,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
     irpt2 = 0
     do irpt = 1,full_nrpt
-     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol5))then
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol8))then
        irpt2 = irpt2 + 1
        eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt)
        eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = full_cell_short_atmfrc(:,:,:,:,irpt)
