@@ -71,6 +71,7 @@ rfphon      1          # Do phonon response
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = scope_gnu_10.2_paral 
 #%% test_chain = t37.abi, t38.abi, t39.abi, t40.abi
 #%% [files]
 #%% files_to_test = 

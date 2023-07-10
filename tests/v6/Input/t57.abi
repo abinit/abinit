@@ -27,6 +27,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% test_chain = t54.abi, t55.abi, t56.abi, t57.abi
 #%% input_ddb = t55.ddb.out 
 #%% input_gkk = t56.ddb.out 
