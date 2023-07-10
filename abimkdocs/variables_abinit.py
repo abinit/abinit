@@ -13221,6 +13221,8 @@ or 0 in each k-point (non-spin-polarized case), or with occupation numbers
 equal to 1 or 0 in each k-point (spin-polarized case). If [[nsppol]] = 2 and
 [[occopt]] == 1 is used, the user has to impose the magnetization, using
 [[spinmagntarget]], except for the case of a single isolated Hydrogen atom.
+Unfortunately, for the time being, in response function calculations,
+only [[spinmagntarget]]=0.0d0 or equal to the default value is allowed.
 
   * [[occopt]] = 2:
 k points may optionally have different numbers of bands and different
@@ -18420,23 +18422,37 @@ Variable(
     mnemonics="SPIN-MAGNetization TARGET",
     added_in_version="before_v9",
     text=r"""
-This input variable is active only in the [[nsppol]] = 2 case. If
-[[spinmagntarget]] is not the "magic" value of -99.99, the spin-
-magnetization of the primitive cell will be fixed (or optimized, if it is not
-possible to impose it) to the value of [[spinmagntarget]], in Bohr magneton
-units (for an Hydrogen atom, it is 1).
-If [[occopt]] is a metallic one, the Fermi energies for spin up and spin down
-are adjusted to give the target spin-polarisation (this is equivalent to an
-exchange splitting). If [[occopt]] = 1 and [[nsppol]] = 2, the occupation numbers
-for spin up and spin down will be adjusted to give the required spin-
-magnetization (occupation numbers are identical for all k-points, with
+This input variable is active only in the [[nsppol]] = 2 case. 
+It is an auxiliary input variable, that is used to define how the occupation numbers 
+are generated (see [[occ]] input variable).
+
+When [[occopt]] defines a metallic occupation ([[occopt]]=3 ... 8),
+the Fermi energies for spin up and spin down
+are adjusted to deliver the target spin-magnetization [[spinmagntarget]],
+in Bohr magneton units (for an Hydrogen atom, it is 1).
+The difference in Fermi energies is equivalent to an exchange splitting.
+However, still in the metallic occupation case, if [[spinmagntarget]] is the "magic" (default) value -99.99, 
+the occupation numbers (and hence the spin-magnetization) are not 
+constrained, and are determined self-consistently, by having the same spin
+up and spin down Fermi energy.
+
+If [[occopt]] = 1 and [[nsppol]] = 2, the occupation numbers
+for spin up and spin down are initialized (and kept unchanged afterwards) to give the required 
+spin-magnetization (occupation numbers are identical for all k-points with
 [[occopt]] = 1). The definition of [[spinmagntarget]] is actually requested in
 this case, except for the single isolated Hydrogen atom.
-If [[spinmagntarget]] is the default one, the spin-magnetization will not be
-constrained, and will be determined self-consistently, by having the same spin
-up and spin down Fermi energy in the metallic case, while for the other cases,
-there will be no spin-magnetization, except for an odd number of electrons if
-[[occopt]] = 1 and [[nsppol]] = 2.
+Still in the [[occopt]] = 1 case, if [[spinmagntarget]] is the "magic" (default) value of -99.99,
+there is no spin-magnetization, except for an odd number of electrons, 
+where one more band is occupied spin up than spin down.
+
+If [[occopt]] = 0 or 2, the [[occ]] input variable is defined directly by the user,
+and does not change during the SCF procedure.
+[[spinmagntarget]] is not used. 
+
+For the time being, in response-function calculations, only [[spinmagntarget]]=0.0 or the default
+value are allowed. Moreover, the occupation numbers for the ground-state and for the reponse-function
+calculations must be identical. Thus, ferromagnetic insulators must rely on 
+[[occopt]]=0 or 2, with explicit definition of the occupation numbers.
 
 !!! note
     For the time being, only the spin down Fermi energy is written out in

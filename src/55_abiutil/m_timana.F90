@@ -332,17 +332,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(198)='getgh1c%dfpt_nstwf              '
  names(199)='getgh1c%dfpt_nstpaw             '
 
- names(200)='getghc                          '
- names(201)='getghc%cgwf                     '
- names(202)='getghc%dfpt_cgwf                '
- names(203)='getghc%mkresi                   '
- names(204)='getghc%kss_ddiago               '
- names(205)='getghc%lobpcgwf                 '
- names(206)='getghc%prep_getghc              '
- names(207)='getghc%other lobpcg             '
- names(208)='getghc%update_mmat              '
- names(209)='getghc(/=fourXX,nonlop)         '; basic(209)=1
-
  names(210)='projbd                          '; basic(210)=1;    ndata(210)=npwnbdmean
  names(211)='projbd%cgwf                     '
  names(212)='projbd%dfpt_cgwf                '
@@ -421,6 +410,19 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(331)='cchi0                           '
  names(332)='cchi0(rho_tw_g)                 '
  names(333)='cchi0(assembly)                 '
+
+ names(350)='getghc                          '
+ names(351)='getghc%cgwf                     '
+ names(352)='getghc%dfpt_cgwf                '
+ names(353)='getghc%mkresi                   '
+ names(354)='getghc%kss_ddiago               '
+ names(355)='getghc%lobpcgwf                 '
+ names(356)='getghc%prep_getghc              '
+ names(357)='getghc%other lobpcg             '
+ names(358)='getghc%update_mmat              '
+ names(359)='getghc(/=fourXX,nonlop,fock_XX) '; basic(359)=1
+ names(360)='getghc(fock_XX)                 '
+
 
  names(401)='sigma                           '
  names(402)='sigma(Init1)                    '
@@ -970,7 +972,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1563)='fock2ACE(fock_getghc)           '
  names(1565)='fock2ACE(finalize)              '; basic(1565)=1
 
- names(1580)='fockACE_getghc                  '; basic(1580)=1
+ names(1580)='fock_ACE_getghc                 '; basic(1580)=1
 
  ! Chebfi
  names(1600) = 'chebfi                        '
@@ -1305,7 +1307,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:12)=(/9, 1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1270/)
    case(15)
 !      Gather the different parts of getghc
-     tslots(:9)=(/200, 201,202,203,204,205,206,207,208/)
+     tslots(:9)=(/350,351,352,353,354,355,356,357,358/)
    case(16)
 !      Gather the different parts of projbd
      tslots(:3)=(/210, 211,212/)
@@ -1314,15 +1316,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:24)=&
 &     (/14, 270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292/)
    case(18)
-!      Estimate the complement of getghc (non fourwf, non fourdp, non nonlop)
-     tslots(:6)=(/-209, 200,-221,-235,-236,-841/)
+!      Estimate the complement of getghc (non fourwf, non fourdp, non nonlop, non fock_XX)
+     tslots(:8)=(/-359, 350,-221,-235,-236,-841,-360,-1580/)
    case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
-     tslots(:6)=(/-40, 22,530,1300,-201,-211/)
+     tslots(:6)=(/-40, 22,530,1300,-351,-211/)
    case(20)
 !      Estimate the complement of dfpt_cgwf (non getghc,projbd,nonlop,fourwf)
 !    tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)  ! 197 includes some nonlop and fourwf, so there is double counting ...
-     tslots(:7)=(/-140, 122,-202,-212,-227,-228,-844/)
+     tslots(:7)=(/-140, 122,-352,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
 !      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
@@ -1410,7 +1412,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:5)=(/1299,1290,-1293,-1294,-1295/)
    case(48)
 !      Estimate the complement of cgwf_cprj
-     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1293,-1363,-1370,-201,-211,-880/)
+     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1293,-1363,-1370,-351,-211,-880/)
    case(49)
 !      Sum calls of getcsc
      tslots(:3)=(/1360,1363,1364/)
@@ -1688,15 +1690,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:18)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,1295,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
        case(8)
          if(abs(timopt)==3)then
-           list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
+           list(:11)=(/530,354,355,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
          else if(abs(timopt)==4)then
            list(:8)=(/530,520,521,522,523,524,525,526/)               ; msg='lobpcgwf (abs(timopt)==4)'
 !            else
-!            list(:3)=(/530,204,205/)
+!            list(:3)=(/530,354,355/)
 !            msg='lobpcgwf (light analysis: for a deeper one, use abs(timopt)=3 or 4)'
          end if
        case(9)
-         list(:4)=(/22,201,40,211/)                                  ; msg='cgwf '
+         list(:4)=(/22,351,40,211/)                                  ; msg='cgwf '
        case(10)
          list(:8)=(/132,133,134,135,136,137,138,141/)                ; msg='respfn '
        case(11)
@@ -1708,9 +1710,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(14)
          list(:9)=(/128,131,122,845,288,214,113,130,565/)            ; msg='dfpt_vtowfk '
        case(15)
-         list(:8)=(/122,140,202,197,212,227,228,844/)                ; msg='dfpt_cgwf '
+         list(:8)=(/122,140,352,197,212,227,228,844/)                ; msg='dfpt_cgwf '
        case(16)
-         list(:6)=(/200,841,221,209,235,236/)                        ; msg='getghc '
+         list(:8)=(/350,841,221,359,235,236,360,1580/)              ; msg='getghc '
        case(17)
          list(:21)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,880/)
          msg='fourwf (upwards partitioning)'
@@ -1810,7 +1812,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(78)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(79)
-         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,201,211,880,1301/) ; msg='cgwf_cprj'
+         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,351,211,880,1301/) ; msg='cgwf_cprj'
        case(80)
          list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
        case(81)
