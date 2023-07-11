@@ -1106,7 +1106,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &     ' and rfstrs=',rfstrs,'.',ch10,&
 &     'Action: change qpt, or rfelfd, or rfstrs in the input file.'
      ABI_ERROR(message)
-   else if(rfasr.eq.2)then
+   else if(rfasr==2)then
      write(message,'(2a)')ch10,' rfasr=2 not allowed with q/=0 => rfasr was reset to 0.'
      ABI_WARNING(message)
      rfasr=0
@@ -3334,9 +3334,8 @@ end subroutine dfpt_dyout
 !! pawbec= flag for the computation of frozen part of Born Effective Charges (PAW only)
 !! prtbbb=if 1, print the band-by-band decomposition, otherwise, prtbbb=0
 !! rfasr= (0=> no acoustic sum rule [asr] imposed), (1=> asr is imposed,
-!!  in the democratic way for the effective charges),
-!! (2=> asr is imposed, in the aristocratic way for the effective
-!!  charges)
+!!  with equal repartition of the charge neutrality correction for the effective charges),
+!! (2=> asr is imposed, with weighted repartition of the charge neutrality correction for the effective charges),
 !! rfpert(mpert)=define the perturbations
 !! rprimd(3,3)=dimensional primitive translations (bohr)
 !! typat(natom)=integer label of each type of atom (1,2,...)
