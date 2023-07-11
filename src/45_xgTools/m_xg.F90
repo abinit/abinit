@@ -440,7 +440,11 @@ contains
 
     ! MG: Initialize arrays with zero to avoid SIGFPE in xmpi_sum
     !FIXME GPU_DISABLED case shouldn't be handled here
+#if defined HAVE_GPU && defined HAVE_YAKL
     if (l_use_gpu==ABI_GPU_KOKKOS .or. l_use_gpu==ABI_GPU_DISABLED) then
+#else
+    if (l_use_gpu==ABI_GPU_KOKKOS) then
+#endif
 #if defined HAVE_GPU && defined HAVE_YAKL
       select case (space)
       case (SPACE_R,SPACE_CR)
@@ -450,7 +454,10 @@ contains
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
         !xg%vecR(:,:) = zero
         size_bytes = rows*cols*dp
-        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
+        !FIXME Remove GPU_DISABLED branch
+        if (l_use_gpu==ABI_GPU_KOKKOS) then
+          call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
+        end if
         xg%trans = 't'
       case (SPACE_C)
         if ( associated(xg%vecC) ) then
@@ -459,7 +466,10 @@ contains
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
         !xg%vecC(:,:) = zero
         size_bytes = rows*cols*dpc
-        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
+        !FIXME Remove GPU_DISABLED branch
+        if (l_use_gpu==ABI_GPU_KOKKOS) then
+          call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
+        end if
         xg%trans = 'c'
       case default
         ABI_ERROR("Invalid space")
@@ -503,7 +513,9 @@ contains
       end select
 #endif
 
-    else
+    !else
+    !FIXME Should be a simple "else", see note at "if" above
+    else if (l_use_gpu==ABI_GPU_DISABLED) then
 
       !FIXME Settle this
 #ifndef HAVE_YAKL
