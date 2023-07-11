@@ -1106,11 +1106,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &     ' and rfstrs=',rfstrs,'.',ch10,&
 &     'Action: change qpt, or rfelfd, or rfstrs in the input file.'
      ABI_ERROR(message)
-   else if(chneut==2)then
-     write(message,'(2a)')ch10,' chneut=2 not allowed with q/=0 => chneut reset to 0.'
+   end if
+   if(chneut/=0)then
+     write(message,'(2a)')ch10,' chneut/=0 not allowed with q/=0 => chneut reset to 0 locally.'
      ABI_WARNING(message)
      chneut=0
    end if
+   if(asr/=0)then
+     write(message,'(2a)')ch10,' asr/=0 not allowed with q/=0 => asr reset to 0 locally.'
+     ABI_WARNING(message)
+     asr=0
+   end if
+
  end if
 
 !Determine the symmetrical perturbations
@@ -1473,8 +1480,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_MALLOC(carflg,(3,mpert,3,mpert))
    ABI_MALLOC(d2matr,(2,3,mpert,3,mpert))
    outd2=1
-   call dfpt_gatherdy(asr,becfrnl,chneut,dtset%berryopt,blkflg,carflg,&
-&   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
+   call dfpt_gatherdy(asr,becfrnl,dtset%berryopt,blkflg,carflg,&
+&   chneut,dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
 &   rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
@@ -3389,7 +3396,7 @@ subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,d
 
 !Local variables -------------------------
 !scalars
- integer :: chneut,iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
+ integer :: iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
  integer :: jj,nblok,selectz
  character(len=500) :: message
 !arrays
