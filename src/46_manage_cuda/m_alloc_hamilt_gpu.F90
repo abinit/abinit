@@ -44,12 +44,12 @@ module m_alloc_hamilt_gpu
  public :: dealloc_hamilt_gpu
 !!***
 
- private :: alloc_nonlop_kokkos
- private :: dealloc_nonlop_kokkos
+ private :: alloc_nonlop_gpu_data
+ private :: dealloc_nonlop_gpu_data
 
- !! data type to store pointers to data used on GPU, mostly in gemm nonlop
+ !! data type to store pointers to data used on GPU, mostly in gemm nonlop_gpu
  !! opernla/b/c
- type, public :: gemm_nonlop_kokkos_type
+ type, public :: gemm_nonlop_gpu_data_type
 
    logical     :: allocated
    type(c_ptr) ::     projections_gpu
@@ -60,9 +60,9 @@ module m_alloc_hamilt_gpu
    type(c_ptr) ::  vectout_gpu
    type(c_ptr) :: svectout_gpu
 
- end type gemm_nonlop_kokkos_type
+ end type gemm_nonlop_gpu_data_type
 
- type(gemm_nonlop_kokkos_type), save, public, target :: gemm_nonlop_kokkos
+ type(gemm_nonlop_gpu_data_type), save, public, target :: gemm_nonlop_gpu_data
 
 contains
 !!***
@@ -174,7 +174,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    if ((use_gpu_cuda == ABI_GPU_KOKKOS .or. use_gpu_cuda == ABI_GPU_LEGACY) &
      &  .and. dtset%use_gemm_nonlop == 1) then
 
-     call alloc_nonlop_kokkos(dtset, &
+     call alloc_nonlop_gpu_data(dtset, &
        &                      psps, &
        &                      npw_max_nonloc,&
        &                      npw_max_nonloc,&
@@ -240,7 +240,7 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 
    if (option==1.or.option==2) then
      call free_nonlop_gpu()
-     call dealloc_nonlop_kokkos()
+     call dealloc_nonlop_gpu_data()
    end if ! option 1 or 2
 
  end if
@@ -256,7 +256,7 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 end subroutine dealloc_hamilt_gpu
 !!***
 
-!!****f* ABINIT/alloc_nonlop_kokkos
+!!****f* ABINIT/alloc_nonlop_gpu_data
 !! NAME
 !! alloc_hamilt_gpu
 !!
@@ -274,11 +274,11 @@ end subroutine dealloc_hamilt_gpu
 !!  use_gpu_cuda= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
 !!
 !! OUTPUT
-!!  (no output - only allocation on GPU, member of gemm_nonlop_kokkos)
+!!  (no output - only allocation on GPU, member of gemm_nonlop_gpu_data)
 !!
 !! SOURCE
 
-subroutine alloc_nonlop_kokkos(dtset,&
+subroutine alloc_nonlop_gpu_data(dtset,&
   &                            psps,&
   &                            npwin,&
   &                            npwout,&
@@ -320,34 +320,34 @@ subroutine alloc_nonlop_kokkos(dtset,&
 
   !! allocate memory on device
 
-  if (gemm_nonlop_kokkos % allocated .eqv. .false.) then
+  if (gemm_nonlop_gpu_data % allocated .eqv. .false.) then
     ! These will store the non-local factors for vectin, svectout and vectout respectively
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%    projections_gpu, INT(cplex, c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  s_projections_gpu, INT(cplex, c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu, INT(2    , c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_gpu_data%    projections_gpu, INT(cplex, c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_gpu_data%  s_projections_gpu, INT(cplex, c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_gpu_data%vnl_projections_gpu, INT(2    , c_size_t) * nprojs * dtset%nspinor*dtset%bandpp * dp)
 
     allocated_size_bytes = allocated_size_bytes + (2*cplex+2)*nprojs * dtset%nspinor*dtset%bandpp * dp
 
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectin_gpu,  INT(2, c_size_t) * npwin  * dtset%nspinor*dtset%bandpp * dp)
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos%  vectout_gpu, INT(2, c_size_t) * npwout * dtset%nspinor*dtset%bandpp * dp)
-    ABI_MALLOC_CUDA(gemm_nonlop_kokkos% svectout_gpu, INT(2, c_size_t) * npwout * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_gpu_data%  vectin_gpu,  INT(2, c_size_t) * npwin  * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_gpu_data%  vectout_gpu, INT(2, c_size_t) * npwout * dtset%nspinor*dtset%bandpp * dp)
+    ABI_MALLOC_CUDA(gemm_nonlop_gpu_data% svectout_gpu, INT(2, c_size_t) * npwout * dtset%nspinor*dtset%bandpp * dp)
 
     allocated_size_bytes = allocated_size_bytes + &
       & 2 * (npwin+2*npwout) * dtset%nspinor * dtset%bandpp * dp
 
-    gemm_nonlop_kokkos % allocated = .true.
+    gemm_nonlop_gpu_data % allocated = .true.
 
-    write(message,*) '  alloc_nonlop_kokkos allocated ', allocated_size_bytes*1e-6, ' MBytes on device memory'
+    write(message,*) '  alloc_nonlop_gpu_data allocated ', allocated_size_bytes*1e-6, ' MBytes on device memory'
     call wrtout(std_out,message,'COLL')
 
   end if
 
-end subroutine alloc_nonlop_kokkos
+end subroutine alloc_nonlop_gpu_data
 !!***
 
-!!****f* ABINIT/dealloc_nonlop_kokkos
+!!****f* ABINIT/dealloc_nonlop_gpu_data
 !! NAME
-!! dealloc_nonlop_kokkos
+!! dealloc_nonlop_gpu_data
 !!
 !! FUNCTION
 !! deallocate several memory pieces on a GPU device used for the application
@@ -359,21 +359,21 @@ end subroutine alloc_nonlop_kokkos
 !!
 !! SOURCE
 
-subroutine dealloc_nonlop_kokkos()
+subroutine dealloc_nonlop_gpu_data()
 
-  if (gemm_nonlop_kokkos % allocated) then
-    ABI_FREE_CUDA(gemm_nonlop_kokkos%    projections_gpu)
-    ABI_FREE_CUDA(gemm_nonlop_kokkos%  s_projections_gpu)
-    ABI_FREE_CUDA(gemm_nonlop_kokkos%vnl_projections_gpu)
+  if (gemm_nonlop_gpu_data % allocated) then
+    ABI_FREE_CUDA(gemm_nonlop_gpu_data%    projections_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_gpu_data%  s_projections_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_gpu_data%vnl_projections_gpu)
 
-    ABI_FREE_CUDA(gemm_nonlop_kokkos% vectin_gpu)
-    ABI_FREE_CUDA(gemm_nonlop_kokkos% vectout_gpu)
-    ABI_FREE_CUDA(gemm_nonlop_kokkos%svectout_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_gpu_data% vectin_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_gpu_data% vectout_gpu)
+    ABI_FREE_CUDA(gemm_nonlop_gpu_data%svectout_gpu)
 
-    gemm_nonlop_kokkos % allocated = .false.
+    gemm_nonlop_gpu_data % allocated = .false.
   end if
 
-end subroutine dealloc_nonlop_kokkos
+end subroutine dealloc_nonlop_gpu_data
 !!***
 
 end module m_alloc_hamilt_gpu
