@@ -85,7 +85,7 @@ contains
 !!         1: allocate data for nonlocal operator
 !!         2: allocate both
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  use_gpu_cuda= 0 or 1 to know if we use cuda
+!!  use_gpu_cuda= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
 !!
 !! OUTPUT
 !!  (no output - only allocation on GPU)
@@ -116,7 +116,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 
 ! *************************************************************************
 
- if (use_gpu_cuda==0) return
+ if (use_gpu_cuda==ABI_GPU_DISABLED) return
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
 !=== Local Hamiltonian ===
@@ -172,7 +172,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
      &                   dimekb2_max)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
-   if (dtset%use_gpu_cuda == 1 .and. dtset%use_gemm_nonlop == 1) then
+   if (dtset%use_gpu_cuda == ABI_GPU_KOKKOS .and. dtset%use_gemm_nonlop == 1) then
 
      call alloc_nonlop_kokkos(dtset, &
        &                      psps, &
@@ -213,7 +213,7 @@ end subroutine alloc_hamilt_gpu
 !!  option=0: deallocate data for local operator (FFT)
 !!         1: deallocate data for nonlocal operator
 !!         2: deallocate both
-!!  use_gpu_cuda= 0 or 1 to know if we use cuda
+!!  use_gpu_cuda= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
 !!
 !! OUTPUT
 !!  (no output - only deallocation on GPU)
@@ -231,21 +231,25 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 
 ! *************************************************************************
 
- if (use_gpu_cuda==0) return
+ if (use_gpu_cuda==ABI_GPU_DISABLED) return
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
 
- if (option==0.or.option==2) then
-   call free_gpu_fourwf()
- end if
- if (option==1.or.option==2) then
-   call free_nonlop_gpu()
+ if (use_gpu_cuda == ABI_GPU_KOKKOS .or. use_gpu_cuda == ABI_GPU_LEGACY) then
+   if (option==0.or.option==2) then
+     call free_gpu_fourwf()
+   end if
 
+   if (option==1.or.option==2) then
+     call free_nonlop_gpu()
 #if defined(HAVE_KOKKOS)
-   call dealloc_nonlop_kokkos()
+     if (use_gpu_cuda == ABI_GPU_KOKKOS) then
+       call dealloc_nonlop_kokkos()
+     end if
 #endif
+   end if ! option 1 or 2
 
- end if ! option 1 or 2
+ end if
 
 #else
 
@@ -273,7 +277,7 @@ end subroutine dealloc_hamilt_gpu
 !!  npwin is the number of plane waves for vectin
 !!  npwout is the number of plane waves for vectout
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  use_gpu_cuda= 0 or 1 to know if we use cuda
+!!  use_gpu_cuda= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
 !!
 !! OUTPUT
 !!  (no output - only allocation on GPU, member of gemm_nonlop_kokkos)

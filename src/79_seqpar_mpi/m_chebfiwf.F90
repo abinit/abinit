@@ -254,7 +254,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end do
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- if(l_gs_hamk%use_gpu_impl==1) then
+ if(l_gs_hamk%use_gpu_impl==ABI_GPU_KOKKOS) then
    ! upload l_pcon to device / gpu
    l_pcon_size_bytes =l_icplx * npw * dp
    call gpu_data_prefetch_async(C_LOC(l_pcon), l_pcon_size_bytes)
@@ -277,7 +277,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%use_gpu_impl==666)
+ !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%use_gpu_impl==ABI_GPU_OPENMP)
 #endif
 
 !Trick with C is to change rank of arrays (:) to (:,:)
@@ -350,7 +350,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call chebfi_free(chebfi)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid) IF(gs_hamk%use_gpu_impl==666)
+ !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid) IF(gs_hamk%use_gpu_impl==ABI_GPU_OPENMP)
 #endif
 !################    SORRY IT'S ALREADY FINISHED : )  #################
 !######################################################################
@@ -431,7 +431,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
  if(l_istwf == 2) then
    call xgBlock_scale(X,inv_sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
-   if(l_gs_hamk%use_gpu_impl==666) then
+   if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -469,7 +469,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  ABI_FREE(l_gvnlxc)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- !if (chebfi%use_gpu_cuda==1) then
+ !if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
    call gpu_device_synchronize()
  !end if
 #endif
@@ -480,7 +480,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
    call xgBlock_scale(X,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
    call xgBlock_scale(AX,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
 
-   if(l_gs_hamk%use_gpu_impl==666) then
+   if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -517,7 +517,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
    end if
    if(l_paw) then
      call xgBlock_scale(BX,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
-     if(l_gs_hamk%use_gpu_impl==666) then
+     if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
          if(l_mpi_enreg%me_g0 == 1) then
@@ -599,7 +599,7 @@ subroutine getBm1X(X,Bm1X,transposer)
  !scale back cg
  if(l_istwf == 2) then
    call xgBlock_scale(X,inv_sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
-   if(l_gs_hamk%use_gpu_impl==666) then
+   if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0 ) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -627,7 +627,7 @@ subroutine getBm1X(X,Bm1X,transposer)
 
    if(l_paw) then
      call xgBlock_scale(Bm1X,inv_sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
-     if(l_gs_hamk%use_gpu_impl==666) then
+     if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
          if(l_mpi_enreg%me_g0 == 1) then
@@ -657,7 +657,7 @@ subroutine getBm1X(X,Bm1X,transposer)
  end if
 
  if(l_paw) then
-   if(l_gs_hamk%use_gpu_impl==666) then
+   if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
      ABI_MALLOC(cwaveprj_next, (1,1))
      call pawcprj_alloc(cwaveprj_next,0,(/1/))
    else
@@ -676,7 +676,7 @@ subroutine getBm1X(X,Bm1X,transposer)
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
    call xgBlock_scale(X,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
-   if(l_gs_hamk%use_gpu_impl==666) then
+   if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -706,7 +706,7 @@ subroutine getBm1X(X,Bm1X,transposer)
 
    if(l_paw) then
      call xgBlock_scale(Bm1X,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
-     if(l_gs_hamk%use_gpu_impl==666) then
+     if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
          if(l_mpi_enreg%me_g0 == 1) then

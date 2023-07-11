@@ -667,7 +667,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  integer :: bandpp,ier,ikpt_this_proc,my_nspinor,ndatarecv,nproc_band,npw,nspinortot
  integer :: old_me_g0,spaceComm=0,tim_nonlop
  logical :: do_transpose
- integer :: l_use_gpu_cuda = 0
+ integer :: l_use_gpu_cuda
  !character(len=500) :: msg
 !arrays
  integer,  allocatable :: index_wavef_band(:)
@@ -717,6 +717,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    if(already_transposed) do_transpose = .false.
  end if
 
+ l_use_gpu_cuda=ABI_GPU_DISABLED
  if (present(use_gpu_cuda)) then
     l_use_gpu_cuda = use_gpu_cuda
  end if
@@ -808,7 +809,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    call timab(581,1,tsec)
    if (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-   if (l_use_gpu_cuda == 1) then
+   if (l_use_gpu_cuda == ABI_GPU_KOKKOS) then
 
       ABI_MALLOC_CUDA(cwavef_mpi_c,  INT(2, c_size_t) * npw * my_nspinor * blocksize * dp)
       call c_f_pointer(cwavef_mpi_c, cwavef_mpi, (/2, npw * my_nspinor * blocksize/))
@@ -840,7 +841,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    ! Here, we cheat, and use DCOPY to bypass some compiler's overzealous bound-checking
    ! (ndatarecv*my_nspinor*bandpp might be greater than the declared size of cwavef)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
-    if (l_use_gpu_cuda == 1) then
+    if (l_use_gpu_cuda == ABI_GPU_KOKKOS) then
        call copy_gpu_to_gpu(C_LOC(cwavef_alltoall2), C_LOC(cwavef), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
     else
        call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
@@ -964,7 +965,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  else
    ! TODO check other usages, maybe
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
-    if (l_use_gpu_cuda == 1) then
+    if (l_use_gpu_cuda == ABI_GPU_KOKKOS) then
        call copy_gpu_to_gpu(C_LOC(gsc), C_LOC(gsc_alltoall2), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
     else
        call DCOPY(2*ndatarecv*my_nspinor*bandpp, gsc_alltoall2, 1, gsc, 1)
@@ -1132,7 +1133,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  bandpp     = mpi_enreg%bandpp
  me_fft     = mpi_enreg%me_fft
 
- use_gpu_cuda_=0;if (present(use_gpu_cuda)) use_gpu_cuda_=use_gpu_cuda
+ use_gpu_cuda_=ABI_GPU_DISABLED;if (present(use_gpu_cuda)) use_gpu_cuda_=use_gpu_cuda
 
  if (present(bandfft_kpt_tab)) then
    bandfft_kpt_ptr => bandfft_kpt_tab
@@ -1143,7 +1144,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 
  istwf_k_=istwf_k
  flag_inv_sym = (istwf_k_==2 .and. any(ngfft(7) == [401,402,312,512]))
- if (option_fourwf==0) flag_inv_sym=((flag_inv_sym).and.(use_gpu_cuda_==0))
+ if (option_fourwf==0) flag_inv_sym=((flag_inv_sym).and.(use_gpu_cuda_==ABI_GPU_DISABLED))
 
  if (flag_inv_sym) then
    istwf_k_       = 1
@@ -1199,7 +1200,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 
  call timab(547,1,tsec)
 #if defined HAVE_GPU && defined HAVE_YAKL
- if(use_gpu_cuda_==1) then
+ if(use_gpu_cuda_==ABI_GPU_KOKKOS) then
     ABI_MALLOC(cwavef_mpi,(2,npw_k*blocksize))
 
     call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*blocksize, CPU_DEVICE_ID)
@@ -1322,7 +1323,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  Fourier calculation
 !  -------------------
 !  Cuda version
-   if(use_gpu_cuda_/=0) then
+   if(use_gpu_cuda_/=ABI_GPU_DISABLED) then
      ABI_MALLOC(weight_t,(bandpp))
      do iibandpp=1,bandpp
 !      Compute the index of the band
@@ -1333,7 +1334,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      end do
 !    Accumulate time because it is not done in gpu_fourwf
      call timab(240+tim_fourwf,1,tsec)
-     if(use_gpu_cuda_==1) then
+     if(use_gpu_cuda_==ABI_GPU_LEGACY .or. use_gpu_cuda_==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU_CUDA
        call gpu_fourwf(1,rhoaug,&
 &       cwavef_alltoall1,&
@@ -1342,7 +1343,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
 &       tim_fourwf,weight_t,weight_t)
 #endif
-     else if(use_gpu_cuda_==666) then
+     else if(use_gpu_cuda_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        call ompgpu_fourwf    (1,rhoaug,&
 &       cwavef_alltoall1,&
@@ -1433,7 +1434,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !  Fourier calculation
 !  ------------------------------------------------------------
 !  Cuda version
-   if (use_gpu_cuda_/=0) then
+   if (use_gpu_cuda_/=ABI_GPU_DISABLED) then
      ABI_MALLOC(weight1_t,(bandpp_sym))
      ABI_MALLOC(weight2_t,(bandpp_sym))
      do iibandpp=1,bandpp_sym
@@ -1448,7 +1449,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight2_t(iibandpp) = occ_k(ind_occ2)*wtk/ucvol
      end do
      call timab(240+tim_fourwf,1,tsec)
-     if (use_gpu_cuda_==1) then
+     if (use_gpu_cuda_==ABI_GPU_LEGACY .or. use_gpu_cuda_==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU_CUDA
        call gpu_fourwf(1,rhoaug,&
 &       ewavef_alltoall_sym,&
@@ -1457,7 +1458,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 &       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
 &       tim_fourwf,weight1_t,weight2_t)
 #endif
-     else if (use_gpu_cuda_==666) then
+     else if (use_gpu_cuda_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        call ompgpu_fourwf(1,rhoaug,&
 &       ewavef_alltoall_sym,&
@@ -1515,7 +1516,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      if (option_fourwf==0.and.bandpp>1) then
        ABI_FREE(wfraug_ptr)
      end if
-   end if ! (use_gpu_cuda/=0)
+   end if ! (use_gpu_cuda/=ABI_GPU_DISABLED)
 
 !  ------------------------------------------------------------
 !  We dissociate each wave function in two waves functions

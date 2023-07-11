@@ -2718,7 +2718,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    ABI_BUG(message)
  end if
 
- if (dtset%use_gpu_cuda==1) then
+ if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
    ! temporarily change the number of threads (currently when GPU is enabled we use
    ! OMP_NUM_THREADS=1 except in specific locations; wfconv is one of them)
    write(std_out,*) "Using ", dtset%use_gpu_openmp_threads, " OpenMP threads to perform wfconv"
@@ -3234,7 +3234,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    ABI_FREE(dum)
  end if
 
- if (dtset%use_gpu_cuda==1) then
+ if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
    ! restore OMP_NUM_THREADS=1
    call xomp_set_num_threads(1)
  end if

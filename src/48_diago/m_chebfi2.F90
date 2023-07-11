@@ -623,7 +623,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  ! they are no longer necessary as chebfi_rayleighRitzQuotients can fully run on GPU
  ! it is no longer necessary to issue a data prefetch, data are already present on device
 
-!  if (chebfi%use_gpu_cuda == 1) then
+!  if (chebfi%use_gpu_cuda == ABI_GPU_KOKKOS) then
 ! #if defined(HAVE_GPU_CUDA)
 !    call xgBlock_prefetch_async(chebfi%xXColsRows,  CPU_DEVICE_ID)
 !    call xgBlock_prefetch_async(chebfi%xAXColsRows, CPU_DEVICE_ID)
@@ -743,7 +743,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  if (xmpi_comm_size(chebfi%spacecom) > 1) then
    call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1, chebfi%use_gpu_cuda)    !copy cannot be avoided :(
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-   if (chebfi%use_gpu_cuda==1) then
+   if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
      call gpu_device_synchronize()
    end if
 #endif
@@ -911,7 +911,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  end if
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- if (chebfi%use_gpu_cuda==1) then
+ if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
    call gpu_device_synchronize()
  end if
 #endif
@@ -1127,7 +1127,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1, use_gpu_cuda=chebfi%use_gpu_cuda)    !copy cannot be avoided :(
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-    if (chebfi%use_gpu_cuda==1) then
+    if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
       call gpu_device_synchronize()
     end if
 #endif
@@ -1147,7 +1147,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   call timab(tim_RR_gemm_2,2,tsec)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-  if (chebfi%use_gpu_cuda==1) then
+  if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
     call gpu_device_synchronize()
   end if
 #endif

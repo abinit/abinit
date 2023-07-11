@@ -341,7 +341,7 @@ has_fock=.false.
    ABI_BUG("Fock exchange term calculation not supported in GPU mode")
  end if
 
- if (gs_ham%use_gpu_impl/=666) then
+ if (gs_ham%use_gpu_impl/=ABI_GPU_OPENMP) then
    ABI_BUG('Unexpected value for gs_ham%use_gpu_impl (debugging) ! ')
  end if
 
