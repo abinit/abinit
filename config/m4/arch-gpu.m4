@@ -130,9 +130,11 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 
     # nVidia C compiler
     AC_MSG_CHECKING([for the nVidia C compiler])
-    if test -x "${abi_gpu_cuda_root}/bin/nvcc"; then
-      abi_gpu_cuda_has_cc="yes"
-      NVCC="${abi_gpu_cuda_root}/bin/nvcc"
+    if test "${NVCC}" = ""; then
+      if test -x "${abi_gpu_cuda_root}/bin/nvcc"; then
+        abi_gpu_cuda_has_cc="yes"
+        NVCC="${abi_gpu_cuda_root}/bin/nvcc"
+      fi
     fi
     if test "${NVCC}" = ""; then
       AC_MSG_RESULT([none found])
