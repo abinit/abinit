@@ -953,20 +953,20 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       if ( use_gpu_cuda == 0) then
+       if ( use_gpu_cuda == ABI_GPU_DISABLED) then
          call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
              gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
              gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
              gs_hamk%kg_k, gs_hamk%kpg_k, &
              compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
        !!FIXME signs==1 not handled in CUDA GEMM nonlop
-       !else if ( use_gpu_cuda /= 1) then
+       !else if ( use_gpu_cuda /= ABI_GPU_LEGACY) then
        !  call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
        !      gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
        !      gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
        !      gs_hamk%kg_k, gs_hamk%kpg_k, &
        !      compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
-       else if ( use_gpu_cuda == 666) then
+       else if ( use_gpu_cuda == ABI_GPU_OPENMP) then
          if(mpi_enreg%paral_kgb==0) then
            call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
          else if(gs_hamk%istwf_k==1) then
@@ -1042,10 +1042,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          else
-           ! here we MUST pass option use_gpu_cuda=0, as cwavef here is a host memory buffer
+           ! here we MUST pass option use_gpu_cuda=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
-&           already_transposed=.False.,use_gpu_cuda=0)
+&           already_transposed=.False.,use_gpu_cuda=ABI_GPU_DISABLED)
          end if
          ABI_NVTX_END_RANGE()
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
@@ -1137,7 +1137,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            end if
          end if ! usefock_loc
        end if
-       if ( use_gpu_cuda == 666) then
+       if ( use_gpu_cuda == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
 

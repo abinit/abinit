@@ -1063,7 +1063,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'goprecon',dt%goprecon,4,[0,1,2,3],iout)
 
    ! gpu_devices
-   if (dt%use_gpu_cuda/=0) then
+   if (dt%use_gpu_cuda/=ABI_GPU_DISABLED) then
      if (all(gpu_devices(:)==-2)) then
        gpu_devices(:)=dt%gpu_devices(:)
      else if (any(dt%gpu_devices(:)/=gpu_devices(:))) then
@@ -3285,7 +3285,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! Check for calculations that are not implemented with RMM-DIIS
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
-     ABI_CHECK(dt%use_gpu_cuda == 0, "RMM-DIIS does not support GPUs.")
+     ABI_CHECK(dt%use_gpu_cuda == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
      berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
      ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
    end if
@@ -3693,8 +3693,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  use_gpu_cuda
-!   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gpu_cuda',dt%use_gpu_cuda,3,(/0,1,666/),iout)
-   if (dt%use_gpu_cuda/=0) then
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gpu_cuda',dt%use_gpu_cuda,4, &
+   &        (/ABI_GPU_DISABLED,ABI_GPU_LEGACY,ABI_GPU_OPENMP,ABI_GPU_KOKKOS/),iout)
+   if (dt%use_gpu_cuda/=ABI_GPU_DISABLED) then
      if (dt%nspinor==2) then
        write(msg,'(3a)')&
 &       'Use of GPU is not allowed when nspinor==2 !',ch10,&

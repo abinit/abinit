@@ -339,17 +339,17 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
      ndat = 1
      if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
-     if (dtset%use_gpu_cuda==1)  ndat = mpi_enreg%bandpp
+     if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED)  ndat = mpi_enreg%bandpp
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-     if (dtset%use_gpu_cuda==1) then
+     if (dtset%use_gpu_cuda==ABI_GPU_DISABLED) then
        ! should we use nband_k instead of ndat here ? (PK)
        ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw*ndat,my_nspinor/))
      else
        ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw,my_nspinor/))
      end if
 #else
-     if (dtset%use_gpu_cuda==1) then
+     if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
        ! should we use nband_k instead of ndat here ? (PK)
        ABI_MALLOC(cwavef,(2,dtset%mpw*ndat,my_nspinor))
      else
@@ -420,11 +420,11 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
 #ifdef HAVE_OPENMP_OFFLOAD
            ! With OpenMP GPU, uploading kg_k when paral_kgb==0
-           !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(dtset%use_gpu_cuda==666)
+           !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(dtset%use_gpu_cuda==ABI_GPU_OPENMP)
 #endif
 
            ! treat all bands at once on GPU
-           if (dtset%use_gpu_cuda /= 0) then
+           if (dtset%use_gpu_cuda /= ABI_GPU_DISABLED) then
 
              ABI_MALLOC(weight_t,(nband_k))
 
@@ -500,7 +500,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support.")
                call abi_abort('COLL')
 #endif
-             else if (dtset%use_gpu_cuda == 666) then
+             else if (dtset%use_gpu_cuda == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                call ompgpu_fourwf(1,&     ! cplex
                  &     rhoaug,&        ! denpot
@@ -702,7 +702,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            end if ! use_gpu_cuda
 
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET EXIT DATA MAP(release:kg_k) IF(dtset%use_gpu_cuda==666)
+           !$OMP TARGET EXIT DATA MAP(release:kg_k) IF(dtset%use_gpu_cuda==ABI_GPU_OPENMP)
 #endif
          else !paral_kgb==1
 

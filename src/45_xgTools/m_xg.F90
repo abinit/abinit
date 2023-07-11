@@ -433,13 +433,14 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu = 0
+    l_use_gpu = ABI_GPU_DISABLED
     if (present(use_gpu)) then
       l_use_gpu = use_gpu
     end if
 
     ! MG: Initialize arrays with zero to avoid SIGFPE in xmpi_sum
-    if (l_use_gpu==1) then
+    !FIXME GPU_DISABLED case shouldn't be handled here
+    if (l_use_gpu==ABI_GPU_KOKKOS .or. l_use_gpu==ABI_GPU_DISABLED) then
 #if defined HAVE_GPU && defined HAVE_YAKL
       select case (space)
       case (SPACE_R,SPACE_CR)
@@ -465,7 +466,7 @@ contains
       end select
 #endif
 
-    else if (l_use_gpu==666) then
+    else if (l_use_gpu==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case (space)
@@ -566,7 +567,7 @@ contains
       ABI_WARNING("Ignore some columns, input array to large")
     endif
 
-    if(xg%use_gpu == 666) then
+    if(xg%use_gpu == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case (xg%space)
       case (SPACE_R)
@@ -646,7 +647,7 @@ contains
       ABI_WARNING("Block Ignore some columns, input array to large")
     endif
 
-    if(xgBlock%use_gpu==666) then
+    if(xgBlock%use_gpu==ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case (xgBlock%space)
       case (SPACE_R)
@@ -755,8 +756,8 @@ contains
     xgBlock%cols = cols
     xgBlock%normal = 'n'
     if ( present(comm) ) xgBlock%spacedim_comm = comm
-    xgBlock%use_gpu = 0
-    if ( xomp_target_is_present(c_loc(array)) ) xgBlock%use_gpu = 666
+    xgBlock%use_gpu = ABI_GPU_DISABLED
+    if ( xomp_target_is_present(c_loc(array)) ) xgBlock%use_gpu = ABI_GPU_OPENMP
 
   end subroutine xgBlock_map
   !!***
@@ -985,7 +986,7 @@ contains
       cptr = getClocR(xg%rows,xg%cols,xg%vecR(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlock%vecR,(/ xgBlock%LDim,cols /))
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xg%use_gpu==666) then
+      if(xg%use_gpu==ABI_GPU_OPENMP) then
         cptr = xomp_get_mapped_ptr(c_loc(xg%vecR(:,fcol:fcol+cols-1)))
         call c_f_pointer(cptr, xgBlock%vecR_gpu, (/ xgBlock%LDim,cols /))
       end if
@@ -994,7 +995,7 @@ contains
       cptr = getClocC(xg%rows,xg%cols,xg%vecC(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlock%vecC,(/ xgBlock%LDim,cols /))
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xg%use_gpu==666) then
+      if(xg%use_gpu==ABI_GPU_OPENMP) then
         cptr = xomp_get_mapped_ptr(c_loc(xg%vecC(:,fcol:fcol+cols-1)))
         call c_f_pointer(cptr, xgBlock%vecC_gpu, (/ xgBlock%LDim,cols /))
       end if
@@ -1039,7 +1040,7 @@ contains
       cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecR,(/ xgBlockB%LDim,cols /))
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xgBlockB%use_gpu==666) then
+      if(xgBlockB%use_gpu==ABI_GPU_OPENMP) then
         cptr = xomp_get_mapped_ptr(c_loc(xgBlockA%vecR(:,fcol:fcol+cols-1)))
         call c_f_pointer(cptr, xgBlockB%vecR_gpu, (/ xgBlockB%LDim,cols /))
       end if
@@ -1048,7 +1049,7 @@ contains
       cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecC,(/ xgBlockB%LDim,cols /))
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xgBlockB%use_gpu==666) then
+      if(xgBlockB%use_gpu==ABI_GPU_OPENMP) then
         cptr = xomp_get_mapped_ptr(c_loc(xgBlockA%vecC(:,fcol:fcol+cols-1)))
         call c_f_pointer(cptr, xgBlockB%vecC_gpu, (/ xgBlockB%LDim,cols /))
       end if
@@ -1067,7 +1068,7 @@ contains
 
     type(xg_t), intent(inout) :: xg
 
-    if(xg%use_gpu==1) then
+    if(xg%use_gpu==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
 
       if ( associated(xg%vecR) ) then
@@ -1079,7 +1080,7 @@ contains
       end if
 
 #endif
-    else if(xg%use_gpu==666) then
+    else if(xg%use_gpu==ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
       if ( allocated(xg%vecR) ) then
@@ -1200,7 +1201,7 @@ contains
     call timab(tim_copy,1,tsec)
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1216,7 +1217,7 @@ contains
     size2 = xgBlockB%LDim*xgBlockB%cols/incy ; if ( size2 * incy < xgBlockB%LDim*xgBlockB%cols ) size2 = size2+1
     size = min(size1,size2)
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -1357,7 +1358,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1378,7 +1379,7 @@ contains
     select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
-      if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+      if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecR, xgBlockA%LDim, &
@@ -1395,10 +1396,10 @@ contains
       end if
 
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
-        if (l_use_gpu_cuda==1) then
+        if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
-        else if (l_use_gpu_cuda==666) then
+        else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
           !FIXME We should avoid that copy using GPU Direct on systems that allow it.
           call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
         end if
@@ -1411,7 +1412,7 @@ contains
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
         call nvtxEndRange() !FIXME Debug only, to be removed
 #endif
-        if (l_use_gpu_cuda==666) then
+        if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
           !Putting data back on GPU
           !FIXME Again, this could be avoided using GPU-direct
           call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
@@ -1420,7 +1421,7 @@ contains
 
     case(SPACE_C)
 
-      if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+      if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
         call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecC, xgBlockA%LDim, &
@@ -1437,15 +1438,15 @@ contains
       end if
 
       if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
-        if (l_use_gpu_cuda==1) then
+        if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
-        else if (l_use_gpu_cuda==666) then
+        else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
           !FIXME We should avoid that copy using GPU Direct on systems that allow it.
           call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
         end if
         call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
-        if (l_use_gpu_cuda==666) then
+        if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
           !Putting data back on GPU
           !FIXME Again, this could be avoided using GPU-direct
           call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
@@ -1483,7 +1484,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1501,7 +1502,7 @@ contains
       K = xgBlockA%rows
     end if
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
       call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
         alpha, &
         xgBlockA%vecC, xgBlockA%LDim, &
@@ -1517,10 +1518,10 @@ contains
         xgBlockW%vecC, xgBlockW%LDim)
     end if
     if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
-      if (l_use_gpu_cuda==1) then
+      if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
         ! CPU waits for GPU to finish before doing MPI communications
         call gpu_device_synchronize()
-      else if (l_use_gpu_cuda==666) then
+      else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
         !FIXME We should avoid that copy using GPU Direct on systems that allow it.
         call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
       end if
@@ -1533,7 +1534,7 @@ contains
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
       call nvtxEndRange()
 #endif
-      if (l_use_gpu_cuda==666) then
+      if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
         !Putting data back on GPU
         !FIXME Again, this could be avoided using GPU-direct
         call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
@@ -1563,7 +1564,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -1572,14 +1573,14 @@ contains
       ABI_ERROR("Matrix should be a square matrixx")
     endif
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xpotrf(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
       case (SPACE_C)
         call abi_gpu_xpotrf(2,uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
       end select
-      if(l_use_gpu_cuda==1) call gpu_device_synchronize()
+      if(l_use_gpu_cuda==ABI_GPU_KOKKOS) call gpu_device_synchronize()
     else
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
@@ -1674,12 +1675,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case(xgBlockA%space)
@@ -1698,7 +1699,7 @@ contains
 
       end select
 
-      if(l_use_gpu_cuda==1) call gpu_device_synchronize()
+      if(l_use_gpu_cuda==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
@@ -2050,12 +2051,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
       select case(xgBlockA%space)
 
@@ -2083,7 +2084,7 @@ contains
 
       end select
 
-      if(l_use_gpu_cuda==1) call gpu_device_synchronize()
+      if(l_use_gpu_cuda==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 
     else
 
@@ -2365,14 +2366,14 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
     calpha = dcmplx(alpha,0.d0)
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xtrsm(1,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
@@ -2425,12 +2426,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda == 1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda == ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
       call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
         alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
     else
@@ -2478,12 +2479,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -2503,7 +2504,7 @@ contains
       call abi_abort('COLL')
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -2579,12 +2580,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -2606,7 +2607,7 @@ contains
       call abi_abort('COLL')
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -2680,12 +2681,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -2705,7 +2706,7 @@ contains
       call abi_abort('COLL')
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -2778,12 +2779,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xaxpy(1, xgBlock1%cols*xgBlock1%LDim, da_cplx, xgBlock2%vecR,1,xgBlock1%vecR,1)
@@ -2832,12 +2833,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
       call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
     else
       call zaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
@@ -2872,12 +2873,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -2976,12 +2977,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -3016,7 +3017,7 @@ contains
       ! input parameter file
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -3100,7 +3101,7 @@ contains
         min_elt = minloc(dot%vecR(1:xgBlock%cols,1),dim=1)
       end if
 
-    end if ! if l_use_gpu_cuda==1
+    end if ! if l_use_gpu_cuda==ABI_GPU_KOKKOS
 
   end subroutine xgBlock_colwiseNorm2
   !!***
@@ -3134,12 +3135,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -3188,7 +3189,7 @@ contains
       ! input parameter file
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case(xgBlockA%space)
@@ -3345,12 +3346,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -3402,7 +3403,7 @@ contains
       ! input parameter file
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -3523,19 +3524,19 @@ contains
     integer         , intent(in   ), optional :: use_gpu_cuda
 
     integer      :: i
-    integer      :: l_use_gpu_cuda = 0
+    integer      :: l_use_gpu_cuda = ABI_GPU_DISABLED
     complex(dpc) :: valc
 
     valc = dcmplx(val,0.0_dp)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1 .or. l_use_gpu_cuda==666) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
         select case(xgBlock%space)
@@ -3604,12 +3605,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
@@ -3632,7 +3633,7 @@ contains
       call abi_abort('COLL')
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
@@ -3820,12 +3821,12 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
 
-    if (l_use_gpu_cuda==1) then
+    if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
 
 #if defined HAVE_GPU
       select case(xgBlock%space)
@@ -3838,7 +3839,7 @@ contains
       end select
 #endif
 
-    else if (l_use_gpu_cuda==666) then
+    else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case(xgBlock%space)
@@ -4061,7 +4062,7 @@ contains
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
-    l_use_gpu_cuda = 0
+    l_use_gpu_cuda = ABI_GPU_DISABLED
     if (present(use_gpu_cuda)) then
       l_use_gpu_cuda = use_gpu_cuda
     end if
@@ -4069,7 +4070,7 @@ contains
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if (l_use_gpu_cuda==666) then
+      if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
         !$OMP TARGET UPDATE FROM(xgBlock%vecR)
       end if
 #endif
@@ -4080,7 +4081,7 @@ contains
       end do
     case (SPACE_C)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if (l_use_gpu_cuda==666) then
+      if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
         !$OMP TARGET UPDATE FROM(xgBlock%vecC)
       end if
 #endif

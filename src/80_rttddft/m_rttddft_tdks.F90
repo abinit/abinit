@@ -548,7 +548,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
                       & dtset%nsppol)
 
  !** Use efficient BLAS calls for computing the non local potential
- if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda/=1) then
+ if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
    ! set global variable
    tdks%gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%nkpt)

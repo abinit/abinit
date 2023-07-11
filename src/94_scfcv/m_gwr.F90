@@ -1359,7 +1359,7 @@ end block
  else
    ! Automatic detection
    gwr%uc_batch_size = 1 * omp_nt
-   if (gwr%dtset%use_gpu_cuda /= 0) gwr%uc_batch_size = 4 * omp_nt
+   if (gwr%dtset%use_gpu_cuda /= ABI_GPU_DISABLED) gwr%uc_batch_size = 4 * omp_nt
  end if
 
  if (gwr%dtset%gwr_ucsc_batch(2) > 0) then
@@ -1368,7 +1368,7 @@ end block
  else
    ! Automatic detection
    gwr%sc_batch_size = 1 * omp_nt
-   if (gwr%dtset%use_gpu_cuda /= 0) gwr%sc_batch_size = 4 * omp_nt
+   if (gwr%dtset%use_gpu_cuda /= ABI_GPU_DISABLED) gwr%sc_batch_size = 4 * omp_nt
  end if
 
  ! Make sure all procs agree.

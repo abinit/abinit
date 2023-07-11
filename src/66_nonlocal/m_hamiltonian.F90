@@ -653,7 +653,7 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
  if (associated(Ham%fockbz)) nullify(Ham%fockbz)
 #if defined HAVE_GPU_CUDA
- if(Ham%use_gpu_impl==1) then
+ if(Ham%use_gpu_impl==ABI_GPU_LEGACY .or. Ham%use_gpu_impl==ABI_GPU_KOKKOS) then
    call gpu_finalize_ham_data()
  end if
 #endif
@@ -813,7 +813,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%usepaw     =psps%usepaw
  ham%ucvol      =ucvol
  ham%useylm     =psps%useylm
- ham%use_gpu_impl=0 ; if(PRESENT(use_gpu_impl)) ham%use_gpu_impl=use_gpu_impl
+ ham%use_gpu_impl=ABI_GPU_DISABLED ; if(PRESENT(use_gpu_impl)) ham%use_gpu_impl=use_gpu_impl
 
  ham%pspso(:)   =psps%pspso(1:psps%ntypat)
  if (psps%usepaw==1) then
@@ -876,7 +876,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !  Update enl on GPU (will do it later for PAW)
 #if defined HAVE_GPU_CUDA
-   if (ham%use_gpu_impl==1) then
+   if (ham%use_gpu_impl==ABI_GPU_LEGACY .or. ham%use_gpu_impl==ABI_GPU_KOKKOS) then
      call gpu_update_ham_data(&
        & ham%ekb(:,:,:,1), INT(size(ham%ekb),   c_int64_t), &
        & ham%sij,          INT(size(ham%sij),   c_int64_t), &
@@ -1485,7 +1485,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
 
  ! Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
- if (Ham%use_gpu_impl==1) then
+ if (Ham%use_gpu_impl==ABI_GPU_LEGACY .or. Ham%use_gpu_impl==ABI_GPU_KOKKOS) then
    call gpu_update_ham_data(&
      & Ham%ekb(:,:,:,1), INT(size(Ham%ekb),   c_int64_t), &
      & Ham%sij,          INT(size(Ham%sij),   c_int64_t), &
