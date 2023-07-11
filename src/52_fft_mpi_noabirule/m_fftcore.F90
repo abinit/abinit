@@ -1194,7 +1194,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
  end if
 
  if (present(use_gpu_cuda)) then
-   if (use_gpu_cuda/=0) then
+   if (use_gpu_cuda/=ABI_GPU_DISABLED) then
      ngfft(4)=ngfft(1)
      ngfft(5)=ngfft(2)
      ngfft(6)=ngfft(3)

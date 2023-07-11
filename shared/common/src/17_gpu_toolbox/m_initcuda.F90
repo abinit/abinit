@@ -284,7 +284,7 @@ end subroutine Get_Mem_Dev
 !!                  if set to 5*-1, will choose the devices by order of performances.
 !!
 !! SIDE EFFECTS
-!!  use_gpu_cuda= 1 if CUDA is on; will be set to 0 if no GPU device is free.
+!!  use_gpu_cuda= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
 !!
 !! SOURCE
 
@@ -310,7 +310,7 @@ end subroutine Get_Mem_Dev
  integer,allocatable :: fastest_devices(:)
 ! *********************************************************************
 
- if (use_gpu_cuda==0) return
+ if (use_gpu_cuda==ABI_GPU_DISABLED) return
 
  nproc=xmpi_comm_size(xmpi_world)
  me=xmpi_comm_rank(xmpi_world)
@@ -336,11 +336,7 @@ end subroutine Get_Mem_Dev
    end if
 
    ! Initialize Kokkos and YAKL if requested
-   ! FIXME For now, we init Kokkos and YAKL if ABINIT is built with them
-   ! and use_gpu_cuda==1.
-   ! Extra variables (dtset%use_kokkos) or values should be used for a clever
-   ! behaviour
-   if(use_gpu_cuda==1) then
+   if(use_gpu_cuda==ABI_GPU_KOKKOS .or. use_gpu_cuda==ABI_GPU_LEGACY) then
 #ifdef HAVE_KOKKOS
      ! initialize kokkos
      if (xmpi_comm_rank(xmpi_world) == 0) then
@@ -361,7 +357,7 @@ end subroutine Get_Mem_Dev
 
    call set_dev(device)
    call check_context(nb_devices,msg)
-   if(use_gpu_cuda==666) then
+   if(use_gpu_cuda==ABI_GPU_OPENMP) then
      call xomp_set_default_device(device)
    end if
    if(nb_devices==1) then !allocation succeed
@@ -386,7 +382,7 @@ end subroutine Get_Mem_Dev
    call InitGPU(gpuinfo,device)
    call CleanGPU(gpuinfo)
  else
-   use_gpu_cuda=0
+   use_gpu_cuda=ABI_GPU_DISABLED
  end if
 #endif
  end subroutine setdevice_cuda
@@ -414,12 +410,12 @@ end subroutine Get_Mem_Dev
  character(len=500) :: msg
 ! *********************************************************************
 
- if (use_gpu_cuda==0) return
+ if (use_gpu_cuda==ABI_GPU_DISABLED) return
 
 #if defined HAVE_GPU_CUDA
+
  ! Closing YAKL and Kokkos if opened
- ! FIXME use another value for use_gpu_cuda or extra parameters
- if (use_gpu_cuda==1) then
+ if (use_gpu_cuda==ABI_GPU_KOKKOS .or. use_gpu_cuda==ABI_GPU_LEGACY) then
 #ifdef HAVE_YAKL
    call gator_finalize()
    write(std_out,*)'yakl gator finalized'
@@ -432,12 +428,8 @@ end subroutine Get_Mem_Dev
 #endif
  end if
 
-#ifdef HAVE_KOKKOS
  ! kokkos_finalize already reset GPU context
- if (use_gpu_cuda/=1) call unset_dev()
-#else
- call unset_dev()
-#endif
+ if (use_gpu_cuda/=ABI_GPU_KOKKOS) call unset_dev()
 
 #endif
  end subroutine unsetdevice_cuda

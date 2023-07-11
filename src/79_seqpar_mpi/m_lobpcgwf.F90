@@ -195,7 +195,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  end do
 
 #ifdef HAVE_OPENMP_OFFLOAD
- if(gs_hamk%use_gpu_impl==666) then
+ if(gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
    !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid)
  end if
 #endif
@@ -209,7 +209,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    ! This is possible since the memory in cg and xgx0 is the same
    ! Don't know yet how to deal with this with xgBlock
    if(l_mpi_enreg%me_g0 == 1) then
-     if(l_gs_hamk%use_gpu_impl==666) then
+     if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET MAP(to:cg)
        cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
@@ -258,7 +258,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  if(l_istwf == 2) then
    call xgBlock_scale(xgx0,inv_sqrt2,1,use_gpu_cuda=gs_hamk%use_gpu_impl)
    if(l_mpi_enreg%me_g0 == 1) then
-     if(l_gs_hamk%use_gpu_impl==666) then
+     if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET MAP(to:cg)
        cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
@@ -314,7 +314,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  call lobpcg_free(lobpcg)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- if(gs_hamk%use_gpu_impl==666) then
+ if(gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
    !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid)
  end if
 #endif
@@ -375,7 +375,7 @@ end subroutine lobpcgwf2
     !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
     call xgBlock_scale(X,inv_sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
     if(l_mpi_enreg%me_g0 == 1) then
-      if(l_gs_hamk%use_gpu_impl==666) then
+      if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
         !$OMP TARGET MAP(to:cg)
         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
@@ -399,14 +399,14 @@ end subroutine lobpcgwf2
       l_gs_hamk,l_gvnlxc,dum, l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
 
   else
-    if(l_gs_hamk%use_gpu_impl==666) then
+    if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
       !$OMP TARGET UPDATE FROM(cg,ghc,gsc)
 #endif
     end if
     call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlxc,ghc,gsc(:,1:blockdim*spacedim),dum,blockdim,l_mpi_enreg,&
 &                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)
-    if(l_gs_hamk%use_gpu_impl==666) then
+    if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
       !$OMP TARGET UPDATE TO(cg,ghc,gsc)
 #endif
@@ -420,7 +420,7 @@ end subroutine lobpcgwf2
     call xgBlock_scale(X,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
     call xgBlock_scale(AX,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
     if(l_mpi_enreg%me_g0 == 1) then
-      if(l_gs_hamk%use_gpu_impl==666) then
+      if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
         !$OMP TARGET MAP(to:cg)
         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
@@ -436,7 +436,7 @@ end subroutine lobpcgwf2
       !gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
       call xgBlock_scale(BX,sqrt2,1,use_gpu_cuda=l_gs_hamk%use_gpu_impl)
       if(l_mpi_enreg%me_g0 == 1) then
-        if(l_gs_hamk%use_gpu_impl==666) then
+        if(l_gs_hamk%use_gpu_impl==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
           !$OMP TARGET MAP(to:cg)
           gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2

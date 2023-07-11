@@ -228,7 +228,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
  DBG_ENTER("COLL")
 
- if(gs_ham%use_gpu_impl==666) then
+ if(gs_ham%use_gpu_impl==ABI_GPU_OPENMP) then
    call getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,ndat,&
                   prtvol,sij_opt,tim_getghc,type_calc,&
                   kg_fft_k,kg_fft_kp,select_k,cwavef_r)
@@ -837,18 +837,16 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
+   if (gs_ham%use_gpu_impl == ABI_GPU_KOKKOS) then
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-   if (gs_ham%use_gpu_impl == 1) then
      call assemble_energy_contribution_kokkos(c_loc(ghc), &
        & c_loc(gsc), c_loc(kinpw_k2), c_loc(cwavef), c_loc(gvnlxc_), &
        & ndat, my_nspinor, npw_k2, sij_opt, k1_eq_k2, hugevalue)
      ! sync device so that data can be reused safely on host
      ! will probably be moved elsewhere once all the scf loop runs on device
      call gpu_device_synchronize()
-   end if
 #endif
-
-   if (gs_ham%use_gpu_impl /= ABI_GPU_KOKKOS) then
+   else
      !  Assemble modified kinetic, local and nonlocal contributions
      !  to <G|H|C(n,k)>. Take also into account build-in debugging.
      if(prtvol/=-level)then
@@ -940,7 +938,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
          end do ! ispinor
        end do ! idat
      end if
-   end if ! gs_ham%use_gpu_impl == 0
+   end if ! gs_ham%use_gpu_impl
    ABI_NVTX_END_RANGE()
 
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
@@ -1785,10 +1783,10 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  !$omp parallel default (none) &
  !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt,firstprj,lastprj,is_nested,usegvnlxc), &
  !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
- !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) IF(gs_ham%use_gpu_impl==0)
+ !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) IF(gs_ham%use_gpu_impl==ABI_GPU_DISABLED)
  ithread = 0
  nthreads = 1
- if(gs_ham%use_gpu_impl/=666) then
+ if(gs_ham%use_gpu_impl/=ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP
    ithread = omp_get_thread_num()
    nthreads = omp_get_num_threads()
@@ -1856,7 +1854,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
      end if
    end if
  end if
- if(gs_ham%use_gpu_impl/=666) then
+ if(gs_ham%use_gpu_impl/=ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP
   ! call omp_set_nested(is_nested)
   !Restore libs behavior (mkl, openblas, fftw3, ...)

@@ -563,8 +563,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 
 !GPU information
- use_gpu_cuda=0
- dtsets(:)%use_gpu_cuda=0
+ use_gpu_cuda=ABI_GPU_DISABLED
+ dtsets(:)%use_gpu_cuda=ABI_GPU_DISABLED
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
  call Get_ndevice(ii)
  if (ii>0) then
@@ -577,7 +577,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda/=0) use_gpu_cuda=1
+   if (dtsets(idtset)%use_gpu_cuda/=ABI_GPU_DISABLED) use_gpu_cuda=ABI_GPU_LEGACY
 end do
 
  dtsets(:)%use_nvtx=0
@@ -609,7 +609,7 @@ end do
  end do
 #endif
 
- if (use_gpu_cuda/=0) then
+ if (use_gpu_cuda/=ABI_GPU_DISABLED) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
      write(msg,'(5a)')&
@@ -2199,9 +2199,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
    if (dtsets(idtset)%use_gpu_cuda==-1) then
      if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
-       dtsets(idtset)%use_gpu_cuda=0
+       dtsets(idtset)%use_gpu_cuda=ABI_GPU_DISABLED
      else
-       dtsets(idtset)%use_gpu_cuda=1
+       dtsets(idtset)%use_gpu_cuda=ABI_GPU_LEGACY
      end if
   end if
 
