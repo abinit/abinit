@@ -66,7 +66,7 @@
  nshiftq  1
  shiftq   0.0 0.0 0.0
  elph2_imagden 0.1 eV
- rfasr   1
+#rfasr   1
 # Miscellaneous
  ntypat  1
  znucl 6

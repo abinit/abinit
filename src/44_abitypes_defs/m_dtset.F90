@@ -1933,7 +1933,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rectesteg          = dtin%rectesteg
  dtout%rcut               = dtin%rcut
  dtout%restartxf          = dtin%restartxf
- dtout%rfasr              = dtin%rfasr
  dtout%rfddk              = dtin%rfddk
  dtout%rfelfd             = dtin%rfelfd
  dtout%rfmagn             = dtin%rfmagn
