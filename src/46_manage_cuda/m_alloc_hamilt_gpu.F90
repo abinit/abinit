@@ -171,8 +171,8 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
      &                   dimekb1_max,&
      &                   dimekb2_max)
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
-   if (dtset%use_gpu_cuda == ABI_GPU_KOKKOS .and. dtset%use_gemm_nonlop == 1) then
+   if ((use_gpu_cuda == ABI_GPU_KOKKOS .or. use_gpu_cuda == ABI_GPU_LEGACY) &
+     &  .and. dtset%use_gemm_nonlop == 1) then
 
      call alloc_nonlop_kokkos(dtset, &
        &                      psps, &
@@ -183,8 +183,6 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
        &                      use_gpu_cuda)
 
    end if
-
-#endif
 
  end if ! option 1 or 2
 
@@ -242,11 +240,7 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 
    if (option==1.or.option==2) then
      call free_nonlop_gpu()
-#if defined(HAVE_KOKKOS)
-     if (use_gpu_cuda == ABI_GPU_KOKKOS) then
-       call dealloc_nonlop_kokkos()
-     end if
-#endif
+     call dealloc_nonlop_kokkos()
    end if ! option 1 or 2
 
  end if
