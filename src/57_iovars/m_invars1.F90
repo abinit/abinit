@@ -2156,6 +2156,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%adpimd=0
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
+   dtsets(idtset)%asr=1
    dtsets(idtset)%atvshift(:,:,:)=zero
    dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
@@ -2185,6 +2186,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
+   dtsets(idtset)%chneut=1      
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
    dtsets(idtset)%cprj_update_lvl=0
@@ -2584,7 +2586,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rectolden=zero
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
-   dtsets(idtset)%rfasr=0
+!  dtsets(idtset)%rfasr=0
    dtsets(idtset)%rfatpol(1:2)=-1
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=1
