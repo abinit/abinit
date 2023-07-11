@@ -2349,14 +2349,14 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  !end if
 
 !Cuda version of fourwf
- use_gpu_cuda_=0
+ use_gpu_cuda_=ABI_GPU_DISABLED
  if (PRESENT(use_gpu_cuda)) use_gpu_cuda_=use_gpu_cuda
 
  if(option==1) then
    weight_array_r(:)=weight_r
    weight_array_i(:)=weight_i
  end if
- if(use_gpu_cuda_==1) then
+ if(use_gpu_cuda_==ABI_GPU_LEGACY .or. use_gpu_cuda_==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU_CUDA
    call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
@@ -2364,7 +2364,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !  &  use_ndo,fofginb)
 #endif
    call timab(840+tim_fourwf,2,tsec); return
- else if(use_gpu_cuda_==666) then
+ else if(use_gpu_cuda_==ABI_GPU_OPENMP) then
    call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
      weight_array_r,weight_array_i)

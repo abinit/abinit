@@ -441,19 +441,21 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! Not enabled by default for CPU and CUDA implementations
  ! Enabled if using OpenMP GPU offload
  gemm_nonlop_use_gemm = .false.
- ! CUDA case
- if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda ==1 ) then
-   gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
-   call init_gemm_nonlop_gpu(dtset%nkpt)
- ! OpenMP GPU offload case
- else if(dtset%use_gpu_cuda == 666) then
+
+ ! OpenMP GPU offload case (GEMM nonlop used by default)
+ if(dtset%use_gpu_cuda == ABI_GPU_OPENMP) then
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop_ompgpu(dtset%nkpt)
- ! CPU case
  else if(dtset%use_gemm_nonlop == 1) then
    gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
+   ! CUDA & Kokkos case (same routine used)
+   if(dtset%use_gpu_cuda == ABI_GPU_LEGACY .or. dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
+     call init_gemm_nonlop(dtset%nkpt)
+     call init_gemm_nonlop_gpu(dtset%nkpt)
+   ! CPU case
+   else if(dtset%use_gpu_cuda == ABI_GPU_DISABLED) then
+     call init_gemm_nonlop(dtset%nkpt)
+   end if
  end if
 
  if(dtset%use_kokkos == 1) then
@@ -997,7 +999,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Here allocation of GPU for vtorho calculations
 #if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
+ if (dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
    call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%use_gpu_cuda)
  end if
 #endif
@@ -1797,20 +1799,21 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
  end if
 
- if(dtset%use_gpu_cuda == 666) then
-   call destroy_gemm_nonlop_ompgpu()
-   gemm_nonlop_use_gemm = .false.
- else if(gemm_nonlop_use_gemm) then
-   if(dtset%use_gpu_cuda==1) then
+ if(gemm_nonlop_use_gemm) then
+   if(dtset%use_gpu_cuda == ABI_GPU_OPENMP) then
+     call destroy_gemm_nonlop_ompgpu()
+   else if(dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
      call destroy_gemm_nonlop_gpu(dtset%nkpt)
+     call destroy_gemm_nonlop(dtset%nkpt)
+   else if(dtset%use_gpu_cuda==ABI_GPU_DISABLED) then
+     call destroy_gemm_nonlop(dtset%nkpt)
    end if
-   call destroy_gemm_nonlop(dtset%nkpt)
    gemm_nonlop_use_gemm = .false.
  end if
 
 !Eventually clean cuda runtime
 #if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
+ if (dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
    call dealloc_hamilt_gpu(2,dtset%use_gpu_cuda)
  end if
 #endif

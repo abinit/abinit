@@ -20,7 +20,7 @@
 
 module m_xgScalapack
 
-  use defs_basis, only : std_err, std_out, dp
+  use defs_basis, only : std_err, std_out, dp, ABI_GPU_DISABLED, ABI_GPU_OPENMP
   use m_abicore
   use m_xmpi
   use m_errors
@@ -284,7 +284,7 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_heev,1,tsec)
 
-    l_use_gpu=0
+    l_use_gpu=ABI_GPU_DISABLED
     if (present(use_gpu)) then
       l_use_gpu = use_gpu
     end if
@@ -307,7 +307,7 @@ module m_xgScalapack
 
       call xgBlock_getSize(matrixA,nbli_global,nbco_global)
 
-      if(l_use_gpu==666) then
+      if(l_use_gpu==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(matrixA)
         call xgBlock_copy_from_gpu(eigenvalues)
       end if
@@ -337,7 +337,7 @@ module m_xgScalapack
     end if
 #endif
 
-    if(l_use_gpu==666) then
+    if(l_use_gpu==ABI_GPU_OPENMP) then
       call xgBlock_copy_to_gpu(matrixA)
       call xgBlock_copy_to_gpu(eigenvalues)
     end if
@@ -377,7 +377,7 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_hegv,1,tsec)
 
-    l_use_gpu=0
+    l_use_gpu=ABI_GPU_DISABLED
     if (present(use_gpu)) then
       l_use_gpu = use_gpu
     end if
@@ -404,7 +404,7 @@ module m_xgScalapack
 
       call xgBlock_getSize(matrixA,nbli_global,nbco_global)
 
-      if(l_use_gpu==666) then
+      if(l_use_gpu==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(matrixA)
         call xgBlock_copy_from_gpu(matrixB)
         call xgBlock_copy_from_gpu(eigenvalues)
@@ -435,7 +435,7 @@ module m_xgScalapack
     end if
 #endif
 
-    if(l_use_gpu==666) then
+    if(l_use_gpu==ABI_GPU_OPENMP) then
       call xgBlock_copy_to_gpu(matrixA)
       call xgBlock_copy_to_gpu(eigenvalues)
     end if

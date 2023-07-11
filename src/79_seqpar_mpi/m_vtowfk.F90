@@ -242,7 +242,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(pawcprj_type),pointer :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cprj_cwavef_bands(:,:),cprj_cwavef(:,:)
 
- real(dp), allocatable :: weight_t(:) ! only allocated and used when use_gpu_cuda = 1
+ real(dp), allocatable :: weight_t(:) ! only allocated and used with GPU fourwf
 
 
 ! **********************************************************************
@@ -789,7 +789,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      if (fixed_occ .and. mpi_enreg%paral_kgb/=1) then
 
        ! treat all bands at once on GPU
-       if (dtset%use_gpu_cuda == 1) then
+       if (dtset%use_gpu_cuda == ABI_GPU_LEGACY .or. dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 
          ABI_MALLOC(weight_t,(blocksize))
 
@@ -825,9 +825,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            &     tim_fourwf,&          ! tim_fourwf
            &     weight_t,&            ! weight_r
            &     weight_t)             ! weight_i
-#else
-             call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support.")
-             call abi_abort('COLL')
 #endif
 
              if (dtset%nspinor==2) then
@@ -904,7 +901,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            end if
          end do  ! Loop inside a block of bands
 
-       end if ! dtset%use_gpu_cuda == 1
+       end if ! dtset%use_gpu_cuda
 
 !      In case of fixed occupation numbers,in bandFFT mode accumulates the partial density
      else if (fixed_occ .and. mpi_enreg%paral_kgb==1) then

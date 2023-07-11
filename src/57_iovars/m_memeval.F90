@@ -608,7 +608,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  end if
 
 !Additional information if GPU
- if (use_gpu_cuda/=0) then
+ if (use_gpu_cuda/=ABI_GPU_DISABLED) then
 !  write(msg, '(a)' )' GPU method is used'
 !  call wrtout(iout,msg)
 !  call wrtout(std_out,msg)
@@ -1947,7 +1947,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
    ABI_BUG(msg)
  end if
 
- firstchar=' ';if (use_gpu_cuda/=0) firstchar='_'
+ firstchar=' ';if (use_gpu_cuda/=ABI_GPU_DISABLED) firstchar='_'
  cmpw(:)=zero ; cfft(:)=zero ; cadd(:)=zero
  dttyp(:)=0
 

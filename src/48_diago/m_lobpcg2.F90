@@ -12,7 +12,7 @@ module m_lobpcg2
 
   use m_xg
   use m_xgScalapack
-  use defs_basis, only : std_err, std_out
+  use defs_basis
   use m_abicore
   use m_errors
   use m_xomp
@@ -452,7 +452,7 @@ module m_lobpcg2
           write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
             "(",minResidu,",",maxResidu, ") for eigen vectors (", &
             eigResiduMin,",",eigResiduMax,")"
-          if(lobpcg%use_gpu_cuda==666) call xgBlock_copy_from_gpu(residuBlock)
+          if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
           call xgBlock_average(residuBlock,average)
           call xgBlock_deviation(residuBlock,deviation)
           write(std_out,'(a,es21.14,a,es21.14)') "Average : ", average, " +/-", deviation
@@ -775,7 +775,7 @@ module m_lobpcg2
       BX = lobpcg%BX
       !eigenSolver = minloc(eigenSolverTime(7:10), dim=1) + 6
       eigenSolver = EIGENEV
-      if(lobpcg%use_gpu_cuda==666) eigenSolver = EIGENEVD
+      if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) eigenSolver = EIGENEVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -792,7 +792,7 @@ module m_lobpcg2
       BWP = lobpcg%BW
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
       eigenSolver = EIGENVX
-      if(lobpcg%use_gpu_cuda==666) eigenSolver = EIGENVD
+      if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) eigenSolver = EIGENVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -809,7 +809,7 @@ module m_lobpcg2
       BWP = lobpcg%BWP
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
         eigenSolver = EIGENVX
-      if(lobpcg%use_gpu_cuda==666) eigenSolver = EIGENVD
+      if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) eigenSolver = EIGENVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -998,9 +998,9 @@ module m_lobpcg2
 
       if ( var /= VAR_X ) then
         ! Cost to pay to avoid temporary array in xgemm
-        if(lobpcg%use_gpu_cuda==666) call xgBlock_copy_from_gpu(vec%self) !FIXME Avoid that transfer
+        if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(vec%self) !FIXME Avoid that transfer
         call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
-        if(lobpcg%use_gpu_cuda==666) call xgBlock_copy_to_gpu(vec%self) !FIXME Avoid that transfer
+        if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) call xgBlock_copy_to_gpu(vec%self) !FIXME Avoid that transfer
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
 
         !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
