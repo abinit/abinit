@@ -697,6 +697,14 @@ SD_WANNIER90_INIT([optional warn], [-lwannier90])
 #SD_XMLF90_INIT([optional fail])
 SD_XMLF90_INIT([optional warn])
 
+# Init KOKKOS
+SD_KOKKOS_INIT([optional fail])
+#SD_KOKKOS_INIT([optional warn])
+
+# Init YAKL
+SD_YAKL_INIT([optional fail])
+#SD_YAKL_INIT([optional warn])
+
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
@@ -870,6 +878,12 @@ SD_WANNIER90_DETECT
 
 # AtomPAW integration support
 ABI_CHECK_ATOMPAW_BINS
+
+# KOKKOS library support
+SD_KOKKOS_DETECT
+
+# YAKL library support
+SD_YAKL_DETECT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
