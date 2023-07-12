@@ -941,7 +941,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1504)='fock_getghc                     '; !1504 = 1505 + 1506 + 1507 
  names(1505)='fock_getghc(init)               '; ! 100 % nested inside 1504
  names(1506)='fock_getghc-kmu_loop            '; ! 100 % nested inside 1504, 1506 = 1521+ ... 1528
- names(1507)='fock_getghc(calc_ghc)           '; ! 100 % nested inside 1504
+ names(1507)='fock_getghc(post-k)             '; ! 100 % nested inside 1504
  names(1512)='fock_getghc(fourwf)             ' 
  names(1513)='fock_getghc(fourdp)             ' 
  names(1514)='fock_getghc(nonlop)             ' 
@@ -963,7 +963,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1544)='fock_getghc(calc_rhog_munu wo fo'; !related to 1524  
  names(1545)='fock_getghc(calc_vloc wo fourXX)'; !related to 1525  
  names(1546)='fock_getghc(calc_dij_fock_hat wo'; !related to 1526
- names(1547)='fock_getghc(calc_ghc wo fourXX  '; !related to 1507
+ names(1547)='fock_getghc(post-k wo fourXX+MPI'; !related to 1507
+ names(1548)='fock_getghc(post-k xmpi_sum)    '; !related to 1507
 
 
  names(1560)='fock2ACE                        '
@@ -1787,8 +1788,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(54)
          list(:11)=(/1504,1505,(ii,ii=1521,1528,1),1507/)            ; msg='fock_getghc small blocs'
        case(55)
-         list(:14)=(/1504,1512,1513,1514,1541,1521,1542,1523,1544,1545,1546,1527,1528,1547/) 
-                                                                       msg='fock_getghc small blocs + fourXX and nonlop '
+         list(:15)=(/1504,1512,1513,1514,1541,1521,1542,1523,1544,1545,1546,1527,1528,1547,1548/) 
+             msg='fock_getghc small blocs + fourXX,  nonlop, xmpi_sum '
        case(60)
          list(:13)=(/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
        case(61)
