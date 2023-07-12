@@ -1359,7 +1359,7 @@ tolerances: {tolwfr: 3.00E-22, }
 
  ==> Compute Derivative Database <==
  Effective charge tensors after 
- imposition of the charge neutrality (if requested by user) (if requested by user),
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.511863E+00   -3.908707E-16    3.063722E-16
@@ -1693,7 +1693,7 @@ tolerances: {tolwfr: 3.00E-22, }
 
  ==> Compute Derivative Database <==
  Effective charge tensors after 
- imposition of the charge neutrality (if requested by user) (if requested by user),
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.511863E+00    4.183489E-16    4.139314E-16
