@@ -255,25 +255,27 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    if (.not.local_gvnlxc) gvnlxc_alltoall1(:,:)=zero
  end if
 
+ if(gs_hamk%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_MALLOC_MANAGED(cwavef_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
- ABI_MALLOC_MANAGED(gwavef_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
- ABI_MALLOC_MANAGED(swavef_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
- if (local_gvnlxc) then
-   ABI_MALLOC_MANAGED(gvnlxc_alltoall2,(/0,0/))
- else
-   ABI_MALLOC_MANAGED(gvnlxc_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
- end if
-#else
- ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_MALLOC(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- ABI_MALLOC(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- if (local_gvnlxc) then
-   ABI_MALLOC(gvnlxc_alltoall2,(0,0))
- else
-   ABI_MALLOC(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
- end if
+   ABI_MALLOC_MANAGED(cwavef_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
+   ABI_MALLOC_MANAGED(gwavef_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
+   ABI_MALLOC_MANAGED(swavef_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
+   if (local_gvnlxc) then
+     ABI_MALLOC_MANAGED(gvnlxc_alltoall2,(/0,0/))
+   else
+     ABI_MALLOC_MANAGED(gvnlxc_alltoall2,(/2,ndatarecv*my_nspinor*bandpp/))
+   end if
 #endif
+ else
+   ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(gwavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(swavef_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+   if (local_gvnlxc) then
+     ABI_MALLOC(gvnlxc_alltoall2,(0,0))
+   else
+     ABI_MALLOC(gvnlxc_alltoall2,(2,ndatarecv*my_nspinor*bandpp))
+   end if
+ end if
 
  swavef_alltoall2(:,:)=zero
  cwavef_alltoall2(:,:)=zero
@@ -551,17 +553,19 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  ABI_FREE(recvcountsloc)
  ABI_FREE(rdisplsloc)
 
+ if(gs_hamk%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_FREE_MANAGED(cwavef_alltoall2)
- ABI_FREE_MANAGED(gwavef_alltoall2)
- ABI_FREE_MANAGED(gvnlxc_alltoall2)
- ABI_FREE_MANAGED(swavef_alltoall2)
-#else
- ABI_FREE(cwavef_alltoall2)
- ABI_FREE(gwavef_alltoall2)
- ABI_FREE(gvnlxc_alltoall2)
- ABI_FREE(swavef_alltoall2)
+   ABI_FREE_MANAGED(cwavef_alltoall2)
+   ABI_FREE_MANAGED(gwavef_alltoall2)
+   ABI_FREE_MANAGED(gvnlxc_alltoall2)
+   ABI_FREE_MANAGED(swavef_alltoall2)
 #endif
+ else
+   ABI_FREE(cwavef_alltoall2)
+   ABI_FREE(gwavef_alltoall2)
+   ABI_FREE(gvnlxc_alltoall2)
+   ABI_FREE(swavef_alltoall2)
+ end if
 
  if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
 & ((.not.flag_inv_sym) .and. bandpp>1) .or.  flag_inv_sym  ) then
@@ -765,25 +769,27 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  sdispls      => bandfft_kpt(ikpt_this_proc)%sdispls   (:)
  ndatarecv    =  bandfft_kpt(ikpt_this_proc)%ndatarecv
 
+ if(hamk%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_MALLOC_MANAGED(cwavef_alltoall2, (/2,ndatarecv*my_nspinor*bandpp/))
- cwavef_alltoall2_size = 2*ndatarecv*my_nspinor*bandpp*dp
+   ABI_MALLOC_MANAGED(cwavef_alltoall2, (/2,ndatarecv*my_nspinor*bandpp/))
+   cwavef_alltoall2_size = 2*ndatarecv*my_nspinor*bandpp*dp
 
- if (paw_opt >= 0 .and. paw_opt < 3) then
-    gsc_alltoall2 => null()
-    gsc_alltoall2_size = 0
- else
-    ABI_MALLOC_MANAGED(gsc_alltoall2,    (/2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp/))
-    gsc_alltoall2_size = 2*ndatarecv*my_nspinor*(paw_opt/3)*bandpp*dp
- endif
+   if (paw_opt >= 0 .and. paw_opt < 3) then
+      gsc_alltoall2 => null()
+      gsc_alltoall2_size = 0
+   else
+      ABI_MALLOC_MANAGED(gsc_alltoall2,    (/2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp/))
+      gsc_alltoall2_size = 2*ndatarecv*my_nspinor*(paw_opt/3)*bandpp*dp
+   endif
 
- ABI_MALLOC_MANAGED(gvnlc_alltoall2,  (/2,ndatarecv*my_nspinor*bandpp/))
- gvnlc_alltoall2_size = 2*ndatarecv*my_nspinor*bandpp*dp
-#else
- ABI_MALLOC(cwavef_alltoall2, (2,ndatarecv*my_nspinor*bandpp))
- ABI_MALLOC(gsc_alltoall2,    (2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
- ABI_MALLOC(gvnlc_alltoall2,  (2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC_MANAGED(gvnlc_alltoall2,  (/2,ndatarecv*my_nspinor*bandpp/))
+   gvnlc_alltoall2_size = 2*ndatarecv*my_nspinor*bandpp*dp
 #endif
+ else
+   ABI_MALLOC(cwavef_alltoall2, (2,ndatarecv*my_nspinor*bandpp))
+   ABI_MALLOC(gsc_alltoall2,    (2,ndatarecv*my_nspinor*(paw_opt/3)*bandpp))
+   ABI_MALLOC(gvnlc_alltoall2,  (2,ndatarecv*my_nspinor*bandpp))
+ end if
 
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*my_nspinor*bandpp))
@@ -985,17 +991,19 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  ABI_FREE(recvcountsloc)
  ABI_FREE(rdisplsloc)
 
+ if(hamk%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_FREE_MANAGED(cwavef_alltoall2)
- ABI_FREE_MANAGED(gvnlc_alltoall2)
- if (paw_opt >= 3) then
-    ABI_FREE_MANAGED(gsc_alltoall2)
- end if
-#else
- ABI_FREE(cwavef_alltoall2)
- ABI_FREE(gvnlc_alltoall2)
- ABI_FREE(gsc_alltoall2)
+   ABI_FREE_MANAGED(cwavef_alltoall2)
+   ABI_FREE_MANAGED(gvnlc_alltoall2)
+   if (paw_opt >= 3) then
+      ABI_FREE_MANAGED(gsc_alltoall2)
+   end if
 #endif
+ else
+   ABI_FREE(cwavef_alltoall2)
+   ABI_FREE(gvnlc_alltoall2)
+   ABI_FREE(gsc_alltoall2)
+ end if
 
  if(do_transpose .and. (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)))then
    ABI_FREE(cwavef_alltoall1)
@@ -1186,11 +1194,13 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 
  ABI_MALLOC(cwavef_alltoall2,(2,ndatarecv*bandpp))
  if ( ((.not.flag_inv_sym) .and. (bandpp>1) ) .or. flag_inv_sym )then
+   if(use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-    ABI_MALLOC_MANAGED(cwavef_alltoall1,(/2,ndatarecv*bandpp/))
-#else
-    ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*bandpp))
+     ABI_MALLOC_MANAGED(cwavef_alltoall1,(/2,ndatarecv*bandpp/))
 #endif
+   else
+     ABI_MALLOC(cwavef_alltoall1,(2,ndatarecv*bandpp))
+   end if
  end if
 
  recvcountsloc(:)=recvcounts(:)*2*bandpp
@@ -1558,11 +1568,13 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  ABI_FREE(rdisplsloc)
  ABI_FREE(cwavef_alltoall2)
  if ( ((.not.flag_inv_sym) .and. (bandpp>1) ) .or. flag_inv_sym ) then
+   if(use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-    ABI_FREE_MANAGED(cwavef_alltoall1)
-#else
-    ABI_FREE(cwavef_alltoall1)
+     ABI_FREE_MANAGED(cwavef_alltoall1)
 #endif
+   else
+     ABI_FREE(cwavef_alltoall1)
+   end if
  end if
 
 end subroutine prep_fourwf

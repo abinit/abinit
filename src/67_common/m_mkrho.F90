@@ -341,51 +341,55 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
      if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED)  ndat = mpi_enreg%bandpp
 
+     if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     if (dtset%use_gpu_cuda==ABI_GPU_DISABLED) then
-       ! should we use nband_k instead of ndat here ? (PK)
-       ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw*ndat,my_nspinor/))
-     else
-       ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw,my_nspinor/))
-     end if
-#else
-     if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
-       ! should we use nband_k instead of ndat here ? (PK)
-       ABI_MALLOC(cwavef,(2,dtset%mpw*ndat,my_nspinor))
-     else
-       ABI_MALLOC(cwavef,(2,dtset%mpw,my_nspinor))
-     end if
+       if (dtset%use_gpu_cuda==ABI_GPU_DISABLED) then
+         ! should we use nband_k instead of ndat here ? (PK)
+         ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw*ndat,my_nspinor/))
+       else
+         ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw,my_nspinor/))
+       end if
 #endif
+     else
+       if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
+         ! should we use nband_k instead of ndat here ? (PK)
+         ABI_MALLOC(cwavef,(2,dtset%mpw*ndat,my_nspinor))
+       else
+         ABI_MALLOC(cwavef,(2,dtset%mpw,my_nspinor))
+       end if
+     end if
 
+     if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_MALLOC_MANAGED(rhoaug,  (/n4,n5,n6/))
-     ABI_MALLOC_MANAGED(wfraug,  (/2,n4,n5,n6*ndat/))
-     ABI_MALLOC_MANAGED(cwavefb, (/2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor/))
-     if(dtset%nspden==4) then
-       ABI_MALLOC_MANAGED(rhoaug_up,  (/n4,n5,n6/))
-       ABI_MALLOC_MANAGED(rhoaug_down,(/n4,n5,n6/))
-       ABI_MALLOC_MANAGED(rhoaug_mx,  (/n4,n5,n6/))
-       ABI_MALLOC_MANAGED(rhoaug_my,  (/n4,n5,n6/))
-       rhoaug_up(:,:,:)=zero
-       rhoaug_down(:,:,:)=zero
-       rhoaug_mx(:,:,:)=zero
-       rhoaug_my(:,:,:)=zero
-     end if
-#else
-     ABI_MALLOC(rhoaug,  (n4,n5,n6))
-     ABI_MALLOC(wfraug,  (2,n4,n5,n6*ndat))
-     ABI_MALLOC(cwavefb,  (2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
-     if(dtset%nspden==4) then
-       ABI_MALLOC(rhoaug_up,  (n4,n5,n6))
-       ABI_MALLOC(rhoaug_down,(n4,n5,n6))
-       ABI_MALLOC(rhoaug_mx,  (n4,n5,n6))
-       ABI_MALLOC(rhoaug_my,  (n4,n5,n6))
-       rhoaug_up(:,:,:)=zero
-       rhoaug_down(:,:,:)=zero
-       rhoaug_mx(:,:,:)=zero
-       rhoaug_my(:,:,:)=zero
-     end if
+       ABI_MALLOC_MANAGED(rhoaug,  (/n4,n5,n6/))
+       ABI_MALLOC_MANAGED(wfraug,  (/2,n4,n5,n6*ndat/))
+       ABI_MALLOC_MANAGED(cwavefb, (/2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor/))
+       if(dtset%nspden==4) then
+         ABI_MALLOC_MANAGED(rhoaug_up,  (/n4,n5,n6/))
+         ABI_MALLOC_MANAGED(rhoaug_down,(/n4,n5,n6/))
+         ABI_MALLOC_MANAGED(rhoaug_mx,  (/n4,n5,n6/))
+         ABI_MALLOC_MANAGED(rhoaug_my,  (/n4,n5,n6/))
+         rhoaug_up(:,:,:)=zero
+         rhoaug_down(:,:,:)=zero
+         rhoaug_mx(:,:,:)=zero
+         rhoaug_my(:,:,:)=zero
+       end if
 #endif
+     else
+       ABI_MALLOC(rhoaug,  (n4,n5,n6))
+       ABI_MALLOC(wfraug,  (2,n4,n5,n6*ndat))
+       ABI_MALLOC(cwavefb,  (2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
+       if(dtset%nspden==4) then
+         ABI_MALLOC(rhoaug_up,  (n4,n5,n6))
+         ABI_MALLOC(rhoaug_down,(n4,n5,n6))
+         ABI_MALLOC(rhoaug_mx,  (n4,n5,n6))
+         ABI_MALLOC(rhoaug_my,  (n4,n5,n6))
+         rhoaug_up(:,:,:)=zero
+         rhoaug_down(:,:,:)=zero
+         rhoaug_mx(:,:,:)=zero
+         rhoaug_my(:,:,:)=zero
+       end if
+     end if
 
      do isppol=1,dtset%nsppol
        ikg=0
@@ -404,11 +408,13 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          end if
 
          ABI_MALLOC(gbound,(2*dtset%mgfft+8,2))
+         if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-         ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
-#else
-         ABI_MALLOC(kg_k,(3,npw_k))
+           ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
 #endif
+         else
+           ABI_MALLOC(kg_k,(3,npw_k))
+         end if
 
          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
          call sphereboundary(gbound,istwf_k,kg_k,dtset%mgfft,npw_k)
@@ -634,17 +640,19 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                        ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
                        ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
 
+                       if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-                       ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k/))
-                       ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k/))
-                       ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*paw_dmft%use_sc_dmft/))
-                       ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*paw_dmft%use_sc_dmft/))
-#else
-                       ABI_MALLOC(cwavef_x,(2,npw_k))
-                       ABI_MALLOC(cwavef_y,(2,npw_k))
-                       ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
-                       ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
+                         ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*paw_dmft%use_sc_dmft/))
+                         ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*paw_dmft%use_sc_dmft/))
 #endif
+                       else
+                         ABI_MALLOC(cwavef_x,(2,npw_k))
+                         ABI_MALLOC(cwavef_y,(2,npw_k))
+                         ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
+                         ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
+                       end if
 
                        ! $(\Psi^{1}+\Psi^{2})$
                        cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
@@ -677,17 +685,19 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                          &                     use_gpu_cuda=dtset%use_gpu_cuda)
 
 
+                       if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-                       ABI_FREE_MANAGED(cwavef_x)
-                       ABI_FREE_MANAGED(cwavef_y)
-                       ABI_FREE_MANAGED(cwavefb_x)
-                       ABI_FREE_MANAGED(cwavefb_y)
-#else
-                       ABI_FREE(cwavef_x)
-                       ABI_FREE(cwavef_y)
-                       ABI_FREE(cwavefb_x)
-                       ABI_FREE(cwavefb_y)
+                         ABI_FREE_MANAGED(cwavef_x)
+                         ABI_FREE_MANAGED(cwavef_y)
+                         ABI_FREE_MANAGED(cwavefb_x)
+                         ABI_FREE_MANAGED(cwavefb_y)
 #endif
+                       else
+                         ABI_FREE(cwavef_x)
+                         ABI_FREE(cwavef_y)
+                         ABI_FREE(cwavefb_x)
+                         ABI_FREE(cwavefb_y)
+                       end if
 
                      end if ! dtset%nspden/=4
                    end if
@@ -713,17 +723,19 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            nbdblock=nband_k/(mpi_enreg%nproc_band * mpi_enreg%bandpp)
            blocksize=nband_k/nbdblock
 
+           if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-           if(associated(cwavef))  then
-             ABI_FREE_MANAGED(cwavef)
-           end if
-           ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*blocksize,dtset%nspinor/))
-#else
-           if(allocated(cwavef))  then
-             ABI_FREE(cwavef)
-           end if
-           ABI_MALLOC(cwavef,(2,npw_k*blocksize,dtset%nspinor))
+             if(associated(cwavef))  then
+               ABI_FREE_MANAGED(cwavef)
+             end if
+             ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*blocksize,dtset%nspinor/))
 #endif
+           else
+             if(allocated(cwavef))  then
+               ABI_FREE(cwavef)
+             end if
+             ABI_MALLOC(cwavef,(2,npw_k*blocksize,dtset%nspinor))
+           end if
            if(ioption==1)  then
              ABI_MALLOC(kg_k_cart_block,(npw_k))
            end if
@@ -824,13 +836,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end if
                else if(dtset%nspden==4 ) then
 
+                 if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-                 ABI_MALLOC_MANAGED(cwavef_x,(/2,npw_k*blocksize/))
-                 ABI_MALLOC_MANAGED(cwavef_y,(/2,npw_k*blocksize/))
-#else
-                 ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
-                 ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
+                   ABI_MALLOC_MANAGED(cwavef_x,(/2,npw_k*blocksize/))
+                   ABI_MALLOC_MANAGED(cwavef_y,(/2,npw_k*blocksize/))
 #endif
+                 else
+                   ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
+                   ABI_MALLOC(cwavef_y,(2,npw_k*blocksize))
+                 end if
 
                  cwavef_x(:,:)=cwavef(:,:,1)+cwavef(:,:,2)
                  cwavef_y(1,:)=cwavef(1,:,1)+cwavef(2,:,2)
@@ -855,13 +869,15 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end if
                  call timab(538,2,tsec)
 
+                 if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-                 ABI_FREE_MANAGED(cwavef_x)
-                 ABI_FREE_MANAGED(cwavef_y)
-#else
-                 ABI_FREE(cwavef_x)
-                 ABI_FREE(cwavef_y)
+                   ABI_FREE_MANAGED(cwavef_x)
+                   ABI_FREE_MANAGED(cwavef_y)
 #endif
+                 else
+                   ABI_FREE(cwavef_x)
+                   ABI_FREE(cwavef_y)
+                 end if
 
                end if
              end if
@@ -870,26 +886,30 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_FREE(kg_k_cart_block)
            end if
 
+           if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-           if (associated(cwavef))  then
-             ABI_FREE_MANAGED(cwavef)
-           end if
-#else
-           if (allocated(cwavef))  then
-             ABI_FREE(cwavef)
-           end if
+             if (associated(cwavef))  then
+               ABI_FREE_MANAGED(cwavef)
+             end if
 #endif
+           else
+             if (allocated(cwavef))  then
+               ABI_FREE(cwavef)
+             end if
+           end if
 
            ABI_FREE(occ_k)
          end if
 
          ABI_FREE(gbound)
 
+         if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-         ABI_FREE_MANAGED(kg_k)
-#else
-         ABI_FREE(kg_k)
+           ABI_FREE_MANAGED(kg_k)
 #endif
+         else
+           ABI_FREE(kg_k)
+         end if
 
          bdtot_index=bdtot_index+nband_k
 
@@ -927,40 +947,44 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug_my,1)
          ispden=4
          call fftpac(ispden,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,rhor,rhoaug_down,1)
+         if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-         ABI_FREE_MANAGED(rhoaug_up)
-         ABI_FREE_MANAGED(rhoaug_down)
-         ABI_FREE_MANAGED(rhoaug_mx)
-         ABI_FREE_MANAGED(rhoaug_my)
-#else
-         ABI_FREE(rhoaug_up)
-         ABI_FREE(rhoaug_down)
-         ABI_FREE(rhoaug_mx)
-         ABI_FREE(rhoaug_my)
+           ABI_FREE_MANAGED(rhoaug_up)
+           ABI_FREE_MANAGED(rhoaug_down)
+           ABI_FREE_MANAGED(rhoaug_mx)
+           ABI_FREE_MANAGED(rhoaug_my)
 #endif
+         else
+           ABI_FREE(rhoaug_up)
+           ABI_FREE(rhoaug_down)
+           ABI_FREE(rhoaug_mx)
+           ABI_FREE(rhoaug_my)
+         end if
        end if
 
      end do ! isppol
 
+     if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     if(associated(cwavef))  then
-       ABI_FREE_MANAGED(cwavef)
-     end if
-     if(associated(cwavefb))  then
-       ABI_FREE_MANAGED(cwavefb)
-     end if
-     ABI_FREE_MANAGED(rhoaug)
-     ABI_FREE_MANAGED(wfraug)
-#else
-     if(allocated(cwavef))  then
-       ABI_FREE(cwavef)
-     end if
-     if(allocated(cwavefb))  then
-       ABI_FREE(cwavefb)
-     endif
-     ABI_FREE(rhoaug)
-     ABI_FREE(wfraug)
+       if(associated(cwavef))  then
+         ABI_FREE_MANAGED(cwavef)
+       end if
+       if(associated(cwavefb))  then
+         ABI_FREE_MANAGED(cwavefb)
+       end if
+       ABI_FREE_MANAGED(rhoaug)
+       ABI_FREE_MANAGED(wfraug)
 #endif
+     else
+       if(allocated(cwavef))  then
+         ABI_FREE(cwavef)
+       end if
+       if(allocated(cwavefb))  then
+         ABI_FREE(cwavefb)
+       endif
+       ABI_FREE(rhoaug)
+       ABI_FREE(wfraug)
+     end if
 
      if(allocated(cwavef_rot))  then
        ABI_FREE(cwavef_rot)
