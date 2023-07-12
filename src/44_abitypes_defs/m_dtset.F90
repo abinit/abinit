@@ -617,7 +617,6 @@ type, public :: dataset_type
  integer :: ucrpa
  integer :: use_gpu_cuda
  integer :: use_gpu_openmp_threads
- integer :: use_kokkos
  integer :: use_nvtx
  integer :: usedmatpu
  integer :: usedmft
@@ -1983,7 +1982,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
  dtout%use_gpu_openmp_threads = dtin%use_gpu_openmp_threads
  dtout%useextfpmd         = dtin%useextfpmd
- dtout%use_kokkos         = dtin%use_kokkos
  dtout%use_nvtx           = dtin%use_nvtx
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
@@ -3524,7 +3522,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
- list_vars=trim(list_vars)//' use_gpu_cuda use_gpu_openmp_threads use_kokkos use_nvtx'
+ list_vars=trim(list_vars)//' use_gpu_cuda use_gpu_openmp_threads use_nvtx'
  list_vars=trim(list_vars)//' use_slk useextfpmd use_yaml'
  list_vars=trim(list_vars)//' use_oldchi'
 !V
