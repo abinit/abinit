@@ -731,7 +731,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*blocksize,dtset%nspinor/))
 #endif
            else
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+             if(associated(cwavef))  then
+#else
              if(allocated(cwavef))  then
+#endif
                ABI_FREE(cwavef)
              end if
              ABI_MALLOC(cwavef,(2,npw_k*blocksize,dtset%nspinor))
@@ -893,7 +898,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              end if
 #endif
            else
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+             if (associated(cwavef))  then
+#else
              if (allocated(cwavef))  then
+#endif
                ABI_FREE(cwavef)
              end if
            end if
@@ -976,10 +986,20 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        ABI_FREE_MANAGED(wfraug)
 #endif
      else
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+       if(associated(cwavef))  then
+#else
        if(allocated(cwavef))  then
+#endif
          ABI_FREE(cwavef)
        end if
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+       if(associated(cwavefb))  then
+#else
        if(allocated(cwavefb))  then
+#endif
          ABI_FREE(cwavefb)
        endif
        ABI_FREE(rhoaug)
