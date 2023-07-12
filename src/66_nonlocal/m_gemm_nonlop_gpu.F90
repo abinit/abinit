@@ -84,9 +84,6 @@ module m_gemm_nonlop_gpu
 
 #endif
 
- logical, save, public :: gemm_nonlop_use_kokkos = .false.
- ! public variable controlled by dataset variable use_kokkos - probably removed when kokkos version is debuged
-
  !!
  !! GPU interface
  !!
