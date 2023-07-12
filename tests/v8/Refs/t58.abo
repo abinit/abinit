@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 00h57 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h17 )
   
 
 ================================================================================
@@ -54,8 +54,8 @@
 ================================================================================
 
  read the DDB information and perform some checks
- 
- 
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  4.6769830 -8.1007722  0.0000000  G(1)=  0.1069065 -0.0617225  0.0000000
@@ -74,31 +74,31 @@
     7)    0.2654617  0.8522942  0.0464244   O
     8)    0.1477058  0.4131675  0.3797577   O
     9)    0.5868325  0.7345383  0.7130911   O
- 
+
  DDB file with 27 blocks has been read.
- 
+
 ================================================================================
- 
+
  Dielectric Tensor and Effective Charges 
- 
- 
+
+
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
- 
+
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1        0.000093        0.000000
-       1               2        0.000000        0.000000
+       1               2       -0.000000        0.000000
        1               3       -0.000000        0.000000
-       2               1        0.000000        0.000000
+       2               1       -0.000000        0.000000
        2               2        0.000093        0.000000
        2               3        0.000000        0.000000
        3               1        0.000000        0.000000
        3               2        0.000000        0.000000
        3               3        0.000103        0.000000
- 
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
@@ -106,8 +106,8 @@
          1         1    3.492008E+00    2.933762E-01    2.214086E-01
          1         2    2.933762E-01    3.153247E+00    1.278303E-01
          1         3   -2.573498E-01   -1.485810E-01    3.438005E+00
-         2         1    2.983866E+00    0.000000E+00    4.934325E-17
-         2         2    0.000000E+00    3.661389E+00   -2.556606E-01
+         2         1    2.983866E+00    8.595164E-17    4.926017E-17
+         2         2    3.536863E-17    3.661389E+00   -2.556606E-01
          2         3    1.079794E-17    2.971620E-01    3.438005E+00
          3         1    3.492008E+00   -2.933762E-01   -2.214086E-01
          3         2   -2.933762E-01    3.153247E+00    1.278303E-01
@@ -131,12 +131,12 @@
          9         2   -5.258708E-01   -1.918242E+00   -6.309853E-01
          9         3   -4.532677E-01   -6.618662E-01   -1.719003E+00
  Now, the imaginary part of the dynamical matrix is zeroed
- 
+
 ================================================================================
- 
+
  Calculation of the interatomic forces 
- 
--begin at tcpu      0.098  and twall      0.431 sec
+
+-begin at tcpu      0.085  and twall      0.093 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      180
  greater than 80, so only write 20 of them
@@ -160,33 +160,33 @@
  18)  -1.66666667E-01  3.33333333E-01  0.00000000E+00
  19)   0.00000000E+00  5.00000000E-01  0.00000000E+00
  20)   1.66666667E-01  5.00000000E-01  0.00000000E+00
- 
+
  The interatomic forces have been obtained
- 
+
 ================================================================================
- 
+
  Calculation of phonon density of states 
- 
+
  Average speed of sound partial sums:     0.2090212568E-02 (at units)
 -                                   =           4.5727 [km/s]
- 
+
  Debye frequency from partial sums:     0.8854083071E-03 (Ha)
 -                                 =     0.5825706802E+01 (THz)
 -Debye temperature from partial sums:     0.2795894983E+03 (K)
- 
+
  Average speed of sound:     0.1827915833E-02 (at units) 
 -                      =           3.9989 [km/s]
- 
+
  Debye frequency from DOS:     0.7743001300E-03 (Ha) 
 -                        =     0.5094650115E+01 (THz)
 -Debye temperature from DOS:     0.2445043526E+03 (K)
- 
- 
+
+
 ================================================================================
- 
+
  Treat the first list of vectors 
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  5.492334E-04  5.492334E-04
@@ -202,46 +202,46 @@
 -  4.675149E+02  6.754738E+02  6.754738E+02  7.592955E+02  7.771608E+02
 -  7.771608E+02  1.055791E+03  1.055791E+03  1.063124E+03  1.072688E+03
 -  1.141440E+03  1.141440E+03
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -0.0 -1.0  0.0 -1.0
+  3.0 -1.0  0.0 -1.0  0.0 -1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #   6
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   7
         degenerate with vibration mode #   8
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #   9
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  10
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  11
         degenerate with vibration mode #  12
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  13
         degenerate with vibration mode #  14
-  2.0  0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #  15
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  16
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
         degenerate with vibration mode #  21
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
@@ -249,7 +249,7 @@
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
   2.0 -0.0 -1.0 -0.0 -1.0  0.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.16667  0.00000  0.00000
  Phonon energies in Hartree :
    1.873514E-04  2.539296E-04  3.125591E-04  5.639103E-04  6.368646E-04
@@ -271,22 +271,22 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.6139146645E-03
    in SI units K  :            193.85869
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.1964314900E-02
    in units km/s:              4.29731
  Partial Debye temperature for this q and mode:
    in atomic units:     0.8320784217E-03
    in SI units K  :            262.74927
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2417853382E-02
    in units km/s:              5.28952
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1024196083E-02
    in SI units K  :            323.41516
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.00000  0.00000
  Phonon energies in Hartree :
    2.672693E-04  4.658405E-04  5.233894E-04  5.976557E-04  7.847318E-04
@@ -302,7 +302,7 @@
 -  4.834938E+02  6.347136E+02  6.873750E+02  7.665495E+02  7.931993E+02
 -  7.949552E+02  1.052919E+03  1.065143E+03  1.070666E+03  1.139135E+03
 -  1.154905E+03  1.195859E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    2.863159E-04  5.117977E-04  6.370001E-04  6.467080E-04  7.785664E-04
@@ -318,7 +318,7 @@
 -  4.823028E+02  6.251932E+02  6.909681E+02  7.739143E+02  7.925495E+02
 -  7.940183E+02  1.052075E+03  1.065906E+03  1.069797E+03  1.139214E+03
 -  1.165581E+03  1.184340E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.41667  0.16667  0.00000
  Phonon energies in Hartree :
    3.495504E-04  5.395090E-04  6.229938E-04  7.440889E-04  8.207318E-04
@@ -334,7 +334,7 @@
 -  5.108745E+02  5.969306E+02  7.165177E+02  7.751695E+02  7.849819E+02
 -  7.897186E+02  1.051547E+03  1.066264E+03  1.068981E+03  1.144951E+03
 -  1.168112E+03  1.178301E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.33333  0.00000
  Phonon energies in Hartree :
    3.828872E-04  5.860273E-04  5.860273E-04  8.849746E-04  8.849746E-04
@@ -350,7 +350,7 @@
 -  5.544345E+02  5.544345E+02  7.390221E+02  7.760940E+02  7.760940E+02
 -  7.834415E+02  1.051091E+03  1.067403E+03  1.067403E+03  1.154338E+03
 -  1.169434E+03  1.169434E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.00000
  Phonon energies in Hartree :
    3.545004E-04  5.214293E-04  6.162563E-04  7.438141E-04  8.430552E-04
@@ -366,7 +366,7 @@
 -  5.186454E+02  5.919828E+02  7.221784E+02  7.671847E+02  7.883872E+02
 -  7.892340E+02  1.051674E+03  1.066047E+03  1.069070E+03  1.145603E+03
 -  1.163396E+03  1.183020E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.16667  0.16667  0.00000
  Phonon energies in Hartree :
    2.767555E-04  4.145616E-04  5.073154E-04  6.019490E-04  7.492891E-04
@@ -388,22 +388,22 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9597726021E-03
    in SI units K  :            303.07186
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.1964314900E-02
    in units km/s:              4.29731
  Partial Debye temperature for this q and mode:
    in atomic units:     0.8320784217E-03
    in SI units K  :            262.74927
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2417853382E-02
    in units km/s:              5.28952
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1024196083E-02
    in SI units K  :            323.41516
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.08333  0.08333  0.00000
  Phonon energies in Hartree :
    1.582066E-04  2.525238E-04  2.544244E-04  5.647411E-04  6.104740E-04
@@ -425,22 +425,22 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.5986111791E-03
    in SI units K  :            189.02624
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2255638818E-02
    in units km/s:              4.93464
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9554824371E-03
    in SI units K  :            301.71713
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2272614879E-02
    in units km/s:              4.97178
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9626734500E-03
    in SI units K  :            303.98787
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  5.492334E-04  5.492334E-04
@@ -456,46 +456,46 @@
 -  4.675149E+02  6.754738E+02  6.754738E+02  7.592955E+02  7.771608E+02
 -  7.771608E+02  1.055791E+03  1.055791E+03  1.063124E+03  1.072688E+03
 -  1.141440E+03  1.141440E+03
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -0.0 -1.0  0.0 -1.0
+  3.0 -1.0  0.0 -1.0  0.0 -1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #   6
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   7
         degenerate with vibration mode #   8
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #   9
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  10
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  11
         degenerate with vibration mode #  12
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  13
         degenerate with vibration mode #  14
-  2.0  0.0 -1.0 -0.0 -1.0  0.0
+  2.0 -0.0 -1.0  0.0 -1.0  0.0
  Symmetry characters of vibration mode #  15
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  16
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
         degenerate with vibration mode #  21
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
@@ -503,7 +503,7 @@
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
   2.0 -0.0 -1.0 -0.0 -1.0  0.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.16667
  Phonon energies in Hartree :
    1.567250E-04  2.516483E-04  2.614917E-04  5.298826E-04  6.057307E-04
@@ -525,22 +525,22 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.6518268177E-03
    in SI units K  :            205.83039
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2470784001E-02
    in units km/s:              5.40531
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1046617349E-02
    in SI units K  :            330.49523
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2567429863E-02
    in units km/s:              5.61674
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1087556272E-02
    in SI units K  :            343.42270
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.33333
  Phonon energies in Hartree :
    2.079813E-04  4.382973E-04  5.151660E-04  5.610209E-04  6.994131E-04
@@ -556,7 +556,7 @@
 -  5.324945E+02  5.841842E+02  7.494700E+02  7.703468E+02  7.722604E+02
 -  7.771020E+02  1.050297E+03  1.063861E+03  1.070363E+03  1.105613E+03
 -  1.181562E+03  1.211093E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
    2.114554E-04  5.084311E-04  5.084311E-04  7.670618E-04  8.424071E-04
@@ -572,7 +572,7 @@
 -  5.512620E+02  5.512620E+02  7.610776E+02  7.687418E+02  7.745545E+02
 -  7.745545E+02  1.049536E+03  1.067536E+03  1.067536E+03  1.099483E+03
 -  1.198207E+03  1.198207E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.16667  0.00000  0.50000
  Phonon energies in Hartree :
    3.082838E-04  5.028285E-04  6.247853E-04  6.846752E-04  8.035847E-04
@@ -588,7 +588,7 @@
 -  5.378101E+02  5.605971E+02  7.535019E+02  7.666982E+02  7.758909E+02
 -  7.891789E+02  1.051475E+03  1.066007E+03  1.066303E+03  1.110045E+03
 -  1.183883E+03  1.194605E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.00000  0.50000
  Phonon energies in Hartree :
    3.137993E-04  3.685640E-04  5.867683E-04  7.706577E-04  8.145355E-04
@@ -604,7 +604,7 @@
 -  5.177277E+02  5.805948E+02  7.164743E+02  7.773645E+02  7.792875E+02
 -  8.133169E+02  1.054837E+03  1.062794E+03  1.063344E+03  1.133968E+03
 -  1.159826E+03  1.182816E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
    2.730030E-04  3.014499E-04  5.307666E-04  7.714206E-04  8.236956E-04
@@ -620,7 +620,7 @@
 -  5.094565E+02  5.936998E+02  6.940926E+02  7.798638E+02  7.840969E+02
 -  8.234591E+02  1.057230E+03  1.061145E+03  1.061232E+03  1.148196E+03
 -  1.155642E+03  1.167516E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.41667  0.16667  0.50000
  Phonon energies in Hartree :
    2.820106E-04  3.558544E-04  4.823455E-04  7.993834E-04  8.223432E-04
@@ -636,7 +636,7 @@
 -  5.200700E+02  5.986509E+02  6.691851E+02  7.918564E+02  7.932074E+02
 -  8.185188E+02  1.057629E+03  1.060478E+03  1.060824E+03  1.146309E+03
 -  1.156835E+03  1.167343E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.33333  0.50000
  Phonon energies in Hartree :
    2.984025E-04  4.050441E-04  4.050441E-04  8.231920E-04  8.231920E-04
@@ -652,7 +652,7 @@
 -  5.273513E+02  6.265104E+02  6.265104E+02  8.044522E+02  8.059632E+02
 -  8.059632E+02  1.058276E+03  1.059961E+03  1.059961E+03  1.144351E+03
 -  1.162574E+03  1.162574E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.50000
  Phonon energies in Hartree :
    2.875248E-04  4.349194E-04  4.512261E-04  8.044944E-04  8.275042E-04
@@ -668,7 +668,7 @@
 -  5.254638E+02  5.924760E+02  6.731647E+02  7.900913E+02  7.996854E+02
 -  8.120422E+02  1.056670E+03  1.061185E+03  1.061220E+03  1.144921E+03
 -  1.152862E+03  1.174032E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.16667  0.16667  0.50000
  Phonon energies in Hartree :
    3.140410E-04  5.158929E-04  5.261448E-04  7.782594E-04  7.998337E-04
@@ -684,7 +684,7 @@
 -  5.283773E+02  5.717705E+02  7.208424E+02  7.761459E+02  7.864352E+02
 -  8.034852E+02  1.053859E+03  1.063802E+03  1.063881E+03  1.126708E+03
 -  1.165911E+03  1.186901E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.08333  0.08333  0.50000
  Phonon energies in Hartree :
    3.007492E-04  5.268880E-04  5.714371E-04  7.008219E-04  8.075800E-04
@@ -700,7 +700,7 @@
 -  5.412546E+02  5.579502E+02  7.567688E+02  7.654225E+02  7.771839E+02
 -  7.848505E+02  1.051061E+03  1.066434E+03  1.066536E+03  1.107548E+03
 -  1.187065E+03  1.195520E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
    2.114554E-04  5.084311E-04  5.084311E-04  7.670618E-04  8.424071E-04
@@ -716,7 +716,7 @@
 -  5.512620E+02  5.512620E+02  7.610776E+02  7.687418E+02  7.745545E+02
 -  7.745545E+02  1.049536E+03  1.067536E+03  1.067536E+03  1.099483E+03
 -  1.198207E+03  1.198207E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.16667  0.00000  0.50000
  Phonon energies in Hartree :
    3.082838E-04  5.028285E-04  6.247853E-04  6.846752E-04  8.035847E-04
@@ -732,7 +732,7 @@
 -  5.378101E+02  5.605971E+02  7.535019E+02  7.666982E+02  7.758909E+02
 -  7.891789E+02  1.051475E+03  1.066007E+03  1.066303E+03  1.110045E+03
 -  1.183883E+03  1.194605E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.00000  0.50000
  Phonon energies in Hartree :
    3.137993E-04  3.685640E-04  5.867683E-04  7.706577E-04  8.145355E-04
@@ -748,7 +748,7 @@
 -  5.177277E+02  5.805948E+02  7.164743E+02  7.773645E+02  7.792875E+02
 -  8.133169E+02  1.054837E+03  1.062794E+03  1.063344E+03  1.133968E+03
 -  1.159826E+03  1.182816E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
    2.730030E-04  3.014499E-04  5.307666E-04  7.714206E-04  8.236956E-04
@@ -764,7 +764,7 @@
 -  5.094565E+02  5.936998E+02  6.940926E+02  7.798638E+02  7.840969E+02
 -  8.234591E+02  1.057230E+03  1.061145E+03  1.061232E+03  1.148196E+03
 -  1.155642E+03  1.167516E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.33333
  Phonon energies in Hartree :
    3.164502E-04  3.922259E-04  5.395260E-04  6.427696E-04  8.742963E-04
@@ -780,7 +780,7 @@
 -  5.054297E+02  6.009375E+02  6.936960E+02  7.733787E+02  7.909768E+02
 -  8.164238E+02  1.056643E+03  1.059355E+03  1.065578E+03  1.144165E+03
 -  1.159749E+03  1.171837E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.16667
  Phonon energies in Hartree :
    3.979161E-04  4.318714E-04  5.407803E-04  6.333728E-04  8.580370E-04
@@ -796,7 +796,7 @@
 -  4.935147E+02  6.167302E+02  6.918247E+02  7.723137E+02  7.941350E+02
 -  8.011573E+02  1.053309E+03  1.063678E+03  1.068685E+03  1.140324E+03
 -  1.164082E+03  1.180216E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    2.863159E-04  5.117977E-04  6.370001E-04  6.467080E-04  7.785664E-04
@@ -812,7 +812,7 @@
 -  4.823028E+02  6.251932E+02  6.909681E+02  7.739143E+02  7.925495E+02
 -  7.940183E+02  1.052075E+03  1.065906E+03  1.069797E+03  1.139214E+03
 -  1.165581E+03  1.184340E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.41667  0.16667  0.00000
  Phonon energies in Hartree :
    3.495504E-04  5.395090E-04  6.229938E-04  7.440889E-04  8.207318E-04
@@ -828,7 +828,7 @@
 -  5.108745E+02  5.969306E+02  7.165177E+02  7.751695E+02  7.849819E+02
 -  7.897186E+02  1.051547E+03  1.066264E+03  1.068981E+03  1.144951E+03
 -  1.168112E+03  1.178301E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.33333  0.00000
  Phonon energies in Hartree :
    3.828872E-04  5.860273E-04  5.860273E-04  8.849746E-04  8.849746E-04
@@ -844,7 +844,7 @@
 -  5.544345E+02  5.544345E+02  7.390221E+02  7.760940E+02  7.760940E+02
 -  7.834415E+02  1.051091E+03  1.067403E+03  1.067403E+03  1.154338E+03
 -  1.169434E+03  1.169434E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.33333  0.16667
  Phonon energies in Hartree :
    4.033320E-04  4.641383E-04  5.785666E-04  8.810404E-04  9.212169E-04
@@ -860,7 +860,7 @@
 -  5.398328E+02  5.714470E+02  7.123405E+02  7.776125E+02  7.866150E+02
 -  7.988141E+02  1.052282E+03  1.064523E+03  1.067282E+03  1.154468E+03
 -  1.158638E+03  1.173955E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.33333  0.33333
  Phonon energies in Hartree :
    2.902175E-04  4.074551E-04  5.565695E-04  7.473143E-04  9.035561E-04
@@ -876,7 +876,7 @@
 -  5.303892E+02  5.937552E+02  6.684560E+02  7.910842E+02  7.991827E+02
 -  8.104277E+02  1.055519E+03  1.060330E+03  1.064384E+03  1.148369E+03
 -  1.156542E+03  1.170300E+03
- 
+
   Phonon wavevector (reduced coordinates) :  0.33333  0.33333  0.50000
  Phonon energies in Hartree :
    2.984025E-04  4.050441E-04  4.050441E-04  8.231920E-04  8.231920E-04
@@ -892,39 +892,39 @@
 -  5.273513E+02  6.265104E+02  6.265104E+02  8.044522E+02  8.059632E+02
 -  8.059632E+02  1.058276E+03  1.059961E+03  1.059961E+03  1.144351E+03
 -  1.162574E+03  1.162574E+03
- 
+
 ================================================================================
- 
+
   
  Mode effective charges 
  Mode number.    x            y            z            length 
 -     1         -0.000000    -0.000001     0.000000     0.000001
--     2         -0.000000    -0.000000    -0.000005     0.000005
--     3         -0.000001     0.000000     0.000000     0.000001
--     4          0.015003    -0.002543    -0.000000     0.015217
--     5          0.002543     0.015003    -0.000000     0.015217
+-     2         -0.000000     0.000000     0.000005     0.000005
+-     3         -0.000001     0.000000    -0.000000     0.000001
+-     4          0.015007    -0.002522    -0.000000     0.015217
+-     5          0.002522     0.015007    -0.000000     0.015217
 ;     6         -0.000000     0.000000    -0.000000     0.000000
--     7          0.240139    -0.277673    -0.000000     0.367109
--     8          0.277673     0.240139     0.000000     0.367109
+-     7          0.239941    -0.277844    -0.000000     0.367109
+-     8          0.277844     0.239941     0.000000     0.367109
 ;     9          0.000000    -0.000000     0.000000     0.000000
 ;    10          0.000000     0.000000     1.862737     1.862737
--    11         -0.850962     1.262633    -0.000000     1.522622
--    12          1.262633     0.850962    -0.000000     1.522622
--    13          2.223480     1.122970    -0.000000     2.490969
--    14          1.122970    -2.223480     0.000000     2.490969
-;    15          0.000000     0.000000    -0.000000     0.000000
+-    11         -0.850124     1.263197    -0.000000     1.522622
+-    12          1.263197     0.850124    -0.000000     1.522622
+-    13          2.223481     1.122968    -0.000000     2.490969
+-    14          1.122968    -2.223481     0.000000     2.490969
+;    15          0.000000     0.000000     0.000000     0.000000
 ;    16          0.000000     0.000000     2.609041     2.609041
--    17          0.706660     0.267988    -0.000000     0.755769
--    18         -0.267988     0.706660    -0.000000     0.755769
+-    17          0.706469     0.268493    -0.000000     0.755769
+-    18         -0.268493     0.706469    -0.000000     0.755769
 ;    19         -0.000000    -0.000000    -1.913084     1.913084
--    20         -1.757758    -0.708598     0.000000     1.895211
--    21          0.708598    -1.757758     0.000000     1.895211
--    22          5.280589     2.086333     0.000000     5.677800
--    23          2.086333    -5.280589    -0.000000     5.677800
+-    20         -1.757584    -0.709030     0.000000     1.895211
+-    21          0.709030    -1.757584     0.000000     1.895211
+-    22          5.280502     2.086554     0.000000     5.677800
+-    23          2.086554    -5.280502    -0.000000     5.677800
 ;    24         -0.000000    -0.000000     5.830963     5.830963
-;    25         -0.000000     0.000000    -0.000000     0.000000
--    26         -0.228463     0.582929    -0.000000     0.626100
--    27          0.582929     0.228463    -0.000000     0.626100
+;    25         -0.000000     0.000000     0.000000     0.000000
+-    26         -0.228447     0.582935    -0.000000     0.626100
+-    27          0.582935     0.228447    -0.000000     0.626100
   
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
@@ -934,79 +934,79 @@
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 -   3     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   4     Real    7.5416E-09  2.1671E-10  0.0000E+00 -1.2784E-09  0.0000E+00  0.0000E+00  7.7583E-09
+-   4     Real    7.5452E-09  2.1313E-10  0.0000E+00 -1.2681E-09  0.0000E+00  0.0000E+00  7.7583E-09
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   5     Real    2.1671E-10  7.5416E-09  0.0000E+00  1.2784E-09  0.0000E+00  0.0000E+00  7.7583E-09
+-   5     Real    2.1313E-10  7.5452E-09  0.0000E+00  1.2681E-09  0.0000E+00  0.0000E+00  7.7583E-09
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   6     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   7     Real    1.8933E-06  2.5314E-06  0.0000E+00 -2.1892E-06  0.0000E+00  0.0000E+00  4.4247E-06
+-   7     Real    1.8902E-06  2.5345E-06  0.0000E+00 -2.1888E-06  0.0000E+00  0.0000E+00  4.4247E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   8     Real    2.5314E-06  1.8933E-06  0.0000E+00  2.1892E-06  0.0000E+00  0.0000E+00  4.4247E-06
+-   8     Real    2.5345E-06  1.8902E-06  0.0000E+00  2.1888E-06  0.0000E+00  0.0000E+00  4.4247E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   9     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  10     Real    0.0000E+00  0.0000E+00  1.1308E-04  0.0000E+00  0.0000E+00  0.0000E+00  1.1308E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  11     Real    2.1842E-05  4.8086E-05  0.0000E+00 -3.2408E-05  0.0000E+00  0.0000E+00  6.9928E-05
+-  11     Real    2.1799E-05  4.8129E-05  0.0000E+00 -3.2391E-05  0.0000E+00  0.0000E+00  6.9928E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  12     Real    4.8086E-05  2.1842E-05  0.0000E+00  3.2408E-05  0.0000E+00  0.0000E+00  6.9928E-05
+-  12     Real    4.8129E-05  2.1799E-05  0.0000E+00  3.2391E-05  0.0000E+00  0.0000E+00  6.9928E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  13     Real    1.5463E-04  3.9442E-05  0.0000E+00  7.8096E-05  0.0000E+00  0.0000E+00  1.9407E-04
+-  13     Real    1.5463E-04  3.9442E-05  0.0000E+00  7.8095E-05  0.0000E+00  0.0000E+00  1.9407E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  14     Real    3.9442E-05  1.5463E-04  0.0000E+00 -7.8096E-05  0.0000E+00  0.0000E+00  1.9407E-04
+-  14     Real    3.9442E-05  1.5463E-04  0.0000E+00 -7.8095E-05  0.0000E+00  0.0000E+00  1.9407E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  15     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  16     Real    0.0000E+00  0.0000E+00  2.0880E-04  0.0000E+00  0.0000E+00  0.0000E+00  2.0880E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  17     Real    1.1860E-05  1.7056E-06  0.0000E+00  4.4975E-06  0.0000E+00  0.0000E+00  1.3565E-05
+-  17     Real    1.1853E-05  1.7120E-06  0.0000E+00  4.5048E-06  0.0000E+00  0.0000E+00  1.3565E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  18     Real    1.7056E-06  1.1860E-05  0.0000E+00 -4.4975E-06  0.0000E+00  0.0000E+00  1.3565E-05
+-  18     Real    1.7120E-06  1.1853E-05  0.0000E+00 -4.5048E-06  0.0000E+00  0.0000E+00  1.3565E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  19     Real    0.0000E+00  0.0000E+00  7.5330E-05  0.0000E+00  1.4458E-14  1.4645E-14  7.5330E-05
+;  19     Real    0.0000E+00  0.0000E+00  7.5330E-05  0.0000E+00  1.4457E-14  1.4645E-14  7.5330E-05
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  20     Real    6.9720E-05  1.1330E-05  0.0000E+00  2.8106E-05 -1.8254E-14  0.0000E+00  8.1050E-05
+-  20     Real    6.9706E-05  1.1344E-05  0.0000E+00  2.8120E-05 -1.8253E-14  0.0000E+00  8.1050E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  21     Real    1.1330E-05  6.9720E-05  0.0000E+00 -2.8106E-05  0.0000E+00  0.0000E+00  8.1050E-05
+-  21     Real    1.1344E-05  6.9706E-05  0.0000E+00 -2.8120E-05  0.0000E+00  0.0000E+00  8.1050E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  22     Real    8.5705E-04  1.3378E-04  0.0000E+00  3.3861E-04  6.7238E-14  2.6565E-14  9.9083E-04
+-  22     Real    8.5702E-04  1.3381E-04  0.0000E+00  3.3865E-04  6.7236E-14  2.6568E-14  9.9083E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  23     Real    1.3378E-04  8.5705E-04  0.0000E+00 -3.3861E-04 -1.2972E-14  3.2833E-14  9.9083E-04
+-  23     Real    1.3381E-04  8.5702E-04  0.0000E+00 -3.3865E-04 -1.2964E-14  3.2809E-14  9.9083E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  24     Real    0.0000E+00  0.0000E+00  1.0434E-03  0.0000E+00 -4.9261E-14 -5.3768E-14  1.0434E-03
+;  24     Real    0.0000E+00  0.0000E+00  1.0434E-03  0.0000E+00 -4.9267E-14 -5.3748E-14  1.0434E-03
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  25     Real    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  26     Real    1.6759E-06  1.0911E-05  0.0000E+00 -4.2761E-06  0.0000E+00  0.0000E+00  1.2586E-05
+-  26     Real    1.6757E-06  1.0911E-05  0.0000E+00 -4.2758E-06  0.0000E+00  0.0000E+00  1.2586E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  27     Real    1.0911E-05  1.6759E-06  0.0000E+00  4.2761E-06  0.0000E+00  0.0000E+00  1.2586E-05
+-  27     Real    1.0911E-05  1.6757E-06  0.0000E+00  4.2758E-06  0.0000E+00  0.0000E+00  1.2586E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
- 
+
  Electronic dielectric tensor
       2.45580974     -0.00000000      0.00000000
-      0.00000000      2.45580974     -0.00000000
+     -0.00000000      2.45580974     -0.00000000
       0.00000000      0.00000000      2.48682608
- 
- 
+
+
  Relaxed ion dielectric tensor
       4.56421303      0.00000000     -0.00000000
       0.00000000      4.56421303      0.00000000
      -0.00000000      0.00000000      4.78376787
- 
- 
+
+
  Frequency dependent dielectric constant:
- 
+
  Full dielectric tensor at frequency  0.0000E+00 Hartree
       4.56421303      0.00000000     -0.00000000
       0.00000000      4.56421303      0.00000000
      -0.00000000      0.00000000      4.78376787
  
 -
-- Proc.   0 individual time (sec): cpu=         11.7  wall=         13.4
- 
+- Proc.   0 individual time (sec): cpu=         11.4  wall=         11.4
+
 ================================================================================
- 
-+Total cpu time     11.702  and wall time     13.368 sec
- 
+
++Total cpu time     11.357  and wall time     11.404 sec
+
  anaddb : the run completed succesfully.
