@@ -808,11 +808,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
+     if(use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*my_nspinor*blocksize/))
-#else
-     ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+       ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*my_nspinor*blocksize/))
 #endif
+     else
+       ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+     end if
 
      if (psps%usepaw==1.and.usecprj_local==1) then
        ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp))
@@ -1169,11 +1171,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      end if
      ABI_FREE(cwaveprj)
 
+     if(use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_FREE_MANAGED(cwavef)
-#else
-     ABI_FREE(cwavef)
+       ABI_FREE_MANAGED(cwavef)
 #endif
+     else
+       ABI_FREE(cwavef)
+     end if
 
      ABI_FREE(lambda)
      ABI_FREE(occblock)

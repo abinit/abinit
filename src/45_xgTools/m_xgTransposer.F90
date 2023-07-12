@@ -423,29 +423,33 @@ module m_xgTransposer
     case (STATE_LINALG)
       ! Assume xgBlock_colsrows is empty and not constructed because user cannot
       ! predict the size
+      if(xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-      if ( associated(xgTransposer%buffer) ) then
-        ABI_FREE_MANAGED(xgTransposer%buffer)
-      end if
-#else
-      if ( allocated(xgTransposer%buffer) ) then
-        if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-          !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
-#endif
+        if ( associated(xgTransposer%buffer) ) then
+          ABI_FREE_MANAGED(xgTransposer%buffer)
         end if
-        ABI_FREE(xgTransposer%buffer)
-      end if
 #endif
+      else
+        if ( allocated(xgTransposer%buffer) ) then
+          if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+            !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
+#endif
+          end if
+          ABI_FREE(xgTransposer%buffer)
+        end if
+      end if
 
       if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
         xgTransposer%xgBlock_colsrows = xgTransposer%xgBlock_linalg
       else
+        if(xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-        ABI_MALLOC_MANAGED(xgTransposer%buffer,(/2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows/))
-#else
-        ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
+          ABI_MALLOC_MANAGED(xgTransposer%buffer,(/2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows/))
 #endif
+        else
+          ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
+        end if
         if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
           !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
@@ -1036,20 +1040,22 @@ module m_xgTransposer
       ABI_FREE(xgTransposer%nrowsLinalg)
     end if
 
+    if(xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-    if ( associated(xgTransposer%buffer) ) then
-      ABI_FREE_MANAGED(xgTransposer%buffer)
-    end if
-#else
-    if ( allocated(xgTransposer%buffer) ) then
-      if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
-#endif
+      if ( associated(xgTransposer%buffer) ) then
+        ABI_FREE_MANAGED(xgTransposer%buffer)
       end if
-      ABI_FREE(xgTransposer%buffer)
-    end if
 #endif
+    else
+      if ( allocated(xgTransposer%buffer) ) then
+        if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+          !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
+#endif
+        end if
+        ABI_FREE(xgTransposer%buffer)
+      end if
+    end if
 
     call timab(tim_free,2,tsec)
 

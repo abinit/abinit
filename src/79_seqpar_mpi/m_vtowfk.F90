@@ -694,11 +694,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
+   if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat/))
-#else
-   ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+     ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat/))
 #endif
+   else
+     ABI_MALLOC(wfraug,(2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat))
+   end if
  end if
 
 !"nonlop" routine input parameters
@@ -723,11 +725,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ABI_MALLOC(enlout,(nnlout*blocksize))
 
  ! Allocation of memory space for one block of waveforms containing blocksize waveforms
+ if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_MALLOC_MANAGED(cwavef, (/2,npw_k*my_nspinor*blocksize/))
-#else
- ABI_MALLOC(cwavef, (2,npw_k*my_nspinor*blocksize))
+   ABI_MALLOC_MANAGED(cwavef, (/2,npw_k*my_nspinor*blocksize/))
 #endif
+ else
+   ABI_MALLOC(cwavef, (2,npw_k*my_nspinor*blocksize))
+ end if
 
  if (.not.has_cprj_in_memory) then
    if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
@@ -1080,11 +1084,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  !call cwtime_report(" Block loop", cpu, wall, gflops)
  ABI_NVTX_END_RANGE()
 
+ if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_FREE_MANAGED(cwavef)
-#else
- ABI_FREE(cwavef)
+   ABI_FREE_MANAGED(cwavef)
 #endif
+ else
+   ABI_FREE(cwavef)
+ end if
 
  ABI_FREE(enlout)
 
@@ -1098,11 +1104,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  if (fixed_occ.and.iscf>0) then
+   if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_FREE_MANAGED(wfraug)
-#else
-   ABI_FREE(wfraug)
+     ABI_FREE_MANAGED(wfraug)
 #endif
+   else
+     ABI_FREE(wfraug)
+   end if
  end if
 
 !Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers
