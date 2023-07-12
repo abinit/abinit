@@ -606,11 +606,11 @@ subroutine destroy_hamiltonian(Ham)
    ABI_SFREE_MANAGED(Ham%nattyp)
 #endif
  else
-   ABI_SFREE(Ham%atindx)
-   ABI_SFREE(Ham%atindx1)
-   ABI_SFREE(Ham%typat)
-   ABI_SFREE(Ham%indlmn)
-   ABI_SFREE(Ham%nattyp)
+   ABI_FREE(Ham%atindx)
+   ABI_FREE(Ham%atindx1)
+   ABI_FREE(Ham%typat)
+   ABI_FREE(Ham%indlmn)
+   ABI_FREE(Ham%nattyp)
  end if
  ABI_SFREE(Ham%gbound_k)
  ABI_SFREE(Ham%pspso)
@@ -649,7 +649,7 @@ subroutine destroy_hamiltonian(Ham)
    ABI_SFREE_MANAGED(Ham%ph1d)
 #endif
  else
-   ABI_SFREE(Ham%ph1d)
+   ABI_FREE(Ham%ph1d)
  end if
 
 ! Structured datatype pointers

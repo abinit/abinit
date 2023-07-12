@@ -430,7 +430,12 @@ module m_xgTransposer
         end if
 #endif
       else
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+        if ( associated(xgTransposer%buffer) ) then
+#else
         if ( allocated(xgTransposer%buffer) ) then
+#endif
           if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
             !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
@@ -1047,7 +1052,12 @@ module m_xgTransposer
       end if
 #endif
     else
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+      if ( associated(xgTransposer%buffer) ) then
+#else
       if ( allocated(xgTransposer%buffer) ) then
+#endif
         if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
           !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
