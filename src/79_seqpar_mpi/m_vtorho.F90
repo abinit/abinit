@@ -724,13 +724,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      nkpt1 = dtefield%mkmem_max
    end if
 
+   if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_MALLOC_MANAGED(rhoaug, (/n4,n5,n6,gs_hamk%nvloc/))
-   ABI_MALLOC_MANAGED(vlocal, (/n4,n5,n6,gs_hamk%nvloc/))
-#else
-   ABI_MALLOC(rhoaug,(n4,n5,n6,gs_hamk%nvloc))
-   ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
+     ABI_MALLOC_MANAGED(rhoaug, (/n4,n5,n6,gs_hamk%nvloc/))
+     ABI_MALLOC_MANAGED(vlocal, (/n4,n5,n6,gs_hamk%nvloc/))
 #endif
+   else
+     ABI_MALLOC(rhoaug,(n4,n5,n6,gs_hamk%nvloc))
+     ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
+   end if
 
    if(with_vxctau) then
      ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
@@ -866,13 +868,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_MALLOC(zshift,(nband_k))
        ABI_MALLOC(grnl_k,(3*natom,nband_k*optforces))
 
+       if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-       ABI_MALLOC_MANAGED(eig_k,(/nband_k/))
-       ABI_MALLOC_MANAGED(resid_k,(/nband_k/))
-#else
-       ABI_MALLOC(eig_k,(nband_k))
-       ABI_MALLOC(resid_k,(nband_k))
+         ABI_MALLOC_MANAGED(eig_k,(/nband_k/))
+         ABI_MALLOC_MANAGED(resid_k,(/nband_k/))
 #endif
+       else
+         ABI_MALLOC(eig_k,(nband_k))
+         ABI_MALLOC(resid_k,(nband_k))
+       end if
 
        eig_k(:)=zero
        ek_k(:)=zero
@@ -886,11 +890,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        !resid_k(:)=zero
        zshift(:)=dtset%eshift
 
+       if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-       ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
-#else
-       ABI_MALLOC(kg_k,(3,npw_k))
+         ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
 #endif
+       else
+         ABI_MALLOC(kg_k,(3,npw_k))
+       end if
 
        ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
@@ -903,11 +909,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Set up remaining of the Hamiltonian
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
+       if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-       ABI_MALLOC_MANAGED(kinpw,(/npw_k/))
-#else
-       ABI_MALLOC(kinpw,(npw_k))
+         ABI_MALLOC_MANAGED(kinpw,(/npw_k/))
 #endif
+       else
+         ABI_MALLOC(kinpw,(npw_k))
+       end if
+
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
@@ -1053,13 +1062,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #endif
        ABI_FREE(ffnl)
 
+       if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-       ABI_FREE_MANAGED(kinpw)
-       ABI_FREE_MANAGED(kg_k)
-#else
-       ABI_FREE(kinpw)
-       ABI_FREE(kg_k)
+         ABI_FREE_MANAGED(kinpw)
+         ABI_FREE_MANAGED(kg_k)
 #endif
+       else
+         ABI_FREE(kinpw)
+         ABI_FREE(kg_k)
+       end if
 
        ABI_FREE(kpg_k)
        ABI_FREE(ylm_k)
@@ -1133,13 +1144,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_FREE(zshift)
        ABI_FREE(enlx_k)
 
+       if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-       ABI_FREE_MANAGED(eig_k)
-       ABI_FREE_MANAGED(resid_k)
-#else
-       ABI_FREE(eig_k)
-       ABI_FREE(resid_k)
+         ABI_FREE_MANAGED(eig_k)
+         ABI_FREE_MANAGED(resid_k)
 #endif
+       else
+         ABI_FREE(eig_k)
+         ABI_FREE(resid_k)
+       end if
 
 !      Keep track of total number of bands (all k points so far, even for k points not treated by me)
        bdtot_index=bdtot_index+nband_k
@@ -1201,13 +1214,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_FREE(dphasek)
    end if ! berryflag
 
+   if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_FREE_MANAGED(rhoaug)
-   ABI_FREE_MANAGED(vlocal)
-#else
-   ABI_FREE(rhoaug)
-   ABI_FREE(vlocal)
+     ABI_FREE_MANAGED(rhoaug)
+     ABI_FREE_MANAGED(vlocal)
 #endif
+   else
+     ABI_FREE(rhoaug)
+     ABI_FREE(vlocal)
+   end if
 
    if(with_vxctau) then
      ABI_FREE(vxctaulocal)

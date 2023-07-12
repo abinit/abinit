@@ -237,11 +237,13 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
  !For preconditionning
+ if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_MALLOC_MANAGED(l_pcon, (/l_icplx*npw/))
-#else
- ABI_MALLOC(l_pcon,(1:l_icplx*npw))
+   ABI_MALLOC_MANAGED(l_pcon, (/l_icplx*npw/))
 #endif
+ else
+   ABI_MALLOC(l_pcon,(1:l_icplx*npw))
+ end if
 
 !$omp parallel do schedule(static), shared(l_pcon,kinpw)
  do ipw=1-1,l_icplx*npw-1
@@ -321,11 +323,13 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,l_mpi_enreg)
 
 !Free preconditionning since not needed anymore
+ if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_FREE_MANAGED(l_pcon)
-#else
- ABI_FREE(l_pcon)
+   ABI_FREE_MANAGED(l_pcon)
 #endif
+ else
+   ABI_FREE(l_pcon)
+ end if
 
 !Compute enlout (nonlocal energy for each band if necessary) This is the best
 !  quick and dirty trick to compute this part in NC. gvnlc cannot be part of

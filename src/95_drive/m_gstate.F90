@@ -722,11 +722,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cg => scf_history%cg(:,:,1)
    eigen => scf_history%eigen(:,1)
  else
+   if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_MALLOC_MANAGED(cg, (/2,mcg/))
-#else
-   ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+     ABI_MALLOC_MANAGED(cg, (/2,mcg/))
 #endif
+   else
+     ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+   end if
    ABI_MALLOC(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
 
@@ -1666,11 +1668,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call pawfgr_destroy(pawfgr)
 
  if(dtset%imgwfstor==0)then
+   if(dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-   ABI_FREE_MANAGED(cg)
-#else
-   ABI_FREE(cg)
+     ABI_FREE_MANAGED(cg)
 #endif
+   else
+     ABI_FREE(cg)
+   end if
    ABI_FREE(eigen)
  else
    nullify(cg,eigen)
