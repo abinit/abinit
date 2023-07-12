@@ -103,15 +103,13 @@ internal and post-processing utilities, their use is strongly disadvised. The lr
 preserves conserves most of ujdet's data processing functionalities. For retrogressive and archive 
 purposes, the primary differences between the two are outlined in the table below.
 
-|   | <code>ujdet</code>                                                                                                      | <code>lruj</code>                                         |
-| - | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| 1 | Embedded in Abinit core routine +
-
-Post-processing extension                                                   | Post-processor                                   |
-| 2 | Two-point linear regression                                                                                    | 3+ point polynomial (variable degree) regression |
+|   | <code>ujdet</code>            | <code>lruj</code>                                |
+| - | ----------------------------- | ------------------------------------------------ |
+| 1 | Embedded in Abinit core routine + Post-processing extension | Post-processor                                   |
+| 2 | Two-point linear regression                                 | 3+ point polynomial (variable degree) regression |
 | 3 | $\chi$ and $\chi_0$ responses treated as matrices; interatomic response monitored; matrices augmented by total system charge |  and  responses treated as scalars               |
-| 4 | Supercell extrapolation scheme                                                                                 | RMS Error analysis                               |
-| 5 | Atomic Sphere Approximation projector extensions/normalizations                                                |                                                  |
+| 4 | Supercell extrapolation scheme                              | RMS Error analysis                               |
+| 5 | Atomic Sphere Approximation projector extensions/normalizations   |                                                  |
 
 As mentioned in item (2), the most influential difference between ujdet and lruj is the number 
 of data points used to compute a linear regression of the response functions $\chi$ and $\chi_0$. 
