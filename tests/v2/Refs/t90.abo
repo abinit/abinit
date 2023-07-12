@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t90/t90.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v2_t90/t90.abi
 - output file    -> t90.abo
 - root for input  files -> t90i
 - root for output files -> t90o
@@ -106,6 +106,8 @@ _ WF disk file :      0.231 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      2.6000000000E+00  2.6000000000E+00  2.6000000000E+00 Bohr
               amu      1.00794000E+00
+              asr           0
+           chneut           0
              ecut      2.00000000E+01 Hartree
 -          fftalg         312
            getwfk1          0
@@ -593,8 +595,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1203,6 +1205,8 @@ tolerances: {toldfe: 1.00E-10, }
  -outvars: echo values of variables after computation  --------
             acell      2.6000000000E+00  2.6000000000E+00  2.6000000000E+00 Bohr
               amu      1.00794000E+00
+              asr           0
+           chneut           0
              ecut      2.00000000E+01 Hartree
            etotal1    -5.5936101443E-01
            etotal2    -8.5604412448E-11
@@ -1745,10 +1749,10 @@ P          mk1mem4         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.5  wall=          2.0
++Overall time at end (sec) : cpu=          1.0  wall=          1.0

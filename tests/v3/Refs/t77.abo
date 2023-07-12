@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t77/t77.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v3_t77/t77.abi
 - output file    -> t77.abo
 - root for input  files -> t77i
 - root for output files -> t77o
@@ -105,6 +105,8 @@ _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0334455587E+01  1.0334455587E+01  1.0334455587E+01 Bohr
               amu      1.37327000E+02  1.59994000E+01
+              asr           0
+           chneut           0
            diemac      1.20000000E+01
              ecut      5.00000000E+00 Hartree
 -          fftalg         312
@@ -324,8 +326,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.17519
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/56ba.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/56ba.psp_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/56ba.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/56ba.psp_mod
 - Barium.ion 5s2.5p6.6s0.5d0 rcs=rcp=rcd=1.7 ecut=22/28
 - 56.00000  10.00000    940000                znucl, zion, pspdat
     4    3    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -342,8 +344,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -6.938476   21.148499
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.psp_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/8o.psp_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/8o.psp_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/8o.psp_mod
 - 1.65bohr 35 hartree exncc psp for oxygen with core 19 june 1992
 -  8.00000   6.00000    920619                znucl, zion, pspdat
     4    3    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2226,7 +2228,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2253,7 +2255,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2315,7 +2317,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           1
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2345,7 +2347,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           2
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2375,7 +2377,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           3
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2405,7 +2407,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           4
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2435,7 +2437,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           5
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2465,7 +2467,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           6
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2495,7 +2497,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           7
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2525,7 +2527,7 @@ tolerances: {toldfe: 1.00E-10, }
   
   Effective charges, in cartesian coordinates, for band           8
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2594,6 +2596,8 @@ tolerances: {toldfe: 1.00E-10, }
  -outvars: echo values of variables after computation  --------
             acell      1.0334455587E+01  1.0334455587E+01  1.0334455587E+01 Bohr
               amu      1.37327000E+02  1.59994000E+01
+              asr           0
+           chneut           0
            diemac      1.20000000E+01
              ecut      5.00000000E+00 Hartree
            etotal1    -3.9297056234E+01
@@ -2876,10 +2880,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.5
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.1  wall=          7.5
++Overall time at end (sec) : cpu=          5.3  wall=          5.4
