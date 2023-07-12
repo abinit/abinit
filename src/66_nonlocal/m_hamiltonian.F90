@@ -597,19 +597,21 @@ subroutine destroy_hamiltonian(Ham)
  end if
 
  ! Integer arrays
+ if(Ham%use_gpu_impl == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_SFREE_MANAGED(Ham%atindx)
- ABI_SFREE_MANAGED(Ham%atindx1)
- ABI_SFREE_MANAGED(Ham%typat)
- ABI_SFREE_MANAGED(Ham%indlmn)
- ABI_SFREE_MANAGED(Ham%nattyp)
-#else
- ABI_SFREE(Ham%atindx)
- ABI_SFREE(Ham%atindx1)
- ABI_SFREE(Ham%typat)
- ABI_SFREE(Ham%indlmn)
- ABI_SFREE(Ham%nattyp)
+   ABI_SFREE_MANAGED(Ham%atindx)
+   ABI_SFREE_MANAGED(Ham%atindx1)
+   ABI_SFREE_MANAGED(Ham%typat)
+   ABI_SFREE_MANAGED(Ham%indlmn)
+   ABI_SFREE_MANAGED(Ham%nattyp)
 #endif
+ else
+   ABI_SFREE(Ham%atindx)
+   ABI_SFREE(Ham%atindx1)
+   ABI_SFREE(Ham%typat)
+   ABI_SFREE(Ham%indlmn)
+   ABI_SFREE(Ham%nattyp)
+ end if
  ABI_SFREE(Ham%gbound_k)
  ABI_SFREE(Ham%pspso)
 
@@ -642,11 +644,13 @@ subroutine destroy_hamiltonian(Ham)
  ABI_SFREE(Ham%ekb_spin)
  ABI_SFREE(Ham%sij)
  ABI_SFREE(Ham%nucdipmom)
+ if(Ham%use_gpu_impl == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_SFREE_MANAGED(Ham%ph1d)
-#else
- ABI_SFREE(Ham%ph1d)
+   ABI_SFREE_MANAGED(Ham%ph1d)
 #endif
+ else
+   ABI_SFREE(Ham%ph1d)
+ end if
 
 ! Structured datatype pointers
  if (associated(Ham%fockcommon)) nullify(Ham%fockcommon)
@@ -734,7 +738,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex_dij,jsp
+ integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex_dij,jsp,l_use_gpu_impl
  real(dp) :: ucvol
 !arrays
  integer :: my_spintab(2)
@@ -751,27 +755,30 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  my_spintab=0;my_spintab(1:nsppol)=1;if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
  my_nsppol=count(my_spintab==1)
+ l_use_gpu_impl=ABI_GPU_DISABLED; if(present(use_gpu_impl)) l_use_gpu_impl=use_gpu_impl
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ABI_CHECK(mgfft==MAXVAL(ngfft(1:3)),"Wrong mgfft")
 
 !Allocate the arrays of the Hamiltonian whose dimensions do not depend on k
+ if(l_use_gpu_impl == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
- ABI_MALLOC_MANAGED(ham%atindx,(/natom/))
- ABI_MALLOC_MANAGED(ham%atindx1,(/natom/))
- ABI_MALLOC_MANAGED(ham%typat,(/natom/))
- ABI_MALLOC_MANAGED(ham%indlmn,(/6,psps%lmnmax,psps%ntypat/))
- ABI_MALLOC_MANAGED(ham%nattyp,(/psps%ntypat/))
- ABI_MALLOC_MANAGED(ham%ph1d,(/2,3*(2*mgfft+1)*natom/))
-#else
- ABI_MALLOC(ham%atindx,(natom))
- ABI_MALLOC(ham%atindx1,(natom))
- ABI_MALLOC(ham%typat,(natom))
- ABI_MALLOC(ham%indlmn,(6,psps%lmnmax,psps%ntypat))
- ABI_MALLOC(ham%nattyp,(psps%ntypat))
- ABI_MALLOC(ham%ph1d,(2,3*(2*mgfft+1)*natom))
+   ABI_MALLOC_MANAGED(ham%atindx,(/natom/))
+   ABI_MALLOC_MANAGED(ham%atindx1,(/natom/))
+   ABI_MALLOC_MANAGED(ham%typat,(/natom/))
+   ABI_MALLOC_MANAGED(ham%indlmn,(/6,psps%lmnmax,psps%ntypat/))
+   ABI_MALLOC_MANAGED(ham%nattyp,(/psps%ntypat/))
+   ABI_MALLOC_MANAGED(ham%ph1d,(/2,3*(2*mgfft+1)*natom/))
 #endif
+ else
+   ABI_MALLOC(ham%atindx,(natom))
+   ABI_MALLOC(ham%atindx1,(natom))
+   ABI_MALLOC(ham%typat,(natom))
+   ABI_MALLOC(ham%indlmn,(6,psps%lmnmax,psps%ntypat))
+   ABI_MALLOC(ham%nattyp,(psps%ntypat))
+   ABI_MALLOC(ham%ph1d,(2,3*(2*mgfft+1)*natom))
+ end if
 
  ABI_MALLOC(ham%pspso,(psps%ntypat))
  ABI_MALLOC(ham%nucdipmom,(3,natom))

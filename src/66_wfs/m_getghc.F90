@@ -298,11 +298,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  if (any(type_calc == [0, 2, 3])) then
    local_gvnlxc = size(gvnlxc)==0
    if (local_gvnlxc) then
+     if(gs_ham%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_MALLOC_MANAGED(gvnlxc_, (/2,npw_k2*my_nspinor*ndat/))
-#else
-     ABI_MALLOC(gvnlxc_,(2,npw_k2*my_nspinor*ndat))
+       ABI_MALLOC_MANAGED(gvnlxc_, (/2,npw_k2*my_nspinor*ndat/))
 #endif
+     else
+       ABI_MALLOC(gvnlxc_,(2,npw_k2*my_nspinor*ndat))
+     end if
    else
      gvnlxc_ => gvnlxc
    end if
@@ -796,11 +798,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
      if (gs_ham%usepaw==1 .and. has_fock)then
        if (fock_get_getghc_call(fock)==1) then
+         if(gs_ham%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-         ABI_MALLOC_MANAGED(gvnlc, (/2,npw_k2*my_nspinor*ndat/))
-#else
-         ABI_MALLOC(gvnlc, (2,npw_k2*my_nspinor*ndat))
+           ABI_MALLOC_MANAGED(gvnlc, (/2,npw_k2*my_nspinor*ndat/))
 #endif
+         else
+           ABI_MALLOC(gvnlc, (2,npw_k2*my_nspinor*ndat))
+         end if
          gvnlc=gvnlxc_
        endif
      endif
@@ -944,19 +948,23 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
    if (gs_ham%usepaw==1 .and. has_fock) then
      gvnlxc_=gvnlxc_-gvnlc
+     if(gs_ham%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_FREE_MANAGED(gvnlc)
-#else
-     ABI_FREE(gvnlc)
+       ABI_FREE_MANAGED(gvnlc)
 #endif
+     else
+       ABI_FREE(gvnlc)
+     end if
    endif
 
    if (local_gvnlxc) then
+     if(gs_ham%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-     ABI_FREE_MANAGED(gvnlxc_)
-#else
-     ABI_FREE(gvnlxc_)
+       ABI_FREE_MANAGED(gvnlxc_)
 #endif
+     else
+       ABI_FREE(gvnlxc_)
+     end if
    end if
 
 !  Structured debugging : if prtvol=-level, stop here.
