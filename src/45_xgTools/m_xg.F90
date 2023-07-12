@@ -255,10 +255,14 @@ contains
   subroutine checkResizeI(array,current_dim,asked_dim)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-
     integer(kind=c_int32_t), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
+#else
+    integer, allocatable, intent(inout) :: array(:)
+#endif
     integer, intent(inout)  :: current_dim
     integer, intent(in   )  :: asked_dim
+
+#if defined HAVE_GPU && defined HAVE_YAKL
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
@@ -269,10 +273,6 @@ contains
     end if
 
 #else
-
-    integer, allocatable, intent(inout) :: array(:)
-    integer, intent(inout)  :: current_dim
-    integer, intent(in   )  :: asked_dim
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
@@ -301,10 +301,14 @@ contains
   subroutine checkResizeR(array,current_dim,asked_dim)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-
     real(kind=c_double), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
+#else
+    double precision, allocatable, intent(inout) :: array(:)
+#endif
     integer, intent(inout) :: current_dim
     integer, intent(in   ) :: asked_dim
+
+#if defined HAVE_GPU && defined HAVE_YAKL
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
@@ -315,10 +319,6 @@ contains
     end if
 
 #else
-
-    double precision, allocatable, intent(inout) :: array(:)
-    integer, intent(inout) :: current_dim
-    integer, intent(in   )  :: asked_dim
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
@@ -347,10 +347,14 @@ contains
   subroutine checkResizeC(array,current_dim,asked_dim)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-
     complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
+#else
+    complex(kind=8), allocatable, intent(inout) :: array(:)
+#endif
     integer, intent(inout)  :: current_dim
     integer, intent(in   )  :: asked_dim
+
+#if defined HAVE_GPU && defined HAVE_YAKL
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
@@ -362,13 +366,14 @@ contains
 
 #else
 
-    complex(kind=8), allocatable, intent(inout) :: array(:)
-    integer, intent(inout) :: current_dim
-    integer, intent(in   )  :: asked_dim
-
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+      if ( associated(array) ) then
+#else
       if ( allocated(array) ) then
+#endif
 #ifdef HAVE_OPENMP_OFFLOAD
         !$OMP TARGET EXIT DATA MAP(release:array)
 #endif
