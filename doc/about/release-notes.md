@@ -42,17 +42,17 @@ By X. Gonze (commit XXX).
 
 Version 9.10, released on June 24, 2023.
 List of changes with respect to version 9.8.
-<!-- Release notes updated on June 14, 2023. -->
+<!-- Release notes updated on July 11, 2023. -->
 
 Many thanks to the contributors to the ABINIT project between
 September 2022 and April 2023 (with some late contributions until June 2023).
 These release notes
 are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
-<!-- Merge requests up to and including MR919. Also, MR923 to MR925 are taken into account. -->
+<!-- Merge requests up to and including MR919. Also, MR923 to MR925 and MR928 are taken into account. -->
 
 The list of contributors includes:
 J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, D.D. O'Regan, S. Rostami,
+L. Mac Enulty, M. Mignolet, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -329,6 +329,14 @@ By X. Gonze (commits 1d56e983f and dfd207458)
 since phonon linewidths were calculated for spin=1 only. spin>=2 values are filled by NaNs. This small addition fixes the issue.
 Also, a minot format fix.
 By F. Akhmetov (Radioteddy on Github). commit bd76768 on abinit github, but directly ported to the trunk/release-9.10 branch.
+
+**D.15** Fix parser problem. The input would not be parsed correctly when more than one environment variable is present in the input file.
+By M. Mignolet (MR 928 backported to ABINITv9.10)
+
+**D.16** Improvements of documentation for spinmagntarget and occopt, in the case of ferromagnetic insulators.
+Improvements of documentation for rfasr, asr and chneut. Fix timing issues for Fock.
+Update doc about the change from npkpt to np_spkpt. Cross refer between U(J) tutorials
+By X. Gonze (several commits)
 
 * * *
 
