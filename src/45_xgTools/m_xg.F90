@@ -89,15 +89,9 @@ module m_xg
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
   integer, save, private :: liwork = 0
-#if defined HAVE_GPU && defined HAVE_YAKL
-  integer(kind=c_int32_t),        ABI_CONTIGUOUS pointer, save, private :: iwork(:) => null()
-  real(kind=c_double),            ABI_CONTIGUOUS pointer, save, private :: rwork(:) => null()
-  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, save, private :: cwork(:) => null()
-#else
   integer,                        allocatable, save, private :: iwork(:)
   real(kind=c_double),            allocatable, save, private :: rwork(:)
   complex(kind=c_double_complex), allocatable, save, private :: cwork(:)
-#endif
 
   type, public :: xgBlock_t
     integer, private :: space
@@ -110,8 +104,6 @@ module m_xg
     integer, private :: use_gpu
     real(kind=c_double)           , pointer, private :: vecR(:,:) => null()
     complex(kind=c_double_complex), pointer, private :: vecC(:,:) => null()
-    real(kind=c_double)           , pointer, private :: vecR_gpu(:,:) => null()
-    complex(kind=c_double_complex), pointer, private :: vecC_gpu(:,:) => null()
   end type xgBlock_t
 
   type, public :: xg_t
@@ -130,8 +122,6 @@ module m_xg
     complex(kind=c_double_complex) , allocatable, private :: vecC(:,:)
 #endif
     integer, private :: use_gpu
-    real(kind=c_double)           , pointer, private :: vecR_gpu(:,:) => null()
-    complex(kind=c_double_complex), pointer, private :: vecC_gpu(:,:) => null()
     type(xgBlock_t), public :: self
   end type xg_t
 
@@ -245,41 +235,17 @@ contains
 
   subroutine checkResizeI(array,current_dim,asked_dim)
 
-#if defined HAVE_GPU && defined HAVE_YAKL
-    integer(kind=c_int32_t), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
-#else
     integer, allocatable, intent(inout) :: array(:)
-#endif
     integer, intent(inout)  :: current_dim
     integer, intent(in   )  :: asked_dim
-
-#if defined HAVE_GPU && defined HAVE_YAKL
-
-    if ( current_dim < asked_dim  ) then
-      current_dim = asked_dim
-      if ( associated(array) ) then
-        ABI_FREE_MANAGED(array)
-      end if
-      ABI_MALLOC_MANAGED(array,(/asked_dim/))
-    end if
-
-#else
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
       if ( allocated(array) ) then
-#ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET EXIT DATA MAP(release:array)
-#endif
         ABI_FREE(array)
       end if
       ABI_MALLOC(array,(asked_dim))
-#ifdef HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET ENTER DATA MAP(alloc:array)
-#endif
     end if
-
-#endif
 
   end subroutine checkResizeI
   !!***
@@ -291,41 +257,17 @@ contains
 
   subroutine checkResizeR(array,current_dim,asked_dim)
 
-#if defined HAVE_GPU && defined HAVE_YAKL
-    real(kind=c_double), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
-#else
     double precision, allocatable, intent(inout) :: array(:)
-#endif
     integer, intent(inout) :: current_dim
     integer, intent(in   ) :: asked_dim
-
-#if defined HAVE_GPU && defined HAVE_YAKL
-
-    if ( current_dim < asked_dim  ) then
-      current_dim = asked_dim
-      if ( associated(array) ) then
-        ABI_FREE_MANAGED(array)
-      end if
-      ABI_MALLOC_MANAGED(array,(/asked_dim/))
-    end if
-
-#else
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
       if ( allocated(array) ) then
-#ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET EXIT DATA MAP(release:array)
-#endif
         ABI_FREE(array)
       end if
       ABI_MALLOC(array,(asked_dim))
-#ifdef HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET ENTER DATA MAP(alloc:array)
-#endif
     end if
-
-#endif
 
   end subroutine checkResizeR
   !!***
@@ -337,46 +279,18 @@ contains
 
   subroutine checkResizeC(array,current_dim,asked_dim)
 
-#if defined HAVE_GPU && defined HAVE_YAKL
-    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer, intent(inout) :: array(:)
-#else
     complex(kind=8), allocatable, intent(inout) :: array(:)
-#endif
     integer, intent(inout)  :: current_dim
     integer, intent(in   )  :: asked_dim
 
-#if defined HAVE_GPU && defined HAVE_YAKL
 
     if ( current_dim < asked_dim  ) then
       current_dim = asked_dim
-      if ( associated(array) ) then
-        ABI_FREE_MANAGED(array)
-      end if
-      ABI_MALLOC_MANAGED(array,(/asked_dim/))
-    end if
-
-#else
-
-    if ( current_dim < asked_dim  ) then
-      current_dim = asked_dim
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
-      if ( associated(array) ) then
-#else
       if ( allocated(array) ) then
-#endif
-#ifdef HAVE_OPENMP_OFFLOAD
-        !$OMP TARGET EXIT DATA MAP(release:array)
-#endif
         ABI_FREE(array)
       end if
       ABI_MALLOC(array,(asked_dim))
-#ifdef HAVE_OPENMP_OFFLOAD
-      !$OMP TARGET ENTER DATA MAP(alloc:array)
-#endif
     end if
-
-#endif
 
   end subroutine checkResizeC
   !!***
@@ -443,13 +357,7 @@ contains
       l_use_gpu = use_gpu
     end if
 
-    ! MG: Initialize arrays with zero to avoid SIGFPE in xmpi_sum
-    !FIXME GPU_DISABLED case shouldn't be handled here
-#if defined HAVE_GPU && defined HAVE_YAKL
-    if (l_use_gpu==ABI_GPU_KOKKOS .or. l_use_gpu==ABI_GPU_DISABLED) then
-#else
     if (l_use_gpu==ABI_GPU_KOKKOS) then
-#endif
 #if defined HAVE_GPU && defined HAVE_YAKL
       select case (space)
       case (SPACE_R,SPACE_CR)
@@ -518,22 +426,28 @@ contains
       end select
 #endif
 
-    !else
-    !FIXME Should be a simple "else", see note at "if" above
-    else if (l_use_gpu==ABI_GPU_DISABLED) then
+    else
 
-      !FIXME Settle this
-#ifndef HAVE_YAKL
       select case (space)
       case (SPACE_R,SPACE_CR)
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+        if ( associated(xg%vecR) ) then
+#else
         if ( allocated(xg%vecR) ) then
+#endif
           ABI_FREE(xg%vecR)
         end if
         ABI_MALLOC(xg%vecR,(1:rows,1:cols))
         xg%vecR(:,:) = zero
         xg%trans = 't'
       case (SPACE_C)
+!FIXME Settle this
+#if defined HAVE_GPU && defined HAVE_YAKL
+        if ( associated(xg%vecC) ) then
+#else
         if ( allocated(xg%vecC) ) then
+#endif
           ABI_FREE(xg%vecC)
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
@@ -542,7 +456,6 @@ contains
       case default
         ABI_ERROR("Invalid space")
       end select
-#endif
     end if
 
     xg%space = space
@@ -746,11 +659,6 @@ contains
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecR,(/ rows, cols /))
 
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      cptr = xomp_get_mapped_ptr(c_loc(array))
-      call c_f_pointer(cptr, xgBlock%vecR_gpu, (/ rows, cols /))
-#endif
       xgBlock%trans = 't'
     case ( SPACE_C )
       if ( fullsize/2 < cols*rows .or. mod(fullsize/2,rows) /= 0) then
@@ -759,11 +667,6 @@ contains
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecC,(/ rows, cols /))
 
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      cptr = xomp_get_mapped_ptr(c_loc(array))
-      call c_f_pointer(cptr, xgBlock%vecC_gpu, (/ rows, cols /))
-#endif
       xgBlock%trans = 'c'
     end select
 
@@ -1002,21 +905,9 @@ contains
     case (SPACE_R,SPACE_CR)
       cptr = getClocR(xg%rows,xg%cols,xg%vecR(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlock%vecR,(/ xgBlock%LDim,cols /))
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xg%use_gpu==ABI_GPU_OPENMP) then
-        cptr = xomp_get_mapped_ptr(c_loc(xg%vecR(:,fcol:fcol+cols-1)))
-        call c_f_pointer(cptr, xgBlock%vecR_gpu, (/ xgBlock%LDim,cols /))
-      end if
-#endif
     case(SPACE_C)
       cptr = getClocC(xg%rows,xg%cols,xg%vecC(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlock%vecC,(/ xgBlock%LDim,cols /))
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xg%use_gpu==ABI_GPU_OPENMP) then
-        cptr = xomp_get_mapped_ptr(c_loc(xg%vecC(:,fcol:fcol+cols-1)))
-        call c_f_pointer(cptr, xgBlock%vecC_gpu, (/ xgBlock%LDim,cols /))
-      end if
-#endif
     end select
 
   end subroutine xg_setBlock
@@ -1056,21 +947,9 @@ contains
     case (SPACE_R,SPACE_CR)
       cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecR,(/ xgBlockB%LDim,cols /))
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xgBlockB%use_gpu==ABI_GPU_OPENMP) then
-        cptr = xomp_get_mapped_ptr(c_loc(xgBlockA%vecR(:,fcol:fcol+cols-1)))
-        call c_f_pointer(cptr, xgBlockB%vecR_gpu, (/ xgBlockB%LDim,cols /))
-      end if
-#endif
     case(SPACE_C)
       cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(:,fcol:fcol+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecC,(/ xgBlockB%LDim,cols /))
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if(xgBlockB%use_gpu==ABI_GPU_OPENMP) then
-        cptr = xomp_get_mapped_ptr(c_loc(xgBlockA%vecC(:,fcol:fcol+cols-1)))
-        call c_f_pointer(cptr, xgBlockB%vecC_gpu, (/ xgBlockB%LDim,cols /))
-      end if
-#endif
     end select
 
   end subroutine xgBlock_setBlock
@@ -3763,28 +3642,6 @@ contains
   end subroutine xgBlock_copy_from_gpu
   !!***
 
-#if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
-  !!****f* m_xg/xgBlock_map_gpu_ptr
-  !!
-  !! NAME
-  !! xgBlock_map_gpu_ptr
-
-  subroutine xgBlock_map_gpu_ptr(xgBlock)
-    type(xgBlock_t), intent(in   ) :: xgBlock
-    type(c_ptr) :: gpu_ptr
-
-    select case(xgBlock%space)
-    case (SPACE_R,SPACE_CR)
-      gpu_ptr = xomp_get_mapped_ptr(c_loc(xgBlock%vecR))
-      call c_f_pointer(gpu_ptr, xgBlock%vecR_gpu, (/ xgBlock%LDim, xgBlock%cols /))
-    case (SPACE_C)
-      gpu_ptr = xomp_get_mapped_ptr(c_loc(xgBlock%vecC))
-      call c_f_pointer(gpu_ptr, xgBlock%vecC_gpu, (/ xgBlock%LDim, xgBlock%cols /))
-    end select
-  end subroutine xgBlock_map_gpu_ptr
-  !!***
-#endif
-
   !!****f* m_xg/xgBlock_reshape
   !!
   !! NAME
@@ -4118,33 +3975,6 @@ contains
 
   subroutine xg_finalize()
 
-!FIXME Improvement needed, GPU variants aren't properly encapsulated
-#if defined HAVE_GPU && defined HAVE_YAKL
-
-    if ( associated(iwork) ) then
-      ABI_FREE_MANAGED(iwork)
-    end if
-    if ( associated(rwork) ) then
-      ABI_FREE_MANAGED(rwork)
-    end if
-    if ( associated(cwork) ) then
-      ABI_FREE_MANAGED(cwork)
-    end if
-
-#elif defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-
-    if ( allocated(iwork) ) then
-      !$OMP TARGET EXIT DATA MAP(release:iwork)
-    end if
-    if ( allocated(rwork) ) then
-      !$OMP TARGET EXIT DATA MAP(release:rwork)
-    end if
-    if ( allocated(cwork) ) then
-      !$OMP TARGET EXIT DATA MAP(release:cwork)
-    end if
-
-#else
-
     if ( allocated(iwork) ) then
       ABI_FREE(iwork)
     end if
@@ -4154,8 +3984,6 @@ contains
     if ( allocated(cwork) ) then
       ABI_FREE(cwork)
     end if
-
-#endif
 
     liwork = 0
     lrwork = 0
