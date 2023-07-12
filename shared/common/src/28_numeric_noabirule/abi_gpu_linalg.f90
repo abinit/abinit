@@ -119,7 +119,7 @@ end subroutine alloc_on_gpu
 !!  gpu_ptr = C_PTR on gpu memory location that has been allocated
 !!
 !! OUTPUT
-!!  cpu_ptr = C_PTR on cpu memory (obtained by c_loc)
+!!  dtab = fortran tab which will contains data
 !!
 !! SIDE EFFECTS
 !!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
@@ -127,13 +127,17 @@ end subroutine alloc_on_gpu
 !!
 !! SOURCE
 
-subroutine copy_from_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
+subroutine copy_from_gpu(dtab,gpu_ptr,size_in_bytes)
 
 !Arguments ------------------------------------
- type(c_ptr)                         :: cpu_ptr
+ real(dp),dimension(*)               :: dtab
  type(c_ptr)                         :: gpu_ptr
  integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
 
+!Local variables ------------------------------
+ type(c_ptr)                         :: cpu_ptr
+
+ if(.false.) write(std_out,*) dtab(1)
  ABI_UNUSED(cpu_ptr)
  ABI_UNUSED(gpu_ptr)
  ABI_UNUSED(size_in_bytes)
@@ -150,7 +154,7 @@ end subroutine copy_from_gpu
 !!
 !! INPUTS
 !!  size_in_bytes = size in bytes to allocate
-!!  cpu_ptr = C_PTR on cpu memory (obtained by c_loc)
+!!  dtab = fortran tab to copy
 !!
 !! OUTPUT
 !!  gpu_ptr= C_PTR on gpu memory location
@@ -161,13 +165,17 @@ end subroutine copy_from_gpu
 !!
 !! SOURCE
 
-subroutine copy_on_gpu(cpu_ptr,gpu_ptr,size_in_bytes)
+subroutine copy_on_gpu(dtab,gpu_ptr,size_in_bytes)
 
   !Arguments ------------------------------------
-  type(c_ptr)                         :: cpu_ptr
+  real(dp),dimension(*)               :: dtab
   type(c_ptr)                         :: gpu_ptr
   integer(kind=c_size_t), intent(in)  :: size_in_bytes ! size in byte (to be transfered)
 
+  !Local variables ------------------------------
+  type(c_ptr)                         :: cpu_ptr
+
+ if(.false.) write(std_out,*) dtab(1)
   ABI_UNUSED(cpu_ptr)
   ABI_UNUSED(gpu_ptr)
   ABI_UNUSED(size_in_bytes)
