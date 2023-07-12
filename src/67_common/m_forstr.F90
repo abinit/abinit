@@ -1071,9 +1071,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          call timab(924,2,tsec)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-         ! the following is done on CPU, so prefetch wave functions from device to host (for efficiency)
-         call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*my_nspinor*blocksize, CPU_DEVICE_ID)
-         call gpu_device_synchronize()
+         if(use_gpu_cuda==ABI_GPU_KOKKOS) then
+           ! the following is done on CPU, so prefetch wave functions from device to host (for efficiency)
+           call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*my_nspinor*blocksize, CPU_DEVICE_ID)
+           call gpu_device_synchronize()
+         end if
 #endif
 
 !        Accumulate stress tensor kinetic contributions
