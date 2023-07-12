@@ -29,6 +29,7 @@ module m_invars1
  use m_atomdata
  use m_dtset
  use m_nctk
+ use m_xomp
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -577,7 +578,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda/=ABI_GPU_DISABLED) use_gpu_cuda=ABI_GPU_LEGACY
+   if (dtsets(idtset)%use_gpu_cuda/=ABI_GPU_DISABLED) use_gpu_cuda=dtsets(idtset)%use_gpu_cuda
 end do
 
  dtsets(:)%use_nvtx=0
@@ -586,15 +587,6 @@ end do
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
    if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
- end do
-#endif
-
- dtsets(:)%use_kokkos=0
-#if defined HAVE_GPU_CUDA && defined HAVE_KOKKOS
- do idtset=1,ndtset_alloc
-   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_kokkos',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_kokkos=intarr(1)
  end do
 #endif
 
@@ -618,6 +610,38 @@ end do
 &     'Action: change the input variable use_gpu_cuda.'
      ABI_ERROR(msg)
    end if
+   if(use_gpu_cuda==ABI_GPU_OPENMP) then
+#if !defined HAVE_OPENMP_OFFLOAD
+     write(msg,'(7a)')&
+&     'Input variables use_gpu_cuda is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
+&     'with OpenMP GPU offloading enabled !',ch10,&
+&     'Action: change the input variable use_gpu_cuda',ch10,&
+&     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
+     ABI_ERROR(msg)
+#endif
+     if(xomp_get_num_devices() == 0) then
+       write(msg,'(13a)')&
+&       'Input variables use_gpu_cuda is set to use OpenMP GPU backend ',ch10,&
+&       'but no GPU is visible by OpenMP.',ch10,&
+&       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
+&       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
+&       'as to which CUDA version is supported.',ch10,&
+&       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
+&       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
+       ABI_ERROR(msg)
+     end if
+
+   else if(use_gpu_cuda==ABI_GPU_KOKKOS) then
+#if !defined HAVE_KOKKOS || !defined HAVE_YAKL
+     write(msg,'(7a)')&
+&     'Input variables use_gpu_cuda is set to use Kokkos backend but abinit hasn''t been built',ch10,&
+&     'with Kokkos and/or YAKL dependencies enabled !',ch10,&
+&     'Action: change the input variable use_gpu_cuda',ch10,&
+&     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
+     ABI_ERROR(msg)
+#endif
+   end if
+
 #else
    write(msg,'(7a)')&
 &   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
