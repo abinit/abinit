@@ -1916,7 +1916,7 @@ tolerances: {tolvrs: 1.00E-14, }
        3               3       -2.931595        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    5.029244E-11   -4.327701E-12   -4.659967E-12
@@ -3470,7 +3470,7 @@ tolerances: {tolvrs: 1.00E-14, }
        3               3       -2.934982        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    3.875567E-12   -6.082158E-12   -6.779510E-12
@@ -5019,7 +5019,7 @@ tolerances: {tolvrs: 1.00E-14, }
        3               3       -2.928426        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    6.587397E-12   -4.935421E-12   -9.661049E-12
