@@ -134,6 +134,7 @@ MODULE m_bandfft_kpt
   integer, allocatable :: recvcount_fft(:)      ! Number of pw to receive from others proc fft
   integer, allocatable :: recvdisp_fft(:)       ! Positions for receiving
   integer, allocatable :: kg_k_fft(:,:)         ! planewaves coordinates
+  integer              :: use_gpu_cuda          ! if this structure will be used with GPU
 
  end type bandfft_kpt_type
 !!***
@@ -209,13 +210,14 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,nband,nkpt,npwarr,nsppol)
+subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,nband,nkpt,npwarr,nsppol,use_gpu_cuda)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mgfft,mkmem,mpw,nkpt,nsppol
  type(bandfft_kpt_type),pointer :: bandfft_kpt_in(:)
  type(MPI_type),intent(inout) :: mpi_enreg
+ integer,intent(in),optional :: use_gpu_cuda
 !arrays
  integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
  integer,intent(in) :: kg(3,mpw*mkmem),npwarr(nkpt)
@@ -275,6 +277,8 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
  bandfft_kpt_in(:)%flag1_is_allocated=0
  bandfft_kpt_in(:)%flag2_is_allocated=0
  bandfft_kpt_in(:)%flag3_is_allocated=0
+ bandfft_kpt_in(:)%use_gpu_cuda=ABI_GPU_DISABLED
+ if(present(use_gpu_cuda)) bandfft_kpt_in(:)%use_gpu_cuda=use_gpu_cuda
 
  do isppol=1,nsppol
    ikg=0
@@ -594,7 +598,11 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
 !    Tabs which are common to istwf_k=1 and 2
 #if defined HAVE_GPU && defined HAVE_YAKL
      if (.not. associated(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather)) then
-       ABI_MALLOC_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather,(/3,ndatarecv/))
+       if(bandfft_kpt_in(ikpt_this_proc)%use_gpu_cuda==ABI_GPU_KOKKOS) then
+         ABI_MALLOC_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather,(/3,ndatarecv/))
+       else
+         ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather,(3,ndatarecv))
+       end if
      end if
 #else
      if (.not. allocated(bandfft_kpt_in(ikpt_this_proc)%kg_k_gather)) then
@@ -707,13 +715,26 @@ subroutine bandfft_kpt_init2(bandfft_kpt_in,dimffnl,ffnl_gather,ikpt_this_proc,k
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  if (associated(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)) then
-   ABI_FREE_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)
+   if(bandfft_kpt_in(ikpt_this_proc)%use_gpu_cuda==ABI_GPU_KOKKOS) then
+     ABI_FREE_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)
+   else
+     ABI_FREE(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)
+   end if
  end if
- if (size(kinpw_gather)>0) then
-   ABI_MALLOC_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(/ndatarecv/))
-   bandfft_kpt_in(ikpt_this_proc)%kinpw_gather(:)     =kinpw_gather(:)
+ if(bandfft_kpt_in(ikpt_this_proc)%use_gpu_cuda==ABI_GPU_KOKKOS) then
+   if (size(kinpw_gather)>0) then
+     ABI_MALLOC_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(/ndatarecv/))
+     bandfft_kpt_in(ikpt_this_proc)%kinpw_gather(:)     =kinpw_gather(:)
+   else
+     ABI_MALLOC_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(/0/))
+   end if
  else
-   ABI_MALLOC_MANAGED(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(/0/))
+   if (size(kinpw_gather)>0) then
+     ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(ndatarecv))
+     bandfft_kpt_in(ikpt_this_proc)%kinpw_gather(:)     =kinpw_gather(:)
+   else
+     ABI_MALLOC(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather,(0))
+   end if
  end if
 #else
  if (allocated(bandfft_kpt_in(ikpt_this_proc)%kinpw_gather)) then
@@ -799,7 +820,11 @@ subroutine bandfft_kpt_destroy(bandfft_kpt_in)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  if (associated(bandfft_kpt_in%kg_k_gather)) then
-   ABI_FREE_MANAGED(bandfft_kpt_in%kg_k_gather)
+   if(bandfft_kpt_in%use_gpu_cuda==ABI_GPU_KOKKOS) then
+     ABI_FREE_MANAGED(bandfft_kpt_in%kg_k_gather)
+   else
+     ABI_FREE(bandfft_kpt_in%kg_k_gather)
+   end if
  end if
 #else
  if (allocated(bandfft_kpt_in%kg_k_gather)) then
@@ -828,7 +853,11 @@ subroutine bandfft_kpt_destroy(bandfft_kpt_in)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
  if (associated(bandfft_kpt_in%kinpw_gather)) then
-   ABI_FREE_MANAGED(bandfft_kpt_in%kinpw_gather)
+   if(bandfft_kpt_in%use_gpu_cuda==ABI_GPU_KOKKOS) then
+     ABI_FREE_MANAGED(bandfft_kpt_in%kinpw_gather)
+   else
+     ABI_FREE(bandfft_kpt_in%kinpw_gather)
+   end if
  end if
 #else
  if (allocated(bandfft_kpt_in%kinpw_gather)) then
@@ -1005,13 +1034,20 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
 ! &           bandfft_kpt_in(jkpt)%ind_kg_mpi_to_seq
 !          end if
 
+         bandfft_kpt_out(jkpt)%use_gpu_cuda=bandfft_kpt_in(jkpt)%use_gpu_cuda
 #if defined HAVE_GPU && defined HAVE_YAKL
          if (associated(bandfft_kpt_in(jkpt)%kg_k_gather)) then
            sz1=size(bandfft_kpt_in(jkpt)%kg_k_gather,1)
            sz2=size(bandfft_kpt_in(jkpt)%kg_k_gather,2)
-           ABI_MALLOC_MANAGED(bandfft_kpt_out(jkpt)%kg_k_gather,(/sz1,sz2/))
-           bandfft_kpt_out(jkpt)%kg_k_gather= &
-&           bandfft_kpt_in(jkpt)%kg_k_gather
+           if(bandfft_kpt_in(jkpt)%use_gpu_cuda==ABI_GPU_KOKKOS) then
+             ABI_MALLOC_MANAGED(bandfft_kpt_out(jkpt)%kg_k_gather,(/sz1,sz2/))
+             bandfft_kpt_out(jkpt)%kg_k_gather= &
+&             bandfft_kpt_in(jkpt)%kg_k_gather
+           else
+             ABI_MALLOC(bandfft_kpt_out(jkpt)%kg_k_gather,(sz1,sz2))
+             bandfft_kpt_out(jkpt)%kg_k_gather= &
+&             bandfft_kpt_in(jkpt)%kg_k_gather
+           end if
          end if
 #else
          if (allocated(bandfft_kpt_in(jkpt)%kg_k_gather)) then
@@ -1066,9 +1102,15 @@ subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandff
 #if defined HAVE_GPU && defined HAVE_YAKL
          if (associated(bandfft_kpt_in(jkpt)%kinpw_gather)) then
            sz1=size(bandfft_kpt_in(jkpt)%kinpw_gather)
-           ABI_MALLOC_MANAGED(bandfft_kpt_out(jkpt)%kinpw_gather,(/sz1/))
-           bandfft_kpt_out(jkpt)%kinpw_gather= &
-&           bandfft_kpt_in(jkpt)%kinpw_gather
+           if(bandfft_kpt_in(jkpt)%use_gpu_cuda==ABI_GPU_KOKKOS) then
+             ABI_MALLOC_MANAGED(bandfft_kpt_out(jkpt)%kinpw_gather,(/sz1/))
+             bandfft_kpt_out(jkpt)%kinpw_gather= &
+&             bandfft_kpt_in(jkpt)%kinpw_gather
+           else
+             ABI_MALLOC(bandfft_kpt_out(jkpt)%kinpw_gather,(sz1))
+             bandfft_kpt_out(jkpt)%kinpw_gather= &
+&             bandfft_kpt_in(jkpt)%kinpw_gather
+           end if
          end if
 #else
          if (allocated(bandfft_kpt_in(jkpt)%kinpw_gather)) then
@@ -1606,12 +1648,20 @@ subroutine bandfft_kpt_mpi_recv(output,sender,tag,spaceComm,ierr)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
    if (associated(output%kg_k_gather)) then
-     ABI_FREE_MANAGED(output%kg_k_gather)
+     if(output%use_gpu_cuda==ABI_GPU_KOKKOS) then
+       ABI_FREE_MANAGED(output%kg_k_gather)
+     else
+       ABI_FREE(output%kg_k_gather)
+     end if
    end if
    if (size1_kg_k_gather*size2_kg_k_gather>0) then
      nsize=size1_kg_k_gather*size2_kg_k_gather
      sz1=size1_kg_k_gather;sz2=size2_kg_k_gather
-     ABI_MALLOC_MANAGED(output%kg_k_gather,(/sz1,sz2/))
+     if(output%use_gpu_cuda==ABI_GPU_KOKKOS) then
+       ABI_MALLOC_MANAGED(output%kg_k_gather,(/sz1,sz2/))
+     else
+       ABI_MALLOC(output%kg_k_gather,(sz1,sz2))
+     end if
      output%kg_k_gather(:,:)=reshape(buffer_int(ipck+1:ipck+nsize),(/sz1,sz2/))
      ipck=ipck+nsize
    end if
@@ -1807,10 +1857,18 @@ subroutine bandfft_kpt_mpi_recv(output,sender,tag,spaceComm,ierr)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
    if (associated(output%kinpw_gather)) then
-     ABI_FREE_MANAGED(output%kinpw_gather)
+     if(output%use_gpu_cuda==ABI_GPU_KOKKOS) then
+       ABI_FREE_MANAGED(output%kinpw_gather)
+     else
+       ABI_FREE(output%kinpw_gather)
+     endif
    end if
    if (size_kinpw_gather>0) then
-     ABI_MALLOC_MANAGED(output%kinpw_gather,(/size_kinpw_gather/))
+     if(output%use_gpu_cuda==ABI_GPU_KOKKOS) then
+       ABI_MALLOC_MANAGED(output%kinpw_gather,(/size_kinpw_gather/))
+     else
+       ABI_MALLOC(output%kinpw_gather,(size_kinpw_gather))
+     endif
      output%kinpw_gather(:)=buffer_dp(ipck+1:ipck+size_kinpw_gather)
      ipck=ipck+size_kinpw_gather
    end if
@@ -2020,11 +2078,19 @@ subroutine bandfft_kpt_restoretabs(bandfft_kpt_out,ffnl,ph3d,kpg,kinpw)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
    if (associated(bandfft_kpt_out%kinpw_gather)) then
-     ABI_FREE_MANAGED(bandfft_kpt_out%kinpw_gather)
+     if(bandfft_kpt_out%use_gpu_cuda==ABI_GPU_KOKKOS) then
+       ABI_FREE_MANAGED(bandfft_kpt_out%kinpw_gather)
+     else
+       ABI_FREE(bandfft_kpt_out%kinpw_gather)
+     end if
    end if
    if (allocated(kinpw)) then
      is1=size(kinpw,1)
-     ABI_MALLOC_MANAGED(bandfft_kpt_out%kinpw_gather,(/is1/))
+     if(bandfft_kpt_out%use_gpu_cuda==ABI_GPU_KOKKOS) then
+       ABI_MALLOC_MANAGED(bandfft_kpt_out%kinpw_gather,(/is1/))
+     else
+       ABI_MALLOC(bandfft_kpt_out%kinpw_gather,(is1))
+     end if
      bandfft_kpt_out%kinpw_gather(:)=kinpw(:)
      ABI_FREE(kinpw)
    end if
