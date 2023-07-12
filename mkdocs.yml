@@ -213,7 +213,7 @@ nav:
         - eph for zero-point renormalization : tutorial/eph4zpr.md
         #- tutorial/eph4isotc.md
         - eph_legacy : tutorial/eph_legacy.md
-        - tdepes_legacy : tutorial/eph_tdep_legacy.md
+        - eph_tdep_legacy : tutorial/eph_tdep_legacy.md
     - Multibinit:
         - introduction to multibinit: tutorial/multibinit.md
         - lattice_model: tutorial/lattice_model.md
