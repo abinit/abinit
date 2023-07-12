@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t36/t36.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v2_t36/t36.abi
 - output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
@@ -125,6 +125,8 @@ _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.096 Mbytes.
             acell4     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
             acell5     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix1     3.33333333E-01
            diemix2     3.33333333E-01
@@ -367,8 +369,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.500   => boxcut(ratio)=   2.04358
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1170,6 +1172,8 @@ band_energy         : -2.13298801285219E+00
             acell4     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
             acell5     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix1     3.33333333E-01
            diemix2     3.33333333E-01
@@ -1486,10 +1490,10 @@ P          mk1mem5          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.4
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  34 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.4
+.Delivered  98 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.9  wall=          4.1
