@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h50 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h32 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/paral_t55_MPI4/t55.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI4/paral_t55_MPI4/t55.abi
 - output file    -> t55_MPI4.abo
 - root for input  files -> t55_MPI4i
 - root for output files -> t55_MPI4o
@@ -333,8 +333,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/31ga.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/31ga.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/31ga.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, only for tests )
 - 31.00000   3.00000    900101                znucl, zion, pspdat
     5    3    2    2       267   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -352,8 +352,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.525725
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -975,6 +975,31 @@ tolerances: {tolwfr: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.142681        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.142681        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.142681        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality,
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    9.877479E-01   -5.912693E-16   -7.446902E-16
+         1         2    2.413980E-16    9.877479E-01    7.730100E-16
+         1         3   -1.935340E-17    5.912693E-16    9.877479E-01
+         2         1   -9.877479E-01    5.912693E-16    7.446902E-16
+         2         2   -2.413980E-16   -9.877479E-01   -7.730100E-16
+         2         3    1.935340E-17   -5.912693E-16   -9.877479E-01
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1077,47 +1102,47 @@ tolerances: {tolwfr: 1.00E-16, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.2988010091         0.0000000000
+   1    1   1    1         0.2988075189         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.2988075189         0.0000000000
-   1    1   2    2        -0.0000000000        -0.0000000000
+   1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.2988010091         0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
+   2    1   2    1         0.2988075189         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-   2    1   1    2        -0.0000000000        -0.0000000000
-   2    1   2    2        -0.2988075189        -0.0000000000
+   2    1   1    2        -0.0000000000         0.0000000000
+   2    1   2    2        -0.2988075189         0.0000000000
    2    1   3    2        -0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.2988010091         0.0000000000
+   3    1   3    1         0.2988075189         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
-   3    1   3    2        -0.2988075189        -0.0000000000
+   3    1   3    2        -0.2988075189         0.0000000000
   
-   1    2   1    1        -0.2988075184        -0.0000000000
+   1    2   1    1        -0.2988075184         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
-   1    2   3    1         0.0000000000        -0.0000000000
-   1    2   1    2         0.2988015518         0.0000000000
+   1    2   3    1         0.0000000000         0.0000000000
+   1    2   1    2         0.2988075184         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1        -0.2988075184         0.0000000000
-   2    2   3    1        -0.0000000000        -0.0000000000
+   2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.2988015518         0.0000000000
+   2    2   2    2         0.2988075184         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
-   3    2   1    1        -0.0000000000        -0.0000000000
-   3    2   2    1        -0.0000000000        -0.0000000000
+   3    2   1    1        -0.0000000000         0.0000000000
+   3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.2988075184         0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.2988015518         0.0000000000
+   3    2   3    2         0.2988075184         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
@@ -1137,98 +1162,98 @@ tolerances: {tolwfr: 1.00E-16, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4         1.0590885811         0.0000000000
+   1    1   1    4         0.9877479311         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    3    1   1    4        -0.0000000000         0.0000000000
-   1    2   1    4        -0.9164072811         0.0000000000
+   1    2   1    4        -0.9877479311         0.0000000000
    2    2   1    4        -0.0000000000         0.0000000000
-   3    2   1    4        -0.0000000000         0.0000000000
+   3    2   1    4         0.0000000000         0.0000000000
   
    1    1   2    4        -0.0000000000         0.0000000000
-   2    1   2    4         1.0590885811         0.0000000000
+   2    1   2    4         0.9877479311         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
-   2    2   2    4        -0.9164072811         0.0000000000
+   2    2   2    4        -0.9877479311         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
   
    1    1   3    4        -0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-   3    1   3    4         1.0590885811         0.0000000000
+   3    1   3    4         0.9877479311         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
    2    2   3    4        -0.0000000000         0.0000000000
-   3    2   3    4        -0.9164072811         0.0000000000
+   3    2   3    4        -0.9877479311         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1         1.0590885868         0.0000000000
-   2    4   1    1         0.0000000000         0.0000000000
+   1    4   1    1         0.9877479242         0.0000000000
+   2    4   1    1        -0.0000000000         0.0000000000
    3    4   1    1        -0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1         1.0590885868         0.0000000000
+   2    4   2    1         0.9877479242         0.0000000000
    3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1        -0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1         1.0590885868         0.0000000000
+   3    4   3    1         0.9877479242         0.0000000000
   
-   1    4   1    2        -0.9164072616         0.0000000000
+   1    4   1    2        -0.9877479242         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
   
-   1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -0.9164072616         0.0000000000
+   1    4   2    2        -0.0000000000         0.0000000000
+   2    4   2    2        -0.9877479242         0.0000000000
    3    4   2    2        -0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
-   3    4   3    2        -0.9164072616         0.0000000000
+   3    4   3    2        -0.9877479242         0.0000000000
   
   
   
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -6.878886E-06 -6.878885E-06 -6.878885E-06  2.130482E-03  2.130482E-03
-   2.130482E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.130493E-03  2.130493E-03
+   2.130493E-03
  Phonon frequencies in cm-1    :
-- -1.509741E+00 -1.509741E+00 -1.509741E+00  4.675867E+02  4.675867E+02
--  4.675867E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.675892E+02  4.675892E+02
+-  4.675892E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -6.878886E-06 -6.878885E-06  2.245037E-05  2.130482E-03  2.130482E-03
-   2.155898E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.130493E-03  2.130493E-03
+   2.155775E-03
  Phonon frequencies in cm-1    :
-- -1.509741E+00 -1.509741E+00  4.927286E+00  4.675867E+02  4.675867E+02
--  4.731648E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.675892E+02  4.675892E+02
+-  4.731379E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-  -6.878886E-06 -6.878885E-06  2.245037E-05  2.130482E-03  2.130482E-03
-   2.155898E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.130493E-03  2.130493E-03
+   2.155775E-03
  Phonon frequencies in cm-1    :
-- -1.509741E+00 -1.509741E+00  4.927286E+00  4.675867E+02  4.675867E+02
--  4.731648E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.675892E+02  4.675892E+02
+-  4.731379E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-  -6.878885E-06 -6.878885E-06  2.245037E-05  2.130482E-03  2.130482E-03
-   2.155898E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.130493E-03  2.130493E-03
+   2.155775E-03
  Phonon frequencies in cm-1    :
-- -1.509741E+00 -1.509741E+00  4.927286E+00  4.675867E+02  4.675867E+02
--  4.731648E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.675892E+02  4.675892E+02
+-  4.731379E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1432,51 +1457,57 @@ P          mk1mem4          4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          5.4        0.09      0.001
-- Total wall clock time (s,m,h):          5.5        0.09      0.002
+- Total cpu        time (s,m,h):          3.9        0.07      0.001
+- Total wall clock time (s,m,h):          4.0        0.07      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0
 -
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.3, wall_time =            1.4
+- cpu_time =            1.0, wall_time =            1.0
 -
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- invars2                           0.387   7.2         0.389   7.1              4      -1.00        1.00       1.00
-- fourwf%(pot)                      0.131   2.4         0.132   2.4           2375      -1.00        0.99       0.99
-- pspini                            0.091   1.7         0.091   1.7              4      -1.00        1.00       1.00
-- abinit(2)                         0.084   1.6         0.084   1.5              1      -1.00        1.00       1.00
-- ewald                             0.034   0.6         0.034   0.6              2      -1.00        1.00       1.00
-- others (134)                      0.138   2.6         0.138   2.5             -1      -1.00        1.00       1.00
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- get_dtsets_pspheads                       0.375   9.5         0.376   9.4              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.095   2.4         0.096   2.4           2375      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.076   1.9         0.077   1.9              1      -1.00        1.00       1.00
+- pspini                                    0.069   1.8         0.069   1.7              4      -1.00        1.00       1.00
+- abinit(outvars)                           0.064   1.6         0.068   1.7              1      -1.00        0.95       0.95
+- abinit(after driver)                      0.049   1.2         0.055   1.4              1      -1.00        0.89       0.89
+- ewald                                     0.026   0.7         0.026   0.7              2      -1.00        1.00       1.00
+- others (153)                              0.115   2.9         0.117   2.9             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                          0.866  16.1         0.870  15.8                                  1.00       1.00
+- subtotal                                  0.870  22.1         0.883  22.0                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           5.4, wall_time =           5.5
+- cpu_time =           3.9, wall_time =           4.0
 -
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- invars2                           1.615  30.1         1.621  29.4             16      -1.00        1.00       1.00
-- fourwf%(pot)                      0.492   9.2         0.495   9.0           8476      -1.00        0.99       0.99
-- pspini                            0.367   6.8         0.368   6.7             16      -1.00        1.00       1.00
-- abinit(2)                         0.337   6.3         0.338   6.1              4      -1.00        1.00       1.00
-- ewald                             0.138   2.6         0.139   2.5              8      -1.00        1.00       1.00
-- dfpt_vtorho:MPI                   0.095   1.8         0.096   1.7            128      -1.00        1.00       1.00
-- fourwf%(G->r)                     0.087   1.6         0.088   1.6           2880      -1.00        0.99       0.99
-- nonlop(apply)                     0.070   1.3         0.071   1.3           7260      -1.00        0.99       0.99
-- stress                            0.048   0.9         0.048   0.9              4      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)                0.048   0.9         0.048   0.9              4      -1.00        1.00       1.00
-- vtorho(MPI)                       0.046   0.9         0.046   0.8             48      -1.00        1.00       1.00
-- fourdp                            0.040   0.7         0.040   0.7            656      -1.00        1.00       1.00
-- others (127)                      0.155   2.9         0.155   2.8             -1      -1.00        1.00       1.00
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- get_dtsets_pspheads                       1.492  38.0         1.495  37.3              4      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.440  11.2         0.441  11.0              4      -1.00        1.00       1.00
+- fourwf%(pot)                              0.338   8.6         0.340   8.5           8476      -1.00        1.00       1.00
+- pspini                                    0.275   7.0         0.275   6.9             16      -1.00        1.00       1.00
+- abinit(outvars)                           0.121   3.1         0.125   3.1              4      -1.00        0.97       0.97
+- ewald                                     0.104   2.7         0.105   2.6              8      -1.00        1.00       1.00
+- dfpt_vtorho:MPI                           0.067   1.7         0.068   1.7            128      -1.00        1.00       1.00
+- fourwf%(G->r)                             0.060   1.5         0.061   1.5           2880      -1.00        1.00       1.00
+- abinit(after driver)                      0.049   1.2         0.055   1.4              4      -1.00        0.89       0.89
+- nonlop(apply)                             0.046   1.2         0.046   1.2           7260      -1.00        0.99       0.99
+- stress                                    0.036   0.9         0.036   0.9              4      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.036   0.9         0.036   0.9              4      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.035   0.9         0.037   0.9              4      -1.00        0.96       0.96
+- vtorho(MPI)                               0.033   0.8         0.033   0.8             48      -1.00        1.00       1.00
+- fourdp                                    0.028   0.7         0.028   0.7            656      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                          0.026   0.7         0.026   0.6             -4      -1.00        1.00       1.00
+- others (144)                              0.141   3.6         0.141   3.5             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                          3.537  65.9         3.552  64.5                                  1.00       1.00
+- subtotal                                  3.329  84.7         3.348  83.4                                  0.99       0.99
 
 ================================================================================
 
@@ -1556,10 +1587,10 @@ P          mk1mem4          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.6  wall=          5.7
++Overall time at end (sec) : cpu=          4.1  wall=          4.2
