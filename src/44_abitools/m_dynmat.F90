@@ -1330,7 +1330,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Write the effective charge tensor
  write(msg, '(a,a,a,a,a,a,a)' )&
    ' Effective charge tensors after ',ch10,&
-   ' imposition of the charge neutrality,',ch10,&
+   ' imposition of the charge neutrality (if requested by user),',ch10,&
    ' and eventual restriction to some part :',ch10,&
   '   atom    displacement  '
  call wrtout(ab_out,msg)

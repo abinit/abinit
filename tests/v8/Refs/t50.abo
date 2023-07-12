@@ -61,7 +61,7 @@
    and impose the ASR on the effective charges 
  
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.812043E+00    0.000000E+00   -7.262549E-21
