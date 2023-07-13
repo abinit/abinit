@@ -91,7 +91,7 @@
        3               3        0.035841        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    3.016338E+00   -5.866490E-18   -1.463092E-18

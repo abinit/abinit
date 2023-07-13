@@ -1,5 +1,5 @@
 
-.Version 9.9.2 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  2 Feb 2023.
-- ( at 18h33 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h32 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/TestBot_MPI4/paral_t66_MPI4/t66.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI4/paral_t66_MPI4/t66.abi
 - output file    -> t66_MPI4.abo
 - root for input  files -> t66_MPI4i
 - root for output files -> t66_MPI4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
 
  DATASET    1 : space group P3_2 2 1 (#154); Bravais hP (primitive hexag.)
 ================================================================================
@@ -214,9 +214,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
          ecut(hartree)=     24.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Si.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90944987
@@ -234,9 +234,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_gwr/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/O.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.41465230
@@ -1226,9 +1226,9 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.4749209459         0.0000000000
-   1    1   2    1         0.0155858299         0.0000000000
-   1    1   3    1         0.0054593484         0.0000000000
+   1    1   1    1         0.4748431914         0.0000000000
+   1    1   2    1         0.0156016042         0.0000000000
+   1    1   3    1         0.0057395966        -0.0000000000
    1    1   1    2        -0.0991753077        -0.0000000000
    1    1   2    2        -0.0197858084         0.0000000000
    1    1   3    2        -0.0202621463         0.0000000000
@@ -1254,9 +1254,9 @@ tolerances: {tolvrs: 1.00E-08, }
    1    1   2    9        -0.0089175753        -0.0000000000
    1    1   3    9         0.0050797028        -0.0000000000
   
-   2    1   1    1         0.0155858299         0.0000000000
-   2    1   2    1         0.4569239798         0.0000000000
-   2    1   3    1         0.0031519562         0.0000000000
+   2    1   1    1         0.0156016042         0.0000000000
+   2    1   2    1         0.4568280106        -0.0000000000
+   2    1   3    1         0.0033137576         0.0000000000
    2    1   1    2         0.0197859158         0.0000000000
    2    1   2    2         0.0010003269         0.0000000000
    2    1   3    2        -0.0009401865        -0.0000000000
@@ -1282,9 +1282,9 @@ tolerances: {tolvrs: 1.00E-08, }
    2    1   2    9        -0.1311514113         0.0000000000
    2    1   3    9         0.1174313371         0.0000000000
   
-   3    1   1    1         0.0054612273         0.0000000000
-   3    1   2    1         0.0031530410         0.0000000000
-   3    1   3    1         0.4959197477         0.0000000000
+   3    1   1    1         0.0050767032        -0.0000000000
+   3    1   2    1         0.0029310359         0.0000000000
+   3    1   3    1         0.4960072002        -0.0000000000
    3    1   1    2         0.0202622583         0.0000000000
    3    1   2    2        -0.0009402187        -0.0000000000
    3    1   3    2        -0.0700957608        -0.0000000000
@@ -1313,9 +1313,9 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   1    1        -0.0991753077         0.0000000000
    1    2   2    1         0.0197858084        -0.0000000000
    1    2   3    1         0.0202621463        -0.0000000000
-   1    2   1    2         0.4749209459         0.0000000000
-   1    2   2    2        -0.0155858299         0.0000000000
-   1    2   3    2        -0.0054593484         0.0000000000
+   1    2   1    2         0.4748431914         0.0000000000
+   1    2   2    2        -0.0156016042        -0.0000000000
+   1    2   3    2        -0.0057395966        -0.0000000000
    1    2   1    3        -0.0240435352         0.0000000000
    1    2   2    3         0.0235914333         0.0000000000
    1    2   3    3         0.0109452986        -0.0000000000
@@ -1341,9 +1341,9 @@ tolerances: {tolvrs: 1.00E-08, }
    2    2   1    1        -0.0197859158        -0.0000000000
    2    2   2    1         0.0010003269        -0.0000000000
    2    2   3    1        -0.0009401865         0.0000000000
-   2    2   1    2        -0.0155858299         0.0000000000
-   2    2   2    2         0.4569239798         0.0000000000
-   2    2   3    2         0.0031519562         0.0000000000
+   2    2   1    2        -0.0156016042        -0.0000000000
+   2    2   2    2         0.4568280106        -0.0000000000
+   2    2   3    2         0.0033137576        -0.0000000000
    2    2   1    3         0.0631631574         0.0000000000
    2    2   2    3        -0.0741314456         0.0000000000
    2    2   3    3        -0.0170774402         0.0000000000
@@ -1369,9 +1369,9 @@ tolerances: {tolvrs: 1.00E-08, }
    3    2   1    1        -0.0202622583        -0.0000000000
    3    2   2    1        -0.0009402187         0.0000000000
    3    2   3    1        -0.0700957608         0.0000000000
-   3    2   1    2        -0.0054612273         0.0000000000
-   3    2   2    2         0.0031530410         0.0000000000
-   3    2   3    2         0.4959197477         0.0000000000
+   3    2   1    2        -0.0050767032        -0.0000000000
+   3    2   2    2         0.0029310359        -0.0000000000
+   3    2   3    2         0.4960072002         0.0000000000
    3    2   1    3        -0.0093168758        -0.0000000000
    3    2   2    3         0.0180177398         0.0000000000
    3    2   3    3        -0.0700957608        -0.0000000000
@@ -1400,9 +1400,9 @@ tolerances: {tolvrs: 1.00E-08, }
    1    3   1    2        -0.0240436283        -0.0000000000
    1    3   2    2         0.0631632112        -0.0000000000
    1    3   3    2        -0.0093168477         0.0000000000
-   1    3   1    3         0.4479254967         0.0000000000
-   1    3   2    3         0.0000000000         0.0000000000
-   1    3   3    3         0.0000000000         0.0000000000
+   1    3   1    3         0.4478204202         0.0000000000
+   1    3   2    3        -0.0000000000         0.0000000000
+   1    3   3    3        -0.0000000000         0.0000000000
    1    3   1    4        -0.1034214799         0.0000000000
    1    3   2    4        -0.0391120748        -0.0000000000
    1    3   3    4        -0.0991586697         0.0000000000
@@ -1428,9 +1428,9 @@ tolerances: {tolvrs: 1.00E-08, }
    2    3   1    2         0.0235914870        -0.0000000000
    2    3   2    2        -0.0741313525        -0.0000000000
    2    3   3    2         0.0180176267        -0.0000000000
-   2    3   1    3         0.0000000000         0.0000000000
-   2    3   2    3         0.4839194290         0.0000000000
-   2    3   3    3        -0.0063039125         0.0000000000
+   2    3   1    3        -0.0000000000         0.0000000000
+   2    3   2    3         0.4838507818        -0.0000000000
+   2    3   3    3        -0.0066275153        -0.0000000000
    2    3   1    4        -0.0546679367        -0.0000000000
    2    3   2    4        -0.0519094609         0.0000000000
    2    3   3    4        -0.0631148202         0.0000000000
@@ -1457,8 +1457,8 @@ tolerances: {tolvrs: 1.00E-08, }
    3    3   2    2        -0.0170775210        -0.0000000000
    3    3   3    2        -0.0700957608         0.0000000000
    3    3   1    3        -0.0000000000         0.0000000000
-   3    3   2    3        -0.0063060821         0.0000000000
-   3    3   3    3         0.4959197477         0.0000000000
+   3    3   2    3        -0.0058620719        -0.0000000000
+   3    3   3    3         0.4960072002         0.0000000000
    3    3   1    4        -0.0972292043         0.0000000000
    3    3   2    4        -0.0639384546         0.0000000000
    3    3   3    4        -0.1373924023        -0.0000000000
@@ -1663,16 +1663,16 @@ tolerances: {tolvrs: 1.00E-08, }
    0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
    0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
    0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
-   0.000000E+00  0.000000E+00  0.000000E+00  2.622651E-03  2.644899E-03
-   2.644899E-03  2.661173E-03  3.291720E-03  3.291720E-03  3.337157E-03
-   3.337157E-03  3.430484E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.622915E-03  2.644663E-03
+   2.644663E-03  2.660788E-03  3.291456E-03  3.291456E-03  3.337353E-03
+   3.337353E-03  3.430335E-03
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
--  0.000000E+00  0.000000E+00  0.000000E+00  5.756053E+02  5.804883E+02
--  5.804883E+02  5.840600E+02  7.224490E+02  7.224490E+02  7.324214E+02
--  7.324214E+02  7.529041E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.756632E+02  5.804364E+02
+-  5.804364E+02  5.839754E+02  7.223911E+02  7.223911E+02  7.324643E+02
+-  7.324643E+02  7.528716E+02
  chkph3 : WARNING -
   Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
@@ -1918,10 +1918,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.5
+- Proc.   0 individual time (sec): cpu=         10.6  wall=         10.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         53.6  wall=         53.8
++Overall time at end (sec) : cpu=         42.6  wall=         42.7

@@ -4076,8 +4076,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  Should check values of fftalg
 
-!  rfasr=2 possible only when electric field response is computed.
-
 !  Must have nqpt=1 for rfphon=1
 
 !  ** Here ends the checking section **************************************

@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,18 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h13 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h18 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v8_t83-t84/t83.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v8_t83-t84/t83.abi
 - output file    -> t83.abo
 - root for input  files -> t83i
 - root for output files -> t83o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -355,9 +355,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -375,9 +375,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -1447,6 +1447,31 @@ tolerances: {tolwfr: 1.00E-20, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -1.416978        0.000000
+       1               2        0.000000        0.000000
+       1               3       -0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -1.416978        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -1.416978        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.580395E+00   -2.316054E-13    1.810090E-13
+         1         2    1.281336E-13    2.580395E+00    6.783903E-13
+         1         3    1.791206E-13    3.173146E-13    2.580395E+00
+         2         1   -2.580395E+00    2.316054E-13   -1.810090E-13
+         2         2   -1.281336E-13   -2.580395E+00   -6.783903E-13
+         2         3   -1.791206E-13   -3.173146E-13   -2.580395E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1573,47 +1598,47 @@ tolerances: {tolwfr: 1.00E-20, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.0951787860         0.0000000000
+   1    1   1    1         0.0965806733         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2        -0.0965806733        -0.0000000000
+   1    1   1    2        -0.0965806733         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.0951787860         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   2    1         0.0965806733         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2        -0.0965806733         0.0000000000
-   2    1   3    2         0.0000000000        -0.0000000000
+   2    1   3    2         0.0000000000         0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.0951787860         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   3    1         0.0965806733         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
-   3    1   2    2         0.0000000000        -0.0000000000
+   3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2        -0.0965806733         0.0000000000
   
    1    2   1    1        -0.0965806733         0.0000000000
-   1    2   2    1         0.0000000000        -0.0000000000
-   1    2   3    1         0.0000000000        -0.0000000000
-   1    2   1    2         0.0966560048         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   2    1         0.0000000000         0.0000000000
+   1    2   3    1         0.0000000000         0.0000000000
+   1    2   1    2         0.0965806733         0.0000000000
+   1    2   2    2        -0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
   
-   2    2   1    1         0.0000000000        -0.0000000000
-   2    2   2    1        -0.0965806733        -0.0000000000
+   2    2   1    1         0.0000000000         0.0000000000
+   2    2   2    1        -0.0965806733         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.0966560048         0.0000000000
+   2    2   1    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.0965806733         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
   
-   3    2   1    1         0.0000000000        -0.0000000000
+   3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
-   3    2   3    1        -0.0965806733        -0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
+   3    2   3    1        -0.0965806733         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.0966560048         0.0000000000
+   3    2   3    2         0.0965806733         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
@@ -1633,60 +1658,60 @@ tolerances: {tolwfr: 1.00E-20, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4         1.8719058562         0.0000000000
+   1    1   1    4         2.5803949271         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
-   1    2   1    4        -3.2888839980         0.0000000000
-   2    2   1    4         0.0000000000         0.0000000000
+   1    2   1    4        -2.5803949271         0.0000000000
+   2    2   1    4        -0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
   
-   1    1   2    4         0.0000000000         0.0000000000
-   2    1   2    4         1.8719058562         0.0000000000
-   3    1   2    4        -0.0000000000         0.0000000000
+   1    1   2    4        -0.0000000000         0.0000000000
+   2    1   2    4         2.5803949271         0.0000000000
+   3    1   2    4         0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
-   2    2   2    4        -3.2888839980         0.0000000000
+   2    2   2    4        -2.5803949271         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
   
    1    1   3    4         0.0000000000         0.0000000000
-   2    1   3    4        -0.0000000000         0.0000000000
-   3    1   3    4         1.8719058562         0.0000000000
+   2    1   3    4         0.0000000000         0.0000000000
+   3    1   3    4         2.5803949271         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
    2    2   3    4        -0.0000000000         0.0000000000
-   3    2   3    4        -3.2888839980         0.0000000000
+   3    2   3    4        -2.5803949271         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1         1.8719058563         0.0000000000
-   2    4   1    1         0.0000000000         0.0000000000
+   1    4   1    1         2.5803949271         0.0000000000
+   2    4   1    1        -0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
    1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1         1.8719058563         0.0000000000
-   3    4   2    1        -0.0000000000         0.0000000000
+   2    4   2    1         2.5803949271         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
-   2    4   3    1        -0.0000000000         0.0000000000
-   3    4   3    1         1.8719058563         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1         2.5803949271         0.0000000000
   
-   1    4   1    2        -3.2888839979         0.0000000000
+   1    4   1    2        -2.5803949271         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2        -0.0000000000         0.0000000000
   
-   1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -3.2888839979         0.0000000000
+   1    4   2    2        -0.0000000000         0.0000000000
+   2    4   2    2        -2.5803949271         0.0000000000
    3    4   2    2        -0.0000000000         0.0000000000
   
    1    4   3    2        -0.0000000000         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
-   3    4   3    2        -3.2888839979         0.0000000000
+   3    4   3    2        -2.5803949271         0.0000000000
   
   
   
@@ -1696,38 +1721,38 @@ tolerances: {tolwfr: 1.00E-20, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -8.487139E-05 -8.487139E-05 -8.487139E-05  1.627903E-03  1.627903E-03
-   1.627903E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.634263E-03
  Phonon frequencies in cm-1    :
-- -1.862712E+01 -1.862712E+01 -1.862712E+01  3.572834E+02  3.572834E+02
--  3.572834E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.586793E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -8.487139E-05 -8.487139E-05  1.355777E-04  1.627903E-03  1.627903E-03
-   1.746017E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.786021E-03
  Phonon frequencies in cm-1    :
-- -1.862712E+01 -1.862712E+01  2.975587E+01  3.572834E+02  3.572834E+02
--  3.832065E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.919863E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-  -8.487139E-05 -8.487139E-05  1.355777E-04  1.627903E-03  1.627903E-03
-   1.746017E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.786021E-03
  Phonon frequencies in cm-1    :
-- -1.862712E+01 -1.862712E+01  2.975587E+01  3.572834E+02  3.572834E+02
--  3.832065E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.919863E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-  -8.487139E-05 -8.487139E-05  1.355777E-04  1.627903E-03  1.627903E-03
-   1.746017E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.786021E-03
  Phonon frequencies in cm-1    :
-- -1.862712E+01 -1.862712E+01  2.975587E+01  3.572834E+02  3.572834E+02
--  3.832065E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.919863E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2052,10 +2077,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.9  wall=         15.1
+- Proc.   0 individual time (sec): cpu=         11.3  wall=         11.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.9  wall=         15.1
+.Delivered  23 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.3  wall=         11.5

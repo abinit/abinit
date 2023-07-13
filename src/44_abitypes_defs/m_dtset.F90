@@ -572,7 +572,7 @@ type, public :: dataset_type
  integer :: recptrott
  integer :: rectesteg
  integer :: restartxf
- integer :: rfasr
+!integer :: rfasr
  integer :: rfddk
  integer :: rfelfd
  integer :: rfmagn
@@ -1933,7 +1933,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rectesteg          = dtin%rectesteg
  dtout%rcut               = dtin%rcut
  dtout%restartxf          = dtin%restartxf
- dtout%rfasr              = dtin%rfasr
  dtout%rfddk              = dtin%rfddk
  dtout%rfelfd             = dtin%rfelfd
  dtout%rfmagn             = dtin%rfmagn
@@ -3462,7 +3461,8 @@ subroutine chkvars(string)
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
- list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
+!list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
+ list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
