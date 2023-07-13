@@ -841,8 +841,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
 !      add  dtset%usepaw, pawspnorb, to define use_inversion
 !      add  jellslab and nzchempot , to define invar_z
 
-!      call symfind_expert(gprimd,msym,natom,noncoll,nptsym,nsym,&
-!        dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+!      call symfind_expert(gprimd,jellslab,msym,natom,nptsym,nspden,nsym,nzchempot,&
+!        dtset%prtvol,pawspnorb,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,use_inversion,xred,&
 !        chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=dtset%field_xred,invar_z=invar_z)
 
 
