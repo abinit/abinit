@@ -684,7 +684,7 @@ contains
     type(symmetry_type), intent(inout) :: sym
     integer, intent(out) :: errno
 
-    integer :: berryopt, invar_z, noncol
+    integer :: berryopt, invar_z
     integer :: use_inversion
     real(dp), pointer :: spinAt_(:,:)
     integer  :: sym_(3, 3, AB7_MAX_SYMMETRIES)
@@ -708,14 +708,9 @@ contains
     else
        invar_z = 0
     end if
-    if (sym%withSpin == 4) then
-       noncol = 1
-       spinAt_ => sym%spinAt
-    else if (sym%withSpin == 2) then
-       noncol = 0
+    if (sym%withSpin == 2 .or. sym%withSpin == 4) then
        spinAt_ => sym%spinAt
     else
-       noncol = 0
        ABI_MALLOC(spinAt_,(3, sym%nAtoms))
        spinAt_ = 0
     end if
@@ -728,7 +723,7 @@ contains
     if (sym%nsym == 0) then
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symfind."
        call symfind(sym%gprimd, AB7_MAX_SYMMETRIES, &
-            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, 0, sym%bravSym, spinAt_, &
+            & sym%nAtoms, sym%nBravSym, sym%withSpin, sym%nSym, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
             & use_inversion, sym%xRed, invardir_red=sym%field, invar_z=invar_z)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
