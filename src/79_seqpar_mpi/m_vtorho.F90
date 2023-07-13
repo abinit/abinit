@@ -1584,13 +1584,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
         & ,ch10,' =====  DMFT starts here                       ========'&
         & ,ch10,' ======================================================'
         call wrtout(std_out,msg,'COLL')
+        call flush_unit(std_out)
 
         ! Invoking python to execute the script
-        write(msg,'(2a)') "paw_dmft%myproc: ", paw_dmft%myproc
-        call wrtout(std_out,msg,'COLL')
-        write(msg,'(2a)') "dtfil%filnam_ds(3): ", dtfil%filnam_ds(3)
-        call wrtout(std_out,msg,'COLL')
-        call flush_unit(std_out)
         call Invoke_python_triqs (paw_dmft%myproc, trim(dtfil%filnam_ds(3))//c_null_char)
         call xmpi_barrier(paw_dmft%spacecomm)
         call flush_unit(std_out)
