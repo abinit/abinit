@@ -2365,7 +2365,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%pawusecp=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawxcdev',tread,'INT')
- if(tread==1) dtset%pawxcdev=intarr(1)
+ if(tread==1) then
+   dtset%pawxcdev=intarr(1)
+ else if (xc_is_mgga) then
+   dtset%pawxcdev=0
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spnorbscl',tread,'DPR')
  if(tread==1) dtset%spnorbscl=dprarr(1)
