@@ -655,6 +655,7 @@ end subroutine symfind
 !Local variables-------------------------------
 !scalars
  integer, save :: print_comment_tolsym=1
+ integer :: fixed_mismatch,mismatch_fft_tnons
  integer :: ierr,isym,use_inversion
  character(len=1000) :: msg
 !arrays
@@ -687,6 +688,7 @@ end subroutine symfind
   ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations,
   ! symmetrize the atomic positions and recompute the symmetry operations
   if(tolsym>1.00001e-8)then
+
     call symmetrize_tnons(nsym,symrel,tnons,tolsym)
     ABI_MALLOC(indsym,(4,natom,nsym))
     ABI_MALLOC(symrec,(3,3,nsym))
@@ -722,7 +724,7 @@ end subroutine symfind
     ABI_MALLOC(tnons_new,(3,nsym))
 
     call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
-&     tnons_new=tnons_new,tolsym=tolsym)
+&     fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
     tnons(:,1:nsym)=tnons_new(:,:)
     ABI_FREE(tnons_new)
   end if ! tolsym >1.00001e-8
