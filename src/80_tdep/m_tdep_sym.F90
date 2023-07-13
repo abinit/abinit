@@ -135,7 +135,7 @@ contains
 
   integer :: ptgroupma,isym,jatom,ii,jj,mu
   integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
-  integer :: jellslab,noncoll,use_inversion,chkprim,counter,nzchempot
+  integer :: use_inversion,chkprim,counter
   integer :: bravais(11)
   integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
   integer, allocatable :: symrel(:,:,:),symrel_tmp(:,:,:)
@@ -167,7 +167,6 @@ contains
 !  write(Invar%stdout,'(a)') 'Before tnons'
 
 ! Calcul des tnons
-  noncoll=0
   ABI_MALLOC(spinat,(3,Invar%natom_unitcell)); spinat(:,:)=0.d0
   use_inversion=1
   ABI_MALLOC(symrel    ,(3,3,Sym%msym)) ; symrel    (:,:,:)=0
@@ -175,7 +174,7 @@ contains
   ABI_MALLOC(Sym%tnons   ,(3,Sym%msym)) ; Sym%tnons   (:,:)=0.d0
   ABI_MALLOC(Sym%symafm    ,(Sym%msym)) ; Sym%symafm(:)    =1
   ABI_MALLOC(tnons_tmp   ,(3,Sym%msym)) ; tnons_tmp   (:,:)=0.d0
-  call symfind(Lattice%gprimd,Sym%msym,Invar%natom_unitcell,noncoll,Sym%nptsym,nsym,&
+  call symfind(Lattice%gprimd,Sym%msym,Invar%natom_unitcell,Sym%nptsym,1,nsym,&
 &      0,Sym%ptsymrel,spinat,Sym%symafm,symrel_tmp,tnons_tmp,tol8,Invar%typat_unitcell,use_inversion,xred_temp)
   ABI_FREE(spinat)
   if (Sym%nptsym.eq.nsym) then

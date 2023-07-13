@@ -167,7 +167,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  integer, save :: print_comment_tolsym=1
  integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
- integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: nobj,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,ucvol,sumalch
@@ -837,7 +837,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
      if (multiplicity==1) typat(:)=typat_read(:)
 
 !!!!! 
-!      should replace noncoll by nspden
 !      add  dtset%usepaw, pawspnorb, to define use_inversion
 !      add  jellslab and nzchempot , to define invar_z
 
@@ -850,7 +849,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
 
      ! Find the symmetry operations: nsym, symafm, symrel and tnons.
      ! Use nptsym and ptsymrel, as determined by symlatt
-     noncoll=0; if (nspden == 4) noncoll=1
      use_inversion=1
      if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
        ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
@@ -859,14 +857,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
 
      invar_z=0
      if(jellslab/=0 .or. nzchempot/=0)invar_z=2
-     call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
        dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
        chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=dtset%field_xred,invar_z=invar_z)
 
      !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
      if(ierr/=0)then
        ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
-       call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+       call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
          dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
          chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
        ABI_CHECK(ierr==0,"Error in group closure")
@@ -903,7 +901,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
          print_comment_tolsym=0
        endif
 
-       call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+       call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
          dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
          chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=field_xred,invar_z=invar_z)
 

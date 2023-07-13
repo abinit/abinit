@@ -1069,7 +1069,7 @@ subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,sym
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: jellslab,noncoll,nptsym,nzchempot,use_inversion
+  integer :: nptsym,use_inversion
   integer :: chkprim
 ! Arraiys
   integer :: bravais(11),ptsymrel(3,3,msym)
@@ -1080,7 +1080,6 @@ subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,sym
 
 ! given the acel, rprim and coor
 ! this suroutine find the symmetry group
-noncoll  = 0
 spinat   = 0
 chkprim  = 0
 use_inversion = 0
@@ -1091,7 +1090,7 @@ use_inversion = 0
 !write(std_out,*) 'nptsym', nptsym
 
   call matr3inv(rprimd,gprimd)
-  call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+  call symfind(gprimd,msym,natom,nptsym,0,nsym,&
 &           0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !write(std_out,*) 'nsym', nsym
