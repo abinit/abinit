@@ -57,6 +57,7 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         added_in_version="before_v9",
         text=r"""
 Governs the imposition of the Acoustic Sum Rule (ASR).
+Note that there is a similar input variable [[asr]] for ABINIT. 
 
   * 0 --> no ASR for interatomic force constants is imposed.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
@@ -197,6 +198,7 @@ based on Wigner-Seitz cells (new as v8.7). The default algorithm has a correct t
         added_in_version="before_v9",
         text=r"""
 Set the treatment of the Charge Neutrality requirement for the effective charges.
+Note that there is a similar input variable [[chneut]] for ABINIT.
 
   * chneut=0 --> no ASR for effective charges is imposed
   * chneut=1 --> the ASR for effective charges is imposed by giving to each atom
