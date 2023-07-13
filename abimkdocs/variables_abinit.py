@@ -252,11 +252,9 @@ Variable(
     mnemonics="Acoustic Sum Rule",
     added_in_version="before_v9",
     text=r"""
-Govern the imposition of the Acoustic Sum Rule (ASR) in phonon calculations.
-Same meaning as the corresponding anaddb variable.
+Set the treatment of the Acoustic Sum Rule (ASR) in phonon calculations in the ABINIT code.
+Same values as the corresponding ANADDB variable [[asr@anaddb]]. Please switch to this description. 
 
-Set the treatment of the Acoustic Sum Rule (ASR) in phonon calculations.
-Same meaning as the corresponding anaddb variable [[asr@anaddb]].
 Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
 Running different DFPT calculations from scratch just to change [[asr]] is indeed a waste of time as
 you can compute the DDB only once and then use anaddb.
@@ -264,8 +262,10 @@ you can compute the DDB only once and then use anaddb.
 Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
 [[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
 [[optdriver]]=10 (longwave calculations).
-For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main input file
+For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
 of the dynamical matrix, and the subsequent echo of the phonon frequencies at Gamma, TO and LO parts.
+
+See also the variables [[chneut]] and [[chneut@anaddb]], that govern the imposition of the charge neutrality sum rule.
 """,
 ),
 
@@ -1731,9 +1731,10 @@ Variable(
     mnemonics="CHarge NEUTrality treatment",
     added_in_version="before_v9",
     text=r"""
-Set the treatment of the Charge Neutrality requirement for the effective charges.
-Same meaning as the corresponding anaddb variable [[chneut@anaddb]].
-Note the different default value in abinit (1) and anaddb (0).
+Set the treatment of the Charge Neutrality requirement for the effective charges in the ABINIT code.
+Same values as the corresponding ANADDB variable [[chneut@anaddb]]. Please switch to this description. 
+Note however the different default value in abinit (1) and anaddb (0).
+
 Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
 Running different DFPT calculations from scratch just to change [[chneut]] is indeed a waste of time as
 you can compute the DDB only once and then use anaddb.
@@ -1741,8 +1742,10 @@ you can compute the DDB only once and then use anaddb.
 Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
 [[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
 [[optdriver]]=10 (longwave calculations).
-For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main input file
+For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
 of the Born effective charge, and the subsequent echo of the phonon frequencies at Gamma, LO part only.
+
+See also the variables [[asr]] and [[asr@anaddb]], that govern the imposition of the acoustic sum rule.
 """,
 ),
 
