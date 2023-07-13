@@ -26,8 +26,8 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, &
-                          smallprim, print_symmetries, sg_multable
+ use m_symtk,     only : chkgrp, chkprimit, mati3inv, matr3inv, symrelrot, symdet, symcharac, holocell, &
+                          smallprim, print_symmetries, sg_multable, symatm, symmetrize_tnons, symmetrize_xred
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 
@@ -613,14 +613,17 @@ end subroutine symfind
 !! tolsym=tolerance for the symmetries
 !! typat(natom)=integer identifying type of atom.
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
-!! xred(3,natom)=reduced coordinates of atoms in terms of real space
-!!   primitive translations
 !!
 !! OUTPUT
 !! nsym=actual number of symmetries
 !! symafm(1:msym)=(anti)ferromagnetic part of nsym symmetry operations
 !! symrel(3,3,1:msym)= nsym symmetry operations in real space in terms of primitive translations
 !! tnons(3,1:msym)=nonsymmorphic translations for each symmetry (would be 0 0 0 each for a symmorphic space group)
+!!
+!! SIDE EFFECTS
+!! xred(3,natom)=reduced coordinates of atoms in terms of real space
+!!   primitive translations. Might be changed during the resymmetrization.
+
 !!
 !! SOURCE
 
@@ -638,7 +641,8 @@ end subroutine symfind
 !arrays
  integer,intent(in) :: ptsymrel(3,3,msym),typat(natom)
  integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
- real(dp),intent(in) :: gprimd(3,3),spinat(3,natom),xred(3,natom)
+ real(dp),intent(in) :: gprimd(3,3),spinat(3,natom)
+ real(dp),intent(inout) :: xred(3,natom)
  real(dp),optional,intent(in) :: invardir_red(3),chrgat(natom)
  real(dp),optional, intent(in) :: nucdipmom(3,natom)
  real(dp),intent(inout) :: tnons(3,msym) !vz_i
@@ -647,7 +651,7 @@ end subroutine symfind
 !scalars
  integer, save :: print_comment_tolsym=1
  integer :: ierr,isym,use_inversion
- character(len=500) :: msg
+ character(len=1000) :: msg
 !arrays
  integer,allocatable :: indsym(:,:,:),symrec(:,:,:) 
  real(dp),allocatable :: tnons_new(:,:)
@@ -663,14 +667,14 @@ end subroutine symfind
 
   call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
     prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-    chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
+    chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
 
   !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
   if(ierr/=0)then
     ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
       prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
-      chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
+      chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
     ABI_CHECK(ierr==0,"Error in group closure")
     ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
   endif
@@ -707,7 +711,7 @@ end subroutine symfind
 
     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
       prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-      chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=field_xred,invar_z=invar_z)
+      chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=invardir_red,invar_z=invar_z)
 
     !Needs one more resymmetrization, for the tnons
     ABI_MALLOC(tnons_new,(3,nsym))
