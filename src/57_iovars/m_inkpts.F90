@@ -707,7 +707,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-   call symfind((/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,0,&
+   call symfind(gprimd,msym,natom,0,nptsym,nsym_new,0,&
     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
 
    ! Prepare to compute the q-point grid in the ZB or IZB

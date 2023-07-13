@@ -684,7 +684,7 @@ contains
     type(symmetry_type), intent(inout) :: sym
     integer, intent(out) :: errno
 
-    integer :: berryopt, jellslab, noncol
+    integer :: berryopt, invar_z, noncol
     integer :: use_inversion
     real(dp), pointer :: spinAt_(:,:)
     integer  :: sym_(3, 3, AB7_MAX_SYMMETRIES)
@@ -703,10 +703,10 @@ contains
     else
        berryopt = 0
     end if
-    if (sym%withJellium) then
-       jellslab = 1
+    if (sym%withJellium .or. sym%nzchempot/=0) then
+       invar_z = 2
     else
-       jellslab = 0
+       invar_z = 0
     end if
     if (sym%withSpin == 4) then
        noncol = 1
@@ -727,10 +727,10 @@ contains
 
     if (sym%nsym == 0) then
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symfind."
-       call symfind(sym%field, sym%gprimd, jellslab, AB7_MAX_SYMMETRIES, &
-            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%nzchempot, 0, sym%bravSym, spinAt_, &
+       call symfind(sym%gprimd, AB7_MAX_SYMMETRIES, &
+            & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
-            & use_inversion, sym%xRed)
+            & use_inversion, sym%xRed, invardir_red=sym%field, invar_z=invar_z)
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
        if (AB_DBG) write(std_err, "(A,I3)") "  nSym:", sym%nSym
        if (associated(sym%sym))  then

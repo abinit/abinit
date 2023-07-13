@@ -166,7 +166,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 !scalars
  integer, save :: print_comment_tolsym=1
  integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
- integer :: ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
+ integer :: invar_z,ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom,use_inversion
@@ -847,16 +847,18 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          end do
        end if
 
-       call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-         nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
+       invar_z=0
+       if(jellslab/=0 .or. nzchempot/=0)invar_z=2
+       call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+         dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
 
        !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
        if(ierr/=0)then
          ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
-         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
-           chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr)
+         call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+           dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
+           chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
          ABI_CHECK(ierr==0,"Error in group closure")
          ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
        endif
@@ -891,9 +893,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            print_comment_tolsym=0
          endif
 
-         call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-           nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-           chrgat=chrgat,nucdipmom=nucdipmom)
+         call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+           dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+           chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=field_xred,invar_z=invar_z)
 
          !Needs one more resymmetrization, for the tnons
          ABI_MALLOC(tnons_new,(3,nsym))

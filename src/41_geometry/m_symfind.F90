@@ -59,7 +59,9 @@ contains
 !!
 !! INPUTS
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
-!! efield=cartesian coordinates of the electric field
+!! invardir_red (optional)=reduced coordinates of an invariant direction (only acting with symrel - not tnons)
+!! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ; 
+!!                     if 2, z must stay invariant and also there cannot be any associated tnons along z.
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
 !! msym=default maximal number of symmetries
 !! natom=number of atoms in cell.
@@ -68,7 +70,6 @@ contains
 !!         else 0
 !! nptsym=number of point symmetries of the Bravais lattice
 !! nucdipmom(3,natom) (optional) array of nuclear dipole moments
-!! nzchempot=if non-zero, means that a z-spatially varying chemical potential is added
 !! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
 !!   of the Bravais lattice in real space in terms
 !!   of primitive translations.
@@ -90,22 +91,23 @@ contains
 !!
 !! SOURCE
 
- subroutine symfind(efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-&  chrgat,ierr,nucdipmom)  ! Optional
+ subroutine symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+&  prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+&  chrgat,ierr,nucdipmom,invardir_red,invar_z)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
+ integer,intent(in) :: msym,natom,noncoll,nptsym,use_inversion
  integer,intent(in) :: prtvol
+ integer,optional,intent(in) :: invar_z
  integer,optional,intent(out) :: ierr
  integer,intent(out) :: nsym
  real(dp),intent(in) :: tolsym
 !arrays
  integer,intent(in) :: ptsymrel(3,3,msym),typat(natom)
  integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
- real(dp),intent(in) :: efield(3),gprimd(3,3),spinat(3,natom),xred(3,natom)
- real(dp),optional,intent(in) :: chrgat(natom)
+ real(dp),intent(in) :: gprimd(3,3),spinat(3,natom),xred(3,natom)
+ real(dp),optional,intent(in) :: invardir_red(3),chrgat(natom)
  real(dp),optional, intent(in) :: nucdipmom(3,natom)
  real(dp),intent(inout) :: tnons(3,msym) !vz_i
 
@@ -124,7 +126,7 @@ contains
  character(len=500) :: msg
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
- real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),spinat0(3),xred0(3)
+ real(dp) :: diff(3),invardir_red_rot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),spinat0(3),xred0(3)
  !real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3)
  real(dp) :: symspinat1(3),symspinat2(3),symxred2(3),trialnons(3)
@@ -139,7 +141,6 @@ contains
 ! if (prtvol>1) msg="remove me later"
 ! write(std_out,*)' symfind : enter'
 ! call flush(6)
-! write(std_out,*)' symfind : nzchempot= ',nzchempot
 ! write(std_out,*)'   ptsymrel matrices are :'
 ! do isym=1,nptsym
 ! write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
@@ -349,12 +350,14 @@ contains
  nsym=0
  do isym=1,nptsym
 
-!  ji: Check whether symmetry operation leaves efield invariant
-   efieldrot(:) = ptsymrel(:,1,isym)*efield(1) +  &
-&   ptsymrel(:,2,isym)*efield(2) +  &
-&   ptsymrel(:,3,isym)*efield(3)
-   diff(:)=efield(:)-efieldrot(:)
-   if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
+   if(present(invardir_red))then
+!    ji: Check whether symmetry operation leaves invardir_red invariant
+     invardir_red_rot(:) = ptsymrel(:,1,isym)*invardir_red(1) +  &
+&     ptsymrel(:,2,isym)*invardir_red(2) +  &
+&     ptsymrel(:,3,isym)*invardir_red(3)
+     diff(:)=invardir_red(:)-invardir_red_rot(:)
+     if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
+   endif
 
    if (use_inversion==0) then
      det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
@@ -368,7 +371,7 @@ contains
 
 !  jellium slab and spatially varying chemical potential cases:
 !  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
-   if (jellslab/=0 .or. nzchempot/=0) then
+   if (invar_z/=0) then
 !    check whether symmetry operation produce a rotation only in the xy plane
      if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
 &     ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
@@ -437,7 +440,7 @@ contains
      end if
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
-     if( jellslab/=0 .and. abs(trialnons(3)) > tolsym ) cycle
+     if( invar_z==2 .and. abs(trialnons(3)) > tolsym ) cycle
      trialok=1
 
 !    DEBUG
