@@ -836,85 +836,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
 
      if (multiplicity==1) typat(:)=typat_read(:)
 
-!!!!! 
-!      add  dtset%usepaw, pawspnorb, to define use_inversion
-!      add  jellslab and nzchempot , to define invar_z
-
-!      call symfind_expert(gprimd,jellslab,msym,natom,nptsym,nspden,nsym,nzchempot,&
-!        dtset%prtvol,pawspnorb,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,use_inversion,xred,&
-!        chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=dtset%field_xred,invar_z=invar_z)
-
-
-!!!!!!!!!!!!!!!!!!
-
      ! Find the symmetry operations: nsym, symafm, symrel and tnons.
      ! Use nptsym and ptsymrel, as determined by symlatt
-     use_inversion=1
-     if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
-       ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
-       use_inversion=0
-     end if
+     ! Will possibly correct xred and tnons.
 
-     invar_z=0
-     if(jellslab/=0 .or. nzchempot/=0)invar_z=2
-     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
-       dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-       chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=dtset%field_xred,invar_z=invar_z)
-
-     !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
-     if(ierr/=0)then
-       ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
-       call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
-         dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
-         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
-       ABI_CHECK(ierr==0,"Error in group closure")
-       ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
-     endif
-
-     ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations, 
-     ! symmetrize the atomic positions and recompute the symmetry operations 
-     if(tolsym>1.00001e-8)then
-       call symmetrize_tnons(nsym,symrel,tnons,tolsym)
-       ABI_MALLOC(indsym,(4,natom,nsym))
-       ABI_MALLOC(symrec,(3,3,nsym))
-       do isym=1,nsym
-         call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
-       end do
-       call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
-       call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
-       ABI_FREE(indsym)
-       ABI_FREE(symrec)
-
-       if(print_comment_tolsym==1)then
-         write(msg,'(a,es12.3,18a)')&
-&         'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
-&         'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
-&         'symmetrized before storing them in the dataset internal variable.',ch10,&
-&         'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
-&         'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
-&         'This is not a problem per se.',ch10,&
-&         'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
-&         ' decrease tolsym to 1.0e-8 or lower,',ch10,&
-&         'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
-&         'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
-         ABI_COMMENT(msg)
-         print_comment_tolsym=0
-       endif
-
-       call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
-         dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-         chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=field_xred,invar_z=invar_z)
-
-       !Needs one more resymmetrization, for the tnons
-       ABI_MALLOC(tnons_new,(3,nsym))
-
-       call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
-&        fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
-       tnons(:,1:nsym)=tnons_new(:,:)
-       ABI_FREE(tnons_new)
-     end if ! tolsym >1.00001e-8
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2
+     call symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
+       pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
+       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_xred,invar_z=invar_z)
 
    end if ! spgroup==0 and nsym==0
 

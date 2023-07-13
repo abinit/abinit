@@ -38,8 +38,8 @@ module m_symfind
 
  public :: symfind     ! From the symmetries of the Bravais lattice,
                        ! select those that leave invariant the system, and generate tnons. Not always robust.
-!public :: symfind_expert     ! Wrap symfind to provide robust determination of the symmetries,
-!                      ! for which resymmetrization of atomic positions and tnons is needed.
+ public :: symfind_expert     ! Wrap symfind to provide robust determination of the symmetries,
+                       ! for which resymmetrization of atomic positions and tnons is needed.
  public :: symanal     ! Find the space group from the list of symmetries and lattice parameters
  public :: symbrav     ! Determine the Bravais information from the list of symmetry operations, and the lattice vectors.
  public :: symlatt     ! Find the Bravais lattice and its symmetry operations (ptsymrel).
@@ -605,27 +605,121 @@ end subroutine symfind
 !! nptsym=number of point symmetries of the Bravais lattice
 !! nspden= number of spin-density components. When 4, the three components of spinat are taken into account, instead of only z-component.
 !! nucdipmom(3,natom) (optional) array of nuclear dipole moments
+!  pawspnorb=flag: 1 if spin-orbit coupling is activated
 !! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
 !!   of the Bravais lattice in real space in terms
 !!   of primitive translations.
 !! spinat(3,natom)=initial spin of each atom, in unit of hbar/2.
 !! tolsym=tolerance for the symmetries
 !! typat(natom)=integer identifying type of atom.
-!! use_inversion=1 if inversion and improper rotations can be included in set of symmetries
+!! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! xred(3,natom)=reduced coordinates of atoms in terms of real space
 !!   primitive translations
 !!
 !! OUTPUT
-!! ierr (optional)=if non-zero, the symmetry operations do not form a group
 !! nsym=actual number of symmetries
 !! symafm(1:msym)=(anti)ferromagnetic part of nsym symmetry operations
-!! symrel(3,3,1:msym)= nsym symmetry operations in real space in terms
-!!  of primitive translations
-!! tnons(3,1:msym)=nonsymmorphic translations for each symmetry (would
-!!  be 0 0 0 each for a symmorphic space group)
+!! symrel(3,3,1:msym)= nsym symmetry operations in real space in terms of primitive translations
+!! tnons(3,1:msym)=nonsymmorphic translations for each symmetry (would be 0 0 0 each for a symmorphic space group)
 !!
 !! SOURCE
 
+ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
+&  pawspnorb,prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,usepaw,xred,&
+&  chrgat,nucdipmom,invardir_red,invar_z)  ! Optional - although for the time being all are required ...
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: msym,natom,nptsym,nspden,pawspnorb,usepaw
+ integer,intent(in) :: prtvol
+ integer,optional,intent(in) :: invar_z
+ integer,intent(out) :: nsym
+ real(dp),intent(in) :: tolsym
+!arrays
+ integer,intent(in) :: ptsymrel(3,3,msym),typat(natom)
+ integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
+ real(dp),intent(in) :: gprimd(3,3),spinat(3,natom),xred(3,natom)
+ real(dp),optional,intent(in) :: invardir_red(3),chrgat(natom)
+ real(dp),optional, intent(in) :: nucdipmom(3,natom)
+ real(dp),intent(inout) :: tnons(3,msym) !vz_i
+
+!Local variables-------------------------------
+!scalars
+ integer, save :: print_comment_tolsym=1
+ integer :: ierr,isym,use_inversion
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: indsym(:,:,:),symrec(:,:,:) 
+ real(dp),allocatable :: tnons_new(:,:)
+ 
+
+!**************************************************************************
+
+  use_inversion=1
+  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+    use_inversion=0
+  end if
+
+  call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+    prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+    chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
+
+  !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
+  if(ierr/=0)then
+    ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
+    call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+      prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
+      chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
+    ABI_CHECK(ierr==0,"Error in group closure")
+    ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
+  endif
+
+  ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations,
+  ! symmetrize the atomic positions and recompute the symmetry operations
+  if(tolsym>1.00001e-8)then
+    call symmetrize_tnons(nsym,symrel,tnons,tolsym)
+    ABI_MALLOC(indsym,(4,natom,nsym))
+    ABI_MALLOC(symrec,(3,3,nsym))
+    do isym=1,nsym
+      call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
+    end do
+    call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
+    call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
+    ABI_FREE(indsym)
+    ABI_FREE(symrec)
+
+    if(print_comment_tolsym==1)then
+      write(msg,'(a,es12.3,18a)')&
+&      'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+&      'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
+&      'symmetrized before storing them in the dataset internal variable.',ch10,&
+&      'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
+&      'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+&      'This is not a problem per se.',ch10,&
+&      'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
+&      ' decrease tolsym to 1.0e-8 or lower,',ch10,&
+&      'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
+&      'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
+      ABI_COMMENT(msg)
+      print_comment_tolsym=0
+    endif
+
+    call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+      prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+      chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=field_xred,invar_z=invar_z)
+
+    !Needs one more resymmetrization, for the tnons
+    ABI_MALLOC(tnons_new,(3,nsym))
+
+    call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&     tnons_new=tnons_new,tolsym=tolsym)
+    tnons(:,1:nsym)=tnons_new(:,:)
+    ABI_FREE(tnons_new)
+  end if ! tolsym >1.00001e-8
+
+end subroutine symfind_expert
+!!***
 
 !!****f* m_symfind/symanal
 !! NAME
