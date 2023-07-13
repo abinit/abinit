@@ -136,7 +136,7 @@ dipdip_range         2         2         2
        3               3        1.323019        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    3.872124E+00    2.346465E-16    6.925642E-30

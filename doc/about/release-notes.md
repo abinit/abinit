@@ -1,3 +1,43 @@
+## v9.12
+
+Version 9.12, released on September 10, 2023.
+List of changes with respect to version 9.10.
+<!-- Release notes updated on XXX YY , 2023. -->
+
+Many thanks to the contributors to the ABINIT project between
+May 2023 and September 2023 (with some late contributions until YYY 2023).
+These release notes
+are relative to modifications/improvements of ABINIT v9.12 with respect to v9.10.
+<!-- TO BE CHANGED Merge requests up to and including MR919. Also, MR923 to MR925 are taken into account. -->
+
+TO BE CHANGED 
+
+The list of contributors includes:
+J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+L. Mac Enulty, D.D. O'Regan, S. Rostami,
+M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+**A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced 
+by [[asr]] and [[chneut]]. The latter variables have been used already for some time for a more detailed imposition of the acoustic sum rule
+and the charge neutrality sum rule in the electron-phonon part of ABINIT, and even for a longer time
+in the ANADDB utility. Actually, rfasr was used to initialize asr and chneut internally. This change was long overdue. 
+The default values for [[asr]] and [[chneut]], namely 1, are however not the same as the previous default value of rfasr, namely 0.
+Thus a large fraction of the reference files of the test have been upgraded to the new default, but in a sizeable number
+the old default value has been specified explicitly.
+
+By X. Gonze (commit XXX).
+
+* * *
+
+
 ## v9.10
 
 Version 9.10, released on June 24, 2023.

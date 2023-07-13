@@ -101,7 +101,7 @@ Computation of Gruneisen parameter with central finite difference:
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.825965E+00    6.443406E-18    6.440990E-18
@@ -175,7 +175,7 @@ Computation of Gruneisen parameter with central finite difference:
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.838808E+00   -2.263711E-18   -2.269921E-18
@@ -249,7 +249,7 @@ Computation of Gruneisen parameter with central finite difference:
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.851728E+00   -3.493521E-18   -3.494502E-18

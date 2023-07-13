@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h25 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h16 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v7_t83/t83.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v7_t83/t83.abi
 - output file    -> t83.abo
 - root for input  files -> t83i
 - root for output files -> t83o
@@ -241,8 +241,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1115,23 +1115,23 @@ tolerances: {tolwfr: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.4062530789         0.0000000000
-   1    1   2    1        -0.0003650347         0.0000000000
-   1    1   3    1        -0.0001366649         0.0000000000
+   1    1   1    1         0.7372960421        -0.0000000000
+   1    1   2    1        -0.0001493655         0.0000000000
+   1    1   3    1         0.0001857126         0.0000000000
    1    1   1    2        -0.7372960421         0.0000000000
    1    1   2    2         0.0001493655        -0.0000000000
    1    1   3    2        -0.0001857126        -0.0000000000
   
-   2    1   1    1        -0.0003486562         0.0000000000
-   2    1   2    1         0.1746960700         0.0000000000
-   2    1   3    1         0.0000767277         0.0000000000
+   2    1   1    1        -0.0001700419         0.0000000000
+   2    1   2    1        -0.1750772065        -0.0000000000
+   2    1   3    1        -0.0000254737         0.0000000000
    2    1   1    2         0.0001700419        -0.0000000000
    2    1   2    2         0.1750772065         0.0000000000
    2    1   3    2         0.0000254737        -0.0000000000
   
-   3    1   1    1        -0.0001430442         0.0000000000
-   3    1   2    1         0.0000772396         0.0000000000
-   3    1   3    1         0.1742878512         0.0000000000
+   3    1   1    1         0.0001270261         0.0000000000
+   3    1   2    1         0.0000771295         0.0000000000
+   3    1   3    1        -0.1754651082        -0.0000000000
    3    1   1    2        -0.0001270261        -0.0000000000
    3    1   2    2        -0.0000771295        -0.0000000000
    3    1   3    2         0.1754651082         0.0000000000
@@ -1139,40 +1139,40 @@ tolerances: {tolwfr: 1.00E-08, }
    1    2   1    1        -0.7372957376        -0.0000000000
    1    2   2    1         0.0001497337         0.0000000000
    1    2   3    1        -0.0001139653         0.0000000000
-   1    2   1    2         0.4064465410         0.0000000000
-   1    2   2    2        -0.0005430856         0.0000000000
-   1    2   3    2         0.0002284298         0.0000000000
+   1    2   1    2         0.7372957376         0.0000000000
+   1    2   2    2        -0.0001497337        -0.0000000000
+   1    2   3    2         0.0001139653        -0.0000000000
   
    2    2   1    1         0.0001624942         0.0000000000
    2    2   2    1         0.1750765778        -0.0000000000
    2    2   3    1        -0.0000756626         0.0000000000
-   2    2   1    2        -0.0005239164         0.0000000000
-   2    2   2    2         0.1749121642         0.0000000000
-   2    2   3    2        -0.0000399840         0.0000000000
+   2    2   1    2        -0.0001624942        -0.0000000000
+   2    2   2    2        -0.1750765778         0.0000000000
+   2    2   3    2         0.0000756626        -0.0000000000
   
    3    2   1    1        -0.0001741176         0.0000000000
    3    2   2    1         0.0000251260         0.0000000000
    3    2   3    1         0.1754680080        -0.0000000000
-   3    2   1    2         0.0002335843         0.0000000000
-   3    2   2    2        -0.0000383227         0.0000000000
-   3    2   3    2         0.1735265685         0.0000000000
+   3    2   1    2         0.0001741176        -0.0000000000
+   3    2   2    2        -0.0000251260        -0.0000000000
+   3    2   3    2        -0.1754680080         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -3.368580E-03 -2.313687E-04 -9.650208E-05  3.461094E-03  3.463606E-03
-   6.262013E-03
+  -3.468825E-03 -3.464938E-03  0.000000E+00  4.920298E-07  6.136078E-07
+   7.110564E-03
  Phonon energies in meV     :
-- -9.166373E+01 -6.295863E+00 -2.625955E+00  9.418117E+01  9.424950E+01
--  1.703980E+02
+- -9.439153E+01 -9.428576E+01  0.000000E+00  1.338881E-02  1.669712E-02
+-  1.934883E+02
  Phonon frequencies in cm-1    :
-- -7.393179E+02 -5.077956E+01 -2.117976E+01  7.596224E+02  7.601736E+02
--  1.374353E+03
+- -7.613191E+02 -7.604660E+02  0.000000E+00  1.079881E-01  1.346714E-01
+-  1.560588E+03
  Phonon frequencies in Thz     :
-- -2.216419E+01 -1.522333E+00 -6.349532E-01  2.277291E+01  2.278943E+01
--  4.120206E+01
+- -2.282377E+01 -2.279820E+01  0.000000E+00  3.237400E-03  4.037346E-03
+-  4.678526E+01
  Phonon energies in Kelvin  :
-- -1.063712E+03 -7.306037E+01 -3.047291E+01  1.092926E+03  1.093719E+03
--  1.977385E+03
+- -1.095367E+03 -1.094140E+03  0.000000E+00  1.553705E-01  1.937618E-01
+-  2.245336E+03
  Components of second-order derivatives of the electronic energy, EIGR2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -5.1269535356E+01    0.0000000000E+00
@@ -1246,61 +1246,61 @@ tolerances: {tolwfr: 1.00E-08, }
  Fan corrections to eigenvalues at T=0 (hartree) for nkpt=   1  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00607   -0.00347   -0.01252   -0.01303   -0.01303   -0.01503   -0.01503   -0.00030
-   0.00073    0.00018
+  -0.00207   -0.00054   -0.00420   -0.00202   -0.00202   -0.00174   -0.00174   -0.00013
+   0.00058    0.00003
  Fan corrections to eigenvalues at T=0 (hartree) for nkpt=   1  k points, SPIN DOWN:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00614   -0.00344   -0.01230   -0.01215   -0.01215   -0.01402   -0.01402   -0.00034
-   0.00014    0.00018
+  -0.00209   -0.00053   -0.00408   -0.00190   -0.00190   -0.00161   -0.00161   -0.00014
+  -0.00001    0.00011
  Fan corrections to eigenvalues at T=0 (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.16519   -0.09437   -0.34066   -0.35463   -0.35463   -0.40894   -0.40894   -0.00811
-   0.01982    0.00477
+  -0.05629   -0.01470   -0.11437   -0.05495   -0.05495   -0.04732   -0.04732   -0.00351
+   0.01578    0.00083
  Fan corrections to eigenvalues at T=0 (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.16696   -0.09354   -0.33457   -0.33056   -0.33056   -0.38163   -0.38160   -0.00921
-   0.00369    0.00503
+  -0.05674   -0.01436   -0.11108   -0.05170   -0.05170   -0.04375   -0.04375   -0.00369
+  -0.00017    0.00287
 
 
  DDW corrections to eigenvalues at T=0 (hartree) for nkpt=   1  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00418    0.00351    0.01152    0.01226    0.01226    0.01522    0.01522    0.00030
-  -0.00042   -0.00014
+   0.00040    0.00058    0.00332    0.00134    0.00134    0.00191    0.00191    0.00013
+  -0.00031   -0.00000
  DDW corrections to eigenvalues at T=0 (hartree) for nkpt=   1  k points, SPIN DOWN:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00422    0.00344    0.01133    0.01137    0.01137    0.01418    0.01418    0.00034
-  -0.00015   -0.00008
+   0.00040    0.00053    0.00324    0.00121    0.00121    0.00174    0.00174    0.00014
+  -0.00001   -0.00001
  DDW corrections to eigenvalues at T=0 (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.11375    0.09545    0.31344    0.33366    0.33366    0.41408    0.41408    0.00816
-  -0.01147   -0.00392
+   0.01099    0.01565    0.09040    0.03648    0.03648    0.05185    0.05185    0.00355
+  -0.00843   -0.00008
  DDW corrections to eigenvalues at T=0 (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.11486    0.09355    0.30842    0.30937    0.30937    0.38585    0.38583    0.00924
-  -0.00417   -0.00223
+   0.01086    0.01437    0.08805    0.03304    0.03304    0.04747    0.04747    0.00371
+  -0.00025   -0.00040
 
 
  Fan+DDW corrs   to eigenvalues at T=0 (hartree) for nkpt=   1  k points, SPIN UP:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00189    0.00004   -0.00100   -0.00077   -0.00077    0.00019    0.00019    0.00000
-   0.00031    0.00003
+  -0.00166    0.00003   -0.00088   -0.00068   -0.00068    0.00017    0.00017    0.00000
+   0.00027    0.00003
  Fan+DDW corrs   to eigenvalues at T=0 (hartree) for nkpt=   1  k points, SPIN DOWN:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00191    0.00000   -0.00096   -0.00078   -0.00078    0.00016    0.00016    0.00000
-  -0.00002    0.00010
+  -0.00169    0.00000   -0.00085   -0.00069   -0.00069    0.00014    0.00014    0.00000
+  -0.00002    0.00009
  Fan+DDW corrs   to eigenvalues at T=0 (   eV  ) for nkpt=   1  k points, SPIN UP:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.05144    0.00108   -0.02722   -0.02098   -0.02098    0.00514    0.00514    0.00005
-   0.00835    0.00086
+  -0.04530    0.00095   -0.02397   -0.01847   -0.01847    0.00453    0.00453    0.00005
+   0.00735    0.00075
  Fan+DDW corrs   to eigenvalues at T=0 (   eV  ) for nkpt=   1  k points, SPIN DOWN:
  kpt#   1, nband= 10, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.05210    0.00001   -0.02615   -0.02119   -0.02119    0.00423    0.00423    0.00003
-  -0.00048    0.00280
+  -0.04588    0.00001   -0.02303   -0.01866   -0.01866    0.00372    0.00372    0.00002
+  -0.00042    0.00246
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1514,10 +1514,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         15.5  wall=         15.7
+- Proc.   0 individual time (sec): cpu=         10.9  wall=         11.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.5  wall=         15.7
++Overall time at end (sec) : cpu=         10.9  wall=         11.1

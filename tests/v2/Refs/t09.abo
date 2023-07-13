@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t09/t09.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v2_t09/t09.abi
 - output file    -> t09.abo
 - root for input  files -> t09i
 - root for output files -> t09o
@@ -142,6 +142,8 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac1     1.50000000E+00
            diemac2     1.50000000E+00
            diemac3     1.00000000E+00
@@ -304,8 +306,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/32ge.SJ_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/32ge.SJ_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/32ge.SJ_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/32ge.SJ_mod
 -   Starkloff-Joannopoulos local psp ( !!! OLD : only for tests)
 - 32.00000   4.00000    900101                znucl, zion, pspdat
     5    3    0    0       700   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1291,6 +1293,8 @@ tolerances: {tolwfr: 1.00E-15, }
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac1     1.50000000E+00
            diemac2     1.50000000E+00
            diemac3     1.00000000E+00
@@ -1507,10 +1511,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  45 WARNINGs and  41 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          2.2
+.Delivered  56 WARNINGs and  41 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.4  wall=          1.5
