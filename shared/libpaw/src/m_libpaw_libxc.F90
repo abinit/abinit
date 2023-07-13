@@ -54,6 +54,7 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_getid              ! Return identifer of a XC functional, from its name
  public :: libpaw_libxc_family_from_id     ! Retrieve family of a XC functional, from its id
  public :: libpaw_libxc_ixc                ! The value of ixc used to initialize the XC functional(s)
+ public :: libpaw_libxc_islda              ! Return TRUE if the set of XC functional(s) is LDA
  public :: libpaw_libxc_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libpaw_libxc_ismgga             ! Return TRUE if the set of XC functional(s) is meta-GGA
  public :: libpaw_libxc_needs_laplacian    ! Return TRUE if the set of XC functional uses LAPLACIAN
@@ -885,6 +886,44 @@ end function libpaw_libxc_family_from_id
  end if
 
 end function libpaw_libxc_ixc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_libpaw_libxc_funcs/libpaw_libxc_islda
+!! NAME
+!!  libpaw_libxc_islda
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used (set of) functional(s)
+!!  is a LDA or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
+!!                     XC functionals to initialize
+!!
+!! SOURCE
+
+ function libpaw_libxc_islda(xc_functionals)
+
+!Arguments ------------------------------------
+ logical :: libpaw_libxc_islda
+ type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ libpaw_libxc_islda = .false.
+ if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
+
+ if (present(xc_functionals)) then
+   libpaw_libxc_islda=(any(xc_functionals%family==LIBPAW_XC_FAMILY_LDA) .or. &
+&                      any(xc_functionals%family==LIBPAW_XC_FAMILY_HYB_LDA))
+ else
+   libpaw_libxc_islda=(any(paw_xc_global%family==LIBPAW_XC_FAMILY_LDA) .or. &
+&                      any(paw_xc_global%family==LIBPAW_XC_FAMILY_HYB_LDA))
+ end if
+
+end function libpaw_libxc_islda
 !!***
 
 !----------------------------------------------------------------------

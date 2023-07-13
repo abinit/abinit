@@ -66,6 +66,7 @@ module libxc_functionals
  public :: libxc_functionals_getid              ! Return identifer of a XC functional, from its name
  public :: libxc_functionals_family_from_id     ! Retrieve family of a XC functional, from its id
  public :: libxc_functionals_ixc                ! The value of ixc used to initialize the XC functional(s)
+ public :: libxc_functionals_islda              ! Return TRUE if the set of XC functional(s) is LDA
  public :: libxc_functionals_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libxc_functionals_ismgga             ! Return TRUE if the set of XC functional(s) set is meta-GGA
  public :: libxc_functionals_istb09             ! Return TRUE if the XC functional is Tran-Blaha 2009.
@@ -896,6 +897,44 @@ end function libxc_functionals_family_from_id
  end if
 
 end function libxc_functionals_ixc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_islda
+!! NAME
+!!  libxc_functionals_islda
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used (set of) functional(s)
+!!  is a LDA or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+ function libxc_functionals_islda(xc_functionals)
+
+!Arguments ------------------------------------
+ logical :: libxc_functionals_islda
+ type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ libxc_functionals_islda = .false.
+ if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
+
+ if (present(xc_functionals)) then
+   libxc_functionals_islda=(any(xc_functionals%family==XC_FAMILY_LDA) .or. &
+&                           any(xc_functionals%family==XC_FAMILY_HYB_LDA))
+ else
+   libxc_functionals_islda=(any(xc_global%family==XC_FAMILY_LDA) .or. &
+&                           any(xc_global%family==XC_FAMILY_HYB_LDA))
+ end if
+
+end function libxc_functionals_islda
 !!***
 
 !----------------------------------------------------------------------
