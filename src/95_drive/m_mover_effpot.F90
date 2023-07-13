@@ -1069,23 +1069,19 @@ subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,sym
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab,noncoll,nptsym,nzchempot,use_inversion
+  integer :: jellslab,noncoll,nptsym,nzchempot,use_inversion
   integer :: chkprim
 ! Arraiys
   integer :: bravais(11),ptsymrel(3,3,msym)
   integer :: symafm(msym),symrel(3,3,msym)
-  real(dp) :: efield(3)=0,gprimd(3,3),spinat(3,natom)
+  real(dp) :: gprimd(3,3),spinat(3,natom)
   real(dp) :: tnons(3,msym)
   real(dp) :: genafm(3)
 
 ! given the acel, rprim and coor
 ! this suroutine find the symmetry group
-berryopt = 0
-jellslab = 0
 noncoll  = 0
-nzchempot= 0
 spinat   = 0
-efield   = 0
 chkprim  = 0
 use_inversion = 0
 
@@ -1095,8 +1091,8 @@ use_inversion = 0
 !write(std_out,*) 'nptsym', nptsym
 
   call matr3inv(rprimd,gprimd)
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+  call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
+&           0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !write(std_out,*) 'nsym', nsym
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
