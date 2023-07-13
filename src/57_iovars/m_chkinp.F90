@@ -2561,6 +2561,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  optstress
+!  Por mGGA, optstress not yet allowed (temporary, hopefully)
+   if(dt%optstress>0.and.xc_is_mgga)then
+     msg='Computation of stress tensor is not yet implemented for meta-GGA XC functionals!'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 !  When optcell>0, optstress must be >0
    if(dt%optcell>0)then
      cond_string(1)='optcell' ; cond_values(1)=dt%optcell
