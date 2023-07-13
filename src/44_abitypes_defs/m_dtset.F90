@@ -902,6 +902,7 @@ type, public :: dataset_type
  real(dp) :: efield(3)
  real(dp) :: einterp(4) = zero
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
+ real(dp) :: field_xred(3)
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
  real(dp) :: neb_spring(2)
@@ -2177,6 +2178,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%bfield(:)          = dtin%bfield(:)
  dtout%dfield(:)          = dtin%dfield(:)
  dtout%efield(:)          = dtin%efield(:)
+ dtout%field_xred(:)      = dtin%field_xred(:)
  dtout%genafm(:)          = dtin%genafm(:)
  dtout%goprecprm(:)       = dtin%goprecprm(:)
  dtout%mdtemp(:)          = dtin%mdtemp(:)

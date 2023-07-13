@@ -958,6 +958,7 @@ subroutine indefo1(dtset)
  dtset%efmas_calc_dirs=0
  dtset%efmas_n_dirs=0
 !F
+ dtset%field_xred(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0
@@ -1154,7 +1155,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: cond_values(4),vacuum(3)
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
-!real(dp) :: field(3)
+ real(dp) :: field_xred(3)
  real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
@@ -1361,6 +1362,31 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'jfielddir',tread,'INT')
  if(tread==1) dtset%jfielddir(1:3)=intarr(1:3)
+
+ if (dtset%berryopt ==4) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
+   end do
+ else if (dtset%berryopt == 6 ) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
+     field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
+   end do
+ else if (dtset%berryopt == 14) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+   end do
+ else if (dtset%berryopt == 16) then
+   do ii=1,3
+     field_xred(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
+   end do
+ else if (dtset%berryopt == 17) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+     if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
+   end do
+ end if
+ dtset%field_xred(:)=field_xred(:)
 
  ! We need to know nsppol/nspinor/nspden before calling ingeo
  nsppol=dtset%nsppol

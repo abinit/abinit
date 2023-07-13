@@ -820,38 +820,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          use_inversion=0
        end if
 
-       ! Get field in reduced coordinates (reduced e/d field)
-
-       field_xred(:)=zero
-       if (dtset%berryopt ==4) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
-         end do
-       else if (dtset%berryopt == 6 ) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
-           field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
-         end do
-       else if (dtset%berryopt == 14) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
-         end do
-       else if (dtset%berryopt == 16) then
-         do ii=1,3
-           field_xred(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
-         end do
-       else if (dtset%berryopt == 17) then
-         do ii=1,3
-           field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
-           if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
-         end do
-       end if
-
        invar_z=0
        if(jellslab/=0 .or. nzchempot/=0)invar_z=2
        call symfind(gprimd,msym,natom,noncoll,nptsym,nsym,&
          dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=field_xred,invar_z=invar_z)
+         chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=dtset%field_xred,invar_z=invar_z)
 
        !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
        if(ierr/=0)then
