@@ -372,12 +372,14 @@ contains
 
 !  jellium slab and spatially varying chemical potential cases:
 !  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
-   if (invar_z/=0) then
-!    check whether symmetry operation produce a rotation only in the xy plane
-     if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
-&     ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
-!    check whether symmetry operation does not change the z
-     if( ptsymrel(3,3,isym)/=1 ) cycle
+   if(present(invar_z))then
+     if (invar_z/=0) then
+!      check whether symmetry operation produce a rotation only in the xy plane
+       if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
+&       ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
+!      check whether symmetry operation does not change the z
+       if( ptsymrel(3,3,isym)/=1 ) cycle
+     end if
    end if
 
 !  If noncoll_orthorhombic=1, require orthorhombic operations of symmetries, except if spinat=0.
@@ -439,9 +441,12 @@ contains
        'isym,iatom0,iatom1=',isym,iatom0,iatom1
        ABI_ERROR(msg)
      end if
+
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
-     if( invar_z==2 .and. abs(trialnons(3)) > tolsym ) cycle
+     if(present(invar_z))then
+       if( invar_z==2 .and. abs(trialnons(3)) > tolsym ) cycle
+     endif
      trialok=1
 
 !    DEBUG
