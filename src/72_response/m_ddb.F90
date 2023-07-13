@@ -791,9 +791,9 @@ subroutine ddb_set_d2matr(ddb, iblok, d2matr, flg)
      do ipert1=1,ddb%mpert
        do idir1=1,3
          ii=ii+1
+         ddb%flg(ii,iblok) = flg(idir1,ipert1,idir2,ipert2)
          ddb%val(1,ii,iblok) = d2matr(1,idir1,ipert1,idir2,ipert2)
          ddb%val(2,ii,iblok) = d2matr(2,idir1,ipert1,idir2,ipert2)
-         ddb%flg(ii,iblok) = flg(idir1,ipert1,idir2,ipert2)
        end do
      end do
    end do
@@ -840,15 +840,19 @@ subroutine ddb_get_d2matr(ddb, iblok, d2matr, flg)
  ABI_MALLOC(d2matr, (2,3,ddb%mpert,3,ddb%mpert))
  ABI_MALLOC(flg, (3,ddb%mpert,3,ddb%mpert))
 
+ d2matr = zero
+
  ii=0
  do ipert2=1,ddb%mpert
    do idir2=1,3
      do ipert1=1,ddb%mpert
        do idir1=1,3
          ii=ii+1
-         d2matr(1,idir1,ipert1,idir2,ipert2) = ddb%val(1,ii,iblok)
-         d2matr(2,idir1,ipert1,idir2,ipert2) = ddb%val(2,ii,iblok)
          flg(idir1,ipert1,idir2,ipert2) = ddb%flg(ii,iblok)
+         if (ddb%flg(ii,iblok) > 0) then
+           d2matr(1,idir1,ipert1,idir2,ipert2) = ddb%val(1,ii,iblok)
+           d2matr(2,idir1,ipert1,idir2,ipert2) = ddb%val(2,ii,iblok)
+         end if
        end do
      end do
    end do
@@ -1030,13 +1034,17 @@ subroutine ddb_get_d1matr(ddb, iblok, d1matr, flg)
  ABI_MALLOC(d1matr, (2,3,ddb%mpert))
  ABI_MALLOC(flg, (3,ddb%mpert))
 
+ d1matr = zero
+
  ii=0
  do ipert1=1,ddb%mpert
    do idir1=1,3
      ii=ii+1
-     d1matr(1,idir1,ipert1) = ddb%val(1,ii,iblok)
-     d1matr(2,idir1,ipert1) = ddb%val(2,ii,iblok)
      flg(idir1,ipert1) = ddb%flg(ii,iblok)
+     if (ddb%flg(ii,iblok) > 0) then
+       d1matr(1,idir1,ipert1) = ddb%val(1,ii,iblok)
+       d1matr(2,idir1,ipert1) = ddb%val(2,ii,iblok)
+     end if
    end do
  end do
 
@@ -2863,9 +2871,11 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
      ! --------------
      ! Copy d0E block
      ! --------------
-     ddb1%val(1,1,iblok1) = ddb2%val(1,1,iblok2)
-     ddb1%val(2,1,iblok1) = ddb2%val(2,1,iblok2)
-     ddb1%flg(1,iblok1) = ddb2%flg(1,iblok2)
+     if (ddb2%flg(1,iblok2) > 0) then
+       ddb1%val(1,1,iblok1) = ddb2%val(1,1,iblok2)
+       ddb1%val(2,1,iblok1) = ddb2%val(2,1,iblok2)
+       ddb1%flg(1,iblok1) = ddb2%flg(1,iblok2)
+     end if
 
   else if (is_type_d1E(blktyp)) then
      ! --------------
@@ -5719,6 +5729,8 @@ subroutine ddb_get_d3matr(ddb, iblok, d3matr, flg)
  ABI_MALLOC(d3matr, (2,3,ddb%mpert,3,ddb%mpert,3,ddb%mpert))
  ABI_MALLOC(flg, (3,ddb%mpert,3,ddb%mpert,3,ddb%mpert))
 
+ d3matr = zero
+
  ii=0
  do ipert3=1,ddb%mpert
    do idir3=1,3
@@ -5727,9 +5739,11 @@ subroutine ddb_get_d3matr(ddb, iblok, d3matr, flg)
          do ipert1=1,ddb%mpert
            do idir1=1,3
              ii=ii+1
-             d3matr(1,idir1,ipert1,idir2,ipert2,idir3,ipert3) = ddb%val(1,ii,iblok)
-             d3matr(2,idir1,ipert1,idir2,ipert2,idir3,ipert3) = ddb%val(2,ii,iblok)
              flg(idir1,ipert1,idir2,ipert2,idir3,ipert3) = ddb%flg(ii,iblok)
+             if (ddb%flg(ii,iblok) > 0) then
+               d3matr(1,idir1,ipert1,idir2,ipert2,idir3,ipert3) = ddb%val(1,ii,iblok)
+               d3matr(2,idir1,ipert1,idir2,ipert2,idir3,ipert3) = ddb%val(2,ii,iblok)
+             end if
            end do
          end do
        end do
@@ -5780,6 +5794,8 @@ subroutine ddb_get_d2eig(ddb, d2eig, flg, iblok)
  ABI_MALLOC(d2eig, (2,3,ddb%mpert,3,ddb%mpert,ddb%nband,ddb%nkpt))
  ABI_MALLOC(flg, (3,ddb%mpert,3,ddb%mpert))
 
+ d2eig = zero
+
  do ikpt=1,ddb%nkpt
    do iband=1,ddb%nband
      ii=0
@@ -5788,9 +5804,11 @@ subroutine ddb_get_d2eig(ddb, d2eig, flg, iblok)
          do ipert1=1,ddb%mpert
            do idir1=1,3
              ii=ii+1
-             d2eig(1,idir1,ipert1,idir2,ipert2,iband,ikpt) = ddb%eig2dval(1,ii,iband,ikpt)
-             d2eig(2,idir1,ipert1,idir2,ipert2,iband,ikpt) = ddb%eig2dval(2,ii,iband,ikpt)
              flg(idir1,ipert1,idir2,ipert2) = ddb%flg(ii,iblok)
+             if (ddb%flg(ii,iblok) > 0) then
+               d2eig(1,idir1,ipert1,idir2,ipert2,iband,ikpt) = ddb%eig2dval(1,ii,iband,ikpt)
+               d2eig(2,idir1,ipert1,idir2,ipert2,iband,ikpt) = ddb%eig2dval(2,ii,iband,ikpt)
+             end if
            end do
          end do
        end do

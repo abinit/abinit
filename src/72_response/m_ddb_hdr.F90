@@ -2749,6 +2749,7 @@ subroutine ddb_hdr_bcast(ddb_hdr, comm)
 
  call xmpi_bcast(ddb_hdr%psps%indlmn, master, comm, ierr)
  call xmpi_bcast(ddb_hdr%psps%pspso, master, comm, ierr)
+
  if (ddb_hdr%psps%dimekb > 0 .and. ddb_hdr%psps%usepaw==0) then
    call xmpi_bcast(ddb_hdr%psps%ekb, master, comm, ierr)
  end if
