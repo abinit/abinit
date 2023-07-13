@@ -2415,10 +2415,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
 
        ! Open the file and write header
-       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1)
+       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1, comm=mpi_enreg%comm_world)
 
        ! Write d2eig data block
-       call ddb%write_d2eig(ddb_hdr, 1)
+       call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
 
        ! close and free memory
        call ddb_hdr%close()
@@ -2448,8 +2448,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
          call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
 
-         call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, with_psps=1)
-         call ddb%write_d2eig(ddb_hdr, 1)
+         call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, with_psps=1,comm=mpi_enreg%comm_world)
+         call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
 
          call ddb_hdr%close()
          call ddb_hdr%free()
