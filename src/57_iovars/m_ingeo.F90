@@ -127,7 +127,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
+subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
   genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
   msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
@@ -154,7 +154,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  real(dp),intent(inout) :: nucdipmom(3,natom)
  real(dp),intent(in) :: ratsph(ntypat)
  real(dp),intent(inout) :: spinat(3,natom)
- real(dp),intent(out) :: acell(3),amu(ntypat),genafm(3),mixalch(npspalch,ntypalch)
+ real(dp),intent(out) :: acell(3),amu(ntypat),field_xred(3),genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
  real(dp),intent(in) :: znucl(npsp)
@@ -178,7 +178,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 !arrays
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
  integer,allocatable :: intarr(:)
- real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
+ real(dp) :: angdeg(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
  real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:)
@@ -273,7 +273,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
    end do
  end if
- dtset%field_xred(:)=field_xred(:)
 
 !tolsym = tol8
 !XG20200801 New default value for tolsym. This default value is also defined in m_invars1.F90
