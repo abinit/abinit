@@ -250,6 +250,31 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call mkrdim(acell, rprim, rprimd)
  call metric(gmet, gprimd, -1, rmet, rprimd, ucvol)
 
+ if (dtset%berryopt ==4) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
+   end do
+ else if (dtset%berryopt == 6 ) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
+     field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
+   end do
+ else if (dtset%berryopt == 14) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+   end do
+ else if (dtset%berryopt == 16) then
+   do ii=1,3
+     field_xred(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
+   end do
+ else if (dtset%berryopt == 17) then
+   do ii=1,3
+     field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+     if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
+   end do
+ end if
+ dtset%field_xred(:)=field_xred(:)
+
 !tolsym = tol8
 !XG20200801 New default value for tolsym. This default value is also defined in m_invars1.F90
  tolsym = tol5
@@ -811,6 +836,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      else
 
        if (multiplicity==1) typat(:)=typat_read(:)
+
+!!!!! 
+!      should replace noncoll by nspden
+!      add  dtset%usepaw, pawspnorb, to define use_inversion
+!      add  jellslab and nzchempot , to define invar_z
+
+!      call symfind_expert(gprimd,msym,natom,noncoll,nptsym,nsym,&
+!        dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+!        chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=dtset%field_xred,invar_z=invar_z)
+
+
+!!!!!!!!!!!!!!!!!!
+
        ! Find the symmetry operations: nsym, symafm, symrel and tnons.
        ! Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0; if (nspden == 4) noncoll=1
