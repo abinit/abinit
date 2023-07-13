@@ -685,7 +685,7 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
+  integer :: jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
   integer :: chkprim,nsym
 ! Arrays
   integer :: bravais(11),ptsymrel(3,3,msym)
@@ -695,11 +695,11 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
   real(dp) :: genafm(3)
 
 ! given the acel, rprim and coor
-! this suroutine find the symmetry group
+! this subroutine find the symmetry group
 
   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
 
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
+  call symfind(efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
 &           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
 
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)

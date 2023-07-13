@@ -727,7 +727,7 @@ contains
 
     if (sym%nsym == 0) then
        if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symfind."
-       call symfind(berryopt, sym%field, sym%gprimd, jellslab, AB7_MAX_SYMMETRIES, &
+       call symfind(sym%field, sym%gprimd, jellslab, AB7_MAX_SYMMETRIES, &
             & sym%nAtoms, noncol, sym%nBravSym, sym%nSym, sym%nzchempot, 0, sym%bravSym, spinAt_, &
             & symAfm_, sym_, transNon_, sym%tolsym, sym%typeAt, &
             & use_inversion, sym%xRed)

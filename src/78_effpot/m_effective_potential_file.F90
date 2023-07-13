@@ -2061,7 +2061,7 @@ end subroutine system_getDimFromXML
  space_group = 0;
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
+ call symfind((/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
 &  0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !Initialisation of crystal
@@ -2237,7 +2237,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_MALLOC(tnons,(3,msym))
   spinat = zero;  symrel = 0;  symafm = 0;  tnons = zero ; space_group = 0;
   call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
-  call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
+  call symfind((/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
 &              0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
 &              crystal%typat,use_inversion,crystal%xred)
   if(crystal%nsym/=nsym)then

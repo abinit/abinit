@@ -58,7 +58,6 @@ contains
 !! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worton1972]]
 !!
 !! INPUTS
-!! berryopt    =  4/14, 6/16, 7/17: electric or displacement field
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
 !! efield=cartesian coordinates of the electric field
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
@@ -91,13 +90,13 @@ contains
 !!
 !! SOURCE
 
- subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
+ subroutine symfind(efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
 &  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
 &  chrgat,ierr,nucdipmom)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
+ integer,intent(in) :: jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
  integer,intent(in) :: prtvol
  integer,optional,intent(out) :: ierr
  integer,intent(out) :: nsym
@@ -351,14 +350,11 @@ contains
  do isym=1,nptsym
 
 !  ji: Check whether symmetry operation leaves efield invariant
-   if (berryopt==4 .or. berryopt==6 .or. berryopt==7 .or. &
-&   berryopt==14 .or. berryopt==16 .or. berryopt==17) then
-     efieldrot(:) = ptsymrel(:,1,isym)*efield(1) +  &
-&     ptsymrel(:,2,isym)*efield(2) +  &
-&     ptsymrel(:,3,isym)*efield(3)
-     diff(:)=efield(:)-efieldrot(:)
-     if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
-   end if
+   efieldrot(:) = ptsymrel(:,1,isym)*efield(1) +  &
+&   ptsymrel(:,2,isym)*efield(2) +  &
+&   ptsymrel(:,3,isym)*efield(3)
+   diff(:)=efield(:)-efieldrot(:)
+   if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
 
    if (use_inversion==0) then
      det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
