@@ -371,7 +371,7 @@ subroutine thmeig(inp, ddb, crystal, elph_base_name, eig2_filnam, iout, natom, m
    if(thmflag==7 .or. thmflag==8) then
 !    Re-generate symmetry operations from the lattice and atomic coordinates
      tolsym=tol8
-     call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+     call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
      use_inversion=1
      call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
 &     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)

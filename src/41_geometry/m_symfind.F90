@@ -58,7 +58,7 @@ contains
 !! select those that leave invariant the system, and generate
 !! the corresponding tnons vectors and symafm information.
 !! Unlike symfind_expert, does NOT resymmetrize atomic positions and tnons for more robust determination of the symmetries.
-!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worton1972]]
+!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worlton1972]]
 !!
 !! INPUTS
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
@@ -871,7 +871,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 !This routine finds the Bravais characteristics, without actually
 !looking at the symmetry operations.
  ABI_MALLOC(ptsymrel,(3,3,maxsym))
- call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimd,tolsym)
+ call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimd,tolsym)
  ABI_FREE(ptsymrel)
 
 !Check whether the cell is primitive or not.
@@ -1134,7 +1134,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
    maxsym=max(192,msym)
    ABI_MALLOC(ptsymrel,(3,3,maxsym))
-   call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
+   call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
    ABI_FREE(ptsymrel)
 
 !DEBUG
@@ -1786,6 +1786,7 @@ end subroutine symspgr
 !! 3) Generate the symmetry operations of the holohedral group
 !!
 !! INPUTS
+!! iout=unit number of output file
 !! msym=default maximal number of symmetries. WARNING : cannot be simply set to nsym, because
 !!   the number of symmetries found here will likely be bigger than sym !
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
@@ -1822,11 +1823,11 @@ end subroutine symspgr
 !!
 !! SOURCE
 
-subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+subroutine symlatt(bravais,iout,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: msym
+ integer,intent(in) :: iout,msym
  integer,intent(out) :: nptsym
  real(dp),intent(in) :: tolsym
 !arrays
@@ -2613,7 +2614,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
  end if
 
- call wrtout(std_out,msg)
+ call wrtout(iout,msg)
 
 !DEBUG
 !write(std_out,*)' symlatt : after checking conventional orthogonal cell '

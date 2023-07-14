@@ -132,7 +132,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
      call metric(gmet,gprimd,dev_null,rmet,rprimd,ucvol)
 
      !From rprimd and tolsym, compute bravais, nptsym and ptsymrel (with maximum size msym).
-     call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+     call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
 
      invar_z=0 ; if(dtsets(idtset)%jellslab/=0 .or. dtsets(idtset)%nzchempot/=0)invar_z=2
      call symfind_expert(gprimd,msym,natom,nptsym,dtsets(idtset)%nspden,nsym,&

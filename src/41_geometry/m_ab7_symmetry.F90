@@ -639,7 +639,7 @@ contains
        berryopt = 0
     end if
     if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT symlatt."
-    call symlatt(sym%bravais, AB7_MAX_SYMMETRIES, &
+    call symlatt(sym%bravais, std_out, AB7_MAX_SYMMETRIES, &
          & sym%nBravSym, sym%bravSym, sym%rprimd, sym%tolsym)
     if (AB_DBG) write(std_err,*) "AB symmetry: call ABINIT OK."
     if (AB_DBG) write(std_err, "(A,I3)") "  nSymBrav :", sym%nBravSym

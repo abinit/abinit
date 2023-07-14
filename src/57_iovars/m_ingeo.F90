@@ -288,7 +288,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  ! Note that the Bravais lattice might not be the correct one yet (because the
  ! actual atomic locations might lower the symmetry obtained from the lattice parameters only)
  ABI_MALLOC(ptsymrel,(3,3,msym))
- call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+ call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
 
  ! 3) Possibly, initialize a jellium slab
  jellslab=0
@@ -799,7 +799,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
          rprimd(:,:)=rprimd_new(:,:)
          rprim(:,:)=rprimd_new(:,:)
          call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-         call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+         call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
        end if
 
      end if

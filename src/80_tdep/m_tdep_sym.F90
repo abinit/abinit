@@ -61,7 +61,7 @@ contains
 ! The routine used is symlatt (from Abinit code)
   Sym%msym=1000 !msym needs to be very large due to non-primitive cell calculations
   ABI_MALLOC(Sym%ptsymrel,(3,3,Sym%msym)) ; Sym%ptsymrel(:,:,:)=0
-  call symlatt(Invar%bravais,Sym%msym,Sym%nptsym,Sym%ptsymrel,Lattice%rprimdt,tol8)
+  call symlatt(Invar%bravais,std_out,Sym%msym,Sym%nptsym,Sym%ptsymrel,Lattice%rprimdt,tol8)
   write(Invar%stdout,'(a,1x,11(i4,1x))')' bravais=',Invar%bravais(:)
   Sym%nsym=Sym%nptsym
 
