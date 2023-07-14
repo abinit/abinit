@@ -709,7 +709,7 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    ABI_MALLOC(symafm_new,(msym))
    ABI_MALLOC(symrel_new,(3,3,msym))
    ABI_MALLOC(tnons_new,(3,msym))
-   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   call symlatt(bravais,dev_null,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 

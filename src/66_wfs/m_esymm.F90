@@ -465,7 +465,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
    spgroup=0
    chkprim=1 ! Cell must be primitive.
-   !call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   !call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
    !call symspgr(bravais,Cryst%nsym,spgroup,Cryst%symrel,Cryst%tnons,tolsym)
 
    !call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)

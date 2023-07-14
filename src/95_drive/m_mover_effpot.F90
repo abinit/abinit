@@ -1086,7 +1086,7 @@ use_inversion = 0
 
 !write(std_out,*) "tolsym", tolsym, "tol3", tol3
 
-  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol4)
+  call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tol4)
 !write(std_out,*) 'nptsym', nptsym
 
   call matr3inv(rprimd,gprimd)
