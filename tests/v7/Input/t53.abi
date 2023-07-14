@@ -8,6 +8,7 @@ t51o_DS1_EIGR2D
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi, t54.abi
 #%% [files]
 #%% files_to_test = 

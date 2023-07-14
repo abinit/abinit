@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h56 )
   
 
 ================================================================================
@@ -43,23 +43,34 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  8.2819417  0.0000000  0.0000000  G(1)=  0.1207446  0.0000000  0.0000000
  R(2)=  0.0000000 12.6669442  0.0000000  G(2)=  0.0000000  0.0789456  0.0000000
  R(3)=  0.0000000  0.0000000 13.1661201  G(3)=  0.0000000  0.0000000  0.0759525
  Unit cell volume ucvol=  1.3812168E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
-
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ca
+    2)    0.5000000  0.5000000  0.5000000  Ca
+    3)    0.0000000  0.2745558  0.3299533  Br
+    4)    0.0000000  0.7254442  0.6700467  Br
+    5)    0.5000000  0.7745558  0.1700467  Br
+    6)    0.5000000  0.2254442  0.8299533  Br
+ 
+ DDB file with 280 blocks has been read.
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -73,9 +84,9 @@
        3               1       -0.000000        0.000000
        3               2        0.000000        0.000000
        3               3        0.001180        0.000000
-
+ 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.605961E+00    0.000000E+00    0.000000E+00
@@ -97,12 +108,12 @@
          6         2   -1.880353E-21   -1.152568E+00    5.966194E-01
          6         3    7.236249E-21    5.822906E-01   -1.192457E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-
+ 
 ================================================================================
-
+ 
  Calculation of the interatomic forces 
-
--begin at tcpu      0.412  and twall      0.414 sec
+ 
+-begin at tcpu      0.263  and twall      0.773 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      539
  greater than 80, so only write 20 of them
@@ -126,7 +137,7 @@
  18)  -4.54545455E-01  1.42857143E-01  0.00000000E+00
  19)  -3.63636364E-01  1.42857143E-01  0.00000000E+00
  20)  -2.72727273E-01  1.42857143E-01  0.00000000E+00
-
+ 
  The interatomic forces have been obtained
  Apply cutoff on IFCs. Using bisection algorithm to find initial guess for nsphere.
  Maximum nuber of atom-centered spheres: 6150
@@ -149,14 +160,13 @@
 -   1609    5.7646E-02          15   -5.9295E-02     4.4470E+01
 -   1597    5.7610E-02          15   -5.4239E-02     4.4314E+01
 -   1591    5.7683E-02          15   -5.2484E-02     4.4314E+01
--   1588    5.9438E-02           3   -1.2587E-02     4.4187E+01
--   1586    6.0651E-02           0    0.0000E+00     4.4187E+01
--   1587    6.0031E-02           0    0.0000E+00     4.4187E+01
+-   1588    5.9434E-02           0    0.0000E+00     4.4187E+01
+-   1589    5.8826E-02           7   -3.1226E-02     4.4187E+01
 -
-- Proc.   0 individual time (sec): cpu=         80.8  wall=         81.0
-
+- Proc.   0 individual time (sec): cpu=         63.2  wall=         64.0
+ 
 ================================================================================
-
-+Total cpu time     80.809  and wall time     81.037 sec
-
+ 
++Total cpu time     63.201  and wall time     64.016 sec
+ 
  anaddb : the run completed succesfully.

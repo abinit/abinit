@@ -245,7 +245,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  use_sigeph = (dtset%eph_task == 9)
 
  if (my_rank == master) then
-   if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
+   ! GA: Let ddb object handle the error at reading time
+   !if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
    if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
 
    if (use_sigeph .and. .not. file_exists(sigeph_filepath)) ABI_ERROR(sjoin("Cannot find SIGEPH file:", sigeph_filepath))
@@ -388,7 +389,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  ! Read the DDB file.
  if (use_wfk) then
-   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst_ddb, comm, prtvol=dtset%prtvol)
+   call ddb%from_file(ddb_filepath, ddb_hdr, cryst_ddb, comm, prtvol=dtset%prtvol)
+
+   call ddb%set_brav(dtset%brav)
 
    ! DDB cryst comes from DFPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
@@ -399,8 +402,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call cryst_ddb%free()
  else
    ! Get crystal from DDB.
-   ! Warning: We may loose precision in rprimd and xred because DDB does not have enough significant digits.
-   call ddb%from_file(ddb_filepath, dtset%brav, ddb_hdr, cryst, comm, prtvol=dtset%prtvol)
+   ! Warning: We may loose precision in rprimd and xred because DDB in text format does not have enough significant digits.
+   call ddb%from_file(ddb_filepath, ddb_hdr, cryst, comm, prtvol=dtset%prtvol)
+
+   call ddb%set_brav(dtset%brav)
+
  end if
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
@@ -424,7 +430,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  ! Read the quadrupoles
- !iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
+ !iblock_quadrupoles = ddb%get_quadrupoles(ddb_hdr%ddb_version,1, 3, qdrp_cart)
 
  iblock_quadrupoles = 0
  qdrp_cart = zero
@@ -461,7 +467,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (iblock_quadrupoles == 0) then
    mtyp = ddb_hdr%mblktyp
-   mpert = dtset%natom + MPERT_MAX
+   mpert = ddb_hdr%mpert
    !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
    !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
 
@@ -473,7 +479,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (mtyp==33) then
      lwsym=1
      call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
-     iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
+     iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version,lwsym, 33, qdrp_cart)
      call ddb_lw%free()
    end if
  endif

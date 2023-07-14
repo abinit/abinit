@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Wed 31 May 2023.
+- ( at 18h58 )
   
 
 ================================================================================
@@ -50,22 +50,38 @@ Will compute Gruneisen parameters with finite difference method. DDB files:
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  6.0203344  6.0203344  G(1)= -0.0830519  0.0830519  0.0830519
  R(2)=  6.0203344  0.0000000  6.0203344  G(2)=  0.0830519 -0.0830519  0.0830519
  R(3)=  6.0203344  6.0203344  0.0000000  G(3)=  0.0830519  0.0830519 -0.0830519
  Unit cell volume ucvol=  4.3640714E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.7500000  0.7500000  0.7500000  Mg
+    2)    0.2500000  0.2500000  0.2500000  Mg
+    3)    0.0000000  0.0000000  0.0000000  Si
+
+ DDB file with 29 blocks has been read.
 Computation of Gruneisen parameter with central finite difference:
  Reading DDB file: t45_Mg2Si_k666_q888_-0.01_DDB
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  6.0001994  6.0001994  G(1)= -0.0833306  0.0833306  0.0833306
  R(2)=  6.0001994  0.0000000  6.0001994  G(2)=  0.0833306 -0.0833306  0.0833306
  R(3)=  6.0001994  6.0001994  0.0000000  G(3)=  0.0833306  0.0833306 -0.0833306
  Unit cell volume ucvol=  4.3204307E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.7500000  0.7500000  0.7500000  Mg
+    2)    0.2500000  0.2500000  0.2500000  Mg
+    3)    0.0000000  0.0000000  0.0000000  Si
+
+ DDB file with 29 blocks has been read.
 
   ==== Structure for ivol: 1 ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -85,7 +101,7 @@ Computation of Gruneisen parameter with central finite difference:
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.825965E+00    6.443406E-18    6.440990E-18
@@ -125,13 +141,21 @@ Computation of Gruneisen parameter with central finite difference:
 
  The interatomic forces have been obtained
  Reading DDB file: t45_Mg2Si_k666_q888_DDB
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  6.0203344  6.0203344  G(1)= -0.0830519  0.0830519  0.0830519
  R(2)=  6.0203344  0.0000000  6.0203344  G(2)=  0.0830519 -0.0830519  0.0830519
  R(3)=  6.0203344  6.0203344  0.0000000  G(3)=  0.0830519  0.0830519 -0.0830519
  Unit cell volume ucvol=  4.3640714E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.7500000  0.7500000  0.7500000  Mg
+    2)    0.2500000  0.2500000  0.2500000  Mg
+    3)    0.0000000  0.0000000  0.0000000  Si
+
+ DDB file with 29 blocks has been read.
 
   ==== Structure for ivol: 2 ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -151,7 +175,7 @@ Computation of Gruneisen parameter with central finite difference:
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.838808E+00   -2.263711E-18   -2.269921E-18
@@ -191,13 +215,21 @@ Computation of Gruneisen parameter with central finite difference:
 
  The interatomic forces have been obtained
  Reading DDB file: t45_Mg2Si_k666_q888_0.01_DDB
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  6.0403357  6.0403357  G(1)= -0.0827769  0.0827769  0.0827769
  R(2)=  6.0403357  0.0000000  6.0403357  G(2)=  0.0827769 -0.0827769  0.0827769
  R(3)=  6.0403357  6.0403357  0.0000000  G(3)=  0.0827769  0.0827769 -0.0827769
  Unit cell volume ucvol=  4.4077121E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.7500000  0.7500000  0.7500000  Mg
+    2)    0.2500000  0.2500000  0.2500000  Mg
+    3)    0.0000000  0.0000000  0.0000000  Si
+
+ DDB file with 29 blocks has been read.
 
   ==== Structure for ivol: 3 ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -217,7 +249,7 @@ Computation of Gruneisen parameter with central finite difference:
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.851728E+00   -3.493521E-18   -3.494502E-18
@@ -263,10 +295,10 @@ Computation of Gruneisen parameter with central finite difference:
  Lebedev-Laikov integration with qradius:   1.0000E-03 tolkms:   2.0000E-01 [km/s], npts: 110
  Spherical average:  5.1015E+00  3.2600E+00  8.2212E+00 [km/s],   5.5276E+00
 -
-- Proc.   0 individual time (sec): cpu=         75.7  wall=         75.9
+- Proc.   0 individual time (sec): cpu=         63.4  wall=         63.6
 
 ================================================================================
 
-+Total cpu time     75.664  and wall time     75.907 sec
++Total cpu time     63.428  and wall time     63.585 sec
 
  anaddb : the run completed succesfully.

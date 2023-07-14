@@ -104,7 +104,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 #ifdef HAVE_LINALG_ELPA
  integer :: icol,irow,np
 #endif
- logical :: fftalg_read,ortalg_read,wfoptalg_read,do_check
+ logical :: fftalg_read,ortalg_read,paral_kgb_read,wfoptalg_read,do_check
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
  character(len=500) :: msg
 !arrays
@@ -148,26 +148,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  Compute metric for this dataset
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-   ! Read paral_kgb and disable it if not supported in optdriver.
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_kgb',tread(1),'INT')
-   if (tread(1)==1) dtsets(idtset)%paral_kgb=intarr(1)
-
-   if(xmpi_paral==0.and.dtsets(idtset)%paral_kgb==1)then
-     dtsets(idtset)%paral_kgb=0
-     write(msg, '(5a)' ) &
-     'When ABINIT is compiled without MPI flag,',ch10,&
-     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
-     'Action: modify compilation option or paral_kgb in the input file.'
-     ABI_WARNING(msg)
-   end if
-
-   if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT]) .and. dtsets(idtset)%paral_kgb/=0) then
-     dtsets(idtset)%paral_kgb=0
-     write(msg, '(a,i0,a)') &
-      "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
-     ABI_COMMENT(msg)
-   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'max_ncpus',tread0,'INT')
    if (tread0==1) dtsets(idtset)%max_ncpus=intarr(1)
@@ -233,6 +213,25 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'autoparal',tread0,'INT')
    if(tread0==1) dtsets(idtset)%autoparal=intarr(1)
 
+!  Read paral_kgb and disable it if not supported in optdriver
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_kgb',tread(1),'INT')
+   paral_kgb_read=(tread(1)==1)
+   if (paral_kgb_read) dtsets(idtset)%paral_kgb=intarr(1)
+   if (xmpi_paral==0.and.dtsets(idtset)%paral_kgb==1) then
+     dtsets(idtset)%paral_kgb=0
+     write(msg, '(5a)' ) &
+     'When ABINIT is compiled without MPI flag,',ch10,&
+     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
+     'Action: modify compilation option or paral_kgb in the input file.'
+     ABI_WARNING(msg)
+   end if
+   if (ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT]) .and. dtsets(idtset)%paral_kgb/=0) then
+     dtsets(idtset)%paral_kgb=0
+     write(msg, '(a,i0,a)') &
+      "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
+     ABI_COMMENT(msg)
+   end if
+
    wfoptalg_read=.false.
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfoptalg',tread0,'INT')
    if(tread0==1) then
@@ -260,9 +259,18 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
 
-   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
-   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
+   call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
+   nproc=mpi_enregs(idtset)%nproc_cell
 
+!  Set paral_kgb to 1 when band-fft parallelism is activated
+   if (ANY(optdriver == [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT])) then
+     if (mpi_enregs(idtset)%nproc_cell>1) then
+       if (dtsets(idtset)%npband>1.or.dtsets(idtset)%npfft>1) then
+         if (.not.paral_kgb_read) dtsets(idtset)%paral_kgb=1
+       end if
+     end if
+   end if
+     
    if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS.and.optdriver/=RUNL_RTTDDFT).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
@@ -336,16 +344,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%npfft>1.and.usepaw==1) then
      dtsets(idtset)%pawmixdg=1
    end if
-
-   call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
-   nproc=mpi_enregs(idtset)%nproc_cell
-
+     
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_FREE(intarr)
      ABI_FREE(dprarr)
      cycle
    end if
+
+   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
+   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
 
    response=0
    if (dtsets(idtset)%rfddk/=0 .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &

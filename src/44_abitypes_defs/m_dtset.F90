@@ -192,6 +192,7 @@ type, public :: dataset_type
  integer :: extrapwf
  integer :: expert_user
 !F
+ integer :: ffnl_lw = 0
  integer :: fftgw = 21
  integer :: fft_count = 0
  integer :: fockoptmix
@@ -353,6 +354,7 @@ type, public :: dataset_type
  integer :: lotf_version
  integer :: lw_flexo
  integer :: lw_qdrpl
+ integer :: lw_natopt
 !M
  integer :: magconon
  integer :: maxnsym
@@ -386,6 +388,7 @@ type, public :: dataset_type
  integer :: nberry
  integer :: nc_xccc_gspace = 0
  integer :: nconeq
+ integer :: ncout = 1 
  integer :: nctime
  integer :: ndivsm = 0
  integer :: ndtset
@@ -487,6 +490,7 @@ type, public :: dataset_type
  integer :: ph_nqpath = 0
  integer :: ph_nqshift = 1
  integer :: pimd_constraint
+ integer :: prt_lorbmag = 0
  integer :: pitransform
  integer :: plowan_bandi
  integer :: plowan_bandf
@@ -505,6 +509,7 @@ type, public :: dataset_type
  integer :: prtbltztrp = 0
  integer :: prtchkprdm = 0
  integer :: prtcif = 0
+ integer :: prtddb = 1
  integer :: prtden
  integer :: prtdensph = 1
  integer :: prtdipole = 0
@@ -515,12 +520,15 @@ type, public :: dataset_type
  integer :: prteliash = 0
  integer :: prteig
  integer :: prtelf = 0
+ integer :: prtevk = 1
+ integer :: prtfc = 0
  integer :: prtfull1wf = 0
  integer :: prtfsurf = 0
  integer :: prtgsr = 1
  integer :: prtgden = 0
  integer :: prtgeo = 0
  integer :: prtgkk = 0
+ integer :: prthist = 1
  integer :: prtkden = 0
  integer :: prtkpt
  integer :: prtlden = 0
@@ -564,7 +572,7 @@ type, public :: dataset_type
  integer :: recptrott
  integer :: rectesteg
  integer :: restartxf
- integer :: rfasr
+!integer :: rfasr
  integer :: rfddk
  integer :: rfelfd
  integer :: rfmagn
@@ -983,6 +991,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
+ character(len=fnlen) :: write_files = ABI_NOFILE
 
  contains
 
@@ -1540,6 +1549,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
+ dtout%ffnl_lw            = dtin%ffnl_lw
  dtout%fftgw              = dtin%fftgw
  dtout%fft_count          = dtin%fft_count
  dtout%fockdownsampling   = dtin%fockdownsampling
@@ -1617,14 +1627,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gw_customnfreqsp   = dtin%gw_customnfreqsp
  dtout%gw_icutcoul        = dtin%gw_icutcoul
  dtout%gw_nqlwl           = dtin%gw_nqlwl
- dtout%gwr_nstep           = dtin%gwr_nstep
  dtout%gw_frqim_inzgrid   = dtin%gw_frqim_inzgrid
  dtout%gw_frqre_inzgrid   = dtin%gw_frqre_inzgrid
  dtout%gw_frqre_tangrid   = dtin%gw_frqre_tangrid
  dtout%gw_invalid_freq    = dtin%gw_invalid_freq
  dtout%gw_qprange         = dtin%gw_qprange
  dtout%gw_sigxcore        = dtin%gw_sigxcore
- dtout%gwr_tolqpe         = dtin%gwr_tolqpe
 
  dtout%gwls_stern_kmax      = dtin%gwls_stern_kmax
  dtout%gwls_npt_gauss_quad  = dtin%gwls_npt_gauss_quad
@@ -1642,13 +1650,15 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwls_first_seed      = dtin%gwls_first_seed
  dtout%gwls_recycle         = dtin%gwls_recycle
 
- dtout%gwr_ntau = dtin%gwr_ntau
- dtout%gwr_chi_algo = dtin%gwr_chi_algo
- dtout%gwr_sigma_algo = dtin%gwr_sigma_algo
- dtout%gwr_rpa_ncut = dtin%gwr_rpa_ncut
- dtout%gwr_boxcutmin = dtin%gwr_boxcutmin
- dtout%gwr_max_hwtene = dtin%gwr_max_hwtene
- dtout%gwr_task = dtin%gwr_task
+ dtout%gwr_ntau             = dtin%gwr_ntau
+ dtout%gwr_chi_algo         = dtin%gwr_chi_algo
+ dtout%gwr_sigma_algo       = dtin%gwr_sigma_algo
+ dtout%gwr_rpa_ncut         = dtin%gwr_rpa_ncut
+ dtout%gwr_boxcutmin        = dtin%gwr_boxcutmin
+ dtout%gwr_max_hwtene       = dtin%gwr_max_hwtene
+ dtout%gwr_task             = dtin%gwr_task
+ dtout%gwr_tolqpe           = dtin%gwr_tolqpe
+ dtout%gwr_nstep            = dtin%gwr_nstep
 
  dtout%hyb_mixing         = dtin%hyb_mixing
  dtout%hyb_mixing_sr      = dtin%hyb_mixing_sr
@@ -1715,6 +1725,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%lotf_version       = dtin%lotf_version
 #endif
  dtout%lw_flexo           = dtin%lw_flexo
+ dtout%lw_natopt          = dtin%lw_natopt
  dtout%lw_qdrpl           = dtin%lw_qdrpl
  dtout%magconon           = dtin%magconon
  dtout%maxnsym            = dtin%maxnsym
@@ -1747,6 +1758,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nc_xccc_gspace     = dtin%nc_xccc_gspace
  dtout%nbandkss           = dtin%nbandkss
  dtout%nconeq             = dtin%nconeq
+ dtout%ncout              = dtin%ncout
  dtout%nctime             = dtin%nctime
  dtout%ndtset             = dtin%ndtset
  dtout%ndynimage          = dtin%ndynimage
@@ -1815,6 +1827,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%paral_atom         = dtin%paral_atom
  dtout%paral_kgb          = dtin%paral_kgb
  dtout%paral_rf           = dtin%paral_rf
+ dtout%prt_lorbmag        = dtin%prt_lorbmag
  dtout%pawcpxocc          = dtin%pawcpxocc
  dtout%pawcross           = dtin%pawcross
  dtout%pawlcutd           = dtin%pawlcutd
@@ -1859,6 +1872,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prtbltztrp         = dtin%prtbltztrp
  dtout%prtchkprdm         = dtin%prtchkprdm
  dtout%prtcif             = dtin%prtcif
+ dtout%prtddb             = dtin%prtddb
  dtout%prtden             = dtin%prtden
  dtout%prtdensph          = dtin%prtdensph
  dtout%prtdipole          = dtin%prtdipole
@@ -1869,12 +1883,15 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%prteig             = dtin%prteig
  dtout%prtelf             = dtin%prtelf
  dtout%prteliash          = dtin%prteliash
+ dtout%prtevk             = dtin%prtevk
+ dtout%prtfc              = dtin%prtfc
  dtout%prtfull1wf         = dtin%prtfull1wf
  dtout%prtfsurf           = dtin%prtfsurf
  dtout%prtgsr             = dtin%prtgsr
  dtout%prtgden            = dtin%prtgden
  dtout%prtgeo             = dtin%prtgeo
  dtout%prtgkk             = dtin%prtgkk
+ dtout%prthist            = dtin%prthist
  dtout%prtkden            = dtin%prtkden
  dtout%prtkpt             = dtin%prtkpt
  dtout%prtlden            = dtin%prtlden
@@ -1916,7 +1933,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rectesteg          = dtin%rectesteg
  dtout%rcut               = dtin%rcut
  dtout%restartxf          = dtin%restartxf
- dtout%rfasr              = dtin%rfasr
  dtout%rfddk              = dtin%rfddk
  dtout%rfelfd             = dtin%rfelfd
  dtout%rfmagn             = dtin%rfmagn
@@ -2009,6 +2025,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%vdw_xc             = dtin%vdw_xc
  dtout%wfinit             = dtin%wfinit
  dtout%wfoptalg           = dtin%wfoptalg
+ dtout%wfoptalg           = dtin%wfoptalg
+ dtout%write_files        = dtin%write_files
  dtout%wvl_bigdft_comp    = dtin%wvl_bigdft_comp
  dtout%w90iniprj          = dtin%w90iniprj
  dtout%w90prtunk          = dtin%w90prtunk
@@ -2573,15 +2591,6 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
-
-!MR: Deactivate perturbation symmetries for a longwave calculation (TODO)
- if (dtset%prepalw==1) then
-   do ipert=1,dtset%natom+6
-     do idir=1,3
-       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
-     end do
-   end do
- end if
 
  npert=0
 ! ABI_MALLOC(pert_tmp,(3*mpert))
@@ -3308,17 +3317,17 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  ! XG20200321, please provide testing for eph_np_pqbks
  ! MG: Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file
  ! whereas EPH requires GS + DFPT + MRGDV + MRGDDB + TESTS_MULTIPLES_PROCS
- list_vars=trim(list_vars)//' eph_np_pqbks eph_phwinfact'
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
- list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_tols_idelta'
- list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
+ list_vars=trim(list_vars)//' eph_np_pqbks'
+ list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact'
+ list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extfpmd_nbdbuf extrapwf'
 !F
- list_vars=trim(list_vars)//' fband fermie_nest'
+ list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
  list_vars=trim(list_vars)//' fit_anhaStrain fit_bancoeff fit_coeff fit_cutoff fit_dispterms'
  list_vars=trim(list_vars)//' fit_EFS fit_factors fit_fixcoeff'
@@ -3327,8 +3336,6 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_nimposecoeff fit_rangePower fit_SPCoupling fit_SPC_maxS'
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
- list_vars=trim(list_vars)//' gwr_np_kgts gwr_ucsc_batch gwr_ntau gwr_boxcutmin gwr_max_hwtene gwr_task'
- list_vars=trim(list_vars)//" gwr_chi_algo gwr_sigma_algo gwr_rpa_ncut"
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
@@ -3348,15 +3355,15 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
- list_vars=trim(list_vars)//' gw_invalid_freq'
- list_vars=trim(list_vars)//' gw_icutcoul'
- list_vars=trim(list_vars)//' gw_qprange gw_nqlwl gwr_nstep gw_qlwl'
- list_vars=trim(list_vars)//' gw_sigxcore gwr_tolqpe'
+ list_vars=trim(list_vars)//' gw_icutcoul gw_invalid_freq'
+ list_vars=trim(list_vars)//' gw_nqlwl gw_qlwl gw_qprange gw_sigxcore'
  list_vars=trim(list_vars)//' gwls_stern_kmax gwls_kmax_complement gwls_kmax_poles'
  list_vars=trim(list_vars)//' gwls_kmax_analytic gwls_kmax_numeric'
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
+ list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_np_kgts gwr_nstep gwr_ntau'
+ list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
 !I
@@ -3388,7 +3395,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' latt_var_temperature'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
- list_vars=trim(list_vars)//' lw_qdrpl lw_flexo'
+ list_vars=trim(list_vars)//' lw_flexo lw_natopt lw_qdrpl'
  list_vars=trim(list_vars)//' lwf_constraint'
  list_vars=trim(list_vars)//' lwf_dt lwf_dynamics lwf_init_state lwf_init_hist_fname'
  list_vars=trim(list_vars)//' lwf_mc_avg_amp'
@@ -3405,7 +3412,7 @@ subroutine chkvars(string)
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
- list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq nc_xccc_gspace'
+ list_vars=trim(list_vars)//' ncell ncellmat ncoeff nbdblock nbdbuf nberry nconeq ncout nc_xccc_gspace'
  list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
@@ -3437,9 +3444,12 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefmas prteig prteliash prtelf'
- list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_GF_csv prt_model prtnabla prtnest prtphbands prtocc prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
+ list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
+ list_vars=trim(list_vars)//' prtebands prtefg prtefmas prteig prteliash prtelf prtevk'
+ list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prthist prtkden prtkpt prtlden'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model prtnabla prtnest prtocc prtphbands prtphdos prtphsurf prtposcar'
  list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
@@ -3451,7 +3461,8 @@ subroutine chkvars(string)
 !R
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
- list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
+!list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
+ list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
@@ -3523,6 +3534,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' wfinit wfmix wfoptalg wtatcon wtk wtq'
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
+ list_vars=trim(list_vars)//' write_files'
 !X
  list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile x1rdm'
 !Y
@@ -3543,7 +3555,7 @@ subroutine chkvars(string)
 !Extra token, also admitted:
 !<ABINIT_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K Kelvin nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ABINIT_UNITS>
 
 !<ABINIT_OPERATORS>

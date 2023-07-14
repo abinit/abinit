@@ -425,14 +425,20 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        bands_treated_now = 0
        bands_treated_now(iband) = 1
        call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-
-       call dfpt_cgwf(iband,iband_me,rank_band,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
-&       rf2,dcwavef,&
-&       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
-&       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
-&       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
-&       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+       
+       if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
+         eig1_k = zero 
+         resid = zero
+       else
+         call dfpt_cgwf(iband,iband_me,rank_band,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+&         rf2,dcwavef,&
+&         eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
+&         idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
+&         npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+&         dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+       end if
        resid_k(iband)=resid
+       
      else
        resid_k(iband)=zero
      end if

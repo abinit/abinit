@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h24 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v6_t37-t38-t39-t40/t37.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v6_t37-t38-t39-t40/t37.abi
 - output file    -> t37.abo
 - root for input  files -> t37i
 - root for output files -> t37o
@@ -184,7 +184,6 @@ P          mk1mem           8
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt4     5.00000000E-01  5.00000000E-01  0.00000000E+00
-            rfasr           1
            rfphon1          0
            rfphon2          1
            rfphon3          0
@@ -248,8 +247,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.09587
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1130,8 +1129,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1628,23 +1627,23 @@ tolerances: {tolwfr: 1.00E-16, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.0000000001        -0.0000000000
-   1    1   2    1         0.1974670687         0.0000000000
-   1    1   3    1         0.0000000014         0.0000000000
+   1    1   1    1         0.3790566048         0.0000000000
+   1    1   2    1         0.0000000006        -0.0000000000
+   1    1   3    1         0.0000000051        -0.0000000000
    1    1   1    2         0.0000000001         0.0000000000
    1    1   2    2        -0.1974670687        -0.0000000000
    1    1   3    2        -0.0000000014        -0.0000000000
   
-   2    1   1    1         0.1974670682         0.0000000000
-   2    1   2    1        -0.0000000002         0.0000000000
-   2    1   3    1         0.0000000037         0.0000000000
+   2    1   1    1         0.0000000004        -0.0000000000
+   2    1   2    1         0.3790566064         0.0000000000
+   2    1   3    1         0.0000000087         0.0000000000
    2    1   1    2        -0.1974670682        -0.0000000000
    2    1   2    2         0.0000000002        -0.0000000000
    2    1   3    2        -0.0000000037        -0.0000000000
   
-   3    1   1    1         0.0000000039         0.0000000000
-   3    1   2    1         0.0000000026         0.0000000000
-   3    1   3    1        -0.0000000009        -0.0000000000
+   3    1   1    1         0.0000000053        -0.0000000000
+   3    1   2    1         0.0000000089        -0.0000000000
+   3    1   3    1         0.6677935674        -0.0000000000
    3    1   1    2        -0.0000000039        -0.0000000000
    3    1   2    2        -0.0000000026        -0.0000000000
    3    1   3    2         0.0000000009         0.0000000000
@@ -1652,40 +1651,40 @@ tolerances: {tolwfr: 1.00E-16, }
    1    2   1    1         0.0000000001        -0.0000000000
    1    2   2    1        -0.1974670684         0.0000000000
    1    2   3    1        -0.0000000033         0.0000000000
-   1    2   1    2        -0.0000000001         0.0000000000
-   1    2   2    2         0.1974670684        -0.0000000000
-   1    2   3    2         0.0000000033        -0.0000000000
+   1    2   1    2         0.3790566036        -0.0000000000
+   1    2   2    2         0.0000000002         0.0000000000
+   1    2   3    2         0.0000000075        -0.0000000000
   
    2    2   1    1        -0.1974670683         0.0000000000
    2    2   2    1         0.0000000001         0.0000000000
    2    2   3    1        -0.0000000021        -0.0000000000
-   2    2   1    2         0.1974670683        -0.0000000000
-   2    2   2    2        -0.0000000001        -0.0000000000
-   2    2   3    2         0.0000000021         0.0000000000
+   2    2   1    2         0.0000000001        -0.0000000000
+   2    2   2    2         0.3790566012        -0.0000000000
+   2    2   3    2         0.0000000021        -0.0000000000
   
    3    2   1    1        -0.0000000022         0.0000000000
    3    2   2    1        -0.0000000040         0.0000000000
    3    2   3    1         0.0000000009        -0.0000000000
-   3    2   1    2         0.0000000022        -0.0000000000
-   3    2   2    2         0.0000000040        -0.0000000000
-   3    2   3    2        -0.0000000009         0.0000000000
+   3    2   1    2         0.0000000076         0.0000000000
+   3    2   2    2         0.0000000026        -0.0000000000
+   3    2   3    2         0.6677935606         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
-  -4.247102E-03 -3.359247E-07  0.000000E+00  0.000000E+00  1.702422E-07
-   4.247102E-03
+   2.879889E-03  2.879889E-03  5.131436E-03  5.131436E-03  5.522700E-03
+   5.522700E-03
  Phonon energies in meV     :
-- -1.155695E+02 -9.140977E-03  0.000000E+00  0.000000E+00  4.632525E-03
--  1.155695E+02
+-  7.836577E+01  7.836577E+01  1.396335E+02  1.396335E+02  1.502803E+02
+-  1.502803E+02
  Phonon frequencies in cm-1    :
-- -9.321312E+02 -7.372696E-02  0.000000E+00  0.000000E+00  3.736384E-02
--  9.321312E+02
+-  6.320626E+02  6.320626E+02  1.126220E+03  1.126220E+03  1.212093E+03
+-  1.212093E+03
  Phonon frequencies in Thz     :
-- -2.794459E+01 -2.210279E-03  0.000000E+00  0.000000E+00  1.120140E-03
--  2.794459E+01
+-  1.894876E+01  1.894876E+01  3.376323E+01  3.376323E+01  3.633762E+01
+-  3.633762E+01
  Phonon energies in Kelvin  :
-- -1.341127E+03 -1.060765E-01  0.000000E+00  0.000000E+00  5.375816E-02
--  1.341127E+03
+-  9.093960E+02  9.093960E+02  1.620377E+03  1.620377E+03  1.743929E+03
+-  1.743929E+03
 ================================================================================
 
  ---- T=0 shift of eigenenergies due to electron-phonon interation at q ---- 
@@ -1708,12 +1707,12 @@ tolerances: {tolwfr: 1.00E-16, }
  Fan corrections to eigenvalues at T=0 (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00081   -0.00570   -0.00570   -0.00570    0.00541    0.00541    0.00541   -0.00811
+  -0.00339   -0.03706   -0.03706   -0.03706   -0.01126   -0.01126   -0.01126   -0.02450
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  Fan corrections to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.02197   -0.15515   -0.15515   -0.15515    0.14732    0.14732    0.14732   -0.22081
+  -0.09231   -1.00837   -1.00837   -1.00837   -0.30633   -0.30633   -0.30633   -0.66681
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1721,12 +1720,12 @@ tolerances: {tolwfr: 1.00E-16, }
  DDW corrections to eigenvalues at T=0 (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00034    0.00613    0.00613    0.00613    0.00538    0.00538    0.00538    0.00053
+   0.00206    0.03763    0.03763    0.03763    0.03307    0.03307    0.03307    0.00326
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  DDW corrections to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00912    0.16669    0.16669    0.16669    0.14648    0.14648    0.14648    0.01445
+   0.05600    1.02398    1.02398    1.02398    0.89979    0.89979    0.89979    0.08874
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1734,12 +1733,12 @@ tolerances: {tolwfr: 1.00E-16, }
  Fan+DDW corrs   to eigenvalues at T=0 (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00047    0.00042    0.00042    0.00042    0.01080    0.01080    0.01080   -0.00758
+  -0.00133    0.00057    0.00057    0.00057    0.02181    0.02181    0.02181   -0.02124
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  Fan+DDW corrs   to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.01285    0.01154    0.01154    0.01154    0.29380    0.29380    0.29380   -0.20637
+  -0.03631    0.01561    0.01561    0.01561    0.59346    0.59346    0.59346   -0.57807
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1837,7 +1836,6 @@ P          mk1mem           8
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  5.00000000E-01  0.00000000E+00
               qpt4     5.00000000E-01  5.00000000E-01  0.00000000E+00
-            rfasr           1
            rfphon1          0
            rfphon2          1
            rfphon3          0
@@ -1966,10 +1964,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.8
+- Proc.   0 individual time (sec): cpu=         11.4  wall=         11.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  45 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.5  wall=         16.8
+.Delivered  17 WARNINGs and  45 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.4  wall=         11.6

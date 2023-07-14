@@ -1,6 +1,6 @@
 
-.Version 9.7.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h26 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h56 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t89.abi
+- input  file    -> /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t89.abi
 - output file    -> t89.abo
 - root for input  files -> t89i
 - root for output files -> t89o
-
-
+ 
+ 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       1.859 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.051 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,8 +55,8 @@ P This job should need less than                       1.853 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,8 +72,8 @@ P This job should need less than                       2.064 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,13 +89,13 @@ P This job should need less than                       2.064 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -112,7 +112,7 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
          eph_task2          1
          eph_task3          2
          eph_task4         -2
--          fftalg         312
+-          fftalg         512
            getddb1          0
            getddb2          0
            getddb3         20
@@ -221,21 +221,21 @@ P           mkmem           8
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
             znucl       13.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   1.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   3.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -246,25 +246,25 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
  R(3)=  3.7500000  3.7500000  0.0000000  G(3)=  0.1333333  0.1333333 -0.1333333
  Unit cell volume ucvol=  1.0546875E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  12  12  12
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -277,25 +277,25 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
              1    7.659439    0.819933
              2  -21.179474   -1.097800
  pspatm: atomic psp has been read  and splines computed
-
+ 
 --------------------------------------------------------------------------------
-
-
+ 
+ 
 ================================================================================
  prteigrs : about to open file t89o_DS1_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   1.33E-15  5.06E-15  8.66E-15  9.50E-15  8.96E-10
  -1.6101E-01  7.5164E-01  7.5171E-01  7.5171E-01  8.1448E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-  prteigrs : nnsclo,ikpt=   30    2 max resid (excl. the buffer)=  3.91337E-12
+ 
+  prteigrs : nnsclo,ikpt=   30    2 max resid (excl. the buffer)=  3.91453E-12
   prteigrs : nnsclo,ikpt=   30    3 max resid (excl. the buffer)=  7.85278E-09
-
-
+ 
+ 
  scprqt:  WARNING -
   nstep=   30 was not enough non-SCF iterations to converge;
   maximum residual=  7.853E-09 exceeds tolwfr=  1.000E-14
-
+ 
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -324,13 +324,13 @@ force_length_stats: {min: null, max: null, mean: null, }
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.91797543
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   32.737E-11; max=  78.528E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
-
+ 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.500000000000  7.500000000000  7.500000000000 bohr
@@ -340,12 +340,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   1, nband=  5, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.16101    0.75164    0.75171    0.75171    0.81448
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -356,32 +356,32 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 ...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
  R(3)=  3.7500000  3.7500000  0.0000000  G(3)=  0.1333333  0.1333333 -0.1333333
  Unit cell volume ucvol=  1.0546875E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  12  12  12
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 --------------------------------------------------------------------------------
-
-
+ 
+ 
 ================================================================================
  prteigrs : about to open file t89o_DS2_EIG
  Non-SCF case, kpt    1 (  0.25000  0.00000  0.00000), residuals and eigenvalues=
   6.89E-16  3.80E-15  5.35E-15  7.98E-15  5.81E-08
  -9.6313E-02  3.9670E-01  6.8608E-01  6.8613E-01  8.1446E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
 
 --- !ResultsGS
 iteration_state: {dtset: 2, }
@@ -410,13 +410,13 @@ force_length_stats: {min: null, max: null, mean: null, }
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.91797543
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   28.681E-16; max=  95.876E-16
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
-
+ 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
  length scales=  7.500000000000  7.500000000000  7.500000000000 bohr
@@ -426,12 +426,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  kpt#   1, nband=  5, wtk=  0.12500, kpt=  0.2500  0.0000  0.0000 (reduced coord)
   -0.09631    0.39670    0.68608    0.68613    0.81446
  prteigrs : prtvol=0 or 1, do not print more k-points.
-
-
+ 
+ 
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -442,30 +442,36 @@ meta: {optdriver: 7, eph_task: 2, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  mkfilename : getwfq/=0, take file _WFQ from output of DATASET   2.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
+ 
 - Reading GS states from WFK file: t89o_DS1_WFK
 - Reading GS states from WFQ file: t89o_DS2_WFQ
 - Reading DDB from file: t89o_DS20_DDB
 - Reading DVDB from file: t89o_DS20_DVDB
-
-
-
+ 
+ 
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
  R(3)=  3.7500000  3.7500000  0.0000000  G(3)=  0.1333333  0.1333333 -0.1333333
  Unit cell volume ucvol=  1.0546875E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+ 
+ DDB file with 8 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t89o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t89o_DS20_DDB
@@ -536,18 +542,18 @@ meta: {optdriver: 7, eph_task: 2, }
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
-
+ 
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
-
+ 
  Computation of electron-phonon coupling matrix elements (GKK files)
-
+ 
  Computation of gkq matrix elements with (GKK files)
-
+ 
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -558,30 +564,36 @@ meta: {optdriver: 7, eph_task: -2, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
-
+ 
  mkfilename : getwfq/=0, take file _WFQ from output of DATASET   2.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
+ 
 - Reading GS states from WFK file: t89o_DS1_WFK
 - Reading GS states from WFQ file: t89o_DS2_WFQ
 - Reading DDB from file: t89o_DS20_DDB
 - Reading DVDB from file: t89o_DS20_DVDB
-
-
-
+ 
+ 
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
  R(3)=  3.7500000  3.7500000  0.0000000  G(3)=  0.1333333  0.1333333 -0.1333333
  Unit cell volume ucvol=  1.0546875E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+ 
+ DDB file with 8 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t89o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t89o_DS20_DDB
@@ -652,29 +664,29 @@ meta: {optdriver: 7, eph_task: -2, }
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
-
+ 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.1002141746E-02 (at units)
 -                                   =           2.1924 [km/s]
-
+ 
  Debye frequency from partial sums:     0.8267449487E-03 (Ha)
 -                                 =     0.5439720446E+01 (THz)
 -Debye temperature from partial sums:     0.2610650968E+03 (K)
-
+ 
  Average speed of sound partial sums:     0.1002141746E-02 (at units)
 -                                   =           2.1924 [km/s]
-
+ 
  Debye frequency from partial sums:     0.8267449487E-03 (Ha)
 -                                 =     0.5439720446E+01 (THz)
 -Debye temperature from partial sums:     0.2610650968E+03 (K)
-
+ 
 - Writing phonon DOS to netcdf file: t89o_DS4_PHDOS.nc
 --------------------------------------------------------------------------------
-
+ 
  Computation of electron-phonon coupling matrix elements GKQ file
-
+ 
  Computation of gkq matrix elements with GKQ file
-
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -694,7 +706,7 @@ meta: {optdriver: 7, eph_task: -2, }
            etotal4     0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddb1          0
            getddb2          0
            getddb3         20
@@ -793,7 +805,7 @@ P           mkmem           8
            tsmear      4.00000000E-02 Hartree
             typat      1
             znucl       13.00000
-
+ 
 ================================================================================
 
 
@@ -888,10 +900,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.3
-
+- Proc.   0 individual time (sec): cpu=          2.3  wall=         17.6
+ 
 ================================================================================
-
+ 
  Calculation completed.
-.Delivered   9 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.3
+.Delivered   9 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.3  wall=         17.6

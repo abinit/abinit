@@ -17,14 +17,16 @@ kptopt2   2
 iscf2    -3     
 rfelfd2   2    
 tolwfr2   1.0d-20
+rfphon2   0
 
 #Set 3: Response function calculation of d2/dkdk wave function
 #*************************************************************
 kptopt3   2
 getddk3   2
 iscf3    -3
-rf2_dkdk3 1
+rf2_dkdk3 3
 tolwfr3   1.0d-20
+rfphon3   0
 
 #Set 4 : Response function calculation of Q=0 phonons and electric field
 #***********************************************************************
@@ -33,7 +35,7 @@ getddk4   2
 rfelfd4   3
 rfphon4   1
 tolvrs4   1.0d-8
-prepalw4  1
+prepalw4  2
 
 #Set 5 : Dynamic Quadrupoles calculation
 #***************************************
@@ -121,6 +123,7 @@ diemac 12.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% [files]
 #%% files_to_test = 

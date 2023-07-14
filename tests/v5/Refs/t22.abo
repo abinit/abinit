@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h27 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h43 )
   
 
 ================================================================================
@@ -81,23 +81,37 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  9.1698100  0.0000000  0.0000000  G(1)=  0.1090535  0.0629621  0.0000000
  R(2)= -4.5849050  7.9412884  0.0000000  G(2)=  0.0000000  0.1259242  0.0000000
  R(3)=  0.0000000  0.0000000  9.8828644  G(3)=  0.0000000  0.0000000  0.1011852
  Unit cell volume ucvol=  7.1967123E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
- Now the whole DDB is in central memory
-
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.4604171 -0.0000000  0.1666667  Si
+    2)    0.0000000  0.4604171  0.8333333  Si
+    3)    0.5395829  0.5395829  0.5000000  Si
+    4)    0.3979514  0.2757286  0.2711161   O
+    5)    0.7242714  0.1222228  0.9377827   O
+    6)    0.8777772  0.6020486  0.6044494   O
+    7)    0.2757286  0.3979514  0.7288839   O
+    8)    0.1222228  0.7242714  0.0622173   O
+    9)    0.6020486  0.8777772  0.3955506   O
+ 
+ DDB file with 13 blocks has been read.
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -111,13 +125,13 @@
        3               1       -0.000000        0.000000
        3               2       -0.000000        0.000000
        3               3        0.085186        0.000000
-
+ 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    3.038676E+00    1.562960E-18    0.000000E+00
-         1         2   -5.598011E-13    3.574199E+00    2.680040E-01
+         1         2   -5.598292E-13    3.574199E+00    2.680040E-01
          1         3    3.536863E-13   -3.383562E-01    3.359905E+00
          2         1    3.440318E+00    2.318881E-01   -2.320983E-01
          2         2    2.318881E-01    3.172557E+00   -1.340020E-01
@@ -144,12 +158,12 @@
          9         2    4.895040E-01   -1.875710E+00    5.336013E-01
          9         3   -4.054960E-01    5.589743E-01   -1.679953E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-
+ 
 ================================================================================
-
+ 
  Calculation of the interatomic forces 
-
--begin at tcpu      0.068  and twall      0.069 sec
+ 
+-begin at tcpu      0.073  and twall      0.532 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  2.50000000E-01
@@ -160,7 +174,7 @@
   6)   5.00000000E-01  0.00000000E+00 -2.50000000E-01
   7)   0.00000000E+00  5.00000000E-01 -2.50000000E-01
   8)   5.00000000E-01  5.00000000E-01 -2.50000000E-01
-
+ 
  The interatomic forces have been obtained
 
  Analysis of interatomic force constants 
@@ -176,13 +190,13 @@
        of the generic atom along z.               
 
  generic atom number   1
- with cartesian coordinates  4.22193766E+00 -1.80063414E-09  1.64714407E+00
+ with cartesian coordinates  4.22193766E+00 -1.80063312E-09  1.64714407E+00
 
  Third atom defining local coordinates : 
      ib =    4   irpt =   18
 
    1 interaction with atom     1 cell      18
- with coordinates     4.221938E+00   -1.800634E-09    1.647144E+00
+ with coordinates     4.221938E+00   -1.800633E-09    1.647144E+00
  and distance     0.000000E+00
    0.49468  0.00000 -0.00000  -0.16588  0.00000  0.00000   0.66056  0.00000 -0.00000
    0.00000  0.51430  0.03696   0.00000 -0.12244  0.10509   0.00000  0.63674 -0.06813
@@ -545,7 +559,7 @@
   -0.00432 -0.00159  0.09607  -0.04049  0.00150  0.15009   0.03618 -0.00309 -0.05402
 
    2 interaction with atom     1 cell      18
- with coordinates     4.221938E+00   -1.800634E-09    1.647144E+00
+ with coordinates     4.221938E+00   -1.800633E-09    1.647144E+00
  and distance     3.038850E+00
   -0.12680  0.11249  0.05349   0.03404 -0.12775 -0.07844  -0.16084  0.24025  0.13193
    0.11387 -0.16219 -0.06311  -0.10767  0.11398  0.09381   0.22154 -0.27617 -0.15692
@@ -858,13 +872,13 @@
    1.00000 -0.17746  0.00000   1.47949 -0.18358 -0.26853  -0.47949  0.00612  0.26853
    0.08215 -0.96631  0.01493   0.47798 -1.46094 -0.03685  -0.39582  0.49463  0.05178
    0.36684  0.00860 -0.90764   0.27335  0.05644 -1.63863   0.09348 -0.04784  0.73098
-
+ 
 ================================================================================
-
+ 
  Calculation of phonon density of states, 
     thermodynamical properties, 
     and Debye-Waller factors.
-
+ 
        Homogeneous q point set in the B.Z.
  Grid q points  :     8000
  greater than 80, so only write 20 of them
@@ -891,7 +905,7 @@
  symkpt : the number of k-points, thanks to the symmetries,
  is reduced to   770 .
  DOS  with channel width=    5               :
-
+ 
  # At  T     F(J/mol-c)     E(J/mol-c)     S(J/(mol-c.K)) C(J/(mol-c.K)) Omega_mean(cm-1)
  # (A mol-c is the abbreviation of a mole-cell, that is, the
  #  number of Avogadro times the atoms in a unit cell)
@@ -1835,12 +1849,12 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
   1  7  1.000E+03  5.6939E+01  5.4576E+01  5.5542E+01  6.8181E-02 -1.6086E+00 -4.0567E-01
   1  8  1.000E+03  5.5089E+01  5.6425E+01  5.5542E+01  9.8140E-01  4.6783E-01  1.5862E+00
   1  9  1.000E+03  5.5244E+01  5.6271E+01  5.5542E+01 -1.0496E+00  1.1408E+00 -1.1806E+00
-
+ 
 ================================================================================
-
+ 
  Treat the first list of vectors 
-
-
+ 
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -8.269578E-06 -8.269576E-06 -3.455740E-06  6.526687E-04  6.526687E-04
@@ -1856,13 +1870,13 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  4.943104E+02  6.909349E+02  6.909349E+02  7.574719E+02  8.100774E+02
 -  8.100774E+02  1.051890E+03  1.051890E+03  1.056735E+03  1.089122E+03
 -  1.119418E+03  1.119418E+03
-
+ 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
         degenerate with vibration mode #   2
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   3
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
@@ -1889,7 +1903,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  17
         degenerate with vibration mode #  18
-  2.0 -0.0 -1.0  0.0 -1.0  0.0
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  19
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  20
@@ -1897,15 +1911,15 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
   2.0 -0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #  22
         degenerate with vibration mode #  23
-  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0  0.0 -1.0 -0.0
  Symmetry characters of vibration mode #  24
   1.0 -1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  25
   1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #  26
         degenerate with vibration mode #  27
-  2.0  0.0 -1.0  0.0 -1.0 -0.0
-
+  2.0 -0.0 -1.0 -0.0 -1.0  0.0
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
    3.034534E-04  6.214043E-04  6.214043E-04  7.722409E-04  8.311109E-04
@@ -1921,7 +1935,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.700488E+02  5.700488E+02  7.732605E+02  7.999299E+02  7.999299E+02
 -  8.028334E+02  1.040208E+03  1.077124E+03  1.077124E+03  1.078489E+03
 -  1.176733E+03  1.176733E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.45000
  Phonon energies in Hartree :
    3.009011E-04  6.124163E-04  6.142798E-04  7.648363E-04  7.660155E-04
@@ -1937,7 +1951,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.625771E+02  5.787508E+02  7.722141E+02  7.979081E+02  8.019904E+02
 -  8.029575E+02  1.040311E+03  1.074774E+03  1.079077E+03  1.079318E+03
 -  1.171890E+03  1.181219E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.40000
  Phonon energies in Hartree :
    2.930258E-04  5.847227E-04  5.887552E-04  7.113279E-04  7.483650E-04
@@ -1953,7 +1967,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.563098E+02  5.886311E+02  7.691142E+02  7.960104E+02  8.033219E+02
 -  8.039957E+02  1.040629E+03  1.072297E+03  1.080803E+03  1.081328E+03
 -  1.166733E+03  1.185312E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.35000
  Phonon energies in Hartree :
    2.792985E-04  5.276311E-04  5.505654E-04  6.771303E-04  7.306539E-04
@@ -1969,7 +1983,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.511504E+02  5.995712E+02  7.640725E+02  7.943066E+02  8.039037E+02
 -  8.058526E+02  1.041180E+03  1.069726E+03  1.083131E+03  1.083561E+03
 -  1.161303E+03  1.188982E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.30000
  Phonon energies in Hartree :
    2.591718E-04  4.531871E-04  4.985128E-04  6.576606E-04  7.152252E-04
@@ -1985,7 +1999,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.469580E+02  6.114081E+02  7.572561E+02  7.928443E+02  8.046689E+02
 -  8.074769E+02  1.041983E+03  1.067096E+03  1.084712E+03  1.087203E+03
 -  1.155647E+03  1.192203E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.25000
  Phonon energies in Hartree :
    2.323318E-04  3.725237E-04  4.340858E-04  6.455778E-04  7.026681E-04
@@ -2001,7 +2015,7 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.435834E+02  6.239570E+02  7.488673E+02  7.916474E+02  8.055733E+02
 -  8.088005E+02  1.043047E+03  1.064441E+03  1.086058E+03  1.091568E+03
 -  1.149810E+03  1.194954E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.20000
  Phonon energies in Hartree :
    1.987521E-04  2.910370E-04  3.593064E-04  6.385996E-04  6.921638E-04
@@ -2023,22 +2037,22 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
  Partial Debye temperature for this q and mode:
    in atomic units:     0.6798663860E-03
    in SI units K  :            214.68457
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2288869933E-02
    in units km/s:              5.00734
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9955430954E-03
    in SI units K  :            314.36727
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2825777228E-02
    in units km/s:              6.18193
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1229070717E-02
    in SI units K  :            388.10938
-
-
+ 
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.15000
  Phonon energies in Hartree :
    1.585671E-04  2.115080E-04  2.763784E-04  6.362857E-04  6.824780E-04
@@ -2060,22 +2074,22 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
  Partial Debye temperature for this q and mode:
    in atomic units:     0.7232086835E-03
    in SI units K  :            228.37097
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2217882766E-02
    in units km/s:              4.85204
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9646672545E-03
    in SI units K  :            304.61746
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2898116169E-02
    in units km/s:              6.34018
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1260534511E-02
    in SI units K  :            398.04484
-
-
+ 
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.10000
  Phonon energies in Hartree :
    1.119049E-04  1.356585E-04  1.874746E-04  6.383585E-04  6.726768E-04
@@ -2097,22 +2111,22 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
  Partial Debye temperature for this q and mode:
    in atomic units:     0.7655811176E-03
    in SI units K  :            241.75111
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2133781772E-02
    in units km/s:              4.66806
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9280875596E-03
    in SI units K  :            293.06652
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2948800334E-02
    in units km/s:              6.45106
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1282579569E-02
    in SI units K  :            405.00611
-
-
+ 
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.05000
  Phonon energies in Hartree :
    5.872727E-05  6.452349E-05  9.465251E-05  6.441759E-04  6.625471E-04
@@ -2134,137 +2148,137 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
  Partial Debye temperature for this q and mode:
    in atomic units:     0.8035478012E-03
    in SI units K  :            253.74003
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2029788486E-02
    in units km/s:              4.44055
  Partial Debye temperature for this q and mode:
    in atomic units:     0.8828557201E-03
    in SI units K  :            278.78346
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.2977591481E-02
    in units km/s:              6.51405
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1295102267E-02
    in SI units K  :            408.96047
-
-
+ 
+ 
 ================================================================================
-
+ 
   
  Mode effective charges 
  Mode number.    x            y            z            length 
 -     1         -0.000001    -0.001275     0.000000     0.001275
 -     2         -0.001275     0.000001    -0.000000     0.001275
 ;     3         -0.000000     0.000000    -0.001975     0.001975
--     4         -0.054061    -0.047413    -0.000000     0.071907
--     5         -0.047413     0.054061     0.000000     0.071907
+-     4         -0.054004    -0.047479    -0.000000     0.071907
+-     5         -0.047479     0.054004     0.000000     0.071907
 ;     6         -0.000000    -0.000000     0.000035     0.000035
--     7         -0.257384    -0.467689     0.000000     0.533835
--     8         -0.467689     0.257384    -0.000000     0.533835
+-     7         -0.257297    -0.467737     0.000000     0.533835
+-     8         -0.467737     0.257297    -0.000000     0.533835
 ;     9          0.000000    -0.000000     1.884827     1.884827
 ;    10         -0.000000    -0.000000    -0.000774     0.000774
--    11         -0.765248    -1.288769    -0.000000     1.498843
--    12         -1.288769     0.765248     0.000000     1.498843
--    13          2.143113    -1.048816    -0.000000     2.385990
--    14          1.048816     2.143113     0.000000     2.385990
+-    11         -0.765449    -1.288651    -0.000000     1.498843
+-    12         -1.288651     0.765449     0.000000     1.498843
+-    13          2.142951    -1.049148    -0.000000     2.385990
+-    14          1.049148     2.142951     0.000000     2.385990
 ;    15         -0.000000    -0.000000    -0.000776     0.000776
 ;    16          0.000000    -0.000000     2.440426     2.440426
--    17         -0.653967     0.302478     0.000000     0.720532
--    18         -0.302478    -0.653967    -0.000000     0.720532
+-    17         -0.653983     0.302444     0.000000     0.720532
+-    18         -0.302444    -0.653983    -0.000000     0.720532
 ;    19          0.000000    -0.000000     3.074391     3.074391
--    20          1.682009    -0.765667    -0.000000     1.848080
--    21          0.765667     1.682009     0.000000     1.848080
--    22          5.017374    -2.273172     0.000000     5.508299
--    23          2.273172     5.017374    -0.000000     5.508299
+-    20          1.681964    -0.765766    -0.000000     1.848080
+-    21          0.765766     1.681964     0.000000     1.848080
+-    22          5.017369    -2.273184     0.000000     5.508299
+-    23          2.273184     5.017369    -0.000000     5.508299
 ;    24          0.000000    -0.000000    -5.310555     5.310555
 ;    25          0.000000     0.000000     0.000088     0.000088
--    26         -0.506398    -1.120674    -0.000000     1.229776
--    27         -1.120674     0.506398     0.000000     1.229776
+-    26         -0.506410    -1.120669    -0.000000     1.229776
+-    27         -1.120669     0.506410     0.000000     1.229776
   
  Oscillator strengths (in a.u. ; 1 a.u.=253.2638413 m3/s2). Set to zero if abs()<tol14.
  Mode number.       xx          yy          zz          xy          xz          yz          trace
--   1     Real    0.0000E+00  4.4517E-11  0.0000E+00  3.4693E-14  0.0000E+00  0.0000E+00  4.4517E-11
+-   1     Real    0.0000E+00  4.4517E-11  0.0000E+00  3.7197E-14  0.0000E+00  0.0000E+00  4.4517E-11
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   2     Real    4.4517E-11  0.0000E+00  0.0000E+00 -3.4693E-14  0.0000E+00  0.0000E+00  4.4517E-11
+-   2     Real    4.4517E-11  0.0000E+00  0.0000E+00 -3.7197E-14  0.0000E+00  0.0000E+00  4.4517E-11
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   3     Real    0.0000E+00  0.0000E+00  1.0686E-10  0.0000E+00  0.0000E+00  0.0000E+00  1.0686E-10
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   4     Real    9.7646E-08  7.5109E-08  0.0000E+00  8.5639E-08  0.0000E+00  0.0000E+00  1.7276E-07
+-   4     Real    9.7439E-08  7.5316E-08  0.0000E+00  8.5666E-08  0.0000E+00  0.0000E+00  1.7276E-07
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   5     Real    7.5109E-08  9.7646E-08  0.0000E+00 -8.5639E-08  0.0000E+00  0.0000E+00  1.7276E-07
+-   5     Real    7.5316E-08  9.7439E-08  0.0000E+00 -8.5666E-08  0.0000E+00  0.0000E+00  1.7276E-07
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   6     Real    0.0000E+00  0.0000E+00  3.6660E-14  0.0000E+00  0.0000E+00  0.0000E+00  3.6660E-14
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   7     Real    2.1523E-06  7.1065E-06  0.0000E+00  3.9109E-06  0.0000E+00  0.0000E+00  9.2588E-06
+-   7     Real    2.1508E-06  7.1079E-06  0.0000E+00  3.9100E-06  0.0000E+00  0.0000E+00  9.2588E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--   8     Real    7.1065E-06  2.1523E-06  0.0000E+00 -3.9109E-06  0.0000E+00  0.0000E+00  9.2588E-06
+-   8     Real    7.1079E-06  2.1508E-06  0.0000E+00 -3.9100E-06  0.0000E+00  0.0000E+00  9.2588E-06
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;   9     Real    0.0000E+00  0.0000E+00  1.1530E-04  0.0000E+00  0.0000E+00  0.0000E+00  1.1530E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  10     Real    0.0000E+00  0.0000E+00  1.7179E-11  0.0000E+00  0.0000E+00  0.0000E+00  1.7179E-11
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  11     Real    1.7016E-05  4.8261E-05  0.0000E+00  2.8656E-05  0.0000E+00  0.0000E+00  6.5276E-05
+-  11     Real    1.7024E-05  4.8252E-05  0.0000E+00  2.8661E-05  0.0000E+00  0.0000E+00  6.5276E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  12     Real    4.8261E-05  1.7016E-05  0.0000E+00 -2.8656E-05  0.0000E+00  0.0000E+00  6.5276E-05
+-  12     Real    4.8252E-05  1.7024E-05  0.0000E+00 -2.8661E-05  0.0000E+00  0.0000E+00  6.5276E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  13     Real    1.4312E-04  3.4277E-05  0.0000E+00 -7.0040E-05  0.0000E+00  0.0000E+00  1.7739E-04
+-  13     Real    1.4309E-04  3.4298E-05  0.0000E+00 -7.0056E-05  0.0000E+00  0.0000E+00  1.7739E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  14     Real    3.4277E-05  1.4312E-04  0.0000E+00  7.0040E-05  0.0000E+00  0.0000E+00  1.7739E-04
+-  14     Real    3.4298E-05  1.4309E-04  0.0000E+00  7.0056E-05  0.0000E+00  0.0000E+00  1.7739E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  15     Real    0.0000E+00  0.0000E+00  2.0170E-11  0.0000E+00  0.0000E+00  0.0000E+00  2.0170E-11
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  16     Real    0.0000E+00  0.0000E+00  1.7979E-04  0.0000E+00  0.0000E+00  0.0000E+00  1.7979E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  17     Real    1.0661E-05  2.2807E-06  0.0000E+00 -4.9309E-06  0.0000E+00  0.0000E+00  1.2941E-05
+-  17     Real    1.0661E-05  2.2802E-06  0.0000E+00 -4.9304E-06  0.0000E+00  0.0000E+00  1.2941E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  18     Real    2.2807E-06  1.0661E-05  0.0000E+00  4.9309E-06  0.0000E+00  0.0000E+00  1.2941E-05
+-  18     Real    2.2802E-06  1.0661E-05  0.0000E+00  4.9304E-06  0.0000E+00  0.0000E+00  1.2941E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  19     Real    0.0000E+00  0.0000E+00  2.0306E-04  0.0000E+00  2.5344E-14 -2.1643E-14  2.0306E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  20     Real    6.6011E-05  1.3679E-05  0.0000E+00 -3.0049E-05 -3.0363E-14  1.3822E-14  7.9690E-05
+-  20     Real    6.6008E-05  1.3682E-05  0.0000E+00 -3.0052E-05 -3.0363E-14  1.3824E-14  7.9690E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  21     Real    1.3679E-05  6.6011E-05  0.0000E+00  3.0049E-05  0.0000E+00  0.0000E+00  7.9690E-05
+-  21     Real    1.3682E-05  6.6008E-05  0.0000E+00  3.0052E-05  0.0000E+00  0.0000E+00  7.9690E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  22     Real    7.7187E-04  1.5844E-04  0.0000E+00 -3.4970E-04  8.3121E-14 -3.7659E-14  9.3030E-04
+-  22     Real    7.7186E-04  1.5844E-04  0.0000E+00 -3.4970E-04  8.3124E-14 -3.7661E-14  9.3030E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  23     Real    1.5844E-04  7.7187E-04  0.0000E+00  3.4970E-04 -1.6575E-14 -3.6584E-14  9.3030E-04
+-  23     Real    1.5844E-04  7.7186E-04  0.0000E+00  3.4970E-04 -1.6578E-14 -3.6592E-14  9.3030E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-;  24     Real    0.0000E+00  0.0000E+00  8.5779E-04  0.0000E+00 -3.3421E-14  4.2651E-14  8.5779E-04
+;  24     Real    0.0000E+00  0.0000E+00  8.5779E-04  0.0000E+00 -3.3423E-14  4.2660E-14  8.5779E-04
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 ;  25     Real    0.0000E+00  0.0000E+00  2.4068E-13  0.0000E+00  0.0000E+00  0.0000E+00  2.4068E-13
 ;         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  26     Real    8.1784E-06  4.0054E-05  0.0000E+00  1.8099E-05  0.0000E+00  1.0190E-14  4.8232E-05
+-  26     Real    8.1788E-06  4.0053E-05  0.0000E+00  1.8099E-05  0.0000E+00  1.0191E-14  4.8232E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
--  27     Real    4.0054E-05  8.1784E-06  0.0000E+00 -1.8099E-05 -3.1655E-14  1.4304E-14  4.8232E-05
+-  27     Real    4.0053E-05  8.1788E-06  0.0000E+00 -1.8099E-05 -3.1655E-14  1.4304E-14  4.8232E-05
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
-
+ 
  Electronic dielectric tensor
-      2.59649421     -0.00000000     -0.00000000
-     -0.00000000      2.59649421     -0.00000000
+      2.59649421     -0.00000000      0.00000000
+     -0.00000000      2.59649421      0.00000000
      -0.00000000      0.00000000      2.60612930
-
-
+ 
+ 
  Relaxed ion dielectric tensor
       4.75336339     -0.00000000      0.00000000
      -0.00000000      4.75336339     -0.00000000
       0.00000000     -0.00000000      5.01028496
-
-
+ 
+ 
  Frequency dependent dielectric constant:
-
+ 
  Full dielectric tensor at frequency  0.0000E+00 Hartree
       4.75336339     -0.00000000      0.00000000
      -0.00000000      4.75336339     -0.00000000
       0.00000000     -0.00000000      5.01028496
  
-
+ 
 ================================================================================
-
+ 
  Treat the second list of vectors 
-
-
+ 
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -2281,15 +2295,15 @@ iatom,iwchan,igqpt2(i),gij error=  10  1    20    20    20   0.00000
 -  5.361280E+02  6.909349E+02  6.909349E+02  7.892333E+02  8.100774E+02
 -  8.100774E+02  1.051890E+03  1.051890E+03  1.089122E+03  1.119418E+03
 -  1.119418E+03  1.201283E+03
-
+ 
  Generalized Lyddane-Sachs-Teller relation at zero frequency :
  Direction                     Dielectric constant
    0.00000   0.00000   1.00000      5.01028515
 -
-- Proc.   0 individual time (sec): cpu=         20.6  wall=         20.7
-
+- Proc.   0 individual time (sec): cpu=         19.5  wall=         20.9
+ 
 ================================================================================
-
-+Total cpu time     20.607  and wall time     20.666 sec
-
+ 
++Total cpu time     19.458  and wall time     20.882 sec
+ 
  anaddb : the run completed succesfully.

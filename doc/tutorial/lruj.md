@@ -4,13 +4,16 @@ authors: LMac and DJA
 
 # Hubbard U and Hund's J Parameters with Cococcioni and de Gironcoli's approach
 
-## 1 How to determine U(J) for DFT+U($\texrm{\pm}$J) via Linear Response
+## 1 How to determine U(J) for DFT+U(+J) via Linear Response
 
 This tutorial aims to demonstrate the operations and functionalities of the Abinit post-processing
 utility called Linear Response Hubbard U and Hund's J (lruj), designed to determine the 
 first-principles Hubbard U and/or Hund's J parameters for particular atomic subspaces. Once obtained,
-these parameters may then be applied via the DFT+U($\texrm{\pm}$J)-like Hubbard functionals to 
+these parameters may then be applied via the DFT+U(+J)-like Hubbard functionals to 
 address self-interaction and static correlation errors.
+
+Note that there is another methodology to compute _U_ and _J_, see the 
+[cRPA U(J)](/tutorial/ucalc_crpa) tutorial.
 
 In this tutorial, you will learn how to run perturbative calculations in Abinit and
 generate input data to successfully execute the lruj post-processing utility.
@@ -100,15 +103,13 @@ internal and post-processing utilities, their use is strongly disadvised. The lr
 preserves conserves most of ujdet's data processing functionalities. For retrogressive and archive 
 purposes, the primary differences between the two are outlined in the table below.
 
-|   | <code>ujdet</code>                                                                                                      | <code>lruj</code>                                         |
-| - | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| 1 | Embedded in Abinit core routine +
-
-Post-processing extension                                                   | Post-processor                                   |
-| 2 | Two-point linear regression                                                                                    | 3+ point polynomial (variable degree) regression |
-| 3 | $\chi$ and $\chi_0$ responses treated as matrices; interatomic response monitored; matrices augmented by total system charge | $\chi$ and $\chi_0$ responses treated as scalars               |
-| 4 | Supercell extrapolation scheme                                                                                 | RMS Error analysis                               |
-| 5 | Atomic Sphere Approximation projector extensions/normalizations                                                |                                                  |
+|   | <code>ujdet</code>            | <code>lruj</code>                                |
+| - | ----------------------------- | ------------------------------------------------ |
+| 1 | Embedded in Abinit core routine + Post-processing extension | Post-processor                                   |
+| 2 | Two-point linear regression                                 | 3+ point polynomial (variable degree) regression |
+| 3 | $\chi$ and $\chi_0$ responses treated as matrices; interatomic response monitored; matrices augmented by total system charge |  and  responses treated as scalars               |
+| 4 | Supercell extrapolation scheme                              | RMS Error analysis                               |
+| 5 | Atomic Sphere Approximation projector extensions/normalizations   |                                                  |
 
 As mentioned in item (2), the most influential difference between ujdet and lruj is the number 
 of data points used to compute a linear regression of the response functions $\chi$ and $\chi_0$. 

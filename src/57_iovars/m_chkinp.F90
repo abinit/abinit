@@ -994,6 +994,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! fermie_nest
    call chkdpr(0,0,cond_string,cond_values,ierr,'fermie_nest',dt%fermie_nest,1,0.0_dp,iout)
 
+!  ffnl_lw
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'ffnl_lw',dt%ffnl_lw,2,(/0,1/),iout)
+
+
    ! fftgw
    call chkint_eq(0,0,cond_string,cond_values,ierr,'fftgw',dt%fftgw,8, [00,01,10,11,20,21,30,31],iout)
 
@@ -1607,6 +1611,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
   call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_qdrpl',dt%lw_qdrpl,2,(/0,1/),iout)
   if(dt%lw_qdrpl/=0)then
     cond_string(1)='lw_qdrpl' ; cond_values(1)=dt%lw_qdrpl
+    call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+  end if
+
+! lw_natopt
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'lw_natopt',dt%lw_natopt,2,(/0,1/),iout)
+  if(dt%lw_natopt/=0)then
+    cond_string(1)='lw_natopt' ; cond_values(1)=dt%lw_natopt
     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
   end if
 
@@ -2395,7 +2406,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    !dkdk and dkde non-linear response only for occopt=1 (insulators)
-   if (dt%rf2_dkdk==1) then
+   if (dt%rf2_dkdk==1 .or. dt%rf2_dkdk==2 .or. dt%rf2_dkdk==3) then
      cond_string(1)='rf2_dkdk' ; cond_values(1)=dt%rf2_dkdk
      call chkint_eq(1,1,cond_string,cond_values,ierr,'occopt',dt%occopt,1,(/1/),iout)
    end if
@@ -2497,17 +2508,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end do
    end if
-   !Longwave calculation function only for LDA
-!   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
-!   if(allow)then
-!     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-!     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
-!   end if
    !Longwave calculation function only for useylm=1
-   if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1)then
-    write(msg, '(3a,i0,2a)' )&
-     'A longwave calculation requires the input variable "useylm" to be 1,',ch10 ,&
-     'while in your input useylm: ',dt%useylm,ch10,&
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1.and.(dt%lw_qdrpl/=0.or.dt%lw_flexo/=0))then
+    write(msg, '(3a,2a,2a)' )&
+     'A longwave calculation can only be run with the input variable useylm/=1',ch10 ,&
+     'for lw_natopt=1, while this seems not to be the case in your input,',ch10,&
+     'where lw_qdrpl/= and/or lw_flexo/=0.',ch10,&
      'Action: change "useylm" value in your input file.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
@@ -2918,6 +2924,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
+! prepalw
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'prepalw',dt%prepalw,5,(/0,1,2,3,4/),iout)
+
 !  prepanl
 !  Must have prtden=1 to prepare a nonlinear calculation
    if (dt%prepanl==1.and.(dt%rfelfd/=0.or.dt%rfphon/=0)) then
@@ -2945,6 +2954,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (usepaw==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdensph',dt%prtdensph,2,(/0,1/),iout)
    endif
+
+   !  prt_lorbmag
+   if (usepaw==1) call chkint_eq(0,0,cond_string,cond_values,ierr,'prt_lorbmag',dt%prt_lorbmag,2,(/0,1/),iout)
 
 !  prtdos
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtdos',dt%prtdos,6,(/0,1,2,3,4,5/),iout)
@@ -3288,14 +3300,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg, '(a,f8.2,4a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized response function calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
+&      '  the default value of spinmagntarget, and explicit definition of occ. ',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%prtdos==1)then
        write(msg, '(a,f8.2,4a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,& 
+&      '  the default value of spinmagntarget, and explicit definition of occ.',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
@@ -4059,8 +4075,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  iatfixy and iatfixz (diagonal symmetry operations)
 
 !  Should check values of fftalg
-
-!  rfasr=2 possible only when electric field response is computed.
 
 !  Must have nqpt=1 for rfphon=1
 
