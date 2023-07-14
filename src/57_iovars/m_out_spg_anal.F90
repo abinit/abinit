@@ -37,6 +37,9 @@ module m_out_spg_anal
 
  use m_parser,    only : ab_dimensions
  use m_nctk,      only : create_nc_file
+ use m_symfind,   only : symfind_expert, symanal, symlatt
+ use m_geometry,  only : metric, mkrdim
+ use m_spgdata,   only : prtspgroup
 
  implicit none
 
@@ -86,12 +89,13 @@ subroutine out_spg_anal(dtsets,iout,ndtset,ndtset_alloc,results_out)
 
 !Local variables-------------------------------
 !scalars
- integer :: idtset,image,invar_z,jdtset,msym,natom,nimage,nptsym,nsym,ptgroupma,spgroup
+ integer :: idtset,iimage,invar_z,jdtset,msym,mu,natom,nimage,nptsym,nsym,ptgroupma,spgroup
  real(dp) :: tolsym,ucvol
+ character(len=500) :: msg
 !arrays
- integer :: genafm(3),bravais(11)
+ integer :: bravais(11)
  integer, allocatable :: ptsymrel(:,:,:),symafm(:),symrel(:,:,:)
- real(dp) :: acell(3),gmet(3,3),gprimd(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
+ real(dp) :: acell(3),genafm(3),gmet(3,3),gprimd(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
  real(dp), allocatable :: tnons(:,:),xred(:,:)
 
 ! *************************************************************************
@@ -126,14 +130,14 @@ subroutine out_spg_anal(dtsets,iout,ndtset,ndtset_alloc,results_out)
      !From rprimd and tolsym, compute bravais, nptsym and ptsymrel (with maximum size msym).
      call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
-     invar_z=0 ; if(dtset(idtset)%jellslab/=0 .or. dtset(idtset)%nzchempot/=0)invar_z=2
-     call symfind_expert(gprimd,msym,natom,nptsym,dtset(idtset)%nspden,nsym,&
-       dtset(idtset)%pawspnorb,dtset(idtset)%prtvol,ptsymrel,dtset(idtset)%spinat,symafm,symrel,
-       tnons,tolsym,dtset(idtset)%typat,dtset(idtset)%usepaw,xred,&
-       chrgat=dtset(idtset)%chrgat,nucdipmom=dtset(idtset)%nucdipmom,
-       invardir_red=dtset(idtset)%field_xred,invar_z=invar_z)
+     invar_z=0 ; if(dtsets(idtset)%jellslab/=0 .or. dtsets(idtset)%nzchempot/=0)invar_z=2
+     call symfind_expert(gprimd,msym,natom,nptsym,dtsets(idtset)%nspden,nsym,&
+       dtsets(idtset)%pawspnorb,dtsets(idtset)%prtvol,ptsymrel,dtsets(idtset)%spinat,symafm,symrel,&
+       tnons,tolsym,dtsets(idtset)%typat,dtsets(idtset)%usepaw,xred,&
+       chrgat=dtsets(idtset)%chrgat,nucdipmom=dtsets(idtset)%nucdipmom,&
+       invardir_red=dtsets(idtset)%field_xred,invar_z=invar_z)
 
-     call symanal(bravais,dtset(idtset)%chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
+     call symanal(bravais,dtsets(idtset)%chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
 !    Should modify prtspgroup to allow echo of iimage, as optional argument
      call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
@@ -152,10 +156,8 @@ subroutine out_spg_anal(dtsets,iout,ndtset,ndtset_alloc,results_out)
  ABI_FREE(symrel)
  ABI_FREE(tnons)
 
- ABI_FREE(jdtset_)
-
- write(message,'(a,80a)')ch10,('=',mu=1,80)
- call wrtout(iout,message,'COLL')
+ write(msg,'(a,80a)')ch10,('=',mu=1,80)
+ call wrtout(iout,msg,'COLL')
 
 !**************************************************************************
 
