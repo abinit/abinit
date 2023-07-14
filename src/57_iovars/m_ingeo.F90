@@ -164,19 +164,18 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
- integer, save :: print_comment_tolsym=1
- integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
+ integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
- integer :: txcart,txred,txrandom,use_inversion
+ integer :: txcart,txred,txrandom
  real(dp) :: amu_default,ucvol,sumalch
  character(len=1000) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
  type(geo_t) :: geo
 !arrays
- integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
+ integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
@@ -187,8 +186,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
 ! *************************************************************************
 
 !DEBUG
- write(std_out,'(a)')' m_ingeo%ingeo : enter '
- call flush(std_out)
+!write(std_out,'(a)')' m_ingeo%ingeo : enter '
+!call flush(std_out)
 !ENDDEBUG
 
  marr=max(12,3*natom,9*msym)
@@ -896,16 +895,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  !========================================================================================================
 
 !DEBUG
- write(std_out,'(a)')' m_ingeo%ingeo : before symanal '
- call flush(std_out)
+!write(std_out,'(a)')' m_ingeo%ingeo : before symanal '
+!call flush(std_out)
 !ENDDEBUG
 
  ! Here, determine correctly the Bravais lattice and other space group or shubnikov group characteristics
  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
 !DEBUG
- write(std_out,'(a)')' m_ingeo%ingeo : after symanal '
- call flush(std_out)
+!write(std_out,'(a)')' m_ingeo%ingeo : after symanal '
+!call flush(std_out)
 !ENDDEBUG
 
  ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the rprimd. Keep xred fixed.
@@ -1115,8 +1114,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  ABI_FREE(dprarr)
 
 !DEBUG
- write(std_out,'(a)')' m_ingeo%ingeo : exit '
- call flush(std_out)
+!write(std_out,'(a)')' m_ingeo%ingeo : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine ingeo

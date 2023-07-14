@@ -139,8 +139,8 @@ contains
 !**************************************************************************
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : enter '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : enter '
+!call flush(std_out)
 !ENDDEBUG
 
 !DEBUG
@@ -217,8 +217,8 @@ contains
  call matr3inv(gprimd,rprimd)
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
+!call flush(std_out)
 !ENDDEBUG
 
 !Initialise with the first atom
@@ -296,8 +296,8 @@ contains
 !ENDDEBUG
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : before select the class '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : before select the class '
+!call flush(std_out)
 !ENDDEBUG
 
 !Select the class with the least number of atoms, and non-zero spinat if any
@@ -407,12 +407,14 @@ contains
 
 !  jellium slab and spatially varying chemical potential cases:
 !  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
-   if (invar_z/=0) then
-!    check whether symmetry operation produce a rotation only in the xy plane
-     if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
-&     ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
-!    check whether symmetry operation does not change the z
-     if( ptsymrel(3,3,isym)/=1 ) cycle
+   if(present(invar_z))then
+     if (invar_z/=0) then
+!      check whether symmetry operation produce a rotation only in the xy plane
+       if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
+&       ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
+!      check whether symmetry operation does not change the z
+       if( ptsymrel(3,3,isym)/=1 ) cycle
+     end if
    end if
 
 !DEBUG
@@ -489,9 +491,12 @@ contains
        'isym,iatom0,iatom1=',isym,iatom0,iatom1
        ABI_ERROR(msg)
      end if
+
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
-     if( invar_z==2 .and. abs(trialnons(3)) > tolsym ) cycle
+     if(present(invar_z))then
+       if( invar_z==2 .and. abs(trialnons(3)) > tolsym ) cycle
+     endif
      trialok=1
 
 !    DEBUG
@@ -711,7 +716,7 @@ end subroutine symfind
 
 !Local variables-------------------------------
 !scalars
- integer, save :: print_comment_tolsym=1 
+ integer, save :: print_comment_tolsym=1
  integer :: fixed_mismatch,mismatch_fft_tnons
  integer :: ierr,isym,use_inversion
  character(len=1000) :: msg
@@ -745,6 +750,7 @@ end subroutine symfind
   ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations,
   ! symmetrize the atomic positions and recompute the symmetry operations
   if(tolsym>1.00001e-8)then
+
     call symmetrize_tnons(nsym,symrel,tnons,tolsym)
     ABI_MALLOC(indsym,(4,natom,nsym))
     ABI_MALLOC(symrec,(3,3,nsym))
