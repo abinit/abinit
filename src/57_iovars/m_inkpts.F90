@@ -698,8 +698,8 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    end if
 
 !DEBUG
- write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
- call flush(std_out)
+!write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
+!call flush(std_out)
 !ENDDEBUG
 
    ! Re-generate symmetry operations from the lattice and atomic coordinates
@@ -714,16 +714,16 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
 !DEBUG
- write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
- call flush(std_out)
+!write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
+!call flush(std_out)
 !ENDDEBUG
 
    call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
 
 !DEBUG
- write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
- call flush(std_out)
+!write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
+!call flush(std_out)
 !ENDDEBUG
 
    ! Prepare to compute the q-point grid in the ZB or IZB

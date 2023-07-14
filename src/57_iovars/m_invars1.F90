@@ -1168,8 +1168,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !************************************************************************
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : enter '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : enter '
+!call flush(std_out)
 !ENDDEBUG
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1508,8 +1508,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : before ingeo '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : before ingeo '
+!call flush(std_out)
 !ENDDEBUG
 
    call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_xred(1:3),dtset%genafm(1:3),iatfix,&
@@ -1522,8 +1522,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     typat,vel,vel_cell,xred,znucl, comm)
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : after ingeo '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : after ingeo '
+!call flush(std_out)
 !ENDDEBUG
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
@@ -1581,8 +1581,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 & dtset%xred_orig(1:3,1:natom,intimage))
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : after invacuum '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : after invacuum '
+!call flush(std_out)
 !ENDDEBUG
 
 !write(std_out,*)' invars1: before inkpts, dtset%mixalch_orig(1:npspalch,1:ntypalch,:)=',&
@@ -1677,8 +1677,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Set up dummy arrays istwfk, kpt, wtk
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '
+!call flush(std_out)
 !ENDDEBUG
 
  if(nkpt/=0 .or. dtset%kptopt/=0)then
@@ -1709,8 +1709,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : before inqpt'
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : before inqpt'
+!call flush(std_out)
 !ENDDEBUG
 
    ! Find the q-point, if any.
@@ -1721,8 +1721,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    endif
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : before inkpts'
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : before inkpts'
+!call flush(std_out)
 !ENDDEBUG
 
 
@@ -1734,8 +1734,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
      string,symafm,symrel,vacuum,wtk,comm)
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : after inkpts'
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : after inkpts'
+!call flush(std_out)
 !ENDDEBUG
 
    ABI_FREE(istwfk)
@@ -1749,8 +1749,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '
+!call flush(std_out)
 !ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')
@@ -1819,8 +1819,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !---------------------------------------------------------------------------
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : before nnos '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : before nnos '
+!call flush(std_out)
 !ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
@@ -2083,8 +2083,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ABI_FREE(dprarr)
 
 !DEBUG
- write(std_out,'(a)')' m_invars1%invars1 : exit '
- call flush(std_out)
+!write(std_out,'(a)')' m_invars1%invars1 : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine invars1
