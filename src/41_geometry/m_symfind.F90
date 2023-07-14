@@ -363,8 +363,8 @@ contains
  end do
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : before big loop '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : before big loop '
+!call flush(std_out)
 !ENDDEBUG
 
 !Big loop over each symmetry operation of the Bravais lattice
@@ -372,8 +372,8 @@ contains
  do isym=1,nptsym
 
 !DEBUG
- write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
- call flush(std_out)
+!write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
+!call flush(std_out)
 !ENDDEBUG
 
    if(present(invardir_red))then
@@ -386,8 +386,8 @@ contains
    endif
 
 !DEBUG
- write(std_out,'(a,i4)')' m_symfind%symfind : 1'
- call flush(std_out)
+!write(std_out,'(a,i4)')' m_symfind%symfind : 1'
+!call flush(std_out)
 !ENDDEBUG
 
    if (use_inversion==0) then
@@ -401,8 +401,8 @@ contains
    end if
 
 !DEBUG
- write(std_out,'(a,i4)')' m_symfind%symfind : 2'
- call flush(std_out)
+!write(std_out,'(a,i4)')' m_symfind%symfind : 2'
+!call flush(std_out)
 !ENDDEBUG
 
 !  jellium slab and spatially varying chemical potential cases:
@@ -418,8 +418,8 @@ contains
    end if
 
 !DEBUG
- write(std_out,'(a,i4)')' m_symfind%symfind : 3'
- call flush(std_out)
+!write(std_out,'(a,i4)')' m_symfind%symfind : 3'
+!call flush(std_out)
 !ENDDEBUG
 
 !  If noncoll_orthorhombic=1, require orthorhombic operations of symmetries, except if spinat=0.
@@ -432,8 +432,8 @@ contains
    endif
 
 !DEBUG
- write(std_out,'(a,i4)')' m_symfind%symfind : 4'
- call flush(std_out)
+!write(std_out,'(a,i4)')' m_symfind%symfind : 4'
+!call flush(std_out)
 !ENDDEBUG
 
 !  Select a tentative set of associated translations
@@ -452,8 +452,8 @@ contains
    endif
 
 !DEBUG
- write(std_out,'(a,i4)')' m_symfind%symfind : 5'
- call flush(std_out)
+!write(std_out,'(a,i4)')' m_symfind%symfind : 5'
+!call flush(std_out)
 !ENDDEBUG
 
 !  From the set of possible images, deduce tentative translations,
@@ -500,7 +500,7 @@ contains
      trialok=1
 
 !    DEBUG
-     write(std_out, '(a,i3,a,i3,a,i3,a,3f12.4,i3)') ' Try isym=',isym,' sending iatom0 ',iatom0,' to iatom1 ',iatom1,' with trialnons(:),trialafm =',trialnons(:),trialafm
+!     write(std_out, '(a,i3,a,i3,a,i3,a,3f12.4,i3)') ' Try isym=',isym,' sending iatom0 ',iatom0,' to iatom1 ',iatom1,' with trialnons(:),trialafm =',trialnons(:),trialafm
 !    ENDDEBUG
 
 !    Loop over all classes, then all atoms in the class,
@@ -575,8 +575,8 @@ contains
      end do ! End loop over all classes
 
 !DEBUG
-     write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
-     write(std_out,*)' '
+!    write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
+!    write(std_out,*)' '
 !ENDDEBUG
 
      if(trialok==1)then
@@ -599,8 +599,8 @@ contains
  end do ! End big loop over each symmetry operation of the Bravais lattice
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : after big loop '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : after big loop '
+!call flush(std_out)
 !ENDDEBUG
 
  ABI_FREE(class)
@@ -641,8 +641,8 @@ contains
 !ENDDEBUG
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : exit '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine symfind
