@@ -1535,12 +1535,9 @@ end subroutine symmetrize_tnons
 !! tnons(3,nsym)=nonsymmorphic translations for symmetries
 !! tolsym=(optional) tolerance on symmetries. When defined, one will try to align the symmetry operations with the FFT grid,
 !!   if the modification is less than tolsym. Take tolsym equal to 1 to deliver possibly large changes of xred,
-!!   giving suggestions of xred modifications, to pbe proposed to users.
+!!   giving suggestions of xred modifications, to be proposed to users.
 !!
 !! OUTPUT
-!! fixed_mismatch=(optional) 1 if there is a mismatch and this mismatch has been fixed, 0 otherwise
-!! mismatch_fft_tnons=(optional) non-zero if there is a mismatch between the fft grid and the tnons, gives the number
-!!   of the first symmetry operation for which there is such a mismatch. Zero otherwise.
 !! tnons_new(3,nsym)=(optional)nonsymmorphic translations for symmetries
 !!
 !! SIDE EFFECTS
@@ -1549,6 +1546,12 @@ end subroutine symmetrize_tnons
 !!  (input) atomic coordinates in terms of real space translations
 !!  (output) symmetrized atomic coordinates in terms
 !!    of real space translations
+!! fixed_mismatch=(optional) At input, needs to be present for tnons_new to be computed
+!!    At output : 1 if there is a mismatch and this mismatch has been fixed, 0 otherwise
+!! mismatch_fft_tnons=(optional) At input, needs to be present for tnons_new to be computed
+!!    Atd output : non-zero if there is a mismatch between the fft grid and the tnons, gives the number
+!!   of the first symmetry operation for which there is such a mismatch. Zero otherwise.
+
 !!
 !! SOURCE
 
