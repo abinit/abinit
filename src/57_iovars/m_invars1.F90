@@ -121,7 +121,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !******************************************************************
 
- !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
+!DEBUG
+!write(std_out,"(3a)")" m_invars1%invars0 : enter with string:", ch10, trim(string)
+!ENDDEBUG
 
  marr=max(9,ndtset_alloc,2)
  ABI_MALLOC(dprarr,(marr))
@@ -1166,8 +1168,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !************************************************************************
 
 !DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : enter '
-!call flush(std_out)
+ write(std_out,'(a)')' m_invars1%invars1 : enter '
+ call flush(std_out)
 !ENDDEBUG
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1505,6 +1507,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : before ingeo '
+ call flush(std_out)
+!ENDDEBUG
+
    call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_xred(1:3),dtset%genafm(1:3),iatfix,&
     dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
     msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
@@ -1513,6 +1520,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
+
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : after ingeo '
+ call flush(std_out)
+!ENDDEBUG
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
@@ -1567,6 +1579,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Examine whether there is some vacuum space in the unit cell
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
 & dtset%xred_orig(1:3,1:natom,intimage))
+
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : after invacuum '
+ call flush(std_out)
+!ENDDEBUG
 
 !write(std_out,*)' invars1: before inkpts, dtset%mixalch_orig(1:npspalch,1:ntypalch,:)=',&
 !dtset%mixalch_orig(1:npspalch,1:ntypalch,1:dtset%nimage)
@@ -1659,6 +1676,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! test that the value of nkpt is OK, if kptopt/=0
  ! Set up dummy arrays istwfk, kpt, wtk
 
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '
+ call flush(std_out)
+!ENDDEBUG
+
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_MALLOC(istwfk,(nkpt))
    ABI_MALLOC(kpt,(3,nkpt))
@@ -1686,6 +1708,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ! Use the first image to predict k and/or q points, except if an intermediate image is available
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : before inqpt'
+ call flush(std_out)
+!ENDDEBUG
+
    ! Find the q-point, if any.
    if(nqpt/=0)then
      call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
@@ -1693,12 +1720,23 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    endif
 
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : before inkpts'
+ call flush(std_out)
+!ENDDEBUG
+
+
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
      kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_filepath, &
      nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)
+
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : after inkpts'
+ call flush(std_out)
+!ENDDEBUG
 
    ABI_FREE(istwfk)
    ABI_FREE(kpt)
@@ -1709,6 +1747,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
  end if
+
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '
+ call flush(std_out)
+!ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')
  if(tread==1) dtset%nqptdm=intarr(1)
@@ -1774,6 +1817,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !---------------------------------------------------------------------------
+
+!DEBUG
+ write(std_out,'(a)')' m_invars1%invars1 : before nnos '
+ call flush(std_out)
+!ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
  if(tread==1) dtset%nnos=intarr(1)
@@ -2035,8 +2083,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ABI_FREE(dprarr)
 
 !DEBUG
-!write(std_out,'(a)')' m_invars1%invars1 : exit '
-!call flush(std_out)
+ write(std_out,'(a)')' m_invars1%invars1 : exit '
+ call flush(std_out)
 !ENDDEBUG
 
 end subroutine invars1

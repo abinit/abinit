@@ -139,6 +139,11 @@ contains
 !**************************************************************************
 
 !DEBUG
+ write(std_out,'(a)')' m_symfind%symfind : enter '
+ call flush(std_out)
+!ENDDEBUG
+
+!DEBUG
 ! if (prtvol>1) msg="remove me later"
 ! write(std_out,*)' symfind : enter'
 ! call flush(6)
@@ -210,6 +215,11 @@ contains
 
  ! need rprimd later to transform back to cart coords
  call matr3inv(gprimd,rprimd)
+
+!DEBUG
+ write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
+ call flush(std_out)
+!ENDDEBUG
 
 !Initialise with the first atom
  nclass=1
@@ -285,6 +295,11 @@ contains
 !write(std_out,*)' '
 !ENDDEBUG
 
+!DEBUG
+ write(std_out,'(a)')' m_symfind%symfind : before select the class '
+ call flush(std_out)
+!ENDDEBUG
+
 !Select the class with the least number of atoms, and non-zero spinat if any
 !It is important to select a magnetic class of atom, if any, otherwise
 !the determination of the initial (inclusive) set of symmetries takes only
@@ -347,9 +362,19 @@ contains
     end do
  end do
 
+!DEBUG
+ write(std_out,'(a)')' m_symfind%symfind : before big loop '
+ call flush(std_out)
+!ENDDEBUG
+
 !Big loop over each symmetry operation of the Bravais lattice
  nsym=0
  do isym=1,nptsym
+
+!DEBUG
+ write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
+ call flush(std_out)
+!ENDDEBUG
 
    if(present(invardir_red))then
 !    ji: Check whether symmetry operation leaves invardir_red invariant
@@ -359,6 +384,11 @@ contains
      diff(:)=invardir_red(:)-invardir_red_rot(:)
      if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
    endif
+
+!DEBUG
+ write(std_out,'(a,i4)')' m_symfind%symfind : 1'
+ call flush(std_out)
+!ENDDEBUG
 
    if (use_inversion==0) then
      det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
@@ -370,6 +400,11 @@ contains
      if(det==-1) cycle
    end if
 
+!DEBUG
+ write(std_out,'(a,i4)')' m_symfind%symfind : 2'
+ call flush(std_out)
+!ENDDEBUG
+
 !  jellium slab and spatially varying chemical potential cases:
 !  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
    if (invar_z/=0) then
@@ -380,6 +415,11 @@ contains
      if( ptsymrel(3,3,isym)/=1 ) cycle
    end if
 
+!DEBUG
+ write(std_out,'(a,i4)')' m_symfind%symfind : 3'
+ call flush(std_out)
+!ENDDEBUG
+
 !  If noncoll_orthorhombic=1, require orthorhombic operations of symmetries, except if spinat=0.
    if (nspden==4 .and. noncoll_orthorhombic==1)then
      if(sum(abs(spinat(:,:)))>tol14)then
@@ -388,6 +428,11 @@ contains
 &          ptsymrel(2,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
      endif
    endif
+
+!DEBUG
+ write(std_out,'(a,i4)')' m_symfind%symfind : 4'
+ call flush(std_out)
+!ENDDEBUG
 
 !  Select a tentative set of associated translations
 !  First compute the symmetric of the first atom in the smallest class,
@@ -403,6 +448,11 @@ contains
 &           ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
 &           ptsymrel(:,3,isym)*spinatred(3,iatom0)
    endif
+
+!DEBUG
+ write(std_out,'(a,i4)')' m_symfind%symfind : 5'
+ call flush(std_out)
+!ENDDEBUG
 
 !  From the set of possible images, deduce tentative translations,
 !  and magnetic factor then test whether it send each atom on a symmetric one
@@ -445,7 +495,7 @@ contains
      trialok=1
 
 !    DEBUG
-!    write(std_out, '(a,i3,a,i3,a,i3,a,3f12.4,i3)') ' Try isym=',isym,' sending iatom0 ',iatom0,' to iatom1 ',iatom1,' with trialnons(:),trialafm =',trialnons(:),trialafm
+     write(std_out, '(a,i3,a,i3,a,i3,a,3f12.4,i3)') ' Try isym=',isym,' sending iatom0 ',iatom0,' to iatom1 ',iatom1,' with trialnons(:),trialafm =',trialnons(:),trialafm
 !    ENDDEBUG
 
 !    Loop over all classes, then all atoms in the class,
@@ -519,8 +569,10 @@ contains
        if(trialok==0)exit
      end do ! End loop over all classes
 
-     !write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
-     !write(std_out,*)' '
+!DEBUG
+     write(std_out,*)' For trial isym=',isym,', trialok = ',trialok
+     write(std_out,*)' '
+!ENDDEBUG
 
      if(trialok==1)then
        nsym=nsym+1
@@ -540,6 +592,11 @@ contains
 
    end do ! End the loop on tentative translations
  end do ! End big loop over each symmetry operation of the Bravais lattice
+
+!DEBUG
+ write(std_out,'(a)')' m_symfind%symfind : after big loop '
+ call flush(std_out)
+!ENDDEBUG
 
  ABI_FREE(class)
  ABI_FREE(natomcl)
@@ -576,6 +633,11 @@ contains
 !    call wrtout(std_out,msg)
 !  end do
 !stop
+!ENDDEBUG
+
+!DEBUG
+ write(std_out,'(a)')' m_symfind%symfind : exit '
+ call flush(std_out)
 !ENDDEBUG
 
 end subroutine symfind

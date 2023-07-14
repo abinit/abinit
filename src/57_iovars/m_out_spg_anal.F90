@@ -58,6 +58,8 @@ contains
 !!
 !! FUNCTION
 !! Perform final spacegroup analysis of the results of ABINIT, for each dataset.
+!! Compare with the initial one, and perform analysis, with adequate warning if there was a change.
+!! Possibly echo spacegroup for all dtsets and possibly all images
 !!
 !! INPUTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables
@@ -65,6 +67,8 @@ contains
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
 !!   one data set. Use for most dimensioned arrays.
+!!  echo_spgroup = option for analysis 
+!!      1 => write ;  2 => echo of spacegroup for all dtsets and possibly all images
 !!  results_out(0:ndtset_alloc)=<type results_out_type>contains the results
 !!   needed for outvars, including evolving variables
 !!
@@ -77,11 +81,11 @@ contains
 !!
 !! SOURCE
 
-subroutine out_spg_anal(dtsets,iout,ndtset,ndtset_alloc,results_out)
+subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iout
+ integer,intent(in) :: echo_spgroup,iout
  integer,intent(in) :: ndtset,ndtset_alloc
 !arrays
  type(dataset_type),intent(in) :: dtsets(0:ndtset_alloc)
@@ -139,8 +143,14 @@ subroutine out_spg_anal(dtsets,iout,ndtset,ndtset_alloc,results_out)
 
      call symanal(bravais,dtsets(idtset)%chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
 
-!    Should modify prtspgroup to allow echo of iimage, as optional argument
-     call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
+!    Echo the spacegroup (and ptgroupma) if requested
+     if(echo_spgroup==1)then
+       if(nimage==1)then
+         call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
+       else
+         call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage=iimage)
+       endif
+     endif
 
    enddo ! iimage
 
@@ -156,8 +166,10 @@ subroutine out_spg_anal(dtsets,iout,ndtset,ndtset_alloc,results_out)
  ABI_FREE(symrel)
  ABI_FREE(tnons)
 
- write(msg,'(a,80a)')ch10,('=',mu=1,80)
- call wrtout(iout,msg,'COLL')
+ if(echo_spgroup==1)then
+   write(msg,'(a,80a)')ch10,('=',mu=1,80)
+   call wrtout(iout,msg,'COLL')
+ endif
 
 !**************************************************************************
 

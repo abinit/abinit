@@ -433,7 +433,7 @@ program abinit
        if(ii==2)iounit=std_out
        write(iounit,*)' '
        call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
-       call out_spg_anal (dtsets,iounit,ndtset,ndtset_alloc,results_out_all)
+       call out_spg_anal (dtsets,(ii-1),iounit,ndtset,ndtset_alloc,results_out_all)
        if(ii==2)write(std_out,*)' '
      end do
    end if
