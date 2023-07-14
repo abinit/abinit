@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h27 )
+.Starting date : Wed 31 May 2023.
+- ( at 19h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t54.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t54.abi
 - output file    -> t54.abo
 - root for input  files -> t54i
 - root for output files -> t54o
@@ -219,13 +219,20 @@ meta: {optdriver: 7, eph_task: 5, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t54o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t54o_DS20_DDB
@@ -244,8 +251,8 @@ meta: {optdriver: 7, eph_task: 5, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -307,13 +314,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t54o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t54o_DS20_DDB
@@ -709,10 +723,64 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          2.3        0.04      0.001
+- Total wall clock time (s,m,h):          2.3        0.04      0.001
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            2.3, wall_time =            2.3
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- dvdb_readsym_qbz                  0.796  34.8         0.798  34.7            154      -1.00        1.00       1.00
+- dvdb_readsym_allv1                0.534  23.4         0.536  23.3            171      -1.00        1.00       1.00
+- fourwf%(pot)                      0.469  20.5         0.458  19.9           4842      -1.00        1.02       1.02
+- v1phq_rotate                      0.360  15.8         0.366  15.9            105      -1.00        0.98       0.98
+- dvdb_rotate_fqg                   0.241  10.6         0.246  10.7            962      -1.00        0.98       0.98
+- fourdp                            0.164   7.2         0.163   7.1           2860      -1.00        1.01       1.01
+- pspini                            0.137   6.0         0.137   6.0              2      -1.00        1.00       1.00
+- timing timab                      0.136   6.0         0.136   5.9             11      -1.00        1.00       1.00
+- invars2                           0.067   2.9         0.067   2.9              2      -1.00        1.00       1.00
+- nonlop(forces)                    0.063   2.7         0.070   3.0           4842      -1.00        0.90       0.90
+- sigph_bsum                        0.034   1.5         0.042   1.8            154      -1.00        0.80       0.80
+- dvdb_qcache_read                  0.028   1.2         0.028   1.2              1      -1.00        1.00       1.00
+- getgh1c_setup                     0.024   1.1         0.028   1.2            948      -1.00        0.87       0.87
+- abinit(2)                         0.024   1.1         0.025   1.1              1      -1.00        0.98       0.98
+- sigph_bsum_1                      0.018   0.8         0.016   0.7            858      -1.00        1.12       1.12
+- others (137)                     -1.071 -46.9        -1.057 -45.9             -1      -1.00        1.01       1.01
+-<END_TIMER>
+-
+- subtotal                          2.025  88.7         2.059  89.4                                  0.98       0.98
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           2.3, wall_time =           2.3
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- dvdb_readsym_qbz                  0.796  34.8         0.798  34.7            154      -1.00        1.00       1.00
+- dvdb_readsym_allv1                0.534  23.4         0.536  23.3            171      -1.00        1.00       1.00
+- fourwf%(pot)                      0.469  20.5         0.458  19.9           4842      -1.00        1.02       1.02
+- v1phq_rotate                      0.360  15.8         0.366  15.9            105      -1.00        0.98       0.98
+- dvdb_rotate_fqg                   0.241  10.6         0.246  10.7            962      -1.00        0.98       0.98
+- fourdp                            0.164   7.2         0.163   7.1           2860      -1.00        1.01       1.01
+- pspini                            0.137   6.0         0.137   6.0              2      -1.00        1.00       1.00
+- timing timab                      0.136   6.0         0.136   5.9             11      -1.00        1.00       1.00
+- invars2                           0.067   2.9         0.067   2.9              2      -1.00        1.00       1.00
+- nonlop(forces)                    0.063   2.7         0.070   3.0           4842      -1.00        0.90       0.90
+- sigph_bsum                        0.034   1.5         0.042   1.8            154      -1.00        0.80       0.80
+- dvdb_qcache_read                  0.028   1.2         0.028   1.2              1      -1.00        1.00       1.00
+- getgh1c_setup                     0.024   1.1         0.028   1.2            948      -1.00        0.87       0.87
+- abinit(2)                         0.024   1.1         0.025   1.1              1      -1.00        0.98       0.98
+- sigph_bsum_1                      0.018   0.8         0.016   0.7            858      -1.00        1.12       1.12
+- others (137)                     -1.071 -46.9        -1.057 -45.9             -1      -1.00        1.01       1.01
+-<END_TIMER>
 
+- subtotal                          2.025  88.7         2.059  89.4                                  0.98       0.98
 
 ================================================================================
 
@@ -796,10 +864,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          3.0
+.Delivered  13 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.3  wall=          2.3

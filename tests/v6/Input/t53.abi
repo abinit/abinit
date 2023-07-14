@@ -31,6 +31,7 @@
 #%% [setup]
 #%% executable = anaddb
 #%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% input_ddb = t51.ddb.out
 #%% input_gkk = t52.ddb.out
 #%% [files]

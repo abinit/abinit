@@ -75,9 +75,8 @@ program anaddb
 !Local variables-------------------------------
  integer:: msym !  msym = maximum number of symmetry elements in space group
 !Define input and output unit numbers (some are defined in defs_basis-all should be there ...):
- integer, parameter:: ddbun = 2, master = 0  ! FIXME: these should not be reserved unit numbers!
- integer, parameter:: rftyp4 = 4
- integer:: comm, iatom, iblok, iblok_stress, iblok_epsinf, iblock_quadrupoles, idir, ii, index
+ integer, parameter:: master = 0
+ integer:: comm, iblok, iblok_stress, iblok_epsinf, iblock_quadrupoles, ii
  integer:: ierr, iphl2, lenstr, lwsym, mtyp, mpert, msize, natom
  integer:: nsym, ntypat, usepaw, nproc, my_rank, ana_ncid, prt_internalstr
  logical:: iam_master
@@ -111,7 +110,7 @@ program anaddb
  type(ddb_type):: ddb_lw
  type(ddb_hdr_type):: ddb_hdr
  type(asrq0_t):: asrq0
- type(crystal_t):: Crystal
+ type(crystal_t):: crystal
  type(supercell_type), allocatable:: thm_scells(:)
 #ifdef HAVE_NETCDF
  integer:: phdos_ncid, ncerr
@@ -169,17 +168,16 @@ program anaddb
 !******************************************************************
 
  ! Must read natom from the DDB before being able to allocate some arrays needed for invars9
- call ddb_hdr%open_read(filnam(3), ddbun, comm = comm, dimonly = 1)
+ call ddb_hdr%open_read(filnam(3), comm = comm, dimonly = 1)
 
+ usepaw = ddb_hdr%usepaw
  natom = ddb_hdr%natom
  ntypat = ddb_hdr%ntypat
  mtyp = ddb_hdr%mblktyp
- usepaw = ddb_hdr%usepaw
-
+ mpert = ddb_hdr%mpert
+ msize = ddb_hdr%msize
  call ddb_hdr%free()
 
- mpert = natom+MPERT_MAX
- msize = 3*mpert*3*mpert; if (mtyp == 3) msize = msize*3*mpert
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
@@ -233,13 +231,18 @@ program anaddb
  write(msg, '(a, a)' )' read the DDB information and perform some checks',ch10
  call wrtout([std_out, ab_out], msg)
 
- call ddb%from_file(filnam(3), inp%brav, ddb_hdr, Crystal, comm, prtvol = inp%prtvol)
+ call ddb%from_file(filnam(3), ddb_hdr, crystal, comm, prtvol = inp%prtvol)
  call ddb_hdr%free()
- nsym = Crystal%nsym
+
+ ! Change the bravais lattice if needed
+ call ddb%set_brav(inp%brav)
+
+ nsym = crystal%nsym
 
  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
- if (mtyp == 33) then
+ ! GA: Should replace with ddb_hdr%with_d3E_lw
+ if (mtyp == BLKTYP_d3E_lw) then
    call ddb_lw_copy(ddb, ddb_lw, mpert, natom, ntypat)
  end if
 
@@ -302,11 +305,11 @@ program anaddb
  ! Get Quadrupole tensor
  iblock_quadrupoles = 0
  qdrp_cart = zero
- if (mtyp == 33) then
+ if (mtyp == BLKTYP_d3E_lw) then
    write(msg, '(2a, (80a), 2a)') ch10, ('=',ii = 1, 80)
    call wrtout([ab_out, std_out],msg, 'COLL')
    lwsym = 1
-   iblock_quadrupoles = ddb_lw%get_quadrupoles(lwsym, 33, qdrp_cart)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version,lwsym, BLKTYP_d3E_lw, qdrp_cart)
  end if
 
  ! The default value is 1. Here we set the flags to zero if Q*is not available.
@@ -389,44 +392,24 @@ program anaddb
      ABI_ERROR("DDB file does not contain GS etotal")
    end if
 
-   ! Extract the block with the gradients
-   ABI_MALLOC(gred, (3, natom))
-   qphon(:,:) = zero; qphnrm(:) = zero
-   rfphon(:) = 0; rfstrs(:) = 0; rfelfd(:) = 2
-   if (inp%relaxat == 1) rfphon(:) = 1
-   if (inp%relaxstr == 1) rfstrs(:) = 3
+   ! Extract the polarizability
+   iblok = ddb%get_pel(pel, inp%relaxat, inp%relaxstr)
 
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp4)
+   ! Extract the forces
+   iblok = ddb%get_gred(gred, inp%relaxat, inp%relaxstr)
 
-   if (inp%relaxat == 1) then
-     index = 0
-     do iatom = 1, natom
-       do idir = 1, 3
-         index = index+1
-         gred(idir, iatom) = ddb%val(1, index, iblok)
-       end do
-     end do
-   end if
-
-   pel(1:3) = ddb%val(1, 3*natom+4:3*natom+6, iblok)
-
-   if (inp%relaxstr == 1) then
-     index = 3*natom+6
-     do ii = 1, 6
-       index = index+1
-       strten(ii) = ddb%val(1, index, iblok)
-     end do
-   end if
+   ! Extract the stress tensor
+   iblok = ddb%get_strten(strten, inp%relaxat, inp%relaxstr)
 
    ! when called from here red_ptot is not set  ! So set it to zero
    red_ptot(:)=zero
 
-   call relaxpol(Crystal, d2flg, d2cart, etotal, gred, inp%iatfix, &
+   call relaxpol(crystal, d2flg, d2cart, etotal, gred, inp%iatfix, &
 &   ab_out, inp%istrfix, mpert, msize, inp%natfix, natom, &
 &   inp%nstrfix, pel, red_ptot, inp%relaxat, inp%relaxstr, &
 &   strten, inp%targetpol, usepaw)
 
-   ABI_FREE(gred)
+   ABI_SFREE(gred)
    ABI_FREE(d2flg)
  end if
 
@@ -484,13 +467,13 @@ program anaddb
      do ii = 1, 3
        ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
      end do
-     call Ifc_coarse%init(Crystal, ddb, &
+     call Ifc_coarse%init(crystal, ddb, &
        inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, ngqpt_coarse, inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
        inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, dipquad = inp%dipquad, quadquad = inp%quadquad)
 
      ! Now use the coarse q-mesh to fill the entries in dynmat(q)
      ! on the dense q-mesh that cannot be obtained from the DDB file.
-     call ifc%init(Crystal, ddb, &
+     call ifc%init(crystal, ddb, &
       inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, &
       inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
       inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, &
@@ -498,7 +481,7 @@ program anaddb
      call Ifc_coarse%free()
 
    else
-     call ifc%init(Crystal, ddb, &
+     call ifc%init(crystal, ddb, &
        inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, &
        inp%ngqpt(1:3), inp%nqshft, inp%q1shft, epsinf, zeff, qdrp_cart, &
        inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm, dipquad = inp%dipquad, quadquad = inp%quadquad)
@@ -520,14 +503,14 @@ program anaddb
 ! Electron-phonon section
 !***************************************************************************
  if (inp%elphflag == 1) then
-   call elphon(inp, Crystal, Ifc, filnam, comm)
+   call elphon(inp, crystal, Ifc, filnam, comm)
  end if
 
 !***************************************************************************
 
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag == 1) then
    ABI_MALLOC(thm_scells, (inp%ntemper))
-   call zacharias_supercell_make(Crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
+   call zacharias_supercell_make(crystal, Ifc, inp%ntemper, inp%thermal_supercell, inp%tempermin, inp%temperinc, thm_scells)
    call zacharias_supercell_print(filnam(8), inp%ntemper, inp%tempermin, inp%temperinc, thm_scells)
  end if
 
@@ -543,7 +526,7 @@ program anaddb
    phibz_prefix = ""
    !phibz_prefix = "freq_displ" ! Uncomment this line to activate output of PHIBZ
    do
-     call Phdos%init(Crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
+     call Phdos%init(crystal, Ifc, inp%prtdos, inp%dosdeltae, inp%dossmear, inp%ng2qpt, 1, inp%q2shft, &
                      phibz_prefix, wminmax, count_wminmax, comm, dos_maxmode = inp%dos_maxmode)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05; wminmax(2) = wminmax(2) + abs(wminmax(2)) * 0.05
@@ -555,13 +538,13 @@ program anaddb
    if (iam_master) then
      call phdos%print_msqd(filnam(8), inp%ntemper, inp%tempermin, inp%temperinc)
      call phdos%print(strcat(filnam(8), "_PHDOS"))
-     call phdos%print_debye(Crystal%ucvol)
+     call phdos%print_debye(crystal%ucvol)
      call phdos%print_thermo(strcat(filnam(8), "_THERMO"), inp%ntemper, inp%tempermin, inp%temperinc)
 
 #ifdef HAVE_NETCDF
      ncerr = nctk_open_create(phdos_ncid, strcat(filnam(8), "_PHDOS.nc"), xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, "Creating PHDOS.nc file")
-     NCF_CHECK(Crystal%ncwrite(phdos_ncid))
+     NCF_CHECK(crystal%ncwrite(phdos_ncid))
      call phdos%ncwrite(phdos_ncid)
      NCF_CHECK(nf90_close(phdos_ncid))
 #endif
@@ -571,7 +554,7 @@ program anaddb
  end if
 
  if (iam_master .and. inp%ifcflag == 1 .and. inp%outboltztrap == 1) then
-   call ifc%outphbtrap(Crystal, inp%ng2qpt, 1, inp%q2shft, filnam(8))
+   call ifc%outphbtrap(crystal, inp%ng2qpt, 1, inp%q2shft, filnam(8))
  end if
 
  ! Phonon density of states and thermodynamical properties calculation
@@ -585,12 +568,12 @@ program anaddb
    call wrtout([std_out, ab_out], msg)
 
    if (inp%thmflag == 1) then
-     call harmonic_thermo(Ifc, Crystal, ddb%amu, inp, ab_out, filnam(8), comm)
+     call harmonic_thermo(Ifc, crystal, ddb%amu, inp, ab_out, filnam(8), comm)
 
    else if (inp%thmflag == 2) then
      write(msg, '(a, (80a), a, a, a, a)' ) ch10, ('=',ii = 1, 80), ch10, ch10, ' Entering thm9 routine with thmflag = 2 ',ch10
      call wrtout([std_out, ab_out], msg)
-     call harmonic_thermo(Ifc, Crystal, ddb%amu, inp, ab_out, filnam(8), comm, thmflag = inp%thmflag)
+     call harmonic_thermo(Ifc, crystal, ddb%amu, inp, ab_out, filnam(8), comm, thmflag = inp%thmflag)
    end if
  end if
 
@@ -603,7 +586,7 @@ program anaddb
  if (inp%ifcflag == 1 .and. inp%lwfflag > 0 ) then
    write(msg, '(a, (80a), 4a)')ch10, ('=',ii = 1, 80), ch10, ch10, ' Calculation of lattice Wannier functions ',ch10
    call wrtout([std_out, ab_out], msg)
-   call run_lattice_wannier(ifc = Ifc, crystal = Crystal, dtset = inp, &
+   call run_lattice_wannier(ifc = Ifc, crystal = crystal, dtset = inp, &
         & prefix = filnam(8), comm = comm)
    write(msg, '(a, (80a))')ch10, ('=',ii = 1, 80)
    call wrtout([std_out, ab_out], msg)
@@ -616,16 +599,16 @@ program anaddb
 ! (print the phonon freq. at each qpt (and eigenvectors if asked by the user)
 ! and the mode characters (Gamma only as of 12.04.2020)
 !**********************************************************************
- call mkphbs(Ifc, Crystal, inp, ddb, asrq0, filnam(8), comm)
+ call mkphbs(Ifc, crystal, inp, ddb, asrq0, filnam(8), comm)
 
 
  ! Interpolate the DDB onto the first list of vectors and write the file.
  if (inp%prtddb == 1 .and. inp%ifcflag == 1) then
-   call ddb_hdr%open_read(filnam(3), ddbun, comm)
-   close(ddbun)
-   ddb_hdr%crystal%space_group = Crystal%space_group  ! GA: the space group is not written in the DDB text file.
+   call ddb_hdr%open_read(filnam(3), comm)
+   call ddb_hdr%close()
+   ddb_hdr%crystal%space_group = crystal%space_group  ! GA: the space group is not written in the DDB text file.
 
-   call ddb_interpolate(Ifc, Crystal, inp, ddb, ddb_hdr, asrq0, filnam(8), comm)
+   call ddb_interpolate(Ifc, crystal, inp, ddb, ddb_hdr, asrq0, filnam(8), comm)
    call ddb_hdr%free()
  end if
 
@@ -636,7 +619,7 @@ program anaddb
 
  if (inp%thmflag >= 3 .and. inp%thmflag <= 8) then
    elph_base_name = trim(filnam(8))//"_ep"
-   call thmeig(inp, ddb, Crystal, elph_base_name, filnam(5), ddbun, ab_out, natom, mpert, msize, asrq0%d2asr, comm)
+   call thmeig(inp, ddb, crystal, elph_base_name, filnam(5), ab_out, natom, mpert, msize, asrq0%d2asr, comm)
  end if
 
 
@@ -667,13 +650,13 @@ program anaddb
     ! Get d2cart using the interatomic forces and the
     ! long-range coulomb interaction through Ewald summation
     call gtdyn9(ddb%acell, Ifc%atmfrc, epsinf, Ifc%dipdip, &
-      Ifc%dyewq0, d2cart, Crystal%gmet, ddb%gprim, mpert, natom, &
-      Ifc%nrpt, qphnrm(1), qphon, Crystal%rmet, ddb%rprim, Ifc%rpt, &
-      Ifc%trans, Crystal%ucvol, Ifc%wghatm, Crystal%xred, zeff, qdrp_cart, Ifc%ewald_option, xmpi_comm_self, &
+      Ifc%dyewq0, d2cart, crystal%gmet, ddb%gprim, mpert, natom, &
+      Ifc%nrpt, qphnrm(1), qphon, crystal%rmet, ddb%rprim, Ifc%rpt, &
+      Ifc%trans, crystal%ucvol, Ifc%wghatm, crystal%xred, zeff, qdrp_cart, Ifc%ewald_option, xmpi_comm_self, &
       dipquad = Ifc%dipquad, quadquad = Ifc%quadquad)
 
   else if (inp%ifcflag == 0) then
-    ! Look after the information in the DDB
+    ! Look for the information in the DDB
     rfphon(1:2)=1; rfelfd(1:2)=2; rfstrs(1:2)=0
     call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, inp%rfmeth)
     ! Copy the dynamical matrix in d2cart
@@ -685,9 +668,9 @@ program anaddb
   !***************************************************************
 
   ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
-  call dfpt_phfrq(ddb%amu, displ, d2cart, eigval, eigvec, Crystal%indsym, &
+  call dfpt_phfrq(ddb%amu, displ, d2cart, eigval, eigvec, crystal%indsym, &
     mpert, msym, natom, nsym, ntypat, phfrq, qphnrm(1), qphon, &
-    Crystal%rprimd, inp%symdynmat, Crystal%symrel, Crystal%symafm, Crystal%typat, Crystal%ucvol)
+    crystal%rprimd, inp%symdynmat, crystal%symrel, crystal%symafm, crystal%typat, crystal%ucvol)
 
   ! calculation of the oscillator strengths, mode effective charge and
   ! dielectric tensor, frequency dependent dielectric tensor (dieflag)
@@ -705,7 +688,7 @@ program anaddb
     write(msg, '(a, (80a), a)' ) ch10, ('=',ii = 1, 80), ch10
     call wrtout([std_out, ab_out], msg)
 
-    call ddb_diel(Crystal, ddb%amu, inp, dielt_rlx, displ, d2cart, epsinf, fact_oscstr, &
+    call ddb_diel(crystal, ddb%amu, inp, dielt_rlx, displ, d2cart, epsinf, fact_oscstr, &
       ab_out, lst, mpert, natom, 0, phfrq, comm, ana_ncid)
   end if
 
@@ -721,7 +704,7 @@ end if  ! dieflag!=0 or inp%nph2l /= 0
 
  if (inp%nlflag == 1) then
    ! Raman susceptibilities for the 1st list (only TO  modes at q = Gamma)
-   call ramansus(d2cart, dchide, dchidt, displ, mpert, natom, phfrq, qphon, qphnrm(1), rsus, Crystal%ucvol)
+   call ramansus(d2cart, dchide, dchidt, displ, mpert, natom, phfrq, qphon, qphnrm(1), rsus, crystal%ucvol)
 
 #ifdef HAVE_NETCDF
    if (my_rank == master) then
@@ -730,7 +713,7 @@ end if  ! dieflag!=0 or inp%nph2l /= 0
 #endif
 
    ! EO coef:
-   call electrooptic(dchide, inp%dieflag, epsinf, fact_oscstr, natom, phfrq, inp%prtmbm, rsus, Crystal%ucvol)
+   call electrooptic(dchide, inp%dieflag, epsinf, fact_oscstr, natom, phfrq, inp%prtmbm, rsus, crystal%ucvol)
 end if  ! condition on nlflag
 
 !**********************************************************************
@@ -771,9 +754,9 @@ end if  ! condition on nlflag
 
      ! Calculation of the eigenvectors and eigenvalues of the dynamical matrix
      ! for the second list of wv (can include non-analyticities if q /= 0)
-     call dfpt_phfrq(ddb%amu, displ, d2cart, eigval, eigvec, Crystal%indsym, &
-       mpert, msym, natom, nsym, ntypat, phfrq, qphnrm(1), qphon, Crystal%rprimd, inp%symdynmat, &
-       Crystal%symrel, Crystal%symafm, Crystal%typat, Crystal%ucvol)
+     call dfpt_phfrq(ddb%amu, displ, d2cart, eigval, eigvec, crystal%indsym, &
+       mpert, msym, natom, nsym, ntypat, phfrq, qphnrm(1), qphon, crystal%rprimd, inp%symdynmat, &
+       crystal%symrel, crystal%symafm, crystal%typat, crystal%ucvol)
 
      ! Write the phonon frequencies for the second list of wv (can include non-analyticities if q /= 0)
      call dfpt_prtph(displ, inp%eivec, inp%enunit, ab_out, natom, phfrq, qphnrm(1), qphon)
@@ -798,7 +781,7 @@ end if  ! condition on nlflag
 
      ! Write Raman susceptibilities for the 2nd list (can includes LO modes if q /= 0 0 0)
      if (inp%nlflag == 1) then
-       call ramansus(d2cart, dchide, dchidt, displ, mpert, natom, phfrq, qphon, qphnrm(1), rsus, Crystal%ucvol)
+       call ramansus(d2cart, dchide, dchidt, displ, mpert, natom, phfrq, qphon, qphnrm(1), rsus, crystal%ucvol)
 #ifdef HAVE_NETCDF
        if (my_rank == master) then
          call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
@@ -809,7 +792,7 @@ end if  ! condition on nlflag
 
    ! Lyddane-Sachs-Teller relation:
    if (inp%dieflag /= 2 .and. inp%dieflag /= 0) then
-     call ddb_diel(Crystal, ddb%amu, inp, dielt_rlx, displ, d2cart, epsinf, fact_oscstr, &
+     call ddb_diel(crystal, ddb%amu, inp, dielt_rlx, displ, d2cart, epsinf, fact_oscstr, &
        ab_out, lst, mpert, natom, inp%nph2l, phfrq, comm, ana_ncid)
    end if
  end if  ! nph2l /= 0
@@ -867,7 +850,7 @@ end if  ! condition on nlflag
      qphon(:,1)=zero; qphnrm(1)=zero
      rfphon(1:2)=0; rfelfd(1:2)=0; rfstrs(1:2)=0
 
-     call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp4)
+     call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, BLKTYP_d1E_xx)
      iblok_stress = iblok
 
      ! look after the blok no.iblok that contains the elastic tensor
@@ -912,7 +895,7 @@ end if  ! condition on nlflag
      ! then print out the piezoelectric constants
      call ddb_piezo(inp, ddb%val, dielt_rlx, elast, iblok, &
          & instrain, ab_out, mpert, natom, ddb%nblok, piezo, &
-         & Crystal%ucvol, ana_ncid)
+         & crystal%ucvol, ana_ncid)
    end if
  end if
 
@@ -927,7 +910,8 @@ end if  ! condition on nlflag
    call wrtout([std_out, ab_out], msg)
 
    ! Compute and print the contributions to the flexoelectric tensor
-   call ddb_flexo(inp%asr, asrq0%d2asr, ddb, ddb_lw, crystal, filnam(3), inp%flexoflag, inp%prtvol, zeff)
+   call ddb_flexo(inp%asr, asrq0%d2asr, ddb, ddb_lw, ddb_hdr%ddb_version, crystal, &
+       & filnam(3), inp%flexoflag, inp%prtvol, zeff)
  end if
 
 !**********************************************************************

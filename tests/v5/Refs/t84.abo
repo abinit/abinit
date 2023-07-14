@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h24 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h45 )
   
 
 ================================================================================
@@ -44,21 +44,28 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= 30.0000000  0.0000000  0.0000000  G(1)=  0.0333333  0.0000000  0.0000000
  R(2)=  0.0000000 30.0000000  0.0000000  G(2)=  0.0000000  0.0333333  0.0000000
  R(3)=  0.0000000  0.0000000  9.9021649  G(3)=  0.0000000  0.0000000  0.1009880
  Unit cell volume ucvol=  8.9119484E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)   -0.0190865  0.0000000 -0.0000000  Au
+    2)    0.0190865  0.0000000  0.5000000  Au
+ 
+ DDB file with 11 blocks has been read.
  asrflag is 1
- Largest and smallest values from svd  7.57997561E+00  2.01758193E-17
-
+ Largest and smallest values from svd  7.57997561E+00  2.50270097E-17
+ 
 ================================================================================
-
+ 
  Treat the first list of vectors 
-
+ 
  asrflag is 2
   1  1  1  0.000E+00
   1  1  2 -3.339E-06
@@ -78,7 +85,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.759771E-04 -5.741821E-05 -1.875132E-06  0.000000E+00  2.476390E-06
@@ -86,7 +93,7 @@
  Phonon frequencies in cm-1    :
 - -6.056997E+01 -1.260184E+01 -4.115439E-01  0.000000E+00  5.435048E-01
 -  5.923907E+01
-
+ 
  Analysis of degeneracies and characters (maximum tolerance=2.00E-05 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
@@ -120,7 +127,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.05000
  Phonon energies in Hartree :
   -9.175615E-05 -1.752483E-05  1.632913E-06  2.885591E-06  1.510831E-05
@@ -134,21 +141,21 @@
  Partial Debye temperature for this q and mode:
    in atomic units:    -0.1038469176E-03
    in SI units K  :            -32.79222
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.5146872538E-04
    in units km/s:              0.11260
  Partial Debye temperature for this q and mode:
    in atomic units:     0.9676155904E-05
    in SI units K  :              3.05548
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.9095260092E-04
    in units km/s:              0.19898
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1709915176E-04
    in SI units K  :              5.39948
-
+ 
  asrflag is 2
   1  1  1  0.000E+00
   1  1  2  3.115E-04
@@ -168,7 +175,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.10000
  Phonon energies in Hartree :
   -7.895251E-05 -2.300546E-05  4.758084E-06  6.454902E-06  1.632928E-05
@@ -182,21 +189,21 @@
  Partial Debye temperature for this q and mode:
    in atomic units:    -0.6816174618E-04
    in SI units K  :            -21.52375
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.7498638615E-04
    in units km/s:              0.16405
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1409749236E-04
    in SI units K  :              4.45163
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.1017278645E-03
    in units km/s:              0.22255
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1912490876E-04
    in SI units K  :              6.03916
-
+ 
  asrflag is 2
   1  1  1  0.000E+00
   1  1  2  6.625E-04
@@ -216,7 +223,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.15000
  Phonon energies in Hartree :
   -4.839044E-05 -2.013094E-05  3.019928E-06  7.259250E-06  1.410629E-05
@@ -230,21 +237,21 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.5965062892E-05
    in SI units K  :              1.88362
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.7626948188E-04
    in units km/s:              0.16685
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1433871525E-04
    in SI units K  :              4.52780
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.1482081150E-03
    in units km/s:              0.32423
  Partial Debye temperature for this q and mode:
    in atomic units:     0.2786322793E-04
    in SI units K  :              8.79850
-
+ 
  asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.073E-03
@@ -264,7 +271,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.20000
  Phonon energies in Hartree :
   -2.150742E-05 -8.580173E-06  1.930891E-05  2.400701E-05  4.840050E-05
@@ -278,21 +285,21 @@
  Partial Debye temperature for this q and mode:
    in atomic units:    -0.1271088517E-04
    in SI units K  :             -4.01378
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.1521521146E-03
    in units km/s:              0.33286
  Partial Debye temperature for this q and mode:
    in atomic units:     0.2860470258E-04
    in SI units K  :              9.03264
-
+ 
  Speed of sound for this q and mode:
    in atomic units:     0.1891726255E-03
    in units km/s:              0.41385
  Partial Debye temperature for this q and mode:
    in atomic units:     0.3556458420E-04
    in SI units K  :             11.23039
-
+ 
  asrflag is 2
   1  1  1  0.000E+00
   1  1  2  1.463E-03
@@ -312,7 +319,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.25000
  Phonon energies in Hartree :
   -3.180537E-05 -1.597640E-05  3.539479E-05  4.206085E-05  8.373358E-05
@@ -339,7 +346,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.30000
  Phonon energies in Hartree :
   -3.909002E-05 -2.312978E-05  4.744042E-05  6.188195E-05  9.310706E-05
@@ -366,7 +373,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.35000
  Phonon energies in Hartree :
   -4.332324E-05 -2.958698E-05  5.939967E-05  7.979950E-05  9.693145E-05
@@ -393,7 +400,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.40000
  Phonon energies in Hartree :
   -4.468850E-05 -3.484402E-05  7.063009E-05  9.544708E-05  9.721398E-05
@@ -420,7 +427,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.45000
  Phonon energies in Hartree :
   -4.373546E-05 -3.868267E-05  8.054625E-05  9.430754E-05  1.082076E-04
@@ -447,7 +454,7 @@
   3  2  1  0.000E+00
   3  2  2  0.000E+00
   3  2  3  0.000E+00
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
   -4.149562E-05 -4.149562E-05  8.860423E-05  8.860423E-05  1.173919E-04
@@ -456,10 +463,10 @@
 - -9.107235E+00 -9.107235E+00  1.944638E+01  1.944638E+01  2.576455E+01
 -  2.576455E+01
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
-
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.7
+ 
 ================================================================================
-
-+Total cpu time      0.052  and wall time      0.081 sec
-
+ 
++Total cpu time      0.111  and wall time      0.704 sec
+ 
  anaddb : the run completed succesfully.

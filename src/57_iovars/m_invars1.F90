@@ -2156,6 +2156,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%adpimd=0
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
+   dtsets(idtset)%asr=1
    dtsets(idtset)%atvshift(:,:,:)=zero
    dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
@@ -2185,6 +2186,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
+   dtsets(idtset)%chneut=1      
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
    dtsets(idtset)%cprj_update_lvl=0
@@ -2401,6 +2403,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%lambsig(:) = zero
    dtsets(idtset)%lw_qdrpl=0
    dtsets(idtset)%lw_flexo=0
+   dtsets(idtset)%lw_natopt=0
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
@@ -2429,6 +2432,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
    dtsets(idtset)%nctime=0
+   dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
    dtsets(idtset)%neb_algo=1
    dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
@@ -2582,7 +2586,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rectolden=zero
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
-   dtsets(idtset)%rfasr=0
+!  dtsets(idtset)%rfasr=0
    dtsets(idtset)%rfatpol(1:2)=-1
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=1
@@ -2698,7 +2702,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%wvl_nprccg  = 10
    dtsets(idtset)%w90iniprj   = 1
    dtsets(idtset)%w90prtunk   = 0
-
+   dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
    dtsets(idtset)%xc_denpos = tol14

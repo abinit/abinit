@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h24 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h47 )
   
 
 ================================================================================
@@ -66,20 +66,26 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= -2.1500000  2.1500000  2.1500000  G(1)=  0.0000000  0.2325581  0.2325581
  R(2)=  2.1500000 -2.1500000  2.1500000  G(2)=  0.2325581  0.0000000  0.2325581
  R(3)=  2.1500000  2.1500000 -2.1500000  G(3)=  0.2325581  0.2325581  0.0000000
  Unit cell volume ucvol=  3.9753500E+01 bohr^3
  Angles (23,13,12)=  1.09471221E+02  1.09471221E+02  1.09471221E+02 degrees
- Now the whole DDB is in central memory
-
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  He
+ 
+ DDB file with 8 blocks has been read.
+ 
 ================================================================================
-
+ 
  Calculation of the interatomic forces 
-
--begin at tcpu      0.035  and twall      0.042 sec
+ 
+-begin at tcpu      0.040  and twall      0.325 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -90,69 +96,69 @@
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
-
+ 
 ================================================================================
-
+ 
  Treat the first list of vectors 
-
-
+ 
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
-
+ 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    3.080797E-03  4.352642E-03  5.766547E-03
  Phonon frequencies in cm-1    :
 -  6.761567E+02  9.552946E+02  1.265611E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.00000
  Phonon energies in Hartree :
    3.080797E-03  4.352642E-03  5.766547E-03
  Phonon frequencies in cm-1    :
 -  6.761567E+02  9.552946E+02  1.265611E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
    3.080797E-03  4.352644E-03  5.766547E-03
  Phonon frequencies in cm-1    :
 -  6.761567E+02  9.552950E+02  1.265611E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
    3.080797E-03  4.352642E-03  5.766547E-03
  Phonon frequencies in cm-1    :
 -  6.761567E+02  9.552946E+02  1.265611E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
    3.080797E-03  4.352644E-03  5.766547E-03
  Phonon frequencies in cm-1    :
 -  6.761567E+02  9.552950E+02  1.265611E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
    3.080797E-03  4.352644E-03  5.766547E-03
  Phonon frequencies in cm-1    :
 -  6.761567E+02  9.552950E+02  1.265611E+03
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    3.399577E-03  3.399578E-03  3.399578E-03
  Phonon frequencies in cm-1    :
 -  7.461210E+02  7.461211E+02  7.461211E+02
-
+ 
 ================================================================================
  Computation of the electron-phonon changes to the electronic eigenenergies
        Homogeneous q point set in the B.Z.
@@ -165,7 +171,7 @@
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  thmeig : list of q wavevectors, with integration weights
      1    0.000000E+00    0.000000E+00    0.000000E+00        1.250000E-01
      2    5.000000E-01    0.000000E+00    0.000000E+00        1.250000E-01
@@ -175,9 +181,9 @@
      6    5.000000E-01    0.000000E+00    5.000000E-01        1.250000E-01
      7    0.000000E+00    5.000000E-01    5.000000E-01        1.250000E-01
      8    5.000000E-01    5.000000E-01    5.000000E-01        1.250000E-01
-
+ 
  Will write phonon DOS in file t53_ep_PDS
-
+ 
  For checking purposes, write ten values in the present file.
        Index    Energy (in Ha)      DOS
          1     -1.151422E-06      1.057855E+04
@@ -246,10 +252,10 @@
      3       -3.291343E-03       -5.274902E-06
      4       -3.291344E-03       -5.274903E-06
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
-
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          1.1
+ 
 ================================================================================
-
-+Total cpu time      0.100  and wall time      0.114 sec
-
+ 
++Total cpu time      0.127  and wall time      1.142 sec
+ 
  anaddb : the run completed succesfully.

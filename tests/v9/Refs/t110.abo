@@ -1,6 +1,6 @@
 
-.Version 9.7.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu11.2 computer) 
+.Version 9.11.0 of ANADDB 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  2 May 2022.
-- ( at 22h13 )
+.Starting date : Wed 31 May 2023.
+- ( at 19h04 )
   
 
 ================================================================================
@@ -54,13 +54,23 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.4964981  0.0000000  0.0000000  G(1)=  0.1333956  0.0000000  0.0000000
  R(2)=  0.0000000  7.4964981  0.0000000  G(2)=  0.0000000  0.1333956  0.0000000
  R(3)=  0.0000000  0.0000000  7.4964981  G(3)=  0.0000000  0.0000000  0.1333956
  Unit cell volume ucvol=  4.2128434E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ba
+    2)    0.5000000  0.5000000  0.5000000  Ti
+    3)    0.5000000  0.5000000  0.0000000   O
+    4)    0.0000000  0.5000000  0.5000000   O
+    5)    0.5000000  0.0000000  0.5000000   O
+
+ DDB file with 12 blocks has been read.
 
 ================================================================================
 
@@ -85,7 +95,7 @@
        3               3        0.001506        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.777682E+00    0.000000E+00    0.000000E+00
@@ -109,7 +119,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.042  and twall      0.090 sec
+-begin at tcpu      0.042  and twall      0.052 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -349,8 +359,8 @@ Columns selected: [5, 6, 4]
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -359,13 +369,13 @@ Columns selected: [5, 6, 4]
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -1.0  1.0  1.0 -1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0 -1.0  1.0 -1.0  1.0  1.0 -1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0 -1.0  1.0  1.0 -1.0  1.0 -1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -1.0  1.0 -1.0  1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -1436,8 +1446,8 @@ Columns selected: [5, 6, 4]
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -1446,13 +1456,13 @@ Columns selected: [5, 6, 4]
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -1.0  1.0  1.0 -1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0 -1.0  1.0 -1.0  1.0  1.0 -1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0 -1.0  1.0  1.0 -1.0  1.0 -1.0 -1.0  1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0 -1.0  1.0 -1.0  1.0  1.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
@@ -2703,11 +2713,6 @@ Columns selected: [5, 6, 4]
 
 ================================================================================
 
-+Total cpu time      0.199  and wall time      0.251 sec
++Total cpu time      0.242  and wall time      0.259 sec
 
  anaddb : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 3125 allocations and 3125 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0

@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h25 )
+.Starting date : Wed 31 May 2023.
+- ( at 18h51 )
   
 
 ================================================================================
@@ -90,19 +90,26 @@ Phonon band structure files, with atomic projections, will be output
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.5762039  0.0000000  0.0000000  G(1)=  0.1793335  0.1035382  0.0000000
  R(2)= -2.7881019  4.8291342  0.0000000  G(2)=  0.0000000  0.2070765  0.0000000
  R(3)=  0.0000000  0.0000000  8.8543118  G(3)=  0.0000000  0.0000000  0.1129393
  Unit cell volume ucvol=  2.3843101E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ti
+    2)    0.3333333  0.6666667  0.5000000  Nb
+
+ DDB file with 4 blocks has been read.
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.045  and twall      0.063 sec
+-begin at tcpu      0.040  and twall      0.050 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -379,10 +386,10 @@ Phonon band structure files, with atomic projections, will be output
 ;  2  0.00000000E+00  0.00000000E+00 -1.03404272E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
 
 ================================================================================
 
-+Total cpu time      0.460  and wall time      0.491 sec
++Total cpu time      0.353  and wall time      0.373 sec
 
  anaddb : the run completed succesfully.

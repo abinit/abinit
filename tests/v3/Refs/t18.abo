@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t18/t18.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v3_t18/t18.abi
 - output file    -> t18.abo
 - root for input  files -> t18i
 - root for output files -> t18o
@@ -235,6 +235,8 @@ _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
             acell10    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
             acell11    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
               amu      2.69600000E+01
+              asr           0
+           chneut           0
              ecut      4.00000000E+00 Hartree
            enunit           2
 -          fftalg         312
@@ -532,15 +534,15 @@ P          mk1mem11         1
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
           rfatpol1          1       1
-          rfatpol2          1       1			
-          rfatpol3          1       1			
-          rfatpol4          1       1			
-          rfatpol5          1       1			
-          rfatpol6          1       2			
-          rfatpol7          1       2			
-          rfatpol8          1       1			
-          rfatpol9          1       2			
-          rfatpol10         1       2			
+          rfatpol2          1       1
+          rfatpol3          1       1
+          rfatpol4          1       1
+          rfatpol5          1       1
+          rfatpol6          1       2
+          rfatpol7          1       2
+          rfatpol8          1       1
+          rfatpol9          1       2
+          rfatpol10         1       2
           rfatpol11         1       1
             rfdir1          1       1       1
             rfdir2          1       1       1
@@ -741,8 +743,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2490,6 +2492,8 @@ tolerances: {toldfe: 2.00E-12, }
             acell10    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
             acell11    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
               amu      2.69600000E+01
+              asr           0
+           chneut           0
              ecut      4.00000000E+00 Hartree
            enunit           2
            etotal1    -2.0191030142E+00
@@ -2810,16 +2814,16 @@ P          mk1mem11         1
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
           rfatpol1          1       1
-          rfatpol2          1       1                
-          rfatpol3          1       1                
-          rfatpol4          1       1                
-          rfatpol5          1       1                
-          rfatpol6          1       2                
-          rfatpol7          1       2                
-          rfatpol8          1       1                
-          rfatpol9          1       2                
-          rfatpol10         1       2                
-          rfatpol11         1       1  
+          rfatpol2          1       1
+          rfatpol3          1       1
+          rfatpol4          1       1
+          rfatpol5          1       1
+          rfatpol6          1       2
+          rfatpol7          1       2
+          rfatpol8          1       1
+          rfatpol9          1       2
+          rfatpol10         1       2
+          rfatpol11         1       1
             rfdir1          1       1       1
             rfdir2          1       1       1
             rfdir3          1       1       1
@@ -3068,10 +3072,10 @@ P          mk1mem11         1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.4
+- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  45 WARNINGs and  48 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.4
+.Delivered  84 WARNINGs and  48 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.2  wall=          4.5

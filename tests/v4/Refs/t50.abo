@@ -1,6 +1,6 @@
 
-.Version 9.3.1 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Tue 30 May 2023.
+- ( at 22h02 )
   
 
 ================================================================================
@@ -93,13 +93,23 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.5589000  0.0000000  0.0000000  G(1)=  0.1322944  0.0000000  0.0000000
  R(2)=  0.0000000  7.5589000  0.0000000  G(2)=  0.0000000  0.1322944  0.0000000
  R(3)=  0.0000000  0.0000000  7.5589000  G(3)=  0.0000000  0.0000000  0.1322944
  Unit cell volume ucvol=  4.3189264E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  no
+    2)    0.5000000  0.5000000  0.5000000  no
+    3)    0.5000000  0.5000000  0.0000000  no
+    4)    0.5000000  0.0000000  0.5000000  no
+    5)    0.0000000  0.5000000  0.5000000  no
+
+ DDB file with 14 blocks has been read.
 
 ================================================================================
 
@@ -124,7 +134,7 @@
        3               3        0.012174        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.736512E+00    1.217076E-27    1.097082E-27
@@ -148,7 +158,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.060  and twall      0.061 sec
+-begin at tcpu      0.056  and twall      0.057 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -652,7 +662,7 @@
    in SI units K  :            331.46012
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2098225455E-02
+   in atomic units:     0.2098225454E-02
    in units km/s:              4.59027
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1081958368E-02
@@ -833,10 +843,15 @@
 -  1.588304E+02  1.656650E+02  1.656650E+02  2.810929E+02  2.810929E+02
 -  2.810929E+02  4.452209E+02  4.533533E+02  4.533533E+02  6.311288E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
 
 ================================================================================
 
-+Total cpu time      0.361  and wall time      0.373 sec
++Total cpu time      0.633  and wall time      0.638 sec
 
  anaddb : the run completed succesfully.
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
+-   There were 0 allocations and 0 deallocations in C code
+- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
+-   There were 1097 allocations and 1097 deallocations in Fortran
+-   Remaining memory at the end of the calculation is 0

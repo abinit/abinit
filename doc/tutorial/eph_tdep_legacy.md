@@ -473,7 +473,7 @@ working directory (if not yet done) and launch the python script with:
 
 Examination of the same HOMO and LUMO bands at k=$\Gamma$ for a 4x4x4 q-point grid gives a very different result
 than previously. 
-The zero-point renormalization (ZPR) is the change of the bandgap at 0 K and was (band 4 - band 3):
+The zero-point renormalization (ZPR) is the change of the bandgap at 0 K and was (band 5 - band 4):
    
     -0.012507 - 0.017727 = -0.030234 eV
 

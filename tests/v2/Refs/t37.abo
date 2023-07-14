@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v2_t37/t37.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v2_t37/t37.abi
 - output file    -> t37.abo
 - root for input  files -> t37i
 - root for output files -> t37o
@@ -161,6 +161,8 @@ _ WF disk file :      0.045 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.7427634300E+00  7.7427634300E+00  7.7427634300E+00 Bohr
               amu      2.43000000E+01  1.60000000E+01
+              asr           0
+           chneut           0
            diemac1     1.00000000E+06
            diemac2     1.00000000E+06
            diemac3     1.00000000E+06
@@ -567,8 +569,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/12mg.2.hgh
 - Hartwigsen-Goedecker-Hutter psp for Mg,  from PRB58, 3641 (1998)
 - 12.00000   2.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -590,8 +592,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.063023
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/8o.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for O,  from PRB58, 3641 (1998)
 -  8.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3660,6 +3662,8 @@ tolerances: {tolwfr: 1.00E-08, }
  -outvars: echo values of variables after computation  --------
             acell      7.7427634300E+00  7.7427634300E+00  7.7427634300E+00 Bohr
               amu      2.43000000E+01  1.60000000E+01
+              asr           0
+           chneut           0
            diemac1     1.00000000E+06
            diemac2     1.00000000E+06
            diemac3     1.00000000E+06
@@ -4116,10 +4120,10 @@ P          mk1mem6         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.3
+- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.0  wall=          7.3
+.Delivered  21 WARNINGs and  31 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.0  wall=          5.2

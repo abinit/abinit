@@ -1,6 +1,6 @@
 
-.Version 9.8.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Mar 2023.
-- ( at 23h04 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h56 )
   
 
 ================================================================================
@@ -55,23 +55,31 @@
 ================================================================================
 
  read the DDB information and perform some checks
-
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.3345059  0.0000000  0.0000000  G(1)=  0.1874588  0.1082294  0.0000000
  R(2)= -2.6672529  4.6198176  0.0000000  G(2)=  0.0000000  0.2164588  0.0000000
  R(3)=  0.0000000  0.0000000 18.8972613  G(3)=  0.0000000  0.0000000  0.0529177
  Unit cell volume ucvol=  4.6571250E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
- Now the whole DDB is in central memory
-
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mo
+    2)    0.6666667  0.3333333  0.1223801   O
+    3)    0.6666667  0.3333333  0.8776199   O
+ 
+ DDB file with 19 blocks has been read.
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -85,27 +93,27 @@
        3               1        0.000000        0.000000
        3               2        0.000000        0.000000
        3               3       -0.000777        0.000000
-
+ 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    3.031584E+00    0.000000E+00    1.061238E-22
-         1         2   -1.727757E-16    3.031584E+00    6.127057E-23
+         1         2   -2.960595E-16    3.031584E+00    6.127057E-23
          1         3    0.000000E+00    0.000000E+00    5.344637E-01
          2         1   -1.515792E+00    0.000000E+00   -5.306187E-23
-         2         2    1.299493E-15   -1.515792E+00   -3.063530E-23
+         2         2    1.480297E-15   -1.515792E+00   -3.063530E-23
          2         3    0.000000E+00    0.000000E+00   -2.672319E-01
          3         1   -1.515792E+00    0.000000E+00   -5.306187E-23
-         3         2   -1.126717E-15   -1.515792E+00   -3.063530E-23
+         3         2   -1.184238E-15   -1.515792E+00   -3.063530E-23
          3         3    0.000000E+00    0.000000E+00   -2.672319E-01
  Now, the imaginary part of the dynamical matrix is zeroed
-
+ 
 ================================================================================
-
+ 
  Calculation of the interatomic forces 
-
--begin at tcpu      0.033  and twall      0.041 sec
+ 
+-begin at tcpu      0.049  and twall      0.389 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      144
  greater than 80, so only write 20 of them
@@ -129,33 +137,33 @@
  18)   4.16666667E-01  8.33333333E-02  0.00000000E+00
  19)   5.00000000E-01  8.33333333E-02  0.00000000E+00
  20)  -4.16666667E-01  8.33333333E-02  0.00000000E+00
-
+ 
  The interatomic forces have been obtained
-
+ 
 ================================================================================
-
+ 
  Calculation of phonon density of states 
-
+ 
  Average speed of sound partial sums:     0.2373329001E-02 (at units)
 -                                   =           5.1921 [km/s]
-
+ 
  Debye frequency from partial sums:     0.1193444711E-02 (Ha)
 -                                 =     0.7852488976E+01 (THz)
 -Debye temperature from partial sums:     0.3768595860E+03 (K)
-
+ 
  Average speed of sound:     0.1857634414E-03 (at units) 
 -                      =           0.4064 [km/s]
-
+ 
  Debye frequency from DOS:     0.9341241629E-04 (Ha) 
 -                        =     0.6146241735E+00 (THz)
 -Debye temperature from DOS:     0.2949727306E+02 (K)
-
-
+ 
+ 
 ================================================================================
-
+ 
  Treat the first list of vectors 
-
-
+ 
+ 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  2.077333E-03  2.077333E-03
@@ -163,24 +171,24 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.559219E+02  4.559219E+02
 -  5.048500E+02  5.048500E+02  6.952030E+02  7.107293E+02
-
+ 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -2.0  1.0  0.0 -1.0  1.0  1.0  0.0 -1.0 -2.0  1.0
+  3.0 -1.0 -2.0  1.0 -0.0 -1.0  1.0  1.0  0.0 -1.0 -2.0  1.0
  Symmetry characters of vibration mode #   4
         degenerate with vibration mode #   5
-  2.0 -0.0  1.0 -0.0 -1.0 -0.0 -2.0  0.0 -1.0 -0.0  1.0  0.0
+  2.0  0.0  1.0  0.0 -1.0 -0.0 -2.0 -0.0 -1.0  0.0  1.0  0.0
  Symmetry characters of vibration mode #   6
         degenerate with vibration mode #   7
-  2.0  0.0 -1.0  0.0 -1.0  0.0  2.0  0.0 -1.0 -0.0 -1.0  0.0
+  2.0  0.0 -1.0 -0.0 -1.0  0.0  2.0  0.0 -1.0 -0.0 -1.0  0.0
  Symmetry characters of vibration mode #   8
   1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0  1.0
  Symmetry characters of vibration mode #   9
   1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-
+ 
   Phonon wavevector (reduced coordinates) :  0.25000  0.00000  0.00000
  Phonon energies in Hartree :
    4.789863E-04  7.269763E-04  1.233066E-03  2.028470E-03  2.193477E-03
@@ -188,7 +196,7 @@
  Phonon frequencies in cm-1    :
 -  1.051253E+02  1.595529E+02  2.706267E+02  4.451978E+02  4.814125E+02
 -  4.885106E+02  5.296437E+02  6.455766E+02  6.658875E+02
-
+ 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    9.748548E-04  1.109767E-03  1.752523E-03  1.981738E-03  2.081968E-03
@@ -196,12 +204,12 @@
  Phonon frequencies in cm-1    :
 -  2.139559E+02  2.435657E+02  3.846343E+02  4.349412E+02  4.569391E+02
 -  4.853713E+02  5.299080E+02  5.758892E+02  6.578652E+02
-
+ 
 ================================================================================
-
+ 
  Treat the second list of vectors 
-
-
+ 
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.86603  0.50000  0.00000
  Phonon energies in Hartree :
@@ -210,7 +218,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.559219E+02  4.559219E+02
 -  5.048500E+02  5.417775E+02  6.952030E+02  7.107293E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.50000  0.86603  0.00000
  Phonon energies in Hartree :
@@ -219,7 +227,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.559219E+02  4.559219E+02
 -  5.048500E+02  5.417775E+02  6.952030E+02  7.107293E+02
-
+ 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -229,10 +237,10 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.559219E+02  4.559219E+02
 -  5.048500E+02  5.048500E+02  6.952030E+02  7.146489E+02
 -
-- Proc.   0 individual time (sec): cpu=         20.4  wall=         20.5
-
+- Proc.   0 individual time (sec): cpu=         16.1  wall=         17.3
+ 
 ================================================================================
-
-+Total cpu time     20.390  and wall time     20.474 sec
-
+ 
++Total cpu time     16.061  and wall time     17.270 sec
+ 
  anaddb : the run completed succesfully.

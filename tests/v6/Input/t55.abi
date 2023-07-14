@@ -9,6 +9,7 @@ t54o_DS5_DDB
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgddb
+#%% exclude_builders = scope_gnu_10.2_paral
 #%% test_chain = t54.abi, t55.abi, t56.abi, t57.abi
 #%% [files]
 #%% files_to_test = 

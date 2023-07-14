@@ -19,7 +19,7 @@ tolvrs1     1.0d-8
 # Parallel settings for dataset 1. NB: These variables are not used in the GWR code.
 paral_kgb1 1
 npband1 2
-npkpt1  4
+np_spkpt1  4
 
 ###########################################
 # Dataset 2: Direct diago with empty states
