@@ -187,8 +187,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,'(a)')' m_ingeo%ingeo : enter '
-!call flush(std_out)
+ write(std_out,'(a)')' m_ingeo%ingeo : enter '
+ call flush(std_out)
 !ENDDEBUG
 
  marr=max(12,3*natom,9*msym)
@@ -895,8 +895,18 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  !
  !========================================================================================================
 
+!DEBUG
+ write(std_out,'(a)')' m_ingeo%ingeo : before symanal '
+ call flush(std_out)
+!ENDDEBUG
+
  ! Here, determine correctly the Bravais lattice and other space group or shubnikov group characteristics
  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
+
+!DEBUG
+ write(std_out,'(a)')' m_ingeo%ingeo : after symanal '
+ call flush(std_out)
+!ENDDEBUG
 
  ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize the rprimd. Keep xred fixed.
  if(tolsym>1.00001e-8)then
@@ -1105,8 +1115,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  ABI_FREE(dprarr)
 
 !DEBUG
-!write(std_out,'(a)')' m_ingeo%ingeo : exit '
-!call flush(std_out)
+ write(std_out,'(a)')' m_ingeo%ingeo : exit '
+ call flush(std_out)
 !ENDDEBUG
 
 end subroutine ingeo

@@ -697,6 +697,11 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      end if
    end if
 
+!DEBUG
+ write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
+ call flush(std_out)
+!ENDDEBUG
+
    ! Re-generate symmetry operations from the lattice and atomic coordinates
    ! This is a fundamental difference with respect to the k point generation.
    tolsym=tol8
@@ -707,8 +712,19 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
+
+!DEBUG
+ write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
+ call flush(std_out)
+!ENDDEBUG
+
    call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
+
+!DEBUG
+ write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
+ call flush(std_out)
+!ENDDEBUG
 
    ! Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=0 ! Do not need the weights
