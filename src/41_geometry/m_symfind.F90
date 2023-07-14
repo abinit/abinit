@@ -649,7 +649,8 @@ end subroutine symfind
 
 !Local variables-------------------------------
 !scalars
- integer, save :: print_comment_tolsym=1
+ integer, save :: print_comment_tolsym=1 
+ integer :: fixed_mismatch,mismatch_fft_tnons
  integer :: ierr,isym,use_inversion
  character(len=1000) :: msg
 !arrays
@@ -717,7 +718,7 @@ end subroutine symfind
     ABI_MALLOC(tnons_new,(3,nsym))
 
     call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
-&     tnons_new=tnons_new,tolsym=tolsym)
+&     fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
     tnons(:,1:nsym)=tnons_new(:,:)
     ABI_FREE(tnons_new)
   end if ! tolsym >1.00001e-8

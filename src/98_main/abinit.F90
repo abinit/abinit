@@ -110,6 +110,7 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
+ use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
@@ -432,6 +433,7 @@ program abinit
        if(ii==2)iounit=std_out
        write(iounit,*)' '
        call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+       call out_spg_anal (dtsets,iounit,ndtset,ndtset_alloc,results_out_all)
        if(ii==2)write(std_out,*)' '
      end do
    end if
