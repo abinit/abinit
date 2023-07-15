@@ -754,7 +754,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
      'According to the symmetry finder, the unit cell is',ch10,&
      'NOT primitive. The multiplicity is ',multi,' .',ch10,&
      'The use of non-primitive unit cells is allowed',ch10,&
-     'only when the input variable chkprim is 0.',ch10,&
+     'only when the current chkprim is 0.',ch10,&
      'Action: either change your unit cell (rprim or angdeg),',ch10,&
      'or set chkprim to 0.'
      ABI_ERROR(msg)
@@ -762,7 +762,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
      write(msg,'(3a,i0,a,a,a)')&
       'According to the symmetry finder, the unit cell is',ch10,&
       'not primitive, with multiplicity= ',multi,'.',ch10,&
-      'This is allowed, as the input variable chkprim is 0.'
+      'This is allowed, as the current chkprim is 0.'
      ABI_COMMENT(msg)
    end if
  end if

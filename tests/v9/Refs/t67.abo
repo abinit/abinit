@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 01h00 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
 
 ================================================================================
@@ -46,8 +46,8 @@
 ================================================================================
 
  read the DDB information and perform some checks
- 
- 
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0838809  5.0838809  G(1)= -0.0983501  0.0983501  0.0983501
@@ -59,13 +59,13 @@
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000  Si
     2)    0.2500000  0.2500000  0.2500000  Si
- 
+
  DDB file with 4 blocks has been read.
- 
+
 ================================================================================
- 
+
  Dynamical Quadrupoles Tensor (units: e Bohr)
- 
+
   atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy
     1     x      0.000000    0.000000    0.000000   16.330466    0.000000    0.000000
     1     y     -0.000000    0.000000   -0.000000    0.000000   16.330466    0.000000
@@ -73,29 +73,29 @@
     2     x     -0.000000   -0.000000   -0.000000  -16.330471   -0.000000   -0.000000
     2     y      0.000000   -0.000000    0.000000   -0.000000  -16.330471   -0.000000
     2     z     -0.000000   -0.000000   -0.000000    0.000000   -0.000000  -16.330471
- 
+
 ================================================================================
- 
+
  Dielectric Tensor and Effective Charges 
- 
- 
+
+
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
- 
+
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1       -0.188514        0.000000
        1               2        0.000000        0.000000
-       1               3       -0.000000        0.000000
+       1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2       -0.188514        0.000000
        2               3       -0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
        3               3       -0.188514        0.000000
- 
+
  Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
@@ -107,19 +107,19 @@
          2         2    0.000000E+00    0.000000E+00    0.000000E+00
          2         3    0.000000E+00    0.000000E+00    0.000000E+00
  Now, the imaginary part of the dynamical matrix is zeroed
- 
+
 ================================================================================
- 
+
  Calculation of the interatomic forces 
- 
--begin at tcpu      0.044  and twall      0.337 sec
- 
+
+-begin at tcpu      0.026  and twall      0.032 sec
+
  Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians
  in ewald9 has been set to eta=    1.2618 1/bohr and the real-space sums have been neglected.
  One should check whether this choice leads to correct results for the specific system under study and q-point grid.
  It is recommended to check that calculations with dipdip=1 and -1 (both with dipquad=0 and quadquad=0)
  lead to identical results. Otherwise increase the resolution of the q-point grid and repeat this test.
- 
+
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -130,14 +130,14 @@
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 
+
  The interatomic forces have been obtained
- 
+
 ================================================================================
- 
+
  Treat the first list of vectors 
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  2.343602E-03  2.343602E-03
@@ -145,25 +145,25 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  5.143613E+02  5.143613E+02
 -  5.143613E+02
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0  3.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0
- -0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
- -0.0 -0.0 -0.0 -0.0  0.0  0.0  0.0  0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
+  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.5
- 
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
+
 ================================================================================
- 
-+Total cpu time      0.076  and wall time      0.480 sec
- 
+
++Total cpu time      0.043  and wall time      0.059 sec
+
  anaddb : the run completed succesfully.
