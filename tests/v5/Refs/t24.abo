@@ -1,5 +1,5 @@
 
-.Version 9.11.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Jul 2023.
-- ( at 22h11 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v5_t24/t24.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t24/t24.abi
 - output file    -> t24.abo
 - root for input  files -> t24i
 - root for output files -> t24o
-
 
  DATASET   11 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       1.480 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -57,7 +55,6 @@ P This job should need less than                       1.360 Mbytes of memory.
 _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET   13 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 13 (RF).
@@ -75,7 +72,6 @@ P This job should need less than                       1.360 Mbytes of memory.
 _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET   21 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 21.
@@ -91,7 +87,6 @@ P This job should need less than                       1.564 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   22 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -110,7 +105,6 @@ P This job should need less than                       1.521 Mbytes of memory.
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET   23 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 23 (RF).
@@ -128,7 +122,6 @@ P This job should need less than                       1.521 Mbytes of memory.
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET   31 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
@@ -144,7 +137,6 @@ P This job should need less than                       1.844 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.018 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   32 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -162,7 +154,6 @@ P This job should need less than                       1.805 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   33 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -470,8 +461,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ge,  from PRB58, 3641 (1998)
 - 32.00000   4.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -496,8 +487,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.513181
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for Te,  from PRB58, 3641 (1998)
 - 52.00000   6.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2527,8 +2518,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/32ge.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ge,  from PRB58, 3641 (1998)
 - 32.00000   4.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2555,8 +2546,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.007832
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for Te,  from PRB58, 3641 (1998)
 - 52.00000   6.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3932,10 +3923,10 @@ P          mk1mem33         4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         10.3  wall=         10.8
+- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  68 WARNINGs and  59 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.3  wall=         10.8
++Overall time at end (sec) : cpu=         10.2  wall=         10.5

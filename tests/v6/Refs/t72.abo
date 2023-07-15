@@ -1,5 +1,5 @@
 
-.Version 9.11.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Jul 2023.
-- ( at 22h13 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v6_t72-t73-t74-t75-t76/t72.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t72-t73-t74-t75-t76/t72.abi
 - output file    -> t72.abo
 - root for input  files -> t72i
 - root for output files -> t72o
-
 
  DATASET    1 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       1.933 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.027 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -57,7 +55,6 @@ P This job should need less than                       2.056 Mbytes of memory.
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -74,7 +71,6 @@ P This job should need less than                       2.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -93,7 +89,6 @@ P This job should need less than                       2.101 Mbytes of memory.
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5 (RF).
@@ -110,7 +105,6 @@ P This job should need less than                       2.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -129,7 +123,6 @@ P This job should need less than                       2.051 Mbytes of memory.
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
 
-
  DATASET    7 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  7.
@@ -145,7 +138,6 @@ P This job should need less than                       1.990 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.068 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
-
 
  DATASET    8 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -164,7 +156,6 @@ P This job should need less than                       2.051 Mbytes of memory.
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
 
-
  DATASET    9 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  9 (RF).
@@ -181,7 +172,6 @@ P This job should need less than                       2.089 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
-
 
  DATASET   10 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -200,7 +190,6 @@ P This job should need less than                       2.089 Mbytes of memory.
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
 
-
  DATASET   11 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11 (RF).
@@ -217,7 +206,6 @@ P This job should need less than                       2.089 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.008 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -1066,8 +1054,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.12886
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1084,8 +1072,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1787,8 +1775,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   1.97857
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1805,8 +1793,8 @@ meta: {optdriver: 1, rfphon: 1, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2334,8 +2322,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   1.95145
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2352,8 +2340,8 @@ meta: {optdriver: 1, rfphon: 1, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2861,8 +2849,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   1.97837
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2879,8 +2867,8 @@ meta: {optdriver: 1, rfphon: 1, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3398,8 +3386,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.12886
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3416,8 +3404,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4229,8 +4217,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   1.97857
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4247,8 +4235,8 @@ meta: {optdriver: 1, rfphon: 1, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4688,8 +4676,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   1.95145
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4706,8 +4694,8 @@ meta: {optdriver: 1, rfphon: 1, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5147,8 +5135,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   1.97837
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5165,8 +5153,8 @@ meta: {optdriver: 1, rfphon: 1, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5606,8 +5594,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.12886
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5624,8 +5612,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6714,10 +6702,10 @@ P          mk1mem12        16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         12.5  wall=         13.2
+- Proc.   0 individual time (sec): cpu=         12.6  wall=         13.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered 497 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.5  wall=         13.2
++Overall time at end (sec) : cpu=         12.6  wall=         13.4
