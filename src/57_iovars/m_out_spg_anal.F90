@@ -168,10 +168,14 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &         ' These modifications are detailed below.',ch10,&
 &         ' The updated tnons, symrel or symrel have NOT been reported in the final echo of variables after computation.'
          call wrtout(iout,msg,'COLL')
-         write(msg,'(7a)')' Such change of spacegroup, or magnetic point group might happen in several cases.',ch10,&
+         write(msg,'(5a)')' Such change of spacegroup, or magnetic point group might happen in several cases.',ch10,&
 &         ' (1) If spgroup (+ptgroupma) defined in the input file, but the actual groups are supergroups of these; ',ch10,&
-&         ' (2) If symrel, tnons (+symafm) defined in the input file, while the system is more symmetric; ',ch10,& 
-&         ' (3) If the system geometry has been optimized and the final structure is more symmetric than the initial one '
+&         ' (2) If symrel, tnons (+symafm) defined in the input file, while the system is more symmetric; '
+         call wrtout(iout,msg,'COLL')
+         write(msg,'(5a)')&
+&         ' (3) If the geometry has been optimized and the final structure is more symmetric than the initial one;',ch10,
+&         ' (4) In case of GW of BSE calculation with inversion symmetry, as nsym has been reduced in such',ch10,&
+&         '       dataset, excluding the improper symmetry operations (with determinant=-1), but not in the postprocessing.'
          call wrtout(iout,msg,'COLL')
          write(msg,'(5a)')' In some case, the recognition of symmetries strongly depends on the value of tolsym.',ch10,&
           ' You might investigate its effect by restarting abinit based on the final acell, rprim and xred,',ch10,&
