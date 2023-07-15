@@ -173,6 +173,9 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &         ' (2) If symrel, tnons (+symafm) defined in the input file, while the system is more symmetric; ',ch10,& 
 &         ' (3) If the system geometry has been optimized and the final structure is more symmetric than the initial one '
          call wrtout(iout,msg,'COLL')
+         write(msg,'(5a)')' In some case, the recognition of symmetries strongly depends on the value of tolsym.',ch10,&
+          ' You might investigate its effect by restarting abinit based on the final acell, rprim and xred,',ch10,&
+&         ' and different values for tolsym.'
          counter1=0
        endif
      endif
