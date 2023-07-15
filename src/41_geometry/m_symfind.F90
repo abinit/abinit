@@ -871,7 +871,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 !This routine finds the Bravais characteristics, without actually
 !looking at the symmetry operations.
  ABI_MALLOC(ptsymrel,(3,3,maxsym))
- call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimd,tolsym)
+ call symlatt(bravais,dev_null,maxsym,nptsym,ptsymrel,rprimd,tolsym)
  ABI_FREE(ptsymrel)
 
 !Check whether the cell is primitive or not.
