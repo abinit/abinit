@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t73/t73.in
-- output file    -> t73.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t73/t73.abi
+- output file    -> t73.abo
 - root for input  files -> t73i
 - root for output files -> t73o
-
 
  Symmetries : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -36,19 +35,19 @@
  For the susceptibility and dielectric matrices, or tddft :
    mgfft =        27  nbnd_in_blk=     6    nfft =      1728     npw =        39
 ================================================================================
-P This job should need less than                       3.560 Mbytes of memory.
+P This job should need less than                       3.744 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P           12 blocks of mpw  integer numbers, for      0.013 Mbytes.
-P          149 blocks of mpw  real(dp)  numbers, for      0.327 Mbytes.
+P          143 blocks of mpw  real(dp)  numbers, for      0.314 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.049 Mbytes.
-P           35 blocks of nfft real(dp)  numbers, for      1.730 Mbytes.
+P           39 blocks of nfft real(dp)  numbers, for      1.928 Mbytes.
 P              Additional     integer numbers, for      0.014 Mbytes.
 P              Additional     real(dp)  numbers, for      0.453 Mbytes.
 P              With residue estimated to be             0.973 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 3.560 Mbytes.
-P Main chain + nonlop.f + opernl.f      3.418 Mbytes.
+P Main chain + fourwf.f                 3.744 Mbytes.
+P Main chain + nonlop.f + opernl.f      3.602 Mbytes.
 P XC chain                              3.450 Mbytes.
 P mkrho chain                           3.283 Mbytes.
 P fourdp chain                          3.220 Mbytes.
@@ -167,8 +166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.500   => boxcut(ratio)=   2.16250
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/42mo.pspnc
 -  Troullier-Martins psp for element  Mo        Thu Oct 27 17:40:28 EDT 1994
 - 42.00000   6.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -666,17 +665,17 @@ force_length_stats: {min:   9.62894254E-03, max:   1.98853650E-01, mean:   8.725
 
  Mean square residual over all n,k,spin=   64.026E-08; max=  34.709E-06
    0.1250  0.1250  0.2500    1  3.47093E-05 kpt; spin; max resid(k); each band:
-   2.14E-12  7.75E-12  9.69E-12  9.50E-12  3.13E-12  1.10E-11  8.58E-12  1.38E-11
-   1.93E-11  9.05E-12  4.24E-12  6.68E-12  2.08E-11  2.44E-11  1.34E-11  1.62E-11
-   1.16E-09  2.69E-08  3.53E-06  3.47E-05
+  2.14E-12 7.75E-12 9.69E-12 9.50E-12 3.13E-12 1.10E-11 8.58E-12 1.38E-11
+  1.93E-11 9.05E-12 4.24E-12 6.68E-12 2.08E-11 2.44E-11 1.34E-11 1.62E-11
+  1.16E-09 2.69E-08 3.53E-06 3.47E-05
    0.3750  0.3750  0.2500    1  1.50907E-07 kpt; spin; max resid(k); each band:
-   2.66E-12  5.46E-12  1.75E-12  7.74E-12  1.01E-12  1.90E-12  6.36E-12  1.36E-12
-   5.55E-12  3.75E-12  4.70E-12  5.13E-12  6.54E-12  1.51E-11  1.30E-11  6.92E-12
-   1.02E-11  1.71E-11  1.79E-11  1.51E-07
+  2.66E-12 5.46E-12 1.75E-12 7.74E-12 1.01E-12 1.90E-12 6.36E-12 1.36E-12
+  5.55E-12 3.75E-12 4.70E-12 5.13E-12 6.54E-12 1.51E-11 1.30E-11 6.92E-12
+  1.02E-11 1.71E-11 1.79E-11 1.51E-07
    0.1250  0.3750  0.2500    1  1.43410E-09 kpt; spin; max resid(k); each band:
-   2.85E-12  8.14E-12  5.83E-12  7.30E-12  1.12E-11  8.39E-12  7.43E-12  5.98E-12
-   7.60E-12  2.66E-12  4.50E-12  6.81E-12  6.37E-12  1.46E-11  1.45E-11  1.62E-11
-   1.37E-11  1.86E-11  9.60E-11  1.43E-09
+  2.85E-12 8.14E-12 5.83E-12 7.30E-12 1.12E-11 8.39E-12 7.43E-12 5.98E-12
+  7.60E-12 2.66E-12 4.50E-12 6.81E-12 6.37E-12 1.46E-11 1.45E-11 1.62E-11
+  1.37E-11 1.86E-11 9.60E-11 1.43E-09
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.001000000000
        0.500000000000      0.500000000000      0.125000000000
@@ -991,10 +990,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.9  wall=          2.9
+.Delivered   1 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.3  wall=          2.4

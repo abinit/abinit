@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 18h52 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h04 )
   
 
 ================================================================================
@@ -109,7 +109,7 @@ Phonon band structure files, with atomic projections, will be output
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.038  and twall      0.049 sec
+-begin at tcpu      0.038  and twall      0.044 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -387,10 +387,10 @@ Phonon band structure files, with atomic projections, will be output
 ;  2  2.07280531E-03  1.19673470E-03  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
-+Total cpu time      1.463  and wall time      1.485 sec
++Total cpu time      1.378  and wall time      1.393 sec
 
  anaddb : the run completed succesfully.

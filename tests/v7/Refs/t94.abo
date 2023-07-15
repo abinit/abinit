@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 00h55 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h07 )
   
 
 ================================================================================
@@ -72,8 +72,8 @@ Phonon band structure files, with atomic projections, will be output
 ================================================================================
 
  read the DDB information and perform some checks
- 
- 
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= -3.1920478  3.1920478  3.1920478  G(1)=  0.0000000  0.1566393  0.1566393
@@ -84,14 +84,14 @@ Phonon band structure files, with atomic projections, will be output
  Time-reversal symmetry is present
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000  Li
- 
+
  DDB file with 3 blocks has been read.
- 
+
 ================================================================================
- 
+
  Calculation of the interatomic forces 
- 
--begin at tcpu      0.044  and twall      0.443 sec
+
+-begin at tcpu      0.030  and twall      0.036 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -102,13 +102,13 @@ Phonon band structure files, with atomic projections, will be output
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 
+
  The interatomic forces have been obtained
- 
+
 ================================================================================
- 
+
  Properties based on electron-phonon coupling 
- 
+
  Found     6 symmetries that leave the perturbation invariant.
  Found     6 symmetries that leave the perturbation invariant.
  Found     6 symmetries that leave the perturbation invariant.
@@ -118,42 +118,42 @@ Phonon band structure files, with atomic projections, will be output
  Found     2 symmetries that leave the perturbation invariant.
  Found     2 symmetries that leave the perturbation invariant.
  Found     2 symmetries that leave the perturbation invariant.
- 
+
  Output of the linewidths for the first point of each segment. Linewidths are given in Hartree.
- 
+
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.286749E-20    0.000000E+00
-       2        0.000000E+00    3.616810E-20    0.000000E+00
-       3        0.000000E+00    5.683633E-20    0.000000E+00
- 
+       1        0.000000E+00    1.550107E-20    0.000000E+00
+       2        0.000000E+00    1.722342E-20    0.000000E+00
+       3        0.000000E+00    1.463990E-20    0.000000E+00
+
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1        1.511044E-03    1.852803E-04    1.108110E+00
        2        1.511044E-03    1.852803E-04    1.108110E+00
        3        1.511044E-03    1.852803E-04    1.108110E+00
- 
+
  Q point =    2.500000E-01    2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -2.282396E-03    1.342939E-04    3.520320E-01
        2       -2.282396E-03    1.342939E-04    3.520320E-01
        3       -2.282396E-03    1.342939E-04    3.520320E-01
- 
+
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-       1        0.000000E+00    6.286749E-20    0.000000E+00
-       2        0.000000E+00    3.616810E-20    0.000000E+00
-       3        0.000000E+00    5.683633E-20    0.000000E+00
- 
+       1        0.000000E+00    1.550107E-20    0.000000E+00
+       2        0.000000E+00    1.722342E-20    0.000000E+00
+       3        0.000000E+00    1.463990E-20    0.000000E+00
+
  Q point =    5.000000E-01    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -2.530419E-03    1.676735E-04    3.575917E-01
        2       -1.939164E-03    3.508736E-05    1.274175E-01
        3        9.414580E-04    1.584671E-04    2.441434E+00
- 
- 
+
+
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
- 
+
  mka2f: lambda <omega^2> =     4.648349E-06
  mka2f: lambda <omega^3> =     6.982389E-09
  mka2f: lambda <omega^4> =     1.193103E-11
@@ -162,18 +162,18 @@ Phonon band structure files, with atomic projections, will be output
  mka2f: omegalog  =     1.003728E-03 (Ha)     3.169517E+02 (Kelvin)
  mka2f: input mustar =     1.000000E-02
 -mka2f: MacMillan Tc =     2.143205E-04 (Ha)     6.767698E+01 (Kelvin)
- 
+
 ================================================================================
- 
+
  Treat the first list of vectors 
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -181,34 +181,34 @@ Phonon band structure files, with atomic projections, will be output
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -6.66321382E-07  8.89014667E-03
+-  1  0.00000000E+00  0.00000000E+00  8.89014669E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  2.22215394E-07 -8.89014666E-03 -6.66325548E-07
+-  1  0.00000000E+00  8.89014669E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  8.89014669E-03  2.22227885E-07  0.00000000E+00
+-  1  8.89014669E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
- 
+  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -2.530419E-03 -1.939164E-03  9.414580E-04
  Phonon frequencies in cm-1    :
 - -5.553627E+02 -4.255974E+02  2.066262E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -227,10 +227,10 @@ Phonon band structure files, with atomic projections, will be output
 ;  1  0.00000000E+00  6.28628301E-03  6.28628301E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=         36.8  wall=         39.1
- 
+- Proc.   0 individual time (sec): cpu=         24.0  wall=         24.1
+
 ================================================================================
- 
-+Total cpu time     36.803  and wall time     39.126 sec
- 
+
++Total cpu time     24.003  and wall time     24.074 sec
+
  anaddb : the run completed succesfully.

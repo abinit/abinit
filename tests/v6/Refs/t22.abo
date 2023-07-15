@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t22/t22.in
-- output file    -> t22.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t22/t22.abi
+- output file    -> t22.abo
 - root for input  files -> t22i
 - root for output files -> t22o
-
 
  DATASET    1 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -35,11 +34,10 @@
        mpw =          78          nfft =        1728          nkpt =          20
   nimage =         6
 ================================================================================
-P This job should need less than                       1.003 Mbytes of memory.
+P This job should need less than                       1.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -53,11 +51,10 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
        mpw =          78          nfft =        1728          nkpt =          20
   nimage =         6
 ================================================================================
-P This job should need less than                       1.003 Mbytes of memory.
+P This job should need less than                       1.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -71,11 +68,10 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
        mpw =          78          nfft =        1728          nkpt =          20
   nimage =         6
 ================================================================================
-P This job should need less than                       1.003 Mbytes of memory.
+P This job should need less than                       1.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -89,11 +85,10 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
        mpw =          78          nfft =        1728          nkpt =          20
   nimage =         6
 ================================================================================
-P This job should need less than                       1.003 Mbytes of memory.
+P This job should need less than                       1.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -107,7 +102,7 @@ _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
        mpw =          78          nfft =        1728          nkpt =          20
   nimage =        11
 ================================================================================
-P This job should need less than                       1.003 Mbytes of memory.
+P This job should need less than                       1.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -486,8 +481,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -499,8 +494,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -14472,6 +14467,11 @@ P           mkmem          20
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -14559,10 +14559,10 @@ P           mkmem          20
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         22.8  wall=         23.6
+- Proc.   0 individual time (sec): cpu=         18.1  wall=         18.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  40 WARNINGs and 237 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.8  wall=         23.6
+.Delivered 683 WARNINGs and 284 COMMENTs to log file.
++Overall time at end (sec) : cpu=         18.1  wall=         18.1

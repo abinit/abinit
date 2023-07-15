@@ -1,6 +1,6 @@
 
-.Version 9.4.0 of ABINIT 
-.(MPI version, prepared for a x86_64_darwin18.7.0_gnu9.3 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 23 Feb 2021.
-- ( at 20h58 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h10 )
   
-- input  file    -> /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Test_suite/v9_t25/t25.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t25/t25.abi
 - output file    -> t25.abo
 - root for input  files -> t25i
 - root for output files -> t25o
-
 
  Symmetries : space group P-1 (#  2); Bravais aP (primitive triclinic)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =           3        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.786 Mbytes of memory.
+P This job should need less than                       0.802 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -121,8 +120,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.02082
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
-- pspatm: opening atomic psp file    /Users/gonze/_Research/ABINIT_git/gonze-9.4/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/21sc.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Sc,  from PRB58, 3641 (1998)
 - 21.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -235,16 +234,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.66814418975963E-01
-hartree             :  3.61386758997432E-02
-xc                  : -7.40710349957780E-01
+kinetic             :  8.66814418975966E-01
+hartree             :  3.61386758997433E-02
+xc                  : -7.40710349957781E-01
 Ewald energy        : -2.37239172660679E+00
 psp_core            :  1.93548703784435E-01
-local_psp           :  2.83724711250014E-01
-non_local_psp       :  1.81606729628611E-01
+local_psp           :  2.83724711250016E-01
+non_local_psp       :  1.81606729628607E-01
 total_energy        : -1.55126883702581E+00
 total_energy_eV     : -4.22121717943650E+01
-band_energy         :  4.08286043218140E-01
+band_energy         :  4.08286043218141E-01
 ...
 
 
@@ -386,10 +385,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.2  wall=          0.3
++Overall time at end (sec) : cpu=          0.2  wall=          0.2
