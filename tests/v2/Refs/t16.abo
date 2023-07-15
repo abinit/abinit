@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 30 May 2023.
-- ( at 21h51 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
 
 ================================================================================
@@ -118,7 +118,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.029  and twall      0.030 sec
+-begin at tcpu      0.031  and twall      0.041 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      256
  greater than 80, so only write 20 of them
@@ -319,8 +319,8 @@
   Trace           0.00069
  Transformation to local coordinates 
  First  local vector :        0.000000       -0.707107        0.707107
- Second local vector :       -1.000000        0.000000        0.000000
- Third  local vector :       -0.000000       -0.707107       -0.707107
+ Second local vector :       -1.000000       -0.000000       -0.000000
+ Third  local vector :        0.000000       -0.707107       -0.707107
   -0.00360  0.00157  0.00000
   -0.00157  0.00433  0.00000
    0.00000  0.00000 -0.00005
@@ -379,8 +379,8 @@
   Trace           0.00069
  Transformation to local coordinates 
  First  local vector :        0.000000        0.707107        0.707107
- Second local vector :        1.000000        0.000000        0.000000
- Third  local vector :        0.000000        0.707107       -0.707107
+ Second local vector :        1.000000        0.000000       -0.000000
+ Third  local vector :       -0.000000        0.707107       -0.707107
   -0.00360  0.00157  0.00000
   -0.00157  0.00433  0.00000
    0.00000  0.00000 -0.00005
@@ -409,7 +409,7 @@
   Trace           0.00069
  Transformation to local coordinates 
  First  local vector :        0.707107        0.707107        0.000000
- Second local vector :        0.000000        0.000000        1.000000
+ Second local vector :        0.000000       -0.000000        1.000000
  Third  local vector :        0.707107       -0.707107       -0.000000
   -0.00360  0.00157  0.00000
   -0.00157  0.00433  0.00000
@@ -455,7 +455,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.301511       -0.301511       -0.904534
  Second local vector :       -0.639602       -0.639602        0.426401
- Third  local vector :       -0.707107        0.707107       -0.000000
+ Third  local vector :       -0.707107        0.707107        0.000000
    0.00037  0.00023  0.00000
    0.00023 -0.00033  0.00000
    0.00000  0.00000  0.00067
@@ -1055,11 +1055,11 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -1.0 -1.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0 -0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  0.0 -0.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
  -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0 -1.0 -1.0 -1.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
  -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
@@ -1086,15 +1086,10 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
 -  1.086272E+02  1.086272E+02  3.723269E+02  4.121226E+02  4.911576E+02
 -  4.911576E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.5
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.459  and wall time      0.463 sec
++Total cpu time      0.199  and wall time      0.230 sec
 
  anaddb : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 2362 allocations and 2362 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0

@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,21 +14,20 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h36 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t15/t15.in
-- output file    -> t15.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t15/t15.abi
+- output file    -> t15.abo
 - root for input  files -> t15i
 - root for output files -> t15o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
-
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
  Symmetries : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -42,7 +41,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        60    nfftf =     19440
 ================================================================================
-P This job should need less than                      10.918 Mbytes of memory.
+P This job should need less than                      10.976 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.113 Mbytes ; DEN or POT disk file :      0.150 Mbytes.
 ================================================================================
@@ -161,9 +160,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.01795
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.10359248
@@ -181,9 +180,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/In.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.50644782
@@ -201,9 +200,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/N.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.20000000
@@ -304,7 +303,7 @@ force_length_stats: {min:   3.88103445E-03, max:   4.57100361E-01, mean:   1.313
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
  Compensation charge over spherical meshes =     29.851871273580148
- Compensation charge over fine fft grid    =      6.731466902318371
+ Compensation charge over fine fft grid    =      6.731466902318528
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -385,7 +384,7 @@ force_length_stats: {min:   3.88103445E-03, max:   4.57100361E-01, mean:   1.313
     2       0.000000000000      0.000000000000      5.664713271258
     3       0.000000000000      0.000000000000      0.948219416267
     4       0.000000000000      0.000000000000      3.562060402042
-    5       0.000000000000      0.000000000000     -8.775987979467
+    5       0.000000000000      0.000000000000     -8.775987979468
     6       0.000000000000      0.000000000000      2.228245382554
     7       0.000000000000      0.000000000000     -0.681579392330
     8       0.000000000000      0.000000000000      0.568252929527
@@ -401,25 +400,25 @@ force_length_stats: {min:   3.88103445E-03, max:   4.57100361E-01, mean:   1.313
     8     -0.00000018658783     1.91835755198854     7.72239806272839
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000113879    -0.00000000065748    -0.04966496888246
+    1      0.00000000113879    -0.00000000065748    -0.04966496888245
     2      0.00000000557899    -0.00000000322103    -0.24331018701049
-    3      0.00000000033359    -0.00000000019260    -0.01454830153516
+    3      0.00000000033359    -0.00000000019260    -0.01454830153517
     4      0.00000000324055    -0.00000000187093    -0.14132620279454
-    5     -0.00000001048110     0.00000000605127     0.45710036100826
-    6      0.00000000175715    -0.00000000101449    -0.07663279957714
+    5     -0.00000001048110     0.00000000605127     0.45710036100827
+    6      0.00000000175715    -0.00000000101449    -0.07663279957715
     7     -0.00000000147898     0.00000000085389     0.06450106434187
     8     -0.00000000008899     0.00000000005138     0.00388103444965
  frms,max,avg= 1.1195981E-01 4.5710036E-01   7.210E-10 -4.163E-10 -3.144E-02 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000005855919    -0.00000003380916    -2.55387516831355
-    2      0.00000028688323    -0.00000016563211   -12.51151181176537
-    3      0.00000001715367    -0.00000000990368    -0.74810368088058
-    4      0.00000016663551    -0.00000009620706    -7.26728493081773
-    5     -0.00000053895988     0.00000031116863    23.50504364895568
-    6      0.00000009035653    -0.00000005216737    -3.94061666245255
-    7     -0.00000007605220     0.00000004390876     3.31677780655322
-    8     -0.00000000457607     0.00000000264199     0.19957079872087
+    1      0.00000005855919    -0.00000003380916    -2.55387516831344
+    2      0.00000028688323    -0.00000016563211   -12.51151181176528
+    3      0.00000001715367    -0.00000000990368    -0.74810368088081
+    4      0.00000016663551    -0.00000009620706    -7.26728493081787
+    5     -0.00000053895988     0.00000031116863    23.50504364895597
+    6      0.00000009035653    -0.00000005216737    -3.94061666245333
+    7     -0.00000007605220     0.00000004390876     3.31677780655351
+    8     -0.00000000457607     0.00000000264199     0.19957079872124
  frms,max,avg= 5.7572045E+00 2.3505044E+01   3.707E-08 -2.140E-08 -1.617E+00 e/A
  length scales=  6.278978981181  6.278978981181 20.617481121000 bohr
               =  3.322692570057  3.322692570057 10.910301107768 angstroms
@@ -436,26 +435,26 @@ force_length_stats: {min:   3.88103445E-03, max:   4.57100361E-01, mean:   1.313
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  5.88139238407663E+01
+kinetic             :  5.88139238407664E+01
 hartree             :  9.53371428601052E+01
-xc                  : -2.31772511727714E+01
+xc                  : -2.31772511727713E+01
 Ewald energy        : -2.21317211819057E+02
 psp_core            :  1.11323708105006E+01
 local_psp           : -2.64709888487607E+02
-spherical_terms     :  1.62009226448409E+01
+spherical_terms     :  1.62009226448410E+01
 total_energy        : -3.27719991323222E+02
-total_energy_eV     : -8.91771448249207E+03
+total_energy_eV     : -8.91771448249206E+03
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.58782819758793E+01
+band_energy         :  1.58782819758791E+01
 Ewald energy        : -2.21317211819057E+02
 psp_core            :  1.11323708105006E+01
 xc_dc               : -9.49998454758604E+01
-spherical_terms     : -1.72574808424359E+01
+spherical_terms     : -1.72574808424358E+01
 total_energy_dc     : -3.06563885350973E+02
 total_energy_dc_eV  : -8.34202756189836E+03
 ...
@@ -487,7 +486,7 @@ total_energy_dc_eV  : -8.34202756189836E+03
                       -1.0481101803E-08  6.0512670124E-09  4.5710036101E-01
                        1.7571549759E-09 -1.0144939092E-09 -7.6632799577E-02
                       -1.4789798466E-09  8.5388942169E-10  6.4501064342E-02
-                      -8.8990341376E-11  5.1378598099E-11  3.8810344496E-03
+                      -8.8990341377E-11  5.1378598099E-11  3.8810344497E-03
 -          fftalg         312
            istwfk        4
               ixc     -101130
@@ -639,10 +638,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.5  wall=          5.5
+.Delivered   4 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.5  wall=          4.5

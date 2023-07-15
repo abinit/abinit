@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 30 May 2023.
-- ( at 22h02 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
 
 ================================================================================
@@ -158,7 +158,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.056  and twall      0.057 sec
+-begin at tcpu      0.063  and twall      0.073 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -662,7 +662,7 @@
    in SI units K  :            331.46012
 
  Speed of sound for this q and mode:
-   in atomic units:     0.2098225454E-02
+   in atomic units:     0.2098225455E-02
    in units km/s:              4.59027
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1081958368E-02
@@ -843,15 +843,10 @@
 -  1.588304E+02  1.656650E+02  1.656650E+02  2.810929E+02  2.810929E+02
 -  2.810929E+02  4.452209E+02  4.533533E+02  4.533533E+02  6.311288E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
 
 ================================================================================
 
-+Total cpu time      0.633  and wall time      0.638 sec
++Total cpu time      0.363  and wall time      0.380 sec
 
  anaddb : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 1097 allocations and 1097 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
