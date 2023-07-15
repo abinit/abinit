@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t39/t39.in
-- output file    -> t39.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t39/t39.abi
+- output file    -> t39.abo
 - root for input  files -> t39i
 - root for output files -> t39o
-
 
  DATASET    1 : magnetic group, Shubnikov type IV
  Fedorov space group P2 3 (#195)
@@ -36,11 +35,10 @@
 -    mband =          15        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       0.768 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type IV
  Fedorov space group F2 3 (#196)
@@ -55,11 +53,10 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          15        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.673 Mbytes of memory.
+P This job should need less than                       0.680 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type IV
  Fedorov space group P2_1 3 (#198)
@@ -74,11 +71,10 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          15        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.753 Mbytes of memory.
+P This job should need less than                       0.768 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    4 : magnetic group, Shubnikov type IV
  Fedorov space group Pm -3 (#200)
@@ -93,11 +89,10 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    5 : magnetic group, Shubnikov type IV
  Fedorov space group Pn -3 (#201)
@@ -112,11 +107,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    6 : magnetic group, Shubnikov type IV
  Fedorov space group Fm -3 (#202)
@@ -131,11 +125,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       0.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET    7 : magnetic group, Shubnikov type IV
  Fedorov space group Fd -3 (#203)
@@ -150,11 +143,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       0.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET    8 : magnetic group, Shubnikov type IV
  Fedorov space group Pa -3 (#205)
@@ -169,11 +161,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    9 : magnetic group, Shubnikov type IV
  Fedorov space group P4 3 2 (#207)
@@ -188,11 +179,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   10 : magnetic group, Shubnikov type IV
  Fedorov space group P4_2 3 2 (#208)
@@ -207,11 +197,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   11 : magnetic group, Shubnikov type IV
  Fedorov space group F4 3 2 (#209)
@@ -226,11 +215,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       0.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET   12 : magnetic group, Shubnikov type IV
  Fedorov space group F4_1 3 2 (#210)
@@ -245,11 +233,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       0.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET   13 : magnetic group, Shubnikov type IV
  Fedorov space group P4_3 3 2 (#212)
@@ -264,11 +251,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   14 : magnetic group, Shubnikov type IV
  Fedorov space group P4_1 3 2 (#213)
@@ -283,11 +269,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   15 : magnetic group, Shubnikov type IV
  Fedorov space group P-4 3 m (#215)
@@ -302,11 +287,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   16 : magnetic group, Shubnikov type IV
  Fedorov space group F-4 3 m (#216)
@@ -321,11 +305,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       0.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET   17 : magnetic group, Shubnikov type IV
  Fedorov space group P-4 3 n (#218)
@@ -340,11 +323,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.011 Mbytes of memory.
+P This job should need less than                       1.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   18 : magnetic group, Shubnikov type IV
  Fedorov space group F-4 3 c (#219)
@@ -359,11 +341,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          30        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.924 Mbytes of memory.
+P This job should need less than                       0.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET   19 : magnetic group, Shubnikov type IV
  Fedorov space group Pm -3 m (#221)
@@ -378,11 +359,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.707 Mbytes of memory.
+P This job should need less than                       1.722 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   20 : magnetic group, Shubnikov type IV
  Fedorov space group Pn -3 n (#222)
@@ -397,11 +377,10 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.707 Mbytes of memory.
+P This job should need less than                       1.722 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   21 : magnetic group, Shubnikov type IV
  Fedorov space group Pm -3 n (#223)
@@ -416,11 +395,10 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.707 Mbytes of memory.
+P This job should need less than                       1.722 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   22 : magnetic group, Shubnikov type IV
  Fedorov space group Pn -3 m (#224)
@@ -435,11 +413,10 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       1.707 Mbytes of memory.
+P This job should need less than                       1.722 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   23 : magnetic group, Shubnikov type IV
  Fedorov space group Fm -3 m (#225)
@@ -454,11 +431,10 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       1.608 Mbytes of memory.
+P This job should need less than                       1.614 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET   24 : magnetic group, Shubnikov type IV
  Fedorov space group Fm -3 c (#226)
@@ -473,11 +449,10 @@ _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       1.608 Mbytes of memory.
+P This job should need less than                       1.614 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET   25 : magnetic group, Shubnikov type IV
  Fedorov space group Fd -3 m (#227)
@@ -492,11 +467,10 @@ _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       1.608 Mbytes of memory.
+P This job should need less than                       1.614 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET   26 : magnetic group, Shubnikov type IV
  Fedorov space group Fd -3 c (#228)
@@ -511,7 +485,7 @@ _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          60        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       1.608 Mbytes of memory.
+P This job should need less than                       1.614 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================

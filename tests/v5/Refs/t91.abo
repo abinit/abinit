@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 00h46 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h02 )
   
 
 ================================================================================
@@ -80,8 +80,8 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 ================================================================================
 
  read the DDB information and perform some checks
- 
- 
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
@@ -92,14 +92,14 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
  Time-reversal symmetry is present
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000  Al
- 
+
  DDB file with 3 blocks has been read.
- 
+
 ================================================================================
- 
+
  Calculation of the interatomic forces 
- 
--begin at tcpu      0.081  and twall      0.307 sec
+
+-begin at tcpu      0.038  and twall      0.044 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -110,13 +110,13 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 
+
  The interatomic forces have been obtained
- 
+
 ================================================================================
- 
+
  Properties based on electron-phonon coupling 
- 
+
  The set of symmetries contains only one element for this perturbation.
  The set of symmetries contains only one element for this perturbation.
  The set of symmetries contains only one element for this perturbation.
@@ -126,93 +126,93 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
  The set of symmetries contains only one element for this perturbation.
  The set of symmetries contains only one element for this perturbation.
  The set of symmetries contains only one element for this perturbation.
- 
+
  Output of the linewidths for the first point of each segment. Linewidths are given in Hartree.
- 
+
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1        0.000000E+00    3.448596E-10    0.000000E+00
        2        0.000000E+00    3.448596E-10    0.000000E+00
        3        0.000000E+00    3.448596E-10    0.000000E+00
- 
+
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -9.501404E-04    7.780430E-06    9.636942E-02
        2       -9.501404E-04    7.780430E-06    9.636942E-02
        3        1.830588E-03    1.163037E-04    3.880819E-01
- 
+
  Q point =    0.000000E+00    0.000000E+00    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1        0.000000E+00    3.448596E-10    0.000000E+00
        2        0.000000E+00    3.448596E-10    0.000000E+00
        3        0.000000E+00    3.448596E-10    0.000000E+00
- 
+
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -1.129682E-03    2.303906E-05    2.018661E-01
        2       -1.129682E-03    2.303906E-05    2.018661E-01
        3        1.231062E-03    9.677035E-06    7.139932E-02
- 
+
  Q point =    5.000000E-01    5.000000E-01    0.000000E+00   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -9.501404E-04    7.780430E-06    9.636942E-02
        2       -9.501404E-04    7.780430E-06    9.636942E-02
        3        1.830588E-03    1.163037E-04    3.880819E-01
- 
+
  Q point =    5.000000E-01   -2.500000E-01    2.500000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -1.070872E-03    2.986708E-06    2.912255E-02
        2        9.900223E-04    5.724833E-05    6.531067E-01
        3        9.900223E-04    5.724833E-05    6.531067E-01
- 
+
  Q point =    5.000000E-01    5.000000E-01    5.000000E-01   isppol =    1
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
        1       -1.129682E-03    2.303906E-05    2.018661E-01
        2       -1.129682E-03    2.303906E-05    2.018661E-01
        3        1.231062E-03    9.677035E-06    7.139932E-02
- 
- 
+
+
  Superconductivity : isotropic evaluation of parameters from electron-phonon coupling.
- 
+
  mka2f: lambda <omega^2> =     8.388430E-07
  mka2f: lambda <omega^3> =     9.181654E-10
  mka2f: lambda <omega^4> =     1.108485E-12
  mka2f: lambda <omega^5> =     1.437325E-15
  mka2f: isotropic lambda =     1.691863E+00
- mka2f: omegalog  =     2.242451E-04 (Ha)     7.081091E+01 (Kelvin)
+ mka2f: omegalog  =     2.242451E-04 (Ha)     7.081092E+01 (Kelvin)
  mka2f: input mustar =     1.360000E-01
 -mka2f: MacMillan Tc =     2.577573E-05 (Ha)     8.139322E+00 (Kelvin)
- 
+
 ================================================================================
- 
+
  Calculation of phonon density of states 
- 
+
  Average speed of sound partial sums:    -0.6590764449E-03 (at units)
 -                                   =          -1.4419 [km/s]
- 
+
  Debye frequency from partial sums:    -0.5437236040E-03 (Ha)
 -                                 =    -0.3577529455E+01 (THz)
 -Debye temperature from partial sums:    -0.1716941308E+03 (K)
- 
- Average speed of sound:     0.2277736505E-04 (at units) 
+
+ Average speed of sound:     0.2277736507E-04 (at units) 
 -                      =           0.0498 [km/s]
- 
- Debye frequency from DOS:     0.1879082633E-04 (Ha) 
--                        =     0.1236376978E+00 (THz)
--Debye temperature from DOS:     0.5933666607E+01 (K)
- 
- 
+
+ Debye frequency from DOS:     0.1879082634E-04 (Ha) 
+-                        =     0.1236376980E+00 (THz)
+-Debye temperature from DOS:     0.5933666612E+01 (K)
+
+
 ================================================================================
- 
+
  Treat the first list of vectors 
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -220,34 +220,34 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.20439058E-07  4.50906596E-03
+-  1  0.00000000E+00  4.63824830E-07 -4.50906596E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906596E-03 -4.20439431E-07
+-  1  0.00000000E+00  4.50906596E-03  4.63825059E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
 -  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
- 
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0  0.0 -0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
   -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -255,23 +255,23 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.35475679E-04 -3.00738894E-03  3.34286462E-03
+-  1  3.33703120E-04 -3.00841531E-03  3.34211843E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66632060E-03  2.12369076E-03  1.54262984E-03
+-  1  3.66648236E-03  2.12223656E-03  1.54424580E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03 -2.60331046E-03 -2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.00000
  Phonon energies in Hartree :
   -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -279,23 +279,23 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.34309221E-04 -3.00806444E-03 -3.34237366E-03
+-  1  3.34398879E-04 -3.00801253E-03 -3.34241141E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66642715E-03  2.12273385E-03 -1.54369330E-03
+-  1  3.66641897E-03  2.12280741E-03 -1.54361156E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03 -2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
   -9.501404E-04 -9.501404E-04  1.830588E-03
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -303,23 +303,23 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  1.91177721E-06  4.50906558E-03  0.00000000E+00
+-  1  7.34191595E-07  4.50906592E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  4.50906558E-03 -1.91177721E-06  0.00000000E+00
+-  1  4.50906592E-03 -7.34191595E-07  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  0.00000000E+00  0.00000000E+00  4.50906598E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.50000
  Phonon energies in Hartree :
   -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -327,23 +327,23 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.33928919E-04  3.00828460E-03  3.34221352E-03
+-  1  3.34303713E-04  3.00806763E-03  3.34237134E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66646180E-03 -2.12242183E-03  1.54403998E-03
+-  1  3.66642765E-03 -2.12272933E-03  1.54369832E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03  2.60331046E-03 -2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.50000
  Phonon energies in Hartree :
   -9.501404E-04 -9.501404E-04  1.830588E-03
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -351,23 +351,23 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  1.69651190E-06  0.00000000E+00 -4.50906566E-03
+-  1  1.02676837E-06  0.00000000E+00 -4.50906586E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  4.50906566E-03  0.00000000E+00  1.69651190E-06
+-  1  4.50906586E-03  0.00000000E+00  1.02676837E-06
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  0.00000000E+00  4.50906598E-03  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.50000  0.50000
  Phonon energies in Hartree :
   -9.501404E-04 -9.501404E-04  1.830588E-03
  Phonon frequencies in cm-1    :
 - -2.085317E+02 -2.085317E+02  4.017677E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -375,23 +375,23 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  2.60786011E-04  4.50151826E-03
+-  1  0.00000000E+00  7.21650960E-05  4.50848846E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -9.501404E-04
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50151826E-03 -2.60786011E-04
+-  1  0.00000000E+00  4.50848846E-03 -7.21650960E-05
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.830588E-03
 ;  1  4.50906598E-03  0.00000000E+00  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
   -1.129682E-03 -1.129682E-03  1.231062E-03
  Phonon frequencies in cm-1    :
 - -2.479366E+02 -2.479366E+02  2.701868E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -399,21 +399,21 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
   Mode number    1   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.34391084E-04  3.00801704E-03 -3.34240813E-03
+-  1  3.34276210E-04  3.00808355E-03 -3.34235976E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy   -1.129682E-03
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  3.66641968E-03 -2.12280101E-03 -1.54361867E-03
+-  1  3.66643016E-03 -2.12270677E-03 -1.54372339E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    1.231062E-03
 ;  1  2.60331046E-03  2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          4.6
- 
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
+
 ================================================================================
- 
-+Total cpu time      2.815  and wall time      4.609 sec
- 
+
++Total cpu time      2.323  and wall time      2.347 sec
+
  anaddb : the run completed succesfully.

@@ -1,5 +1,5 @@
 
-.Version 9.7.5 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 18 Jun 2022.
-- ( at 10h59 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h04 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__baguetl/tests/Test_suite/v7_t05/t05.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t05/t05.abi
 - output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
-
 
  DATASET    1 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
@@ -41,7 +40,6 @@ P This job should need less than                       4.870 Mbytes of memory.
 _ WF disk file :      0.142 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
  Magnetic point group 4/m'mm (# 26)
@@ -59,7 +57,6 @@ P This job should need less than                       4.870 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.142 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
@@ -79,7 +76,6 @@ P This job should need less than                       4.870 Mbytes of memory.
 _ WF disk file :      0.142 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
  Magnetic point group 4/m'mm (# 26)
@@ -98,7 +94,6 @@ P This job should need less than                       4.870 Mbytes of memory.
 _ WF disk file :      0.142 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -115,7 +110,6 @@ P This job should need less than                       3.224 Mbytes of memory.
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -131,7 +125,6 @@ P This job should need less than                       3.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Im -3 m (#229); Bravais cI (body-center cubic)
 ================================================================================
@@ -690,8 +683,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__baguetl/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__baguetl/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2843,10 +2836,10 @@ P           mkmem7          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.1
+- Proc.   0 individual time (sec): cpu=         16.8  wall=         17.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  24 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.9  wall=         14.1
+.Delivered  88 WARNINGs and  35 COMMENTs to log file.
++Overall time at end (sec) : cpu=         16.8  wall=         17.0
