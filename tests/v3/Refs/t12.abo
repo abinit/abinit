@@ -1,5 +1,5 @@
 
-.Version 9.11.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Jul 2023.
-- ( at 22h08 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v3_t12/t12.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t12/t12.abi
 - output file    -> t12.abo
 - root for input  files -> t12i
 - root for output files -> t12o
-
 
  DATASET    1 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       4.776 Mbytes of memory.
 _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (RF).
@@ -56,7 +54,6 @@ P This job should need less than                       2.930 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -76,7 +73,6 @@ P This job should need less than                       4.991 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
 
-
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
  Magnetic point group 4/m'mm (# 26)
@@ -95,7 +91,6 @@ P This job should need less than                       4.991 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
 
-
  DATASET    5 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
  Magnetic point group 4/m'mm (# 26)
@@ -113,7 +108,6 @@ P This job should need less than                       4.991 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
-
 
  DATASET    6 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -459,8 +453,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well

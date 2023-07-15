@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 30 May 2023.
-- ( at 21h51 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
 
 ================================================================================
@@ -128,7 +128,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.036  and twall      0.036 sec
+-begin at tcpu      0.034  and twall      0.045 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -343,7 +343,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350       -0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
   -0.02716  0.00000  0.00000  -0.02150  0.00000  0.00000  -0.00566  0.00000  0.00000
    0.00000  0.01446  0.00000   0.00000  0.01075  0.00000   0.00000  0.00371  0.00000
    0.00000  0.00000  0.01446   0.00000  0.00000  0.01075   0.00000  0.00000  0.00371
@@ -406,7 +406,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350        0.577350
  Second local vector :        0.816497        0.408248        0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
   -0.02716  0.00000  0.00000  -0.02150  0.00000  0.00000  -0.00566  0.00000  0.00000
    0.00000  0.01446  0.00000   0.00000  0.01075  0.00000   0.00000  0.00371  0.00000
    0.00000  0.00000  0.01446   0.00000  0.00000  0.01075   0.00000  0.00000  0.00371
@@ -448,7 +448,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350       -0.577350        0.577350
  Second local vector :        0.816497        0.408248       -0.408248
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
   -0.02716  0.00000  0.00000  -0.02150  0.00000  0.00000  -0.00566  0.00000  0.00000
    0.00000  0.01446  0.00000   0.00000  0.01075  0.00000   0.00000  0.00371  0.00000
    0.00000  0.00000  0.01446   0.00000  0.00000  0.01075   0.00000  0.00000  0.00371
@@ -469,7 +469,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350       -0.577350
  Second local vector :        0.816497       -0.408248        0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
   -0.02716  0.00000  0.00000  -0.02150  0.00000  0.00000  -0.00566  0.00000  0.00000
    0.00000  0.01446  0.00000   0.00000  0.01075  0.00000   0.00000  0.00371  0.00000
    0.00000  0.00000  0.01446   0.00000  0.00000  0.01075   0.00000  0.00000  0.00371
@@ -705,8 +705,8 @@
   1.00000                   0.54742                   0.45258
  Transformation to local coordinates 
  First  local vector :        0.000000       -0.707107       -0.707107
- Second local vector :       -0.000000       -0.707107        0.707107
- Third  local vector :       -1.000000        0.000000       -0.000000
+ Second local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -1.000000       -0.000000        0.000000
   -0.02325  0.00584  0.00000  -0.02406  0.01091  0.00000   0.00080 -0.00507  0.00000
   -0.00584  0.01039  0.00000  -0.01091  0.01376  0.00000   0.00507 -0.00337  0.00000
    0.00000  0.00000  0.00379   0.00000  0.00000  0.00533   0.00000  0.00000 -0.00154
@@ -810,8 +810,8 @@
   1.00000                   0.54742                   0.45258
  Transformation to local coordinates 
  First  local vector :        0.000000        0.707107       -0.707107
- Second local vector :       -0.000000        0.707107        0.707107
- Third  local vector :        1.000000        0.000000        0.000000
+ Second local vector :        0.000000        0.707107        0.707107
+ Third  local vector :        1.000000       -0.000000       -0.000000
   -0.02325  0.00584  0.00000  -0.02406  0.01091  0.00000   0.00080 -0.00507  0.00000
   -0.00584  0.01039  0.00000  -0.01091  0.01376  0.00000   0.00507 -0.00337  0.00000
    0.00000  0.00000  0.00379   0.00000  0.00000  0.00533   0.00000  0.00000 -0.00154
@@ -1097,24 +1097,24 @@
  -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
+  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0 -0.0  1.0
   1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
- -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
+  0.0  1.0 -1.0 -1.0 -1.0  0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
-  3.0  0.0  0.0 -1.0 -1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -0.0  0.0 -1.0
- -1.0  1.0  1.0  0.0  0.0 -1.0  1.0 -1.0 -3.0 -0.0 -0.0  1.0  1.0  1.0 -1.0 -0.0
-  0.0 -1.0  1.0  1.0 -1.0  0.0 -0.0  1.0  1.0 -1.0 -1.0 -0.0 -0.0  1.0 -1.0  1.0
+  3.0 -0.0 -0.0 -1.0 -1.0 -1.0  1.0 -0.0  0.0  1.0 -1.0 -1.0  1.0  0.0 -0.0 -1.0
+ -1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0 -1.0 -3.0  0.0  0.0  1.0  1.0  1.0 -1.0  0.0
+ -0.0 -1.0  1.0  1.0 -1.0 -0.0  0.0  1.0  1.0 -1.0 -1.0  0.0  0.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
-  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
-  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
- -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
- Symmetry characters of vibration mode #  13
-       degenerate with vibration modes #  14 to   15
   3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
   1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
   0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+ Symmetry characters of vibration mode #  13
+       degenerate with vibration modes #  14 to   15
+  3.0  0.0  0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0  0.0  1.0
+  1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0  0.0
+ -0.0  1.0 -1.0 -1.0 -1.0 -0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0  0.0 -1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -1222,15 +1222,10 @@
 -  3.435503E+01  3.435503E+01  3.435503E+01  8.091622E+01  1.603365E+02
 -  1.603365E+02  3.201188E+02  5.939924E+02  5.939924E+02  7.196054E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
 
 ================================================================================
 
-+Total cpu time      0.687  and wall time      0.692 sec
++Total cpu time      0.315  and wall time      0.337 sec
 
  anaddb : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 703 allocations and 703 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
