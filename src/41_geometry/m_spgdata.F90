@@ -73,7 +73,7 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage)
  integer,intent(in),optional :: iimage
 !arrays
  integer,intent(in) :: bravais(11)
- real(dp),intent(inout) :: genafm(3)
+ real(dp),intent(in) :: genafm(3)
 
 !Local variables -------------------------------
 !scalars
@@ -130,15 +130,15 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage)
 !Prepare the print : establish message header
  if(jdtset/=0)then
    if(present(iimage))then
-     write(msg_header,'(a,a,i5,a,i5)')ch10,' DATASET',jdtset,' IMAGE NUMBER',iimage
+     write(msg_header,'(a,i5,a,i5)')' DATASET',jdtset,' IMAGE NUMBER',iimage
    else
-     write(msg_header,'(a,a,i5)')ch10,' DATASET',jdtset
+     write(msg_header,'(a,i5)')' DATASET',jdtset
    endif
  else
    if(present(iimage))then
-     write(msg_header,'(a,a,i5)')ch10,' IMAGE NUMBER',iimage
+     write(msg_header,'(a,i5)')' IMAGE NUMBER',iimage
    else
-     write(msg_header,'(a,a)')ch10,' Symmetries'
+     write(msg_header,'(a)')' Symmetries'
    endif
  endif
 
@@ -284,7 +284,7 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage)
      if(jdtset/=0 .or. present(iimage))then
        write(message,'(2a)' )trim(msg_header),' : magnetic group, Shubnikov type III '
      else
-       write(message,'(2a)' )ch10,' Magnetic group, Shubnikov type III '
+       write(message,'(a)' )' Magnetic group, Shubnikov type III '
      end if
      call wrtout(iout,message,'COLL')
 
@@ -304,7 +304,7 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage)
      if(jdtset/=0 .or. present(iimage))then
        write(message,'(2a)' )trim(msg_header),' : magnetic group, Shubnikov type IV '
      else
-       write(message,'(2a)' )ch10,' Magnetic group, Shubnikov type IV '
+       write(message,'(a)' )' Magnetic group, Shubnikov type IV '
      end if
      call wrtout(iout,message,'COLL')
 

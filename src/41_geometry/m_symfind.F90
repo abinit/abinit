@@ -861,6 +861,11 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
 !DEBUG
 !write(std_out,*)' symanal : enter'
+!write(std_out,*)' symanal : chkprim =',chkprim
+!write(std_out,*)' symanal : nsym=',nsym
+!do isym=1,nsym
+!  write(std_out,*)' symanal : symrel=',symrel(1:3,1:3,isym)
+!enddo
 !ENDDEBUG
 
  verbose_=.false.
