@@ -174,7 +174,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &         ' (2) If symrel, tnons (+symafm) defined in the input file, while the system is more symmetric; '
          call wrtout(iout,msg,'COLL')
          write(msg,'(5a)')&
-&         ' (3) If the geometry has been optimized and the final structure is more symmetric than the initial one;',ch10,
+&         ' (3) If the geometry has been optimized and the final structure is more symmetric than the initial one;',ch10,&
 &         ' (4) In case of GW of BSE calculation with inversion symmetry, as nsym has been reduced in such',ch10,&
 &         '       dataset, excluding the improper symmetry operations (with determinant=-1), but not in the postprocessing.'
          call wrtout(iout,msg,'COLL')
