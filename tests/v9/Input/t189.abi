@@ -57,7 +57,7 @@ shiftk   0.0 0.0 0.0
 ionmov 2
 ntime  20
 
- pp_dirpath "../../../Psps_for_tests"
+ pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosTM_pwteter/6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
@@ -72,6 +72,6 @@ ntime  20
 #%% authors = X. Gonze
 #%% keywords = 
 #%% description = 
-#%%   Test post identification of more symmetric structureas after geometry optimization
+#%%   Test the post identification of more symmetric structures obtained after geometry optimization
 #%%   Consider diamond and graphene, with low ecut and number of k points. 
 #%%<END TEST_INFO>
