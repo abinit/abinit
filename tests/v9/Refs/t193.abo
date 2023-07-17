@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t18/t18.abi
-- output file    -> t18.abo
-- root for input  files -> t18i
-- root for output files -> t18o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t193/t193.abi
+- output file    -> t193.abo
+- root for input  files -> t193i
+- root for output files -> t193o
 
  Symmetries : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
@@ -274,7 +274,7 @@ force_length_stats: {min:   6.77778172E-02, max:   6.77778172E-02, mean:   6.777
  frms,max,avg= 2.0122246E+00 3.4852752E+00   0.000E+00  0.000E+00  3.047E+00 e/A
  length scales=  7.660055757126  7.660055757126 12.590143458100 bohr
               =  4.053526923199  4.053526923199  6.662416970905 angstroms
- prteigrs : about to open file t18o_EIG
+ prteigrs : about to open file t193o_EIG
  Fermi (or HOMO) energy (hartree) =  -0.02022   Average Vxc (hartree)=  -0.38573
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 40, wtk=  1.00000, kpt=  0.0000  0.0000  0.2500 (reduced coord)
@@ -473,10 +473,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.3
++Overall time at end (sec) : cpu=          1.7  wall=          1.8

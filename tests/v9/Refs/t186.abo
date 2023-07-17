@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t26/t26.abi
-- output file    -> t26.abo
-- root for input  files -> t26i
-- root for output files -> t26o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t186/t186.abi
+- output file    -> t186.abo
+- root for input  files -> t186i
+- root for output files -> t186o
 
  Symmetries : space group C2/m (# 12); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -365,7 +365,7 @@ force_length_stats: {min:   1.97286401E-18, max:   1.17072497E-01, mean:   6.264
  frms,max,avg= 2.1626977E+00 6.0137244E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
- prteigrs : about to open file t26o_EIG
+ prteigrs : about to open file t186o_EIG
  Fermi (or HOMO) energy (hartree) =   0.69573   Average Vxc (hartree)=  -0.46029
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 34, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -577,10 +577,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
++Overall time at end (sec) : cpu=          2.4  wall=          2.4
