@@ -240,7 +240,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
  integer :: tread_brange, tread_erange, tread_kfilter
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
- logical :: xc_is_mgga,xc_need_kden
+ logical :: xc_is_mgga,xc_need_kden,xc_has_kxc
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
@@ -1831,6 +1831,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call libxc_functionals_init(ixc_here,dtset%nspden,xc_functionals=xcfunc)
  end if
  call get_xclevel(ixc_here,dtset%xclevel,dtset%usefock)
+ xc_has_kxc=has_kxc(ixc_here,xc_funcs=xcfunc)
  ! Meta-GGA
  if (ixc_here<0) then
    xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
@@ -1945,7 +1946,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 &         dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) then
    !In case of density mixing (iscf>=10) and correction of forces (densfor_pred/=0 and 5)
    !  we need Kxc. If it is not available, we switch to potential mixing (iscf<10)
-   if (.not.has_kxc(ixc_here,xcfunc)) then
+   if (.not.xc_has_kxc) then
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
      if (dtset%optforces/=0.or.intarr(1)/=0) then
        dtset%iscf=dtset%iscf-10

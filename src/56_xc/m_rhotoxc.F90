@@ -119,7 +119,7 @@ contains
 !!    if xcdata%nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                         kxc(:,2)= d2Exc/drho_up drho_dn
 !!                         kxc(:,3)= d2Exc/drho_dn drho_dn
-!!   ===== if GGA
+!!   ===== if GGA or mGGA
 !!    if xcdata%nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
 !!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
@@ -148,6 +148,7 @@ contains
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
+!!    Note about mGGA: 2nd derivatives involving Tau or Laplacian are not output
 !!
 !!  === Only if abs(option)=3 ===
 !!  [k3xc(nfft,nk3xc)]= -- optional -- third derivative of the XC energy functional of the density,
@@ -407,7 +408,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  end if
  if((usekden==1.or.uselaplacian==1).and.nspden==4)then
    !mGGA en NC-magnetism: how do we rotate tau kinetic energy density?
-   message=' At present, meta-GGA (usekden=1 or uselaplacian=1)  is not comptatible with non-collinear magnetism (nspden=4).'
+   message=' At present, meta-GGA (usekden=1 or uselaplacian=1) is not compatible with non-collinear magnetism (nspden=4).'
    ABI_ERROR(message)
  end if
 
