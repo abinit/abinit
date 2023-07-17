@@ -204,7 +204,8 @@ program abinit
  ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
  ! note that the file can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
+!call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
+ call abimem_init(2, limit_mb=args%abimem_limit_mb)
 #endif
 
 !------------------------------------------------------------------------------
