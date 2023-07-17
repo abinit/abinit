@@ -1,6 +1,6 @@
 # Minimal file to test structure (inaccurate POSCAR) and symmetry recognition
   
- structure "poscar:t97_POSCAR_mp-1193887"
+ structure "poscar:t197_POSCAR_mp-1193887"
 
 # Minimal parameters
  ecut 2
@@ -22,12 +22,12 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t97.abo , tolnlines = 1, tolabs = 1.1e-6, tolrel = 3.0e-5, fld_options= -medium;
+#%%   t197.abo , tolnlines = 1, tolabs = 1.1e-6, tolrel = 3.0e-5, fld_options= -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
 #%% pre_commands =
-#%%   iw_cp t97_POSCAR_mp-1193887 t97_POSCAR_mp-1193887;
+#%%   iw_cp t197_POSCAR_mp-1193887 t197_POSCAR_mp-1193887;
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% references = 
