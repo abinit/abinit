@@ -102,7 +102,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
  integer :: bravais(11)
  integer, allocatable :: ptsymrel(:,:,:),symafm(:),symrel(:,:,:)
  real(dp) :: acell(3),genafm(3),gmet(3,3),gprimd(3,3),rmet(3,3),rprim(3,3),rprimd(3,3)
- real(dp), allocatable :: tnons(:,:),xred(:,:)
+ real(dp), allocatable :: tnons(:,:)
 
 ! *************************************************************************
 
