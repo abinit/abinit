@@ -1102,7 +1102,7 @@ By J. Zwanziger (MR749)
 By G. Petretto
 
 **D.5** Several bug fixes related to the treatment of inaccurate atomic positions (and large tolsym).
-Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
+Several test have been created test:v9_17 to test:v9_20.
 
 **D.6** AiiDA+ABINIT developments
 
