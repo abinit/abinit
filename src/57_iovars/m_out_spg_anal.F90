@@ -151,6 +151,13 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
        symmetry_changed=1
      endif
 
+!DEBUG
+!    write(std_out,*)' m_out_spg_anal : determined symmetry_changed =', symmetry_changed
+!    write(std_out,*)' m_out_spg_anal : nsym, dtsets(idtset)%nsym=',nsym, dtsets(idtset)%nsym
+!    write(std_out,*)' m_out_spg_anal : spgroup,dtsets(idtset)%spgroup=',spgroup,dtsets(idtset)%spgroup
+!    write(std_out,*)' m_out_spg_anal : ptgroupma,dtsets(idtset)%ptgroupma=',ptgroupma,dtsets(idtset)%ptgroupma
+!ENDDEBUG
+
      if(symmetry_changed==1)then
        if(echo_spgroup==0 .and. counter0==1)then
          write(msg,'(8a)')ch10,' The spacegroup number, the magnetic point group, and/or the number of symmetries',ch10,&

@@ -451,7 +451,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
           '   Please, read the description of the input variable chksymtnons.',ch10,&
           '   If you are planning cDFT, GW or BSE calculations, such tnons value is very problematic.',ch10,&
           '   Otherwise, you might set chksymtnons=0.',&
-          '   But do not be surprised if ABINIT do not converge for cDFT, or crashes for GW or BSE.',ch10,&
+          '   But do not be surprised if ABINIT does not converge for cDFT, or crashes for GW or BSE.',ch10,&
           '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg)
          if(fixed_mismatch==1)then

@@ -164,6 +164,7 @@ inp_files = [
     "t186.abi",  # test treatment of inaccurate POSCAR file
     "t187.abi",  # test treatment of inaccurate POSCAR file
     "t188.abi",  # test treatment of inaccurate POSCAR file
+    "t189.abi",  # test post treatment of an increase of symmetry due to geometry optimization
     "t190.abi",  # check slight misalignment of rprim, with large tolsym
     "t191.abi",  # check slightly incorrect xred, with large tolsym
     "t192.abi",  # check slightly incorrect rprim and xred, yielding correction to tnons, although still not tolerated.
