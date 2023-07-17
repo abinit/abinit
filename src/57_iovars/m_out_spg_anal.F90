@@ -106,14 +106,14 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
 ! *************************************************************************
 
-!An upper bound on the number of symmetry operations is 48 (maximum of point symmetries) time the number of atoms
-!as the latter gives the maximum number of non-symmorphic translations.
+!An upper bound on the number of symmetry operations is 48 (maximum of point symmetries) times 2 (for the spin flip)
+!times the number of atoms as the latter gives the maximum number of non-symmorphic translations.
 !Actually, a better bound might be obtained from the minimum of the numbers of atoms of the same type,
 !but this refinement is not needed here. 
- msym=48*dtsets(1)%natom
+ msym=96*dtsets(1)%natom
  if(ndtset_alloc>1)then
    do idtset=2,ndtset_alloc
-     msym=max(48*dtsets(idtset)%natom,msym)
+     msym=max(96*dtsets(idtset)%natom,msym)
    end do
  end if
  ABI_MALLOC(ptsymrel,(3,3,msym))
