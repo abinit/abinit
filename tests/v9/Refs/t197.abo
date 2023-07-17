@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h12 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t97/t97.abi
-- output file    -> t97.abo
-- root for input  files -> t97i
-- root for output files -> t97o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t197/t197.abi
+- output file    -> t197.abo
+- root for input  files -> t197i
+- root for output files -> t197o
 
  Symmetries : space group P2_1/c (# 14); Bravais mP (primitive monocl.)
 ================================================================================
@@ -575,7 +575,7 @@ force_length_stats: {min:   1.61557335E-18, max:   7.65735708E-01, mean:   3.632
  frms,max,avg= 1.2639986E+01 3.9171730E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.719450187391 10.922825659593 18.867677666285 bohr
               =  4.614134310603  5.780110392459  9.984345000021 angstroms
- prteigrs : about to open file t97o_EIG
+ prteigrs : about to open file t197o_EIG
  Fermi (or HOMO) energy (hartree) =   0.74784   Average Vxc (hartree)=  -0.48302
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 80, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -867,10 +867,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.3
++Overall time at end (sec) : cpu=          1.7  wall=          1.7

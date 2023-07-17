@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h12 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t95/t95.abi
-- output file    -> t95.abo
-- root for input  files -> t95i
-- root for output files -> t95o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t195/t195.abi
+- output file    -> t195.abo
+- root for input  files -> t195i
+- root for output files -> t195o
 
  Symmetries : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -489,7 +489,7 @@ force_length_stats: {min:   9.32364978E-02, max:   5.05509332E+00, mean:   2.042
  frms,max,avg= 7.5670541E+01 2.5994333E+02   0.000E+00  0.000E+00  4.468E-02 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
- prteigrs : about to open file t95o_EIG
+ prteigrs : about to open file t195o_EIG
  Fermi (or HOMO) energy (hartree) =   0.94928   Average Vxc (hartree)=  -0.52954
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 86, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -741,10 +741,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.3
++Overall time at end (sec) : cpu=          3.4  wall=          3.5
