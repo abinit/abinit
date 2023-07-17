@@ -94,7 +94,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 !Local variables-------------------------------
 !scalars
  integer, save :: counter0=1, counter1=1
- integer :: idtset,iimage,invar_z,jdtset,msym,mu,natom,nimage,nptsym,nsym
+ integer :: idtset,iimage,invar_z,jdtset,matom,msym,mu,natom,nimage,nptsym,nsym
  integer :: ptgroupma,spgroup,symmetry_changed
  real(dp) :: tolsym,ucvol
  character(len=500) :: msg
@@ -107,15 +107,18 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 ! *************************************************************************
 
  msym=dtsets(1)%maxnsym
+ matom=dtsets(1)%natom
  if(ndtset_alloc>1)then
    do idtset=2,ndtset_alloc
      msym=max(dtsets(idtset)%maxnsym,msym)
+     matom=max(dtsets(idtset)%natom,natom)
    end do
  end if
  ABI_MALLOC(ptsymrel,(3,3,msym))
  ABI_MALLOC(symafm,(msym))
  ABI_MALLOC(symrel,(3,3,msym))
  ABI_MALLOC(tnons,(3,msym))
+ ABI_MALLOC(xred,(3,matom))
 
  do idtset=1,ndtset_alloc
 
@@ -123,13 +126,13 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
    natom=dtsets(idtset)%natom
    nimage=results_out(idtset)%nimage
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   ABI_MALLOC(xred,(3,natom))
 
    do iimage=1,nimage 
 
      acell=results_out(idtset)%acell(:,iimage)
      rprim=results_out(idtset)%rprim(:,:,iimage)
-     xred=results_out(idtset)%xred(:,:,iimage)
+     xred=zero
+     xred=results_out(idtset)%xred(:,1:natom,iimage)
      call mkrdim(acell,rprim,rprimd)
      call metric(gmet,gprimd,dev_null,rmet,rprimd,ucvol)
 
@@ -140,7 +143,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
      call symfind_expert(gprimd,msym,natom,nptsym,dtsets(idtset)%nspden,nsym,&
        dtsets(idtset)%pawspnorb,dtsets(idtset)%prtvol,ptsymrel,dtsets(idtset)%spinat,symafm,symrel,&
-       tnons,tolsym,dtsets(idtset)%typat,dtsets(idtset)%usepaw,xred,&
+       tnons,tolsym,dtsets(idtset)%typat,dtsets(idtset)%usepaw,xred(1:3,1:natom),&
        chrgat=dtsets(idtset)%chrgat,nucdipmom=dtsets(idtset)%nucdipmom,&
        invardir_red=dtsets(idtset)%field_xred,invar_z=invar_z)
 
@@ -217,8 +220,6 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
    enddo ! iimage
 
-   ABI_FREE(xred)
-
  enddo ! idtset
 
 !###########################################################
@@ -228,6 +229,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
  ABI_FREE(symafm)
  ABI_FREE(symrel)
  ABI_FREE(tnons)
+ ABI_FREE(xred)
 
  if(echo_spgroup==1)then
    write(msg,'(a,80a)')ch10,('=',mu=1,80)
