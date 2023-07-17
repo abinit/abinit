@@ -1,6 +1,6 @@
 # Minimal file to test structure (inaccurate POSCAR) and symmetry recognition
   
- structure "poscar:t98_POSCAR_mp-505562"
+ structure "poscar:t196_POSCAR_mp-1218490"
 
 # Minimal parameters
  ecut 2
@@ -15,25 +15,25 @@
 
 #Pseudos
  pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
- pseudos "24cr.6.hgh, 29cu.1.hgh, 8o.6.hgh"
+ pseudos "38sr.2.hgh, 60nd.14.hgh, 29cu.1.hgh, 44ru.8.hgh, 8o.6.hgh"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t98.abo , tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t196.abo , tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
 #%% pre_commands =
-#%%   iw_cp t98_POSCAR_mp-505562 t98_POSCAR_mp-505562;
+#%%   iw_cp t196_POSCAR_mp-1218490 t196_POSCAR_mp-1218490;
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% references = 
 #%% keywords = POSCAR
 #%% description =
-#%%   Cr2 Cu2 O4, inaccurate parameters.
+#%%   Sr3 Nd1 Cu1 Ru1 O8, inaccurate parameters.
 #%%   Test inaccurate POSCAR and symmetry recognition
 #%% topics = crystal
 #%%<END TEST_INFO>
