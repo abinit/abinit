@@ -537,6 +537,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(2)='iprcel';cond_values(2)=dt%iprcel
        call chkint_ge(1,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
      end if
+     ! densfor_pred<0 not valid for mGGA
+     ! Yet it is but contribution from Laplacian and/or kin. ene. density are not taken into account
+     !if(dt%densfor_pred<0.and.xc_is_mgga.and.dt%iscf>=10)then
+     !  msg='densfor_pred<0 (full correction for forces) is not allowed for density mixing and meta-GGA XC!'       
+     !  ABI_ERROR_NOSTOP(msg, ierr)
+     !end if
    end if
 
 !  diecut
