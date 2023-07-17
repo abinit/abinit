@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t25/t25.abi
-- output file    -> t25.abo
-- root for input  files -> t25i
-- root for output files -> t25o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t185/t185.abi
+- output file    -> t185.abo
+- root for input  files -> t185i
+- root for output files -> t185o
 
  Symmetries : space group P-1 (#  2); Bravais aP (primitive triclinic)
 ================================================================================
@@ -225,7 +225,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
- prteigrs : about to open file t25o_EIG
+ prteigrs : about to open file t185o_EIG
  Fermi (or HOMO) energy (hartree) =   0.54143   Average Vxc (hartree)=  -0.29806
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -385,10 +385,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.2  wall=          0.2
++Overall time at end (sec) : cpu=          0.3  wall=          0.3

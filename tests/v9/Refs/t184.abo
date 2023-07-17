@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t24/t24.abi
-- output file    -> t24.abo
-- root for input  files -> t24i
-- root for output files -> t24o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t184/t184.abi
+- output file    -> t184.abo
+- root for input  files -> t184i
+- root for output files -> t184o
 
  Symmetries : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -470,7 +470,7 @@ force_length_stats: {min:   1.66553781E-16, max:   8.49559044E+00, mean:   3.478
  frms,max,avg= 1.3198447E+02 4.3523397E+02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
- prteigrs : about to open file t24o_EIG
+ prteigrs : about to open file t184o_EIG
  Fermi (or HOMO) energy (hartree) =   0.72650   Average Vxc (hartree)=  -0.46390
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 40, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -710,10 +710,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          5.8
++Overall time at end (sec) : cpu=          9.2  wall=          9.3

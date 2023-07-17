@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t15/t15.abi
-- output file    -> t15.abo
-- root for input  files -> t15i
-- root for output files -> t15o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t190/t190.abi
+- output file    -> t190.abo
+- root for input  files -> t190i
+- root for output files -> t190o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ga.xml
@@ -422,7 +422,7 @@ force_length_stats: {min:   3.88103445E-03, max:   4.57100361E-01, mean:   1.313
  frms,max,avg= 5.7572045E+00 2.3505044E+01   3.707E-08 -2.140E-08 -1.617E+00 e/A
  length scales=  6.278978981181  6.278978981181 20.617481121000 bohr
               =  3.322692570057  3.322692570057 10.910301107768 angstroms
- prteigrs : about to open file t15o_EIG
+ prteigrs : about to open file t190o_EIG
  Fermi (or HOMO) energy (hartree) =   0.78530   Average Vxc (hartree)=  -0.39872
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 37, wtk=  1.00000, kpt=  0.0000  0.0000  0.5000 (reduced coord)
@@ -638,10 +638,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.5
+- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.5  wall=          4.5
++Overall time at end (sec) : cpu=          6.1  wall=          6.2

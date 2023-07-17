@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 17h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t16/t16.abi
-- output file    -> t16.abo
-- root for input  files -> t16i
-- root for output files -> t16o
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t191/t191.abi
+- output file    -> t191.abo
+- root for input  files -> t191i
+- root for output files -> t191o
 
  Symmetries : the unit cell is not primitive
 ================================================================================
@@ -348,7 +348,7 @@ force_length_stats: {min:   1.57653052E-01, max:   6.36178774E-01, mean:   3.969
  frms,max,avg= 1.2887765E+01 3.2713625E+01   0.000E+00  0.000E+00 -2.781E+01 e/A
  length scales=  5.669178374981  5.669178374981 20.786987374929 bohr
               =  2.999999987471  2.999999987471 10.999999954061 angstroms
- prteigrs : about to open file t16o_EIG
+ prteigrs : about to open file t191o_EIG
  Fermi (or HOMO) energy (hartree) =   0.95714   Average Vxc (hartree)=  -0.46077
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 37, wtk=  1.00000, kpt=  0.0000  0.0000  0.5000 (reduced coord)
@@ -574,10 +574,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.5  wall=          2.5
++Overall time at end (sec) : cpu=          3.8  wall=          3.8
