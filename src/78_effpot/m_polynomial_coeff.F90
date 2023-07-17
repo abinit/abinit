@@ -317,16 +317,6 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
    if(abs(weights(ii)) > tol16)then
      iterm1 = iterm1 + 1
      call polynomial_term_copy(terms(ii), polynomial_coeff%terms(iterm1))
-     !if (terms(ii)%nindex>-1) then
-     !  call polynomial_term_init(terms(ii)%atindx,terms(ii)%cell,terms(ii)%direction,terms(ii)%ndisp,&
-     !    &                              terms(ii)%nstrain,polynomial_coeff%terms(iterm1),terms(ii)%power_disp,&
-     !    &                              terms(ii)%power_strain,terms(ii)%strain,terms(ii)%weight, &
-     !    &                             .True., terms(ii)%index_coeff)
-     !else
-     !  call polynomial_term_init(terms(ii)%atindx,terms(ii)%cell,terms(ii)%direction,terms(ii)%ndisp,&
-     !    &                              terms(ii)%nstrain,polynomial_coeff%terms(iterm1),terms(ii)%power_disp,&
-     !    &                              terms(ii)%power_strain,terms(ii)%strain,terms(ii)%weight, check=.True.)
-     !endif
    end if
  end do
 end subroutine polynomial_coeff_init
@@ -2229,180 +2219,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  call get_combinations_of_lists()
  call get_symmetric_combinations()
  call combinations_to_terms()
-
-!Need to redistribute the coefficients over the CPU
-!Get the list with the number of coeff on each CPU
-!In order to be abble to compute the my_coeffindexes array which is for example:
-! if CPU0 has 200  Coeff and CPU1 has 203 Coeff then
-! for CPU0:my_coeffindexes=>1-200 and for CPU1:my_coeffindexes=>201-403
- if(need_verbose .and. nproc > 1)then
-   write(message,'(1a)')' Redistribute the coefficients over the CPU'
-   call wrtout(std_out,message,'COLL')
- end if
-
- ABI_MALLOC(buffdispl,(nproc))
- buffdispl = 0
- buffdispl(my_rank+1) = my_ncoeff
- call xmpi_sum(buffdispl,comm,ierr)
- ABI_MALLOC(my_coeffindexes,(my_ncoeff))
- ABI_MALLOC(my_coefflist,(my_ncoeff))
- my_coeffindexes = 0
- my_coefflist = 0
- do icoeff=1,my_ncoeff
-   my_coefflist(icoeff) = icoeff
-   if(my_rank==0) then
-     my_coeffindexes(icoeff) = icoeff
-   else
-     my_coeffindexes(icoeff) = sum(buffdispl(1:my_rank)) + icoeff
-   end if
- end do
- ABI_FREE(buffdispl)
-
-!Compute the new number of coefficient per CPU
- if(need_distributed) then
-   ncoeff_alone = mod(ncoeff_tot,nproc)
-   my_newncoeff = int(aint(real(ncoeff_tot,sp)/(nproc)))
-   if(my_rank >= (nproc-ncoeff_alone)) then
-     my_newncoeff = my_newncoeff  + 1
-   end if
- else
-   my_newncoeff = ncoeff_tot
- end if
-
- ncoeff = my_newncoeff ! Set the output
-
-!2:compute the number of coefficients and the list of the corresponding
-!  coefficients for each CPU.
- ABI_MALLOC(my_newcoeffindexes,(my_newncoeff))
- if(need_distributed) then
-   do icoeff=1,my_newncoeff
-     if(my_rank >= (nproc-ncoeff_alone))then
-       my_newcoeffindexes(icoeff)=int(aint(real(ncoeff_tot,sp)/(nproc)))*(my_rank)+&
-&                              (my_rank - (nproc-ncoeff_alone)) + icoeff
-     else
-       my_newcoeffindexes(icoeff)=(my_newncoeff)*(my_rank)  + icoeff
-     end if
-   end do
- else
-   do icoeff=1,my_newncoeff
-     my_newcoeffindexes(icoeff) = icoeff
-   end do
- end if
-
-!2- Transfer
- if(.not.need_distributed)then
-   if(.not.allocated(coefficients))then
-     ABI_MALLOC(coefficients,(my_newncoeff))
-   end if
- end if
- icoeff  = 0! icoeff is the current index in the total list of coefficients
- icoeff2 = 0! icoeff2 is the current index in the output coefficients array on each CPU
- icoeff3 = 0! icoeff3 is the current index in total new list of coefficients
- rank_to_send_save = 0
-
- do icoeff=1,ncoeff_max
-!  Need to send the rank with the chosen coefficient
-   rank_to_send = 0
-   my_icoeff = 0
-   do ii=1,my_ncoeff
-     if (my_coeffindexes(ii)==icoeff) then
-       my_icoeff = ii
-       if (abs(coeffs_tmp(my_icoeff)%coefficient) > tol16)then
-         rank_to_send = my_rank
-       else
-         rank_to_send = -1
-!        Free the coefficient
-         call polynomial_coeff_free(coeffs_tmp(ii))
-       end if
-       exit
-     end if
-   end do
-   call xmpi_sum(rank_to_send, comm, ierr)
-!  This coefficient is not compute
-   if (rank_to_send == -1) cycle
-
-!  increase icoeff3
-   icoeff3 = icoeff3 + 1
-
-!  Find the receiver CPU
-   rank_to_receive = 0
-   do ii=1,my_newncoeff
-     if (my_newcoeffindexes(ii)==icoeff3) then
-       rank_to_receive = my_rank
-     end if
-   end do
-   call xmpi_sum(rank_to_receive, comm, ierr)
-
-   if(need_distributed.and.rank_to_send /= rank_to_send_save) then
-     if(my_rank == rank_to_send_save)then
-       ABI_FREE(coeffs_tmp)!Free memory if the current CPU has already distribute
-                                          !all its own coefficients
-     end if
-     rank_to_send_save = rank_to_send
-   end if
-
-   if(need_distributed.and.my_rank == rank_to_receive)then
-     if(.not.allocated(coefficients))then
-       ABI_MALLOC(coefficients,(my_newncoeff))
-     end if
-   end if
-
-
-   if (need_distributed)then
-     if(my_rank==rank_to_send)then
-       if(any(my_newcoeffindexes(:)==icoeff3))then
-         icoeff2 = icoeff2 + 1
-!        Get the name of this coefficient
-         call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
-         call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
-           &                                  coeffs_tmp(my_icoeff)%terms,name=name, &
-           &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
-       else
-         call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
-       end if
-!      Free the coefficient
-       call polynomial_coeff_free(coeffs_tmp(my_icoeff))
-     else
-       if(any(my_newcoeffindexes(:)==icoeff3))then
-         icoeff2 = icoeff2 + 1
-         call polynomial_coeff_MPIrecv(coefficients(icoeff2), icoeff, rank_to_send, comm)
-         call polynomial_coeff_getName(name,coefficients(icoeff2),symbols,recompute=.TRUE.)
-         call polynomial_coeff_SetName(name,coefficients(icoeff2))
-       end if
-     end if
-   else
-     icoeff2 = icoeff2 + 1
-!    Get the name of this coefficient
-     if(my_rank==rank_to_send)then
-       call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
-       call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
-         &                                 coeffs_tmp(my_icoeff)%terms,name=name,   &
-         &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
-!      Free the coefficient
-       call polynomial_coeff_free(coeffs_tmp(my_icoeff))
-     end if
-     call polynomial_coeff_broadcast(coefficients(icoeff2),rank_to_send, comm)
-   end if
- end do
-
-!Debug write xml
-!     write (filename, "(A9,I2,A4)") "terms_set", my_rank+1,".xml"
-!     call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
-
- if(need_verbose)then
-   write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
- end if
-
-
-!Final deallocation
- ABI_FREE(symbols)
- ABI_FREE(my_coeffindexes)
- ABI_FREE(my_newcoeffindexes)
- ABI_FREE(my_coefflist)
-   ABI_SFREE(coeffs_tmp)
-
+ call distribute_coefficients_over_cpu()
+ call free_memory()
  contains
    subroutine get_mpi_params()
      !MPI variables
@@ -2572,8 +2390,8 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      end if
 
    end subroutine getList
+
    subroutine get_combinations_of_lists()
-     integer,allocatable :: list_coeff(:)
      ABI_MALLOC(list_coeff,(0))
      ABI_MALLOC(list_combination,(0,0))
      icoeff  = 1
@@ -2613,7 +2431,16 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power,disp=need_dispterms)
      ABI_FREE(list_coeff)
      nirred_comb = size(list_combination_tmp,2)
+
+     block
+       integer :: ii
+       do ii = 1, nirred_comb
+       end do
+     end block
+
    end subroutine get_combinations_of_lists
+
+
    subroutine get_symmetric_combinations()
      ! If we want to compute equivalent symmetric combinations go here.
      if(need_compute_symmetric)then
@@ -2662,6 +2489,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        !my_nirred = my_ncombi_end - my_ncombi_start + 1
        ABI_MALLOC(my_list_combination_tmp,(power_disps(2),my_nirred))
        if(my_nirred /= 0) my_list_combination_tmp(:,:) = list_combination_tmp(:,my_ncombi_start:my_ncombi_end)
+
+       block
+         integer :: ii
+         do ii = 1, my_nirred
+         end do
+       end block
+
        ABI_MALLOC(my_index_irredcomb,(my_nirred))
        !DEALLOCATE list_combination_tmp
        ABI_FREE(list_combination_tmp)
@@ -2735,6 +2569,13 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        enddo
        call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
+       block
+         integer :: ii
+         do ii = 1, size(list_combination_tmp, 2)
+         end do
+       end block
+
+
 
        !Deallocation of variables inside need_symmetric
        ABI_FREE(buffsize)
@@ -2759,23 +2600,21 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
            write(message,'(1a)')' Reduce reducible Strain-Phonon combinations on master'
            call wrtout(std_out,message,'COLL')
          endif
-
+         block
+           type(IrreducibleCombinations_T) :: irred_combinations
+           call irred_combinations%init()
+           do i=1, ncombination
+            if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
+             irreducible=irred_combinations%add_irr(list_combination_tmp(:,i), &
+               & list_symcoeff, list_symstr, ncoeff_symsym, nsym, power_disps(2),cell)
+             if(.not. irreducible) list_combination_tmp(:,i) = 0
+            endif
+           end do
+           call reduce_zero_combinations(list_combination_tmp)
+           ncombination = size(list_combination_tmp,2)
+           call irred_combinations%free()
+         end block
        endif
-       block
-         type(IrreducibleCombinations_T) :: irred_combinations
-         call irred_combinations%init()
-         do i=1, ncombination
-           !if(any(list_combination_tmp(:,i) > ncoeff_symsym))then
-           irreducible=irred_combinations%add_irr(list_combination_tmp(:,i), &
-             & list_symcoeff, list_symstr, ncoeff_symsym, nsym, power_disps(2),cell)
-           if(.not. irreducible) list_combination_tmp(:,i) = 0
-           !endif
-         end do
-         call reduce_zero_combinations(list_combination_tmp)
-         ncombination = size(list_combination_tmp,2)
-         call irred_combinations%free()
-       end block
-
 
      end if !iam_master
      if(need_verbose)then
@@ -2827,6 +2666,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      ABI_FREE(list_combination_tmp)
 
    end subroutine get_symmetric_combinations
+
    subroutine combinations_to_terms()
      if(need_verbose .and. nproc > 1)then
        write(message,'(1a)')' Compute the coefficients'
@@ -2883,6 +2723,186 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
      call xmpi_sum(ncoeff_tot,comm,ierr)
      call xmpi_sum(ncoeff_max,comm,ierr)
    end subroutine combinations_to_terms
+
+
+   subroutine distribute_coefficients_over_cpu()
+     !Need to redistribute the coefficients over the CPU
+     !Get the list with the number of coeff on each CPU
+     !In order to be abble to compute the my_coeffindexes array which is for example:
+     ! if CPU0 has 200  Coeff and CPU1 has 203 Coeff then
+     ! for CPU0:my_coeffindexes=>1-200 and for CPU1:my_coeffindexes=>201-403
+     if(need_verbose .and. nproc > 1)then
+       write(message,'(1a)')' Redistribute the coefficients over the CPU'
+       call wrtout(std_out,message,'COLL')
+     end if
+
+     ABI_MALLOC(buffdispl,(nproc))
+     buffdispl = 0
+     buffdispl(my_rank+1) = my_ncoeff
+     call xmpi_sum(buffdispl,comm,ierr)
+     ABI_MALLOC(my_coeffindexes,(my_ncoeff))
+     ABI_MALLOC(my_coefflist,(my_ncoeff))
+     my_coeffindexes = 0
+     my_coefflist = 0
+     do icoeff=1,my_ncoeff
+       my_coefflist(icoeff) = icoeff
+       if(my_rank==0) then
+         my_coeffindexes(icoeff) = icoeff
+       else
+         my_coeffindexes(icoeff) = sum(buffdispl(1:my_rank)) + icoeff
+       end if
+     end do
+     ABI_FREE(buffdispl)
+
+     !Compute the new number of coefficient per CPU
+     if(need_distributed) then
+       ncoeff_alone = mod(ncoeff_tot,nproc)
+       my_newncoeff = int(aint(real(ncoeff_tot,sp)/(nproc)))
+       if(my_rank >= (nproc-ncoeff_alone)) then
+         my_newncoeff = my_newncoeff  + 1
+       end if
+     else
+       my_newncoeff = ncoeff_tot
+     end if
+
+     ncoeff = my_newncoeff ! Set the output
+
+     !2:compute the number of coefficients and the list of the corresponding
+     !  coefficients for each CPU.
+     ABI_MALLOC(my_newcoeffindexes,(my_newncoeff))
+     if(need_distributed) then
+       do icoeff=1,my_newncoeff
+         if(my_rank >= (nproc-ncoeff_alone))then
+           my_newcoeffindexes(icoeff)=int(aint(real(ncoeff_tot,sp)/(nproc)))*(my_rank)+&
+             &                              (my_rank - (nproc-ncoeff_alone)) + icoeff
+         else
+           my_newcoeffindexes(icoeff)=(my_newncoeff)*(my_rank)  + icoeff
+         end if
+       end do
+     else
+       do icoeff=1,my_newncoeff
+         my_newcoeffindexes(icoeff) = icoeff
+       end do
+     end if
+
+     !2- Transfer
+     if(.not.need_distributed)then
+       if(.not.allocated(coefficients))then
+         ABI_MALLOC(coefficients,(my_newncoeff))
+       end if
+     end if
+     icoeff  = 0! icoeff is the current index in the total list of coefficients
+     icoeff2 = 0! icoeff2 is the current index in the output coefficients array on each CPU
+     icoeff3 = 0! icoeff3 is the current index in total new list of coefficients
+     rank_to_send_save = 0
+
+     do icoeff=1,ncoeff_max
+       !  Need to send the rank with the chosen coefficient
+       rank_to_send = 0
+       my_icoeff = 0
+       do ii=1,my_ncoeff
+         if (my_coeffindexes(ii)==icoeff) then
+           my_icoeff = ii
+           if (abs(coeffs_tmp(my_icoeff)%coefficient) > tol16)then
+             rank_to_send = my_rank
+           else
+             rank_to_send = -1
+             !        Free the coefficient
+             call polynomial_coeff_free(coeffs_tmp(ii))
+           end if
+           exit
+         end if
+       end do
+       call xmpi_sum(rank_to_send, comm, ierr)
+       !  This coefficient is not compute
+       if (rank_to_send == -1) cycle
+
+       !  increase icoeff3
+       icoeff3 = icoeff3 + 1
+
+       !  Find the receiver CPU
+       rank_to_receive = 0
+       do ii=1,my_newncoeff
+         if (my_newcoeffindexes(ii)==icoeff3) then
+           rank_to_receive = my_rank
+         end if
+       end do
+       call xmpi_sum(rank_to_receive, comm, ierr)
+
+       if(need_distributed.and.rank_to_send /= rank_to_send_save) then
+         if(my_rank == rank_to_send_save)then
+           ABI_FREE(coeffs_tmp)!Free memory if the current CPU has already distribute
+           !all its own coefficients
+         end if
+         rank_to_send_save = rank_to_send
+       end if
+
+       if(need_distributed.and.my_rank == rank_to_receive)then
+         if(.not.allocated(coefficients))then
+           ABI_MALLOC(coefficients,(my_newncoeff))
+         end if
+       end if
+
+
+       if (need_distributed)then
+         if(my_rank==rank_to_send)then
+           if(any(my_newcoeffindexes(:)==icoeff3))then
+             icoeff2 = icoeff2 + 1
+             !        Get the name of this coefficient
+             call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
+             call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
+               &                                  coeffs_tmp(my_icoeff)%terms,name=name, &
+               &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
+           else
+             call polynomial_coeff_MPIsend(coeffs_tmp(my_icoeff), icoeff, rank_to_receive, comm)
+           end if
+           !      Free the coefficient
+           call polynomial_coeff_free(coeffs_tmp(my_icoeff))
+         else
+           if(any(my_newcoeffindexes(:)==icoeff3))then
+             icoeff2 = icoeff2 + 1
+             call polynomial_coeff_MPIrecv(coefficients(icoeff2), icoeff, rank_to_send, comm)
+             call polynomial_coeff_getName(name,coefficients(icoeff2),symbols,recompute=.TRUE.)
+             call polynomial_coeff_SetName(name,coefficients(icoeff2))
+           end if
+         end if
+       else
+         icoeff2 = icoeff2 + 1
+         !    Get the name of this coefficient
+         if(my_rank==rank_to_send)then
+           call polynomial_coeff_getName(name,coeffs_tmp(my_icoeff),symbols,recompute=.TRUE.)
+           call polynomial_coeff_init(one,coeffs_tmp(my_icoeff)%nterm,coefficients(icoeff2),&
+             &                                 coeffs_tmp(my_icoeff)%terms,name=name,   &
+             &                                  isbound=coeffs_tmp(my_icoeff)%isbound, check=.false.)
+           !      Free the coefficient
+           call polynomial_coeff_free(coeffs_tmp(my_icoeff))
+         end if
+         call polynomial_coeff_broadcast(coefficients(icoeff2),rank_to_send, comm)
+       end if
+     end do
+
+     !Debug write xml
+     !     write (filename, "(A9,I2,A4)") "terms_set", my_rank+1,".xml"
+     !     call polynomial_coeff_writeXML(coefficients,my_newncoeff,filename=filename)
+
+     if(need_verbose)then
+       write(message,'(1x,I0,2a)') ncoeff_tot,' coefficients generated ',ch10
+       call wrtout(ab_out,message,'COLL')
+       call wrtout(std_out,message,'COLL')
+     end if
+
+
+   end subroutine distribute_coefficients_over_cpu
+
+   subroutine free_memory()
+     !Final deallocation
+     ABI_FREE(symbols)
+     ABI_FREE(my_coeffindexes)
+     ABI_FREE(my_newcoeffindexes)
+     ABI_FREE(my_coefflist)
+     ABI_SFREE(coeffs_tmp)
+   end subroutine free_memory
+
 end subroutine polynomial_coeff_getNorder
 !!***
 
@@ -3238,6 +3258,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
  if(present(only_odd_power)) need_only_odd_power = only_odd_power
  if(present(only_even_power)) need_only_even_power = only_even_power
 
+
  if(power_disp <= power_disp_max)then
 
    !  Initialisation of variables
@@ -3318,9 +3339,9 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
        if(any(mod(powers(1:power_disp),2) ==0) .and. need_only_odd_power)then
          possible = .false.
        end if
-       if(nbody_count==1) then
-         possible = .False.
-       end if
+       !if(nbody_count==1) then
+       !  possible = .False.
+       !end if
 
        !      Check the nbody flag
        if(nbody_in /= 0)then
@@ -3494,10 +3515,16 @@ subroutine computeSymmetricCombinations(array_combination, &
   !call irred_combinations%init()
 
   ! nbody and power for strain term
+
+
   call get_totpower_and_nbody(index_coeff_in(ndisp+1:ndisp+nstrain), nstrain, nbody_strain,  totpower_strain)
   call get_totpower_and_nbody(index_coeff_in(1:ndisp), ndisp, nbody_disp, totpower_disp)
   totpower=totpower_disp+totpower_strain
   nbody=nbody_disp+nbody_strain
+
+  if(nbody_disp==1) then
+    if(.not. is_right_order(index_coeff_in(1))) return
+  end if
 
   max_nbody_copy(:)=max_nbody(:)
   if(max_nbody(totpower)==-1) then
@@ -3513,6 +3540,7 @@ subroutine computeSymmetricCombinations(array_combination, &
   if(max_nbody_copy(totpower)==0 .or. nbody> max_nbody_copy(totpower)) then
     return
   end if
+
 
   block
     logical:: allsym
@@ -3542,7 +3570,6 @@ subroutine computeSymmetricCombinations(array_combination, &
       end if
 
 
-      ! TODO: move it into subsubroutine.
       if(.not. allsym) then
         call get_powers(index_coeff_tmp, ndisp, powers)
         ! only treat the terms with nbody< nbody_max
@@ -3595,6 +3622,17 @@ subroutine computeSymmetricCombinations(array_combination, &
 
   call array_combination%concate(irred_combinations%array)
   call symlist%free()
+
+contains
+  function is_right_order(index) result(right)
+    integer, intent(in) :: index
+    logical :: right
+    integer :: ia, ib, ico
+    ico=list_symcoeff(6, index, 1)
+    ia=list_symcoeff(1, ico, 1)
+    ib=list_symcoeff(2, ico, 1)
+    right=ia>=ib
+  end function is_right_order
 end subroutine computeSymmetricCombinations
 
 !!****f* m_polynomial_coeff/getCoeffFromList

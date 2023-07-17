@@ -155,10 +155,10 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp), optional, intent(in) :: drop_rate
 !Local variables-------------------------------
 !scalar
- integer :: nbound
+ integer :: nbound, nfix
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff,ia,generateterm_in
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncoeff_to_select,ncoeff_tot_tmp
- integer :: ncoeff_preselected,ncoeff_to_fit,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out
+ integer :: ncoeff_preselected, ncoeff_selected, ncoeff_to_fit,nproc,ntime,nsweep,size_mpi,ncoeff_fix,ncoeff_out
  integer :: my_ncoeff_start,my_ncoeff_end,my_ncoeff_simple,ncoeff_alone
  integer :: rank_to_send,unit_anh,fit_iatom_in,unit_GF_val,nfix_and_impose,nfixcoeff_corr,atom_start,atom_end
  integer :: ncopy_terms
@@ -199,7 +199,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  character(len=3)  :: i_char
  character(len=7)  :: j_char
  character(len=5),allocatable :: symbols(:)
- integer, allocatable :: list_bound(:)
+ integer, allocatable :: list_bound(:), list_fix(:)
 
 
  integer :: n_remaining
@@ -225,6 +225,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  call check_sanity_ncoeff_in()
  call initialize_tags_for_coeffs()
  call select_bounding_terms()
+ call select_fix_terms()
  call get_ncoeff_preselected()
  call get_ncoeff_to_select_and_ncoeff_to_fit()
  call initialize_fitting_parameters_for_coefficients()
@@ -318,7 +319,9 @@ contains
     if(present(min_bound_coeff))  min_bound_coeff1=min_bound_coeff
     remaining_rate=0.5
     if(present(drop_rate))  remaining_rate=1.0_dp-drop_rate
+    ncoeff_selected=0
   end subroutine initialize_parameters
+
   subroutine deallocate_arrays()
     !Deallocation of arrays
     call fit_data_free(fit_data)
@@ -339,6 +342,7 @@ contains
     call effective_potential_free(eff_pot_fixed)
     !Other deallocations
     ABI_FREE(list_bound)
+    ABI_FREE(list_fix)
     ABI_FREE(gf_values_iter)
     ABI_FREE(buffsize)
     ABI_FREE(buffdisp)
@@ -366,6 +370,7 @@ contains
     ABI_SFREE(fix_and_impose)
     ABI_SFREE(list_coeffs_copy)
   end subroutine deallocate_arrays
+
   subroutine copy_eff_pot_to_eff_pot_fixed()
     ! if there is no imposed coefficient, just copy the effpot without any coefficient.
     ! if impose, copy all the imposed coefficient.
@@ -408,100 +413,101 @@ contains
         call polynomial_coeff_free(coeffs_tmp(ii))
       enddo
       ABI_FREE(coeffs_tmp)
-      !Fix the whole input potential, copy the input potential to eff_pot
     elseif (nimposecoeff == -1)then
       call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
-      !Fix only the harmonic potential
     else
       call effective_potential_copy(eff_pot_fixed,eff_pot,comm)
       call effective_potential_freeCoeffs(eff_pot_fixed)
     endif
   end subroutine copy_eff_pot_to_eff_pot_fixed
-  subroutine combine_fixcoeff_and_imposecoeff()
-    block !Set consistency between fixcoeff and imposecoeff.
-      if ( nfixcoeff > 0 .and. nimposecoeff >0)then
-        ABI_MALLOC(fix_and_impose,(nfixcoeff))
-        fix_and_impose = .FALSE.
-        do ii = 1,nfixcoeff
-          if (any(imposecoeff == fixcoeff(ii)))then
-            fix_and_impose(ii) = .TRUE.
-          endif
-        enddo
-        nfix_and_impose = count(fix_and_impose)
-        nfixcoeff_corr = nfixcoeff - nfix_and_impose
-        ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
-        ia = 1
-        do ii = 1,nfixcoeff
-          if (.not. fix_and_impose(ii))then
-            fixcoeff_corr(ia) = fixcoeff(ii)
-            ia = ia + 1
-          endif
-        enddo
-        ncopy_terms = ncoeff_model - nimposecoeff
-        ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
-        ia = 1
-        do ii = 1,ncoeff_model
-          if( .not. any(imposecoeff == ii))then
-            list_coeffs_copy(ia) = ii
-            ia = ia + 1
-          endif
-        enddo
-        do ii = 1,ncopy_terms
-          do ia = 1,nfixcoeff_corr
-            if (list_coeffs_copy(ii) == fixcoeff_corr(ia))then
-              fixcoeff_corr(ia) = ii
-            endif
-          enddo
-        enddo
-      elseif (nfixcoeff == -1 .and. nimposecoeff > 0)then
-        ABI_MALLOC(fix_and_impose,(ncoeff_model))
-        fix_and_impose = .FALSE.
-        do ii = 1,ncoeff_model
-          if (any( imposecoeff == ii))then
-            fix_and_impose(ii) = .TRUE.
-          endif
-        enddo
-        nfix_and_impose = nimposecoeff
-        ncopy_terms = ncoeff_model - nimposecoeff
-        ABI_MALLOC(fixcoeff_corr,(ncopy_terms))
-        ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
-        ia = 1
-        do ii = 1,ncoeff_model
-          if (.not. fix_and_impose(ii))then
-            fixcoeff_corr(ia) = ia
-            list_coeffs_copy(ia) = ii
-            ia = ia + 1
-          endif
-        enddo
-        nfixcoeff_corr = ncoeff_model- nfix_and_impose
-      elseif (nfixcoeff == -1 .and. nimposecoeff ==-1)then
-        nfixcoeff_corr = 0
-        write(message,'(3a)') "nfixcoeff and nimposecoeff are set to -1.",ch10,&
-          &                         "This does not make sense. nfixcoeff will be set to 0."
-        if(iam_master) ABI_WARNING(message)
-        ncopy_terms = 0
-        ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
-      elseif (nfixcoeff >0 .and. nimposecoeff ==-1)then
-        nfixcoeff_corr = 0
-        write(message,'(3a)') "nfixcoeff is > 0 and nimposecoeff is set to -1.",ch10,&
-          &                         "This does not make sense. nfixcoeff will be set to 0."
-        if(iam_master) ABI_WARNING(message)
-        ncopy_terms = 0
-      else
-        nfixcoeff_corr = nfixcoeff
-        ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
-        !nimposecoeff or nfixcoeff always 0 here so fix_and_impose is empty
-        ABI_MALLOC(fix_and_impose,(0))
-        fixcoeff_corr = fixcoeff
-        ncopy_terms = ncoeff_model
-        ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
-        do ii = 1,ncopy_terms
-          list_coeffs_copy(ii) = ii
-        enddo
-      endif
-    end block
 
+
+
+  subroutine combine_fixcoeff_and_imposecoeff()
+    !Set consistency between fixcoeff and imposecoeff.
+    if ( nfixcoeff > 0 .and. nimposecoeff >0)then
+      ABI_MALLOC(fix_and_impose,(nfixcoeff))
+      fix_and_impose = .FALSE.
+      do ii = 1,nfixcoeff
+        if (any(imposecoeff == fixcoeff(ii)))then
+          fix_and_impose(ii) = .TRUE.
+        endif
+      enddo
+      nfix_and_impose = count(fix_and_impose)
+      nfixcoeff_corr = nfixcoeff - nfix_and_impose
+      ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
+      ia = 1
+      do ii = 1,nfixcoeff
+        if (.not. fix_and_impose(ii))then
+          fixcoeff_corr(ia) = fixcoeff(ii)
+          ia = ia + 1
+        endif
+      enddo
+      ncopy_terms = ncoeff_model - nimposecoeff
+      ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
+      ia = 1
+      do ii = 1,ncoeff_model
+        if( .not. any(imposecoeff == ii))then
+          list_coeffs_copy(ia) = ii
+          ia = ia + 1
+        endif
+      enddo
+      do ii = 1,ncopy_terms
+        do ia = 1,nfixcoeff_corr
+          if (list_coeffs_copy(ii) == fixcoeff_corr(ia))then
+            fixcoeff_corr(ia) = ii
+          endif
+        enddo
+      enddo
+    elseif (nfixcoeff == -1 .and. nimposecoeff > 0)then
+      ABI_MALLOC(fix_and_impose,(ncoeff_model))
+      fix_and_impose = .FALSE.
+      do ii = 1,ncoeff_model
+        if (any( imposecoeff == ii))then
+          fix_and_impose(ii) = .TRUE.
+        endif
+      enddo
+      nfix_and_impose = nimposecoeff
+      ncopy_terms = ncoeff_model - nimposecoeff
+      ABI_MALLOC(fixcoeff_corr,(ncopy_terms))
+      ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
+      ia = 1
+      do ii = 1,ncoeff_model
+        if (.not. fix_and_impose(ii))then
+          fixcoeff_corr(ia) = ia
+          list_coeffs_copy(ia) = ii
+          ia = ia + 1
+        endif
+      enddo
+      nfixcoeff_corr = ncoeff_model- nfix_and_impose
+    elseif (nfixcoeff == -1 .and. nimposecoeff ==-1)then
+      nfixcoeff_corr = 0
+      write(message,'(3a)') "nfixcoeff and nimposecoeff are set to -1.",ch10,&
+        &                         "This does not make sense. nfixcoeff will be set to 0."
+      if(iam_master) ABI_WARNING(message)
+      ncopy_terms = 0
+      ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
+    elseif (nfixcoeff >0 .and. nimposecoeff ==-1)then
+      nfixcoeff_corr = 0
+      write(message,'(3a)') "nfixcoeff is > 0 and nimposecoeff is set to -1.",ch10,&
+        &                         "This does not make sense. nfixcoeff will be set to 0."
+      if(iam_master) ABI_WARNING(message)
+      ncopy_terms = 0
+    else
+      nfixcoeff_corr = nfixcoeff
+      ABI_MALLOC(fixcoeff_corr,(nfixcoeff_corr))
+      !nimposecoeff or nfixcoeff always 0 here so fix_and_impose is empty
+      ABI_MALLOC(fix_and_impose,(0))
+      fixcoeff_corr = fixcoeff
+      ncopy_terms = ncoeff_model
+      ABI_MALLOC(list_coeffs_copy,(ncopy_terms))
+      do ii = 1,ncopy_terms
+        list_coeffs_copy(ii) = ii
+      enddo
+    endif
   end subroutine combine_fixcoeff_and_imposecoeff
+
+
   subroutine print_start_fitting()
     if(need_verbose) then
       write(message,'(a,(80a))') ch10,('-',ii=1,80)
@@ -547,6 +553,7 @@ contains
         &                               eff_pot%crystal%rprimd(ii,3)**2)))
     end do
   end subroutine map_hist_to_supercell
+
   subroutine generate_list_of_coefficients_to_fit()
     !Get the list of coefficients to fit:
     !get from the eff_pot type (from the input)
@@ -568,7 +575,6 @@ contains
     ABI_MALLOC(symbols,(eff_pot%crystal%natom))
     call symbols_crystal(eff_pot%crystal%natom,eff_pot%crystal%ntypat,eff_pot%crystal%npsp,&
       &                     symbols,eff_pot%crystal%typat,eff_pot%crystal%znucl)
-
 
     if (fit_iatom_all .and. generateterm==1) then
       atom_start = 1
@@ -599,8 +605,9 @@ contains
           write(message,'(a,F6.3,a)') " Cutoff of ",cutoff," Bohr is imposed"
           call wrtout(std_out,message,'COLL')
         end if  !need_verbose
+
         call polynomial_coeff_getNorder(coeffs_iatom,eff_pot%crystal,cutoff,my_ncoeff,ncoeff_tot_tmp,power_disps,&
-          &                                  max_power_strain_in,0,sc_size,comm,anharmstr=need_anharmstr,&
+          &                                  max_power_strain_in,0,sc_size,comm,anharmstr=(ii==1 .and. need_anharmstr),&
           &                                  spcoupling=need_spcoupling,distributed=.true.,&
           &                                  only_odd_power=need_only_odd_power,&
           &                                  only_even_power=need_only_even_power,&
@@ -613,22 +620,19 @@ contains
           call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
           call polynomial_coeff_list_free(coeffs_iatom)
         else
-            ncoeff_tot = ncoeff_tot+ncoeff_tot_tmp
-            if(.not.(allocated(coeffs_tmp))) then
-              ABI_MALLOC(coeffs_tmp,(size(coeffs_iatom)))
-              call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
-            else
-              call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
-            end if ! not allocate coeffs_tmp
+          ncoeff_tot = ncoeff_tot+ncoeff_tot_tmp
+          if(.not.(allocated(coeffs_tmp))) then
+            ABI_MALLOC(coeffs_tmp,(size(coeffs_iatom)))
+            call coeffs_list_copy(coeffs_tmp,coeffs_iatom)
+          else
+            call coeffs_list_conc_onsite(coeffs_tmp,coeffs_iatom)
+          end if ! not allocate coeffs_tmp
           call polynomial_coeff_list_free(coeffs_iatom)
         end if  !fit_iatom/=-2
       end do  ! ii = atom_start, atom_end
 
       !call coeffs_list_reduce_duplicate(coeffs_tmp, eff_pot%crystal, sc_size, fit_iatom_in, cutoff , power_disps(2))
-      call polynomial_coeff_list_free(coeffs_iatom)
       my_ncoeff = size(coeffs_tmp)
-      !ncoeff_tot = size(coeffs_tmp)
-
       if (fit_iatom_all .and. iam_master) then
         write(message, '(2a,I6,a)' )ch10,' fit_iatom = -2 : The total number of coefficients for all atoms are',ncoeff_tot,ch10
         call wrtout(std_out,message,'COLL')
@@ -638,37 +642,23 @@ contains
     ABI_FREE(symbols)
   end subroutine generate_list_of_coefficients_to_fit
 
-  !!!!!!!!! TOBE checked
-     block ! check duplicate
-       integer:: ii
-       logical :: found
-       found =.False.
-       if(coeff_tmp%isbound==1) then
-         do ii=1, real_ic
-           if(terms_compare(coeff_tmp%terms(1), coeffs_tmp(ii)%terms(1))) then
-             found=.True.
-             cycle
-           end if
-           if(terms_compare_inverse(coeff_tmp%terms(1), coeffs_tmp(ii)%terms(1))) then
-             found=.True.
-             cycle
-           end if
-       end do
-      endif
-     if(.not. found) then
-         real_ic = real_ic+1
-         !call polynomial_coeff_free(coeffs_tmp(real_ic))
-         coeffs_tmp(real_ic) = coeff_tmp
-         call xmpi_bcast(etmp, rank_to_send, comm, ierr)
-         call xmpi_bcast(ftmp(:,:, :) , rank_to_send, comm, ierr)
-         call xmpi_bcast(stmp(:,:), rank_to_send, comm, ierr)
-         energy_coeffs_tmp(real_ic,:)    = etmp
-         fcart_coeffs_tmp(:,:,real_ic,:) = ftmp
-         strten_coeffs_tmp(:,:,real_ic)  = stmp
+   function is_duplicate_coeff(coeff, lcoeffs, ncoeff_to_compare) result(found)
+     type(polynomial_coeff_type), intent(in):: coeff, lcoeffs(:)
+     integer, intent(in) :: ncoeff_to_compare
+     integer:: ii
+     logical :: found
+     found =.False.
+     do ii=1, ncoeff_to_compare
+       if(terms_compare(coeff%terms(1), lcoeffs(ii)%terms(1))) then
+         found=.True.
+         cycle
        end if
-       ! TODO coeffs_tmp is not fully cleaned
-       call polynomial_coeff_free(coeff_tmp)
-   end block
+       if(terms_compare_inverse(coeff%terms(1), lcoeffs(ii)%terms(1))) then
+         found=.True.
+         cycle
+       end if
+     end do
+   end function is_duplicate_coeff
 
 
   subroutine read_or_write_coeffs_to_xml()
@@ -718,10 +708,9 @@ contains
         ABI_MALLOC(coeffs_tmp,(my_ncoeff))
         if(my_ncoeff /= 0)coeffs_tmp = read_effective_potential%anharmonics_terms%coefficients(my_ncoeff_start:my_ncoeff_end)
       end if
-
     end if
-
   end subroutine read_or_write_coeffs_to_xml
+
   subroutine assign_coeffs_to_cpu()
     !Get the list with the number of coeff on each CPU
     !In order to be abble to compute the my_coeffindexes array which is for example:
@@ -776,8 +765,8 @@ contains
 
     !Reset the output (we free the memory)
     call effective_potential_freeCoeffs(eff_pot)
-
   end subroutine assign_coeffs_to_cpu
+
   subroutine get_num_fixed_coeff()
     !Get number of fixed coeff
     ncoeff_fix = 0
@@ -789,6 +778,7 @@ contains
       endif
     endif
   end subroutine get_num_fixed_coeff
+
   subroutine check_sanity_ncoeff_in()
     !Check if ncycle_in is not zero or superior to ncoeff_tot
     if(need_verbose.and.(ncoeff_in > ncoeff_tot).or.(ncoeff_in<0.and.nfixcoeff_corr /= -1)) then
@@ -808,6 +798,8 @@ contains
     isselected(:)=.False.
     isbanned(:)=.False.
   end subroutine initialize_tags_for_coeffs
+
+
   subroutine select_bounding_terms()
       integer :: ico
       type(int_array_type) :: ind_bound
@@ -815,11 +807,11 @@ contains
       do ico=1, size(my_coeffs)
         if ( my_coeffs(ico)%isbound==1) then
           ! If it is already imposed/fixed, it needs not to be added.
-          if (.not.(any(fixcoeff_corr==my_coeffindexes(ico)))) then
+          !if (.not.(any(fixcoeff_corr==my_coeffindexes(ico)))) then
             nbound =nbound +1
             call ind_bound%push(my_coeffindexes(ico))
             isselected(my_coeffindexes(ico))=.True.
-          end if
+          !end if
         end if
       end do
       call xmpi_sum(nbound, comm, ierr)
@@ -827,16 +819,55 @@ contains
       call xmpi_bcast(list_bound, master, comm, ierr)
       call ind_bound%finalize()
       call xmpi_lor(isselected, comm)
+      if (nbound /=count(isselected)) then
+        ABI_ERROR("The number of the bounding term is not consistent with the selected terms.")
+      end if
   end subroutine select_bounding_terms
+
+  subroutine select_fix_terms()
+    integer :: ico, ifix
+    type(int_array_type) :: ind_fix
+    nfix=0
+
+    do ico=1, size(my_coeffs)
+      ifix=my_coeffindexes(ico)
+      if( any(fixcoeff_corr==ifix) .and. my_coeffs(ico)%isbound==0) then
+        nfix=nfix+1
+        call ind_fix%push(ifix)
+        isselected(ifix)=.True.
+      end if
+    end do
+    call xmpi_sum(nfix, comm, ierr)
+    call ind_fix%allgatherv(list_fix, comm, nproc)
+    call xmpi_bcast(list_fix, master, comm, ierr)
+    call ind_fix%finalize()
+    call xmpi_lor(isselected, comm)
+    if (nfix/=count(isselected)-nbound) then
+      ABI_ERROR("The number of the fixed term is not consistent with the selected terms.")
+    end if
+  end subroutine select_fix_terms
+
+
+
   subroutine get_ncoeff_preselected()
     !Use fixcoeff
     !ncoeff_preselected store the curent number of coefficient in the model
     !Do not reset this variable...
     ncoeff_preselected = 0
+
+    ! add bounding terms to the list of coefficients to keep
+    if (nbound>0) then
+      ncoeff_preselected=ncoeff_preselected+nbound
+    end if
+    isbanned(bancoeff(1: nbancoeff))=.True.
+    call xmpi_lor(isbanned, comm)
+
+
     if (nfixcoeff_corr == -1)then
       write(message, '(3a)')' nfixcoeff is set to -1, the coefficients present in the model',&
         &                        ' are imposed.',ch10
-      ncoeff_preselected = ncoeff_preselected + ncoeff_model
+      ncoeff_preselected = ncoeff_preselected + ncoeff_model - nbound
+      isselected(:)=.True.
     else
       if (nfixcoeff_corr > 0)then
         if(maxval(fixcoeff_corr(:)) > ncoeff_tot) then
@@ -846,7 +877,7 @@ contains
             &        '     Start from scratch...',ch10,&
             &        ' ---',ch10
         else
-          ncoeff_preselected = ncoeff_preselected + nfixcoeff_corr
+          ncoeff_preselected = ncoeff_preselected + nfix
           write(message, '(2a)')' Some coefficients are imposed from the input.',ch10
         end if
       else
@@ -858,13 +889,6 @@ contains
     if(need_verbose) call wrtout(std_out,message,'COLL')
 
 
-    ! add bounding terms to the list of coefficients to keep
-    if (nbound>0) then
-      ncoeff_preselected=ncoeff_preselected+nbound
-    end if
-    isbanned(bancoeff(1: nbancoeff))=.True.
-    call xmpi_lor(isselected, comm)
-    call xmpi_lor(isbanned, comm)
   end subroutine get_ncoeff_preselected
 
   subroutine get_ncoeff_to_select_and_ncoeff_to_fit()
@@ -911,23 +935,30 @@ contains
       end do
     end if
 
-    !if ncoeff_preselected > 0 fill list_coeffs with the fixed coefficients
-    ! TODO: check if the bounding terms are already in the list of fixed.
-    if(ncoeff_preselected > nbound)then
-      do ii = nbound+1,ncoeff_preselected
-        if(nfixcoeff_corr == -1)then
-          if(ii <= ncoeff_model)then
-            list_coeffs(ii) = ii
-            isselected(ii) = .True.
-          end if
-        else
-          list_coeffs(ii) = fixcoeff_corr(ii-nbound)
-          isselected(fixcoeff_corr(ii-nbound)) = .True.
-        end if
+    if(nfix > 0) then
+      do ii = 1,nfix
+        list_coeffs(nbound+ii) = list_fix(ii)
       end do
     end if
 
-    call  xmpi_lor(isselected, comm)
+    !if ncoeff_preselected > 0 fill list_coeffs with the fixed coefficients
+    ! TODO: check if the bounding terms are already in the list of fixed.
+    !if(ncoeff_preselected > nbound)then
+    !  do ii = nbound+1,ncoeff_preselected
+    !    if(nfixcoeff_corr == -1)then
+    !      if(ii <= ncoeff_model)then
+    !        list_coeffs(ii) = ii
+    !        isselected(ii) = .True.
+    !      end if
+    !    else
+    !      list_coeffs(ii) = fixcoeff_corr(ii-nbound)
+    !      isselected(fixcoeff_corr(ii-nbound)) = .True.
+    !    end if
+    !  end do
+    !end if
+    !call  xmpi_lor(isselected, comm)
+
+    !FIXME: here the number of n_preselcted is wrong.
 
     !Get the decomposition for each coefficients of the forces and stresses for
     !each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
@@ -966,7 +997,7 @@ contains
   end subroutine initialize_fitting_parameters_for_coefficients
 
   subroutine initialize_gf()
-    integer :: ipre
+    integer :: ipre, duplicated, ipre_real
     !Allocation of arrays
     ABI_MALLOC(coeffs_tmp,(ncoeff_to_fit))
     ABI_MALLOC(singular_coeffs,(max(1,my_ncoeff)))
@@ -996,49 +1027,57 @@ contains
     !If some coeff are imposed by the input, we need to fill the arrays
     !with this coeffs and broadcast to the others CPUs :
     if(ncoeff_preselected>=1)then
-      do ipre= 1,ncoeff_preselected
-        list_coeffs_tmp(ipre) = ipre
-        rank_to_send = 0
-        do icoeff=1,my_ncoeff
-          if((my_coeffindexes(icoeff)==list_coeffs(ipre)))then
-            if(need_initialize_data)then
-              my_icoeff = icoeff
-            else
-              my_icoeff = 1
-              !          Need to initialized the data for the fit for this coefficient
-              call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
-                &                                          fit_data%training_set%displacement,&
-                &                                          energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
-                &                                          my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
-                &                                          strten_coeffs,fit_data%training_set%ucvol,&
-                &                                          my_coefflist(icoeff),1)
-            end if
-            energy_coeffs_tmp(ipre,:)    = energy_coeffs(my_icoeff,:)
-            fcart_coeffs_tmp(:,:,ipre,:) = fcart_coeffs(:,:,my_icoeff,:)
-            strten_coeffs_tmp(:,:,ipre)  = strten_coeffs(:,:,my_icoeff)
+      !ipre_real=0
+      do ipre=1, ncoeff_preselected
+          list_coeffs_tmp(ipre) = ipre
+          rank_to_send = 0
+          duplicated= 0
+          do icoeff=1,my_ncoeff
+            if((my_coeffindexes(icoeff)==list_coeffs(ipre)))then
+              if (is_duplicate_coeff(my_coeffs(icoeff), coeffs_tmp, ncoeff_selected))   duplicated=1
+            endif
+          end do
+          call xmpi_sum(duplicated, comm, ierr)
+          if(duplicated==0) then
+            ipre_real=ipre_real+1
+            do icoeff=1,my_ncoeff
+              if((my_coeffindexes(icoeff)==list_coeffs(ipre)))then
+                if(need_initialize_data)then
+                  my_icoeff = icoeff
+                else
+                  my_icoeff = 1
+                  !          Need to initialized the data for the fit for this coefficient
+                  call fit_polynomial_coeff_getFS(my_coeffs,fit_data%training_set%du_delta,&
+                    &                                          fit_data%training_set%displacement,&
+                    &                                          energy_coeffs,fcart_coeffs,natom_sc,eff_pot%crystal%natom,&
+                    &                                          my_ncoeff,ntime,sc_size,fit_data%training_set%strain,&
+                    &                                          strten_coeffs,fit_data%training_set%ucvol,&
+                    &                                          my_coefflist(icoeff),1)
+                end if
+                energy_coeffs_tmp(ipre,:)    = energy_coeffs(my_icoeff,:)
+                fcart_coeffs_tmp(:,:,ipre,:) = fcart_coeffs(:,:,my_icoeff,:)
+                strten_coeffs_tmp(:,:,ipre)  = strten_coeffs(:,:,my_icoeff)
 
-
-            rank_to_send = my_rank
-            call polynomial_coeff_free(coeffs_tmp(ipre))
-            call polynomial_coeff_init(coeff_values(ipre),my_coeffs(icoeff)%nterm,&
-              &                                   coeffs_tmp(ipre),my_coeffs(icoeff)%terms,&
-              &                                   my_coeffs(icoeff)%name,&
-              &                                   my_coeffs(icoeff)%isbound,&
-              &                                   check=.false.)
-            exit
+                rank_to_send = my_rank
+                call polynomial_coeff_free(coeffs_tmp(ipre))
+                call polynomial_coeff_init(coeff_values(ipre),my_coeffs(icoeff)%nterm,&
+                  &                                   coeffs_tmp(ipre),my_coeffs(icoeff)%terms,&
+                  &                                   my_coeffs(icoeff)%name,&
+                  &                                   my_coeffs(icoeff)%isbound,&
+                  &                                   check=.false.)
+                exit
+              end if
+            end do
+            !    Boadcast the coefficient
+            !    Need to send the rank with the chosen coefficient
+            call xmpi_sum(rank_to_send, comm, ierr)
+            call xmpi_bcast(energy_coeffs_tmp(ipre,:), rank_to_send, comm, ierr)
+            call xmpi_bcast(fcart_coeffs_tmp(:,:,ipre,:) , rank_to_send, comm, ierr)
+            call xmpi_bcast(strten_coeffs_tmp(:,:,ipre), rank_to_send, comm, ierr)
+            call polynomial_coeff_broadcast(coeffs_tmp(ipre), rank_to_send, comm)
           end if
-        end do
-        !    Boadcast the coefficient
-        !    Need to send the rank with the chosen coefficient
-        call xmpi_sum(rank_to_send, comm, ierr)
-        call xmpi_bcast(energy_coeffs_tmp(ipre,:), rank_to_send, comm, ierr)
-        call xmpi_bcast(fcart_coeffs_tmp(:,:,ipre,:) , rank_to_send, comm, ierr)
-        call xmpi_bcast(strten_coeffs_tmp(:,:,ipre), rank_to_send, comm, ierr)
-        call polynomial_coeff_broadcast(coeffs_tmp(ipre), rank_to_send, comm)
       end do
     end if
-
-
     !Waiting for all
     if(nproc > 1)  then
       if(need_verbose)then
@@ -1051,7 +1090,6 @@ contains
     !Compute GF, coeff_values,strten_coeffs and fcart_coeffs are set to zero
     !it means that only the harmonic part wiil be computed
     coeff_values = zero
-
     call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,fit_data%energy_diff,fcart_coeffs,&
       &                                    fit_data%fcart_diff,gf_values(:,1),int((/1/)),natom_sc,&
       &                                    0,my_ncoeff,ntime,strten_coeffs,fit_data%strten_diff,&
@@ -1099,7 +1137,7 @@ contains
 
 !  Start fit process
    do icycle_tmp = 1,ncycle_select
-     ncoeff_this_cycle= min(ncoeff_per_cycle, ncoeff_to_select-ncoeff_selected)
+     ncoeff_this_cycle= min(ncoeff_per_cycle, ncoeff_to_select+ncoeff_preselected-ncoeff_selected)
      icycle=ncoeff_selected+1
      list_coeffs_tmp(icycle)= icycle
      if(need_verbose)then
@@ -1150,18 +1188,20 @@ contains
      gf_values(:,:) = huge(0.0_dp)
 
      do icoeff=1,my_ncoeff
-       if(any(list_coeffs==my_coeffindexes(icoeff)) .or. singular_coeffs(icoeff) == 1)then
-          gf_values(:,icoeff) = huge(0.0_dp)/5
-          cycle
-       endif
-       !if(nbancoeff >= 1)then
        if(isbanned(my_coeffindexes(icoeff)) .or. &
          & isselected(my_coeffindexes(icoeff))  )then
          gf_values(:,icoeff) = huge(0.0_dp)/5
          cycle
        endif
+       if(any(list_coeffs==my_coeffindexes(icoeff)) .or. singular_coeffs(icoeff) == 1)then
+          gf_values(:,icoeff) = huge(0.0_dp)/5
+          cycle
+       endif
+       !if(nbancoeff >= 1)then
        !end if
-       list_coeffs(icycle) = my_coeffindexes(icoeff)
+       !list_coeffs(icycle) = my_coeffindexes(icoeff)
+       !my_coeffindexes(my_coeffindexes(icoeff)) = .True.
+
 
        if(need_initialize_data)then
          my_icoeff = icoeff
@@ -1291,8 +1331,6 @@ contains
        integer :: myorder(my_ncoeff), ntot
        real(dp), allocatable :: allgf(:)
        integer, allocatable :: allorder(:)
-
-
        !print *, "DEBUG==================> ", "Gather best on each cpu finished2."
        do icoeff=1,my_ncoeff
          if(gf_values(1,icoeff) < zero) then
@@ -1330,15 +1368,23 @@ contains
        BLOCK ! add selected terms
          integer :: i
          integer :: ind_select
-         do i=1, ncoeff_this_cycle
-           ind_select=ncoeff_selected+1
+         integer :: nselected_this_cycle
+         !do i=1, ncoeff_this_cycle
+         nselected_this_cycle=0
+         i=0
+         do while(nselected_this_cycle<ncoeff_this_cycle)
+           i=i+1
            index_min = allorder(i)
            !    Check if there is still coefficient
            if(index_min==0) then
              exit
+           !else if(is_duplicate_coeff(index_min)) then
+           !  cycle
            else
+             ind_select=ncoeff_selected+1
              list_coeffs(ind_select) = index_min
              isselected(index_min)=.True.
+             nselected_this_cycle=nselected_this_cycle+1
            end if
            !    Check if this coeff is treat by this cpu and fill the
            !    temporary array before broadcast
@@ -1375,13 +1421,11 @@ contains
            end do
            !    Need to send the rank with the chosen coefficient
            call xmpi_sum(rank_to_send, comm, ierr)
-
            !    Boadcast the coefficient
            call xmpi_bcast(energy_coeffs_tmp(ind_select,:), rank_to_send, comm, ierr)
            call xmpi_bcast(fcart_coeffs_tmp(:,:,ind_select,:) , rank_to_send, comm, ierr)
            call xmpi_bcast(strten_coeffs_tmp(:,:,ind_select), rank_to_send, comm, ierr)
            call polynomial_coeff_broadcast(coeffs_tmp(ind_select), rank_to_send, comm)
-
            if(need_verbose) then
              write(message, '(a,I0,2a)' )' Selecting the coefficient number ',list_coeffs(ind_select),&
                &                                   ' ===> ',trim(coeffs_tmp(ind_select)%name)
@@ -1732,6 +1776,36 @@ contains
      end if
    end if
  end subroutine fit_all_selected_coefficients
+
+ subroutine select_one_coeff(ind)
+   ! Note ind is my_coeffindexes(icoeff)
+   integer :: ind
+   if (.not. isselected(ind)) then
+     rank_to_send= my_rank
+     isselected(ind)=.True.
+     call xmpi_lor(isselected, comm)
+   end if
+     !ncoeff_selected=count(isselected)
+   if(isselected(ind)) then
+     ncoeff_selected = ncoeff_selected+1
+     n_remaining=n_remaining-1
+     call xmpi_bcast(n_remaining, rank_to_send, comm, ierr)
+   end if
+   list_coeffs(ncoeff_selected) = ind
+ end subroutine select_one_coeff
+
+ subroutine ban_one_term(icoeff)
+   integer :: icoeff
+   if (.not. isbanned(my_coeffindexes(icoeff))) then
+     isbanned(my_coeffindexes(icoeff))=.True.
+     call xmpi_lor(isbanned, comm)
+     n_remaining=n_remaining-1
+     call xmpi_bcast(n_remaining, rank_to_send, comm, ierr)
+   end if
+ end subroutine ban_one_term
+
+
+
 
 end subroutine fit_polynomial_coeff_fit
 !!***
