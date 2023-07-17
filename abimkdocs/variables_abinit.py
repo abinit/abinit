@@ -4749,7 +4749,7 @@ The behaviour of ABINIT before v5.5 corresponds to the default value 11.
 ),
 
 Variable(
-    abivarname="field_xred",
+    abivarname="field_red",
     varset="ffield",
     vartype="real",
     topics=[],

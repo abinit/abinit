@@ -91,6 +91,7 @@ contains
 !! amu(ntypat)=mass of each atomic type
 !! bravais(11)=characteristics of Bravais lattice (see symlatt.F90)
 !! chrgat(natom)=target charge for each atom. Not always used, it depends on the value of constraint_kind
+!! field_red(3)=applied field direction in reduced coordinates
 !! genafm(3)=magnetic translation generator (in case of Shubnikov group type IV)
 !! iatfix(3,natom)=indices for atoms fixed along some (or all) directions
 !! jellslab=not zero if jellslab keyword is activated
@@ -127,7 +128,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
+subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
   genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
   msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
   nucdipmom,nzchempot,pawspnorb,&
@@ -154,7 +155,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
  real(dp),intent(inout) :: nucdipmom(3,natom)
  real(dp),intent(in) :: ratsph(ntypat)
  real(dp),intent(inout) :: spinat(3,natom)
- real(dp),intent(out) :: acell(3),amu(ntypat),field_xred(3),genafm(3),mixalch(npspalch,ntypalch)
+ real(dp),intent(out) :: acell(3),amu(ntypat),field_red(3),genafm(3),mixalch(npspalch,ntypalch)
  real(dp),intent(inout) :: rprim(3,3),tnons(3,msym) !vz_i
  real(dp),intent(out) :: vel(3,natom),vel_cell(3,3),xred(3,natom)
  real(dp),intent(in) :: znucl(npsp)
@@ -251,25 +252,25 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
 
  if (dtset%berryopt ==4) then
    do ii=1,3
-     field_xred(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
+     field_red(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
    end do
  else if (dtset%berryopt == 6 ) then
    do ii=1,3
-     field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
-     field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
+     field_red(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
+     field_red(ii)=field_red(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
    end do
  else if (dtset%berryopt == 14) then
    do ii=1,3
-     field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+     field_red(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
    end do
  else if (dtset%berryopt == 16) then
    do ii=1,3
-     field_xred(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
+     field_red(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
    end do
  else if (dtset%berryopt == 17) then
    do ii=1,3
-     field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
-     if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
+     field_red(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+     if(dtset%jfielddir(ii)==2) field_red(ii)=dtset%red_dfield(ii)
    end do
  end if
 
@@ -842,7 +843,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_xred,&
      invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2
      call symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
        pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
-       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_xred,invar_z=invar_z)
+       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_red,invar_z=invar_z)
 
    end if ! spgroup==0 and nsym==0
 

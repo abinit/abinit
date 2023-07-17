@@ -960,7 +960,7 @@ subroutine indefo1(dtset)
  dtset%efmas_calc_dirs=0
  dtset%efmas_n_dirs=0
 !F
- dtset%field_xred(:)=zero
+ dtset%field_red(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0
@@ -1512,7 +1512,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !call flush(std_out)
 !ENDDEBUG
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_xred(1:3),dtset%genafm(1:3),iatfix,&
+   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
     dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
     msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&

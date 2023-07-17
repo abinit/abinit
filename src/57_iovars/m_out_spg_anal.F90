@@ -144,7 +144,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
        dtsets(idtset)%pawspnorb,dtsets(idtset)%prtvol,ptsymrel,dtsets(idtset)%spinat,symafm,symrel,&
        tnons,tolsym,dtsets(idtset)%typat,dtsets(idtset)%usepaw,results_out(idtset)%xred(1:3,1:natom,iimage),&
        chrgat=dtsets(idtset)%chrgat,nucdipmom=dtsets(idtset)%nucdipmom,&
-       invardir_red=dtsets(idtset)%field_xred,invar_z=invar_z)
+       invardir_red=dtsets(idtset)%field_red,invar_z=invar_z)
 
      !Set chkprim to 0, to allow detecting increase of multiplicity
      call symanal(bravais,0,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
