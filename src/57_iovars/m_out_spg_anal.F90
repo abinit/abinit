@@ -125,7 +125,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
    tolsym=dtsets(idtset)%tolsym
    natom=dtsets(idtset)%natom
-   nimage=results_out(idtset)%nimage
+   std_nimage=results_out(idtset)%nimage
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
 
    do iimage=1,nimage 
@@ -217,7 +217,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
          endif
        else 
          write(msg,'(2a,3i8)')ch10,' Initial data. jdtset, iimage, nsym=',jdtset,iimage,dtsets(idtset)%nsym
-         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,msg,'COLL')
          if(nimage==1)then
            call prtspgroup(dtsets(idtset)%bravais,dtsets(idtset)%genafm,std_out,jdtset,&
 &           dtsets(idtset)%ptgroupma,dtsets(idtset)%spgroup)
@@ -226,7 +226,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &           dtsets(idtset)%ptgroupma,dtsets(idtset)%spgroup,iimage=iimage)
          endif
          write(msg,'(a,3i8)')' Final data.   jdtset, iimage, nsym=',jdtset,iimage,nsym
-         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,msg,'COLL')
          if(nimage==1)then
            call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup)
          else
