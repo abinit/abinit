@@ -138,6 +138,12 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
      !From rprimd and tolsym, compute bravais, nptsym and ptsymrel (with maximum size msym).
      call symlatt(bravais,dev_null,msym,nptsym,ptsymrel,rprimd,tolsym)
 
+!DEBUG
+!    write(std_out,*)' out_spg_data : before symfind_expert, return, msym=  ',msym
+     write(std_out,*)' out_spg_data : before symfind_expert, continue  '
+!    return
+!ENDDEBUG
+
      invar_z=0 ; if(dtsets(idtset)%jellslab/=0 .or. dtsets(idtset)%nzchempot/=0)invar_z=2
 
      call symfind_expert(gprimd,msym,natom,nptsym,dtsets(idtset)%nspden,nsym,&
@@ -145,6 +151,12 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
        tnons,tolsym,dtsets(idtset)%typat,dtsets(idtset)%usepaw,results_out(idtset)%xred(1:3,1:natom,iimage),&
        chrgat=dtsets(idtset)%chrgat,nucdipmom=dtsets(idtset)%nucdipmom,&
        invardir_red=dtsets(idtset)%field_red,invar_z=invar_z)
+
+!DEBUG
+!    write(std_out,*)' out_spg_data : before symfind_expert, return  '
+     write(std_out,*)' out_spg_data : after symfind_expert, return  '
+!    return
+!ENDDEBUG
 
      !Set chkprim to 0, to allow detecting increase of multiplicity
      call symanal(bravais,0,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)

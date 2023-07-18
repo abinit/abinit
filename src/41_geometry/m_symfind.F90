@@ -139,8 +139,8 @@ contains
 !**************************************************************************
 
 !DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : enter '
-!call flush(std_out)
+ write(std_out,'(a)')' m_symfind%symfind : enter '
+ call flush(std_out)
 !ENDDEBUG
 
 !DEBUG
@@ -217,8 +217,8 @@ contains
  call matr3inv(gprimd,rprimd)
 
 !DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
-!call flush(std_out)
+ write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
+ call flush(std_out)
 !ENDDEBUG
 
 !Initialise with the first atom
@@ -296,8 +296,8 @@ contains
 !ENDDEBUG
 
 !DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : before select the class '
-!call flush(std_out)
+ write(std_out,'(a)')' m_symfind%symfind : before select the class '
+ call flush(std_out)
 !ENDDEBUG
 
 !Select the class with the least number of atoms, and non-zero spinat if any
@@ -363,8 +363,8 @@ contains
  end do
 
 !DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : before big loop '
-!call flush(std_out)
+ write(std_out,'(a)')' m_symfind%symfind : before big loop '
+ call flush(std_out)
 !ENDDEBUG
 
 !Big loop over each symmetry operation of the Bravais lattice
@@ -372,8 +372,8 @@ contains
  do isym=1,nptsym
 
 !DEBUG
-!write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
-!call flush(std_out)
+ write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
+ call flush(std_out)
 !ENDDEBUG
 
    if(present(invardir_red))then
@@ -599,8 +599,8 @@ contains
  end do ! End big loop over each symmetry operation of the Bravais lattice
 
 !DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : after big loop '
-!call flush(std_out)
+ write(std_out,'(a)')' m_symfind%symfind : after big loop, will call ABI_FREE '
+ call flush(std_out)
 !ENDDEBUG
 
  ABI_FREE(class)
@@ -616,8 +616,19 @@ contains
    ABI_FREE(spinatred)
  end if
 
+ !DEBUG
+ write(std_out,'(a,i6)')' m_symfind%symfind : call sg_multable, nsym= ',nsym
+ call flush(std_out)
+!ENDDEBUG
+
 ! call chkgrp(nsym,symafm,symrel,ierr_)
  call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
+
+  !DEBUG
+ write(std_out,'(a)')' m_symfind%symfind : call print_symmetries, ierr_= ',ierr_
+ call flush(std_out)
+!ENDDEBUG
+
  if (ierr_/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
  end if
@@ -641,8 +652,8 @@ contains
 !ENDDEBUG
 
 !DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : exit '
-!call flush(std_out)
+ write(std_out,'(a)')' m_symfind%symfind : exit '
+ call flush(std_out)
 !ENDDEBUG
 
 end subroutine symfind
@@ -727,15 +738,27 @@ end subroutine symfind
 
 !**************************************************************************
 
+!DEBUG
+  write(std_out,*)' m_symfind%symfind_expert : enter '
+!ENDDEBUG
+
   use_inversion=1
   if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
     ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
     use_inversion=0
   end if
 
+!DEBUG
+  write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
+!ENDDEBUG
+
   call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
     prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
     chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
+
+!DEBUG
+  write(std_out,*)' m_symfind%symfind_expert : after call symfind (1) '
+!ENDDEBUG
 
   !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
   if(ierr/=0)then
@@ -778,9 +801,17 @@ end subroutine symfind
       print_comment_tolsym=0
     endif
 
+!DEBUG
+  write(std_out,*)' m_symfind%symfind_expert : before call symfind (3) '
+!ENDDEBUG
+
     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
       prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=invardir_red,invar_z=invar_z)
+
+!DEBUG
+  write(std_out,*)' m_symfind%symfind_expert : after call symfind (3) '
+!ENDDEBUG
 
     !Needs one more resymmetrization, for the tnons
     ABI_MALLOC(tnons_new,(3,nsym))
@@ -790,6 +821,10 @@ end subroutine symfind
     tnons(:,1:nsym)=tnons_new(:,:)
     ABI_FREE(tnons_new)
   end if ! tolsym >1.00001e-8
+
+!DEBUG
+  write(std_out,*)' m_symfind%symfind_expert : exit '
+!ENDDEBUG
 
 end subroutine symfind_expert
 !!***
