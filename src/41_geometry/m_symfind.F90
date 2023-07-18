@@ -26,7 +26,7 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkgrp, chkprimit, mati3inv, matr3inv, symrelrot, symdet, symcharac, holocell, &
+ use m_symtk,     only : chkprimit, mati3inv, matr3inv, symrelrot, symdet, symcharac, holocell, &
                           smallprim, print_symmetries, sg_multable, symatm, symmetrize_tnons, symmetrize_xred
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
@@ -641,7 +641,6 @@ contains
 !ENDDEBUG
 
 ! The algorithm in sg_multable is still cubic in nsym, so avoid calling it uselessly  when nsym is too large
-! call chkgrp(nsym,symafm,symrel,ierr_)
  if(present(ierr) .or. nsym<=384)then
    call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
  else

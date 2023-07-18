@@ -49,7 +49,7 @@ module m_bz_mesh
 
  use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
- use m_symtk,          only : chkgrp, littlegroup_q
+ use m_symtk,          only : sg_multable, littlegroup_q
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : getkgrid
@@ -2376,7 +2376,7 @@ subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec, 
  ! Check the closure of the (ferromagnetic) little group
  ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
  symafm_ltg(:) = 1
- call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
+ call sg_multable(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
  ABI_CHECK(ierr == 0, "Error in group closure")
 
  ABI_FREE(symafm_ltg)

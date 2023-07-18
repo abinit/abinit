@@ -27,7 +27,7 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
- use m_symtk,          only : matr3inv, chkgrp, symrelrot, littlegroup_q
+ use m_symtk,          only : matr3inv, sg_multable, symrelrot, littlegroup_q
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
@@ -421,9 +421,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ABI_MALLOC(dum_symafm,(esymm%nsym_gk))
  dum_symafm=1
 
- call chkgrp(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
-
- ABI_CHECK(grp_ierr==0,"chkgrp failed")
+!Check group closure
+ call sg_multable(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
+ ABI_CHECK(grp_ierr==0,"sg_multable failed")
  ABI_FREE(dum_symafm)
 
  ABI_MALLOC(tmp_nelements,(esymm%nsym_gk))

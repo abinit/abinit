@@ -25,7 +25,7 @@ module m_spgbuilder
  use m_errors
  use m_abicore
 
- use m_symtk,   only : chkgrp, print_symmetries
+ use m_symtk,   only : sg_multable, print_symmetries
  use m_symsg,   only : symsgcube, symsghexa, symsgmono, symsgortho, symsgtetra
 
  implicit none
@@ -543,7 +543,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 !write(std_out,*)' gensymspgr  : out of the Bravais lattice, nsym is',nsym
 !ENDDEBUG
 
- call chkgrp(nsym,symafm,symrel,ierr)
+ call sg_multable(nsym,symafm,symrel,ierr,tnons=tnons,tnons_tol=tol5)
  if (ierr/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
  end if
