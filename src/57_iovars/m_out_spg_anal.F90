@@ -125,7 +125,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
    tolsym=dtsets(idtset)%tolsym
    natom=dtsets(idtset)%natom
-   std_nimage=results_out(idtset)%nimage
+   nimage=results_out(idtset)%nimage
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
 
    do iimage=1,nimage 
@@ -250,7 +250,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
  if(echo_spgroup==1)then
    write(msg,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg,'COLL')
  endif
 
 !**************************************************************************
