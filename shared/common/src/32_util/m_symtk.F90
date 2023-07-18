@@ -384,6 +384,7 @@ end subroutine chkgrp
 !!
 !! FUNCTION
 !! Checks that a set of input symmetries constitutes a group.
+!! Treat reasonably well large set of symmetries, where pure translations are present.
 !!
 !! INPUTS
 !! nsym=number of symmetry operations
@@ -422,11 +423,13 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
 
 !Local variables-------------------------------
 !scalars
- integer :: echo,sym1,sym2,sym3,prd_symafm
+ integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
+ integer :: sym1,sym2,sym3
  logical :: found_inv,iseq
  character(len=500) :: msg
 !arrays
- integer :: prd_symrel(3,3)
+ integer :: nlist_symrel(48),prd_symrel(3,3),ptmultable(48,48),ptsymrel(3,3,48)
+ integer,allocatable :: ptsymm(:),list_symrel(:,:)
  real(dp) :: prd_tnons(3)
 
 ! *************************************************************************
@@ -469,60 +472,65 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
    end if
  end do
 
- !In order to avoid potential cubic with number of atoms in exotic cases, set up lookup table for the
- !point symmetry part of the symmetry operations
+ ! 3)
+ !In order to avoid potential cubic scaling with number of atoms, in exotic cases, with large prefactor, 
+ !set up lookup table for the point symmetry part of the symmetry operations.
+ !Still cubic, but with a reduced prefactor. To fully eliminate cubic scaling, should
+ !set up lookup table for the tnons as well.
+
+ ABI_MALLOC(list_symrel,(nsym,48))
+ ABI_MALLOC(ptsymm,(nsym))
+
+ nlist_symrel(:)=0
+ ! Initialize with the first symmetry operation
  ptsymrel(1:3,1:3,1)=symrel(:,:,1)
- ptsym(1)=1
- nptsym=1
- do sym1=1,nsym
-   found=0
-   do sym2=1,nptsym
-     iseq = all(ptsymrel(:,:,sym2) == symrel(:,:,sym1) 
-     if(iseq)then
-       ptsym(sym1)=sym2
-       found=1
-       cycle
+ ptsymm(1)=1
+ nptsymm=1
+ list_symrel(1,1)=1
+ nlist_symrel(1)=1
+ !If more than one symmetry operation, then loop on the other ones, find whether the ptsymm has already been found,
+ !or create one new item in the list 
+ if(nsym/=1)then
+   do sym1=2,nsym
+     found=0
+     do ptsymm2=1,nptsymm
+       if(all(ptsymrel(:,:,ptsymm2) == symrel(:,:,sym1)))then
+         ptsymm(sym1)=ptsymm2 ; found=1 
+         nlist_symrel(ptsymm2)=nlist_symrel(ptsymm2)+1
+         list_symrel(nlist_symrel(ptsymm2),ptsymm2)=sym1
+         cycle
+       endif
+     enddo
+     if(found==0)then
+       nptsymm=nptsymm+1
+       ptsymrel(1:3,1:3,nptsymm)=symrel(:,:,sym2)
+       nlist_symrel(nptsymm)=1
+       list_symrel(1,nptsymm)=sym1
      endif
    enddo
-   if(found==0)then
-     nptsym=nptsym+1
-     ptsymrel(1:3,1:3,nptsym)=symrel(:,:,sym2)
+ endif
 
-
-   
- enddo
-
- ! Check closure under composition and construct multiplication table.
+ ! 4)
+ !Check closure under composition and construct multiplication table of ptsymrel
  echo = 1
- do sym1=1,nsym
-   do sym2=1,nsym
-
-     ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a + Ab}
-     prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
-     prd_symafm = symafm(sym1) * symafm(sym2)
-     prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
-
-     ! Check that product array is one of the original symmetries.
-     iseq = .False.
-     do sym3=1,nsym
-       ! MG: Here v4/t26 and v4/t27 were failing. The rotational part is in the group but with different magnetic part!
-       ! XG: 2020_10_24 Not anymore
-       iseq = (all(prd_symrel == symrel(:,:,sym3) ) .and. &
-               isinteger(prd_tnons - tnons(:,sym3), tnons_tol) .and. &
-               prd_symafm == symafm(sym3) )
-
-       if (iseq) then
-         ! The test is positive
-         if (present(multable)) then
-           multable(1,sym1,sym2) = sym3; multable(2:4,sym1,sym2) = nint(prd_tnons - tnons(:,sym3))
-         end if
+ do ptsymm1=1,nptsymm
+   do ptsymm2=1,nptsymm
+     ! Compute the product of the two symmetries. 
+     prd_symrel = matmul(symrel(:,:,list_symrel(1,ptsymm1)), symrel(:,:,list_symrel(1,ptsymm2)))
+     ! Check that product array is one of the original point symmetries.
+     iseq= .false.
+     do ptsymm3=1,nptsymm
+       iseq=  all(prd_symrel == symrel(:,:,list_symrel(1,ptsymm3) ))
+       if(iseq)then
+         ptmultable(ptsymm1,ptsymm2) = ptsymm3
          exit
-       end if
+       endif
      end do
-
      if (.not. iseq .and. echo == 1) then
        if (echo == 1)then
          ! The test is negative
+         prd_symafm = symafm(sym1) * symafm(sym2)
+         prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
          write(msg, '(a,2(i0,1x),2a,3i3,f11.6,i3,a,2(3i3,f11.6,a),5a)' )&
            'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
            prd_symrel(1,1:3),prd_tnons(1),prd_symafm,ch10,&
@@ -541,11 +549,88 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
        exit
      end if
 
-   end do ! sym2
+   end do ! ptsymm2
    if (echo == 0) exit
- end do ! sym1
+ end do ! ptsymm1
 
-end subroutine sg_multable
+ ! 5)
+ ! Check closure under composition and construct multiplication table.
+ ! However, does this only if the ptgroup has been successfull.
+ if(echo/=0)then
+   do sym1=1,nsym
+     ptsymm1=ptsymm(sym1)
+     do sym2=1,nsym
+       ptsymm2=ptsymm(sym2)
+
+       ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a + Ab}
+!      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
+       prd_ptsymm=ptmultable(ptsymm1,ptsymm2)
+       prd_symrel=list_symrel(1,ptsymm3)
+       prd_symafm = symafm(sym1) * symafm(sym2)
+       prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
+
+       ! Check that product array is one of the original symmetries.
+       ! Only explore those symmetries that have a symrel that is the product of the two symrel of sym1 and sym2.
+       iseq = .False.
+       do ilist_symrel=1,nlist_symrel(prd_ptsymm)
+         sym3=list_symrel(ilist_symrel,prd_ptsymm)
+         iseq = isinteger(prd_tnons(1) - tnons(1,sym3), tnons_tol)
+         if(iseq)then
+           iseq = isinteger(prd_tnons(2) - tnons(2,sym3), tnons_tol)
+           if(iseq)then
+             iseq = isinteger(prd_tnons(3) - tnons(3,sym3), tnons_tol)
+             if(iseq)then
+               iseq = (prd_symafm == symafm(sym3))
+               if(iseq)then
+                 ! The test is positive
+                 if (present(multable)) then
+                   multable(1,sym1,sym2) = sym3; multable(2:4,sym1,sym2) = nint(prd_tnons - tnons(:,sym3))
+                 end if
+                 exit
+               endif
+             endif
+           endif
+         endif
+       end do
+  
+       if (.not. iseq .and. echo == 1) then
+         if (echo == 1)then
+           ! The test is negative
+           write(msg, '(a,2(i0,1x),2a,3i3,f11.6,i3,a,2(3i3,f11.6,a),5a)' )&
+             'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
+             prd_symrel(1,1:3),prd_tnons(1),prd_symafm,ch10,&
+             prd_symrel(2,1:3),prd_tnons(2),ch10,&
+             prd_symrel(3,1:3),prd_tnons(3),ch10,&
+             'This indicates that the input symmetry elements',ch10,&
+             'do not possess closure under group composition.',ch10,&
+             'Action: check symrel, symafm and fix them.'
+           ABI_WARNING(msg)
+           echo = 0
+         endif
+         ierr = ierr + 1
+         if (present(multable)) then
+           multable(1, sym1, sym2) = 0; multable(2:4, sym1, sym2) = huge(0)
+         end if
+         exit
+       end if
+
+     end do ! sym2
+     if (echo == 0) exit
+   end do ! sym1
+ else
+   if (present(multable)) then
+     do sym1=1,nsym
+       do sym2=1,nsym
+         multable(1, sym1, sym2) = 0; multable(2:4, sym1, sym2) = huge(0)
+       enddo
+     enddo
+   endif
+ endif
+
+ ABI_FREE(list_symrel)
+ ABI_FREE(ptsymm)
+
+ end subroutine sg_multable
 !!***
 
 !!****f* m_symtk/chkorthsy
