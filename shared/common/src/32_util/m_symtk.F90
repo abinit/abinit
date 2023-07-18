@@ -385,12 +385,14 @@ end subroutine chkgrp
 !! FUNCTION
 !! Checks that a set of input symmetries constitutes a group.
 !! Treat reasonably well large set of symmetries, where pure translations are present.
+!! The translations are optional. This allows to test symrec.
 !!
 !! INPUTS
 !! nsym=number of symmetry operations
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym)=symmetry operations in real space.
-!! tnons(3,nsym)=Fractional translations.
+!! tnons(3,nsym) [optional]=Fractional translations.
+!! tnons_tol [optional]= tolerance on the match for tnons
 !!
 !! OUTPUT
 !!  ierr=Status error. A non-zero value signals failure.
@@ -409,34 +411,49 @@ end subroutine chkgrp
 !!
 !! SOURCE
 
-subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, toinv)
+subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, &
+&  tnons, tnons_tol, multable, toinv)    ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
  integer,intent(out) :: ierr
- real(dp),intent(in) :: tnons_tol
+ real(dp),optional,intent(in) :: tnons_tol
 !arrays
  integer,intent(in) :: symafm(nsym),symrel(3,3,nsym)
  integer,optional,intent(out) :: multable(4,nsym,nsym), toinv(4,nsym)
- real(dp),intent(in) :: tnons(3,nsym)
+ real(dp),optional,intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
 !scalars
  integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
  integer :: sym1,sym2,sym3
+ real(dp) :: tnons_tol_
  logical :: found_inv,iseq
  character(len=500) :: msg
 !arrays
  integer :: nlist_symrel(48),prd_symrel(3,3),ptmultable(48,48),ptsymrel(3,3,48)
  integer,allocatable :: ptsymm(:),list_symrel(:,:)
  real(dp) :: prd_tnons(3)
+ integer,allocatable :: tnons_(:,:)
 
 ! *************************************************************************
 
  ierr = 0
 
- ! 1) Identity must be the first symmetry. Do not check if tnons == 0 as cell might not be primitive.
+ ABI_MALLOC(tnons_,(3,nsym))
+ if(present(tnons))then
+   tnons_=tnons
+ else
+   tnons_=zero
+ endif
+ if(present(tnons_tol))then
+   tnons_tol_=tnons_tol
+ else
+   tnons_tol_=tol5
+ endif
+
+ ! 1) Identity must be the first symmetry. Do not check if tnons_ == 0 as cell might not be primitive.
  if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
    ABI_WARNING("First operation must be the identity operator")
    ierr = ierr + 1
@@ -448,9 +465,9 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
    found_inv = .FALSE.
    do sym2=1,nsym
      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
-     prd_tnons = tnons(:,sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
+     prd_tnons = tnons_(:,sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
      prd_symafm = symafm(sym1)*symafm(sym2)
-     if ( all(prd_symrel == identity_3d) .and. isinteger(prd_tnons, tnons_tol) .and. prd_symafm == 1 ) then
+     if ( all(prd_symrel == identity_3d) .and. isinteger(prd_tnons, tnons_tol_) .and. prd_symafm == 1 ) then
        found_inv = .TRUE.
        if (present(toinv)) then
          toinv(1, sym1) = sym2; toinv(2:4, sym1) = nint(prd_tnons)
@@ -476,7 +493,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
  !In order to avoid potential cubic scaling with number of atoms, in exotic cases, with large prefactor, 
  !set up lookup table for the point symmetry part of the symmetry operations.
  !Still cubic, but with a reduced prefactor. To fully eliminate cubic scaling, should
- !set up lookup table for the tnons as well.
+ !set up lookup table for the tnons_ as well.
 
  ABI_MALLOC(list_symrel,(nsym,48))
  ABI_MALLOC(ptsymm,(nsym))
@@ -559,7 +576,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
        if (echo == 1)then
          ! The test is negative
          prd_symafm = symafm(sym1) * symafm(sym2)
-         prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
+         prd_tnons = tnons_(:, sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
          write(msg, '(a,2(i0,1x),2a,3i3,f11.6,i3,a,2(3i3,f11.6,a),5a)' )&
            'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
            prd_symrel(1,1:3),prd_tnons(1),prd_symafm,ch10,&
@@ -622,24 +639,24 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
        prd_ptsymm=ptmultable(ptsymm1,ptsymm2)
        prd_symrel=list_symrel(1,prd_ptsymm)
        prd_symafm = symafm(sym1) * symafm(sym2)
-       prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
+       prd_tnons = tnons_(:, sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
 
        ! Check that product array is one of the original symmetries.
        ! Only explore those symmetries that have a symrel that is the product of the two symrel of sym1 and sym2.
        iseq = .False.
        do ilist_symrel=1,nlist_symrel(prd_ptsymm)
          sym3=list_symrel(ilist_symrel,prd_ptsymm)
-         iseq = isinteger(prd_tnons(1) - tnons(1,sym3), tnons_tol)
+         iseq = isinteger(prd_tnons(1) - tnons(1,sym3), tnons_tol_)
          if(iseq)then
-           iseq = isinteger(prd_tnons(2) - tnons(2,sym3), tnons_tol)
+           iseq = isinteger(prd_tnons(2) - tnons(2,sym3), tnons_tol_)
            if(iseq)then
-             iseq = isinteger(prd_tnons(3) - tnons(3,sym3), tnons_tol)
+             iseq = isinteger(prd_tnons(3) - tnons(3,sym3), tnons_tol_)
              if(iseq)then
                iseq = (prd_symafm == symafm(sym3))
                if(iseq)then
                  ! The test is positive
                  if (present(multable)) then
-                   multable(1,sym1,sym2) = sym3; multable(2:4,sym1,sym2) = nint(prd_tnons - tnons(:,sym3))
+                   multable(1,sym1,sym2) = sym3; multable(2:4,sym1,sym2) = nint(prd_tnons - tnons_(:,sym3))
                  end if
                  exit
                endif
@@ -684,6 +701,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
 
  ABI_FREE(list_symrel)
  ABI_FREE(ptsymm)
+ ABI_MALLOC(tnons_)
 
  end subroutine sg_multable
 !!***

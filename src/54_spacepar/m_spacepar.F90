@@ -30,7 +30,7 @@ module m_spacepar
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
+ use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
@@ -2587,10 +2587,10 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  end do
 
 !Check for group closure
- call chkgrp(nsym,symafm,symrel,ierr)
+ call sg_multable(nsym,symafm,symrel,ierr,tnons=tnons,tnons_tol=tol5)
  ABI_CHECK(ierr==0,"Error in group closure")
 
- call chkgrp(nsym,symafm,symrec,ierr)
+ call sg_multable(nsym,symafm,symrec,ierr)
  ABI_CHECK(ierr==0,"Error in group closure")
 
 !Obtain a list of rotated atom labels:

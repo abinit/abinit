@@ -35,7 +35,7 @@ module m_chkinp
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
- use m_symtk,          only : chkgrp, chkorthsy, symmetrize_xred
+ use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
  use m_fstrings,       only : string_in, sjoin
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
@@ -3361,8 +3361,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  symrel and tnons
-!  Check the point group closure (TODO should check the spatial group closure !!)
-   call chkgrp(dt%nsym,dt%symafm,dt%symrel,ierrgrp)
+!  Check the point group closure 
+   call sg_multable(dt%nsym,dt%symafm,dt%symrel,ierrgrp, tnons=dt%tnons, tnons_tol=tol5)
    if (ierrgrp==1) ierr=ierr+1
 
 !  Check the orthogonality of the symmetry operations
