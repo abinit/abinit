@@ -1,5 +1,5 @@
 
-.Version 9.11.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu12.2 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 12 Jul 2023.
-- ( at 16h40 )
+.Starting date : Tue 18 Jul 2023.
+- ( at 21h03 )
   
 - input  file    -> /home/buildbot/ABINIT/scope_gnu_12.2_mpich/trunk__gonze2/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_4/teph_tdep_legacy_4.abi
 - output file    -> teph_tdep_legacy_4.abo
 - root for input  files -> teph_tdep_legacy_4i
 - root for output files -> teph_tdep_legacy_4o
-
 
  DATASET   11 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       7.626 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -56,7 +54,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   13 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 13.
@@ -72,7 +69,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   14 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -91,7 +87,6 @@ P This job should need less than                       8.620 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   15 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 15.
@@ -107,7 +102,6 @@ P This job should need less than                      17.664 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   16 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -126,7 +120,6 @@ P This job should need less than                      44.879 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   21 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 21.
@@ -142,7 +135,6 @@ P This job should need less than                       7.626 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   22 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -160,7 +152,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   23 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 23.
@@ -176,7 +167,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   24 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -195,7 +185,6 @@ P This job should need less than                       9.671 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   25 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 25.
@@ -211,7 +200,6 @@ P This job should need less than                      17.664 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   26 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -230,7 +218,6 @@ P This job should need less than                      45.780 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   31 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
@@ -246,7 +233,6 @@ P This job should need less than                       7.626 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   32 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -264,7 +250,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   33 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 33.
@@ -280,7 +265,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   34 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -299,7 +283,6 @@ P This job should need less than                       9.671 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   35 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 35.
@@ -315,7 +298,6 @@ P This job should need less than                      17.380 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.515 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   36 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -334,7 +316,6 @@ P This job should need less than                      45.780 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   41 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 41.
@@ -350,7 +331,6 @@ P This job should need less than                       7.626 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   42 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -368,7 +348,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   43 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 43.
@@ -384,7 +363,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   44 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -403,7 +381,6 @@ P This job should need less than                       9.671 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   45 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 45.
@@ -419,7 +396,6 @@ P This job should need less than                      17.714 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.827 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   46 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -438,7 +414,6 @@ P This job should need less than                      45.928 Mbytes of memory.
 _ WF disk file :     12.827 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   51 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 51.
@@ -454,7 +429,6 @@ P This job should need less than                       7.626 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   52 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -472,7 +446,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   53 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 53.
@@ -488,7 +461,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   54 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -507,7 +479,6 @@ P This job should need less than                       9.671 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   55 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 55.
@@ -523,7 +494,6 @@ P This job should need less than                      17.714 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.827 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   56 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -542,7 +512,6 @@ P This job should need less than                      45.928 Mbytes of memory.
 _ WF disk file :     12.827 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   61 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 61.
@@ -558,7 +527,6 @@ P This job should need less than                       7.626 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   62 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -576,7 +544,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   63 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 63.
@@ -592,7 +559,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   64 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -611,7 +577,6 @@ P This job should need less than                       9.671 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   65 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 65.
@@ -627,7 +592,6 @@ P This job should need less than                      17.380 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.515 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   66 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -646,7 +610,6 @@ P This job should need less than                      45.780 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   71 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 71.
@@ -662,7 +625,6 @@ P This job should need less than                       7.626 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   72 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -680,7 +642,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   73 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 73.
@@ -696,7 +657,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   74 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -715,7 +675,6 @@ P This job should need less than                       9.671 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   75 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 75.
@@ -731,7 +690,6 @@ P This job should need less than                      17.714 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.827 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   76 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -750,7 +708,6 @@ P This job should need less than                      45.928 Mbytes of memory.
 _ WF disk file :     12.827 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   81 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 81.
@@ -766,7 +723,6 @@ P This job should need less than                       7.626 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   82 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -784,7 +740,6 @@ P This job should need less than                      17.664 Mbytes of memory.
 _ WF disk file :     12.780 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   83 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 83.
@@ -800,7 +755,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   84 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -819,7 +773,6 @@ P This job should need less than                       9.671 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   85 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 85.
@@ -835,7 +788,6 @@ P This job should need less than                      17.714 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     12.827 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   86 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -34625,6 +34577,11 @@ P          mk1mem86        85
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -34732,15 +34689,15 @@ P          mk1mem86        85
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        482.7  wall=        484.0
+- Proc.   0 individual time (sec): cpu=        488.6  wall=        490.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered 765 WARNINGs and 338 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        482.7  wall=        484.0
+.Delivered 765 WARNINGs and 339 COMMENTs to log file.
++Overall time at end (sec) : cpu=        488.6  wall=        490.0
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
 -   There were 3000 allocations and 3000 deallocations in C code
 - [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 72097387 allocations and 72097387 deallocations in Fortran
+-   There were 72099327 allocations and 72099327 deallocations in Fortran
 -   Remaining memory at the end of the calculation is 0
