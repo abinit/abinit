@@ -433,7 +433,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
 
  ierr = 0
 
- ! 1) Identity must be the first symmetry. Do not check if tnon == 0 as cell might not be primitive.
+ ! 1) Identity must be the first symmetry. Do not check if tnons == 0 as cell might not be primitive.
  if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
    ABI_WARNING("First operation must be the identity operator")
    ierr = ierr + 1
@@ -468,6 +468,29 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
      exit
    end if
  end do
+
+ !In order to avoid potential cubic with number of atoms in exotic cases, set up lookup table for the
+ !point symmetry part of the symmetry operations
+ ptsymrel(1:3,1:3,1)=symrel(:,:,1)
+ ptsym(1)=1
+ nptsym=1
+ do sym1=1,nsym
+   found=0
+   do sym2=1,nptsym
+     iseq = all(ptsymrel(:,:,sym2) == symrel(:,:,sym1) 
+     if(iseq)then
+       ptsym(sym1)=sym2
+       found=1
+       cycle
+     endif
+   enddo
+   if(found==0)then
+     nptsym=nptsym+1
+     ptsymrel(1:3,1:3,nptsym)=symrel(:,:,sym2)
+
+
+   
+ enddo
 
  ! Check closure under composition and construct multiplication table.
  echo = 1
