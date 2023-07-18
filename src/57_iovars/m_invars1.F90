@@ -2405,6 +2405,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
+   dtsets(idtset)%mag1mom = 0
    dtsets(idtset)%magpen = zero
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
