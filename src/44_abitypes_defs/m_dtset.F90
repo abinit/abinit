@@ -359,6 +359,7 @@ type, public :: dataset_type
  integer :: lw_natopt
 !M
  integer :: magconon
+ integer :: mag1mom
  integer :: maxnsym
  integer :: max_ncpus = 0
  integer :: mband
@@ -1733,6 +1734,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%lw_natopt          = dtin%lw_natopt
  dtout%lw_qdrpl           = dtin%lw_qdrpl
  dtout%magconon           = dtin%magconon
+ dtout%mag1mom            = dtin%mag1mom
  dtout%maxnsym            = dtin%maxnsym
  dtout%max_ncpus          = dtin%max_ncpus
  dtout%mband              = dtin%mband
@@ -3407,7 +3409,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' lwf_temperature_nstep lwf_var_temperature'
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
- list_vars=trim(list_vars)//' magconon magcon_lambda magpen mbpt_sciss'
+ list_vars=trim(list_vars)//' magconon magcon_lambda mag1mom magpen mbpt_sciss'
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
  list_vars=trim(list_vars)//' mpatpol mpdir mqgrid mqgriddg'
 !N

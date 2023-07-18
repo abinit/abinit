@@ -1633,6 +1633,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !     end if
 !   end if
 
+!  mag1mom
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'mag1mom',dt%mag1mom,3,(/0,1,2/),iout)
+
 !  magpen
    if(dt%magpen/=zero)then
      cond_string(1)='magpen' ; cond_values(1)=dt%magpen
