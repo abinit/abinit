@@ -222,8 +222,8 @@ contains
 
  if(ipert>natom+11.and.ipert<=2*natom+11)then
    ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
-   call dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,natom,nfft,nspden,&
-&  rhomag,v1zeeman)
+   call dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,nspden,&
+&  v1zeeman)
  end if
 
  if (abs(magpen) > tol6) then
@@ -765,18 +765,15 @@ end subroutine dfpt_v1magpen
 !!
 !! SOURCE
 
-subroutine dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,natom,nfft,nspden,&
-& rhomag,v1zeeman)
+subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,nspden,&
+& v1zeeman)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)    :: idir,ipert,nfft,cplex,natom,nspden
- real*8, intent(in)     :: magpen  
  type(MPI_type), intent(in) :: mpi_enreg
 !arrays
  real(dp), intent(in)   :: fatsph(nfft,natom)
- real(dp), intent(in)   :: intgden(cplex,nspden,natom)
- real(dp), intent(in)   :: rhomag(2,nspden)
  real(dp), intent(inout) :: v1zeeman(cplex*nfft,nspden)
 
 !Local variables-------------------------------
@@ -793,15 +790,11 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,
  !Define the local magnetic field
  if (cplex==1) then
    do ifft=1,nfft
-!     Bloc(ifft)=-magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
      Bloc(ifft)=-0.5*fatsph(ifft,iatom)
    end do
  else if (cplex==2) then
    do ifft=1,nfft
-!     Bloc(2*ifft-1)=-magpen*intgden(1,idir+1,iatom)*fatsph(ifft,iatom)
-!     Bloc(2*ifft  )=-magpen*intgden(2,idir+1,iatom)*fatsph(ifft,iatom)
      Bloc(2*ifft-1)=-0.5*fatsph(ifft,iatom)
-     Bloc(2*ifft  )=-0.5*fatsph(ifft,iatom)
    end do
  end if
 
@@ -845,8 +838,8 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= Bloc(2*ifft-1) !Re[V^12]
-         v1zeeman(2*ifft  ,3)= Bloc(2*ifft) !Im[V^12]
-         v1zeeman(2*ifft-1,4)=-Bloc(2*ifft) !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
+         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
          v1zeeman(2*ifft  ,4)= Bloc(2*ifft-1) !Im[i.V^21]=Re[V^12]
        end do
      case(2) !along y, v1 = -sigma_y
@@ -855,17 +848,17 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,intgden,idir,ipert,magpen,mpi_enreg,
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)= Bloc(2*ifft)  !Re[V^12]
+         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)=-Bloc(2*ifft-1) !Im[V^12]
          v1zeeman(2*ifft-1,4)=-Bloc(2*ifft-1) !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)=-Bloc(2*ifft)  !Im[i.V^21]=Re[V^12]
+         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
        end do
      case(3)
        do ifft=1,nfft
          v1zeeman(2*ifft-1,1)= Bloc(2*ifft-1) !Re[V^11]
-         v1zeeman(2*ifft  ,1)= Bloc(2*ifft)   !Im[V^11]
+         v1zeeman(2*ifft  ,1)= 0.0e0   !Im[V^11]
          v1zeeman(2*ifft-1,2)=-Bloc(2*ifft-1) !Re[V^22]
-         v1zeeman(2*ifft  ,2)=-Bloc(2*ifft)   !Im[V^22]
+         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
          v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
