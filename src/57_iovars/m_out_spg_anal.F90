@@ -63,12 +63,12 @@ contains
 !!
 !! INPUTS
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables
-!!  iout=unit number for echoed output
+!!  iout=unit number for echoed output - the echo is done to std_out anyhow.
 !!  ndtset=number of datasets
 !!  ndtset_alloc=number of datasets, corrected for allocation of at least
 !!   one data set. Use for most dimensioned arrays.
-!!  echo_spgroup = option for analysis 
-!!      1 => write ;  2 => echo of spacegroup for all dtsets and possibly all images
+!!  echo_spgroup = not relevant anymore, as at present set to 1 in the calling routine.
+!!      (0 => write ;  1 => echo of spacegroup for all dtsets and possibly all images)
 !!  results_out(0:ndtset_alloc)=<type results_out_type>contains the results
 !!   needed for outvars, including evolving variables
 !!
@@ -140,7 +140,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
 !DEBUG
 !    write(std_out,*)' out_spg_data : before symfind_expert, return, msym=  ',msym
-     write(std_out,*)' out_spg_data : before symfind_expert, continue  '
+!     write(std_out,*)' out_spg_data : before symfind_expert, continue  '
 !    return
 !ENDDEBUG
 
@@ -154,7 +154,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
 !DEBUG
 !    write(std_out,*)' out_spg_data : before symfind_expert, return  '
-     write(std_out,*)' out_spg_data : after symfind_expert, return  '
+!    write(std_out,*)' out_spg_data : after symfind_expert, return  '
 !    return
 !ENDDEBUG
 
@@ -175,7 +175,7 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 !ENDDEBUG
 
      if(symmetry_changed==1)then
-       if(echo_spgroup==0 .and. counter0==1)then
+       if(counter0==1)then
          write(msg,'(8a)')ch10,' The spacegroup number, the magnetic point group, and/or the number of symmetries',ch10,&
 &         ' have changed between the initial recognition based on the input file',ch10,&
 &         ' and a postprocessing based on the final acell, rprim, and xred.',ch10,&
@@ -189,16 +189,16 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 &         ' and a postprocessing based on the final acell, rprim, and xred.',ch10,&
 &         ' These modifications are detailed below.',ch10,&
 &         ' The updated tnons, symrel or symrel have NOT been reported in the final echo of variables after computation.'
-         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,msg,'COLL')
          write(msg,'(5a)')' Such change of spacegroup, or magnetic point group might happen in several cases.',ch10,&
 &         ' (1) If spgroup (+ptgroupma) defined in the input file, but the actual groups are supergroups of these; ',ch10,&
 &         ' (2) If symrel, tnons (+symafm) defined in the input file, while the system is more symmetric; '
-         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,msg,'COLL')
          write(msg,'(5a)')&
 &         ' (3) If the geometry has been optimized and the final structure is more symmetric than the initial one;',ch10,&
 &         ' (4) In case of GW of BSE calculation with inversion symmetry, as nsym has been reduced in such',ch10,&
 &         '       dataset, excluding the improper symmetry operations (with determinant=-1), but not in the postprocessing.'
-         call wrtout(iout,msg,'COLL')
+         call wrtout(std_out,msg,'COLL')
          write(msg,'(5a)')' In some case, the recognition of symmetries strongly depends on the value of tolsym.',ch10,&
           ' You might investigate its effect by restarting abinit based on the final acell, rprim and xred,',ch10,&
 &         ' and different values for tolsym.'
@@ -211,26 +211,26 @@ subroutine out_spg_anal(dtsets,echo_spgroup,iout,ndtset,ndtset_alloc,results_out
 
        if(symmetry_changed==0)then
          if(nimage==1)then
-           call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
+           call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup)
          else
-           call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage=iimage)
+           call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup,iimage=iimage)
          endif
        else 
-         write(msg,'(2a,3i5)')ch10,' Initial data. jdtset, iimage, nsym=',jdtset,iimage,dtsets(idtset)%nsym
+         write(msg,'(2a,3i8)')ch10,' Initial data. jdtset, iimage, nsym=',jdtset,iimage,dtsets(idtset)%nsym
          call wrtout(iout,msg,'COLL')
          if(nimage==1)then
-           call prtspgroup(dtsets(idtset)%bravais,dtsets(idtset)%genafm,iout,jdtset,&
+           call prtspgroup(dtsets(idtset)%bravais,dtsets(idtset)%genafm,std_out,jdtset,&
 &           dtsets(idtset)%ptgroupma,dtsets(idtset)%spgroup)
          else
-           call prtspgroup(dtsets(idtset)%bravais,dtsets(idtset)%genafm,iout,jdtset,&
+           call prtspgroup(dtsets(idtset)%bravais,dtsets(idtset)%genafm,std_out,jdtset,&
 &           dtsets(idtset)%ptgroupma,dtsets(idtset)%spgroup,iimage=iimage)
          endif
-         write(msg,'(a,3i5)')' Final data.   jdtset, iimage, nsym=',jdtset,iimage,nsym
+         write(msg,'(a,3i8)')' Final data.   jdtset, iimage, nsym=',jdtset,iimage,nsym
          call wrtout(iout,msg,'COLL')
          if(nimage==1)then
-           call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
+           call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup)
          else
-           call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage=iimage)
+           call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup,iimage=iimage)
          endif
        endif
 

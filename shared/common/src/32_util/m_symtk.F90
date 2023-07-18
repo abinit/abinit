@@ -494,7 +494,7 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
    do sym1=2,nsym
      found=0
      do ptsymm2=1,nptsymm
-       if(all(ptsymrel(:,:,ptsymm2) == symrel(:,:,sym1)))then
+       if(all(symrel(:,:,list_symrel(1,ptsymm2)) == symrel(:,:,sym1)))then
          ptsymm(sym1)=ptsymm2 ; found=1 
          nlist_symrel(ptsymm2)=nlist_symrel(ptsymm2)+1
          list_symrel(nlist_symrel(ptsymm2),ptsymm2)=sym1
@@ -503,12 +503,41 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
      enddo
      if(found==0)then
        nptsymm=nptsymm+1
-       ptsymrel(1:3,1:3,nptsymm)=symrel(:,:,sym2)
+!DEBUG
+!      write(std_out,*)' current value of nptsymm, sym1=',nptsymm, sym1
+!ENDDEBUG
+       ptsymrel(1:3,1:3,nptsymm)=symrel(:,:,sym1)
+       ptsymm(sym1)=nptsymm
        nlist_symrel(nptsymm)=1
        list_symrel(1,nptsymm)=sym1
      endif
    enddo
  endif
+
+ !Check that each point symmetry is associated to the same number of translations
+ if(nptsymm/=1)then
+   do ptsymm1=1,nptsymm
+     if(nlist_symrel(ptsymm1)/=nlist_symrel(1))then 
+       write(msg, '(9a)' )&
+&        'The number of translations (and possibly symafm) associated to the same symrel',ch10,&
+&        'is not the same for all point symmetries',ch10,&
+&        'This indicates that the input symmetry elements',ch10,&
+&        'do not possess closure under group composition.',ch10,&
+&        'Action: check symrel, symafm and fix them.'
+       ABI_WARNING(msg)
+       echo = 0
+       ierr = ierr + 1
+       if (present(multable)) then
+         multable(1,:,:) = 0; multable(2:4,:,:) = huge(0)
+       end if
+       exit
+     endif
+   enddo
+ endif
+
+!DEBUG
+!  write(std_out,*)' final value of nptsymm=',nptsymm
+!ENDDEBUG
 
  ! 4)
  !Check closure under composition and construct multiplication table of ptsymrel
@@ -550,22 +579,48 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
      end if
 
    end do ! ptsymm2
+
+!DEBUG
+!  write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
+!  write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
+!  write(std_out,'(16i3)')ptmultable(ptsymm1,17:32)
+!  write(std_out,'(16i3)')ptmultable(ptsymm1,33:48)
+!ENDDEBUG
+
    if (echo == 0) exit
  end do ! ptsymm1
 
  ! 5)
  ! Check closure under composition and construct multiplication table.
  ! However, does this only if the ptgroup has been successfull.
- if(echo/=0)then
+ if(echo/=0 .and. ierr==0)then
    do sym1=1,nsym
      ptsymm1=ptsymm(sym1)
      do sym2=1,nsym
        ptsymm2=ptsymm(sym2)
 
+       !The equal number of translations for each point symmetry has been checked earlier.
+       !If the full table is not requested, it is now sufficient to check that
+       !the product of all symmetry operations sym1 with a pure translation (ptsymm=1), or with one of the instances        
+       !for each point symmetries is indeed present in the table.
+       !This is done to save CPU time when the number of symmetry operations is bigger than 384.
+
+       if (nsym>384 .and. .not.(present(multable))) then
+         if(ptsymm2/=1 .and. sym2/=list_symrel(1,ptsymm2))then
+           cycle
+         endif
+       end if
+
+       !DEBUG
+       !if(ptsymm2<1 .or. ptsymm2>48)then
+       ! write(std_out,*)' sym1,sym2,ptsymm1,ptsymm2=',sym1,sym2,ptsymm1,ptsymm2
+       !endif
+       !ENDDEBUG
+
        ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a + Ab}
 !      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
        prd_ptsymm=ptmultable(ptsymm1,ptsymm2)
-       prd_symrel=list_symrel(1,ptsymm3)
+       prd_symrel=list_symrel(1,prd_ptsymm)
        prd_symafm = symafm(sym1) * symafm(sym2)
        prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
 

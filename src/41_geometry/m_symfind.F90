@@ -116,8 +116,8 @@ contains
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ierr_,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
- real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20
- real(dp) :: spinat2,spinatcl2,spinatcl20
+ real(dp) :: det,diff1,diff2,diff3,diffr1,diffr2,diffr3,ndnorm,nucdipmomcl2,nucdipmomcl20
+ real(dp) :: spinat2,spinatcl2,spinatcl20,tolsym2
 ! TRUE if antiferro symmetries are used with non-collinear magnetism.
  integer :: afm_noncoll=1 !For nspden==4.  If 1, all symops are permitted ; if 0 symafm must be 1.
 !For nspden=4. If noncoll_orthorhombic1, require the symmetry operations to be a subset of the orthorhombic symmetries, except if all spinat=0..
@@ -139,8 +139,8 @@ contains
 !**************************************************************************
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : enter '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : enter '
+!call flush(std_out)
 !ENDDEBUG
 
 !DEBUG
@@ -182,6 +182,8 @@ contains
  ABI_MALLOC(local_nucdipmom,(3,3,natom))
  ABI_MALLOC(nucdipmomcl,(3,natom))
 
+ tolsym2=tolsym**2
+
  chrgat_(:)=zero
  if(present(chrgat))then
    chrgat_(:)=chrgat(:)
@@ -217,8 +219,8 @@ contains
  call matr3inv(gprimd,rprimd)
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
+!call flush(std_out)
 !ENDDEBUG
 
 !Initialise with the first atom
@@ -296,8 +298,8 @@ contains
 !ENDDEBUG
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : before select the class '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : before select the class '
+!call flush(std_out)
 !ENDDEBUG
 
 !Select the class with the least number of atoms, and non-zero spinat if any
@@ -363,8 +365,8 @@ contains
  end do
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : before big loop '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : before big loop '
+!call flush(std_out)
 !ENDDEBUG
 
 !Big loop over each symmetry operation of the Bravais lattice
@@ -372,8 +374,8 @@ contains
  do isym=1,nptsym
 
 !DEBUG
- write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
- call flush(std_out)
+!write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
+!call flush(std_out)
 !ENDDEBUG
 
    if(present(invardir_red))then
@@ -542,17 +544,34 @@ contains
            found3=1
            iatom3=class(kk,iclass)
 !          Check the location
-           diff(:)=xred(:,iatom3)-symxred2(:)
-           diff(:)=diff(:)-nint(diff(:))
-           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
+           diffr1=xred(1,iatom3)-symxred2(1)
+           diff1=diffr1-nint(diffr1)
+           if(diff1**2>tolsym2)then
+             found3=0 ; cycle
+           else
+             diffr2=xred(2,iatom3)-symxred2(2)
+             diff2=diffr2-nint(diffr2)
+             if(diff2**2>tolsym2)then
+               found3=0 ; cycle
+             else
+               diffr3=xred(3,iatom3)-symxred2(3)
+               diff3=diffr3-nint(diffr3)
+               if( (diff1**2+diff2**2+diff3**2) > tolsym**2 )then
+                 found3=0 ; cycle
+               endif
+             endif
+           endif
 !          Check the spinat
            if (nspden/=4) then
              diff(:)=spinat(:,iatom3)-symspinat2(:)
            else
              diff(:)=spinatred(:,iatom3)-symspinat2(:)
            end if
-           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
-           !          Check the nucdipmom
+           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )then
+             found3=0
+             cycle
+           endif  
+           ! Check the nucdipmom
            ! hand3 gives original circulation sense of nuclear dipole
            call acrossb(local_nucdipmom(1:3,2,iatom3),local_nucdipmom(1:3,3,iatom3),hand3)
 
@@ -599,8 +618,8 @@ contains
  end do ! End big loop over each symmetry operation of the Bravais lattice
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : after big loop, will call ABI_FREE '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : after big loop, will call ABI_FREE '
+!call flush(std_out)
 !ENDDEBUG
 
  ABI_FREE(class)
@@ -616,17 +635,22 @@ contains
    ABI_FREE(spinatred)
  end if
 
- !DEBUG
- write(std_out,'(a,i6)')' m_symfind%symfind : call sg_multable, nsym= ',nsym
- call flush(std_out)
+!DEBUG
+!write(std_out,'(a,i6)')' m_symfind%symfind : call sg_multable, nsym= ',nsym
+!call flush(std_out)
 !ENDDEBUG
 
+! The algorithm in sg_multable is still cubic in nsym, so avoid calling it uselessly  when nsym is too large
 ! call chkgrp(nsym,symafm,symrel,ierr_)
- call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
+ if(present(ierr) .or. nsym<=384)then
+   call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
+ else
+   ierr_=0
+ endif
 
-  !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : call print_symmetries, ierr_= ',ierr_
- call flush(std_out)
+!DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : call print_symmetries, ierr_= ',ierr_
+!call flush(std_out)
 !ENDDEBUG
 
  if (ierr_/=0) then
@@ -652,8 +676,8 @@ contains
 !ENDDEBUG
 
 !DEBUG
- write(std_out,'(a)')' m_symfind%symfind : exit '
- call flush(std_out)
+!write(std_out,'(a)')' m_symfind%symfind : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine symfind
@@ -739,7 +763,7 @@ end subroutine symfind
 !**************************************************************************
 
 !DEBUG
-  write(std_out,*)' m_symfind%symfind_expert : enter '
+! write(std_out,*)' m_symfind%symfind_expert : enter '
 !ENDDEBUG
 
   use_inversion=1
@@ -749,7 +773,7 @@ end subroutine symfind
   end if
 
 !DEBUG
-  write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
+! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
 !ENDDEBUG
 
   call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
@@ -757,7 +781,7 @@ end subroutine symfind
     chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
 
 !DEBUG
-  write(std_out,*)' m_symfind%symfind_expert : after call symfind (1) '
+! write(std_out,*)' m_symfind%symfind_expert : after call symfind (1) '
 !ENDDEBUG
 
   !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
@@ -802,7 +826,7 @@ end subroutine symfind
     endif
 
 !DEBUG
-  write(std_out,*)' m_symfind%symfind_expert : before call symfind (3) '
+!write(std_out,*)' m_symfind%symfind_expert : before call symfind (3) '
 !ENDDEBUG
 
     call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
@@ -810,7 +834,7 @@ end subroutine symfind
       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=invardir_red,invar_z=invar_z)
 
 !DEBUG
-  write(std_out,*)' m_symfind%symfind_expert : after call symfind (3) '
+! write(std_out,*)' m_symfind%symfind_expert : after call symfind (3) '
 !ENDDEBUG
 
     !Needs one more resymmetrization, for the tnons
@@ -823,7 +847,7 @@ end subroutine symfind
   end if ! tolsym >1.00001e-8
 
 !DEBUG
-  write(std_out,*)' m_symfind%symfind_expert : exit '
+! write(std_out,*)' m_symfind%symfind_expert : exit '
 !ENDDEBUG
 
 end subroutine symfind_expert
