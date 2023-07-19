@@ -47,7 +47,7 @@ module m_xg
  use mpi
 #endif
 
-#if defined(HAVE_GPU_CUDA)
+#if defined(HAVE_GPU)
   use m_gpu_toolbox
 #endif
 
@@ -332,7 +332,7 @@ contains
 
   subroutine xg_init(xg, space, rows, cols, comm, use_gpu)
 
-    type(xg_t), intent(inout) :: xg
+    type(xg_t), target, intent(inout) :: xg
     integer   , intent(in   ) :: space
     integer   , intent(in   ) :: rows
     integer   , intent(in   ) :: cols
@@ -391,28 +391,45 @@ contains
           ABI_FREE(xg%vecR)
         end if
         ABI_MALLOC(xg%vecR,(1:rows,1:cols))
-        !xg%vecR(:,:) = zero
         xg%trans = 't'
+
+#ifdef HAVE_GPU_CUDA
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecR)
         !FIXME To be wrapped
         size_bytes = sizeof(xg%vecR)
+
         !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecR)
         call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
         !$OMP END TARGET DATA
+#endif
+
+#ifdef HAVE_GPU_HIP
+        !FIXME Memset doesn't work between HIP and OpenMP
+        xg%vecR(:,:) = zero
+        !$OMP TARGET ENTER DATA MAP(to:xg%vecR)
+#endif
       case (SPACE_C)
         if ( allocated(xg%vecC) ) then
           !$OMP TARGET EXIT DATA MAP(release:xg%vecC)
           ABI_FREE(xg%vecC)
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
-        !xg%vecC(:,:) = zero
         xg%trans = 'c'
+
+#ifdef HAVE_GPU_CUDA
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecC)
         !FIXME To be wrapped
         size_bytes = sizeof(xg%vecC)
         !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecC)
         call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
         !$OMP END TARGET DATA
+#endif
+        !FIXME Memset doesn't work between HIP and OpenMP
+#ifdef HAVE_GPU_HIP
+        xg%vecC(:,:) = zero
+        !$OMP TARGET ENTER DATA MAP(to:xg%vecC)
+#endif
+
       case default
         ABI_ERROR("Invalid space")
       end select
@@ -470,13 +487,18 @@ contains
 
   subroutine xg_set(xg,array,shift_col,rows)
 
-    type(xg_t), intent(inout) :: xg
+    type(xg_t), target, intent(inout) :: xg
     double precision, intent(in) :: array(:,:)
     integer, intent(in) :: shift_col
     integer, intent(in) :: rows
     integer :: cols
     integer :: col
     double precision :: tsec(2)
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    complex(dpc), pointer :: xg__vecC(:,:)
+    real(dp), pointer :: xg__vecR(:,:)
+#endif
 
     call timab(tim_set,1,tsec)
 
@@ -493,11 +515,13 @@ contains
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case (xg%space)
       case (SPACE_R)
+        xg__vecR => xg%vecR
         do col = 1, min(cols,xg%cols-shift_col)
           xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
         end do
-        !$OMP TARGET UPDATE TO(xg%vecR)
+        !$OMP TARGET UPDATE TO(xg__vecR)
       case (SPACE_CR)
+        xg__vecR => xg%vecR
         if ( xg%rows /= 2*rows ) then
           ABI_ERROR("Bad number of rows")
         end if
@@ -506,13 +530,14 @@ contains
           xg%vecR(1:rows,shift_col+col) = array(1,(col-1)*rows+1:col*rows)
           xg%vecR(rows+1:2*rows,shift_col+col) = array(2,(col-1)*rows+1:col*rows)
         end do
-        !$OMP TARGET UPDATE TO(xg%vecR)
+        !$OMP TARGET UPDATE TO(xg__vecR)
       case (SPACE_C)
+        xg__vecC => xg%vecC
         do col = 1, min(cols,xg%cols-shift_col)
           xg%vecC(1:rows,shift_col+col) = dcmplx(array(1,(col-1)*rows+1:col*rows), &
             array(2,(col-1)*rows+1:col*rows))
         end do
-        !$OMP TARGET UPDATE TO(xg%vecC)
+        !$OMP TARGET UPDATE TO(xg__vecC)
       end select
 #endif
     else
@@ -2363,7 +2388,9 @@ contains
     integer          :: l_use_gpu_cuda
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    integer :: jblock
+    integer :: rows,cols,jblock
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:),da__vecR(:,:)
 #endif
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockW%space ) then
@@ -2410,21 +2437,32 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
+      rows = xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
-        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecR,xgBlockB%vecR,xgBlockW%vecR,da%vecR)
-        do iblock = 1, xgBlockA%cols
-          do jblock = 1, xgBlockA%rows
-            xgBlockA%vecR(jblock,iblock) = - da%vecR(iblock,1) * xgBlockB%vecR(jblock,iblock) &
-                + xgBlockW%vecR(jblock,iblock)
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        xgBlockW__vecR => xgBlockW%vecR
+        da__vecR => da%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+        !$OMP& MAP(to:xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR,da__vecR)
+        do iblock = 1, cols
+          do jblock = 1, rows
+            xgBlockA__vecR(jblock,iblock) = - da__vecR(iblock,1) * xgBlockB__vecR(jblock,iblock) &
+                + xgBlockW__vecR(jblock,iblock)
           end do
         end do
       case (SPACE_C)
-        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecC,xgBlockB%vecC,xgBlockW%vecC,da%vecR)
-        do iblock = 1, xgBlockA%cols
-          do jblock = 1, xgBlockA%rows
-            xgBlockA%vecC(jblock,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(jblock,iblock) &
-                + xgBlockW%vecC(jblock,iblock)
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        xgBlockW__vecC => xgBlockW%vecC
+        da__vecR => da%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+        !$OMP& MAP(to:xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC,da__vecR)
+        do iblock = 1, cols
+          do jblock = 1, rows
+            xgBlockA__vecC(jblock,iblock) = - da__vecR(iblock,1) * xgBlockB__vecC(jblock,iblock) &
+                + xgBlockW__vecC(jblock,iblock)
           end do
         end do
       end select
@@ -2477,6 +2515,12 @@ contains
     integer :: iblock,irow
     integer :: l_use_gpu_cuda
 
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer :: min_rows,cols
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+#endif
+
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
@@ -2514,19 +2558,23 @@ contains
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
       !$OMP TARGET ENTER DATA MAP(to:vec)
+      min_rows=min(xgBlock%rows,shift+rows)
+      cols=xgBlock%cols
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
-        !$OMP TARGET PARALLEL DO MAP(to:xgBlock%vecR) MAP(to:vec) PRIVATE(iblock,irow)
-        do iblock = 1, xgBlock%cols
-          do irow = shift+1, min(xgBlock%rows,shift+rows)
-            xgBlock%vecR(irow,iblock) = xgBlock%vecR(irow,iblock) * vec(irow)
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR) MAP(to:vec) PRIVATE(iblock,irow)
+        do iblock = 1, cols
+          do irow = shift+1, min_rows
+            xgBlock__vecR(irow,iblock) = xgBlock__vecR(irow,iblock) * vec(irow)
           end do
         end do
       case (SPACE_C)
-        !$OMP TARGET PARALLEL DO MAP(to:xgBlock%vecC) MAP(to:vec) PRIVATE(iblock,irow)
-        do iblock = 1, xgBlock%cols
-          do irow = shift+1, min(xgBlock%rows,shift+rows)
-            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+        xgBlock__vecC => xgBlock%vecC
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC) MAP(to:vec) PRIVATE(iblock,irow)
+        do iblock = 1, cols
+          do irow = shift+1, min_rows
+            xgBlock__vecC(irow,iblock) = xgBlock__vecC(irow,iblock) * vec(irow)
           end do
         end do
       end select
@@ -2575,8 +2623,11 @@ contains
     integer,         intent(in   ), optional :: use_gpu_cuda
 
     integer :: rows
+    integer :: cols
+    integer :: min_rows
     integer :: iblock,irow
     integer :: l_use_gpu_cuda
+    complex(dpc),pointer :: xgBlock__vecC(:,:)
 
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
@@ -2616,11 +2667,13 @@ contains
       case (SPACE_R,SPACE_CR)
         ABI_ERROR("Error colwiseMulC")
       case (SPACE_C)
+        min_rows=min(xgBlock%rows,shift+rows); cols = xgBlock%cols
+        xgBlock__vecC => xgBlock%vecC
         !$OMP TARGET ENTER DATA MAP(to:vec)
-        !$OMP TARGET PARALLEL DO MAP(to:xgBlock%vecC) MAP(to:vec) PRIVATE(iblock,irow)
-        do iblock = 1, xgBlock%cols
-          do irow = shift+1, min(xgBlock%rows,shift+rows)
-            xgBlock%vecC(irow,iblock) = xgBlock%vecC(irow,iblock) * vec(irow)
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC) MAP(to:vec) PRIVATE(iblock,irow)
+        do iblock = 1, cols
+          do irow = shift+1, min_rows
+            xgBlock__vecC(irow,iblock) = xgBlock__vecC(irow,iblock) * vec(irow)
           end do
         end do
       end select
@@ -2761,7 +2814,10 @@ contains
     integer, intent(in), optional :: use_gpu_cuda
     integer :: col
     integer :: row
+    integer :: rows,cols
     integer      :: l_use_gpu_cuda
+    real(dp),pointer :: A__vecR(:,:), B__vecR(:,:)
+    complex(dpc),pointer :: A__vecC(:,:), B__vecC(:,:)
 
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Must be same space for add")
@@ -2782,20 +2838,26 @@ contains
 
     if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      cols=xgBlockB%cols
+      rows=xgBlockB%rows
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
-        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecR,xgBlockB%vecR)
-        do col = 1, xgBlockB%cols
-          do row = 1, xgBlockB%rows
-            xgBlockA%vecR(row,col) = xgBlockA%vecR(row,col) + xgBlockB%vecR(row,col)
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecR,xgBlockB__vecR)
+        do col = 1, cols
+          do row = 1, rows
+            xgBlockA__vecR(row,col) = xgBlockA__vecR(row,col) + xgBlockB__vecR(row,col)
           end do
         end do
         !call daxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
       case (SPACE_C)
-        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecC,xgBlockB%vecC)
-        do col = 1, xgBlockB%cols
-          do row = 1, xgBlockB%rows
-            xgBlockA%vecC(row,col) = xgBlockA%vecC(row,col) + xgBlockB%vecC(row,col)
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecC,xgBlockB__vecC)
+        do col = 1, cols
+          do row = 1, rows
+            xgBlockA__vecC(row,col) = xgBlockA__vecC(row,col) + xgBlockB__vecC(row,col)
           end do
         end do
         !call zaxpy(xgBlockA%cols*xgBlockA%LDim,1.d0,xgBlockB%vecR,1,xgBlockA%vecR1)
@@ -2870,7 +2932,9 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     double precision :: tmp
-    integer :: i
+    integer :: i,cols
+    complex(dpc), pointer :: xgBlock__vecC(:,:)
+    real(dp), pointer :: xgBlock__vecR(:,:),dot__vecR(:,:)
 #endif
 
     if ( dot%space /= SPACE_R ) then
@@ -2923,32 +2987,36 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
+      cols=xgBlock%cols
+      dot__vecR => dot%vecR
       select case(xgBlock%space)
       case(SPACE_R,SPACE_CR)
-        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecR,xgBlock%vecR) PRIVATE(icol,tmp)
-        do icol = 1, xgBlock%cols
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlock__vecR) PRIVATE(icol,tmp)
+        do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
-          do i = 1,xgBlock%rows
-            tmp = tmp + xgBlock%vecR(i,icol)*xgBlock%vecR(i,icol)
+          do i = 1,rows
+            tmp = tmp + xgBlock__vecR(i,icol)*xgBlock__vecR(i,icol)
           end do
-          dot%vecR(icol,1)=tmp
+          dot__vecR(icol,1)=tmp
         end do
       case(SPACE_C)
-        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecR,xgBlock%vecC) PRIVATE(icol,tmp)
-        do icol = 1, xgBlock%cols
+        xgBlock__vecC => xgBlock%vecC
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlock__vecC) PRIVATE(icol,tmp)
+        do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
-          do i = 1,xgBlock%rows
-            tmp = tmp + dconjg(xgBlock%vecC(i,icol))*xgBlock%vecC(i,icol)
+          do i = 1,rows
+            tmp = tmp + dconjg(xgBlock__vecC(i,icol))*xgBlock__vecC(i,icol)
           end do
-          dot%vecR(icol,1)=tmp
+          dot__vecR(icol,1)=tmp
         end do
       end select
       !FIXME This should happen inplace ideally
-      !$OMP TARGET UPDATE FROM(dot%vecR)
+      !$OMP TARGET UPDATE FROM(dot__vecR)
       call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
-      !$OMP TARGET UPDATE TO(dot%vecR)
+      !$OMP TARGET UPDATE TO(dot__vecR)
 
       ! do reductions
       if ( present(max_val) ) then
@@ -3030,6 +3098,8 @@ contains
 
     double precision :: tmp
     integer :: i
+    complex(dpc), pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
+    real(dp), pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
 
     ! Actually used with NVHPC or OpenMP Offload
     ABI_UNUSED((/i/))
@@ -3094,19 +3164,23 @@ contains
     else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      rows = xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
       case(SPACE_R,SPACE_CR)
-        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecR,xgBlockA%vecR,xgBlockB%vecR) PRIVATE(icol,tmp)
-        do icol = 1, xgBlockA%cols
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        dot__vecR => dot%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlockA__vecR,xgBlockB__vecR) PRIVATE(icol,tmp)
+        do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
-          do i = 1,xgBlockA%rows
-            tmp = tmp + xgBlockA%vecR(i,icol)*xgBlockB%vecR(i,icol)
+          do i = 1, rows
+            tmp = tmp + xgBlockA__vecR(i,icol)*xgBlockB__vecR(i,icol)
           end do
-          dot%vecR(icol,1)=tmp
+          dot__vecR(icol,1)=tmp
         end do
 
-        !$OMP TARGET UPDATE FROM(dot%vecR)
+        !$OMP TARGET UPDATE FROM(dot__vecR)
         !TODO Port this to GPU (reductions)
         if ( present(max_val) ) then
           max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
@@ -3122,17 +3196,20 @@ contains
         end if
 
       case(SPACE_C)
-        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot%vecC,xgBlockA%vecC,xgBlockB%vecC) PRIVATE(icol,tmp)
-        do icol = 1, xgBlockA%cols
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        dot__vecC => dot%vecC
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
+        do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
-          do i = 1, xgBlockA%rows
-            tmp = tmp + dconjg(xgBlockA%vecC(i,icol))*xgBlockB%vecC(i,icol)
+          do i = 1, rows
+            tmp = tmp + dconjg(xgBlockA__vecC(i,icol))*xgBlockB__vecC(i,icol)
           end do
-          dot%vecC(icol,1)=tmp
+          dot__vecC(icol,1)=tmp
         end do
 
-        !$OMP TARGET UPDATE FROM(dot%vecC)
+        !$OMP TARGET UPDATE FROM(dot__vecC)
         !TODO Port this to GPU (reductions)
         if ( present(max_val) ) then
           max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
@@ -3243,6 +3320,8 @@ contains
     integer(kind=c_int32_t)  :: total_size
 #if defined HAVE_OPENMP_OFFLOAD
     integer :: icol
+    complex(dpc), pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),divResult__vecC(:,:)
+    real(dp), pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),divResult__vecR(:,:)
 #endif
 #endif
 
@@ -3310,17 +3389,20 @@ contains
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
       total_size = xgBlockA%rows * xgBlockA%cols
-
+      rows = xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
       case(SPACE_R,SPACE_CR)
-        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecR,xgBlockB%vecR,divResult%vecR)
-        do irow = 1, xgBlockA%rows
-          do icol = 1, xgBlockA%cols
-            divResult%vecR(irow,icol) = xgBlockA%vecR(irow,icol)/xgBlockB%vecR(irow,icol)
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        divResult__vecR => divResult%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecR,xgBlockB__vecR,divResult__vecR)
+        do irow = 1, rows
+          do icol = 1, cols
+            divResult__vecR(irow,icol) = xgBlockA__vecR(irow,icol)/xgBlockB__vecR(irow,icol)
           end do
         end do
         !FIXME Port this on GPU to avoid copy below ?
-        !$OMP TARGET UPDATE FROM(divResult%vecR)
+        !$OMP TARGET UPDATE FROM(divResult__vecR)
         if ( present(max_val) ) then
           max_val = maxval(dble(divResult%vecR))
         end if
@@ -3335,15 +3417,31 @@ contains
         end if
 
       case(SPACE_C)
-
-        !$OMP TARGET TEAMS LOOP MAP(to:xgBlockA%vecC,xgBlockB%vecC,divResult%vecC)
-        do irow = 1, xgBlockA%rows
-          do icol = 1, xgBlockA%cols
-            divResult%vecC(irow,icol) = xgBlockA%vecC(irow,icol)/xgBlockB%vecC(irow,icol)
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        divResult__vecC => divResult%vecC
+#ifdef HAVE_GPU_CUDA
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecC,xgBlockB__vecC,divResult__vecC)
+        do irow = 1, rows
+          do icol = 1, cols
+            divResult__vecC(irow,icol) = xgBlockA__vecC(irow,icol)/xgBlockB__vecC(irow,icol)
           end do
         end do
         !FIXME Port this on GPU to avoid copy below ?
-        !$OMP TARGET UPDATE FROM(divResult%vecC)
+        !$OMP TARGET UPDATE FROM(divResult__vecC)
+#endif
+
+!AOMP 15 doesn't support complex division inside OpenMP !?
+#ifdef HAVE_GPU_HIP
+
+        !$OMP TARGET UPDATE FROM(xgBlockA__vecC,xgBlockB__vecC)
+        do irow = 1, rows
+          do icol = 1, cols
+            divResult__vecC(irow,icol) = xgBlockA__vecC(irow,icol)/xgBlockB__vecC(irow,icol)
+          end do
+        end do
+        !$OMP TARGET UPDATE TO(divResult__vecC)
+#endif
         if ( present(max_val) ) then
           max_val = maxval(dble(divResult%vecC))
         end if
@@ -3610,15 +3708,19 @@ contains
   !! xgBlock_copy_to_gpu
 
   subroutine xgBlock_copy_to_gpu(xgBlock)
-    type(xgBlock_t), intent(in   ) :: xgBlock
+    type(xgBlock_t), target, intent(in   ) :: xgBlock
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
     integer(c_size_t) :: size
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      !$OMP TARGET UPDATE TO(xgBlock%vecR)
+      xgBlock__vecR => xgBlock%vecR
+      !$OMP TARGET UPDATE TO(xgBlock__vecR)
     case (SPACE_C)
-      !$OMP TARGET UPDATE TO(xgBlock%vecC)
+      xgBlock__vecC => xgBlock%vecC
+      !$OMP TARGET UPDATE TO(xgBlock__vecC)
     end select
 #else
     ABI_UNUSED_A(xgBlock)
@@ -3632,15 +3734,19 @@ contains
   !! xgBlock_copy_from_gpu
 
   subroutine xgBlock_copy_from_gpu(xgBlock)
-    type(xgBlock_t), intent(in   ) :: xgBlock
+    type(xgBlock_t), target, intent(in   ) :: xgBlock
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
     integer(c_size_t) :: size
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      !$OMP TARGET UPDATE FROM(xgBlock%vecR)
+      xgBlock__vecR => xgBlock%vecR
+      !$OMP TARGET UPDATE FROM(xgBlock__vecR)
     case (SPACE_C)
-      !$OMP TARGET UPDATE FROM(xgBlock%vecC)
+      xgBlock__vecC => xgBlock%vecC
+      !$OMP TARGET UPDATE FROM(xgBlock__vecC)
     end select
 #else
     ABI_UNUSED_A(xgBlock)
@@ -3697,6 +3803,12 @@ contains
     integer :: l_use_gpu_cuda
 #if defined HAVE_GPU
     integer(C_SIZE_T) :: byte_count
+#endif
+
+#if defined HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+    integer :: rows,cols,iblock,jblock
 #endif
 
     ! if optional parameter is present, use it
@@ -3966,6 +4078,12 @@ contains
     character(len=50) :: fstring
     integer :: l_use_gpu_cuda
 
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    complex(dpc), pointer :: xgBlock__vecC(:,:)
+    real(dp), pointer :: xgBlock__vecR(:,:)
+    integer :: rows, cols
+#endif
+
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
     l_use_gpu_cuda = ABI_GPU_DISABLED
@@ -3977,7 +4095,8 @@ contains
     case (SPACE_R,SPACE_CR)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
-        !$OMP TARGET UPDATE FROM(xgBlock%vecR)
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET UPDATE FROM(xgBlock__vecR)
       end if
 #endif
       write(ccols,'(i4)') xgBlock%cols
@@ -3988,7 +4107,8 @@ contains
     case (SPACE_C)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
-        !$OMP TARGET UPDATE FROM(xgBlock%vecC)
+        xgBlock__vecC => xgBlock%vecC
+        !$OMP TARGET UPDATE FROM(xgBlock__vecC)
       end if
 #endif
       write(ccols,'(i4)') xgBlock%cols
