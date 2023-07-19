@@ -428,6 +428,7 @@ end subroutine chkgrp
 !scalars
  integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
  integer :: sym1,sym2,sym3
+ integer :: isym
  real(dp) :: tnons_tol_
  logical :: found_inv,iseq
  character(len=500) :: msg
@@ -440,7 +441,7 @@ end subroutine chkgrp
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,*)' m_symtk%sg_multable : enter '
+!write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
 !ENDDEBUG
 
  ierr = 0
@@ -456,6 +457,14 @@ end subroutine chkgrp
  else
    tnons_tol_=tol5
  endif
+
+!DEBUG
+!write(std_out,*)' present(tnons),present(tnons_tol)=',present(tnons),present(tnons_tol)
+!write(std_out,*)' isym   symrel                      symafm  tnons '
+!do isym=1,nsym
+! write(std_out,'(i5,a,9i3,a,i3,a,3f9.4)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym),'   ',tnons_(:,isym)
+!end do
+!ENDDEBUG
 
  ! 1) Identity must be the first symmetry. Do not check if tnons_ == 0 as cell might not be primitive.
  if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
@@ -564,9 +573,11 @@ end subroutine chkgrp
  !Check closure under composition and construct multiplication table of ptsymrel
  echo = 1
  do ptsymm1=1,nptsymm
+   sym1=list_symrel(1,ptsymm1)
    do ptsymm2=1,nptsymm
+     sym2=list_symrel(1,ptsymm2)
      ! Compute the product of the two symmetries. 
-     prd_symrel = matmul(symrel(:,:,list_symrel(1,ptsymm1)), symrel(:,:,list_symrel(1,ptsymm2)))
+     prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
      ! Check that product array is one of the original point symmetries.
      iseq= .false.
      do ptsymm3=1,nptsymm
@@ -602,8 +613,8 @@ end subroutine chkgrp
    end do ! ptsymm2
 
 !DEBUG
-   write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
-   write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
+!  write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
+!  write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
 !  write(std_out,'(16i3)')ptmultable(ptsymm1,17:32)
 !  write(std_out,'(16i3)')ptmultable(ptsymm1,33:48)
 !ENDDEBUG
@@ -634,7 +645,7 @@ end subroutine chkgrp
 
        !DEBUG
        !if(ptsymm2<1 .or. ptsymm2>48)then
-       write(std_out,*)' sym1,sym2,ptsymm1,ptsymm2=',sym1,sym2,ptsymm1,ptsymm2
+       !write(std_out,*)' sym1,sym2,ptsymm1,ptsymm2=',sym1,sym2,ptsymm1,ptsymm2
        !endif
        !ENDDEBUG
 

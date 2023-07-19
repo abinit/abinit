@@ -139,8 +139,8 @@ contains
 !**************************************************************************
 
 !DEBUG
-!write(std_out,'(a)')' m_symfind%symfind : enter '
-!call flush(std_out)
+ write(std_out,'(a)')' m_symfind%symfind : enter '
+ call flush(std_out)
 !ENDDEBUG
 
 !DEBUG
