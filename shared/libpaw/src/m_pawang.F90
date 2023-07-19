@@ -42,7 +42,7 @@ MODULE m_pawang
  public :: initang            ! Initialize angular mesh for PAW calculations
  public :: make_angular_mesh  ! Build angular mesh from ntheta, nphi
 
- ! MGPAW: Private?
+! MGPAW: Private?
  public :: gauleg
  public :: mat_mlms2jmj
  public :: mat_slm2ylm
