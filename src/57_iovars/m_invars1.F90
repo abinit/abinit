@@ -592,7 +592,7 @@ end do
 #endif
 
  if (use_gpu_cuda/=ABI_GPU_DISABLED) then
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
+#if defined HAVE_GPU
    if (ii<=0) then
      write(msg,'(5a)')&
 &     'Input variables use_gpu_cuda is on',ch10,&
