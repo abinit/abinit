@@ -340,6 +340,7 @@ AC_DEFUN([ABI_GPU_INIT],[
   abi_gpu_flavor="${sd_gpu_flavor}"
   abi_gpu_incs="${GPU_CPPFLAGS}"
   abi_gpu_libs="${GPU_LIBS}"
+  abi_gpu_device="${DEVICE}"
 
   if test "${abi_gpu_enable}" = "yes" -o "${abi_gpu_enable}" = "auto"; then
 
@@ -383,6 +384,7 @@ AC_DEFUN([ABI_GPU_INIT],[
   AC_SUBST(abi_gpu_flavor)
   AC_SUBST(abi_gpu_incs)
   AC_SUBST(abi_gpu_libs)
+  AC_SUBST(abi_gpu_device)
 ]) # ABI_GPU_INIT
 
 

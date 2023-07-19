@@ -98,14 +98,9 @@ def macro_optflags(name):
       echo "fcflags_opt_%s='${fcflags_opt_%s}'" >>config.optim
       fcflags_opt_dirlist="${fcflags_opt_dirlist} %s"
     fi
-  else
-    if test "${fcflags_opt_%s}" != ""; then
-      fcflags_opt_%s=""
-      AC_MSG_NOTICE([fcflags_opt_%s overriden by FCFLAGS])
-    fi
   fi
   AC_SUBST(fcflags_opt_%s)
-""" % (name,name,name,name,name,name,name,name,name,name,name,name)
+""" % (name,name,name,name,name,name,name,name,name)
 
 
 
