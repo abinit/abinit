@@ -1208,7 +1208,8 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
    case(3,6,9,16,24,28,32,36,40,44,52,56,60,64,78,84,&
 &     90,96,112,116,120,124,128,132,136,142,148,154,160,166,172,&
 &     178,184,190,196,202,208,214,220,226,232,242,252,262,272)
-     brvlttbw=6     !C
+!    brvlttbw=6     !C    XG230719 This is likely erroneous
+     brvlttbw=3     !c
    case(12,20,48,68,72,102,108)
      brvlttbw=7     !I
    end select
