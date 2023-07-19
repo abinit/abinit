@@ -1330,6 +1330,9 @@ contains
 
     ! opernld
     if(signs==1) then
+#ifdef HAVE_GPU_HIP
+      !$OMP TARGET UPDATE FROM(vnl_projections,projections_ptr,dprojections)
+#endif
       if(choice==1.or.choice==3.or.choice==23) then
         shift=0
         iatm=0
@@ -1339,13 +1342,17 @@ contains
           ibeg = shift+1
           iend = shift+nattyp(itypat)*nlmn
           nattyp_i = nattyp(itypat)
+#ifndef HAVE_GPU_HIP
           !$OMP TARGET TEAMS DISTRIBUTE &
           !$OMP& MAP(to:vnl_projections,projections_ptr,enlk) &
           !$OMP& FIRSTPRIVATE(idat,itypat,nlmn,esum)
+#endif
           do idat=1,ndat*nspinor
             esum=zero
+#ifndef HAVE_GPU_HIP
             !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) &
             !$OMP& PRIVATE(ia,ilmn,ii)
+#endif
             do ia=1,nattyp_i
               do ilmn=1,nlmn
                 do ii=1,cplex
@@ -1354,19 +1361,18 @@ contains
                 end do
               end do
             end do
-            !$OMP END PARALLEL DO
             enlk(idat) = enlk(idat) + esum
           end do
-          !$OMP END TARGET TEAMS DISTRIBUTE
           shift = shift + nattyp(itypat)*nlmn
           iatm = iatm+nattyp(itypat)
         end do
         if (choice==1) then
-          !$OMP TARGET MAP(to:enlout,enlk)
+#ifndef HAVE_GPU_HIP
+          !$OMP TARGET PARALLEL DO MAP(to:enlout,enlk) PRIVATE(idat)
+#endif
           do idat=1,ndat
             enlout(idat)=enlk(idat)
           end do
-          !$OMP END TARGET
         end if
       end if ! choice=1/3/23
       if(choice==2.or.choice==3.or.choice==23) then
@@ -1380,14 +1386,18 @@ contains
             iend = shift+nattyp(itypat)*nlmn
             nattyp_i = nattyp(itypat)
 
+#ifndef HAVE_GPU_HIP
             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
             !$OMP& MAP(to:vnl_projections,dprojections,enlout) &
             !$OMP& FIRSTPRIVATE(idat,itypat,nlmn,esum)
+#endif
             do idat=1,ndat*nspinor
               do igrad=1,6
                 esum=zero
+#ifndef HAVE_GPU_HIP
                 !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) &
                 !$OMP& PRIVATE(ia,ilmn,ii)
+#endif
                 do ia=1,nattyp_i
                   !Following loops are a [D][Z]DOT
                   do ilmn=1,nlmn
@@ -1397,11 +1407,9 @@ contains
                     end do
                   end do
                 end do
-                !$OMP END PARALLEL DO
                 enlout((idat-1)*nnlout+igrad) = enlout((idat-1)*nnlout+igrad) + two*esum
               end do
             end do
-            !$OMP END TARGET TEAMS DISTRIBUTE
 
             shift = shift + nattyp(itypat)*nlmn
             iatm = iatm+nattyp(itypat)
@@ -1416,36 +1424,40 @@ contains
             nlmn=count(indlmn(3,:,itypat)>0)
             nattyp_i = nattyp(itypat)
 
+#ifndef HAVE_GPU_HIP
             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
             !$OMP& MAP(to:vnl_projections,dprojections,enlout) &
             !$OMP& FIRSTPRIVATE(idat,itypat,nlmn,esum)
+#endif
             do idat=1,ndat*nspinor
               do ia=1,nattyp_i
                 do igrad=1,3
                   !Following loops are a [D][Z]DOT
                   esum=zero
+#ifndef HAVE_GPU_HIP
                   !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum) &
                   !$OMP& PRIVATE(ilmn,ii)
+#endif
                   do ilmn=1,nlmn
                     do ii=1,cplex
                       esum=esum +vnl_projections(ii,shift+(ia-1)*nlmn+ilmn,idat) &
 &                               *dprojections(ii,grad_shift*shift+(ia-1)*nlmn*grad_shift+(igrad-1+force_shift)*nlmn +ilmn,idat)
                     end do
                   end do
-                  !$OMP END PARALLEL DO
                   enlout((idat-1)*nnlout + force_shift + (iatm+ia-1)*3 + igrad)= &
 &                               enlout((idat-1)*nnlout + force_shift + (iatm+ia-1)*3 + igrad) + two*esum
                 end do
               end do
             end do
-            !$OMP END TARGET TEAMS DISTRIBUTE
 
             shift = shift + nattyp(itypat)*nlmn
             iatm = iatm+nattyp(itypat)
           end do
         end if
       end if ! choice=2, 3 or 23
+#ifndef HAVE_GPU_HIP
       !$OMP TARGET UPDATE FROM(enlout,enlk)
+#endif
     end if !opernld
 
   end if ! choice>0
