@@ -3729,7 +3729,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &       'Action: suppress ngfft in input file or change it.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
-#ifndef HAVE_GPU_CUDA
+#ifndef HAVE_GPU
      write(msg,'(6a)') ch10,&
 &     ' invars0: ERROR -',ch10,&
 &     '   Input variables use_gpu_cuda is on but abinit hasn''t been built with gpu mode enabled !',ch10,&

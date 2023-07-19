@@ -113,8 +113,11 @@ program abinit
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  use m_gpu_toolbox
+#endif
+
+#ifdef HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
 
