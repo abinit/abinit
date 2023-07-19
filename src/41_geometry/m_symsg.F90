@@ -618,19 +618,19 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
      case (143,146,147,148)        !P3, R3, PB3, RB3
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
-       nogen=0
+       nogen=0 ! All symmetries have been generated
      case (144)                !P31
        tnons(:,2)=(/0.d0,0.d0,twothird/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,third/)
-       nogen=0
+       nogen=0 ! All symmetries have been generated
      case (145)                !P32
        tnons(:,2)=(/0.d0,0.d0,third/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,twothird/)
-       nogen=0
+       nogen=0 ! All symmetries have been generated
      case (149)                !P312
        symrel(:,:,3) = genswmmm(:,:)
        nogen=3
