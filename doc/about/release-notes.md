@@ -181,9 +181,9 @@ See the [[test:v9_130]] and [[test:v9_131]]
 
 By M. Giantomassi (MR896)
 
-**B.6** Initialization of the wavefunctions using atomic orbitals
+**B.6** Initialization of the wavefunctions using atomic pseudo-orbitals
 
-For pseudopotentials that contain the information about atomic local orbitals, like the UPF2 format, the wavefunctions
+For pseudopotentials that contain the information about atomic local pseudo-orbitals, like the UPF2 format, the wavefunctions
 inside ABINIT can be initialized from the Hilbert space spanned by such set of functions,
 using the input variable [[wfinit]]=2.
 
