@@ -2911,13 +2911,13 @@ end subroutine realgaunt
 !! Nabla_RealGaunt(ilm,ilm_i,ilm_j) = Int[ Slm Grad(Slm_i).Grad(Slm_j)]
 !!
 !! INPUTS
-!!  l_max = max. l value for Slm (see description above)
-!!  l_max_ij = max. l value for Slm_i and Slm_j (see description above)
+!!  l_max = 1 + max. l value for Slm (see description above)
+!!  l_max_ij = 1 + max. l value for Slm_i and Slm_j (see description above)
 !!
 !! OUTPUT
 !! nnablagnt= number of non-zero integrals
-!! nabgauntselect((l_max+1)**2,(l_max_ij+1)**2,(l_max_ij+1)**2)= indexes of the non-zero integrals
-!! nablagaunt((l_max+1)**2*(l_max_ij+1)**2)= values of the integrals
+!! nabgauntselect(l_max**2,l_max_ij**2,l_max_ij**2)= indexes of the non-zero integrals
+!! nablagaunt(l_max**2*l_max_ij**4)= values of the integrals
 !!  
 !! SOURCE
 
@@ -2928,31 +2928,29 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
  integer, intent(in) :: l_max,l_max_ij
  integer, intent(out) :: nnablagnt
 !array
- integer,intent(out) :: nabgauntselect((l_max+1)**2,(l_max_ij+1)**2,(l_max_ij+1)**2)
- real(dp),intent(out) :: nablagaunt(((l_max+1)**2)*((l_max_ij+1)**2))
+ integer,intent(out) :: nabgauntselect(l_max**2,l_max_ij**2,l_max_ij**2)
+ real(dp),intent(out) :: nablagaunt((l_max**2)*(l_max_ij**4))
 
 !Local variables ---------------------------------------
- integer :: ii,ntheta,nphi
+ logical,parameter :: debug=.false.
+ integer :: angl_size,ii,ilm,ilm_i,ilm_j,ipt,mpsang,ntheta,nphi,ylm_size
+ real(dp) :: nabla_rg, yylmgr
  character(len=500) :: msg
+ real(dp),allocatable :: ang_wgth(:),cart_coord(:,:),ylmr(:,:),ylmrgr(:,:,:)
 
 !************************************************************************
-
- if (l_max>2.or.l_max_ij>2) then
-   msg='  Not designed for angular momentum greater than 2!'
-   LIBPAW_ERROR(msg)
- end if
 
  nabgauntselect(:,:,:)=-1
  nablagaunt(:)=zero
 
  ii=0
- if (l_max>=1) then
+ if (l_max>1) then
    if (l_max_ij>=1) then
      ii=ii+1 ; nabgauntselect(1,2,2)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi)) 
      ii=ii+1 ; nabgauntselect(1,3,3)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi))
      ii=ii+1 ; nabgauntselect(1,4,4)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi))
    end if
-   if (l_max_ij>=2) then
+   if (l_max_ij>2) then
      ii=ii+1 ; nabgauntselect(1,5,5)=ii ; nablagaunt(ii)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
      ii=ii+1 ; nabgauntselect(1,6,6)=ii ; nablagaunt(ii)=1.692568750643269_dp !\dfrac{3}{\sqrt{\pi}}
      ii=ii+1 ; nabgauntselect(1,7,7)=ii ; nablagaunt(ii)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
@@ -2983,8 +2981,8 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
    end if
  end if
 
- if (l_max>=2) then
-   if (l_max_ij>=1) then
+ if (l_max>2) then
+   if (l_max_ij>1) then
      ii=ii+1 ; nabgauntselect(5,2,4)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
      ii=ii+1 ; nabgauntselect(5,4,2)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
      ii=ii+1 ; nabgauntselect(6,2,3)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
@@ -2997,7 +2995,7 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
      ii=ii+1 ; nabgauntselect(9,2,2)=ii ; nablagaunt(ii)=0.2185096861184158_dp !\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
      ii=ii+1 ; nabgauntselect(9,4,4)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
    end if
-   if (l_max_ij>=2) then
+   if (l_max_ij>2) then
      ii=ii+1 ; nabgauntselect(5,5,7)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
      ii=ii+1 ; nabgauntselect(5,6,8)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
      ii=ii+1 ; nabgauntselect(5,7,5)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
@@ -3027,6 +3025,59 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
  end if
 
  nnablagnt=ii
+
+!If not tabulated, compute the integrals
+ if (l_max>3.or.l_max_ij>3) then
+ 
+   ntheta=25 ; nphi=25
+   call ylm_angular_mesh(ntheta,nphi,angl_size,cart_coord,ang_wgth)
+
+   mpsang=1+max(l_max,l_max_ij)
+   ylm_size=mpsang**2
+   LIBPAW_ALLOCATE(ylmr,(ylm_size,angl_size))
+   LIBPAW_ALLOCATE(ylmrgr,(3,ylm_size,angl_size))
+   call initylmr(mpsang,0,angl_size,ang_wgth,2,cart_coord,ylmr,ylmr_gr=ylmrgr)
+ 
+   if (debug) open(unit=111,file='nablarealgaunt.dat',form='formatted')
+
+   do ilm=1,l_max**2
+     do ilm_i=1,l_max_ij**2
+       do ilm_j=1,l_max_ij**2
+
+         if (ilm<10.and.ilm_i<10.and.ilm_j<10) cycle  ! Already stored (tabulated)
+
+         ! Compute integral
+         nabla_rg=zero
+         do ipt=1,angl_size
+           yylmgr=ylmrgr(1,ilm_i,ipt)*ylmrgr(1,ilm_j,ipt) &
+&                +ylmrgr(2,ilm_i,ipt)*ylmrgr(2,ilm_j,ipt) &
+&                +ylmrgr(3,ilm_i,ipt)*ylmrgr(3,ilm_j,ipt)
+           nabla_rg=nabla_rg+ang_wgth(ipt)*ylmr(ilm,ipt)*yylmgr
+         end do
+         nabla_rg=four_pi*nabla_rg
+
+         ! Store it if non-zero
+         if (abs(nabla_rg)>tol12) then
+           if (debug) then
+             write(111,'(5x,a,i2,a,i2,a,i2,a,f19.15,a)') &
+&              "ii=ii+1 ; nabgauntselect(",ilm,",",ilm_i,",",ilm_j, &
+&              ")=ii ; nablagaunt(ii)=",nabla_rg,"_dp"
+           end if
+           nnablagnt=nnablagnt+1
+           nabgauntselect(ilm,ilm_i,ilm_j)=nnablagnt
+           nablagaunt(nnablagnt)=nabla_rg
+         end if
+
+       end do ! ilm_j
+     end do ! ilm_i
+   end do !ilm
+
+   if (debug) close(111)
+   LIBPAW_DEALLOCATE(ylmr)
+   LIBPAW_DEALLOCATE(ylmrgr)
+   LIBPAW_DEALLOCATE(cart_coord)
+   LIBPAW_DEALLOCATE(ang_wgth)
+ end if
 
 end subroutine nablarealgaunt
 !!***
