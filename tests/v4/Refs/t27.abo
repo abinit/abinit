@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.10.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Wed 19 Jul 2023.
+- ( at 13h38 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t27/t27.in
-- output file    -> t27.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.10/tests/TestBot_MPI1/v4_t27/t27.abi
+- output file    -> t27.abo
 - root for input  files -> t27i
 - root for output files -> t27o
 
@@ -36,7 +36,7 @@
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -55,7 +55,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -74,7 +74,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -93,7 +93,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -112,7 +112,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -131,7 +131,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -150,7 +150,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -169,7 +169,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -188,7 +188,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -207,7 +207,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -226,7 +226,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -245,7 +245,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -264,7 +264,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -283,7 +283,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -302,7 +302,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -321,7 +321,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -340,7 +340,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -359,7 +359,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -378,7 +378,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -397,7 +397,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -416,7 +416,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -435,7 +435,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -454,7 +454,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -473,7 +473,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -492,7 +492,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -511,7 +511,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -530,7 +530,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -549,7 +549,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -568,7 +568,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -587,7 +587,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -606,7 +606,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -625,7 +625,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -644,7 +644,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -663,7 +663,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -682,7 +682,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -701,7 +701,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -720,7 +720,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -739,7 +739,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -758,7 +758,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -777,7 +777,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -796,7 +796,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -815,7 +815,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -834,7 +834,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -853,7 +853,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -872,7 +872,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -891,7 +891,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -910,7 +910,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -929,7 +929,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -948,7 +948,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -967,7 +967,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -986,7 +986,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -1005,7 +1005,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -1024,7 +1024,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -1043,7 +1043,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -1062,7 +1062,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -1081,7 +1081,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =          11          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.714 Mbytes of memory.
+P This job should need less than                       0.733 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
@@ -1100,7 +1100,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1119,7 +1119,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1138,7 +1138,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1157,7 +1157,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1176,7 +1176,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1195,7 +1195,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1214,7 +1214,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1233,7 +1233,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1252,7 +1252,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1271,7 +1271,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1290,7 +1290,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1309,7 +1309,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1328,7 +1328,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1347,7 +1347,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1366,7 +1366,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1385,7 +1385,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1404,7 +1404,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1423,7 +1423,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1442,7 +1442,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1461,7 +1461,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1480,7 +1480,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1499,7 +1499,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1518,7 +1518,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1537,7 +1537,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1556,7 +1556,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1575,7 +1575,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1594,7 +1594,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -1613,7 +1613,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       0.605 Mbytes of memory.
+P This job should need less than                       0.611 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
@@ -2468,19 +2468,19 @@ P           mkmem           1
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat15    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat16    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -2532,19 +2532,19 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat19    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
            spinat20    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -2580,19 +2580,19 @@ P           mkmem           1
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
            spinat22    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat23    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -2644,19 +2644,19 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat26    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
            spinat27    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -2916,19 +2916,19 @@ P           mkmem           1
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
            spinat43    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat44    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -2980,19 +2980,19 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat47    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
            spinat48    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -3028,19 +3028,19 @@ P           mkmem           1
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
            spinat50    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat51    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -3092,19 +3092,19 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat54    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
            spinat55    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -3615,30 +3615,30 @@ P           mkmem           1
                         -1   -1    1    1    1   -1
            symafm14      1    1   -1    1   -1   -1    1   -1   -1   -1
                          1   -1    1    1   -1    1
-           symafm15      1   -1    1    1   -1   -1    1    1   -1   -1
-                        -1   -1    1   -1    1    1
+           symafm15      1    1    1    1   -1   -1   -1   -1   -1   -1
+                        -1   -1    1    1    1    1
            symafm16      1    1   -1   -1   -1    1   -1    1    1   -1
                          1   -1   -1   -1    1    1
            symafm17      1    1   -1   -1    1    1    1    1   -1   -1
                         -1   -1    1    1   -1   -1
            symafm18      1    1   -1   -1    1   -1    1   -1   -1    1
                         -1    1   -1   -1    1    1
-           symafm19      1   -1    1    1   -1    1    1   -1   -1    1
-                        -1    1   -1    1   -1   -1
+           symafm19      1    1    1    1   -1    1   -1    1   -1    1
+                        -1    1   -1   -1   -1   -1
            symafm20      1    1   -1   -1   -1   -1   -1   -1    1    1
                          1    1    1    1   -1   -1
            symafm21      1    1    1    1    1   -1    1   -1    1   -1
                          1   -1   -1   -1   -1   -1
-           symafm22      1   -1    1    1   -1   -1    1    1   -1   -1
-                        -1   -1    1   -1    1    1
+           symafm22      1    1    1    1   -1   -1   -1   -1   -1   -1
+                        -1   -1    1    1    1    1
            symafm23      1    1   -1   -1   -1    1   -1    1    1   -1
                          1   -1   -1   -1    1    1
            symafm24      1    1   -1   -1    1    1    1    1   -1   -1
                         -1   -1    1    1   -1   -1
            symafm25      1    1   -1   -1    1   -1    1   -1   -1    1
                         -1    1   -1   -1    1    1
-           symafm26      1   -1    1    1   -1    1    1   -1   -1    1
-                        -1    1   -1    1   -1   -1
+           symafm26      1    1    1    1   -1    1   -1    1   -1    1
+                        -1    1   -1   -1   -1   -1
            symafm27      1    1   -1   -1   -1   -1   -1   -1    1    1
                          1    1    1    1   -1   -1
            symafm28      1    1    1    1    1   -1    1   -1    1   -1
@@ -3671,30 +3671,30 @@ P           mkmem           1
                          1   -1   -1   -1    1    1
            symafm42      1    1    1    1    1    1    1    1   -1   -1
                         -1   -1   -1   -1   -1   -1
-           symafm43      1   -1    1    1   -1   -1    1    1   -1   -1
-                        -1   -1    1   -1    1    1
+           symafm43      1    1    1    1   -1   -1   -1   -1   -1   -1
+                        -1   -1    1    1    1    1
            symafm44      1    1   -1   -1   -1    1   -1    1    1   -1
                          1   -1   -1   -1    1    1
            symafm45      1    1   -1   -1    1    1    1    1   -1   -1
                         -1   -1    1    1   -1   -1
            symafm46      1    1   -1   -1    1   -1    1   -1   -1    1
                         -1    1   -1   -1    1    1
-           symafm47      1   -1    1    1   -1    1    1   -1   -1    1
-                        -1    1   -1    1   -1   -1
+           symafm47      1    1    1    1   -1    1   -1    1   -1    1
+                        -1    1   -1   -1   -1   -1
            symafm48      1    1   -1   -1   -1   -1   -1   -1    1    1
                          1    1    1    1   -1   -1
            symafm49      1    1    1    1    1   -1    1   -1    1   -1
                          1   -1   -1   -1   -1   -1
-           symafm50      1   -1    1    1   -1   -1    1    1   -1   -1
-                        -1   -1    1   -1    1    1
+           symafm50      1    1    1    1   -1   -1   -1   -1   -1   -1
+                        -1   -1    1    1    1    1
            symafm51      1    1   -1   -1   -1    1   -1    1    1   -1
                          1   -1   -1   -1    1    1
            symafm52      1    1   -1   -1    1    1    1    1   -1   -1
                         -1   -1    1    1   -1   -1
            symafm53      1    1   -1   -1    1   -1    1   -1   -1    1
                         -1    1   -1   -1    1    1
-           symafm54      1   -1    1    1   -1    1    1   -1   -1    1
-                        -1    1   -1    1   -1   -1
+           symafm54      1    1    1    1   -1    1   -1    1   -1    1
+                        -1    1   -1   -1   -1   -1
            symafm55      1    1   -1   -1   -1   -1   -1   -1    1    1
                          1    1    1    1   -1   -1
            symafm56      1    1    1    1    1   -1    1   -1    1   -1
@@ -9319,10 +9319,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
+- Proc.   0 individual time (sec): cpu=         14.6  wall=         14.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  86 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.9  wall=         14.0
++Overall time at end (sec) : cpu=         14.6  wall=         14.6
