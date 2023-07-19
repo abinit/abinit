@@ -30,35 +30,39 @@ MODULE m_paw_sphharm
 
  private
 
-!public procedures.
- public :: ylmc            ! Complex Spherical harmonics for l<=3.
- public :: ylmcd           ! First derivative of complex Ylm wrt theta and phi up to l<=3
- public :: ylm_cmplx       ! All (complex) spherical harmonics for lx<=4
- public :: initylmr        ! Real Spherical Harmonics on a set of vectors
- public :: ys              ! Matrix element <Yl'm'|Slm>
- public :: lxyz            ! Matrix element <Yl'm'|L_idir|Ylm>
- public :: slxyzs          ! Matrix element <Sl'm'|L_idir|Slm>
- public :: plm_coeff       ! Coefficients depending on Plm used to compute the 2nd der of Ylm
- public :: ass_leg_pol     ! Associated Legendre Polynomial Plm(x)
- public :: plm_d2theta     ! d2(Plm (cos(theta)))/d(theta)2 (P_lm= ass. legendre polynomial)
- public :: plm_dphi        ! m*P_lm(x)/sqrt((1-x^2)  (P_lm= ass. legendre polynomial)
- public :: plm_dtheta      ! -(1-x^2)^1/2*d/dx{P_lm(x)} (P_lm= ass. legendre polynomial)
- public :: pl_deriv        ! d2(Pl (x)))/d(x)2  where P_l is a legendre polynomial
- public :: mkeuler         ! For a given symmetry operation, determines the corresponding Euler angles
- public :: dble_factorial  ! Compute factorial of an integer; returns a double precision real
- public :: dbeta           ! Calculate the rotation matrix d^l_{m{\prim}m}(beta)
- public :: phim            ! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
-                           !                       Sqrt[2] sin[Abs(m) theta], if m<0
-                           !                       1                        , if m=0
- public :: mat_mlms2jmj    ! Change a matrix from the Ylm basis to the J,M_J basis
- public :: mat_slm2ylm     ! Change a matrix from the Slm to the Ylm basis or from Ylm to Slm
- public :: create_slm2ylm  ! For a given angular momentum lcor, compute slm2ylm
- public :: create_mlms2jmj ! For a given angular momentum lcor, give the rotation matrix msml2jmj
- public :: setsym_ylm      ! Compute rotation matrices expressed in the basis of real spherical harmonics
- public :: gaunt           ! Gaunt coeffients for complex Yml
- public :: realgaunt       ! Compute "real Gaunt coefficients" with "real spherical harmonics"
- public :: setnabla_ylm    ! Compute rotation matrices expressed in the basis of real spherical harmonics
- public :: nablarealgaunt  ! Compute the integrals of nablaSlimi.nablaySjmj Slkmk on the PAW spheres
+!Public procedures.
+ public :: ylmc             ! Complex Spherical harmonics for l<=3.
+ public :: ylmcd            ! First derivative of complex Ylm wrt theta and phi up to l<=3
+ public :: ylm_cmplx        ! All (complex) spherical harmonics for lx<=4
+ public :: initylmr         ! Real Spherical Harmonics on a set of vectors
+ public :: ys               ! Matrix element <Yl'm'|Slm>
+ public :: lxyz             ! Matrix element <Yl'm'|L_idir|Ylm>
+ public :: slxyzs           ! Matrix element <Sl'm'|L_idir|Slm>
+ public :: lsylm            ! Compute the LS operator in the real spherical harmonics basis
+ public :: plm_coeff        ! Coefficients depending on Plm used to compute the 2nd der of Ylm
+ public :: ass_leg_pol      ! Associated Legendre Polynomial Plm(x)
+ public :: plm_dphi         ! m*P_lm(x)/sqrt((1-x^2)  (P_lm= associatedLegendre polynomial)
+ public :: plm_dtheta       ! -(1-x^2)^1/2*d/dx{P_lm(x)} (P_lm= associated Legendre polynomial)
+ public :: plm_d2theta      ! d2(Plm (cos(theta)))/d(theta)2 (P_lm= associated Legendre polynomial)
+ public :: pl_deriv         ! d2(Pl (x)))/d(x)2  where P_l is a Legendre polynomial
+ public :: ylm_angular_mesh ! Build (theta, phi) angular mesh
+ public :: mat_mlms2jmj     ! Change a matrix from the Ylm basis to the J,M_J basis
+ public :: mat_slm2ylm      ! Change a matrix from the Slm to the Ylm basis or from Ylm to Slm
+ public :: setsym_ylm       ! Compute rotation matrices expressed in the basis of real spherical harmonics
+ public :: setnabla_ylm     ! Evaluate several integrals involving spherical harmonics and their gradient
+ public :: gaunt            ! Gaunt coeffients for complex Yml
+ public :: realgaunt        ! Compute "real Gaunt coefficients" with "real spherical harmonics"
+ public :: nablarealgaunt   ! Compute the integrals Grad(Slimi).Grad(Sjmj) Slkmk of real spherical harmonics
+
+!Private functions
+ private :: create_slm2ylm  ! For a given angular momentum lcor, compute slm2ylm
+ private :: create_mlms2jmj ! For a given angular momentum lcor, give the rotation matrix msml2jmj
+ private :: mkeuler         ! For a given symmetry operation, determines the corresponding Euler angles
+ private :: dbeta           ! Calculate the rotation matrix d^l_{m{\prim}m}(beta)
+ private :: phim            ! Computes Phi_m[t]=Sqrt2.cos[m.t] (m>0), Sqrt2.sin[|m|.t] (m<0), 1 (m=0)
+ private :: gauleg          ! Compute the coefficients for Gauss-Legendre integration
+ private :: perms           ! Returns N!/(N-k)! if N>=0 and N>k
+ private :: rfactorial      ! Calculates N! as a double precision real
 !!***
 
 CONTAINS
@@ -203,14 +207,14 @@ function ylmc(il,im,kcart)
 #if 0
 ! Remember the expression of complex spherical harmonics:
 ! $Y_{lm}(\theta,\phi)=sqrt{{(2l+1) over (4\pi)} {fact(l-m)/fact(l+m)} } P_l^m(cos(\theta)) e^{i m\phi}$
-  new_ylmc = SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi)) * &
+  new_ylmc = SQRT((2*il+1)*rfactorial(il-ABS(im))/(rfactorial(il+ABS(im))*four_pi)) * &
 &   ass_leg_pol(il,ABS(im),costh) * CMPLX(cosphi,sinphi)**ABS(im)
   if (im<0) new_ylmc=(-one)**(im)*CONJG(new_ylmc)
 
   if (ABS(new_ylmc-ylmc)>tol6) then
     !LIBPAW_WARNING("Check new_ylmc")
     !write(std_out,*)"il,im,new_ylmc, ylmc",il,im,new_ylmc,ylmc
-    !write(std_out,*)"fact",SQRT((2*il+1)*dble_factorial(il-ABS(im))/(dble_factorial(il+ABS(im))*four_pi))
+    !write(std_out,*)"fact",SQRT((2*il+1)*rfactorial(il-ABS(im))/(rfactorial(il+ABS(im))*four_pi))
     !write(std_out,*)"costh,sinth,ass_leg_pol",costh,sinth,ass_leg_pol(il,ABS(im),costh)
     !write(std_out,*)"cosphi,sinphi,e^{imphi}",cosphi,sinphi,CMPLX(cosphi,sinphi)**ABS(im)
   end if
@@ -883,6 +887,200 @@ end subroutine slxyzs
 
 !----------------------------------------------------------------------
 
+!!****f* m_paw_sphharm/lsylm
+!! NAME
+!! lsylm
+!!
+!! FUNCTION
+!! Compute the LS operator in the real spherical harmonics basis
+!! ls_ylm(ilm1,ilm2,ispin)= <sigma, S_lm1| L.S |S_lm2, sigma_prime>
+!!   ilm,1m2=(l,m1,m2) with -l<=m1<=l, -l<=m2<=l and 0<l<=lmax
+!!   ispin=(sigma,sigma_prime) 1=(up,up), 2=(up,dn), 3=(dn,up), 4=(dn,dn)
+!!
+!! INPUTS
+!!  lmax= max. value of angular momentum l
+!!
+!! OUTPUT
+!!  ls_ylm(2,l_max**2*(l_max**2+1)/2,2)=LS operator in the real spherical harmonics basis
+!!        ls_ylm(:,:,1)=<up, S_lm1| L.S |S_lm2, up>
+!!        ls_ylm(:,:,2)=<up, S_lm1| L.S |S_lm2, down>
+!!        One can deduce:
+!!        <down, S_lm1| L.S |S_lm2, down>=-<up, S_lm1| L.S |S_lm2, up>
+!!        <down, S_lm1| L.S |S_lm2, up>  =-Conjg[<up, S_lm1| L.S |S_lm2, down>]
+!!        Also, only ilm1<=ilm2 terms are stored, because:
+!!         <sigma, S_lm1| L.S |S_lm2, sigma_prime>=-<sigma_prime, S_lm1| L.S |S_lm2, sigma>
+!!
+!! SOURCE
+
+subroutine lsylm(ls_ylm,lmax)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lmax
+!arrays
+ real(dp),allocatable :: ls_ylm(:,:,:)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii,ilm,im,j0lm,jj,jlm,jm,klm,ll,lm0,mm,ispden
+ real(dp),parameter :: invsqrt2=one/sqrt2
+ real(dp) :: onem
+ character(len=500) :: msg
+ logical,parameter :: tso=.false. ! use true to Test Spin Orbit and
+!                                   write the matrix of L.S in different basis
+!arrays
+ complex(dpc) :: tmp(2)
+ complex(dpc),allocatable :: ls_cplx(:,:,:),slm2ylm(:,:)
+ complex(dpc),allocatable :: mat_inp_c(:,:,:),mat_out_c(:,:,:)
+ complex(dpc),allocatable :: mat_ls_ylm(:,:,:),mat_jmj(:,:)
+ character(len=9),parameter :: dspin2(2)=(/"up-up    ","up-dn    "/)
+ character(len=9),parameter :: dspin6(6)=(/"dn       ","up       ","dn-dn    ","up-up    ","dn-up    ","up-dn    "/)
+ character(len=9),parameter :: dspinm(6)=(/"dn       ","up       ","n        ","mx       ","my       ","mz       "/)
+
+! *************************************************************************
+
+ if (.not.allocated(ls_ylm)) then
+   msg='ls_ylm is not allocated!'
+   LIBPAW_BUG(msg)
+ end if
+ if ( size(ls_ylm) < 2*(lmax+1)**2 * ((lmax+1)**2+1) ) then
+   msg='wrong size for ls_ylm!'
+   LIBPAW_BUG(msg)
+ end if
+
+!Initialization
+ ls_ylm=zero
+
+!Nothing to do if lmax=0
+ if (lmax<=0) return
+
+!Loop on l quantum number
+ do ll=1,lmax
+
+!  Transformation matrixes: real->complex spherical harmonics
+   LIBPAW_ALLOCATE(slm2ylm,(2*ll+1,2*ll+1))
+   slm2ylm=czero
+   do im=1,2*ll+1
+     mm=im-ll-1;jm=-mm+ll+1
+     onem=dble((-1)**mm)
+     if (mm> 0) then
+       slm2ylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
+       slm2ylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
+     end if
+     if (mm==0) then
+       slm2ylm(im,im)=cone
+     end if
+     if (mm< 0) then
+       slm2ylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
+       slm2ylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
+     end if
+   end do
+
+!  Compute <sigma, Y_lm1|L.S|Y_lm2, sigma_prime> (Y_lm=complex spherical harmonics)
+!  1= <up|L.S|up>  ;  2= <up|L.S|dn>
+   LIBPAW_ALLOCATE(ls_cplx,(2*ll+1,2*ll+1,2))
+   ls_cplx=czero
+   if(tso)  then
+     LIBPAW_ALLOCATE(mat_ls_ylm,(2*ll+1,2*ll+1,4))
+     if(tso) mat_ls_ylm=czero
+   end if
+   if(tso)  then
+     LIBPAW_ALLOCATE(mat_jmj,(2*(2*ll+1),2*(2*ll+1)))
+     if(tso) mat_jmj=czero
+   end if
+   do im=1,2*ll+1
+     mm=im-ll-1
+     ls_cplx(im,im,1)=half*mm
+     if(tso) mat_ls_ylm(im,im,1)=-half*mm ! dn dn
+     if(tso) mat_ls_ylm(im,im,2)=half*mm  ! up up
+     if ((mm+1)<= ll) then
+       ls_cplx(im,im+1,2)=half*sqrt(real((ll-mm)*(ll+mm+1),kind=dp))
+       if(tso) mat_ls_ylm(im,im+1,4)=half*sqrt(real((ll-mm)*(ll+mm+1),kind=dp))  ! up dn
+       if(tso) mat_ls_ylm(im+1,im,3)=half*sqrt(real((ll-mm)*(ll+mm+1),kind=dp))  ! dn up
+     end if
+     if ((mm-1)>=-ll) then
+       ls_cplx(im-1,im,2)=half*sqrt(real((ll+mm)*(ll-mm+1),kind=dp))
+       if(tso) mat_ls_ylm(im-1,im,4)=half*sqrt(real((ll+mm)*(ll-mm+1),kind=dp))  ! up dn
+       if(tso) mat_ls_ylm(im,im-1,3)=half*sqrt(real((ll+mm)*(ll-mm+1),kind=dp))  ! dn up
+     end if
+   end do
+
+!  test : print LS in J,M_J basis
+   if(tso) then
+     do ispden=1,4
+       write(msg,'(3a)') ch10,"value of LS in the Ylm basis for " ,trim(dspin6(ispden+2*(4/4)))
+       call wrtout(std_out,msg,'COLL')
+       do im=1,ll*2+1
+         write(msg,'(12(1x,9(1x,"(",f7.3,",",f7.3,")")))') (mat_ls_ylm(im,jm,ispden),jm=1,ll*2+1)
+         call wrtout(std_out,msg,'COLL')
+       end do
+     end do
+     call mat_mlms2jmj(ll,mat_ls_ylm,mat_jmj,4,1,2,3,std_out,'COLL')  ! optspin=2 : dn spin are first
+   end if
+
+!  Compute <sigma, S_lm1|L.S|S_lm2, sigma_prime> (S_lm=real spherical harmonics)
+!  1= <up|L.S|up>  ;  2= <up|L.S|dn>
+   if(tso) then
+     LIBPAW_ALLOCATE(mat_inp_c,(2*ll+1,2*ll+1,4))
+     LIBPAW_ALLOCATE(mat_out_c,(2*ll+1,2*ll+1,4))
+   end if
+   lm0=ll**2
+   do jm=1,2*ll+1
+     jlm=lm0+jm;j0lm=jlm*(jlm-1)/2
+     do im=1,jm
+       ilm=lm0+im;klm=j0lm+ilm
+       tmp(:)=czero
+       do ii=1,2*ll+1
+         do jj=1,2*ll+1
+           tmp(:)=tmp(:)+ls_cplx(ii,jj,:)*CONJG(slm2ylm(ii,im))*slm2ylm(jj,jm)
+         end do
+       end do
+       ls_ylm(1,klm,:)=REAL(tmp(:),kind=dp)
+       ls_ylm(2,klm,:)=AIMAG(tmp(:))
+     end do
+   end do
+
+!  Test: print LS in Slm basis
+   if(tso) then
+     call mat_slm2ylm(ll,mat_ls_ylm,mat_inp_c,4,2,2,3,std_out,'COLL') ! from Ylm to Slm, and dn spin are first
+     do ispden=1,4
+       write(msg,'(3a)') ch10,"value of LS in the Slm basis for " ,trim(dspin6(ispden+2*(4/4)))
+       call wrtout(std_out,msg,'COLL')
+       do im=1,ll*2+1
+         write(msg,'(12(1x,9(1x,"(",f7.3,",",f7.3,")")))') (mat_inp_c(im,jm,ispden),jm=1,ll*2+1)
+         call wrtout(std_out,msg,'COLL')
+       end do
+     end do
+!    change into n,m basis
+     mat_ls_ylm(:,:,1)=(mat_inp_c(:,:,1)+mat_inp_c(:,:,2))
+     mat_ls_ylm(:,:,2)=(mat_inp_c(:,:,3)+mat_inp_c(:,:,4))
+     mat_ls_ylm(:,:,3)=-cmplx(0.d0,1.d0)*(mat_inp_c(:,:,4)-mat_inp_c(:,:,3))
+     mat_ls_ylm(:,:,4)=(mat_inp_c(:,:,1)-mat_inp_c(:,:,2))
+     do ispden=1,4
+       write(msg,'(3a)') ch10,"value of LS in the Slm basis for " ,trim(dspinm(ispden+2*(4/4)))
+       call wrtout(std_out,msg,'COLL')
+       do im=1,ll*2+1
+         write(msg,'(12(1x,9(1x,"(",f7.3,",",f7.3,")")))') (mat_ls_ylm(im,jm,ispden),jm=1,ll*2+1)
+         call wrtout(std_out,msg,'COLL')
+       end do
+     end do
+     LIBPAW_DEALLOCATE(mat_inp_c)
+     LIBPAW_DEALLOCATE(mat_ls_ylm)
+     LIBPAW_DEALLOCATE(mat_jmj)
+     LIBPAW_DEALLOCATE(mat_out_c)
+   end if ! tso
+
+   LIBPAW_DEALLOCATE(ls_cplx)
+   LIBPAW_DEALLOCATE(slm2ylm)
+
+!  End loop on l
+ end do
+
+ end subroutine lsylm
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_paw_sphharm/plm_coeff
 !! NAME
 !! plm_coeff
@@ -1051,80 +1249,6 @@ function ass_leg_pol(l,m,xarg)
  endif
 
 end function ass_leg_pol
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_paw_sphharm/plm_d2theta
-!! NAME
-!! plm_d2theta
-!!
-!! FUNCTION
-!! Compute d2(Plm (cos(theta)))/d(theta)2  where P_lm is a legendre polynome
-!!
-!! INPUTS
-!!  mpsang=1+ maximum l quantum number
-!!  xx= input value
-!!
-!! OUTPUT
-!!  plm_d2t(mpsang*mpsang)
-!!
-!! SOURCE
-
-subroutine plm_d2theta(mpsang,plm_d2t,xx)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: mpsang
- real(dp),intent(in) :: xx
-!arrays
- real(dp),intent(out) :: plm_d2t(mpsang*mpsang)
-
-!Local variables ---------------------------------------
-!scalars
- integer :: il,ilm,ilmm1,ilmm2,im
- real(dp) :: sqrx
- character(len=500) :: msg
-
-!************************************************************************
- if (abs(xx).gt.1.d0) then
-   msg = 'plm_d2theta : xx > 1 !'
-   LIBPAW_ERROR(msg)
- end if
-
- plm_d2t=zero
- if (mpsang>1) then
-   sqrx=sqrt(abs((1.d0-xx)*(1.d0+xx)))
-
-   do il=1,mpsang-1
-     ilm=il*il+2*il+1
-     ilmm1=(il-1)*(il-1)+2*(il-1)+1
-!    terme d2(Pll)/dtet2
-     plm_d2t(ilm)=(2*il-1)*(sqrx*(plm_d2t(ilmm1)-(-1)**(il-1)*ass_leg_pol(il-1,il-1,xx))+&
-&     2.d0*xx*(-1)**(il-1)*plm_dtheta(il-1,il-1,xx))
-     plm_d2t(ilm-2*il)=plm_d2t(ilm)
-!    terme d2(Pl(l-1))/dtet2
-     plm_d2t(ilm-1)=(2*il-1)*(xx*(plm_d2t(ilmm1)-(-1)**(il-1)*ass_leg_pol(il-1,il-1,xx))-&
-&     2.d0*sqrx*(-1)**(il-1)*plm_dtheta(il-1,il-1,xx))
-     if(il>1) plm_d2t(il*il+2)=plm_d2t(ilm-1)
-   end do
-!  terme d2(Plm)/dtet2
-   if(mpsang>2) then
-     do il=2,mpsang-1
-       do im=0,il-2
-         ilm=il*il+il+1+im
-         ilmm1=(il-1)*(il-1)+il+im
-         ilmm2=(il-2)*(il-2)+il-1+im
-         plm_d2t(ilm)=dble(2*il-1)/dble(il-im)*(xx*(plm_d2t(ilmm1)-(-1)**im*ass_leg_pol(il-1,im,xx))-&
-&         2.d0*sqrx*(-1)**im*plm_dtheta(il-1,im,xx))-&
-&         dble(il+im-1)/dble(il-im)*plm_d2t(ilmm2)
-         plm_d2t(ilm-2*im)=plm_d2t(ilm)
-       end do
-     end do
-   end if
- end if
-
-end subroutine plm_d2theta
 !!***
 
 !----------------------------------------------------------------------
@@ -1299,6 +1423,80 @@ end function plm_dtheta
 
 !----------------------------------------------------------------------
 
+!!****f* m_paw_sphharm/plm_d2theta
+!! NAME
+!! plm_d2theta
+!!
+!! FUNCTION
+!! Compute d2(Plm (cos(theta)))/d(theta)2  where P_lm is a legendre polynome
+!!
+!! INPUTS
+!!  mpsang=1+ maximum l quantum number
+!!  xx= input value
+!!
+!! OUTPUT
+!!  plm_d2t(mpsang*mpsang)
+!!
+!! SOURCE
+
+subroutine plm_d2theta(mpsang,plm_d2t,xx)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: mpsang
+ real(dp),intent(in) :: xx
+!arrays
+ real(dp),intent(out) :: plm_d2t(mpsang*mpsang)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: il,ilm,ilmm1,ilmm2,im
+ real(dp) :: sqrx
+ character(len=500) :: msg
+
+!************************************************************************
+ if (abs(xx).gt.1.d0) then
+   msg = 'plm_d2theta : xx > 1 !'
+   LIBPAW_ERROR(msg)
+ end if
+
+ plm_d2t=zero
+ if (mpsang>1) then
+   sqrx=sqrt(abs((1.d0-xx)*(1.d0+xx)))
+
+   do il=1,mpsang-1
+     ilm=il*il+2*il+1
+     ilmm1=(il-1)*(il-1)+2*(il-1)+1
+!    terme d2(Pll)/dtet2
+     plm_d2t(ilm)=(2*il-1)*(sqrx*(plm_d2t(ilmm1)-(-1)**(il-1)*ass_leg_pol(il-1,il-1,xx))+&
+&     2.d0*xx*(-1)**(il-1)*plm_dtheta(il-1,il-1,xx))
+     plm_d2t(ilm-2*il)=plm_d2t(ilm)
+!    terme d2(Pl(l-1))/dtet2
+     plm_d2t(ilm-1)=(2*il-1)*(xx*(plm_d2t(ilmm1)-(-1)**(il-1)*ass_leg_pol(il-1,il-1,xx))-&
+&     2.d0*sqrx*(-1)**(il-1)*plm_dtheta(il-1,il-1,xx))
+     if(il>1) plm_d2t(il*il+2)=plm_d2t(ilm-1)
+   end do
+!  terme d2(Plm)/dtet2
+   if(mpsang>2) then
+     do il=2,mpsang-1
+       do im=0,il-2
+         ilm=il*il+il+1+im
+         ilmm1=(il-1)*(il-1)+il+im
+         ilmm2=(il-2)*(il-2)+il-1+im
+         plm_d2t(ilm)=dble(2*il-1)/dble(il-im)*(xx*(plm_d2t(ilmm1)-(-1)**im*ass_leg_pol(il-1,im,xx))-&
+&         2.d0*sqrx*(-1)**im*plm_dtheta(il-1,im,xx))-&
+&         dble(il+im-1)/dble(il-im)*plm_d2t(ilmm2)
+         plm_d2t(ilm-2*im)=plm_d2t(ilm)
+       end do
+     end do
+   end if
+ end if
+
+end subroutine plm_d2theta
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_paw_sphharm/pl_deriv
 !! NAME
 !! pl_deriv
@@ -1358,311 +1556,83 @@ end subroutine pl_deriv
 
 !----------------------------------------------------------------------
 
-!!****f* m_paw_sphharm/mkeuler
+!!****f* m_paw_sphharm/ylm_angular_mesh
 !! NAME
-!! mkeuler
+!! ylm_angular_mesh
 !!
 !! FUNCTION
-!! For a given symmetry operation, determines the corresponding Euler angles
+!!  Build (theta, phi) angular mesh from (ntheta, nphi)
 !!
 !! INPUTS
-!!  rot(3,3)= symmetry matrix
+!!   ntheta= number of sample points in the theta dir
+!!   nphi= number of sample points in the phi dir
 !!
 !! OUTPUT
-!!  cosalp=  cos(alpha) with alpha=Euler angle 1
-!!  cosbeta= cos(beta)  with beta =Euler angle 2
-!!  cosgam=  cos(gamma) with gamma=Euler angle 3
-!!  isn= error code (0 if the routine exit normally)
-!!  sinalp= sin(alpha) with alpha=Euler angle 1
-!!  sinbeta= sin(beta)  with beta=Euler angle 2
-!!  singam= sin(gamma) with gamma=Euler angle 3
+!!   angl_size= total number of sample points in the angular mesh, i.e. (ntheta * nphi)
+!!   cart_coord(3, angl_size)= for each point of the angular mesh, gives the Cartesian coordinates
+!!     of the corresponding point on an unitary sphere.
+!!   ang_wgth(angl_size)= for each point of the angular mesh, gives the weight
+!!       of the corresponding point on an unitary sphere.
 !!
-!! NOTES
-!!  This file comes from the file crystal_symmetry.f
-!!  by N.A.W. Holzwarth and A. Tackett for the code pwpaw
-!!  XG20200718 However, this routine was not accurate in the determination
-!!  of beta when cosbeta was close to one (indeed this is a special case). 
-!!  This has been corrected. Moreover, sinbeta has been made an output in order
-!!  to allow accurate calculations in dbeta. Also, tolerances have been made consistent.
+!! NOTE
+!!   Summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
 !!
 !! SOURCE
 
-subroutine mkeuler(rot,cosbeta,sinbeta,cosalp,sinalp,cosgam,singam,isn)
+subroutine ylm_angular_mesh(ntheta, nphi, angl_size, cart_coord, ang_wgth)
 
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(out) :: isn
- real(dp),intent(out) :: cosalp,cosbeta,cosgam,sinalp,sinbeta,singam
-!arrays
- real(dp),intent(in) :: rot(3,3)
-
-!Local variables ---------------------------------------
-!scalars
- integer :: ier
- real(dp) :: check,sinbeta2
- character(len=500) :: msg
-
-! *********************************************************************
-
- do isn= -1,1,2
-
-!Old coding, inaccurate
-!  cosbeta=real(isn)*rot(3,3)
-!  if(abs(1._dp-cosbeta*cosbeta)<tol10) then
-!    sinbeta=zero
-!  else
-!    sinbeta=sqrt(1._dp-cosbeta*cosbeta)
-!  end if
-!  if (abs(sinbeta).gt.tol10)  then
-!    cosalp=isn*rot(3,1)/sinbeta
-!    sinalp=isn*rot(3,2)/sinbeta
-!    cosgam=-isn*rot(1,3)/sinbeta
-!    singam=isn*rot(2,3)/sinbeta
-!  else
-!    cosalp=isn*rot(1,1)/cosbeta
-!    sinalp=isn*rot(1,2)/cosbeta
-!    cosgam=one
-!    singam=zero
-!  end if
-
-!New coding, more accurate
-   cosbeta=real(isn)*rot(3,3)
-   sinbeta2=rot(1,3)**2+rot(2,3)**2
-   if(sinbeta2<tol8**2)then
-     sinbeta=zero
-     cosalp=isn*rot(1,1)/cosbeta
-     sinalp=isn*rot(1,2)/cosbeta
-     cosgam=one
-     singam=zero
-   else
-     sinbeta=sqrt(sinbeta2)
-     cosalp=isn*rot(3,1)/sinbeta
-     sinalp=isn*rot(3,2)/sinbeta
-     cosgam=-isn*rot(1,3)/sinbeta
-     singam=isn*rot(2,3)/sinbeta
-   end if
-!
-
-!  Check matrix:
-   ier=0
-   check=cosalp*cosbeta*cosgam-sinalp*singam
-   if (abs(check-isn*rot(1,1))>tol8) ier=ier+1
-   check=sinalp*cosbeta*cosgam+cosalp*singam
-   if (abs(check-isn*rot(1,2))>tol8) ier=ier+1
-   check=-sinbeta*cosgam
-   if (abs(check-isn*rot(1,3))>tol8) ier=ier+1
-   check=-cosalp*cosbeta*singam-sinalp*cosgam
-   if (abs(check-isn*rot(2,1))>tol8) ier=ier+1
-   check=-sinalp*cosbeta*singam+cosalp*cosgam
-   if (abs(check-isn*rot(2,2))>tol8) ier=ier+1
-   check=sinbeta*singam
-   if (abs(check-isn*rot(2,3))>tol8) ier=ier+1
-   check=cosalp*sinbeta
-   if (abs(check-isn*rot(3,1))>tol8) ier=ier+1
-   check=sinalp*sinbeta
-   if (abs(check-isn*rot(3,2))>tol8) ier=ier+1
-   if (ier.eq.0) return
- end do
-
- isn=0
- write(msg, '(7a)' )&
-& 'Error during determination of symetries!',ch10,&
-& 'Action: check your input file:',ch10,&
-& 'unit cell vectors and/or atoms positions',ch10,&
-& 'have to be given with a better precision.'
- LIBPAW_ERROR(msg)
-
-end subroutine mkeuler
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_paw_sphharm/dble_factorial
-!! NAME
-!! dble_factorial
-!!
-!! FUNCTION
-!! PRIVATE function
-!! Calculates N! as a double precision real.
-!!
-!! INPUTS
-!!   nn=input integer
-!!
-!! OUTPUT
-!!   factorial= N! (double precision)
-!!
-!! SOURCE
-
-elemental function dble_factorial(nn)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: nn
- real(dp) :: dble_factorial
-
-!Local variables ---------------------------------------
-!scalars
- integer :: ii
-
-! *********************************************************************
-
- dble_factorial=one
- do ii=2,nn
-   dble_factorial=dble_factorial*ii
- end do
-
-end function dble_factorial
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_paw_sphharm/dbeta
-!! NAME
-!! dbeta
-!!
-!! FUNCTION
-!!  Calculate the rotation matrix d^l_{m{\prim}m}(beta) using Eq. 4.14 of
-!!  M.E. Rose, Elementary Theory of Angular Momentum,
-!!             John Wiley & Sons, New-York, 1957
-!!
-!! INPUTS
-!!  cosbeta= cosinus of beta (=Euler angle)
-!!  sinbeta= sinus of beta (=Euler angle)
-!!  ll= index l
-!!  mm= index m
-!!  mp= index m_prime
-!!
-!! OUTPUT
-!!  dbeta= rotation matrix
-!!
-!! NOTES
-!!  - This file comes from the file crystal_symmetry.f
-!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
-!!  - Assume l relatively small so that factorials do not cause
-!!    roundoff error
-!!  - XG20200718 This routine was inaccurate when cosbeta was close to one or minus one. 
-!!    This has been fixed by adding sinbeta argument obtained from mkeuler. 
-!!    Tolerances have been adjusted as well.
-!!
-!! SOURCE
-
-function dbeta(cosbeta,sinbeta,ll,mp,mm)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: ll,mm,mp
- real(dp) :: dbeta
- real(dp),intent(in) :: cosbeta,sinbeta
+!Arguments ------------------------------------
+ integer,intent(in) :: ntheta, nphi
+ integer,intent(out) :: angl_size
+ real(dp),allocatable,intent(out) :: cart_coord(:,:)
+ real(dp),allocatable,intent(out) :: ang_wgth(:)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: mxterms=200
- integer :: ii,ina,inb,inc,ml,ms
- real(dp) :: arg,cosbetab2,pref,sinbetab2,sum,tt
+ integer :: it, ip, npoints
+ real(dp) :: ang, con, cos_phi, cos_theta, sin_phi, sin_theta
+ character(len=500) :: msg
+!arrays
+ real(dp),allocatable :: th(:),wth(:)
 
-!************************************************************************
- dbeta=zero
+! *************************************************************************
 
-!Special cases
- if (abs(cosbeta-1._dp).lt.tol10) then
-   if (mp.eq.mm) dbeta=1
- else if (abs(cosbeta+1._dp).lt.tol10) then
-   if (mp.eq.-mm) dbeta=(-1)**(ll+mm)
- else
-!  General case
+ LIBPAW_ALLOCATE(th, (ntheta))
+ LIBPAW_ALLOCATE(wth, (ntheta))
 
-!!!!! Old coding
-!!  This is inaccurate when cosbeta is close to -1
-!   cosbetab2=sqrt((1+cosbeta)*0.5_dp)
-!!  This is inaccurate when cosbeta is close to +1
-!   sinbetab2=sqrt((1-cosbeta)*0.5_dp)
-!!!!! End old coding, begin new coding
-  if(cosbeta>-tol8)then
-    !If cosbeta is positive, cosbeta2 is positive with value >0.7, so one can divide by cosbetab2
-    cosbetab2=sqrt((1+cosbeta)*half)
-    sinbetab2=sinbeta*half/cosbetab2
-  else
-    !If cosbeta is negative, sinbeta2 is positive with value >0.7, so one can divide by sinbetab2
-    sinbetab2=sqrt((1-cosbeta)*half)
-    cosbetab2=sinbeta*half/sinbetab2
-  endif
-!!!!! End of new coding
+ con = two_pi / nphi
+ call gauleg(-one, one, th, wth, ntheta)
 
-   ml=max(mp,mm)
-   ms=min(mp,mm)
-   if (ml.ne.mp) sinbetab2=-sinbetab2
-   tt=-(sinbetab2/cosbetab2)**2
-   pref=sqrt((dble_factorial(ll-ms)*dble_factorial(ll+ml))&
-&   /(dble_factorial(ll+ms)*dble_factorial(ll-ml)))&
-&   /dble_factorial(ml-ms)*(cosbetab2**(2*ll+ms-ml))&
-&   *((-sinbetab2)**(ml-ms))
-   sum=1._dp
-   arg=1._dp
-   ina=ml-ll
-   inb=-ms-ll
-   inc=ml-ms+1
-   do ii=1,mxterms
-     if (ina.eq.0.or.inb.eq.0) exit
-     arg=(arg*ina*inb*tt)/(ii*inc)
-     sum=sum+arg
-     ina=ina+1
-     inb=inb+1
-     inc=inc+1
+ angl_size = ntheta * nphi
+ LIBPAW_ALLOCATE(cart_coord, (3, angl_size))
+ LIBPAW_ALLOCATE(ang_wgth, (angl_size))
+ npoints = 0
+ do it = 1, ntheta
+   cos_theta = th(it)
+   sin_theta = sqrt(one - cos_theta*cos_theta)
+   do ip = 1, nphi
+     ang = con * (ip-1)
+     cos_phi = cos(ang); sin_phi = sin(ang)
+     npoints = npoints + 1
+     cart_coord(1, npoints) = sin_theta * cos_phi
+     cart_coord(2, npoints) = sin_theta * sin_phi
+     cart_coord(3, npoints) = cos_theta
+     ! Normalization required
+     ang_wgth(npoints) = wth(it) / (two * nphi)
    end do
-   dbeta=pref*sum
+ end do
+
+ LIBPAW_DEALLOCATE(th)
+ LIBPAW_DEALLOCATE(wth)
+
+!Error if npoints exceeds angl_size
+ if (npoints > angl_size) then
+   write(msg, '(a,i4,a,a,i4)' ) 'npoints =',npoints,ch10,&
+&                               'angl_size =',angl_size
+   LIBPAW_BUG(msg)
  end if
 
-end function dbeta
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_paw_sphharm/phim
-!! NAME
-!! phim
-!!
-!! FUNCTION
-!! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
-!!                       Sqrt[2] sin[Abs(m) theta], if m<0
-!!                       1                        , if m=0
-!!
-!! INPUTS
-!!  costeta= cos(theta)  (theta= input angle)
-!!  mm = index m
-!!  sinteta= sin(theta)  (theta= input angle)
-!!
-!! OUTPUT
-!!  phim= Phi_m(theta) (see above)
-!!
-!! NOTES
-!!  - This file comes from the file crystal_symmetry.f
-!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
-!!
-!! SOURCE
-
-pure function phim(costheta,sintheta,mm)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: mm
- real(dp) :: phim
- real(dp),intent(in) :: costheta,sintheta
-
-! *********************************************************************
-
- if (mm==0)  phim=one
- if (mm==1)  phim=sqrt2*costheta
- if (mm==-1) phim=sqrt2*sintheta
- if (mm==2)  phim=sqrt2*(costheta*costheta-sintheta*sintheta)
- if (mm==-2) phim=sqrt2*two*sintheta*costheta
- if (mm==3)  phim=sqrt2*&
-& (costheta*(costheta*costheta-sintheta*sintheta)&
-& -sintheta*two*sintheta*costheta)
- if (mm==-3) phim=sqrt2*&
-& (sintheta*(costheta*costheta-sintheta*sintheta)&
-& +costheta*two*sintheta*costheta)
-
- end function phim
+end subroutine ylm_angular_mesh
 !!***
 
 !----------------------------------------------------------------------
@@ -2088,151 +2058,6 @@ end subroutine mat_slm2ylm
 
 !----------------------------------------------------------------------
 
-!!****f* m_paw_sphharm/create_slm2ylm
-!! NAME
-!! create_slm2ylm
-!!
-!! FUNCTION
-!! For a given angular momentum lcor, compute slm2ylm.
-!!
-!! INPUTS
-!!  lcor= angular momentum, size of the matrix is 2(2*lcor+1)
-!!
-!! OUTPUT
-!!  slm2ylm(2lcor+1,2lcor+1) = rotation matrix.
-!!
-!! NOTES
-!!  useful only in ndij==4
-!!
-!! SOURCE
-
-subroutine create_slm2ylm(lcor,slmtwoylm)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: lcor
-!arrays
- complex(dpc),intent(out) :: slmtwoylm(2*lcor+1,2*lcor+1)
-
-!Local variables ---------------------------------------
-!scalars
- integer :: jm,ll,mm,im
- real(dp),parameter :: invsqrt2=one/sqrt2
- real(dp) :: onem
-!arrays
-
-! *********************************************************************
-
- ll=lcor
- slmtwoylm=czero
- do im=1,2*ll+1
-   mm=im-ll-1;jm=-mm+ll+1
-   onem=dble((-1)**mm)
-   if (mm> 0) then
-     slmtwoylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
-     slmtwoylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
-   end if
-   if (mm==0) then
-     slmtwoylm(im,im)=cone
-   end if
-   if (mm< 0) then
-     slmtwoylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
-     slmtwoylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
-   end if
- end do
-
-end subroutine create_slm2ylm
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_paw_sphharm/create_mlms2jmj
-!! NAME
-!! create_mlms2jmj
-!!
-!! FUNCTION
-!! For a given angular momentum lcor, give the rotation matrix msml2jmj
-!!
-!! INPUTS
-!!  lcor= angular momentum
-!!
-!! SIDE EFFECTS
-!!  mlms2jmj= rotation matrix
-!!
-!! SOURCE
-
-subroutine create_mlms2jmj(lcor,mlmstwojmj)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: lcor
-!arrays
- complex(dpc),intent(out) :: mlmstwojmj(2*(2*lcor+1),2*(2*lcor+1))
-
-!Local variables ---------------------------------------
-!scalars
- integer :: jc1,jj,jm,ll,ml1,ms1
- real(dp) :: invsqrt2lp1,xj,xmj
- character(len=500) :: msg
-!arrays
- integer, allocatable :: ind_msml(:,:)
- complex(dpc),allocatable :: mat_mlms2(:,:)
-
-!*********************************************************************
-
-!--------------- Built indices + allocations
- ll=lcor
- mlmstwojmj=czero
- LIBPAW_BOUND2_ALLOCATE(ind_msml,BOUNDS(1,2),BOUNDS(-ll,ll))
- LIBPAW_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
- mlmstwojmj=czero
- jc1=0
- do ms1=1,2
-   do ml1=-ll,ll
-     jc1=jc1+1
-     ind_msml(ms1,ml1)=jc1
-   end do
- end do
-
-!--------------- built mlmstwojmj
-!do jj=ll,ll+1    ! the physical value of j are ll-0.5,ll+0.5
-!xj(jj)=jj-0.5
- if(ll==0)then
-   msg=' ll should not be equal to zero !'
-   LIBPAW_BUG(msg)
- end if
- jc1=0
- invsqrt2lp1=one/sqrt(float(2*lcor+1))
- do jj=ll,ll+1
-   xj=float(jj)-half
-   do jm=-jj,jj-1
-     xmj=float(jm)+half
-     jc1=jc1+1
-     if(nint(xj+0.5)==ll+1) then
-       if(nint(xmj+0.5)==ll+1)  then
-         mlmstwojmj(ind_msml(2,ll),jc1)=1.0   !  J=L+0.5 and m_J=L+0.5
-       else if(nint(xmj-0.5)==-ll-1) then
-         mlmstwojmj(ind_msml(1,-ll),jc1)=1.0   !  J=L+0.5 and m_J=-L-0.5
-       else
-         mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
-         mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
-       end if
-     end if
-     if(nint(xj+0.5)==ll) then
-       mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
-       mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=-invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
-     end if
-   end do
- end do
-
- LIBPAW_DEALLOCATE(ind_msml)
- LIBPAW_DEALLOCATE(mat_mlms2)
-
-end subroutine create_mlms2jmj
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_paw_sphharm/setsym_ylm
 !! NAME
 !! setsym_ylm
@@ -2436,7 +2261,7 @@ end subroutine setsym_ylm
 ! ************************************************************************
 
  if (mpsang>4) then
-   msg='  Not designed for angular momentum greater than 3 !'
+   msg='  Not designed for angular momentum greater than 3!'
    LIBPAW_ERROR(msg)
  end if
 
@@ -2799,94 +2624,10 @@ end subroutine setsym_ylm
 
  end subroutine setnabla_ylm
 !!***
-!----------------------------------------------------------------------
-
-!!****f* m_paw_sphharm/rfactorial
-!! NAME
-!! rfactorial
-!!
-!! FUNCTION
-!! Private function
-!! Calculates N! as a double precision real.
-!!
-!! INPUTS
-!!   nn=number to use
-!!
-!! OUTPUT
-!!   factorial= n! (real)
-!!
-!! SOURCE
-
-elemental function rfactorial(nn)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: nn
- real(dp) :: rfactorial
-
-!Local variables ---------------------------------------
-!scalars
- integer :: ii
-
-! *********************************************************************
-
- rfactorial=one
- do ii=2,nn
-   rfactorial=rfactorial*ii
- end do
-
-end function rfactorial
-!!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_paw_sphharm/perms
-!! NAME
-!! perms
-!!
-!! FUNCTION
-!! Private function
-!! Returns N!/(N-k)!  if N>=0 and N>k ; otherwise 0 is returned
-!!
-!! INPUTS
-!!   kk=number k to use
-!!   nn=number N to use
-!!
-!! OUTPUT
-!!   perms= n!/(n-k)!
-!!
-!! SOURCE
-
-function perms(nn,kk)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: kk,nn
- real(dp) :: perms
-
-!Local variables ---------------------------------------
-!scalars
- integer :: ii
- real(dp) :: pp
-
-! *********************************************************************
-
- if (nn>=0.and.nn>=kk) then
-   pp=1._dp
-   do ii=nn-kk+1,nn
-     pp=pp*ii
-   end do
- else
-   pp=0._dp
- end if
-
- perms=pp
-
-end function perms
-!!***
-
-!----------------------------------------------------------------------
-!!****f* m_pawang/gaunt
+!!****f* m_paw_sphharm/gaunt
 !! NAME
 !! gaunt
 !!
@@ -2998,13 +2739,14 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 
 !----------------------------------------------------------------------
 
-!!****f* m_pawang/realgaunt
+!!****f* m_pawsphharm/realgaunt
 !! NAME
 !! realgaunt
 !!
 !! FUNCTION
 !! This routine compute "real Gaunt coefficients", i.e. gaunt
 !! coefficients according to "real spherical harmonics"
+!!   RealGaunt(ilm,ilm_i,ilm_j) = Int[ S_lm Slm_i Slm_j]
 !!
 !! INPUTS
 !!  l_max= max. value of ang. momentum l+1;  Gaunt coeffs up to
@@ -3165,111 +2907,697 @@ end subroutine realgaunt
 !!
 !! FUNCTION
 !! Evaluate integrals involving spherical harmonics and their gradient.
-!! These integrals are angular part for <nablaphi|nablaphj> and <tnablaphi|tnablaphj>.
+!! These integrals are angular part for <nablaphi|nablaphj> and <tnablaphi|tnablaphj>
+!! Nabla_RealGaunt(ilm,ilm_i,ilm_j) = Int[ Slm Grad(Slm_i).Grad(Slm_j)]
 !!
 !! INPUTS
-!!  mpsang=1+ max. angular momentum
+!!  l_max = max. l value for Slm (see description above)
+!!  l_max_ij = max. l value for Slm_i and Slm_j (see description above)
 !!
 !! OUTPUT
-!! nnablagnt= number of non zero integrals
-!! nabgauntselect(mpsang**2,mpsang**2,mpsang**2)= stores the index of the non zero integrals
-!! nablagaunt((mpsang**2)**3)= stores the integrals' values
+!! nnablagnt= number of non-zero integrals
+!! nabgauntselect((l_max+1)**2,(l_max_ij+1)**2,(l_max_ij+1)**2)= indexes of the non-zero integrals
+!! nablagaunt((l_max+1)**2*(l_max_ij+1)**2)= values of the integrals
 !!  
 !! SOURCE
 
-subroutine nablarealgaunt(mpsang,nnablagnt,nabgauntselect,nablagaunt) 
+subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt) 
 
 !Arguments ---------------------------------------------
 !scalars
- integer, intent(in) :: mpsang
+ integer, intent(in) :: l_max,l_max_ij
  integer, intent(out) :: nnablagnt
 !array
- integer,intent(out) :: nabgauntselect(mpsang**2,mpsang**2,mpsang**2)
- real(dp),intent(out) :: nablagaunt((mpsang**2)**3)
+ integer,intent(out) :: nabgauntselect((l_max+1)**2,(l_max_ij+1)**2,(l_max_ij+1)**2)
+ real(dp),intent(out) :: nablagaunt(((l_max+1)**2)*((l_max_ij+1)**2))
 
 !Local variables ---------------------------------------
-! No local variable
+ integer :: ii,ntheta,nphi
+ character(len=500) :: msg
 
 !************************************************************************
+
+ if (l_max>2.or.l_max_ij>2) then
+   msg='  Not designed for angular momentum greater than 2!'
+   LIBPAW_ERROR(msg)
+ end if
 
  nabgauntselect(:,:,:)=-1
  nablagaunt(:)=zero
 
- if (mpsang>=2) then
-   nabgauntselect(1,2,2)=1  ; nablagaunt(1)=0.5641895835477563_dp !(1/sqrt(pi)) 
-   nabgauntselect(1,3,3)=2  ; nablagaunt(2)=0.5641895835477563_dp !(1/sqrt(pi))
-   nabgauntselect(1,4,4)=3  ; nablagaunt(3)=0.5641895835477563_dp !(1/sqrt(pi))
-   nnablagnt=3
+ ii=0
+ if (l_max>=1) then
+   if (l_max_ij>=1) then
+     ii=ii+1 ; nabgauntselect(1,2,2)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi)) 
+     ii=ii+1 ; nabgauntselect(1,3,3)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi))
+     ii=ii+1 ; nabgauntselect(1,4,4)=ii ; nablagaunt(ii)=0.5641895835477563_dp !(1/sqrt(pi))
+   end if
+   if (l_max_ij>=2) then
+     ii=ii+1 ; nabgauntselect(1,5,5)=ii ; nablagaunt(ii)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+     ii=ii+1 ; nabgauntselect(1,6,6)=ii ; nablagaunt(ii)=1.692568750643269_dp !\dfrac{3}{\sqrt{\pi}}
+     ii=ii+1 ; nabgauntselect(1,7,7)=ii ; nablagaunt(ii)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+     ii=ii+1 ; nabgauntselect(1,8,8)=ii ; nablagaunt(ii)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+     ii=ii+1 ; nabgauntselect(1,9,9)=ii ; nablagaunt(ii)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+     ii=ii+1 ; nabgauntselect(2,2,7)=ii ; nablagaunt(ii)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(2,2,9)=ii ; nablagaunt(ii)=-0.6555290583552474_dp !\frac{-1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(2,3,6)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(2,4,5)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(2,5,4)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(2,6,3)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(2,7,2)=ii ; nablagaunt(ii)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(2,9,2)=ii ; nablagaunt(ii)=-0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+     ii=ii+1 ; nabgauntselect(3,2,6)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(3,3,7)=ii ; nablagaunt(ii)=0.75693974607408354_dp !\frac{3}{\sqrt{5\pi}
+     ii=ii+1 ; nabgauntselect(3,4,8)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(3,6,2)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(3,7,3)=ii ; nablagaunt(ii)=0.7569397566060481_dp !\frac{3}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(3,8,4)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,2,5)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,3,8)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,4,7)=ii ; nablagaunt(ii)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,4,9)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,5,2)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,7,4)=ii ; nablagaunt(ii)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,8,3)=ii ; nablagaunt(ii)=0.6555290583552474_dp  !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+     ii=ii+1 ; nabgauntselect(4,9,4)=ii ; nablagaunt(ii)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+   end if
  end if
 
- if (mpsang>=3) then
-   nabgauntselect(7,2,2)=4  ; nablagaunt(4)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
-   nabgauntselect(9,2,2)=5 ; nablagaunt(5)=0.2185096861184158_dp !\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(6,2,3)=6 ; nablagaunt(6)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(5,2,4)=7 ; nablagaunt(7)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(4,2,5)=8 ; nablagaunt(8)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(3,2,6)=9 ; nablagaunt(9)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(2,2,7)=10 ; nablagaunt(10)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
-   nabgauntselect(2,2,9)=11 ; nablagaunt(11)=-0.6555290583552474_dp !\frac{-1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(6,3,2)=12 ; nablagaunt(12)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(7,3,3)=13 ; nablagaunt(13)=-0.252313252202016_dp !-\frac{1}{\sqrt{5\pi}}
-   nabgauntselect(8,3,4)=14 ; nablagaunt(14)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(2,3,6)=15 ; nablagaunt(15)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(3,3,7)=16 ; nablagaunt(16)=0.75693974607408354_dp !\frac{3}{\sqrt{5\pi}
-   nabgauntselect(4,3,8)=17 ; nablagaunt(17)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(5,4,2)=18 ; nablagaunt(18)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(8,4,3)=19 ; nablagaunt(19)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(7,4,4)=20 ; nablagaunt(20)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
-   nabgauntselect(9,4,4)=21 ; nablagaunt(21)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(2,4,5)=22 ; nablagaunt(22)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(4,4,7)=23 ; nablagaunt(23)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
-   nabgauntselect(3,4,8)=24 ; nablagaunt(24)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(4,4,9)=25 ; nablagaunt(25)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(4,5,2)=26 ; nablagaunt(26)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(2,5,4)=27 ; nablagaunt(27)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(1,5,5)=28 ; nablagaunt(28)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
-   nabgauntselect(7,5,5)=29 ; nablagaunt(29)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(8,5,6)=30 ; nablagaunt(30)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(5,5,7)=31 ; nablagaunt(31)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(6,5,8)=32 ; nablagaunt(32)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(3,6,2)=33 ; nablagaunt(33)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(2,6,3)=34 ; nablagaunt(34)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
-   nabgauntselect(8,6,5)=35 ; nablagaunt(35)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(1,6,6)=36 ; nablagaunt(36)=1.692568750643269_dp !\dfrac{3}{\sqrt{\pi}}
-   nabgauntselect(7,6,6)=37 ; nablagaunt(37)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(9,6,6)=38 ; nablagaunt(38)=-0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(6,6,7)=39 ; nablagaunt(39)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(5,6,8)=40 ; nablagaunt(40)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(6,6,9)=41 ; nablagaunt(41)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(2,7,2)=42 ; nablagaunt(42)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
-   nabgauntselect(3,7,3)=43 ; nablagaunt(43)=0.7569397566060481_dp !\frac{3}{\sqrt{5\pi}}
-   nabgauntselect(4,7,4)=44 ; nablagaunt(44)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
-   nabgauntselect(5,7,5)=45 ; nablagaunt(45)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(6,7,6)=46 ; nablagaunt(46)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(1,7,7)=47 ; nablagaunt(47)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
-   nabgauntselect(7,7,7)=48 ; nablagaunt(48)=0.5406712547186058_dp !\frac{3}{7}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(8,7,8)=49 ; nablagaunt(49)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(9,7,9)=50 ; nablagaunt(50)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(4,8,3)=51 ; nablagaunt(51)=0.6555290583552474_dp  !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
-   nabgauntselect(3,8,4)=52 ; nablagaunt(52)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
-   nabgauntselect(6,8,5)=53 ; nablagaunt(53)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(5,8,6)=54 ; nablagaunt(54)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(8,8,7)=55 ; nablagaunt(55)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(1,8,8)=56 ; nablagaunt(56)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
-   nabgauntselect(7,8,8)=57 ; nablagaunt(57)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(9,8,8)=58 ; nablagaunt(58)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(8,8,9)=59 ; nablagaunt(59)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(6,9,6)=60 ; nablagaunt(60)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(9,9,7)=61 ; nablagaunt(61)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(8,9,8)=62 ; nablagaunt(62)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
-   nabgauntselect(1,9,9)=63 ; nablagaunt(63)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
-   nabgauntselect(2,9,2)=64 ; nablagaunt(64)=-0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
-   nabgauntselect(7,9,9)=65 ; nablagaunt(65)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
-   nabgauntselect(4,9,4)=66 ; nablagaunt(66)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
-   nnablagnt=66
+ if (l_max>=2) then
+   if (l_max_ij>=1) then
+     ii=ii+1 ; nabgauntselect(5,2,4)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(5,4,2)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(6,2,3)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(6,3,2)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(7,2,2)=ii ; nablagaunt(ii)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(7,3,3)=ii ; nablagaunt(ii)=-0.252313252202016_dp !-\frac{1}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(7,4,4)=ii ; nablagaunt(ii)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(8,3,4)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(8,4,3)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(9,2,2)=ii ; nablagaunt(ii)=0.2185096861184158_dp !\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+     ii=ii+1 ; nabgauntselect(9,4,4)=ii ; nablagaunt(ii)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   end if
+   if (l_max_ij>=2) then
+     ii=ii+1 ; nabgauntselect(5,5,7)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(5,6,8)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(5,7,5)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(5,8,6)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(6,5,8)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(6,6,7)=ii ; nablagaunt(ii)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(6,6,9)=ii ; nablagaunt(ii)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(6,7,6)=ii ; nablagaunt(ii)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(6,8,5)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(6,9,6)=ii ; nablagaunt(ii)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(7,5,5)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(7,6,6)=ii ; nablagaunt(ii)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(7,7,7)=ii ; nablagaunt(ii)=0.5406712547186058_dp !\frac{3}{7}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(7,8,8)=ii ; nablagaunt(ii)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(7,9,9)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(8,5,6)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(8,6,5)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(8,7,8)=ii ; nablagaunt(ii)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(8,8,7)=ii ; nablagaunt(ii)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(8,8,9)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(8,9,8)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(9,6,6)=ii ; nablagaunt(ii)=-0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(9,7,9)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+     ii=ii+1 ; nabgauntselect(9,8,8)=ii ; nablagaunt(ii)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+     ii=ii+1 ; nabgauntselect(9,9,7)=ii ; nablagaunt(ii)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   end if
  end if
+
+ nnablagnt=ii
 
 end subroutine nablarealgaunt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/create_slm2ylm
+!! NAME
+!! create_slm2ylm
+!!
+!! FUNCTION
+!! For a given angular momentum lcor, compute slm2ylm.
+!!
+!! INPUTS
+!!  lcor= angular momentum, size of the matrix is 2(2*lcor+1)
+!!
+!! OUTPUT
+!!  slm2ylm(2lcor+1,2lcor+1) = rotation matrix.
+!!
+!! NOTES
+!!  useful only in ndij==4
+!!
+!! SOURCE
+
+subroutine create_slm2ylm(lcor,slmtwoylm)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lcor
+!arrays
+ complex(dpc),intent(out) :: slmtwoylm(2*lcor+1,2*lcor+1)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: jm,ll,mm,im
+ real(dp),parameter :: invsqrt2=one/sqrt2
+ real(dp) :: onem
+!arrays
+
+! *********************************************************************
+
+ ll=lcor
+ slmtwoylm=czero
+ do im=1,2*ll+1
+   mm=im-ll-1;jm=-mm+ll+1
+   onem=dble((-1)**mm)
+   if (mm> 0) then
+     slmtwoylm(im,im)= cmplx(onem*invsqrt2,zero,kind=dp)
+     slmtwoylm(jm,im)= cmplx(invsqrt2,     zero,kind=dp)
+   end if
+   if (mm==0) then
+     slmtwoylm(im,im)=cone
+   end if
+   if (mm< 0) then
+     slmtwoylm(im,im)= cmplx(zero,     invsqrt2,kind=dp)
+     slmtwoylm(jm,im)=-cmplx(zero,onem*invsqrt2,kind=dp)
+   end if
+ end do
+
+end subroutine create_slm2ylm
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/create_mlms2jmj
+!! NAME
+!! create_mlms2jmj
+!!
+!! FUNCTION
+!! For a given angular momentum lcor, give the rotation matrix msml2jmj
+!!
+!! INPUTS
+!!  lcor= angular momentum
+!!
+!! SIDE EFFECTS
+!!  mlms2jmj= rotation matrix
+!!
+!! SOURCE
+
+subroutine create_mlms2jmj(lcor,mlmstwojmj)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: lcor
+!arrays
+ complex(dpc),intent(out) :: mlmstwojmj(2*(2*lcor+1),2*(2*lcor+1))
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: jc1,jj,jm,ll,ml1,ms1
+ real(dp) :: invsqrt2lp1,xj,xmj
+ character(len=500) :: msg
+!arrays
+ integer, allocatable :: ind_msml(:,:)
+ complex(dpc),allocatable :: mat_mlms2(:,:)
+
+!*********************************************************************
+
+!--------------- Built indices + allocations
+ ll=lcor
+ mlmstwojmj=czero
+ LIBPAW_BOUND2_ALLOCATE(ind_msml,BOUNDS(1,2),BOUNDS(-ll,ll))
+ LIBPAW_ALLOCATE(mat_mlms2,(2*(2*lcor+1),2*(2*lcor+1)))
+ mlmstwojmj=czero
+ jc1=0
+ do ms1=1,2
+   do ml1=-ll,ll
+     jc1=jc1+1
+     ind_msml(ms1,ml1)=jc1
+   end do
+ end do
+
+!--------------- built mlmstwojmj
+!do jj=ll,ll+1    ! the physical value of j are ll-0.5,ll+0.5
+!xj(jj)=jj-0.5
+ if(ll==0)then
+   msg=' ll should not be equal to zero !'
+   LIBPAW_BUG(msg)
+ end if
+ jc1=0
+ invsqrt2lp1=one/sqrt(float(2*lcor+1))
+ do jj=ll,ll+1
+   xj=float(jj)-half
+   do jm=-jj,jj-1
+     xmj=float(jm)+half
+     jc1=jc1+1
+     if(nint(xj+0.5)==ll+1) then
+       if(nint(xmj+0.5)==ll+1)  then
+         mlmstwojmj(ind_msml(2,ll),jc1)=1.0   !  J=L+0.5 and m_J=L+0.5
+       else if(nint(xmj-0.5)==-ll-1) then
+         mlmstwojmj(ind_msml(1,-ll),jc1)=1.0   !  J=L+0.5 and m_J=-L-0.5
+       else
+         mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+         mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+       end if
+     end if
+     if(nint(xj+0.5)==ll) then
+       mlmstwojmj(ind_msml(1,nint(xmj+0.5)),jc1)=invsqrt2lp1*(sqrt(float(ll)+xmj+0.5))
+       mlmstwojmj(ind_msml(2,nint(xmj-0.5)),jc1)=-invsqrt2lp1*(sqrt(float(ll)-xmj+0.5))
+     end if
+   end do
+ end do
+
+ LIBPAW_DEALLOCATE(ind_msml)
+ LIBPAW_DEALLOCATE(mat_mlms2)
+
+end subroutine create_mlms2jmj
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/mkeuler
+!! NAME
+!! mkeuler
+!!
+!! FUNCTION
+!! Private function
+!! For a given symmetry operation, determines the corresponding Euler angles
+!!
+!! INPUTS
+!!  rot(3,3)= symmetry matrix
+!!
+!! OUTPUT
+!!  cosalp=  cos(alpha) with alpha=Euler angle 1
+!!  cosbeta= cos(beta)  with beta =Euler angle 2
+!!  cosgam=  cos(gamma) with gamma=Euler angle 3
+!!  isn= error code (0 if the routine exit normally)
+!!  sinalp= sin(alpha) with alpha=Euler angle 1
+!!  sinbeta= sin(beta)  with beta=Euler angle 2
+!!  singam= sin(gamma) with gamma=Euler angle 3
+!!
+!! NOTES
+!!  This file comes from the file crystal_symmetry.f
+!!  by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  XG20200718 However, this routine was not accurate in the determination
+!!  of beta when cosbeta was close to one (indeed this is a special case). 
+!!  This has been corrected. Moreover, sinbeta has been made an output in order
+!!  to allow accurate calculations in dbeta. Also, tolerances have been made consistent.
+!!
+!! SOURCE
+
+subroutine mkeuler(rot,cosbeta,sinbeta,cosalp,sinalp,cosgam,singam,isn)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(out) :: isn
+ real(dp),intent(out) :: cosalp,cosbeta,cosgam,sinalp,sinbeta,singam
+!arrays
+ real(dp),intent(in) :: rot(3,3)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ier
+ real(dp) :: check,sinbeta2
+ character(len=500) :: msg
+
+! *********************************************************************
+
+ do isn= -1,1,2
+
+!Old coding, inaccurate
+!  cosbeta=real(isn)*rot(3,3)
+!  if(abs(1._dp-cosbeta*cosbeta)<tol10) then
+!    sinbeta=zero
+!  else
+!    sinbeta=sqrt(1._dp-cosbeta*cosbeta)
+!  end if
+!  if (abs(sinbeta).gt.tol10)  then
+!    cosalp=isn*rot(3,1)/sinbeta
+!    sinalp=isn*rot(3,2)/sinbeta
+!    cosgam=-isn*rot(1,3)/sinbeta
+!    singam=isn*rot(2,3)/sinbeta
+!  else
+!    cosalp=isn*rot(1,1)/cosbeta
+!    sinalp=isn*rot(1,2)/cosbeta
+!    cosgam=one
+!    singam=zero
+!  end if
+
+!New coding, more accurate
+   cosbeta=real(isn)*rot(3,3)
+   sinbeta2=rot(1,3)**2+rot(2,3)**2
+   if(sinbeta2<tol8**2)then
+     sinbeta=zero
+     cosalp=isn*rot(1,1)/cosbeta
+     sinalp=isn*rot(1,2)/cosbeta
+     cosgam=one
+     singam=zero
+   else
+     sinbeta=sqrt(sinbeta2)
+     cosalp=isn*rot(3,1)/sinbeta
+     sinalp=isn*rot(3,2)/sinbeta
+     cosgam=-isn*rot(1,3)/sinbeta
+     singam=isn*rot(2,3)/sinbeta
+   end if
+!
+
+!  Check matrix:
+   ier=0
+   check=cosalp*cosbeta*cosgam-sinalp*singam
+   if (abs(check-isn*rot(1,1))>tol8) ier=ier+1
+   check=sinalp*cosbeta*cosgam+cosalp*singam
+   if (abs(check-isn*rot(1,2))>tol8) ier=ier+1
+   check=-sinbeta*cosgam
+   if (abs(check-isn*rot(1,3))>tol8) ier=ier+1
+   check=-cosalp*cosbeta*singam-sinalp*cosgam
+   if (abs(check-isn*rot(2,1))>tol8) ier=ier+1
+   check=-sinalp*cosbeta*singam+cosalp*cosgam
+   if (abs(check-isn*rot(2,2))>tol8) ier=ier+1
+   check=sinbeta*singam
+   if (abs(check-isn*rot(2,3))>tol8) ier=ier+1
+   check=cosalp*sinbeta
+   if (abs(check-isn*rot(3,1))>tol8) ier=ier+1
+   check=sinalp*sinbeta
+   if (abs(check-isn*rot(3,2))>tol8) ier=ier+1
+   if (ier.eq.0) return
+ end do
+
+ isn=0
+ write(msg, '(7a)' )&
+& 'Error during determination of symetries!',ch10,&
+& 'Action: check your input file:',ch10,&
+& 'unit cell vectors and/or atoms positions',ch10,&
+& 'have to be given with a better precision.'
+ LIBPAW_ERROR(msg)
+
+end subroutine mkeuler
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/phim
+!! NAME
+!! phim
+!!
+!! FUNCTION
+!! Computes Phi_m[theta]=Sqrt[2] cos[m theta],      if m>0
+!!                       Sqrt[2] sin[Abs(m) theta], if m<0
+!!                       1                        , if m=0
+!!
+!! INPUTS
+!!  costeta= cos(theta)  (theta= input angle)
+!!  mm = index m
+!!  sinteta= sin(theta)  (theta= input angle)
+!!
+!! OUTPUT
+!!  phim= Phi_m(theta) (see above)
+!!
+!! NOTES
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!
+!! SOURCE
+
+pure function phim(costheta,sintheta,mm)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: mm
+ real(dp) :: phim
+ real(dp),intent(in) :: costheta,sintheta
+
+! *********************************************************************
+
+ if (mm==0)  phim=one
+ if (mm==1)  phim=sqrt2*costheta
+ if (mm==-1) phim=sqrt2*sintheta
+ if (mm==2)  phim=sqrt2*(costheta*costheta-sintheta*sintheta)
+ if (mm==-2) phim=sqrt2*two*sintheta*costheta
+ if (mm==3)  phim=sqrt2*&
+& (costheta*(costheta*costheta-sintheta*sintheta)&
+& -sintheta*two*sintheta*costheta)
+ if (mm==-3) phim=sqrt2*&
+& (sintheta*(costheta*costheta-sintheta*sintheta)&
+& +costheta*two*sintheta*costheta)
+
+ end function phim
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/dbeta
+!! NAME
+!! dbeta
+!!
+!! FUNCTION
+!!  Calculate the rotation matrix d^l_{m{\prim}m}(beta) using Eq. 4.14 of
+!!  M.E. Rose, Elementary Theory of Angular Momentum,
+!!             John Wiley & Sons, New-York, 1957
+!!
+!! INPUTS
+!!  cosbeta= cosinus of beta (=Euler angle)
+!!  sinbeta= sinus of beta (=Euler angle)
+!!  ll= index l
+!!  mm= index m
+!!  mp= index m_prime
+!!
+!! OUTPUT
+!!  dbeta= rotation matrix
+!!
+!! NOTES
+!!  - This file comes from the file crystal_symmetry.f
+!!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
+!!  - Assume l relatively small so that factorials do not cause
+!!    roundoff error
+!!  - XG20200718 This routine was inaccurate when cosbeta was close to one or minus one. 
+!!    This has been fixed by adding sinbeta argument obtained from mkeuler. 
+!!    Tolerances have been adjusted as well.
+!!
+!! SOURCE
+
+function dbeta(cosbeta,sinbeta,ll,mp,mm)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: ll,mm,mp
+ real(dp) :: dbeta
+ real(dp),intent(in) :: cosbeta,sinbeta
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: mxterms=200
+ integer :: ii,ina,inb,inc,ml,ms
+ real(dp) :: arg,cosbetab2,pref,sinbetab2,sum,tt
+
+!************************************************************************
+ dbeta=zero
+
+!Special cases
+ if (abs(cosbeta-1._dp).lt.tol10) then
+   if (mp.eq.mm) dbeta=1
+ else if (abs(cosbeta+1._dp).lt.tol10) then
+   if (mp.eq.-mm) dbeta=(-1)**(ll+mm)
+ else
+!  General case
+
+!!!!! Old coding
+!!  This is inaccurate when cosbeta is close to -1
+!   cosbetab2=sqrt((1+cosbeta)*0.5_dp)
+!!  This is inaccurate when cosbeta is close to +1
+!   sinbetab2=sqrt((1-cosbeta)*0.5_dp)
+!!!!! End old coding, begin new coding
+  if(cosbeta>-tol8)then
+    !If cosbeta is positive, cosbeta2 is positive with value >0.7, so one can divide by cosbetab2
+    cosbetab2=sqrt((1+cosbeta)*half)
+    sinbetab2=sinbeta*half/cosbetab2
+  else
+    !If cosbeta is negative, sinbeta2 is positive with value >0.7, so one can divide by sinbetab2
+    sinbetab2=sqrt((1-cosbeta)*half)
+    cosbetab2=sinbeta*half/sinbetab2
+  endif
+!!!!! End of new coding
+
+   ml=max(mp,mm)
+   ms=min(mp,mm)
+   if (ml.ne.mp) sinbetab2=-sinbetab2
+   tt=-(sinbetab2/cosbetab2)**2
+   pref=sqrt((rfactorial(ll-ms)*rfactorial(ll+ml))&
+&   /(rfactorial(ll+ms)*rfactorial(ll-ml)))&
+&   /rfactorial(ml-ms)*(cosbetab2**(2*ll+ms-ml))&
+&   *((-sinbetab2)**(ml-ms))
+   sum=1._dp
+   arg=1._dp
+   ina=ml-ll
+   inb=-ms-ll
+   inc=ml-ms+1
+   do ii=1,mxterms
+     if (ina.eq.0.or.inb.eq.0) exit
+     arg=(arg*ina*inb*tt)/(ii*inc)
+     sum=sum+arg
+     ina=ina+1
+     inb=inb+1
+     inc=inc+1
+   end do
+   dbeta=pref*sum
+ end if
+
+end function dbeta
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/gauleg
+!! NAME
+!! gauleg
+!!
+!! FUNCTION
+!! Private function
+!! Compute the coefficients (supports and weights) for Gauss-Legendre integration
+!!
+!! INPUTS
+!!  xmin=lower bound of integration
+!!  xmax=upper bound of integration
+!!  nn=order of integration
+!!
+!! OUTPUT
+!!  x(nn)=array of support points
+!!  weights(n)=array of integration weights
+!!
+!! SOURCE
+
+ subroutine gauleg(xmin,xmax,x,weights,nn)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp),intent(in) :: xmax,xmin
+!arrays
+ real(dp),intent(out) :: weights(nn),x(nn)
+
+!Local variables ------------------------------
+!scalars
+ integer :: ii,jj
+ real(dp),parameter :: tol=1.d-13
+ real(dp) :: p1,p2,p3,pi,xl,pp,xmean,z,z1
+
+!************************************************************************
+
+ pi=4._dp*atan(1._dp)
+ xl=(xmax-xmin)*0.5_dp
+ xmean=(xmax+xmin)*0.5_dp
+
+ do ii=1,(nn+1)/2
+   z=cos(pi*(ii-0.25_dp)/(nn+0.5_dp))
+   do
+     p1=1._dp
+     p2=0._dp
+     do jj=1,nn
+       p3=p2
+       p2=p1
+       p1=((2._dp*jj-1._dp)*z*p2-(jj-1._dp)*p3)/jj
+     end do
+     pp=nn*(p2-z*p1)/(1._dp-z**2)
+     z1=z
+     z=z1-p1/pp
+     if(abs(z-z1) < tol) exit
+   end do
+   x(ii)=xmean-xl*z
+   x(nn+1-ii)=xmean+xl*z
+   weights(ii)=2._dp*xl/((1._dp-z**2)*pp**2)
+   weights(nn+1-ii)=weights(ii)
+ end do
+
+ end subroutine gauleg
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/perms
+!! NAME
+!! perms
+!!
+!! FUNCTION
+!! Private function
+!! Returns N!/(N-k)!  if N>=0 and N>k ; otherwise 0 is returned
+!!
+!! INPUTS
+!!   kk=number k to use
+!!   nn=number N to use
+!!
+!! OUTPUT
+!!   perms= n!/(n-k)!
+!!
+!! SOURCE
+
+function perms(nn,kk)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: kk,nn
+ real(dp) :: perms
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+ real(dp) :: pp
+
+! *********************************************************************
+
+ if (nn>=0.and.nn>=kk) then
+   pp=1._dp
+   do ii=nn-kk+1,nn
+     pp=pp*ii
+   end do
+ else
+   pp=0._dp
+ end if
+
+ perms=pp
+
+end function perms
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_paw_sphharm/rfactorial
+!! NAME
+!! rfactorial
+!!
+!! FUNCTION
+!! Private function
+!! Calculates N! as a double precision real.
+!!
+!! INPUTS
+!!   nn=number to use
+!!
+!! OUTPUT
+!!   factorial= n! (real)
+!!
+!! SOURCE
+
+elemental function rfactorial(nn)
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: nn
+ real(dp) :: rfactorial
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: ii
+
+! *********************************************************************
+
+ rfactorial=one
+ do ii=2,nn
+   rfactorial=rfactorial*ii
+ end do
+
+end function rfactorial
+!!***
 
 END MODULE m_paw_sphharm
 !!***
