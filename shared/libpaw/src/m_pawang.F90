@@ -39,7 +39,6 @@ MODULE m_pawang
 !Public procedures.
  public :: pawang_init       ! Constructor
  public :: pawang_free       ! Free memory
- public :: make_angular_mesh ! Build (theta, phi) angular mesh (and Gauss-Legendre weights)
 
 !!***
 
@@ -247,19 +246,19 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngr
  Pawang%gnt_option=gnt_option
  if (Pawang%gnt_option==1.or.Pawang%gnt_option==2) then
    if (Pawang%gnt_option==1) then
-     sz1=(2*Pawang%l_max-1)**2*(Pawang%l_max)**4
+     sz1=(Pawang%l_size_max)**2*(Pawang%l_max)**4
      sz2=(Pawang%l_size_max)**2
      sz3=(Pawang%l_max**2)*(Pawang%l_max**2+1)/2
      LIBPAW_ALLOCATE(rgnt_tmp,(sz1))
      LIBPAW_ALLOCATE(pawang%gntselect,(sz2,sz3))
      call realgaunt(Pawang%l_max,Pawang%ngnt,Pawang%gntselect,rgnt_tmp)
    else if (Pawang%gnt_option==2) then
-     sz1=(4*Pawang%l_max-3)**2*(2*Pawang%l_max-1)**4
+     sz1=(2*Pawang%l_size_max-1)**2*(Pawang%l_size_max)**4
      sz2=(2*Pawang%l_size_max-1)**2
-     sz3=((2*Pawang%l_max-1)**2)*((2*Pawang%l_max-1)**2+1)/2
+     sz3=((Pawang%l_size_max)**2)*((Pawang%l_size_max)**2+1)/2
      LIBPAW_ALLOCATE(rgnt_tmp,(sz1))
      LIBPAW_ALLOCATE(pawang%gntselect,(sz2,sz3))
-     call realgaunt(2*Pawang%l_max-1,Pawang%ngnt,Pawang%gntselect,rgnt_tmp)
+     call realgaunt(Pawang%l_size_max,Pawang%ngnt,Pawang%gntselect,rgnt_tmp)
    end if
    if (allocated(pawang%realgnt))  then
      LIBPAW_DEALLOCATE(pawang%realgnt)
@@ -271,11 +270,19 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngr
 
  Pawang%nabgnt_option=nabgnt_option
  if (Pawang%nabgnt_option==1) then
-   sz1=(Pawang%l_size_max)**6
-   sz2=(Pawang%l_size_max)**2
+!   sz1=(Pawang%l_size_max)**2*(Pawang%l_max)**4
+!   sz2=(Pawang%l_size_max)**2
+!   sz3=(Pawang%l_max)**2
+!   LIBPAW_ALLOCATE(nablargnt_tmp,(sz1))
+!   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz2,sz3,sz3))
+!   call nablarealgaunt(pawang%l_size_max,pawang%l_max, &
+!&                      pawang%nnablagnt,pawang%nablagntselect,nablargnt_tmp)
+   sz1=(7)**2*(4)**4
+   sz2=(7)**2
+   sz3=(4)**2
    LIBPAW_ALLOCATE(nablargnt_tmp,(sz1))
-   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz2,sz2,sz2))
-   call nablarealgaunt(pawang%l_size_max-1,pawang%l_size_max-1, &
+   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz2,sz3,sz3))
+   call nablarealgaunt(7,4, &
 &                      pawang%nnablagnt,pawang%nablagntselect,nablargnt_tmp)
    if (allocated(pawang%nablarealgnt)) then
      LIBPAW_DEALLOCATE(pawang%nablarealgnt)
@@ -364,53 +371,6 @@ subroutine pawang_free(Pawang)
  pawang%ngnt=0
 
 end subroutine pawang_free
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_pawang/make_angular_mesh
-!! NAME
-!! make_angular_mesh
-!!
-!! FUNCTION
-!!  Build (theta, phi) angular mesh from (ntheta, nphi)
-!!
-!! INPUTS
-!!   ntheta= number of sample points in the theta dir
-!!   nphi= number of sample points in the phi dir
-!!
-!! OUTPUT
-!!   angl_size= total number of sample points in the angular mesh, i.e. (ntheta * nphi)
-!!   cart_coord(3, angl_size)= for each point of the angular mesh, gives the Cartesian coordinates
-!!     of the corresponding point on an unitary sphere.
-!!   ang_wgth(angl_size)= for each point of the angular mesh, gives the weight
-!!       of the corresponding point on an unitary sphere.
-!!
-!! NOTE
-!!   Summing over f * angwgth gives the spherical average 1/(4pi) \int domega f(omega)
-!!
-!! SOURCE
-
-subroutine make_angular_mesh(ntheta, nphi, angl_size, cart_coord, ang_wgth)
-
-!Arguments ------------------------------------
- integer,intent(in) :: ntheta, nphi
- integer,intent(out) :: angl_size
- real(dp),allocatable,intent(out) :: cart_coord(:,:)
- real(dp),allocatable,intent(out) :: ang_wgth(:)
-
-!Local variables ------------------------------
-!scalars
- integer :: it, ip, npoints
- real(dp) :: ang, con, cos_phi, cos_theta, sin_phi, sin_theta
-!arrays
- real(dp),allocatable :: th(:),wth(:)
-
-! *************************************************************************
-
- call ylm_angular_mesh(ntheta, nphi, angl_size, cart_coord, ang_wgth)
-
-end subroutine make_angular_mesh
 !!***
 
 !----------------------------------------------------------------------
