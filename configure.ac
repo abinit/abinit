@@ -490,6 +490,12 @@ if test "${abi_optim_flavor}" != "none"; then
   fcflags_opt_20_datashare="-O0"
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
+  if test "${abi_fc_vendor}" == "llvm"; then
+    AC_MSG_NOTICE([disabling optimizations for shared/common/src/39_libpaw/ with LLVM/Flang.])
+    fcflags_opt_39_libpaw="-O0"
+    AC_MSG_NOTICE([disabling optimizations for src/95_drive/ with LLVM/Flang.])
+    fcflags_opt_95_drive="-O0"
+  fi
 fi
 
 # Set per-directory Fortran optimizations
