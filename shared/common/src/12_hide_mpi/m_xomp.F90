@@ -551,7 +551,11 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
 #ifdef HAVE_OPENMP_OFFLOAD
  device_id = xomp_get_default_device()
  if(xomp_target_is_present(ptr)) then
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
    gpu_ptr = omp_get_mapped_ptr(ptr, device_id)
+#else
+   gpu_ptr = c_null_ptr
+#endif
  else
    gpu_ptr = c_null_ptr
  end if
