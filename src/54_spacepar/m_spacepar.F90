@@ -2573,6 +2573,10 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,*)' m_spacepar%setsym : enter '
+!ENDDEBUG
+
  call timab(6,1,tsec)
 
 !Check that symmetries have unity determinant
@@ -2604,6 +2608,10 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  end if
 
  call timab(6,2,tsec)
+
+!DEBUG
+!write(std_out,*)' m_spacepar%setsym : exit '
+!ENDDEBUG
 
 end subroutine setsym
 !!***

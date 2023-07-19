@@ -256,11 +256,12 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,jsym,ksym,identity_idx !,ierr
+ integer :: isym,jsym,ksym,identity_idx,ierr
  character(len=500) :: msg
 !arrays
  integer :: cjg(3,3),ss(3,3),xx(3,3),xxm1(3,3),test(3,3)
  integer :: identity(3,3)
+ integer :: dummy_symafm(nsym)
  logical :: found(nsym),found_identity
 
 !************************************************************************

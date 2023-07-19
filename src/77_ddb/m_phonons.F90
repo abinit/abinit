@@ -3627,7 +3627,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
 
  ABI_MALLOC(toinv, (4, cryst%nsym))
- call sg_multable(cryst%nsym, cryst%symafm, cryst%symrel, cryst%tnons, tol6, ierr, toinv=toinv)
+ call sg_multable(cryst%nsym, cryst%symafm, cryst%symrel, ierr, toinv=toinv, tnons=cryst%tnons, tnons_tol=tol6)
  ABI_CHECK(ierr == 0, "sg_multable returned ierr != 0")
 
  ! Precompute ph freqs in the BZ and compare with BZ
