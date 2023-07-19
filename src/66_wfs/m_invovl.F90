@@ -1363,7 +1363,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
   call solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat*nspinor, sm1proj, PtPsm1proj, block_sliced)
-  !$OMP TARGET TEAMS LOOP MAP(to:sm1proj,PtPsm1proj)
+  !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) MAP(to:sm1proj,PtPsm1proj)
   do idat  =1, ndat*nspinor
     do iproj = 1, nprojs
       do icplx = 1, cplx
@@ -1464,7 +1464,7 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  character(len=500) :: message
 
  real(dp), parameter :: precision = 1e-16 ! maximum relative error. TODO: use tolwfr ?
- real(dp) :: convergence_rate
+ real(dp) :: convergence_rate,sum_tmp
  integer :: additional_steps_to_take,idat,iproj,icplx
  integer :: Ptsize(3)
 ! *************************************************************************
@@ -1474,16 +1474,17 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
- !$OMP TARGET TEAMS DISTRIBUTE MAP(to:normprojs,proj) PRIVATE(idat)
+ !$OMP TARGET TEAMS DISTRIBUTE MAP(to:normprojs,proj) PRIVATE(idat,sum_tmp)
  do idat = 1,ndat
-  normprojs(idat)=0
-  !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:normprojs(idat)) PRIVATE(iproj,icplx)
+  sum_tmp=0
+  !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:sum_tmp) PRIVATE(iproj,icplx)
   do iproj = 1,nprojs
     do icplx = 1,cplx
-      normprojs(idat) = normprojs(idat) + proj(icplx,iproj,idat)**2
+      sum_tmp = sum_tmp + proj(icplx,iproj,idat)**2
     end do
   end do
   !$OMP END PARALLEL DO
+  normprojs(idat)=sum_tmp
  end do
  !$OMP TARGET UPDATE FROM(normprojs)
 
@@ -1519,16 +1520,17 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    end do
 
    ! exit check
-   !$OMP TARGET TEAMS DISTRIBUTE MAP(to:errs,resid) PRIVATE(idat)
+   !$OMP TARGET TEAMS DISTRIBUTE MAP(to:errs,resid) PRIVATE(idat,sum_tmp)
    do idat = 1,ndat
-     errs(idat)=0
-     !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:errs(idat)) PRIVATE(iproj,icplx)
+     sum_tmp=0
+     !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:sum_tmp) PRIVATE(iproj,icplx)
      do iproj = 1,nprojs
        do icplx = 1,cplx
-         errs(idat) = errs(idat) + resid(icplx,iproj,idat)**2
+         sum_tmp = sum_tmp + resid(icplx,iproj,idat)**2
        end do
      end do
      !$OMP END PARALLEL DO
+     errs(idat)=sum_tmp
    end do
    ABI_NVTX_END_RANGE()
 
