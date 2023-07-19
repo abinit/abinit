@@ -393,8 +393,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
  case (3)
 !    For space groups containing d elements, all the symmetry operations
 !    have already been obtained
-   if(spgroup/=43 .and. spgroup/=203 .and. spgroup/=227 .and. &
-&   spgroup/=228)then
+    if(spgroup/=43 .and. spgroup/=227 .and. spgroup/=228)then  
      do ii=1,nsym
 !        First translation: a/2+b/2
        tnons(1,nsym+ii)=tnons(1,ii)+0.5
