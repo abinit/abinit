@@ -18358,17 +18358,26 @@ which is a translation in real space followed by a spin flip.
 Such a Shubnikov type IV magnetic space group might be defined by its Fedorov space
 group (set of spatial symmetries that do not change the magnetization), and an
 additional magnetic space group number [[spgroupma]].
+In this case, the Fedorov space group associated with [[spgroup]] is a subgroup
+of the magnetic space group number associated with [[spgroupma]], the latter
+has twice the number of operations than the former.
 
-A Shubnikov type III magnetic space group does not contain a translation in real space
-followed by a spin flip. It might be defined by its Fedorov
+Unlike Shubnikov type IV magnetic space groups, 
+a Shubnikov type III magnetic space group does not contain a translation in real space
+followed by a spin flip. It might be defined by a covering Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and an additional magnetic space group number [[spgroupma]].
-For the additional number [[spgroupma]], we follow the definition of Table 7.4
-of the above-mentioned [[cite:Bradley1972]].
-
+In this case, the covering Fedorov space group is a supergroup of the
+magnetic space group number [[spgroupma]], the former
+has twice the number of operations than the latter.
 Thus, one way to specify a Shubnikov type IV magnetic space group, is to define
 both [[spgroup]] and [[spgroupma]].
 For example, the group P2_1/c_prime has [[spgroup]] = 14 and [[spgroupma]] = 78.
+
+For the meaning of the number [[spgroupma]], in both Shubnikov type III and IV,
+we follow the definition of Table 7.4
+of the above-mentioned [[cite:Bradley1972]].
+
 Alternatively, for Shubnikov type IV magnetic groups, one might define [[spgroup]]
 and [[genafm]]. For both the types III and IV, one might define by hand the set
 of symmetries, using [[symrel]], [[tnons]] and [[symafm]].
