@@ -2116,6 +2116,7 @@ subroutine setsym_ylm(gprimd,lmax,nsym,pawprtvol,rprimd,sym,zarot)
  character(len=1000) :: msg
 !arrays
  real(dp) :: prod(3,3),rot(3,3)
+
 !************************************************************************
 
  if (abs(pawprtvol)>=3) then
@@ -2761,6 +2762,11 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 !!  ngnt= number of non-zero Gaunt coefficients
 !!  realgnt((2*l_max-1)**2*l_max**4)= non-zero real Gaunt coefficients
 !!
+!! NOTE
+!! Second index of gntselect is in "upper triangle" format.
+!! Its formula is klm_ij = ilm_i*(ilm_i-1)/2 + ilm_j,
+!!   corresponding to the two index pairs: (ilm_i,ilm_j) and (ilm_j,ilmj)
+!!
 !! SOURCE
 
 subroutine realgaunt(l_max,ngnt,gntselect,realgnt)
@@ -2770,18 +2776,25 @@ subroutine realgaunt(l_max,ngnt,gntselect,realgnt)
  integer,intent(in) :: l_max
  integer,intent(out) :: ngnt
 !arrays
- integer,intent(out) :: gntselect((2*l_max-1)**2,l_max**2*(l_max**2+1)/2)
- real(dp),intent(out) :: realgnt((2*l_max-1)**2*(l_max)**4)
+ integer,intent(out) :: gntselect(:,:)
+ real(dp),intent(out) :: realgnt(:)
 
 !Local variables ------------------------------
 !scalars
  integer :: ilm1,ilm2,ilmp1,k0lm1,klm1,l1,l2,ll,lp1,m1,m2,mm,mm1,mm2,mm3,mp1
  real(dp) :: c11,c12,c21,c22,c31,c32,fact,realgnt_tmp
+ character(len=500) :: msg
 !arrays
  integer,allocatable :: ssgn(:)
  type(coeff3_type), allocatable :: coeff(:)
 
 !************************************************************************
+
+ if ( size(gntselect)<(2*l_max-1)**2*(l_max**2*(l_max**2+1))/2 .or. &
+&     size(realgnt)  <(2*l_max-1)**2*(l_max**2*(l_max**2+1))/2 ) then
+   msg='Too small sizes for gntselect/realgnt!'
+   LIBPAW_BUG(msg)
+ end if
 
 !Initialize output arrays with zeros.
  gntselect = 0; realgnt = zero
@@ -2918,7 +2931,7 @@ end subroutine realgaunt
 !! nnablagnt= number of non-zero integrals
 !! nabgauntselect(l_max**2,l_max_ij**2,l_max_ij**2)= indexes of the non-zero integrals
 !! nablagaunt(l_max**2*l_max_ij**4)= values of the integrals
-!!  
+!!
 !! SOURCE
 
 subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt) 
@@ -2928,8 +2941,8 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
  integer, intent(in) :: l_max,l_max_ij
  integer, intent(out) :: nnablagnt
 !array
- integer,intent(out) :: nabgauntselect(l_max**2,l_max_ij**2,l_max_ij**2)
- real(dp),intent(out) :: nablagaunt((l_max**2)*(l_max_ij**4))
+ integer,intent(out) :: nabgauntselect(:,:,:)
+ real(dp),intent(out) :: nablagaunt(:)
 
 !Local variables ---------------------------------------
  logical,parameter :: debug=.false.
@@ -2939,6 +2952,12 @@ subroutine nablarealgaunt(l_max,l_max_ij,nnablagnt,nabgauntselect,nablagaunt)
  real(dp),allocatable :: ang_wgth(:),cart_coord(:,:),ylmr(:,:),ylmrgr(:,:,:)
 
 !************************************************************************
+
+ if ( size(nabgauntselect)< (l_max**2)*(l_max_ij**4) .or. &
+&     size(nablagaunt)    < (l_max**2)*(l_max_ij**4) ) then
+   msg='Too small sizes for nabgauntselect/nablagaunt!'
+   LIBPAW_BUG(msg)
+ end if
 
  nabgauntselect(:,:,:)=-1
  nablagaunt(:)=zero
