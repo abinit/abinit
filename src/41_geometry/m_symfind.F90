@@ -640,9 +640,9 @@ contains
 !call flush(std_out)
 !ENDDEBUG
 
-! The algorithm in sg_multable is still cubic in nsym, so avoid calling it uselessly  when nsym is too large
+! The algorithm in sg_multable is still cubic in nsym, so avoid calling it uselessly when nsym is too large
  if(present(ierr) .or. nsym<=384)then
-   call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
+   call sg_multable(nsym, symafm, symrel, ierr_, tnons=tnons, tnons_tol=tolsym)
  else
    ierr_=0
  endif

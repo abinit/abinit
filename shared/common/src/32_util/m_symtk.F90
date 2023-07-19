@@ -411,7 +411,7 @@ end subroutine chkgrp
 !!
 !! SOURCE
 
-subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, &
+ subroutine sg_multable(nsym, symafm, symrel, ierr, &
 &  tnons, tnons_tol, multable, toinv)    ! optional
 
 !Arguments ------------------------------------
@@ -438,6 +438,10 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, &
  integer,allocatable :: tnons_(:,:)
 
 ! *************************************************************************
+
+!DEBUG
+!write(std_out,*)' m_symtk%sg_multable : enter '
+!ENDDEBUG
 
  ierr = 0
 
@@ -646,11 +650,11 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, &
        iseq = .False.
        do ilist_symrel=1,nlist_symrel(prd_ptsymm)
          sym3=list_symrel(ilist_symrel,prd_ptsymm)
-         iseq = isinteger(prd_tnons(1) - tnons(1,sym3), tnons_tol_)
+         iseq = isinteger(prd_tnons(1) - tnons_(1,sym3), tnons_tol_)
          if(iseq)then
-           iseq = isinteger(prd_tnons(2) - tnons(2,sym3), tnons_tol_)
+           iseq = isinteger(prd_tnons(2) - tnons_(2,sym3), tnons_tol_)
            if(iseq)then
-             iseq = isinteger(prd_tnons(3) - tnons(3,sym3), tnons_tol_)
+             iseq = isinteger(prd_tnons(3) - tnons_(3,sym3), tnons_tol_)
              if(iseq)then
                iseq = (prd_symafm == symafm(sym3))
                if(iseq)then
@@ -664,7 +668,6 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, &
            endif
          endif
        end do
-  
        if (.not. iseq .and. echo == 1) then
          if (echo == 1)then
            ! The test is negative
@@ -685,7 +688,6 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, &
          end if
          exit
        end if
-
      end do ! sym2
      if (echo == 0) exit
    end do ! sym1
@@ -701,7 +703,11 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, &
 
  ABI_FREE(list_symrel)
  ABI_FREE(ptsymm)
- ABI_MALLOC(tnons_)
+ ABI_FREE(tnons_)
+
+!DEBUG
+!write(std_out,*)' m_symtk%sg_multable : exit '
+!ENDDEBUG
 
  end subroutine sg_multable
 !!***

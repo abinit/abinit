@@ -1424,12 +1424,10 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 
  debug = .False.
  if (debug) then
-   ABI_CALLOC(tnons, (3, ptg_nsym))
    ABI_MALLOC(symafm, (ptg_nsym))
    symafm = 1
-   call sg_multable(ptg_nsym, symafm, ptg_symrel, tnons, tol12, ierr)
+   call sg_multable(ptg_nsym, symafm, ptg_symrel, ierr)
    ABI_CHECK(ierr == 0, "point group is not a group! See messages above")
-   ABI_FREE(tnons)
    ABI_FREE(symafm)
  end if
 
