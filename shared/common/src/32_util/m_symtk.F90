@@ -435,7 +435,7 @@ end subroutine chkgrp
  integer :: nlist_symrel(48),prd_symrel(3,3),ptmultable(48,48),ptsymrel(3,3,48)
  integer,allocatable :: ptsymm(:),list_symrel(:,:)
  real(dp) :: prd_tnons(3)
- integer,allocatable :: tnons_(:,:)
+ real(dp),allocatable :: tnons_(:,:)
 
 ! *************************************************************************
 
@@ -602,8 +602,8 @@ end subroutine chkgrp
    end do ! ptsymm2
 
 !DEBUG
-!  write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
-!  write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
+   write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
+   write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
 !  write(std_out,'(16i3)')ptmultable(ptsymm1,17:32)
 !  write(std_out,'(16i3)')ptmultable(ptsymm1,33:48)
 !ENDDEBUG
@@ -634,16 +634,19 @@ end subroutine chkgrp
 
        !DEBUG
        !if(ptsymm2<1 .or. ptsymm2>48)then
-       ! write(std_out,*)' sym1,sym2,ptsymm1,ptsymm2=',sym1,sym2,ptsymm1,ptsymm2
+       write(std_out,*)' sym1,sym2,ptsymm1,ptsymm2=',sym1,sym2,ptsymm1,ptsymm2
        !endif
        !ENDDEBUG
 
        ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a + Ab}
 !      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
        prd_ptsymm=ptmultable(ptsymm1,ptsymm2)
-       prd_symrel=list_symrel(1,prd_ptsymm)
+       prd_symrel=ptsymrel(:,:,prd_ptsymm)
        prd_symafm = symafm(sym1) * symafm(sym2)
        prd_tnons = tnons_(:, sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
+       !DEBUG
+       write(std_out,*)' prd_ptsymm,prdsymrel=',prd_ptsymm,prd_symrel                                       
+       !DEBUG
 
        ! Check that product array is one of the original symmetries.
        ! Only explore those symmetries that have a symrel that is the product of the two symrel of sym1 and sym2.
