@@ -107,7 +107,7 @@ MODULE m_pawang
    ! (if gntselect>0, Gaunt coeff. is non-zero)
 
   integer, allocatable :: nablagntselect(:,:,:)
-  ! nablagntselect((l_max+1)**2,(l_max+1)**2,(l_max+1)**2)
+  ! nablagntselect(l_size_max**2,l_max**2,l_max**2)
   ! Selection rules for nablaGaunt coefficients
   ! (if nablagntselect>0, nablGaunt coeff. is non-zero)
 
@@ -130,7 +130,7 @@ MODULE m_pawang
    ! ls_ylm(ilm1m2,ispin)= <sigma, y_lm1| LS |y_lm2, sigma_prime>
 
   real(dp), allocatable :: nablarealgnt(:)
-   ! realgnt(2,nnablagnt)
+   ! nablarealgnt(2,nnablagnt)
    ! Non zero real nablaGaunt coefficients
 
   real(dp), allocatable :: realgnt(:)
@@ -198,7 +198,7 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngr
 
 !Local variables-------------------------------
 !scalars
- integer :: ll,sz1,sz2,sz3
+ integer :: ll,sz1,sz2
 !arrays
  real(dp),allocatable :: rgnt_tmp(:)
  real(dp),allocatable :: nablargnt_tmp(:)
@@ -246,18 +246,16 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngr
  Pawang%gnt_option=gnt_option
  if (Pawang%gnt_option==1.or.Pawang%gnt_option==2) then
    if (Pawang%gnt_option==1) then
-     sz1=(Pawang%l_size_max)**2*(Pawang%l_max)**4
-     sz2=(Pawang%l_size_max)**2
-     sz3=(Pawang%l_max**2)*(Pawang%l_max**2+1)/2
-     LIBPAW_ALLOCATE(rgnt_tmp,(sz1))
-     LIBPAW_ALLOCATE(pawang%gntselect,(sz2,sz3))
+     sz1=(Pawang%l_size_max)**2
+     sz2=((Pawang%l_max**2)*(Pawang%l_max**2+1))/2
+     LIBPAW_ALLOCATE(rgnt_tmp,(sz1*sz2))
+     LIBPAW_ALLOCATE(pawang%gntselect,(sz1,sz2))
      call realgaunt(Pawang%l_max,Pawang%ngnt,Pawang%gntselect,rgnt_tmp)
    else if (Pawang%gnt_option==2) then
-     sz1=(2*Pawang%l_size_max-1)**2*(Pawang%l_size_max)**4
-     sz2=(2*Pawang%l_size_max-1)**2
-     sz3=((Pawang%l_size_max)**2)*((Pawang%l_size_max)**2+1)/2
-     LIBPAW_ALLOCATE(rgnt_tmp,(sz1))
-     LIBPAW_ALLOCATE(pawang%gntselect,(sz2,sz3))
+     sz1=(2*Pawang%l_size_max-1)**2
+     sz2=((Pawang%l_size_max)**2*(Pawang%l_size_max**2+1))/2
+     LIBPAW_ALLOCATE(rgnt_tmp,(sz1*sz2))
+     LIBPAW_ALLOCATE(pawang%gntselect,(sz1,sz2))
      call realgaunt(Pawang%l_size_max,Pawang%ngnt,Pawang%gntselect,rgnt_tmp)
    end if
    if (allocated(pawang%realgnt))  then
@@ -270,19 +268,11 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngr
 
  Pawang%nabgnt_option=nabgnt_option
  if (Pawang%nabgnt_option==1) then
-!   sz1=(Pawang%l_size_max)**2*(Pawang%l_max)**4
-!   sz2=(Pawang%l_size_max)**2
-!   sz3=(Pawang%l_max)**2
-!   LIBPAW_ALLOCATE(nablargnt_tmp,(sz1))
-!   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz2,sz3,sz3))
-!   call nablarealgaunt(pawang%l_size_max,pawang%l_max, &
-!&                      pawang%nnablagnt,pawang%nablagntselect,nablargnt_tmp)
-   sz1=(7)**2*(4)**4
-   sz2=(7)**2
-   sz3=(4)**2
-   LIBPAW_ALLOCATE(nablargnt_tmp,(sz1))
-   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz2,sz3,sz3))
-   call nablarealgaunt(7,4, &
+   sz1=(Pawang%l_size_max)**2
+   sz2=(Pawang%l_max)**2
+   LIBPAW_ALLOCATE(nablargnt_tmp,(sz1*sz2*sz2))
+   LIBPAW_ALLOCATE(pawang%nablagntselect,(sz1,sz2,sz2))
+   call nablarealgaunt(pawang%l_size_max,pawang%l_max, &
 &                      pawang%nnablagnt,pawang%nablagntselect,nablargnt_tmp)
    if (allocated(pawang%nablarealgnt)) then
      LIBPAW_DEALLOCATE(pawang%nablarealgnt)
