@@ -18284,7 +18284,7 @@ group (set of spatial symmetries that do not change the magnetization), and an
 additional magnetic space group number [[spgroupma]].
 
 A Shubnikov type III magnetic space group does not contain a translation in real space
-wollowed by a spin flip. It might be defined by its Fedorov
+followed by a spin flip. It might be defined by its Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and an additional magnetic space group number [[spgroupma]].
 For the additional number [[spgroupma]], we follow the definition of Table 7.4
