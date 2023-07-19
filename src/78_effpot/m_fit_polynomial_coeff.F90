@@ -320,6 +320,10 @@ contains
     remaining_rate=0.5
     if(present(drop_rate))  remaining_rate=1.0_dp-drop_rate
     ncoeff_selected=0
+
+    if(nfixcoeff==-1 .and. any(max_nbody==-1)) then
+      ABI_ERROR("nfixcoeff=-1 and max_nbody -1 cannot be used together in the current version of Multibinit.")
+    end if
   end subroutine initialize_parameters
 
   subroutine deallocate_arrays()
@@ -341,8 +345,8 @@ contains
     !Deallocate fixed eff_pot
     call effective_potential_free(eff_pot_fixed)
     !Other deallocations
-    ABI_FREE(list_bound)
-    ABI_FREE(list_fix)
+    ABI_SFREE(list_bound)
+    ABI_SFREE(list_fix)
     ABI_FREE(gf_values_iter)
     ABI_FREE(buffsize)
     ABI_FREE(buffdisp)
@@ -829,21 +833,40 @@ contains
     type(int_array_type) :: ind_fix
     nfix=0
 
-    do ico=1, size(my_coeffs)
-      ifix=my_coeffindexes(ico)
-      if( any(fixcoeff_corr==ifix) .and. my_coeffs(ico)%isbound==0) then
-        nfix=nfix+1
-        call ind_fix%push(ifix)
-        isselected(ifix)=.True.
+    if(nfixcoeff_corr>0) then
+      do ico=1, size(my_coeffs)
+        ifix=my_coeffindexes(ico)
+        if( any(fixcoeff_corr==ifix) .and. my_coeffs(ico)%isbound==0) then
+          nfix=nfix+1
+          call ind_fix%push(ifix)
+          isselected(ifix)=.True.
+        end if
+      end do
+      call xmpi_sum(nfix, comm, ierr)
+      call ind_fix%allgatherv(list_fix, comm, nproc)
+      call xmpi_bcast(list_fix, master, comm, ierr)
+      call ind_fix%finalize()
+      call xmpi_lor(isselected, comm)
+      if (nfix/=count(isselected)-nbound) then
+        ABI_ERROR("The number of the fixed term is not consistent with the selected terms.")
       end if
-    end do
-    call xmpi_sum(nfix, comm, ierr)
-    call ind_fix%allgatherv(list_fix, comm, nproc)
-    call xmpi_bcast(list_fix, master, comm, ierr)
-    call ind_fix%finalize()
-    call xmpi_lor(isselected, comm)
-    if (nfix/=count(isselected)-nbound) then
-      ABI_ERROR("The number of the fixed term is not consistent with the selected terms.")
+    else if(nfixcoeff_corr==-1) then
+      do ico=1, size(my_coeffs)
+        ifix=my_coeffindexes(ico)
+        if( ifix<ncoeff_model .and. my_coeffs(ico)%isbound==0) then
+          nfix=nfix+1
+          call ind_fix%push(ifix)
+          isselected(ifix)=.True.
+        end if
+      end do
+      call xmpi_sum(nfix, comm, ierr)
+      call ind_fix%allgatherv(list_fix, comm, nproc)
+      call xmpi_bcast(list_fix, master, comm, ierr)
+      call ind_fix%finalize()
+      call xmpi_lor(isselected, comm)
+      if (nfix/=count(isselected)-nbound) then
+        ABI_ERROR("The number of the fixed term is not consistent with the selected terms.")
+      end if
     end if
   end subroutine select_fix_terms
 
@@ -866,8 +889,8 @@ contains
     if (nfixcoeff_corr == -1)then
       write(message, '(3a)')' nfixcoeff is set to -1, the coefficients present in the model',&
         &                        ' are imposed.',ch10
-      ncoeff_preselected = ncoeff_preselected + ncoeff_model - nbound
-      isselected(:)=.True.
+      !ncoeff_preselected = ncoeff_preselected + ncoeff_model - nbound
+      ncoeff_preselected = ncoeff_preselected + nfix
     else
       if (nfixcoeff_corr > 0)then
         if(maxval(fixcoeff_corr(:)) > ncoeff_tot) then
