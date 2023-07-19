@@ -3737,16 +3737,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call wrtout(std_out,msg)
      ierr=ierr+1
 #endif
-#ifndef HAVE_GPU_CUDA_DP
-     write(msg,'(10a)') ch10,&
-&     ' invars0: ERROR -',ch10,&
-&     '   Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
-&     '   with gpu mode in DOUBLE PRECISION enabled !',ch10,&
-&     '   Action: change the input variable use_gpu_cuda',ch10,&
-&     '   or re-compile ABINIT with double precision Cuda enabled.'
-     call wrtout(std_out,msg)
-     ierr=ierr+1
-#endif
+!#ifndef HAVE_GPU_CUDA_DP
+!     write(msg,'(10a)') ch10,&
+!&     ' invars0: ERROR -',ch10,&
+!&     '   Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
+!&     '   with gpu mode in DOUBLE PRECISION enabled !',ch10,&
+!&     '   Action: change the input variable use_gpu_cuda',ch10,&
+!&     '   or re-compile ABINIT with double precision Cuda enabled.'
+!     call wrtout(std_out,msg)
+!     ierr=ierr+1
+!#endif
    end if
 
 !  use_slk
