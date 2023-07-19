@@ -3164,7 +3164,7 @@ end subroutine realgaunt
 !! nablarealgaunt
 !!
 !! FUNCTION
-!! Evaluate inegrals involving spherical harmonics and their gradient.
+!! Evaluate integrals involving spherical harmonics and their gradient.
 !! These integrals are angular part for <nablaphi|nablaphj> and <tnablaphi|tnablaphj>.
 !!
 !! INPUTS
@@ -3174,109 +3174,102 @@ end subroutine realgaunt
 !! nnablagnt= number of non zero integrals
 !! nabgauntselect(mpsang**2,mpsang**2,mpsang**2)= stores the index of the non zero integrals
 !! nablagaunt((mpsang**2)**3)= stores the integrals' values
-!!  NOTES
 !!  
 !! SOURCE
 
 subroutine nablarealgaunt(mpsang,nnablagnt,nabgauntselect,nablagaunt) 
- implicit none
 
- !Arguments ---------------------------------------------
- !scalars
+!Arguments ---------------------------------------------
+!scalars
  integer, intent(in) :: mpsang
  integer, intent(out) :: nnablagnt
- !array
+!array
  integer,intent(out) :: nabgauntselect(mpsang**2,mpsang**2,mpsang**2)
  real(dp),intent(out) :: nablagaunt((mpsang**2)**3)
 
- !Local variables ---------------------------------------
- !array
+!Local variables ---------------------------------------
+! No local variable
 
+!************************************************************************
 
-nabgauntselect(:,:,:)=-1
-nablagaunt(:)=zero
+ nabgauntselect(:,:,:)=-1
+ nablagaunt(:)=zero
 
+ if (mpsang>=2) then
+   nabgauntselect(1,2,2)=1  ; nablagaunt(1)=0.5641895835477563_dp !(1/sqrt(pi)) 
+   nabgauntselect(1,3,3)=2  ; nablagaunt(2)=0.5641895835477563_dp !(1/sqrt(pi))
+   nabgauntselect(1,4,4)=3  ; nablagaunt(3)=0.5641895835477563_dp !(1/sqrt(pi))
+   nnablagnt=3
+ end if
 
-
-if (mpsang>=2) then
-  nabgauntselect(1,2,2)=1  ; nablagaunt(1)=0.5641895835477563_dp !(1/sqrt(pi)) 
-  nabgauntselect(1,3,3)=2  ; nablagaunt(2)=0.5641895835477563_dp !(1/sqrt(pi))
-  nabgauntselect(1,4,4)=3  ; nablagaunt(3)=0.5641895835477563_dp !(1/sqrt(pi))
-  nnablagnt=3
-end if
-
-if (mpsang>=3) then
-
-
- nabgauntselect(7,2,2)=4  ; nablagaunt(4)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
- nabgauntselect(9,2,2)=5 ; nablagaunt(5)=0.2185096861184158_dp !\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(6,2,3)=6 ; nablagaunt(6)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(5,2,4)=7 ; nablagaunt(7)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(4,2,5)=8 ; nablagaunt(8)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(3,2,6)=9 ; nablagaunt(9)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(2,2,7)=10 ; nablagaunt(10)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
- nabgauntselect(2,2,9)=11 ; nablagaunt(11)=-0.6555290583552474_dp !\frac{-1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(6,3,2)=12 ; nablagaunt(12)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(7,3,3)=13 ; nablagaunt(13)=-0.252313252202016_dp !-\frac{1}{\sqrt{5\pi}}
- nabgauntselect(8,3,4)=14 ; nablagaunt(14)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(2,3,6)=15 ; nablagaunt(15)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(3,3,7)=16 ; nablagaunt(16)=0.75693974607408354_dp !\frac{3}{\sqrt{5\pi}
- nabgauntselect(4,3,8)=17 ; nablagaunt(17)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(5,4,2)=18 ; nablagaunt(18)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(8,4,3)=19 ; nablagaunt(19)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(7,4,4)=20 ; nablagaunt(20)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
- nabgauntselect(9,4,4)=21 ; nablagaunt(21)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(2,4,5)=22 ; nablagaunt(22)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(4,4,7)=23 ; nablagaunt(23)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
- nabgauntselect(3,4,8)=24 ; nablagaunt(24)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(4,4,9)=25 ; nablagaunt(25)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(4,5,2)=26 ; nablagaunt(26)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(2,5,4)=27 ; nablagaunt(27)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(1,5,5)=28 ; nablagaunt(28)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
- nabgauntselect(7,5,5)=29 ; nablagaunt(29)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
- nabgauntselect(8,5,6)=30 ; nablagaunt(30)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(5,5,7)=31 ; nablagaunt(31)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
- nabgauntselect(6,5,8)=32 ; nablagaunt(32)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(3,6,2)=33 ; nablagaunt(33)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(2,6,3)=34 ; nablagaunt(34)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(8,6,5)=35 ; nablagaunt(35)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(1,6,6)=36 ; nablagaunt(36)=1.692568750643269_dp !\dfrac{3}{\sqrt{\pi}}
- nabgauntselect(7,6,6)=37 ; nablagaunt(37)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
- nabgauntselect(9,6,6)=38 ; nablagaunt(38)=-0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(6,6,7)=39 ; nablagaunt(39)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
- nabgauntselect(5,6,8)=40 ; nablagaunt(40)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(6,6,9)=41 ; nablagaunt(41)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(2,7,2)=42 ; nablagaunt(42)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
- nabgauntselect(3,7,3)=43 ; nablagaunt(43)=0.7569397566060481_dp !\frac{3}{\sqrt{5\pi}}
- nabgauntselect(4,7,4)=44 ; nablagaunt(44)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
- nabgauntselect(5,7,5)=45 ; nablagaunt(45)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
- nabgauntselect(6,7,6)=46 ; nablagaunt(46)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
- nabgauntselect(1,7,7)=47 ; nablagaunt(47)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
- nabgauntselect(7,7,7)=48 ; nablagaunt(48)=0.5406712547186058_dp !\frac{3}{7}\sqrt{\frac{5}{\pi}}
- nabgauntselect(8,7,8)=49 ; nablagaunt(49)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
- nabgauntselect(9,7,9)=50 ; nablagaunt(50)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
- nabgauntselect(4,8,3)=51 ; nablagaunt(51)=0.6555290583552474_dp  !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
- nabgauntselect(3,8,4)=52 ; nablagaunt(52)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
- nabgauntselect(6,8,5)=53 ; nablagaunt(53)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(5,8,6)=54 ; nablagaunt(54)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(8,8,7)=55 ; nablagaunt(55)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
- nabgauntselect(1,8,8)=56 ; nablagaunt(56)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
- nabgauntselect(7,8,8)=57 ; nablagaunt(57)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
- nabgauntselect(9,8,8)=58 ; nablagaunt(58)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(8,8,9)=59 ; nablagaunt(59)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(9,2,2)=60 ; nablagaunt(60)=0.2185096861184158_dp !!!!! \frac{0.5\sqrt{3}}{\sqrt{5\pi}}
- nabgauntselect(9,4,4)=61 ; nablagaunt(61)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
- nabgauntselect(6,9,6)=62 ; nablagaunt(62)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(9,9,7)=63 ; nablagaunt(63)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
- nabgauntselect(8,9,8)=64 ; nablagaunt(64)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
- nabgauntselect(1,9,9)=65 ; nablagaunt(65)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
- nabgauntselect(7,9,9)=66 ; nablagaunt(66)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
- nabgauntselect(4,9,4)=67 ; nablagaunt(67)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
- nnablagnt=67
+ if (mpsang>=3) then
+   nabgauntselect(7,2,2)=4  ; nablagaunt(4)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
+   nabgauntselect(9,2,2)=5 ; nablagaunt(5)=0.2185096861184158_dp !\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(6,2,3)=6 ; nablagaunt(6)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(5,2,4)=7 ; nablagaunt(7)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(4,2,5)=8 ; nablagaunt(8)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(3,2,6)=9 ; nablagaunt(9)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(2,2,7)=10 ; nablagaunt(10)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
+   nabgauntselect(2,2,9)=11 ; nablagaunt(11)=-0.6555290583552474_dp !\frac{-1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(6,3,2)=12 ; nablagaunt(12)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(7,3,3)=13 ; nablagaunt(13)=-0.252313252202016_dp !-\frac{1}{\sqrt{5\pi}}
+   nabgauntselect(8,3,4)=14 ; nablagaunt(14)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(2,3,6)=15 ; nablagaunt(15)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(3,3,7)=16 ; nablagaunt(16)=0.75693974607408354_dp !\frac{3}{\sqrt{5\pi}
+   nabgauntselect(4,3,8)=17 ; nablagaunt(17)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(5,4,2)=18 ; nablagaunt(18)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(8,4,3)=19 ; nablagaunt(19)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(7,4,4)=20 ; nablagaunt(20)=0.126156626101008_dp !\frac{1}{2\sqrt{5\pi}}
+   nabgauntselect(9,4,4)=21 ; nablagaunt(21)=-0.2185096861184158_dp !-\frac{0.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(2,4,5)=22 ; nablagaunt(22)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(4,4,7)=23 ; nablagaunt(23)=-0.37846987830302403_dp !\frac{-3}{2\sqrt{5\pi}}
+   nabgauntselect(3,4,8)=24 ; nablagaunt(24)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(4,4,9)=25 ; nablagaunt(25)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(4,5,2)=26 ; nablagaunt(26)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(2,5,4)=27 ; nablagaunt(27)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(1,5,5)=28 ; nablagaunt(28)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+   nabgauntselect(7,5,5)=29 ; nablagaunt(29)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(8,5,6)=30 ; nablagaunt(30)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(5,5,7)=31 ; nablagaunt(31)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(6,5,8)=32 ; nablagaunt(32)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(3,6,2)=33 ; nablagaunt(33)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(2,6,3)=34 ; nablagaunt(34)=0.6555290583552474_dp !\frac{1.5\sqrt{3}}{\sqrt{5\pi}}
+   nabgauntselect(8,6,5)=35 ; nablagaunt(35)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(1,6,6)=36 ; nablagaunt(36)=1.692568750643269_dp !\dfrac{3}{\sqrt{\pi}}
+   nabgauntselect(7,6,6)=37 ; nablagaunt(37)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(9,6,6)=38 ; nablagaunt(38)=-0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(6,6,7)=39 ; nablagaunt(39)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(5,6,8)=40 ; nablagaunt(40)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(6,6,9)=41 ; nablagaunt(41)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(2,7,2)=42 ; nablagaunt(42)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
+   nabgauntselect(3,7,3)=43 ; nablagaunt(43)=0.7569397566060481_dp !\frac{3}{\sqrt{5\pi}}
+   nabgauntselect(4,7,4)=44 ; nablagaunt(44)=-0.37846987830302403_dp!\frac{-3}{2\sqrt{5\pi}}
+   nabgauntselect(5,7,5)=45 ; nablagaunt(45)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(6,7,6)=46 ; nablagaunt(46)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(1,7,7)=47 ; nablagaunt(47)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+   nabgauntselect(7,7,7)=48 ; nablagaunt(48)=0.5406712547186058_dp !\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(8,7,8)=49 ; nablagaunt(49)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(9,7,9)=50 ; nablagaunt(50)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(4,8,3)=51 ; nablagaunt(51)=0.6555290583552474_dp  !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+   nabgauntselect(3,8,4)=52 ; nablagaunt(52)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+   nabgauntselect(6,8,5)=53 ; nablagaunt(53)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(5,8,6)=54 ; nablagaunt(54)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(8,8,7)=55 ; nablagaunt(55)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(1,8,8)=56 ; nablagaunt(56)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+   nabgauntselect(7,8,8)=57 ; nablagaunt(57)=0.2703356273593029_dp !\frac{3}{14}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(9,8,8)=58 ; nablagaunt(58)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(8,8,9)=59 ; nablagaunt(59)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(6,9,6)=60 ; nablagaunt(60)=-0.4682350416823196_dp !-\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(9,9,7)=61 ; nablagaunt(61)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(8,9,8)=62 ; nablagaunt(62)=0.4682350416823196_dp !\frac{3}{14}\sqrt{\frac{15}{\pi}}
+   nabgauntselect(1,9,9)=63 ; nablagaunt(63)=1.692568750643269_dp !\frac{3}{\sqrt{\pi}}
+   nabgauntselect(2,9,2)=64 ; nablagaunt(64)=-0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+   nabgauntselect(7,9,9)=65 ; nablagaunt(65)=-0.5406712547186058_dp !-\frac{3}{7}\sqrt{\frac{5}{\pi}}
+   nabgauntselect(4,9,4)=66 ; nablagaunt(66)=0.6555290583552474_dp !\frac{3}{2}\sqrt{\frac{3}{5\pi}}
+   nnablagnt=66
  end if
 
 end subroutine nablarealgaunt
-
 
 END MODULE m_paw_sphharm
 !!***
