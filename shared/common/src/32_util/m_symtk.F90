@@ -441,7 +441,7 @@ end subroutine chkgrp
 ! *************************************************************************
 
 !DEBUG
-!write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
+ write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
 !ENDDEBUG
 
  ierr = 0
@@ -459,11 +459,11 @@ end subroutine chkgrp
  endif
 
 !DEBUG
-!write(std_out,*)' present(tnons),present(tnons_tol)=',present(tnons),present(tnons_tol)
-!write(std_out,*)' isym   symrel                      symafm  tnons '
-!do isym=1,nsym
-! write(std_out,'(i5,a,9i3,a,i3,a,3f9.4)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym),'   ',tnons_(:,isym)
-!end do
+ write(std_out,*)' present(tnons),present(tnons_tol)=',present(tnons),present(tnons_tol)
+ write(std_out,*)' isym   symrel                      symafm  tnons '
+ do isym=1,nsym
+  write(std_out,'(i5,a,9i3,a,i3,a,3f9.4)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym),'   ',tnons_(:,isym)
+ end do
 !ENDDEBUG
 
  ! 1) Identity must be the first symmetry. Do not check if tnons_ == 0 as cell might not be primitive.
@@ -656,7 +656,7 @@ end subroutine chkgrp
        prd_symafm = symafm(sym1) * symafm(sym2)
        prd_tnons = tnons_(:, sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
        !DEBUG
-       write(std_out,*)' prd_ptsymm,prdsymrel=',prd_ptsymm,prd_symrel                                       
+       !write(std_out,*)' prd_ptsymm,prdsymrel=',prd_ptsymm,prd_symrel
        !DEBUG
 
        ! Check that product array is one of the original symmetries.
