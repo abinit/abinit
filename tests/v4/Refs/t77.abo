@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 30 May 2023.
-- ( at 22h05 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h01 )
   
 
 ================================================================================
@@ -64,11 +64,11 @@
     atom        electric field
  displacement     direction
        1               1       -0.000004        0.000000
-       1               2        0.000000        0.000000
+       1               2       -0.000000        0.000000
        1               3       -0.000000        0.000000
-       2               1        0.000000        0.000000
+       2               1       -0.000000        0.000000
        2               2       -0.000004        0.000000
-       2               3       -0.000000        0.000000
+       2               3        0.000000        0.000000
        3               1        0.000000        0.000000
        3               2        0.000000        0.000000
        3               3       -0.000004        0.000000
@@ -77,12 +77,12 @@
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.248400E+00    0.000000E+00    1.331219E-19
-         1         2    0.000000E+00    2.248400E+00    1.331219E-19
-         1         3    0.000000E+00    0.000000E+00    2.248400E+00
-         2         1   -2.248400E+00    0.000000E+00   -1.331219E-19
-         2         2    0.000000E+00   -2.248400E+00   -1.331219E-19
-         2         3    0.000000E+00    0.000000E+00   -2.248400E+00
+         1         1    2.248400E+00    3.192045E-17    3.212395E-17
+         1         2    3.192045E-17    2.248400E+00   -3.171696E-17
+         1         3   -3.192045E-17   -3.192045E-17    2.248400E+00
+         2         1   -2.248400E+00   -3.192045E-17   -3.212395E-17
+         2         2   -3.192045E-17   -2.248400E+00    3.171696E-17
+         2         3    3.192045E-17    3.192045E-17   -2.248400E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
  Polarization in cartesian coordinates (a.u.):
@@ -118,18 +118,18 @@
  fmax =     2.020862512E-02
 
  Change of cartesian coordinates (delta_xcart):
-       1       0.131608670       0.131608460       0.131608280
-       2      -0.086256985      -0.086257201      -0.086257375
+       1       0.131609680       0.131609460       0.131609290
+       2      -0.086255977      -0.086256193      -0.086256367
 
  New cartesian coordinates (xcart_new):
    xcart
-     0.13160867000000D+00     0.13160846000000D+00     0.13160828000000D+00
-     0.25678757275000D+01     0.25678755115000D+01     0.25678753375000D+01
+     0.13160968000000D+00     0.13160946000000D+00     0.13160929000000D+00
+     0.25678767355000D+01     0.25678765195000D+01     0.25678763455000D+01
 
  New reduced coordinates (xred_new):
    xred
-     0.12396523107169D-01     0.12396562668115D-01     0.12396596577497D-01
-     0.24187516221459D+00     0.24187520290585D+00     0.24187523568492D+00
+     0.12396617299897D-01     0.12396658744697D-01     0.12396690770225D-01
+     0.24187525716086D+00     0.24187529785212D+00     0.24187533063119D+00
 
  Difference between the Hellmann-Feynman stresses
  and the stresses induced by the electric field
@@ -146,23 +146,18 @@
 
  New lattice constants (acell_new):
    acell
-    0.73126511818950D+01    0.73126511817752D+01    0.73126511818292D+01
+    0.73126511818898D+01    0.73126511817701D+01    0.73126511818242D+01
 
  New primitive vectors (rprim_new):
    rprim
-    0.22044886200853D-02    0.70710506298799D+00    0.70710506300456D+00
-    0.70710506299068D+00    0.22044886344413D-02    0.70710506300182D+00
-    0.70710506299899D+00    0.70710506299355D+00    0.22044886208955D-02
+    0.22044886202406D-02    0.70710506298798D+00    0.70710506300456D+00
+    0.70710506299068D+00    0.22044886345992D-02    0.70710506300182D+00
+    0.70710506299899D+00    0.70710506299355D+00    0.22044886210424D-02
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.024  and wall time      0.026 sec
++Total cpu time      0.023  and wall time      0.034 sec
 
  anaddb : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 139 allocations and 139 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0

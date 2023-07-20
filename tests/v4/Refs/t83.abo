@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 30 May 2023.
-- ( at 22h06 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h01 )
   
 
 ================================================================================
@@ -118,15 +118,10 @@
    0.0066685  -0.0265425   0.0164669  -0.0512873   1.1838752  -0.0290469
    0.0162524   0.0162524  -0.0403673  -0.0290838  -0.0290838   1.1282574
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.025  and wall time      0.166 sec
++Total cpu time      0.021  and wall time      0.027 sec
 
  anaddb : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 127 allocations and 127 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0
