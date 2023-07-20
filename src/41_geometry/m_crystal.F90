@@ -1379,7 +1379,6 @@ subroutine crystal_point_group(cryst, ptg_nsym, ptg_symrel, ptg_symrec, has_inve
 !arrays
  integer :: work_symrel(3,3,cryst%nsym)
  integer,allocatable :: symafm(:)
- real(dp),allocatable :: tnons(:,:)
 
 ! *************************************************************************
 
