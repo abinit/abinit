@@ -214,14 +214,11 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngr
  if (use_angular_grid==1) then
    Pawang%nphi=nphi
    Pawang%ntheta=ntheta
+   call ylm_angular_mesh(Pawang%ntheta,Pawang%nphi,Pawang%angl_size,Pawang%anginit,Pawang%angwgth)
  else
    Pawang%nphi=0
    Pawang%ntheta=0
    Pawang%angl_size=0
- end if
-
- if (ntheta*nphi>0) then
-   call ylm_angular_mesh(Pawang%ntheta,Pawang%nphi,Pawang%angl_size,Pawang%anginit,Pawang%angwgth)
  end if
 
  if (use_ylm>0.and.Pawang%angl_size>0) then
