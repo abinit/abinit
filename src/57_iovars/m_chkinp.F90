@@ -1482,7 +1482,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
    allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==0.or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
    if(.not.allowed)then
-print *,"AA"
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
@@ -2462,7 +2461,6 @@ print *,"AA"
    !Linear Response function only for LDA/GGA
    allowed=((xc_is_lda.or.xc_is_gga.or.dt%ixc==0).and.dt%ixc/=50)
    if(.not.allowed)then
-print *,"BB"
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
    end if
@@ -2504,7 +2502,6 @@ print *,"BB"
    !Non linear Response function only for LDA (restricted to ixc=3/7/8)
    allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==0.or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
    if(.not.allowed)then
-print *,"CC"
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
