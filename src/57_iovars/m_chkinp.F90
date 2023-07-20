@@ -3319,14 +3319,18 @@ print *,"CC"
        write(msg, '(a,f8.2,4a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized response function calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
+&      '  the default value of spinmagntarget, and explicit definition of occ. ',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%prtdos==1)then
        write(msg, '(a,f8.2,4a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,& 
+&      '  the default value of spinmagntarget, and explicit definition of occ.',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if

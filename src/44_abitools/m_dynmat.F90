@@ -56,7 +56,7 @@ module m_dynmat
  public :: d2cart_to_red        ! Transform a second-derivative matrix
                                 ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
- public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
+ public :: chneu9               ! Imposition of the charge neutrality sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
  public :: q0dy3_apply          ! Takes care of the inclusion of the ewald q=0 term in the dynamical matrix
  public :: q0dy3_calc           ! Calculate the q=0 correction term to the dynamical matrix
@@ -1145,11 +1145,11 @@ end subroutine chkph3
 !! chneu9
 !!
 !! FUNCTION
-!! Imposition of the Acoustic sum rule on the Effective charges
+!! Imposition of the charge neutrality sum rule on the Effective charges
 !! and suppress the imaginary part of the dynamical matrix
 !!
 !! INPUTS
-!!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
+!!  chneut=(0 => no ASR, 1 => equal repartition, 2 => weighted repartition )
 !!  mpert =maximum number of ipert
 !!  natom=number of atom
 !!  ntypat=number of types of atoms in unit cell
