@@ -1411,7 +1411,6 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 
 !  To be adjusted for the call to rhotoxc
    nk3xc=1
-print *,option, nkxc, nkxc_cur, optxc;stop
    call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
 &   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,&
 &   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres)  !vresid=work space
