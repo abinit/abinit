@@ -6,14 +6,14 @@ authors: MG
 
 This page provides a quick introduction to the new GWR driver of ABINIT
 We discuss the technical details related to the implementation, the associated input variables.
-as well as the pros and cons with respect to the legacy GW implementation 
+as well as the pros and cons with respect to the conventional GW implementation formulated
 in Fourier-space and frequency domain.
 
 ## Why a new GW code?
 
 The conventional GW algorithm has quartic scaling with the number of atoms whereas GWR scales cubically.
-The legacy GW code obtains the matrix elelments of self-energy by performing a convolution in frequency domain, 
-usually withing the plasmon-pole approximation whereas GWR computes the self-energy elements in 
+The legacy GW code obtains the matrix elements of self-energy by performing a convolution in frequency domain, 
+usually within the plasmon-pole approximation whereas GWR computes the self-energy elements in 
 imaginary-time 
 
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
@@ -24,7 +24,8 @@ while [[gwr_task]] defines the task
 * Scalapack
 * Optmized FFT libraries (FFTW3 or MKL-DFTI)
 
-Discuss single and double precision version. Single-precision is the default
+Discuss single and double precision version. 
+We recall that single-precision is the default
 
 ## Formalism
 
@@ -55,10 +56,10 @@ and the Fermi level $\mu$ has been set to zero.
 
 The GWR code constructs the Green's function from the KS wavefunctions and eigenvalues stored 
 in the WFK file specified via [[getwfk_filepath]] ([[getwfk]] in multi-dataset mode).
-This WFK file is usually produced by performing a NSCF run with many empty states and the GWR driver
-provides a specialized option to perform a direct diagonalization of the KS Hamiltonian with Scalapack.
+This WFK file is usually produced by performing a NSCF calculation including empty states and the GWR driver
+provides a specialized option to perform a direct diagonalization of the KS Hamiltonian in parallel with Scalapack.
 (see section below)
-When computing $G$, the number of bands included in the sum over states is controlled by [[nband]].
+When computing $G^0$, the number of bands included in the sum over states is controlled by [[nband]].
 Clearly, it does not make any sense to ask for more bands than the ones available in the WFK file. 
 
 The imaginary axis is sampled using a minimax mesh with [[gwr_ntau]] points.
@@ -67,7 +68,7 @@ is the ratio between the fundamental gap and the maximum transition energy i.e.
 the differerence between the highest KS eigenvalue for empty states that clearly depends 
 on [[nband]] and the energy of the lowest occupied state.
 
-The k-mesh must be $\Gamma$-centered e.g.
+Note that only $\Gamma$-centered $\kk$-meshes are supported in GWR, e,g:
 
 * [[ngkpt]] 4 4 4
 * [[nshiftk]] 1 
@@ -77,16 +78,17 @@ The cutoff energy for the polarizability is given by [[ecuteps]]
 while [[ecutsigx]] defines the number of g-vectors for the exchange part of the self-energy.
 
 Note that GWR also needs the GS density produced by a previous GS SCF run.
-This file can be read via [[getden_filepath]] (recommended) or, alternatively 
-with [[getden]] in multi dataset mode.
+This file can be read via [[getden_filepath]].
+
 
 \begin{equation}
 \chi(\rr,\RR', t) = G(\rr,\RR', i\tau) G^*(\rr,\RR', -i\tau)
 \end{equation}
 
-Treatment of the long-wavelenght limit
+As concerns the treatment of the long-wavelenght limit, we have the following input variables:
 
 [[inclvkb]], [[gw_qlwl]], [[gwr_max_hwtene]]
+
 
 ## GWR workflow for QP energies
 
@@ -97,7 +99,7 @@ is schematically represented in the figure below:
 
 In order to perform a standard one-shot GW calculation one has to:
 
-  1. Run a converged Ground State calculation to obtain the self-consistent density.
+  1. Run a converged ground state calculation to obtain the density.
 
   2. Perform a non self-consistent run to compute the KS eigenvalues and the eigenfunctions
      including several empty states. Note that, unlike standard band structure calculations,
@@ -124,5 +126,6 @@ At the time of writing, the following features are **not yet supported** in GWR:
 
 * PAW calculations
 * Spinors ([[nspinor]] = 2)
+
 
 ## Tricks to accelerate the computation and reduce the memory requirements

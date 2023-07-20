@@ -2,12 +2,12 @@
 authors: MG
 ---
 
-# First tutorial on GWR (GW in real-space and imaginary axis)
+# First tutorial on GWR (GW in real-space and imaginary time)
 
 ## The quasi-particle band structure of Silicon in the GW approximation.
 
 This tutorial aims at showing how to calculate self-energy corrections to the
-DFT Kohn-Sham (KS) eigenvalues in the GW approximation using the GWR code
+DFT Kohn-Sham (KS) eigenvalues in the on-shot GW approximation using the GWR code
 
 The user should be familiarized with the four basic tutorials of ABINIT,
 see the [tutorial home page](/tutorial).
@@ -51,11 +51,13 @@ Ideally the total number of cores should be a multiple of [[nkpt]] * [[nsppol]] 
 The k-points for the QP corrections can be specified in different ways
 
 Explictly via:
+
 [[nkptgw]], [[kptgw]] and [[bdgw]]
 
 Implicitly via [[gw_qprange]]
 
 For the spectral function
+
 [[nfreqsp]], [[freqspmax]]
 
 Notes on the MPI parallelization

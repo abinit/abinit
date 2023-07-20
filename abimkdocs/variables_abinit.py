@@ -15337,7 +15337,7 @@ Variable(
     mnemonics="PRinT the Derivative Data Base file",
     added_in_version="9.11.0",
     text=r"""
-If set to 1, ABINIT will produce a DDB file. 
+If set to 1, ABINIT will produce a DDB file.
 """,
 ),
 
@@ -16988,7 +16988,7 @@ In most cases (see later for [[prtdos]] = 3), provides the radius of the spheres
 charge density or magnetization will be integrated.
 The integral within the sphere is obtained by a sum over real space FFT points
 inside the sphere, multiplied by a function that is one inside the sphere, except in a small boundary zone determined by [[ratsm]],
-where this fonction goes smoothly from 1 to 0.
+where this function goes smoothly from 1 to 0.
 In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
 considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
@@ -21245,7 +21245,7 @@ Supra-variable controlling the underlying printing options of the prt-type varia
 It can be used as a simple string flagging the desired outputs as follows:
 
  * "default"   --> An empty string will produce only the log and abo files
- * "none"      --> It will deactivate all printing options currently available. Only the log and abo file will be produced following a calculation.  
+ * "none"      --> It will deactivate all printing options currently available. Only the log and abo file will be produced following a calculation.
  * "ddb"       --> Activates the printing of the DDB file. Refer to [[prtddb]] for further documentation.
  * "den_1"     --> Activates the printing of the density file under option 1 of the [[prtden]] variable.
  * "den_2"     --> Activates the printing of the density file under option 2 of the [[prtden]] variable.
