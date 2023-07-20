@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 19h03 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       3.971 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.064 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -470,8 +468,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05308
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1204,48 +1202,10 @@ P           mkmem2        145
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         14.2        0.24      0.004
-- Total wall clock time (s,m,h):         14.3        0.24      0.004
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           14.2, wall_time =           14.3
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- dvdb_get_ftqbz                    0.577   4.1         0.589   4.1            852      -1.00        0.98       0.98
-- fourwf%(pot)                      0.550   3.9         0.528   3.7           5242      -1.00        1.04       1.04
-- invars2                           0.301   2.1         0.301   2.1              2      -1.00        1.00       1.00
-- abinit(2)                         0.240   1.7         0.241   1.7              1      -1.00        1.00       1.00
-- nonlop(forces)                    0.156   1.1         0.145   1.0           2556      -1.00        1.07       1.07
-- timing timab                      0.135   1.0         0.136   1.0             11      -1.00        1.00       1.00
-- nonlop(apply)                     0.085   0.6         0.086   0.6           2686      -1.00        0.99       0.99
-- others (145)                     -0.500  -3.5        -0.415  -2.9             -1      -1.00        1.20       1.20
--<END_TIMER>
--
-- subtotal                          1.545  10.9         1.611  11.3                                  0.96       0.96
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          14.2, wall_time =          14.3
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- dvdb_get_ftqbz                    0.577   4.1         0.589   4.1            852      -1.00        0.98       0.98
-- fourwf%(pot)                      0.550   3.9         0.528   3.7           5242      -1.00        1.04       1.04
-- invars2                           0.301   2.1         0.301   2.1              2      -1.00        1.00       1.00
-- abinit(2)                         0.240   1.7         0.241   1.7              1      -1.00        1.00       1.00
-- nonlop(forces)                    0.156   1.1         0.145   1.0           2556      -1.00        1.07       1.07
-- timing timab                      0.135   1.0         0.136   1.0             11      -1.00        1.00       1.00
-- nonlop(apply)                     0.085   0.6         0.086   0.6           2686      -1.00        0.99       0.99
-- others (145)                     -0.500  -3.5        -0.415  -2.9             -1      -1.00        1.20       1.20
--<END_TIMER>
 
-- subtotal                          1.545  10.9         1.611  11.3                                  0.96       0.96
 
 ================================================================================
 
@@ -1329,10 +1289,10 @@ P           mkmem2        145
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         14.2  wall=         14.3
+- Proc.   0 individual time (sec): cpu=         14.4  wall=         14.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.2  wall=         14.3
+.Delivered   3 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         14.4  wall=         14.6

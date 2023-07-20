@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 19h03 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t54.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t54.abi
 - output file    -> t54.abo
 - root for input  files -> t54i
 - root for output files -> t54o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       4.102 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -251,8 +249,8 @@ meta: {optdriver: 7, eph_task: 5, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -723,64 +721,10 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          2.3        0.04      0.001
-- Total wall clock time (s,m,h):          2.3        0.04      0.001
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.3, wall_time =            2.3
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- dvdb_readsym_qbz                  0.796  34.8         0.798  34.7            154      -1.00        1.00       1.00
-- dvdb_readsym_allv1                0.534  23.4         0.536  23.3            171      -1.00        1.00       1.00
-- fourwf%(pot)                      0.469  20.5         0.458  19.9           4842      -1.00        1.02       1.02
-- v1phq_rotate                      0.360  15.8         0.366  15.9            105      -1.00        0.98       0.98
-- dvdb_rotate_fqg                   0.241  10.6         0.246  10.7            962      -1.00        0.98       0.98
-- fourdp                            0.164   7.2         0.163   7.1           2860      -1.00        1.01       1.01
-- pspini                            0.137   6.0         0.137   6.0              2      -1.00        1.00       1.00
-- timing timab                      0.136   6.0         0.136   5.9             11      -1.00        1.00       1.00
-- invars2                           0.067   2.9         0.067   2.9              2      -1.00        1.00       1.00
-- nonlop(forces)                    0.063   2.7         0.070   3.0           4842      -1.00        0.90       0.90
-- sigph_bsum                        0.034   1.5         0.042   1.8            154      -1.00        0.80       0.80
-- dvdb_qcache_read                  0.028   1.2         0.028   1.2              1      -1.00        1.00       1.00
-- getgh1c_setup                     0.024   1.1         0.028   1.2            948      -1.00        0.87       0.87
-- abinit(2)                         0.024   1.1         0.025   1.1              1      -1.00        0.98       0.98
-- sigph_bsum_1                      0.018   0.8         0.016   0.7            858      -1.00        1.12       1.12
-- others (137)                     -1.071 -46.9        -1.057 -45.9             -1      -1.00        1.01       1.01
--<END_TIMER>
--
-- subtotal                          2.025  88.7         2.059  89.4                                  0.98       0.98
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.3, wall_time =           2.3
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- dvdb_readsym_qbz                  0.796  34.8         0.798  34.7            154      -1.00        1.00       1.00
-- dvdb_readsym_allv1                0.534  23.4         0.536  23.3            171      -1.00        1.00       1.00
-- fourwf%(pot)                      0.469  20.5         0.458  19.9           4842      -1.00        1.02       1.02
-- v1phq_rotate                      0.360  15.8         0.366  15.9            105      -1.00        0.98       0.98
-- dvdb_rotate_fqg                   0.241  10.6         0.246  10.7            962      -1.00        0.98       0.98
-- fourdp                            0.164   7.2         0.163   7.1           2860      -1.00        1.01       1.01
-- pspini                            0.137   6.0         0.137   6.0              2      -1.00        1.00       1.00
-- timing timab                      0.136   6.0         0.136   5.9             11      -1.00        1.00       1.00
-- invars2                           0.067   2.9         0.067   2.9              2      -1.00        1.00       1.00
-- nonlop(forces)                    0.063   2.7         0.070   3.0           4842      -1.00        0.90       0.90
-- sigph_bsum                        0.034   1.5         0.042   1.8            154      -1.00        0.80       0.80
-- dvdb_qcache_read                  0.028   1.2         0.028   1.2              1      -1.00        1.00       1.00
-- getgh1c_setup                     0.024   1.1         0.028   1.2            948      -1.00        0.87       0.87
-- abinit(2)                         0.024   1.1         0.025   1.1              1      -1.00        0.98       0.98
-- sigph_bsum_1                      0.018   0.8         0.016   0.7            858      -1.00        1.12       1.12
-- others (137)                     -1.071 -46.9        -1.057 -45.9             -1      -1.00        1.01       1.01
--<END_TIMER>
 
-- subtotal                          2.025  88.7         2.059  89.4                                  0.98       0.98
 
 ================================================================================
 
@@ -864,10 +808,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.3
+.Delivered   2 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.1  wall=          2.2
