@@ -502,7 +502,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
+ integer :: b0,b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
  integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign,lenstr_raw
  logical :: include_found, ex
 !arrays
@@ -763,11 +763,12 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
 !Substitute environment variables, if any
- b1=0
+ b0=0
  do
-   b1=b1+1
-   b1 = index(string(b1:lenstr), '$')
+   b0=b0+1
+   b1 = index(string(b0:lenstr), '$')
    if(b1==0 .or. b1>=lenstr)exit
+   b1 = b0 + b1 - 1
    !Identify delimiter, either a '"', or a "'", or a blank, or a /
    b2=index(string(b1+1:lenstr),'"')
    b3=index(string(b1+1:lenstr),"'")
