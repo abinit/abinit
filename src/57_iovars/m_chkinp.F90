@@ -171,7 +171,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      xc_is_hybrid=(dt%ixc==40.or.dt%ixc==41.or.dt%ixc==42)
      xc_need_kden=(dt%ixc==31.or.dt%ixc==34.or.dt%ixc==35)
    else
-     call libxc_functionals_init(dt%ixc,nspden,xc_functionals=xcfunc)
+     call libxc_functionals_init(dt%ixc,nspden,xc_functionals=xcfunc,xc_tb09_c=dt%xc_tb09_c)
      xc_is_lda=libxc_functionals_islda(xc_functionals=xcfunc)
      xc_is_gga=libxc_functionals_isgga(xc_functionals=xcfunc)
      xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
@@ -1480,7 +1480,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (dt%usepaw>0.and.(dt%ixc==-427.or.dt%ixc==-428)) then
      ABI_WARNING('Range-separated Hybrid Functionals have not been extensively tested in PAW!!!')
    end if
-   allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
+   allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==0.or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
    if(.not.allowed)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
@@ -2459,7 +2459,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
    end if
    !Linear Response function only for LDA/GGA
-   allowed=((xc_is_lda.or.xc_is_gga).and.dt%ixc/=50)
+   allowed=((xc_is_lda.or.xc_is_gga).and.dt%ixc/=0.and.dt%ixc/=50)
    if(.not.allowed)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
@@ -2467,7 +2467,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !PAW+Linear Response+GGA function restricted to pawxcdev=0
    !PAW+response_to_strain only allowed for LDA
    if (dt%usepaw==1.and.dt%optdriver==RUNL_RESPFN) then
-     if(xc_is_gga) then
+     if( xc_is_gga.and. &
+&       (dt%rfphon/=0.or.dt%rfelfd==1.or.dt%rfelfd==3.or.dt%rfstrs/=0.or.dt%rf2_dkde/=0) ) then
        if (dt%pawxcdev/=0)then
          write(msg,'(7a)' )&
          'You are performing a DFPT+PAW calculation using a GGA XC functional:',ch10,&
@@ -2499,7 +2500,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
    !Non linear Response function only for LDA (restricted to ixc=3/7/8)
-   allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
+   allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==0.or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
    if(.not.allowed)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)

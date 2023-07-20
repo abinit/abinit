@@ -1828,7 +1828,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! Initialize here data related to exchange-correlation functional
  if (ixc_here<0) then
-   call libxc_functionals_init(ixc_here,dtset%nspden,xc_functionals=xcfunc)
+   call libxc_functionals_init(ixc_here,dtset%nspden,xc_functionals=xcfunc,xc_tb09_c=dtset%xc_tb09_c)
  end if
  call get_xclevel(ixc_here,dtset%xclevel,dtset%usefock)
  xc_has_kxc=has_kxc(ixc_here,xc_funcs=xcfunc)
@@ -2372,7 +2372,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawxcdev',tread,'INT')
  if(tread==1) then
    dtset%pawxcdev=intarr(1)
- else if (xc_is_mgga) then
+ else if (usepaw==1.and.xc_is_mgga) then
    dtset%pawxcdev=0
  end if
 
