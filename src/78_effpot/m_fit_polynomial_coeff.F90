@@ -341,7 +341,7 @@ contains
     do ii=1,ncoeff_out
       call polynomial_coeff_free(coeffs_out(ii))
     end do
-    ABI_FREE(coeffs_out)
+    ABI_SFREE(coeffs_out)
     !Deallocate fixed eff_pot
     call effective_potential_free(eff_pot_fixed)
     !Other deallocations
@@ -853,7 +853,7 @@ contains
     else if(nfixcoeff_corr==-1) then
       do ico=1, size(my_coeffs)
         ifix=my_coeffindexes(ico)
-        if( ifix<ncoeff_model .and. my_coeffs(ico)%isbound==0) then
+        if( ifix<=ncoeff_model .and. my_coeffs(ico)%isbound==0) then
           nfix=nfix+1
           call ind_fix%push(ifix)
           isselected(ifix)=.True.
@@ -868,6 +868,7 @@ contains
         ABI_ERROR("The number of the fixed term is not consistent with the selected terms.")
       end if
     end if
+
   end subroutine select_fix_terms
 
 
@@ -912,6 +913,8 @@ contains
     if(need_verbose) call wrtout(std_out,message,'COLL')
 
 
+
+
   end subroutine get_ncoeff_preselected
 
   subroutine get_ncoeff_to_select_and_ncoeff_to_fit()
@@ -919,6 +922,7 @@ contains
     ncoeff_to_select     = ncoeff_in
     !Compute the maximum number of cycle
     ncoeff_to_fit = ncoeff_in + ncoeff_preselected
+
 
     !Check if the number of request cycle + the initial number of coeff is superior to
     !the maximum number of coefficient allowed
@@ -981,7 +985,6 @@ contains
     !end if
     !call  xmpi_lor(isselected, comm)
 
-    !FIXME: here the number of n_preselcted is wrong.
 
     !Get the decomposition for each coefficients of the forces and stresses for
     !each atoms and each step  equations 11 & 12 of  PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
