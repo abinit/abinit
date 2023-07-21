@@ -759,13 +759,12 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
  inquire(file=filename, exist=file_exists)
 
  if (file_exists .eqv. .true.)then
-   !Reading the ddb
-   call ddb_hdr%open_read(filename,2,comm,dimonly=1)
 
-   natom = ddb_hdr%natom
+   !Reading the ddb
+   call ddb%from_file(filename, ddb_hdr, ucell_ddb, comm)
    call ddb_hdr%free()
 
-   call ddb%from_file(filename,1, ddb_hdr, ucell_ddb,comm)
+   natom = ddb%natom
 
  else
    ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
@@ -797,7 +796,6 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
 
  ! Free them all
  call ddb%free()
- call ddb_hdr%free()
 
 end subroutine ifc_from_file
 !!***

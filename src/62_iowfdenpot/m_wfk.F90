@@ -1166,9 +1166,11 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
  if (present(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
+   kg_k = zero
  end if
  if (present(cg_k)) then
    ABI_CHECK(SIZE(cg_k, DIM=2) >= npw_tot_disk,"cg_k too small")
+   cg_k = zero
  end if
 
  if (present(eig_k)) then
@@ -1222,11 +1224,11 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
 
        if (present(eig_k)) then
          eig_k = zero
-         eig_k(1:nband_disk) = tmp_eigk(1:nband_disk)
+         eig_k(1:nband_disk_keep) = tmp_eigk(1:nband_disk_keep)
        end if
        if (present(occ_k)) then
          occ_k = zero
-         occ_k(1:nband_disk) = tmp_occk(1:nband_disk)
+         occ_k(1:nband_disk_keep) = tmp_occk(1:nband_disk_keep)
        end if
 
        ABI_FREE(tmp_eigk)
@@ -1314,8 +1316,12 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        call mpio_read_eigocc_k(Wfk%fh,my_offset,nband_disk,Wfk%formeig,sc_mode,tmp_eigk,mpierr)
        ABI_CHECK_MPI(mpierr, "reading eigocc")
 
-       if (present(eig_k)) eig_k(1:nband_disk) = tmp_eigk(1:nband_disk)
-       if (present(occ_k)) occ_k(1:nband_disk) = tmp_eigk(nband_disk+1:2*nband_disk)
+       if (present(eig_k)) then
+         eig_k(1:nband_disk_keep) = tmp_eigk(1:nband_disk_keep)
+       end if
+       if (present(occ_k)) then
+         occ_k(1:nband_disk_keep) = tmp_eigk(nband_disk+1:nband_disk+nband_disk_keep)
+       end if
 
        ABI_FREE(tmp_eigk)
      end if
@@ -1413,7 +1419,7 @@ subroutine wfk_read_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg_
        if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then
          NCF_CHECK(nctk_set_collective(wfk%fh, eig_varid))
        end if
-       ncerr = nf90_get_var(wfk%fh, eig_varid, eig_k, start=[1,ik_ibz,spin], count=[nband_disk,1,1])
+       ncerr = nf90_get_var(wfk%fh, eig_varid, eig_k, start=[1,ik_ibz,spin], count=[nband_disk_keep,1,1])
        NCF_CHECK(ncerr)
      end if
 
@@ -3133,7 +3139,7 @@ subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in, &
  ! main loop reading in wfk and spinning them out to all kptns_in which need them
 
  ! MG TODO: I believe this is not the most efficient way to implement the IO algorithm
- ! On might have only the master proc reading all the (ik_ibz, spin, mband) states
+ ! One might have only the master proc reading all the (ik_ibz, spin, mband) states
  ! perhaps blocking on the band dimension to reduce memory and then broadcast the block of bands.
  ! At this point, each proc rotates the wavefunctions and store it in memory if these states are needed.
 

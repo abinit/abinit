@@ -56,7 +56,7 @@ module m_dynmat
  public :: d2cart_to_red        ! Transform a second-derivative matrix
                                 ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
- public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
+ public :: chneu9               ! Imposition of the charge neutrality sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
  public :: q0dy3_apply          ! Takes care of the inclusion of the ewald q=0 term in the dynamical matrix
  public :: q0dy3_calc           ! Calculate the q=0 correction term to the dynamical matrix
@@ -1146,11 +1146,11 @@ end subroutine chkph3
 !! chneu9
 !!
 !! FUNCTION
-!! Imposition of the Acoustic sum rule on the Effective charges
+!! Imposition of the charge neutrality sum rule on the Effective charges
 !! and suppress the imaginary part of the dynamical matrix
 !!
 !! INPUTS
-!!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
+!!  chneut=(0 => no ASR, 1 => equal repartition, 2 => weighted repartition )
 !!  mpert =maximum number of ipert
 !!  natom=number of atom
 !!  ntypat=number of types of atoms in unit cell
@@ -1330,7 +1330,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Write the effective charge tensor
  write(msg, '(a,a,a,a,a,a,a)' )&
    ' Effective charge tensors after ',ch10,&
-   ' imposition of the charge neutrality,',ch10,&
+   ' imposition of the charge neutrality (if requested by user),',ch10,&
    ' and eventual restriction to some part :',ch10,&
   '   atom    displacement  '
  call wrtout(ab_out,msg)
@@ -1486,6 +1486,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
        do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
+           ! FIXME use is_type functions
 !          If an element exists
            if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
 
@@ -2246,16 +2247,6 @@ subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
  real(dp) :: arg,im,re,sumi,sumr
 
 ! *********************************************************************
-
-!DEBUG
-!write(std_out,*)' dfpt_sygra : enter '
-!write(std_out,*)' dfpt_sygra : qpt(:)',qpt(:)
-!do ia=1,natom
-!do mu=1,3
-!write(std_out,*)' dfpt_sygra : deunsy(:2,mu,ia)',deunsy(:2,mu,ia)
-!enddo
-!enddo
-!ENDDEBUG
 
  if (nsym==1) then
 

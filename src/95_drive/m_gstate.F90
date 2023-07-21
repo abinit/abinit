@@ -265,7 +265,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,iorder_cprj,itypat
- integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
+ integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,mu,my_natom,my_nspinor
  integer :: nband_k,nbandtot,nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
@@ -275,7 +275,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
- character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
+ character(len=fnlen) :: dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
  type(ebands_t) :: bstruct,ebands
@@ -1550,42 +1550,37 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      nblok = 1  ! 1st blok = gradients
    end if
    mpert = dtset%natom + 6
-   msize = 3*mpert
 
    ! Create header and ddb objects
    dscrpt=' Note : temporary (transfer) database '
    call ddb_hdr%init(dtset,psps,pawtab,dscrpt,nblok,&
 &                    xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb%init(dtset, nblok, mpert, msize)
-
-   ! Write gradients to the DDB
-   if (dtset%iscf > 0) then
-     call ddb%set_gred(results_gs%gred, 1)
-   end if
+   call ddb%init(dtset, nblok, mpert, with_d1E=.true.)
 
    ! Set the electronic polarization
    if ((abs(dtset%berryopt) == 1).or.(abs(dtset%berryopt) == 3)) then
      call ddb%set_pel(results_gs%pel, dtset%rfdir, 1)
    end if
 
-   ! Set the stress tensor
    if (dtset%iscf > 0) then
-     call ddb%set_strten(results_gs%strten, 1)
-   end if
 
-   ! Set the total energy
-   if (dtset%iscf > 0) then
+     ! Set the gradients (forces) in reduced coordinates
+     call ddb%set_gred(results_gs%gred, 1)
+
+     ! Set the stress tensor
+     call ddb%set_strten(results_gs%strten, 1)
+
+     ! Set the total energy
      call ddb%set_etotal(results_gs%etotal, 2)
    end if
 
    if (dtset%prtddb==1) then
     ! Write the DDB
-    ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
-    call ddb%write_txt(ddb_hdr, ddbnm, fullinit=0)
-   endif  
+     call ddb%write(ddb_hdr, dtfil%fnameabo_ddb, with_psps=0)
+   end if
 
-   ! Deallocate
+   ! Free memory
    call ddb_hdr%free()
    call ddb%free()
 

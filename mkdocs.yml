@@ -45,8 +45,9 @@ nav:
     - topics/Abipy.md
     - topics/APPA.md
     - topics/Artificial.md
-    - topics/AtomManipulator.md
     - topics/aTDEP.md
+    - topics/AtomCentered.md
+    - topics/AtomManipulator.md
     - topics/AtomTypes.md
     - topics/Bader.md
     - topics/Band2eps.md
@@ -59,7 +60,7 @@ nav:
     - topics/Control.md
     - topics/Coulomb.md
     - topics/CrossingBarriers.md
-    - topics/CRPA.md
+    - topics/CalcUJ.md
     - topics/crystal.md
     - topics/DFT+U.md
     - topics/DeltaSCF.md
@@ -85,6 +86,7 @@ nav:
     - topics/Git.md
     - topics/GSintroduction.md
     - topics/GW.md
+    - topics/GWR.md
     - topics/GWls.md
     - topics/Hybrids.md
     - topics/k-points.md
@@ -212,7 +214,7 @@ nav:
         - eph for zero-point renormalization : tutorial/eph4zpr.md
         #- tutorial/eph4isotc.md
         - eph_legacy : tutorial/eph_legacy.md
-        - tdepes_legacy : tutorial/eph_tdep_legacy.md
+        - eph_tdep_legacy : tutorial/eph_tdep_legacy.md
     - Multibinit:
         - introduction to multibinit: tutorial/multibinit.md
         - lattice_model: tutorial/lattice_model.md
@@ -348,7 +350,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.11.0
+    version: 9.11.2
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github

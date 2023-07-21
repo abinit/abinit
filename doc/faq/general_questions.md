@@ -97,7 +97,7 @@ grep "<<< MEM" run.log -A 3
 No, [[paral_kgb]] = 1 refers to a particular MPI-distribution of the wavefunctions that is only available
 for GS calculations (total energy calculations, relaxations, molecular dynamics as well
 as NSCF band structure calculations).
-Variables such as [[npkpt]], [[npband]], [[npfft]], [[npspinor]] are relevant only if [[paral_kgb]] = 1.
+Variables such as [[np_spkpt]], [[npband]], [[npfft]], [[npspinor]] are relevant only if [[paral_kgb]] = 1.
 All the other Abinit drivers (e.g. DFPT, GW, BSE, EPH) use a completely different approach to parallelize
 the calculation and distribute memory.
 
