@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t76/t76.in
-- output file    -> t76.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t76/t76.abi
+- output file    -> t76.abo
 - root for input  files -> t76i
 - root for output files -> t76o
-
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          63          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.050 Mbytes of memory.
+P This job should need less than                       1.099 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          63          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.050 Mbytes of memory.
+P This job should need less than                       1.099 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          63          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.050 Mbytes of memory.
+P This job should need less than                       1.099 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          63          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.050 Mbytes of memory.
+P This job should need less than                       1.099 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          63          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.050 Mbytes of memory.
+P This job should need less than                       1.099 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -119,11 +113,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          63          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.050 Mbytes of memory.
+P This job should need less than                       1.099 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -136,11 +129,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    8 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -153,11 +145,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -170,11 +161,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   10 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -187,11 +177,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   11 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -204,11 +193,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -221,11 +209,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -238,11 +225,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   14 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -255,11 +241,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   15 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -272,11 +257,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   16 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -289,11 +273,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   17 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -306,11 +289,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   18 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -323,11 +305,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   19 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -340,11 +321,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   20 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -357,11 +337,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -374,7 +353,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.052 Mbytes of memory.
+P This job should need less than                       1.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -617,8 +596,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.15501
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4171,6 +4150,11 @@ P           mkmem           2
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -4258,10 +4242,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered 125 WARNINGs and  45 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.6  wall=          3.7
+.Delivered 227 WARNINGs and  46 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=          3.8

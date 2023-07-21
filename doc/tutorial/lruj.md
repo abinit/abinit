@@ -4,7 +4,7 @@ authors: LMac and DJA
 
 # Hubbard U and Hund's J Parameters with Cococcioni and de Gironcoli's approach
 
-## 1 How to determine U(J) for DFT+U(+J) via Linear Response
+## 1 How to determine U and/or J for DFT+U(+J) via Linear Response
 
 This tutorial aims to demonstrate the operations and functionalities of the Abinit post-processing
 utility called Linear Response Hubbard U and Hund's J (lruj), designed to determine the 
@@ -12,15 +12,22 @@ first-principles Hubbard U and/or Hund's J parameters for particular atomic subs
 these parameters may then be applied via the DFT+U(+J)-like Hubbard functionals to 
 address self-interaction and static correlation errors.
 
+Note that there is another methodology to compute U and J; see the 
+[cRPA U(J)](/tutorial/ucalc_crpa) tutorial.
+
 In this tutorial, you will learn how to run perturbative calculations in Abinit and
 generate input data to successfully execute the lruj post-processing utility.
 We strongly encourage you to read the [PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2)
 and [DFT+U](/tutorial/dftu) tutorials to familiarize yourself with the manifestation of
-PAW atomic datasets within Abinit. This tutorial should take less than 30 minutes.
+PAW atomic datasets within Abinit. Also consider checking out this video introducing
+the PAW formalism in an Abinit context. 
 
-We begin with a brief description of the linear response method and an important explanation
-of recent renovations to the linear response functionalities of Abinit. 
-[Click here](#tutref) if you'd like to skip to the NiO tutorial directly.
+<iframe width="1384" height="629" src="https://www.youtube.com/watch?v=5WEdd78GDFw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+This tutorial should take less than 30 minutes. We begin with a brief description of the 
+linear response method and an important explanation of recent renovations to the linear 
+response functionalities of Abinit. [Click here](#tutref) if you'd like to skip to 
+the NiO tutorial directly.
 
 [TUTORIAL_README]
 
@@ -28,13 +35,13 @@ of recent renovations to the linear response functionalities of Abinit.
 
 The Hubbard U and Hund's J are ground-state properties of any multi-atomic system 
 treated with a given approximate XC functional. They embody the spurious curvature of 
-the total energy with respect to subspace occupation and magnetisation respectively. 
+the total energy with respect to subspace occupation and magnetization respectively. 
 The Hubbard U, specifically, is compensating for an unphysical quadratic term left over 
 by the Hartree energy; it is thus defined as the second derivative of the total energy 
 with respect to charge occupation: $U=\frac{\delta^2 E}{\delta^2 n}$.
 
-Cococcioni and de Gironcoli, [[cite:Cococcioni2002]], following the seminal work from 
-Pickett *et al.* in 1998, [[cite:Pickett1998]], further defined a protocol to strictly
+Cococcioni and de Gironcoli [[cite:Cococcioni2002]], following the seminal work from 
+Pickett *et al.* in 1998 [[cite:Pickett1998]], further defined a protocol to strictly
 avoid the semi-empirical evaluation of these parameters. This linear response procedure
 is described mathematically in terms of constraint formalism and Lagrange 
 coefficients by Dederichs *et al.* [[cite:Dederichs1984]] and Anisimov *et al.*
@@ -57,7 +64,7 @@ to be a linear function of the perturbation's magnitude.
     parameters in the LDA + U method", M. Cococcioni and S. de Gironcoli, Physical
     Review B 71, 035105 (2005)  [[cite:Cococcioni2005]]
 
-    [2] "The role of spin in the calculation of Hubbard $U$ and Hund's $J$ parameters 
+    [2] "The role of spin in the calculation of Hubbard U and Hund's J parameters 
     from first principles", E.B. Linscott, D.J. Cole, M.C. Payne and D.D. O'Regan, Physical
     Review B 98, 235157 (2018) [[cite:Linscott2018]]
     
@@ -96,27 +103,25 @@ In 2022, users alerted Abinit to the existence of a bug in ujdet which led to th
 its post-processing utility and the renovation of its internal Abinit functionality. As of Version 
 9.6.2, the Abinit DFT suite is equipped with the lruj post-processing tool, which is built off of the
 same core, but debugged, ujdet programming. Although older versions of Abinit preserve the ujdet 
-internal and post-processing utilities, their use is strongly disadvised. The lruj functionality
-preserves conserves most of ujdet's data processing functionalities. For retrogressive and archive 
+internal and post-processing utilities, their use is strongly disadvised. The lruj functionality 
+conserves most of ujdet's data processing functionalities. For retrogressive and archive 
 purposes, the primary differences between the two are outlined in the table below.
 
-|   | <code>ujdet</code>                                                                                                      | <code>lruj</code>                                         |
-| - | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| 1 | Embedded in Abinit core routine +
-
-Post-processing extension                                                   | Post-processor                                   |
-| 2 | Two-point linear regression                                                                                    | 3+ point polynomial (variable degree) regression |
-| 3 | $\chi$ and $\chi_0$ responses treated as matrices; interatomic response monitored; matrices augmented by total system charge |  and  responses treated as scalars               |
-| 4 | Supercell extrapolation scheme                                                                                 | RMS Error analysis                               |
-| 5 | Atomic Sphere Approximation projector extensions/normalizations                                                |                                                  |
+|   | <code>ujdet</code>            | <code>lruj</code>                                |
+| - | ----------------------------- | ------------------------------------------------ |
+| 1 | Embedded in Abinit core routine + Post-processing extension | Post-processor                                   |
+| 2 | Two-point linear regression                                 | 3+ point polynomial (variable degree) regression |
+| 3 | $\chi$ and $\chi_0$ responses treated as matrices; interatomic response monitored; matrices augmented by total system charge | $\chi$ and $\chi_0$ responses treated as scalars               |
+| 4 | Supercell extrapolation scheme                              | RMS Error analysis                               |
+| 5 | Atomic Sphere Approximation projector extensions/normalizations   |                                                  |
 
 As mentioned in item (2), the most influential difference between ujdet and lruj is the number 
 of data points used to compute a linear regression of the response functions $\chi$ and $\chi_0$. 
 The ujdet utility uses only two points: the unperturbed case—in which the perturbation applied 
 is zero and the subspace occupations are those of the ground state—and one perturbed case, in 
-which the potential perturbation is equal to the value of pawujv. Note that the ujdet procedure 
+which the potential perturbation is equal to the value of [[pawujv]]. Note that the ujdet procedure 
 differs slightly from its implementations in Abinit versions prior to 9.6.2, in which it conducted 
-two perturbations: one of strength pawujv and the other of strength -pawujv. Due to a bug in the 
+two perturbations: one of strength [[pawujv]] and the other of strength -[[pawujv]]. Due to a bug in the 
 program, the second perturbation administered provided erroneous unscreened response occupations. 
 To fix this, we exchanged the data point from the second perturbation for one from the unperturbed 
 case, whose occupations are calculated anyway from the ground state wavefunctions read into Abinit.
@@ -131,21 +136,22 @@ Another crucial difference between the two utilities is item (3) in the above ta
 utility treats the response functions as matrices, whereas the lruj utility treats them as scalars. 
 Ideologically, this means that the ujdet Hubbard parameters are, to some degree, informed by 
 the Hubbard interactions on and between the other atomic subspaces of the system as well as the 
-total charge bath. The protocol is expanded upon in Cococcioni’s 2005 thesis [[cite:Cococcioni2002]].
+total charge bath. The protocol is expanded upon in Cococcioni’s thesis [[cite:Cococcioni2002]].
 
 By contrast, the lruj utility provides the scalar Hubbard parameters, informed only by the change 
 in occupancy on the perturbed subspace. This parameter is functionally sufficient for SIE corrective 
 application to that subspace. 
 
 For all other purposes, it can be said that lruj offers a simplified data processing procedure to 
-that of ujdet. For more detailed information, see the user guide here. (Insert link to user guide).
+that of ujdet. More detailed information is due to follow in the coming months in the form of a
+user guide, so stay tuned.
 
 
 
-## 4 Determine the Hund's J for Ni *3d* in NiO with lruj <a id="tutref"></a>
+## 4 Determine the Hubbard U for Ni *3d* in NiO with lruj <a id="tutref"></a>
 
 For this tutorial, we will calculate the scalar Hubbard U parameter for the Ni *3d* subspace in
-a four-atom unit cell of AF2 ordered NiO using the lruj post-processing utility. The lruj procedure
+a four-atom unit cell of AF2-ordered NiO using the lruj post-processing utility. The lruj procedure
 can be carried out in three steps:
 
 1. Run a ground state Abinit calculation for NiO to generate <code>WFK</code> files.
@@ -232,7 +238,7 @@ to the script
 and ensure that [[prtwf]] is set to 1 so that the <code>WFK</code> file is printed. The [[lpawu]] 
 2 setting specifies the $3d$ orbitals on Ni as those for which we will calculate and apply U. 
 
-Other related variables include a high [[tolvrs]] 10d-11 so that we can converge the electronic
+Other related variables include a high [[tolvrs]] = 10d-11 so that we can converge the electronic
 structure to a high degree of accuracy. The [[ecut]] is chosen to be very low in order to 
 accelerate calculations, so raise this for precision calculations. All other variables used to 
 conduct a ground state calculation remain unmodified. Launch the Abinit run to print out the 
@@ -253,16 +259,15 @@ summon and guide via the following additional input variables in <code>tlruj_2.a
 * [[pawujv]] => Strength of the perturbation (usually on the order of 10e-1 to 10e-2). Default
 value is 0.1 eV. (Our tests show that 0.1 eV is the optimal value, but the
 linear response is linear in a wide range (1-0.001 eV).)
-* [[macro_uj]] => With [[nsppol]], which parameter is Abinit to determine? See the user guide
-here for more information. (Insert link to user guide)
+* [[macro_uj]] => With [[nsppol]], which parameter is Abinit to determine? For [[nsppol]] = 2, 
+set [[macro_uj]] to 1 for Hubbard U, or set [[macro_uj]] to 4 for the Hund's J.
 
 It is typically enough to make [[macro_uj]] non-zero. To run a perturbative
-calculation for the Hubbard U parameter, we set [[macro_uj]] to 1 and [[nsppol]] to 2. (For
-the Hund's J parameter, set [[macro_uj]] to 4 and [[nsppol]] to 2.) Note also, that the 
-[[irdwfk]] 1 and the [[tolvrs]] 1d-8 do not need to be set explicitly because they are the 
-defaults with a non-zero [[macro_uj]]. Lastly, ensure that the variable [[pawujat]], which identifies
-the perturbed atom, is set to the same atom specified as a separate species in generating the 
-<code>WFK</code> file.
+calculation for the Hubbard U parameter, we set [[macro_uj]] to 1 and [[nsppol]] to 2.  Note 
+also, that the [[irdwfk]] 1 and the [[tolvrs]] 1d-8 do not need to be set explicitly because 
+they are the defaults with a non-zero [[macro_uj]]. Lastly, ensure that the variable 
+[[pawujat]], which identifies the perturbed atom, is set to the same atom specified as a 
+separate species in generating the <code>WFK</code> file.
 
 !!! note
 

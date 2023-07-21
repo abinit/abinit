@@ -244,16 +244,28 @@ where each of the vectors is normalized, and form the desired angles with the ot
 
 Variable(
     abivarname="asr",
-    varset="eph",
+    varset="dfpt",
     vartype="integer",
-    topics=['DFPT_useful'],
+    topics=['DFPT_useful','Phonons_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Acoustic Sum Rule",
     added_in_version="before_v9",
     text=r"""
-Govern the imposition of the Acoustic Sum Rule (ASR) in phonon calculations.
-Same meaning as the corresponding anaddb variable.
+Set the treatment of the Acoustic Sum Rule (ASR) in phonon calculations in the ABINIT code.
+Same values as the corresponding ANADDB variable [[asr@anaddb]]. Please switch to this description. 
+
+Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
+Running different DFPT calculations from scratch just to change [[asr]] is indeed a waste of time as
+you can compute the DDB only once and then use anaddb.
+
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+[[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
+[[optdriver]]=10 (longwave calculations).
+For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
+of the dynamical matrix, and the subsequent echo of the phonon frequencies at Gamma, TO and LO parts.
+
+See also the variables [[chneut]] and [[chneut@anaddb]], that govern the imposition of the charge neutrality sum rule.
 """,
 ),
 
@@ -317,13 +329,13 @@ The different values are:
   * 1 --> The number of processors per parallelization level is determined by mean of a simple
     (but relatively efficient) heuristic method. A scaling factor is attributed to each level and an simple
     speedup factor is computed. The selected parameters are those giving the best speedup factor.
-    Possibly concerned parameters: [[npimage]], [[npkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
+    Possibly concerned parameters: [[npimage]], [[np_spkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
 
   * 2 --> The number of processors per parallelization level is first determined by mean of a simple
     (but relatively efficient) heuristic method (see 1 above). Then the code performs a series of
     small benchmarks using the scheme applied for the LOBPCG algorithm (see [[wfoptalg]] = 4 or 14).
     The parallel distribution is then changed according to the benchmarks.
-    Possibly concerned parameters: [[npimage]], [[npkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
+    Possibly concerned parameters: [[npimage]], [[np_spkpt]], [[npspinor]], [[npfft]], [[npband]], [[bandpp]].
 
   * 3 --> Same as *autoparal* = 1, plus automatic determination of Linear Algebra routines parameters.
     In addition, the code performs a series of small benchmarks using the Linear
@@ -1711,17 +1723,29 @@ and corresponding translated atomic positions.
 
 Variable(
     abivarname="chneut",
-    varset="eph",
+    varset="dfpt",
     vartype="integer",
-    topics=['Phonons_useful'],
+    topics=['Phonons_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="CHarge NEUTrality treatment",
     added_in_version="before_v9",
     text=r"""
-Set the treatment of the Charge Neutrality requirement for the effective charges.
-Same meaning as the corresponding anaddb variable.
-Note the different default value in abinit and anaddb
+Set the treatment of the Charge Neutrality requirement for the effective charges in the ABINIT code.
+Same values as the corresponding ANADDB variable [[chneut@anaddb]]. Please switch to this description. 
+Note however the different default value in abinit (1) and anaddb (0).
+
+Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
+Running different DFPT calculations from scratch just to change [[chneut]] is indeed a waste of time as
+you can compute the DDB only once and then use anaddb.
+
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+[[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
+[[optdriver]]=10 (longwave calculations).
+For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
+of the Born effective charge, and the subsequent echo of the phonon frequencies at Gamma, LO part only.
+
+See also the variables [[asr]] and [[asr@anaddb]], that govern the imposition of the acoustic sum rule.
 """,
 ),
 
@@ -4723,6 +4747,25 @@ grid compatible with all the symmetries of the space group must be enforced or n
 The behaviour of ABINIT before v5.5 corresponds to the default value 11.
 """,
 ),
+
+Variable(
+    abivarname="field_red",
+    varset="ffield",
+    vartype="real",
+    topics=[],
+    dimensions=[3],
+    defaultval=MultipleValue(number=3, value=0.0),
+    mnemonics="FIELD in REDuced coordinates",
+    requires="[[berryopt]] in [4, 6, 14, 16, 17]",
+    added_in_version="v9.11.2",
+    text=r"""
+Stores the field direction in reduced coordinates, deduced from [[dfield]], [[efield]],
+[[red_efieldbar]], [[red_dfield]], [[red_efield]], and/or [[jfielddir]],
+depending on the value of [[berryopt]], for the purpose of computing
+the symmetries of the system placed in such field.
+""",
+),
+
 
 Variable(
     abivarname="fockdownsampling",
@@ -12003,10 +12046,10 @@ Variable(
     text=r"""
 Relevant only for the band/FFT parallelisation (see the [[paral_kgb]] input variable).
 [[npband]] gives the number of processors among which the work load over the
-band level is shared. [[npband]], [[npfft]], [[npkpt]] and [[npspinor]] are
+band level is shared. [[npband]], [[npfft]], [[np_spkpt]] and [[npspinor]] are
 combined to give the total number of processors (nproc) working on the
 band/FFT/k-point parallelisation.
-See [[npfft]], [[npkpt]], [[npspinor]] and [[paral_kgb]] for the additional
+See [[npfft]], [[np_spkpt]], [[npspinor]] and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation. [[npband]] has to
 be a divisor or equal to [[nband]]
 Note: an optimal value for this parameter can be automatically found by using
@@ -12028,10 +12071,10 @@ Variable(
 Relevant only for the band/FFT/k-point parallelisation (see the [[paral_kgb]]
 input variable).
 [[npfft]] gives the number of processors among which the work load over the
-FFT level is shared. [[npfft]], [[npkpt]], [[npband]] and [[npspinor]] are
+FFT level is shared. [[npfft]], [[np_spkpt]], [[npband]] and [[npspinor]] are
 combined to give the total number of processors (nproc) working on the
 band/FFT/k-point parallelisation.
-See [[npband]], [[npkpt]], [[npspinor]], and [[paral_kgb]] for the additional
+See [[npband]], [[np_spkpt]], [[npspinor]], and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
 
 Note: [[ngfft]] is automatically adjusted to [[npfft]]. If the number of
@@ -12055,7 +12098,7 @@ Variable(
 Relevant only for the k-point/fock parallelisation (option [[paral_kgb]] input
 variable).
 [[nphf]] gives the number of processors among which the work load over the
-occupied states level is shared. [[nphf]] and [[npkpt]] are combined to give
+occupied states level is shared. [[nphf]] and [[np_spkpt]] are combined to give
 the total number of processors (nproc) working on the parallelisation.
 
 Note: [[nphf]] should be a divisor or equal to the number of k-point times
@@ -12082,7 +12125,7 @@ available for ground-state calculations.
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
 
-See [[paral_kgb]], [[npkpt]], [[npband]], [[npfft]] and [[npspinor]] for the
+See [[paral_kgb]], [[np_spkpt]], [[npband]], [[npfft]] and [[npspinor]] for the
 additional information on the use of k-point/band/FFT parallelisation.
 """,
 ),
@@ -12091,24 +12134,45 @@ Variable(
     abivarname="npkpt",
     varset="paral",
     vartype="integer",
-    topics=['parallelism_useful'],
+    topics=['parallelism_expert'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="Number of Processors at the K-Point Level",
+    mnemonics="Number of Processors at the SPin and K-Point Level",
     requires="[[paral_kgb]] == 1",
     added_in_version="before_v9",
     text=r"""
+This input variable has been superceded by [[np_spkpt]].
+For the time being, for backward compatibility with AbiPy, 
+[[npkpt]] is still recognized, with the same meaning than [[np_spkpt]],
+despite the incorrect lack of mention of the spin parallelism in the name [[npkpt]]. 
+Please, stop using [[npkpt]] as soon as possible.
+""",
+),
+
+Variable(
+    abivarname="np_spkpt",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Number of Processors at the SPin and K-Point Level",
+    requires="[[paral_kgb]] == 1",
+    added_in_version="9.4.0",
+    text=r"""
 Relevant only for the band/FFT/k-point parallelisation (see the [[paral_kgb]]
 input variable).
-[[npkpt]] gives the number of processors among which the work load over the
-k-point/spin-component level is shared. [[npkpt]], [[npfft]], [[npband]] and
+[[np_spkpt]] gives the number of processors among which the work load over the
+k-point/spin-component level is shared. [[np_spkpt]], [[npfft]], [[npband]] and
 [[npspinor]] are combined to give the total number of processors (nproc)
 working on the band/FFT/k-point parallelisation.
 See [[npband]], [[npfft]], [[npspinor]] and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
 
-[[npkpt]] should be a divisor or equal to with the number of k-point/spin-
-components ([[nkpt]] $\times$ [[nsppol]]) in order to have the better load-balancing
+Previously, this input variable was called [[npkpt]].
+
+[[np_spkpt]] should be a divisor of or equal to the number of k-point/spin-
+components ([[nkpt]] $\times$ [[nsppol]]) in order to have a good load-balancing
 and efficiency.
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
@@ -12194,12 +12258,12 @@ Relevant only for the band/FFT/k-point parallelisation (see the [[paral_kgb]]
 input variable).
 [[npspinor]] gives the number of processors among which the work load over the
 spinorial components of wave-functions is shared. [[npspinor]], [[npfft]],
-[[npband]] and [[npkpt]] are combined to give the total number of processors
+[[npband]] and [[np_spkpt]] are combined to give the total number of processors
 (nproc) working on the band/FFT/k-point parallelisation.
 Note: an optimal value for this parameter can be automatically found by using
 the [[autoparal]] input keyword.
 
-See [[npkpt]], [[npband]], [[npfft]], and [[paral_kgb]] for the additional
+See [[np_spkpt]], [[npband]], [[npfft]], and [[paral_kgb]] for the additional
 information on the use of band/FFT/k-point parallelisation.
 """,
 ),
@@ -12743,8 +12807,8 @@ Variable(
     text=r"""
 Places an array of nuclear magnetic dipole moments on the atomic
 positions, useful for computing the magnetization in the presence of
-nuclear dipoles and thus the chemical shielding by the converse method (see [[orbmag]] and
-[[cite:Thonhauser2009]]). The presence of these dipoles breaks time
+nuclear dipoles and thus the chemical shielding by the converse method (see [[orbmag]],
+[[cite:Thonhauser2009]] and [[cite:Zwanziger2023]]). The presence of these dipoles breaks time
 reversal symmetry and lowers the overall spatial symmetry.  The dipole
 moment values are entered in atomic units, as vectors in the Cartesian (not crystallographic)
 coordinate frame. For reference, note that
@@ -13200,6 +13264,8 @@ or 0 in each k-point (non-spin-polarized case), or with occupation numbers
 equal to 1 or 0 in each k-point (spin-polarized case). If [[nsppol]] = 2 and
 [[occopt]] == 1 is used, the user has to impose the magnetization, using
 [[spinmagntarget]], except for the case of a single isolated Hydrogen atom.
+Unfortunately, for the time being, in response function calculations,
+only [[spinmagntarget]]=0.0d0 or equal to the default value is allowed.
 
   * [[occopt]] = 2:
 k points may optionally have different numbers of bands and different
@@ -13560,16 +13626,16 @@ Variable(
 **If paral_kgb is not explicitely put in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
-been sent and calculates values of [[npkpt]], [[npfft]], [[npband]],
+been sent and calculates values of [[np_spkpt]], [[npfft]], [[npband]],
 [[bandpp]], [[npimage]] and [[npspinor]] that are compatible with the number
 of processors. It then set **paral_kgb** to 0 or 1 (see hereunder) and launches the job.
 
 **If paral_kgb = 0**, the parallelization over k-points only is activated. In
-this case, [[npkpt]], [[npspinor]], [[npfft]] and [[npband]] are ignored.
+this case, [[np_spkpt]], [[npspinor]], [[npfft]] and [[npband]] are ignored.
 Require compilation option --enable-mpi="yes".
 
 **If paral_kgb = 1**, the parallelization over bands, FFTs, and k-point/spin-
-components is activated (see [[npkpt]], [[npfft]] [[npband]] and possibly
+components is activated (see [[np_spkpt]], [[npfft]] [[npband]] and possibly
 [[npspinor]]). With this parallelization, the work load is split over four
 levels of parallelization (three level of parallelisation (kpt-band-fft )+
 spin) The different communications almost occur along one dimension only.
@@ -13577,7 +13643,7 @@ Require compilation option --enable-mpi="yes".
 
 HOWTO fix the number of processors along one level of parallelisation:
 At first, try to parallelise over the k point and spin (see
-[[npkpt]],[[npspinor]]). Otherwise, for unpolarized calculation at the gamma
+[[np_spkpt]],[[npspinor]]). Otherwise, for unpolarized calculation at the gamma
 point, parallelise over the two other levels: the band and FFT ones. For nproc $\leq$ 50, the best speed-up is achieved for [[npband]] = nproc and [[npfft]] = 1
 (which is not yet the default). For nproc $\geq$ 50, the best speed-up is achieved
 for [[npband]] $\geq$ 4 $\times$ [[npfft]].
@@ -13589,7 +13655,7 @@ Suggested acknowledgments:
 [[cite:Bottin2008]], also available on arXiv, http://arxiv.org/abs/0707.3405.
 
 If the total number of processors used is compatible with the four levels of
-parallelization, the values for [[npkpt]], [[npspinor]], [[npfft]], [[npband]]
+parallelization, the values for [[np_spkpt]], [[npspinor]], [[npfft]], [[npband]]
 and [[bandpp]] will be filled automatically, although the repartition may not
 be optimal. To optimize the repartition use:
 
@@ -13602,7 +13668,7 @@ processors as possible). The code will then stop after the printing. This test
 can be done as well with a sequential as with a parallel version of the code.
 The user can then choose the adequate number of processor on which he can run
 his job. He must put again paral_kgb = 1 in the input file and put the
-corresponding values for [[npkpt]], [[npfft]], [[npband]],[[bandpp]] and
+corresponding values for [[np_spkpt]], [[npfft]], [[npband]],[[bandpp]] and
 possibly [[npspinor]] in the input file.
 """,
 ),
@@ -15019,8 +15085,10 @@ Variable(
     text=r"""
 **In plasmon-pole calculations**
 
-Usually only effective if GW corrections are evaluated using the plasmon-pole
+Relevant only if GW corrections are evaluated using the plasmon-pole
 model of Godby-Needs ([[ppmodel]] == 1).
+The default value is automatically replaced by the Drude plasma frequency,
+computed from the valence charge density (echoed in the main output file as omega_plasma)..
 
 In the present status of the GW code, the convolution in frequency space
 defining the self-energy operator can be evaluated using two different
@@ -15033,7 +15101,7 @@ Alternatively, it is possible to approximate the dynamical behaviour of the
 screened interaction through simple analytical expressions, the so-called
 plasmon-pole models. In the plasmon-pole model proposed by Godby-Needs
 ([[ppmodel]] = 1), the screening must be available at zero frequency, as well as
-at another imaginary frequency, of the order of the plasmon frequency (the
+at another imaginary frequency, on the order of the plasmon frequency (the
 peak in the EELS spectrum). This information is used to model the behaviour of
 the dielectric matrix for all frequencies. During the calculation of the
 screening, [[ppmfrq]] defines the imaginary frequency where the dielectric
@@ -17403,36 +17471,6 @@ See [[rf2_dkdk]] for more details.
 ),
 
 Variable(
-    abivarname="rfasr",
-    varset="dfpt",
-    vartype="integer",
-    topics=['Phonons_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="Response Function: Acoustic Sum Rule",
-    added_in_version="before_v9",
-    text=r"""
-Control the evaluation of the acoustic sum rule in effective charges and
-dynamical matrix at Gamma within a response function calculation (not active
-at the level of producing the DDB, but at the level of the phonon
-eigenfrequencies output).
-
-  * 0 --> no acoustic sum rule imposed
-  * 1 --> acoustic sum rule imposed for dynamical matrix at Gamma, and charge neutrality
-    imposed with extra charge evenly distributed among atoms
-  * 2 --> acoustic sum rule imposed for dynamical matrix at Gamma, and charge neutrality
-    imposed with extra charge given proportionally to those atoms with the largest effective charge.
-
-The treatment of the acoustic sum rule and charge neutrality sum rule is finer
-at the level of the ANADDB utility, with the two independent input variables
-[[anaddb:asr]] and [[anaddb:chneut]].
-Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
-Running different DFPT calculations from scrarch just to change [[rfasr]] is indeed a waste of time as
-you can compute the DDB only once and then use anaddb.
-""",
-),
-
-Variable(
     abivarname="rfatpol",
     varset="dfpt",
     vartype="integer",
@@ -18320,17 +18358,26 @@ which is a translation in real space followed by a spin flip.
 Such a Shubnikov type IV magnetic space group might be defined by its Fedorov space
 group (set of spatial symmetries that do not change the magnetization), and an
 additional magnetic space group number [[spgroupma]].
+In this case, the Fedorov space group associated with [[spgroup]] is a subgroup
+of the magnetic space group number associated with [[spgroupma]], the latter
+has twice the number of operations than the former.
 
-A Shubnikov type III magnetic space group does not contain a translation in real space
-wollowed by a spin flip. It might be defined by its Fedorov
+Unlike Shubnikov type IV magnetic space groups, 
+a Shubnikov type III magnetic space group does not contain a translation in real space
+followed by a spin flip. It might be defined by a covering Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and an additional magnetic space group number [[spgroupma]].
-For the additional number [[spgroupma]], we follow the definition of Table 7.4
-of the above-mentioned [[cite:Bradley1972]].
-
+In this case, the covering Fedorov space group is a supergroup of the
+magnetic space group number [[spgroupma]], the former
+has twice the number of operations than the latter.
 Thus, one way to specify a Shubnikov type IV magnetic space group, is to define
 both [[spgroup]] and [[spgroupma]].
 For example, the group P2_1/c_prime has [[spgroup]] = 14 and [[spgroupma]] = 78.
+
+For the meaning of the number [[spgroupma]], in both Shubnikov type III and IV,
+we follow the definition of Table 7.4
+of the above-mentioned [[cite:Bradley1972]].
+
 Alternatively, for Shubnikov type IV magnetic groups, one might define [[spgroup]]
 and [[genafm]]. For both the types III and IV, one might define by hand the set
 of symmetries, using [[symrel]], [[tnons]] and [[symafm]].
@@ -18397,23 +18444,37 @@ Variable(
     mnemonics="SPIN-MAGNetization TARGET",
     added_in_version="before_v9",
     text=r"""
-This input variable is active only in the [[nsppol]] = 2 case. If
-[[spinmagntarget]] is not the "magic" value of -99.99, the spin-
-magnetization of the primitive cell will be fixed (or optimized, if it is not
-possible to impose it) to the value of [[spinmagntarget]], in Bohr magneton
-units (for an Hydrogen atom, it is 1).
-If [[occopt]] is a metallic one, the Fermi energies for spin up and spin down
-are adjusted to give the target spin-polarisation (this is equivalent to an
-exchange splitting). If [[occopt]] = 1 and [[nsppol]] = 2, the occupation numbers
-for spin up and spin down will be adjusted to give the required spin-
-magnetization (occupation numbers are identical for all k-points, with
+This input variable is active only in the [[nsppol]] = 2 case. 
+It is an auxiliary input variable, that is used to define how the occupation numbers 
+are generated (see [[occ]] input variable).
+
+When [[occopt]] defines a metallic occupation ([[occopt]]=3 ... 8),
+the Fermi energies for spin up and spin down
+are adjusted to deliver the target spin-magnetization [[spinmagntarget]],
+in Bohr magneton units (for an Hydrogen atom, it is 1).
+The difference in Fermi energies is equivalent to an exchange splitting.
+However, still in the metallic occupation case, if [[spinmagntarget]] is the "magic" (default) value -99.99, 
+the occupation numbers (and hence the spin-magnetization) are not 
+constrained, and are determined self-consistently, by having the same spin
+up and spin down Fermi energy.
+
+If [[occopt]] = 1 and [[nsppol]] = 2, the occupation numbers
+for spin up and spin down are initialized (and kept unchanged afterwards) to give the required 
+spin-magnetization (occupation numbers are identical for all k-points with
 [[occopt]] = 1). The definition of [[spinmagntarget]] is actually requested in
 this case, except for the single isolated Hydrogen atom.
-If [[spinmagntarget]] is the default one, the spin-magnetization will not be
-constrained, and will be determined self-consistently, by having the same spin
-up and spin down Fermi energy in the metallic case, while for the other cases,
-there will be no spin-magnetization, except for an odd number of electrons if
-[[occopt]] = 1 and [[nsppol]] = 2.
+Still in the [[occopt]] = 1 case, if [[spinmagntarget]] is the "magic" (default) value of -99.99,
+there is no spin-magnetization, except for an odd number of electrons, 
+where one more band is occupied spin up than spin down.
+
+If [[occopt]] = 0 or 2, the [[occ]] input variable is defined directly by the user,
+and does not change during the SCF procedure.
+[[spinmagntarget]] is not used. 
+
+For the time being, in response-function calculations, only [[spinmagntarget]]=0.0 or the default
+value are allowed. Moreover, the occupation numbers for the ground-state and for the reponse-function
+calculations must be identical. Thus, ferromagnetic insulators must rely on 
+[[occopt]]=0 or 2, with explicit definition of the occupation numbers.
 
 !!! note
     For the time being, only the spin down Fermi energy is written out in
@@ -22382,7 +22443,7 @@ allocated for the wavefunctions, especially when we have to sum over empty state
 
     Note also that the EPH code implements its own MPI-algorithm and [[eph_np_pqbks]] is
     the **only variable** that should be used to change the default behaviour.
-    Other variables such as [[nppert]], [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    Other variables such as [[nppert]], [[npband]], [[npfft]], [[np_spkpt]] and [[paral_kgb]]
     are **not used** in the EPH subdriver.
 """,
 ),
@@ -23109,7 +23170,7 @@ paral_kgb 1
 rmm_diis  1
 ```
 
-in the input file and then select the value of [[npkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
+in the input file and then select the value of [[np_spkpt]], [[npband]], [[npfft]], [[npspinor]] according to the system.
 
 !!! tip
 
@@ -23539,7 +23600,7 @@ and the basic dimensions of the job computed at runtime.
 
     Note also that the GWR code implements its own MPI-algorithm and [[gwr_np_kgts]] is
     the **only variable** that should be used to change the default behaviour.
-    Other variables such as [[npband]], [[npfft]], [[npkpt]] and [[paral_kgb]]
+    Other variables such as [[npband]], [[npfft]], [[np_spkpt]] and [[paral_kgb]]
     are **not used** in the GWR subdriver.
 """,
 ),

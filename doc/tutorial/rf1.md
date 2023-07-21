@@ -327,14 +327,13 @@ atom, placed in a rather symmetric local site, and the other perturbation is for
 The phonon frequencies, obtained by diagonalizing the dynamical matrix (where
 the atomic masses have been taken into account, see [[amu]]), are given as follows:
 
-      Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
-     Phonon energies in Hartree :
-       2.559712E-06  2.559712E-06  2.559713E-06  1.568567E-03  1.568567E-03
-       1.568567E-03
-     Phonon frequencies in cm-1    :
-    -  5.617917E-01  5.617918E-01  5.617921E-01  3.442606E+02  3.442606E+02
-    -  3.442606E+02
-
+       Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+      Phonon energies in Hartree :
+        0.000000E+00  0.000000E+00  0.000000E+00  1.568561E-03  1.568561E-03
+        1.568561E-03
+      Phonon frequencies in cm-1    :
+     -  0.000000E+00  0.000000E+00  0.000000E+00  3.442594E+02  3.442594E+02
+     -  3.442594E+02
 
 !!! tip
 
@@ -345,9 +344,26 @@ the atomic masses have been taken into account, see [[amu]]), are given as follo
     developer, you should ignore these signs. In the present case, they should not
     be interpreted as a minus sign for the floating numbers that follow them...
 
-There are a good and a bad news about this result. The good news is that
-there are indeed three acoustic modes, with frequency rather close to zero
-(less than 1 cm$^{-1}$, which is rather good!). The bad news comes when the three
+There is a good news and a bad news about this result. The good news is that
+there are indeed three acoustic modes, with frequency exactly zero.
+This has been obtained thanks to the imposition of the acoustic sum rule,
+with the default value of the variable [[asr]].
+
+By the way, switching [[asr]] to zero delivers
+
+      Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
+     Phonon energies in Hartree :
+       2.559712E-06  2.559712E-06  2.559713E-06  1.568567E-03  1.568567E-03
+       1.568567E-03
+     Phonon frequencies in cm-1    :
+    -  5.617917E-01  5.617918E-01  5.617921E-01  3.442606E+02  3.442606E+02
+    -  3.442606E+02
+
+The three acoustic modes do not have exactly zero frequency, still these are less
+less than 1 cm$^{-1}$, which is rather good! The other modes are marginally
+modified by the imposition of the acoustic sum rule.
+
+The bad news comes when the three
 other frequencies are compared with experimental results, or other theoretical
 results. Indeed, in the present run, one obtains three degenerate modes, while
 there should be a (2+1) splitting. This can be seen in the paper Ab initio

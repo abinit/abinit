@@ -345,7 +345,9 @@ module defs_basis
   integer,parameter,public :: NLO_MBLKPW = 199
   integer,parameter,public :: NLO_MINCAT = 10
 
-! Parameter to compute the maximum index of the perturbation
+! This is used to compute the maximum index of the perturbation as natom + MPERT_MAX
+! GA: But this is not actually the maximum perturbation,
+!     see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
 
 !Parameters for LOG/STATUS files treatment

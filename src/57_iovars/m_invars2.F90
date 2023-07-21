@@ -609,8 +609,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! RESPFN integer input variables (needed here to get the value of response)
  ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
- if(tread==1) dtset%rfasr=intarr(1)
+
+!call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
+!if(tread==1) dtset%rfasr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
+ if(tread==1) dtset%asr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
+ if(tread==1) dtset%chneut=intarr(1)
+
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rfatpol',tread,'INT')
  if(tread==1) dtset%rfatpol(1:2)=intarr(1:2)
@@ -1477,14 +1485,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%enunit=intarr(1)
 
  ! eph variables
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
- if(tread==1) dtset%asr=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread_dipdip,'INT')
  if(tread_dipdip==1) dtset%dipdip=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
- if(tread==1) dtset%chneut=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symdynmat',tread,'INT')
  if(tread==1) dtset%symdynmat=intarr(1)
