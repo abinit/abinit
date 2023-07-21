@@ -441,8 +441,10 @@ has_fock=.false.
  transfer_omp_args =  .not. ( xomp_target_is_present(c_loc(ghc)) &
    .and. xomp_target_is_present(c_loc(gsc_ptr)) &
    .and. xomp_target_is_present(c_loc(cwavef)) )
- !$OMP TARGET ENTER DATA MAP(alloc:ghc,gsc_ptr,cwavef) IF(transfer_omp_args)
- !$OMP TARGET UPDATE TO(cwavef)                        IF(transfer_omp_args)
+
+ !$OMP TARGET ENTER DATA MAP(alloc:ghc) IF(transfer_omp_args)
+ !$OMP TARGET ENTER DATA MAP(alloc:gsc_ptr) IF(transfer_omp_args)
+ !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_omp_args)
 
 !============================================================
 ! Application of the local potential
