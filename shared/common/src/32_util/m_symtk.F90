@@ -441,7 +441,7 @@ end subroutine chkgrp
 ! *************************************************************************
 
 !DEBUG
- write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
+!write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
 !ENDDEBUG
 
  ierr = 0
@@ -459,11 +459,11 @@ end subroutine chkgrp
  endif
 
 !DEBUG
- write(std_out,*)' present(tnons),present(tnons_tol)=',present(tnons),present(tnons_tol)
- write(std_out,*)' isym   symrel                      symafm  tnons '
- do isym=1,nsym
-  write(std_out,'(i5,a,9i3,a,i3,a,3f9.4)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym),'   ',tnons_(:,isym)
- end do
+!write(std_out,*)' present(tnons),present(tnons_tol)=',present(tnons),present(tnons_tol)
+!write(std_out,*)' isym   symrel                      symafm  tnons '
+!do isym=1,nsym
+! write(std_out,'(i5,a,9i3,a,i3,a,3f9.4)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym),'   ',tnons_(:,isym)
+!end do
 !ENDDEBUG
 
  ! 1) Identity must be the first symmetry. Do not check if tnons_ == 0 as cell might not be primitive.
