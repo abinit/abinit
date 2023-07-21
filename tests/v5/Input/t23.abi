@@ -33,6 +33,11 @@ berryopt3   4
    prtwf3   0
   rfelfd3   3
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 #Common input variables
 acell 3*10.62
 rprim  0.0  0.5  0.5

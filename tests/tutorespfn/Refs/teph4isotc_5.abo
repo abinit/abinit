@@ -1,6 +1,6 @@
 
-.Version 9.8.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Dec 2022.
-- ( at 21h08 )
+.Starting date : Wed 31 May 2023.
+- ( at 18h34 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_5.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_5.abi
 - output file    -> teph4isotc_5.abo
 - root for input  files -> teph4isotc_5i
 - root for output files -> teph4isotc_5o
@@ -301,13 +301,21 @@ meta: {optdriver: 7, eph_task: 1, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.0503959  2.9158474  0.0000000  G(1)=  0.0990021  0.1714767  0.0000000
  R(2)= -5.0503959  2.9158474  0.0000000  G(2)= -0.0990021  0.1714767  0.0000000
  R(3)=  0.0000000  0.0000000  6.6575051  G(3)=  0.0000000  0.0000000  0.1502064
  Unit cell volume ucvol=  1.9607929E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.3333333  0.6666667  0.5000000   B
+    3)    0.6666667  0.3333333  0.5000000   B
+
+ DDB file with 12 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
@@ -390,8 +398,8 @@ meta: {optdriver: 7, eph_task: 1, }
 - Writing phonon DOS to netcdf file: teph4isotc_5o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
 - Mg    ONCVPSP-3.3.0  r_core=   2.31813   2.10714
 - 12.00000   2.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -404,8 +412,8 @@ meta: {optdriver: 7, eph_task: 1, }
              1    4.197993    0.757155
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
 - B     ONCVPSP-3.3.0  r_core=   1.20849   1.20849
 -  5.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -948,10 +956,46 @@ P           mkmem         370
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         95.6        1.59      0.027
+- Total wall clock time (s,m,h):         95.8        1.60      0.027
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0
+-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           95.6, wall_time =           95.8
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- fourwf%(pot)                     24.141  25.3        24.196  25.3          75510      -1.00        1.00       1.00
+- nonlop(forces)                   14.164  14.8        14.228  14.8          75510      -1.00        1.00       1.00
+- getgh1c_setup                    12.793  13.4        12.820  13.4          66330      -1.00        1.00       1.00
+- mkffnl                            3.221   3.4         3.262   3.4          14915      -1.00        0.99       0.99
+- kpgsph                            2.267   2.4         2.265   2.4          91168      -1.00        1.00       1.00
+- ctgk_rotate                       0.643   0.7         0.652   0.7          15509      -1.00        0.99       0.99
+- others (146)                    -76.036 -79.6       -76.292 -79.6             -1      -1.00        1.00       1.00
+-<END_TIMER>
+-
+- subtotal                        -18.808 -19.7       -18.869 -19.7                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          95.6, wall_time =          95.8
+-
+- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                        (-1=no count)
+- fourwf%(pot)                     24.141  25.3        24.196  25.3          75510      -1.00        1.00       1.00
+- nonlop(forces)                   14.164  14.8        14.228  14.8          75510      -1.00        1.00       1.00
+- getgh1c_setup                    12.793  13.4        12.820  13.4          66330      -1.00        1.00       1.00
+- mkffnl                            3.221   3.4         3.262   3.4          14915      -1.00        0.99       0.99
+- kpgsph                            2.267   2.4         2.265   2.4          91168      -1.00        1.00       1.00
+- ctgk_rotate                       0.643   0.7         0.652   0.7          15509      -1.00        0.99       0.99
+- others (146)                    -76.036 -79.6       -76.292 -79.6             -1      -1.00        1.00       1.00
+-<END_TIMER>
 
+- subtotal                        -18.808 -19.7       -18.869 -19.7                                  1.00       1.00
 
 ================================================================================
 
@@ -1031,10 +1075,10 @@ P           mkmem         370
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         86.6  wall=         87.0
+- Proc.   0 individual time (sec): cpu=         95.6  wall=         95.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         86.6  wall=         87.0
+.Delivered   8 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         95.6  wall=         95.8

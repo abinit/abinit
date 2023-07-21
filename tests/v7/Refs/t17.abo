@@ -1,5 +1,5 @@
 
-.Version 9.5.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Jun 2021.
-- ( at 19h29 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h05 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/TestBot_MPI1/v7_t17/t17.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t17/t17.abi
 - output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          30        mffmem =           1         mkmem =          10
        mpw =         441          nfft =       13824          nkpt =          10
 ================================================================================
-P This job should need less than                      10.544 Mbytes of memory.
+P This job should need less than                      11.020 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.021 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -334,8 +332,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pt-sp_r.psp8
 - Pt    ONCVPSP  r_core=  1.41  1.46  1.41
 - 78.00000  18.00000    160330                znucl, zion, pspdat
     8   11    2    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -516,8 +514,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_ibte/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pt-sp_r.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pt-sp_r.psp8
 - Pt    ONCVPSP  r_core=  1.41  1.46  1.41
 - 78.00000  18.00000    160330                znucl, zion, pspdat
     8   11    2    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1017,10 +1015,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         57.3  wall=         57.5
+- Proc.   0 individual time (sec): cpu=         45.2  wall=         45.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         57.3  wall=         57.5
++Overall time at end (sec) : cpu=         45.2  wall=         45.4

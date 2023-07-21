@@ -1,0 +1,20 @@
+t161o.ddb
+BaTiO3 DDB file converted from netcdf to text
+1
+t160o.ddb.nc
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = mrgddb
+#%% test_chain = t160.abi, t161.abi
+#%% [files]
+#%% files_to_test =
+#%%   t161o.ddb, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% [extra_info]
+#%% authors = G. Antonius
+#%% keywords = NC, DFPT, DDB
+#%% description = Convert a DDB file from netcdf to text format.
+#%%<END TEST_INFO>
