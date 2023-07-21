@@ -48,6 +48,11 @@ d3e_pert3_atpol 1 1
  rfatpol 1 1
    rfdir 1 0 0
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 #DATASET1 : scf calculation: GS WF in the BZ
 #********************************************
    prtden1   1

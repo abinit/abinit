@@ -33,4 +33,6 @@ Please, see the README file in the tests directory (above this one) to get help.
 
 * Test  150 concerning write_files supravariable
 
+* Test  180-199 concern ground state geometry recognition
+
 ------------------------------------------------------------------

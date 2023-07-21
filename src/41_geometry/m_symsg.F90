@@ -239,8 +239,7 @@ subroutine symsgcube(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symaf
      if (spgorig==1) then
        symrel(:,:,2) = genrot(:,:)
        symrel(:,:,3) = genmmp(:,:)
-       symrel(:,:,4) = genmpm(:,:)
-       nogen=4
+       nogen=3
        nsym=12
        call bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
        do ii=1,12
@@ -619,19 +618,19 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
      case (143,146,147,148)        !P3, R3, PB3, RB3
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
-       nogen=0
+       nogen=0 ! All symmetries have been generated
      case (144)                !P31
        tnons(:,2)=(/0.d0,0.d0,twothird/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,third/)
-       nogen=0
+       nogen=0 ! All symmetries have been generated
      case (145)                !P32
        tnons(:,2)=(/0.d0,0.d0,third/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,twothird/)
-       nogen=0
+       nogen=0 ! All symmetries have been generated
      case (149)                !P312
        symrel(:,:,3) = genswmmm(:,:)
        nogen=3
@@ -2287,9 +2286,9 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,syma
 &     318,324,329,335,342,344,354,356,390,394,402,406,&
 &     438,440,450,452,486,488,498,502,534,536,544,548)
      symafm(2:3)=-1
-   case(365,377,413,425,461,473,509,521)
-     symafm(2)=-1
-     symafm(5:6)=-1
+!  case(365,377,413,425,461,473,509,521) !XG230719
+!    symafm(2)=-1
+!    symafm(5:6)=-1
    case(366,378,414,426,462,474,510,522,554,564)
      symafm(3:5)=-1
    case(367,379,415,427,463,475,511,523,555,565)
@@ -2297,16 +2296,18 @@ subroutine symsgtetra(msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,syma
    case(368,380,416,428,464,476,512,524,556,566)
      symafm(3:4)=-1
      symafm(6)=-1
-   case(369,381,417,429,465,477,513,525)
-     symafm(2)=-1
-     symafm(5)=-1
+!  case(369,381,417,429,465,477,513,525) !XG230719
+!    symafm(2)=-1
+!    symafm(5)=-1
    case(370,382,418,430,466,478,514,526,558,568)
      symafm(3:6)=-1
    case(371,383,419,431,467,479,515,527,559,569)
      symafm(6)=-1
-   case(553,563)
+!  case(553,563)
+   case(365,377,413,425,461,473,509,521,553,563) !XG230719
      symafm(5:6)=-1
-   case(557,567)
+!  case(557,567)
+   case(369,381,417,429,465,477,513,525,557,567) !XG230719
      symafm(5)=-1
    end select
  end if
@@ -2389,9 +2390,9 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
  nastyzero=0.1
 
 !DEBUG
-! write(std_out,*)' bldgrp : enter, builds the space group symmetry '
-! write(std_out,*)' bldgrp : number of generators : ',nogen
-! write(std_out,*)' bldgrp : nsym,msym=',nsym,msym
+  write(std_out,*)' bldgrp : enter, builds the space group symmetry '
+  write(std_out,*)' bldgrp : number of generators : ',nogen
+  write(std_out,*)' bldgrp : nsym,msym=',nsym,msym
 !ENDDEBUG
 
  if (nogen<1) then
@@ -2421,7 +2422,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
  do ijkl=1,nsym
 
 !  DEBUG
-!  write(std_out,*)' bldgrp : in loop, ijkl,nogen=',ijkl,nogen
+   write(std_out,*)' bldgrp : in loop, ijkl,nogen=',ijkl,nogen
 !  ENDDEBUG
 
    nogen_new=nogen
@@ -2469,12 +2470,14 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
 !      Add the new determined symmetry if it is unique
        if (flagtr+flagop<2) then
          nogen_new=nogen_new+1
-!        DEBUG
-!         write(std_out,*)' added one more symmetry : nogen_new=',nogen_new
-!        ENDDEBUG
          bcksymrel(:,:,nogen_new)=matrintoper(:,:)
          bcktnons(:,nogen_new)=matrinttransl(:)
          bcksymafm(nogen_new)=matrintsymafm
+!        DEBUG
+         write(std_out,*)' added one more symmetry : nogen_new=',nogen_new
+         write(std_out,'(i3,2x,9i3,3es12.2,i3)')&
+&          nogen_new,bcksymrel(:,:,nogen_new),bcktnons(:,nogen_new),bcksymafm(nogen_new)
+!        ENDDEBUG
        end if
 
      end do
@@ -2500,7 +2503,7 @@ subroutine bldgrp(msym,nogen,nsym,symafm,symrel,tnons)
  end if
 
 !DEBUG
-!write(std_out,*)' bldgrp : exit with  ',nogen,' operation symmetries'
+ write(std_out,*)' bldgrp : exit with  ',nogen,' operation symmetries'
 !ENDDEBUG
 
 end subroutine bldgrp

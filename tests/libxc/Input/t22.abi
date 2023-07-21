@@ -84,7 +84,7 @@ toldfe 1.0d-8          # Total energy difference to achieve
 #%% authors = M. Torrent
 #%% keywords = PAW, libxc
 #%% description =
-#%%   Crystalline aluminum, primitive cell
-#%%   Testing temperature-dependent libxc functionals
-#%%   Several XC functionals, several electronic temperatures
+#%%   Crystalline aluminum, primitive cell.
+#%%   Testing temperature-dependent libxc functionals.
+#%%   Several XC functionals, several electronic temperatures.
 #%%<END TEST_INFO>

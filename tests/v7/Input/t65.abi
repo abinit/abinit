@@ -34,7 +34,7 @@ ecut  6.0         # Maximal kinetic energy cut-off, in Hartree
 #Definition of the k-point grid
 kptopt 1          # Option for the automatic generation of k points, taking
                   # into account the symmetry
-ngkpt 3 3 3       # This is a 2x2x2 grid based on the primitive vectors
+ngkpt 3 3 3       # This is a Gamma-centered 3x3x3 grid based on the primitive vectors
 nshiftk 1         # of the reciprocal space 
 shiftk 0.0 0.0 0.0
 

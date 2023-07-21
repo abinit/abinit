@@ -1,0 +1,39 @@
+# Minimal file to test structure (inaccurate POSCAR) and symmetry recognition
+  
+ structure "poscar:t199_POSCAR_mp-1246974"
+
+# Minimal parameters
+ ecut 2
+ tolwfr 1.0d-12
+ nstep 1
+ nline 1
+
+# k-point grid
+ kptopt 1
+ shiftk   0.0  0.0  0.0
+ ngkpt 1 1 1
+
+#Pseudos
+ pp_dirpath "$ABI_PSPDIR/PseudosHGH_pwteter"
+ pseudos "12mg.2.hgh, 21sc.3.hgh, 23v.5.hgh, 16s.6.hgh"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t199.abo , tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [shell]
+#%% pre_commands =
+#%%   iw_cp t199_POSCAR_mp-1246974 t199_POSCAR_mp-1246974;
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% references = 
+#%% keywords = POSCAR
+#%% description =
+#%%   Mg2 Sc2 V2 S8, inaccurate parameters.
+#%%   Test inaccurate POSCAR and symmetry recognition
+#%% topics = crystal
+#%%<END TEST_INFO>

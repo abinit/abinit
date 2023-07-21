@@ -1,6 +1,6 @@
 
-.Version 9.8.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Dec 2022.
-- ( at 21h09 )
+.Starting date : Wed 31 May 2023.
+- ( at 05h27 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_6.abi
+- input  file    -> /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_6.abi
 - output file    -> teph4isotc_6.abo
 - root for input  files -> teph4isotc_6i
 - root for output files -> teph4isotc_6o
-
-
+ 
+ 
  Symmetries : space group P6/m m m (#191); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -38,13 +38,13 @@ P This job should need less than                     114.521 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :    100.000 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -58,7 +58,7 @@ _ WF disk file :    100.000 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
              ecut      3.80000000E+01 Hartree
    eph_ngqpt_fine        6    6    6
          eph_task          11
--          fftalg         312
+-          fftalg         512
            istwfk        2    0    0    0    0    0    0    0    0    3
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
@@ -270,15 +270,15 @@ P           mkmem         370
                        3.3333333333E-01  6.6666666667E-01  5.0000000000E-01
                        6.6666666667E-01  3.3333333333E-01  5.0000000000E-01
             znucl       12.00000    5.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -289,24 +289,32 @@ meta: {optdriver: 7, eph_task: 11, }
 ...
 
  mkfilename: getwfk from: teph4isotc_4o_DS1_WFK
-
+ 
  mkfilename: getddb from: MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
-
+ 
  mkfilename: getdvdb from: teph4isotc_1_DVDB
-
+ 
 - Reading GS states from WFK file: teph4isotc_4o_DS1_WFK
 - Reading DDB from file: MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
 - Reading DVDB from file: teph4isotc_1_DVDB
-
-
-
+ 
+ 
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.0503959  2.9158474  0.0000000  G(1)=  0.0990021  0.1714767  0.0000000
  R(2)= -5.0503959  2.9158474  0.0000000  G(2)= -0.0990021  0.1714767  0.0000000
  R(3)=  0.0000000  0.0000000  6.6575051  G(3)=  0.0000000  0.0000000  0.1502064
  Unit cell volume ucvol=  1.9607929E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.3333333  0.6666667  0.5000000   B
+    3)    0.6666667  0.3333333  0.5000000   B
+ 
+ DDB file with 12 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: MgB2_eph4isotc/flow_mgb2_phonons/w1/outdata/out_DDB
@@ -377,12 +385,12 @@ meta: {optdriver: 7, eph_task: 11, }
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
-
+ 
  The interatomic forces have been obtained
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Mg-low.psp8
 - Mg    ONCVPSP-3.3.0  r_core=   2.31813   2.10714
 - 12.00000   2.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -394,9 +402,9 @@ meta: {optdriver: 7, eph_task: 11, }
              0    6.239305    0.688626
              1    4.197993    0.757155
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
+ 
+- pspini: atom type   2  psp file is /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/B.psp8
 - B     ONCVPSP-3.3.0  r_core=   1.20849   1.20849
 -  5.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -408,7 +416,7 @@ meta: {optdriver: 7, eph_task: 11, }
              0    8.437831    1.245441
              1   -3.670611   -0.766497
  pspatm: atomic psp has been read  and splines computed
-
+ 
   -1.94839037E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
@@ -425,7 +433,7 @@ meta: {optdriver: 7, eph_task: 11, }
  kptopt: 1
  qptopt: 1
  with_vk: 1
-
+ 
   === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 9
@@ -456,7 +464,7 @@ P Number of CPUs for parallelism over k-points: 1
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc       -1012
          kptrlatt       18    0    0      0   18    0      0    0   18
           kptrlen      1.04970507E+02
@@ -603,7 +611,7 @@ P           mkmem         370
                        3.3333333333E-01  6.6666666667E-01  5.0000000000E-01
                        6.6666666667E-01  3.3333333333E-01  5.0000000000E-01
             znucl       12.00000    5.00000
-
+ 
 ================================================================================
 
 
@@ -689,10 +697,10 @@ P           mkmem         370
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        366.1  wall=        367.4
-
+- Proc.   0 individual time (sec): cpu=        239.1  wall=        242.9
+ 
 ================================================================================
-
+ 
  Calculation completed.
 .Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        366.1  wall=        367.4
++Overall time at end (sec) : cpu=        239.1  wall=        242.9

@@ -110,6 +110,7 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
+ use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
@@ -225,7 +226,7 @@ program abinit
 !read names of files (input, output, rootinput, rootoutput, roottemporaries),
 !create the name of the status file, initialize the status subroutine.
 
- call timab(41,3,tsec)
+ call timab(101,3,tsec)
  call iofn1(args%input_path, filnam, filstat, xmpi_world)
 
 !------------------------------------------------------------------------------
@@ -255,13 +256,15 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
- call timab(44,1,tsec)
-
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
+ call timab(101,2,tsec)
+
  call get_dtsets_pspheads(args%input_path, filnam(1), ndtset, lenstr, string, &
                           timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
+
+ call timab(103,1,tsec)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -337,12 +340,13 @@ program abinit
 !there are problems with Tv1#93 in parallel, PGI compiler, on Intel/PC
  call abi_io_redirect(new_io_comm=xmpi_world)
 
- call timab(44,2,tsec)
+ call timab(103,2,tsec)
+ call timab(104,3,tsec)
 
 !------------------------------------------------------------------------------
 
 !13) Perform additional checks on input data
- call timab(45,3,tsec)
+
  call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
  ! Check whether the string only contains valid keywords
@@ -384,7 +388,7 @@ program abinit
 !------------------------------------------------------------------------------
 
 !15) Perform main calculation
- call timab(45,2,tsec)
+ call timab(104,2,tsec)
 
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
@@ -403,7 +407,7 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 16) Give final echo of coordinates, etc.
- call timab(46,1,tsec)
+ call timab(105,1,tsec)
 
  write(msg,'(a,a,a,62a,80a)') ch10,'== END DATASET(S) ',('=',mu=1,62),ch10,('=',mu=1,80)
  call wrtout([std_out, ab_out], msg)
@@ -423,12 +427,16 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     !  so there is only one call to the latter, for both units)
+     ! both 
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out
        if(ii==2)iounit=std_out
        write(iounit,*)' '
        call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+       if(ii==2)call out_spg_anal (dtsets,(ii-1),ab_out,ndtset,ndtset_alloc,results_out_all)
        if(ii==2)write(std_out,*)' '
      end do
    end if
@@ -459,7 +467,7 @@ program abinit
  strten(:)  =results_out(1)%strten(:,1)
  xred(:,:)  =results_out(1)%xred(:,1:natom,1)
 
- call timab(46,2,tsec)
+ call timab(105,2,tsec)
 
 !------------------------------------------------------------------------------
 

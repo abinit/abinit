@@ -6489,7 +6489,8 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  if (present(ddb_filepath)) then
    ! Build ddb object from file. Will release memory before returning.
    ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
-   call this_ddb%from_file(ddb_filepath, dvdb%brav, ddb_hdr, cryst_ddb, comm, prtvol=prtvol)
+   call this_ddb%from_file(ddb_filepath, ddb_hdr, cryst_ddb, comm, prtvol=prtvol)
+   call this_ddb%set_brav(dvdb%brav)
    call ddb_hdr%free()
    call cryst_ddb%free()
    ddb_ptr => this_ddb

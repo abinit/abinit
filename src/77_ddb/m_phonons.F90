@@ -47,8 +47,9 @@ module m_phonons
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
- use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec, &
-                               phangmom_from_eigvec
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, &
+                               pheigvec_normalize, massmult_and_breaksym, &
+                               phdispl_from_eigvec, phangmom_from_eigvec
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
@@ -3628,7 +3629,7 @@ subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
 
  ABI_MALLOC(toinv, (4, cryst%nsym))
- call sg_multable(cryst%nsym, cryst%symafm, cryst%symrel, cryst%tnons, tol6, ierr, toinv=toinv)
+ call sg_multable(cryst%nsym, cryst%symafm, cryst%symrel, ierr, toinv=toinv, tnons=cryst%tnons, tnons_tol=tol6)
  ABI_CHECK(ierr == 0, "sg_multable returned ierr != 0")
 
  ! Precompute ph freqs in the BZ and compare with BZ

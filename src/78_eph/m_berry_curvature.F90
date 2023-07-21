@@ -277,7 +277,9 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  !  2) In the presence of time reversal symmetry, the Berry curvature would be zero
 
  call wrtout(units, sjoin("- Reading input DDB from file:", dtfil%filddbsin))
- call berry_ddb%from_file_txt(dtfil%filddbsin, dtset%brav, in_ddb_hdr, ddb_crystal, comm, prtvol=dtset%prtvol, raw=1)
+ !call berry_ddb%from_file_txt(dtfil%filddbsin, dtset%brav, in_ddb_hdr, ddb_crystal, comm, prtvol=dtset%prtvol, raw=1)
+ ! GA: FIXME
+ call berry_ddb%from_file(dtfil%filddbsin, in_ddb_hdr, ddb_crystal, comm, prtvol=dtset%prtvol, raw=1)
  call ddb_crystal%free()
 
  ! mpert = maximum number of perturbations (atom displacements + electric field + ...)
@@ -300,6 +302,8 @@ subroutine berry_curvature(gstore, dtset, dtfil)
        !print *, "flg:", berry_ddb%flg(index, iblok)
        !if (berry_ddb%flg(index, iblok) == 0) cycle
        g_ri(:) = [real(gmat(ipc1, ipc2, iq_ibz)), aimag(gmat(ipc1, ipc2, iq_ibz))]
+
+       ! GA: We can create a new block type for this. see m_ddb_hdr
        !berry_ddb%val(:,index,iblok) = berry_ddb%val(:,index,iblok) + g_ri
      end do
    end do
@@ -312,7 +316,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  if (my_rank == master) then
    call wrtout(units, sjoin("- Writing DDB file with Berry curvature to: ", berry_ddb_filepath), pre_newlines=2)
    in_ddb_hdr%dscrpt = "DDB including Berry curvature"
-   call berry_ddb%write_txt(in_ddb_hdr, berry_ddb_filepath) !, fullinit, comm)
+   call berry_ddb%write(in_ddb_hdr, berry_ddb_filepath)
  end if
  call in_ddb_hdr%free(); call berry_ddb%free()
 
@@ -320,8 +324,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  ! Now reopen berry_ddb with raw=0
  ! ===============================
  call xmpi_barrier(comm)
- call berry_ddb%from_file_txt(berry_ddb_filepath, dtset%brav, in_ddb_hdr, ddb_crystal, comm, &
-                              prtvol=dtset%prtvol, raw=0)
+ call berry_ddb%from_file(berry_ddb_filepath, in_ddb_hdr, ddb_crystal, comm, prtvol=dtset%prtvol, raw=0)
  call in_ddb_hdr%free(); call ddb_crystal%free()
 
  ! Build berry_ifc from berry_ddb.
