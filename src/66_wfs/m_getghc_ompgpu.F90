@@ -441,14 +441,22 @@ has_fock=.false.
  if (gs_ham%usepaw==0) gsc_ptr => nonlop_dum
  if (gs_ham%usepaw==1) gsc_ptr => gsc
 
- !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc_)
+ if (any(type_calc == [0, 2])) then
+   !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc_) IF(local_gvnlxc)
+   !$OMP TARGET ENTER DATA MAP(to:gvnlxc_) IF(.not. local_gvnlxc)
+ end if
 
  transfer_omp_args =  .not. ( xomp_target_is_present(c_loc(ghc)) &
    .and. xomp_target_is_present(c_loc(gsc_ptr)) &
    .and. xomp_target_is_present(c_loc(cwavef)) )
 
- !$OMP TARGET ENTER DATA MAP(alloc:ghc) IF(transfer_omp_args)
- !$OMP TARGET ENTER DATA MAP(alloc:gsc_ptr) IF(transfer_omp_args)
+ if (type_calc == 2) then
+   !$OMP TARGET ENTER DATA MAP(to:ghc) IF(transfer_omp_args)
+   !$OMP TARGET ENTER DATA MAP(to:gsc_ptr) IF(transfer_omp_args)
+ else
+   !$OMP TARGET ENTER DATA MAP(alloc:ghc) IF(transfer_omp_args)
+   !$OMP TARGET ENTER DATA MAP(alloc:gsc_ptr) IF(transfer_omp_args)
+ end if
  !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_omp_args)
 
 !============================================================
@@ -763,19 +771,12 @@ has_fock=.false.
 ! Application of the non-local potential and the Fock potential
 !============================================================
    ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
-   if (type_calc==2) then
-     !$OMP TARGET UPDATE TO(gvnlxc_)
-     if(transfer_omp_args) then
-       !$OMP TARGET UPDATE TO(ghc,gsc_ptr)
-     end if
-   end if
    if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
      cwaveprj_nonlop=>cwaveprj
      lambda_ndat = lambda
 
-     !$OMP TASKWAIT
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
 
