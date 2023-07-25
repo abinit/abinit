@@ -270,8 +270,10 @@ int version_2_cores(int major, int minor)
         { 0x72, 64 }, // Volta Generation (SM 7.2) AGX class
         { 0x75, 64 }, // Turing Generation (SM 7.5) RTX class
         { 0x80, 64 }, // Ampere Generation (SM 8.0) A100 class
-        { 0x86, 128}, // Ampere Generation (SM 8.6)
-        { 0x87, 128}, // Ampere Generation (SM 8.7)
+        { 0x86, 128}, // Ampere Generation (SM 8.6) RTX class
+        { 0x87, 128}, // Ampere Generation (SM 8.7) AGX class
+        { 0x89, 128}, // Ada Lovelace Generation (SM 8.9) RTX class
+        { 0x90, 128}, // Hooper Generation (SM 9.0) H100 class
         {   -1, -1 }
     };
     int index = 0;
