@@ -1782,6 +1782,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call pawcprj_free(cprj_tmp)
        ABI_FREE(cprj_tmp)
      end if
+!TESTMT
+     if (dtset%nspden==1.and.my_natom>=1) then
+       if (pawrhoij_unsym(1)%nspden==4.and.pawrhoij_unsym(1)%cplex_rhoij==2) then
+         do ii=1,my_natom
+           do iplex=1,pawrhoij(ii)%lmn2_size
+             pawrhoij_unsym(ii)%rhoij_(2*iplex-1,2:4)=zero
+           end do
+         end do
+       end if
+     end if
+!TESTMT
      call timab(555,2,tsec)
 !    Build symetrized packed rhoij and compensated pseudo density
      cplex=1;ipert=0;idir=0;qpt(:)=zero

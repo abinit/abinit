@@ -1555,7 +1555,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
 !*********************************************************************
 
  DBG_ENTER("COLL")
-!in case of calculating orbital magnetic mometns, only the occupation matrix for atoms atom_orbmom and orbital l_orbmom
+!in case of calculating orbital magnetic moments, only the occupation matrix for atoms atom_orbmom and orbital l_orbmom
 !is calculated and returned in my_l_occmat.
 if (present(l_orbmom) .and. present(atom_orbmom))  then
     cal_lmom= .true.
@@ -1635,23 +1635,30 @@ end if
          ABI_MALLOC(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,ndij))
          tmp_noccmmp(iatom_tot)%value=zero
          if(limp==0) then ! default reading
-           snorm=sqrt(spinat(1,iatom_tot)**2+spinat(1,iatom_tot)**2+spinat(3,iatom_tot)**2)
-           if (snorm>tol12) then
-             sx=half*spinat(1,iatom_tot)/snorm
-             sy=half*spinat(2,iatom_tot)/snorm
-             szp=half*(one+spinat(3,iatom_tot)/snorm)
-             szm=half*(one-spinat(3,iatom_tot)/snorm)
-           else
-             sx=zero;sy=zero
-             szp=one;szm=zero
-           end if
+!            snorm=sqrt(spinat(1,iatom_tot)**2+spinat(1,iatom_tot)**2+spinat(3,iatom_tot)**2)
+!            if (snorm>tol12) then
+!              sx=half*spinat(1,iatom_tot)/snorm
+!              sy=half*spinat(2,iatom_tot)/snorm
+!              szp=half*(one+spinat(3,iatom_tot)/snorm)
+!              szm=half*(one-spinat(3,iatom_tot)/snorm)
+!            else
+!              sx=zero;sy=zero
+!              szp=half;szm=half
+!            end if                    
            do im2=1,2*lpawu+1
              do im1=1,2*lpawu+1
                nup=dmatpawu(im1,im2,1,iatpawu);ndn=dmatpawu(im1,im2,2,iatpawu)
-               tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=nup*szp+ndn*szm
-               tmp_noccmmp(iatom_tot)%value(1,im1,im2,2)=nup*szm+ndn*szp
-               tmp_noccmmp(iatom_tot)%value(1,im1,im2,3)=(nup-ndn)*sx
-               tmp_noccmmp(iatom_tot)%value(1,im1,im2,4)=(ndn-nup)*sy
+               if (nspden==1) then
+                 tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=half*(nup+ndn)
+                 tmp_noccmmp(iatom_tot)%value(2,im1,im2,1)=half*(nup+ndn)
+               else
+                 tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=nup
+                 tmp_noccmmp(iatom_tot)%value(2,im1,im2,1)=ndn
+               end if
+!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=nup*szp+ndn*szm
+!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,2)=nup*szm+ndn*szp
+!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,3)=(nup-ndn)*sx
+!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,4)=(ndn-nup)*sy
              end do
            end do
          else if(limp>=1) then
@@ -1772,7 +1779,8 @@ end if
          end if
          ABI_MALLOC(nocctot2,(ndij))
        end if
-       do ispden=1,ndij
+       nsploop=ndij
+       do ispden=1,nsploop
          jrhoij=1
          do irhoij=1,pawrhoij(iatom)%nrhoijsel
            klmn=pawrhoij(iatom)%rhoijselect(irhoij)
