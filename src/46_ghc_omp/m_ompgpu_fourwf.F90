@@ -165,7 +165,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  !$OMP TARGET ENTER DATA MAP(alloc:fofgout) IF(transfer_fofgout)
  !$OMP TARGET ENTER DATA MAP(alloc:fofr)    IF(transfer_fofr)
 
+#ifdef HAVE_GPU_CUDA
+ !Work buffer allocated at each call to save memory in CUDA
  !$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+#endif
 
  if(option==3) then
    !$OMP TARGET UPDATE TO(fofr)
@@ -368,7 +371,9 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    endif
  endif
 
+#ifdef HAVE_GPU_CUDA
  !$OMP TARGET EXIT DATA MAP(release:work_gpu)
+#endif
 
  !$OMP TARGET EXIT DATA MAP(release:fofgin)  IF(transfer_fofgin)
  !$OMP TARGET EXIT DATA MAP(release:fofgout) IF(transfer_fofgout)
@@ -416,7 +421,10 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
 
  ABI_MALLOC(work_gpu, (2,n1,n2,n3*ndat))
  !FIXME Smarter buffer management ?
- !!$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+#ifdef HAVE_GPU_HIP
+ !Work buffer allocated once to save time in HIP (alloc costful)
+ !$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+#endif
 
 end subroutine alloc_ompgpu_fourwf
 
@@ -430,7 +438,9 @@ subroutine free_ompgpu_fourwf()
  call gpu_fft_plan_destroy()
 
  !FIXME Smarter buffer management ?
- !!$OMP TARGET EXIT DATA MAP(release:work_gpu)
+#ifdef HAVE_GPU_HIP
+ !$OMP TARGET EXIT DATA MAP(release:work_gpu)
+#endif
  ABI_FREE(work_gpu)
 
  fourwf_initialized = 0;

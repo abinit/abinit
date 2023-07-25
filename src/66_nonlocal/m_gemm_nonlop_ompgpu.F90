@@ -921,10 +921,13 @@ contains
    end if
    if (local_vectproj) projections_ptr => vectproj
 
+#ifdef HAVE_GPU_CUDA
+  !Work buffers allocated at each call to save memory in CUDA
   !$OMP TARGET ENTER DATA MAP(alloc:s_projections,vnl_projections)
   if(.not. local_vectproj) then
     !$OMP TARGET ENTER DATA MAP(alloc:projections_ptr)
   end if
+#endif
 
   if(gemm_nonlop_is_distributed) then
     ABI_MALLOC(projs_recv,   (cplex, npwin, gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
@@ -1490,10 +1493,12 @@ contains
  !$OMP TARGET EXIT DATA MAP(from:vectout)   IF(transfer_vectout)
  !$OMP TARGET EXIT DATA MAP(from:svectout)  IF(transfer_svectout)
 
+#ifdef HAVE_GPU_CUDA
  !$OMP TARGET EXIT DATA MAP(release:s_projections,vnl_projections)
  if(.not. local_vectproj) then
    !$OMP TARGET EXIT DATA MAP(release:projections_ptr)
  end if
+#endif
 
 ! Release memory
   if(signs == 1) then
