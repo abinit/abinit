@@ -2577,6 +2577,36 @@ subroutine abi_gpu_work_resizeC(array,array_managed,current_dim,asked_dim)
 end subroutine abi_gpu_work_resizeC
 !!***
 
+!!****f* m_abi_gpu_linalg/abi_gpu_work_resizeCptr
+!!
+!! NAME
+!! abi_gpu_work_resizeCptr
+
+subroutine abi_gpu_work_resizeCptr(array,current_dim,asked_dim)
+
+  type(c_ptr), intent(inout) :: array
+  integer(c_size_t), intent(inout)  :: current_dim
+  integer(c_size_t), intent(in   )  :: asked_dim
+
+! *************************************************************************
+
+  if ( current_dim < asked_dim  ) then
+    if(current_dim == 0) then
+      call dealloc_on_gpu(array)
+    end if
+    current_dim = asked_dim
+    call alloc_on_gpu(array, asked_dim)
+  end if
+
+#ifndef HAVE_GPU
+  ! Unused if GPU code disabled
+  ABI_UNUSED(array)
+  ABI_UNUSED((/current_dim,asked_dim/))
+#endif
+
+end subroutine abi_gpu_work_resizeCptr
+!!***
+
 subroutine abi_gpu_work_finalize()
 
 #ifdef HAVE_GPU
@@ -2584,9 +2614,6 @@ subroutine abi_gpu_work_finalize()
   if(abi_linalg_gpu_mode == ABI_GPU_LEGACY .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
 
 #ifdef HAVE_YAKL
-    if ( associated(i_work_managed) ) then
-      ABI_FREE_MANAGED(i_work_managed)
-    end if
     if ( associated(r_work_managed) ) then
       ABI_FREE_MANAGED(r_work_managed)
     end if
@@ -2598,10 +2625,6 @@ subroutine abi_gpu_work_finalize()
   else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
 
 #ifdef HAVE_OPENMP_OFFLOAD
-    if ( allocated(i_work) ) then
-      !$OMP TARGET EXIT DATA MAP(release:i_work)
-      ABI_FREE(i_work)
-    end if
     if ( allocated(r_work) ) then
       !$OMP TARGET EXIT DATA MAP(release:r_work)
       ABI_FREE(r_work)
@@ -2612,11 +2635,14 @@ subroutine abi_gpu_work_finalize()
     end if
 #endif
 
+    if(gpu_work_len == 0) then
+      call dealloc_on_gpu(gpu_work)
+    end if
   end if
 
-  i_work_len = 0
   r_work_len = 0
   c_work_len = 0
+  gpu_work_len = 0
 
 #endif
 
@@ -2699,26 +2725,46 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
   case (1)
 
     ! resize work array if needed
+#ifdef HAVE_GPU_CUDA
     call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
+#endif
+#ifdef HAVE_GPU_HIP
+    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+#endif
 
     ! retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
+#endif
+#ifdef HAVE_GPU_HIP
+      gpu_ptr = gpu_work
+#endif
     end if
   case (2)
 
     ! resize work array if needed
+#ifdef HAVE_GPU_CUDA
     call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
+#endif
+#ifdef HAVE_GPU_HIP
+    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
+#endif
 
     ! retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
+#endif
+#ifdef HAVE_GPU_HIP
+      gpu_ptr = gpu_work
+#endif
     end if
   end select
 
@@ -2994,26 +3040,46 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
   case (1)
 
     ! resize work array if needed
+#ifdef HAVE_GPU_CUDA
     call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
+#endif
+#ifdef HAVE_GPU_HIP
+    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+#endif
 
     ! retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
+#endif
+#ifdef HAVE_GPU_HIP
+      gpu_ptr = gpu_work
+#endif
     end if
   case (2)
 
     ! resize work array if needed
+#ifdef HAVE_GPU_CUDA
     call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
+#endif
+#ifdef HAVE_GPU_HIP
+    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
+#endif
 
     ! retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
+#endif
+#ifdef HAVE_GPU_HIP
+      gpu_ptr = gpu_work
+#endif
     end if
   end select
 
@@ -3260,26 +3326,46 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
   case (1)
 
     ! resize work array if needed
+#ifdef HAVE_GPU_CUDA
     call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
+#endif
+#ifdef HAVE_GPU_HIP
+    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+#endif
 
     ! retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
+#endif
+#ifdef HAVE_GPU_HIP
+      gpu_ptr = gpu_work
+#endif
     end if
   case (2)
 
     ! resize work array if needed
+#ifdef HAVE_GPU_CUDA
     call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
+#endif
+#ifdef HAVE_GPU_HIP
+    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
+#endif
 
     ! retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
+#endif
+#ifdef HAVE_GPU_HIP
+      gpu_ptr = gpu_work
+#endif
     end if
   end select
 

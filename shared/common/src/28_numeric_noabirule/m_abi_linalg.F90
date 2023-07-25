@@ -118,18 +118,17 @@ module m_abi_linalg
  integer, save, private     :: abi_linalg_gpu_mode = ABI_GPU_DISABLED
 
 #ifdef HAVE_GPU
- integer,                       allocatable,save,private,target :: i_work(:)
  real(kind=c_double),           allocatable,save,private,target :: r_work(:)
  complex(kind=c_double_complex),allocatable,save,private,target :: c_work(:)
+ type(c_ptr),save,private :: gpu_work
 
  !FIXME *_managed arrays are only used with YAKL, in place of previous ones
- integer(kind=c_int32_t),        ABI_CONTIGUOUS pointer,save,private :: i_work_managed(:) => null()
  real(kind=c_double),            ABI_CONTIGUOUS pointer,save,private :: r_work_managed(:) => null()
  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer,save,private :: c_work_managed(:) => null()
 
  integer, save, private :: r_work_len = 0
  integer, save, private :: c_work_len = 0
- integer, save, private :: i_work_len = 0
+ integer(c_size_t), save, private :: gpu_work_len = 0
 #endif
 
 !----------------------------------------------------------------------
