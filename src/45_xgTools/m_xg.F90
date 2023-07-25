@@ -3722,6 +3722,7 @@ contains
     else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_CUDA
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         byte_count = xgBlock%ldim * xgBlock%cols * dp
@@ -3734,6 +3735,31 @@ contains
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
       end select
+#endif
+
+#ifdef HAVE_GPU_HIP
+
+      rows = xgBlock%rows; cols = xgBlock%cols
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR)
+        do iblock = 1, cols
+          do jblock = 1, rows
+            xgBlock__vecR(jblock,iblock) = zero
+          end do
+        end do
+      case (SPACE_C)
+        xgBlock__vecC => xgBlock%vecC
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC)
+        do iblock = 1, cols
+          do jblock = 1, rows
+            xgBlock__vecC(jblock,iblock) = dcmplx(0,0)
+          end do
+        end do
+      end select
+#endif
+
 #endif
 
     else

@@ -939,20 +939,52 @@ contains
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
+#ifdef HAVE_GPU_HIP
+  if(cpopt < 2) then
+    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+    !$OMP& MAP(to:projections_ptr) PRIVATE(i1,i2)
+    do i2=1, nspinor*ndat
+      do i1=1, nprojs
+        projections_ptr(:,i1,i2) = zero
+      end do
+    end do
+  end if
+  !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+  !$OMP& MAP(to:s_projections,vnl_projections) PRIVATE(i1,i2)
+  do i2=1, nspinor*ndat
+    do i1=1, nprojs
+      s_projections(:,i1,i2) = zero
+      vnl_projections(:,i1,i2) = zero
+    end do
+  end do
+#endif
+#ifdef HAVE_GPU_CUDA
   byte_count=sizeof(projections_ptr)
   !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,s_projections,vnl_projections)
   if(cpopt < 2) call gpu_memset(c_loc(projections_ptr),     0, byte_count)
   call gpu_memset(c_loc(s_projections),   0, byte_count)
   call gpu_memset(c_loc(vnl_projections), 0, byte_count)
   !$OMP END TARGET DATA
+#endif
 
   if (signs==1.and.ngrads>0) then
     ABI_MALLOC(dprojections,(cplex, ngrads*nprojs, nspinor*ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:dprojections)
+#ifdef HAVE_GPU_HIP
+    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+    !$OMP& MAP(to:dprojections) PRIVATE(i1,i2)
+    do i2=1, nspinor*ndat
+      do i1=1, nprojs*ngrads
+        dprojections(:,i1,i2) = zero
+      end do
+    end do
+#endif
+#ifdef HAVE_GPU_CUDA
     byte_count=sizeof(dprojections)
     !$OMP TARGET DATA USE_DEVICE_PTR(dprojections)
     call gpu_memset(c_loc(dprojections), 0, byte_count)
     !$OMP END TARGET DATA
+#endif
     if(choice==1.or.choice==3.or.choice==23) then
       ABI_MALLOC(enlk,(ndat))
       enlk=zero
