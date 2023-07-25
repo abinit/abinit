@@ -130,7 +130,7 @@ CONTAINS !===========================================================
  write (msg,formatdev)&
        & '  Device             ',device,' : ',name(1:lenname)
  call wrtout(std_out,msg,'PERS')
- write (msg,'(a,2(i1,a),a,i6,a,a,a,f7.1,a,a,a,i4,a,i4,4a,2(a,i7,2a),a,i7,a)')&
+ write (msg,'(a,2(i1,a),a,i9,a,a,a,f7.1,a,a,a,i9,a,i9,4a,2(a,i9,2a),a,i9,a)')&
        & ' Revision number:                   ',vers(0),'.',vers(1),ch10, &
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &
