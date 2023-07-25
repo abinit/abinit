@@ -1111,6 +1111,11 @@ contains
     integer :: size
     double precision :: tsec(2)
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:)
+#endif
+
     call timab(tim_copy,1,tsec)
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
@@ -1131,14 +1136,31 @@ contains
     size = min(size1,size2)
 
     if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
-
+#ifdef HAVE_GPU_CUDA
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xcopy(1, size, xgBlockA%vecR, incx, xgBlockB%vecR, incy)
       case(SPACE_C)
         call abi_gpu_xcopy(2, size, xgBlockA%vecC, incx, xgBlockB%vecC, incy)
       end select
+#endif
 
+#ifdef HAVE_GPU_HIP
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR)
+        call abi_gpu_xcopy(1, size, c_loc(xgBlockA__vecR), incx, c_loc(xgBlockB__vecR), incy)
+        !$OMP END TARGET DATA
+      case(SPACE_C)
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+        call abi_gpu_xcopy(2, size, c_loc(xgBlockA__vecC), incx, c_loc(xgBlockB__vecC), incy)
+        !$OMP END TARGET DATA
+      end select
+#endif
     else
 
       select case(xgBlockA%space)
@@ -1267,6 +1289,11 @@ contains
     double precision :: tsec(2)
     integer          :: l_use_gpu_cuda
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
+#endif
+
     call timab(tim_gemm,1,tsec)
 
     ! if optional parameter is present, use it
@@ -1293,12 +1320,28 @@ contains
 
     case (SPACE_R,SPACE_CR)
       if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecR, xgBlockA%LDim, &
           xgBlockB%vecR, xgBlockB%LDim, &
           cbeta, &
           xgBlockW%vecR, xgBlockW%LDim)
+#endif
+
+#ifdef HAVE_GPU_HIP
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        xgBlockW__vecR => xgBlockW%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          calpha, &
+          c_loc(xgBlockA__vecR), xgBlockA%LDim, &
+          c_loc(xgBlockB__vecR), xgBlockB%LDim, &
+          cbeta, &
+          c_loc(xgBlockW__vecR), xgBlockW%LDim)
+        !$OMP END TARGET DATA
+#endif
       else
         call dgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           alpha, &
@@ -1326,6 +1369,13 @@ contains
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 #endif
+#ifdef HAVE_GPU_HIP
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecR,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          !$OMP END TARGET DATA
+#endif
 
 #else
 
@@ -1341,12 +1391,28 @@ contains
     case(SPACE_C)
 
       if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
         call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecC, xgBlockA%LDim, &
           xgBlockB%vecC, xgBlockB%LDim, &
           cbeta, &
           xgBlockW%vecC, xgBlockW%LDim)
+#endif
+
+#ifdef HAVE_GPU_HIP
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        xgBlockW__vecC => xgBlockW%vecC
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC)
+        call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          calpha, &
+          c_loc(xgBlockA__vecC), xgBlockA%LDim, &
+          c_loc(xgBlockB__vecC), xgBlockB%LDim, &
+          cbeta, &
+          c_loc(xgBlockW__vecC), xgBlockW%LDim)
+        !$OMP END TARGET DATA
+#endif
       else
         call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
@@ -1370,6 +1436,13 @@ contains
 #ifdef HAVE_GPU_CUDA
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          !$OMP END TARGET DATA
+#endif
+#ifdef HAVE_GPU_HIP
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
@@ -1487,6 +1560,11 @@ contains
     double precision :: tsec(2)
     integer          :: l_use_gpu_cuda
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+#endif
+
     call timab(tim_potrf,1,tsec)
 
     ! if optional parameter is present, use it
@@ -1501,12 +1579,30 @@ contains
     endif
 
     if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xpotrf(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
       case (SPACE_C)
         call abi_gpu_xpotrf(2,uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
       end select
+#endif
+
+#ifdef HAVE_GPU_HIP
+      select case(xgBlock%space)
+      case (SPACE_R,SPACE_CR)
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+        call abi_gpu_xpotrf(1,uplo,xgBlock%rows,c_loc(xgBlock__vecR),xgBlock%LDim,info)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        xgBlock__vecC => xgBlock%vecC
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+        call abi_gpu_xpotrf(2,uplo,xgBlock%rows,c_loc(xgBlock__vecC),xgBlock%LDim,info)
+        !$OMP END TARGET DATA
+      end select
+#endif
+
       if(l_use_gpu_cuda==ABI_GPU_KOKKOS) call gpu_device_synchronize()
     else
       select case(xgBlock%space)
@@ -1594,6 +1690,11 @@ contains
     integer         , intent(in   ), optional :: use_gpu_cuda
     integer          :: l_use_gpu_cuda
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockW__vecR(:,:)
+#endif
+
     call timab(tim_heevd,1,tsec)
 
     if ( xgBlockW%space /= SPACE_R ) then
@@ -1609,7 +1710,7 @@ contains
 
     if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#ifdef HAVE_GPU_CUDA
       select case(xgBlockA%space)
 
       case (SPACE_R,SPACE_CR)
@@ -1625,14 +1726,33 @@ contains
             xgBlockW%vecR,info)
 
       end select
+#endif
 
       if(l_use_gpu_cuda==ABI_GPU_KOKKOS) call gpu_device_synchronize()
+#ifdef HAVE_GPU_HIP
+      select case(xgBlockA%space)
 
-#else
-      ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
-      call abi_abort('COLL')
+      case (SPACE_R,SPACE_CR)
+
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockW__vecR => xgBlockW%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
+        call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA__vecR),xgBlockA%LDim, &
+            c_loc(xgBlockW__vecR),info)
+        !$OMP END TARGET DATA
+
+      case (SPACE_C)
+
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockW__vecR => xgBlockW%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockW__vecR)
+        call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
+            c_loc(xgBlockA__vecC),xgBlockA%LDim, &
+            c_loc(xgBlockW__vecR),info)
+        !$OMP END TARGET DATA
+
+      end select
 #endif
 
     else
@@ -1966,6 +2086,10 @@ contains
 
     double precision :: tsec(2)
     integer          :: l_use_gpu_cuda
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
+#endif
 
     call timab(tim_hegvd,1,tsec)
 
@@ -1989,12 +2113,28 @@ contains
 
       case (SPACE_R,SPACE_CR)
 
+#ifdef HAVE_GPU_CUDA
         call abi_gpu_xhegvd(1, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             xgBlockA%vecR, xgBlockA%ldim, &
           &             xgBlockB%vecR, xgBlockB%ldim, &
           &             xgBlockW%vecR, &
           &             info)
+#endif
+
+#ifdef HAVE_GPU_HIP
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        xgBlockW__vecR => xgBlockW%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        call abi_gpu_xhegvd(1, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
+          &             c_loc(xgBlockB__vecR), xgBlockB%ldim, &
+          &             c_loc(xgBlockW__vecR), &
+          &             info)
+        !$OMP END TARGET DATA
+#endif
 
       case (SPACE_C)
 
@@ -2002,12 +2142,28 @@ contains
         !call xgBlock_prefetch_async(xgBlockB, 0)
         !call xgBlock_prefetch_async(xgBlockW, 0)
 
+#ifdef HAVE_GPU_CUDA
         call abi_gpu_xhegvd(2, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             xgBlockA%vecC, xgBlockA%ldim, &
           &             xgBlockB%vecC, xgBlockB%ldim, &
           &             xgBlockW%vecR, &
           &             info)
+#endif
+
+#ifdef HAVE_GPU_HIP
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        xgBlockW__vecR => xgBlockW%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
+        call abi_gpu_xhegvd(2, itype, jobz, uplo, &
+          &             xgBlockA%rows, &
+          &             c_loc(xgBlockA__vecC), xgBlockA%ldim, &
+          &             c_loc(xgBlockB__vecC), xgBlockB%ldim, &
+          &             c_loc(xgBlockW__vecR), &
+          &             info)
+        !$OMP END TARGET DATA
+#endif
 
       end select
 
@@ -2286,6 +2442,11 @@ contains
     double precision :: tsec(2)
     integer          :: l_use_gpu_cuda
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:)
+#endif
+
     call timab(tim_trsm,1,tsec)
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
@@ -2301,6 +2462,7 @@ contains
     calpha = dcmplx(alpha,0.d0)
 
     if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xtrsm(1,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
@@ -2309,6 +2471,26 @@ contains
         call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
           calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
       end select
+#endif
+
+#ifdef HAVE_GPU_HIP
+      select case(xgBlockA%space)
+      case (SPACE_R,SPACE_CR)
+        xgBlockA__vecR => xgBlockA%vecR
+        xgBlockB__vecR => xgBlockB%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR)
+        call abi_gpu_xtrsm(1,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+          calpha,c_loc(xgBlockA__vecR),xgBlockA%LDim,c_loc(xgBlockB__vecR),xgBlockB%LDim)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        xgBlockA__vecC => xgBlockA%vecC
+        xgBlockB__vecC => xgBlockB%vecC
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+        call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+          calpha,c_loc(xgBlockA__vecC),xgBlockA%LDim,c_loc(xgBlockB__vecC),xgBlockB%LDim)
+        !$OMP END TARGET DATA
+      end select
+#endif
     else
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -2345,6 +2527,10 @@ contains
     double precision :: tsec(2)
     integer          :: l_use_gpu_cuda
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
+#endif
+
     call timab(tim_trsm,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= SPACE_C) then
@@ -2359,8 +2545,18 @@ contains
     end if
 
     if (l_use_gpu_cuda == ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
         alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
+#endif
+#ifdef HAVE_GPU_HIP
+      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
+      xgBlockA__vecC => xgBlockA%vecC
+      xgBlockB__vecC => xgBlockB%vecC
+      call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
+        alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
+      !$OMP END TARGET DATA
+#endif
     else
       call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
         alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
@@ -2623,11 +2819,13 @@ contains
     integer,         intent(in   ), optional :: use_gpu_cuda
 
     integer :: rows
-    integer :: cols
-    integer :: min_rows
     integer :: iblock,irow
     integer :: l_use_gpu_cuda
-    complex(dpc),pointer :: xgBlock__vecC(:,:)
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer :: cols,min_rows
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+#endif
 
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
@@ -2719,6 +2917,10 @@ contains
 
     integer      :: l_use_gpu_cuda
     complex(dpc) :: da_cplx
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecR(:,:),xgBlock2__vecR(:,:)
+#endif
 
     da_cplx = dcmplx(da,0.0_dp)
 
@@ -2740,12 +2942,31 @@ contains
     end if
 
     if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xaxpy(1, xgBlock1%cols*xgBlock1%LDim, da_cplx, xgBlock2%vecR,1,xgBlock1%vecR,1)
       case (SPACE_C)
         call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, xgBlock2%vecC,1,xgBlock1%vecC,1)
       end select
+#endif
+
+#ifdef HAVE_GPU_HIP
+      select case(xgBlock1%space)
+      case (SPACE_R,SPACE_CR)
+        xgBlock1__vecR => xgBlock1%vecR
+        xgBlock2__vecR => xgBlock2%vecR
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecR,xgBlock2__vecR)
+        call abi_gpu_xaxpy(1, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecR),1,c_loc(xgBlock1__vecR),1)
+        !$OMP END TARGET DATA
+      case (SPACE_C)
+        xgBlock1__vecC => xgBlock1%vecC
+        xgBlock2__vecC => xgBlock2%vecC
+        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecC,xgBlock2__vecC)
+        call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
+        !$OMP END TARGET DATA
+      end select
+#endif
     else
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
@@ -2773,6 +2994,10 @@ contains
 
     integer      :: l_use_gpu_cuda
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
+#endif
+
     if ( xgBlock1%space /= xgBlock2%space ) then
       ABI_ERROR("Must be same space for Saxpy")
     end if
@@ -2794,7 +3019,17 @@ contains
     end if
 
     if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_GPU_CUDA
       call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
+#endif
+
+#ifdef HAVE_GPU_HIP
+      xgBlock1__vecC => xgBlock1%vecC
+      xgBlock2__vecC => xgBlock2%vecC
+      !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock1__vecC,xgBlock2__vecC)
+      call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, c_loc(xgBlock2__vecC),1,c_loc(xgBlock1__vecC),1)
+      !$OMP END TARGET DATA
+#endif
     else
       call zaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
     end if
@@ -2814,10 +3049,13 @@ contains
     integer, intent(in), optional :: use_gpu_cuda
     integer :: col
     integer :: row
+    integer :: l_use_gpu_cuda
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: rows,cols
-    integer      :: l_use_gpu_cuda
-    real(dp),pointer :: A__vecR(:,:), B__vecR(:,:)
-    complex(dpc),pointer :: A__vecC(:,:), B__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:), xgBlockB__vecR(:,:)
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:), xgBlockB__vecC(:,:)
+#endif
 
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Must be same space for add")
@@ -2932,9 +3170,9 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     double precision :: tmp
-    integer :: i,cols
-    complex(dpc), pointer :: xgBlock__vecC(:,:)
-    real(dp), pointer :: xgBlock__vecR(:,:),dot__vecR(:,:)
+    integer :: i,cols,rows
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:),dot__vecR(:,:)
 #endif
 
     if ( dot%space /= SPACE_R ) then
@@ -2988,6 +3226,7 @@ contains
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
       cols=xgBlock%cols
+      rows=xgBlock%rows
       dot__vecR => dot%vecR
       select case(xgBlock%space)
       case(SPACE_R,SPACE_CR)
@@ -3098,8 +3337,12 @@ contains
 
     double precision :: tmp
     integer :: i
-    complex(dpc), pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
-    real(dp), pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer :: rows,cols
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
+#endif
 
     ! Actually used with NVHPC or OpenMP Offload
     ABI_UNUSED((/i/))
@@ -3353,9 +3596,9 @@ contains
     ! does spacedim * neigenpairs be larger than 2^31 = 2. 10^9
     integer(kind=c_int32_t)  :: total_size
 #if defined HAVE_OPENMP_OFFLOAD
-    integer :: icol
-    complex(dpc), pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),divResult__vecC(:,:)
-    real(dp), pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),divResult__vecR(:,:)
+    integer :: icol,rows,cols
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),divResult__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),divResult__vecR(:,:)
 #endif
 #endif
 
@@ -3561,6 +3804,11 @@ contains
     integer      :: l_use_gpu_cuda = ABI_GPU_DISABLED
     complex(dpc) :: valc
 
+#ifdef HAVE_GPU_HIP
+    complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+#endif
+
     valc = dcmplx(val,0.0_dp)
 
     ! if optional parameter is present, use it
@@ -3573,14 +3821,32 @@ contains
     if (l_use_gpu_cuda==ABI_GPU_KOKKOS .or. l_use_gpu_cuda==ABI_GPU_OPENMP) then
 
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
+#ifdef HAVE_GPU_CUDA
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           call abi_gpu_xscal(1, xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecR, inc)
         case (SPACE_C)
           call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecC, inc)
         end select
+#endif
+
+#ifdef HAVE_GPU_HIP
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          xgBlock__vecR => xgBlock%vecR
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+          call abi_gpu_xscal(1, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecR), inc)
+          !$OMP END TARGET DATA
+        case (SPACE_C)
+          xgBlock__vecC => xgBlock%vecC
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+          call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, c_loc(xgBlock__vecC), inc)
+          !$OMP END TARGET DATA
+        end select
+#endif
       else
         !FIXME Do loop that calls scal on each column sequentially, might be improved
+#ifdef HAVE_GPU_CUDA
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           do i=1,xgBlock%cols
@@ -3591,6 +3857,24 @@ contains
             call abi_gpu_xscal(2, xgBlock%rows/inc, valc, xgBlock%vecC(:,i), inc)
           end do
         end select
+#endif
+
+#ifdef HAVE_GPU_HIP
+        select case(xgBlock%space)
+        case (SPACE_R,SPACE_CR)
+          do i=1,xgBlock%cols
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
+            call abi_gpu_xscal(1, xgBlock%rows/inc, valc, c_loc(xgBlock__vecR(1,i)), inc)
+            !$OMP END TARGET DATA
+          end do
+        case (SPACE_C)
+          do i=1,xgBlock%cols
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
+            call abi_gpu_xscal(2, xgBlock%rows/inc, valc, c_loc(xgBlock__vecC(1,i)), inc)
+            !$OMP END TARGET DATA
+          end do
+        end select
+#endif
       end if
 
     else
