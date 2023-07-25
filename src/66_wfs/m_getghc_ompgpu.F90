@@ -97,7 +97,10 @@ subroutine alloc_getghc_ompgpu_buffers(npw, nspinor, ndat, n4, n5, n6)
  mod__ndat = ndat
  mod__npw = npw
  !FIXME Smater buffer management ?
- !!$OMP TARGET ENTER DATA MAP(alloc:work)
+#ifdef HAVE_GPU_HIP
+  !Work buffer allocated once to save time in HIP (alloc costful)
+ !$OMP TARGET ENTER DATA MAP(alloc:work)
+#endif
 
  buf_initialized = 1
 
@@ -119,7 +122,9 @@ subroutine free_getghc_ompgpu_buffers
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !FIXME Smater buffer management ?
- !!$OMP TARGET EXIT DATA MAP(release:work)
+#ifdef HAVE_GPU_HIP
+ !$OMP TARGET EXIT DATA MAP(release:work)
+#endif
  ABI_FREE(work)
 
  buf_initialized = 0
@@ -469,7 +474,11 @@ has_fock=.false.
   &   .or. mod__n6/=gs_ham%n6 .or. mod__nspinor/=my_nspinor .or. mod__ndat/=ndat .or. npw_k1/=mod__npw) then
       call alloc_getghc_ompgpu_buffers(npw_k1, my_nspinor, ndat, gs_ham%n4, gs_ham%n5, gs_ham%n6)
    end if
+!  End with function ghc in reciprocal space also.
+#ifndef HAVE_GPU_HIP
+   !Work buffer allocated at each call to save memory (but too costful on HIP)
    !$OMP TARGET ENTER DATA MAP(alloc:work)
+#endif
    weight=one
    if (.not.use_cwavef_r) then
      option_fft=2
@@ -741,7 +750,9 @@ has_fock=.false.
      end if
    end if
 
+#ifndef HAVE_GPU_HIP
    !$OMP TARGET EXIT DATA MAP(release:work)
+#endif
  end if ! type_calc
  ABI_NVTX_END_RANGE()
 
