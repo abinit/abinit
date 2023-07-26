@@ -271,7 +271,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
  integer :: nstep_save,nsym1,ntypat,nwffile,nylmgr,nylmgr1,old_comm_atom,openexit,option,optorth,optthm,pertcase
  integer :: qphase_rhoij,rdwr,rdwrpaw,spaceComm,smdelta,timrev_pert,timrev_kpt,to_compute_this_pert
- integer :: useylmgr,useylmgr1,dfpt_scfcv_retcode,optn2,zeromag_rhoij
+ integer :: useylmgr,useylmgr1,dfpt_scfcv_retcode,optn2
 #ifdef HAVE_NETCDF
  integer :: ncerr,ncid
 #endif
@@ -1412,17 +1412,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if (psps%usepaw==1) then
      ABI_MALLOC(pawrhoij1,(my_natom))
      call pawrhoij_nullify(pawrhoij1)
-     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,&
-&         zeromag_rhoij=zeromag_rhoij,nspden_rhoij=nspden_rhoij,nspden=dtset%nspden,&
-&         spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij1,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&                        dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
+&                        dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
 &                        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      if (cplex_rhoij/=hdr%pawrhoij(1)%cplex_rhoij.or.qphase_rhoij/=hdr%pawrhoij(1)%qphase) then
 !      Eventually reallocate hdr%pawrhoij
        call pawrhoij_free(hdr%pawrhoij)
        call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&                          dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
+&                          dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
 &                          comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
      end if
    else

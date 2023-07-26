@@ -96,7 +96,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  integer                     :: cplex_rhoij
  integer                     :: ipert, idir
  integer                     :: my_natom
- integer                     :: nspden_rhoij, zeromag_rhoij
+ integer                     :: nspden_rhoij
  integer                     :: tim_mkrho
  real(dp)                    :: compch_fft
  !arrays
@@ -133,11 +133,10 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    if (my_natom/=dtset%natom) then
      ABI_MALLOC(pawrhoij_unsym,(dtset%natom))
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij, &
-                             & zeromag_rhoij=zeromag_rhoij, &
                              & nspden=dtset%nspden,spnorb=dtset%pawspnorb,        &
                              & cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor, &
-        & dtset%nsppol,dtset%typat,pawtab=tdks%pawtab,zeromag=zeromag_rhoij,use_rhoijp=0)
+                       & dtset%nsppol,dtset%typat,pawtab=tdks%pawtab,use_rhoijp=0)
    else
        pawrhoij_unsym => tdks%pawrhoij
    end if

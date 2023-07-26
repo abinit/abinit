@@ -176,7 +176,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  integer :: optcut,optgr0,optgr1,optgr2,optrad,option,optorth
  integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
  integer :: psp_gencond,pead,qphase_rhoij,rdwr,rdwrpaw,spaceworld,tim_mkrho,timrev
- integer :: use_sym,usecprj,usexcnhat,zeromag_rhoij
+ integer :: use_sym,usecprj,usexcnhat
  logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
@@ -750,9 +750,9 @@ end if
      ABI_MALLOC(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-&         zeromag_rhoij=zeromag_rhoij,nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_read,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&         dtset%nsppol,dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab)
+&                        dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab)
    else
      ABI_MALLOC(pawrhoij_read,(0))
    end if

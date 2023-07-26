@@ -1276,7 +1276,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 !Local variables-------------------------------
 !scalars
  integer :: bantot,date,nkpt,npsp,ntypat,nsppol,nspinor
- integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij,zeromag_rhoij
+ integer :: cplex_rhoij,nspden_rhoij,qphase_rhoij
  integer :: idx,isppol,ikpt,iband,ipsp
  character(len=8) :: date_time
 
@@ -1377,20 +1377,20 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
 
  if (psps%usepaw==1)then
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-        zeromag_rhoij=zeromag_rhoij,nspden=nspden,spnorb=pawspnorb,cpxocc=pawcpxocc,qpt=qptn)
+                             nspden=nspden,spnorb=pawspnorb,cpxocc=pawcpxocc,qpt=qptn)
    ABI_MALLOC(hdr%pawrhoij,(natom))
    ! Values of nspden/nspinor/nsppol are dummy ones; they are overwritten later (by hdr_update)
    if (present(comm_atom)) then
      if (present(mpi_atmtab)) then
        call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
-            zeromag=zeromag_rhoij,pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
+                           pawtab=pawtab,comm_atom=comm_atom,mpi_atmtab=mpi_atmtab)
      else
        call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
-            zeromag=zeromag_rhoij,pawtab=pawtab,comm_atom=comm_atom)
+                           pawtab=pawtab,comm_atom=comm_atom)
      end if
    else
      call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
-          zeromag=zeromag_rhoij,pawtab=pawtab)
+                         pawtab=pawtab)
    end if
  end if
 
@@ -2425,7 +2425,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
 !Local variables-------------------------------
 !scalars
  integer :: bantot,cplex_rhoij,iatom,ierr,index,index2,ipsp,iq,iq0,ispden,list_size,list_size2
- integer :: lmn2_size,natom,nkpt,npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat,qphase,zeromag
+ integer :: lmn2_size,natom,nkpt,npsp,nsel,nspden,nsppol,nsym,nrhoij,ntypat,qphase
  character(len=fnlen) :: list_tmp
 !arrays
  integer,allocatable :: list_int(:)
@@ -2687,7 +2687,6 @@ subroutine hdr_bcast(hdr, master, me, comm)
      cplex_rhoij=hdr%pawrhoij(1)%cplex_rhoij
      qphase=hdr%pawrhoij(1)%qphase
      nspden=hdr%pawrhoij(1)%nspden
-     zeromag=hdr%pawrhoij(1)%zeromag
      do iatom=1,natom
        nrhoij=nrhoij+hdr%pawrhoij(iatom)%nrhoijsel
      end do
@@ -2726,7 +2725,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
      index=0;index2=0
      ABI_MALLOC(hdr%pawrhoij,(natom))
      call pawrhoij_alloc(hdr%pawrhoij,cplex_rhoij,nspden,hdr%nspinor,hdr%nsppol,hdr%typat,&
-                         lmnsize=hdr%lmn_size,qphase=qphase,zeromag=zeromag)
+                         lmnsize=hdr%lmn_size,qphase=qphase)
      do iatom=1,natom
        nsel=list_int(1+index)
        lmn2_size=hdr%pawrhoij(iatom)%lmn2_size
