@@ -2527,6 +2527,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        end if
        ncerr = nf90_inq_varid(ncid, "pawrhoij_zeromag", zeromag_id)
        if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_def_var(ncid, "pawrhoij_zeromag", NF90_INT, zeromag_id))
          NCF_CHECK(nf90_put_var(ncid, zeromag_id, my_zeromag))
        end if
        if (bsize > 0) then
