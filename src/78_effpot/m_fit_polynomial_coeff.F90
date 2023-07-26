@@ -877,6 +877,9 @@ contains
     !Use fixcoeff
     !ncoeff_preselected store the curent number of coefficient in the model
     !Do not reset this variable...
+
+    ncoeff_model = eff_pot%anharmonics_terms%ncoeff
+    ncoeff_tot = ncoeff_tot + ncoeff_model
     ncoeff_preselected = 0
 
     ! add bounding terms to the list of coefficients to keep
@@ -1143,7 +1146,6 @@ contains
     gf_values_iter(:,:) = zero
     !Store initial gf_values as first value in gf_values_iter
     gf_values_iter(:,1) = gf_values(:,1)
-    ncoeff_tot = ncoeff_tot + ncoeff_model
   end subroutine initialize_gf
 
   subroutine select_one_by_one()
@@ -1381,9 +1383,15 @@ contains
          ! FIXME: Crashes here when fixcoeff.
          ! check size of coeff. and order are correctly set.
          ! allorder is gathered from myorder.
+         print *, "sizeof allorder:", size(allorder)
+         print *, "size of isbanned:", size(isbanned)
+         print *, "max allorder:", maxval(allorder)
+         print *, "ncoeff_tot:", ncoeff_tot
+         print *, "n_remaining:", n_remaining
          do i=n_remaining+1, ncoeff_tot
            isbanned(allorder(i))=.True.
          end do
+
          if(my_rank==0) then
            do i=1, min(30,size(allorder))
              print *, "index=", i, "icoeff=", allorder(i), "  GF=", allgf(i)
@@ -1766,7 +1774,6 @@ contains
 
      ! If Wanted open the anharmonic_terms_file and write header
      filename = "TRS_fit_diff"
-     ncoeff_model = eff_pot%anharmonics_terms%ncoeff
      if(need_prt_anh .and. ncoeff_model > 0 )then
        call effective_potential_writeAnhHead(ncoeff_model,filename,&
          &                                     eff_pot%anharmonics_terms)
