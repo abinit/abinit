@@ -387,7 +387,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,istep_fock_outer,istep_mix,itypat,izero,me,mgfftdiel,mvdum !lmn2_size,
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
- integer :: optene,optfr,option,optres,prtfor,qphase_rhoij,quit,quit_sum,qzero
+ integer :: optene,optfr,option,optres,prtfor,qphase_rhoij,quit,quit_sum,qzero,zeromag_rhoij
  integer :: my_quit,quitsum_request,timelimit_exit,varid,ncerr,ncid
  integer ABI_ASYNC :: quitsum_async
  integer :: rdwrpaw,spaceComm,sz1,sz2,usexcnhat,with_vectornd,Z_kappa
@@ -831,11 +831,12 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        ABI_MALLOC(pawrhoijfermi,(my_natom*psps%usepaw))
        if (psps%usepaw==1) then
          !Q phase should be 1 because Q=0
-         call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-&                              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
-         call pawrhoij_alloc(pawrhoijfermi,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&         dtset%nsppol,dtset%typat,pawtab=pawtab,mpi_atmtab=mpi_enreg%my_atmtab,&
-&         comm_atom=mpi_enreg%comm_atom)
+         call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij, &
+&             zeromag_rhoij=zeromag_rhoij,nspden_rhoij=nspden_rhoij,nspden=dtset%nspden, &
+&             spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+         call pawrhoij_alloc(pawrhoijfermi,cplex_rhoij,nspden_rhoij,dtset%nspinor, &
+&         dtset%nsppol,dtset%typat,zeromag=zeromag_rhoij,pawtab=pawtab, &
+&         mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
        end if
 
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
@@ -3666,7 +3667,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: ispden,isppol,istr,istwf_k
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,npw1_k,npw_k,nspden_rhoij
- integer :: optfr,qphase_rhoij,spaceworld
+ integer :: optfr,qphase_rhoij,spaceworld,zeromag_rhoij
  integer :: nband_me
  logical :: paral_atom,qne0
  real(dp) :: arg,fe1norm,invfe1norm,wtk_k
@@ -3765,10 +3766,12 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
    if (paral_atom) then
      ABI_MALLOC(pawrhoijfermi_unsym,(natom))
      !Q phase should be 1 because Q=0
-     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-&                              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,&
+&         zeromag_rhoij=zeromag_rhoij,nspden_rhoij=nspden_rhoij,nspden=dtset%nspden,&
+&         spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoijfermi_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,&
+&     pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
      call pawrhoij_init_unpacked(pawrhoijfermi_unsym)
    end if

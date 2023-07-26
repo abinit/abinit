@@ -272,8 +272,8 @@ subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,p
 &                    pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
 &                    mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,&
 &                    pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                    qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
-&                    use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                    qphase=pawrhoij(1)%qphase,zeromag=pawrhoij(1)%zeromag,&
+&                    use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
    end if
    electronpositron%lmmax=0
    do ii=1,dtset%ntypat
@@ -555,8 +555,8 @@ subroutine exchange_electronpositron(cg,cprj,dtset,eigen,electronpositron,energi
       call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
 &                      pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,typ, &
 &                      lmnsize=nlmn,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
-&                      qphase=pawrhoij(1)%qphase,use_rhoij_=pawrhoij(1)%use_rhoij_,&
-&                      use_rhoijres=pawrhoij(1)%use_rhoijres)
+&                      qphase=pawrhoij(1)%qphase,zeromag=pawrhoij(1)%zeromag,&
+&                      use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres)
       ABI_FREE(typ)
       ABI_FREE(nlmn)
       call pawrhoij_copy(pawrhoij,pawrhoij_tmp)

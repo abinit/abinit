@@ -563,7 +563,7 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
        if (size(pawrhoij)>0.and.size(electronpositron%pawrhoij_ep)>0) then
          ABI_MALLOC(pawrhoij_tmp,(my_natom))
          call pawrhoij_alloc(pawrhoij_tmp,pawrhoij(1)%cplex_rhoij,pawrhoij(1)%nspden,&
-&         pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,&
+&         pawrhoij(1)%nspinor,pawrhoij(1)%nsppol,dtset%typat,zeromag=pawrhoij(1)%zeromag,&
 &         pawtab=pawtab,ngrhoij=pawrhoij(1)%ngrhoij,nlmnmix=pawrhoij(1)%lmnmix_sz,&
 &         use_rhoij_=pawrhoij(1)%use_rhoij_,use_rhoijres=pawrhoij(1)%use_rhoijres, &
 &         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
@@ -1881,7 +1881,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: nproc_band,nproc_fft,nproc_spkpt,nproc_kptband,npw_k,npw_k_pos
  integer :: nspden_rhoij,option,tag,unit_doppler
  integer :: tim_fourdp=0,tim_fourwf=-36
- integer :: ylmr_normchoice,ylmr_npts,ylmr_option
+ integer :: ylmr_normchoice,ylmr_npts,ylmr_option,zeromag_rhoij
  logical,parameter :: include_nhat_in_gamma=.false.,state_dependent=.true.
  logical,parameter :: kgamma_only_positron=.true.,wf_conjugate=.false.
  logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev,abinitcorewf,xmlcorewf
@@ -2357,11 +2357,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
    ABI_MALLOC(rhor_dop_el,(nfft))
    if (dtset%usepaw==1) then
      ABI_MALLOC(pawrhoij_dop_el,(dtset%natom))
-     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,&
 &            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_dop_el,cplex_rhoij,nspden_rhoij,&
                          dtset%nspinor,dtset%nsppol,dtset%typat,&
-                         pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)
+                         zeromag=zeromag_rhoij,pawtab=pawtab,use_rhoij_=1,use_rhoijp=1)
 !    Cancel distribution of PAW data over atomic sites
 !    We use here pawrhoij because polifetime routine
 !    detects by itself the particle described by pawrhoij

@@ -145,7 +145,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
  integer :: ierr,usexcnhat
- integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
+ integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,zeromag_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
  !real(dp) :: cpu,wall,gflops
@@ -236,9 +236,10 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    cplex_dij=dtset%nspinor; cplex=1; ndij=1
 
    ABI_MALLOC(pawrhoij,(cryst%natom))
-   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,&
                              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
-   call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,pawtab=pawtab)
+   call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,cryst%typat,&
+&                      zeromag=zeromag_rhoij,pawtab=pawtab)
 
    ! Initialize values for several basic arrays
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
