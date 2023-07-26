@@ -1116,9 +1116,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
    if (ohdr%usepaw == 1) then
      ABI_MALLOC(pawrhoij_file, (ohdr%natom))
      call pawrhoij_nullify(pawrhoij_file)
-     call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, &
-&         ohdr%pawrhoij(1)%nspinor, ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, &
-&         qphase=ohdr%pawrhoij(1)%qphase, zeromag=ohdr%pawrhoij(1)%zeromag)
+     call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+         ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
      call pawrhoij_copy(ohdr%pawrhoij, pawrhoij_file)
    end if
 
@@ -1149,9 +1148,8 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
      if (my_rank /= master) then
        ABI_MALLOC(pawrhoij_file, (ohdr%natom))
        call pawrhoij_nullify(pawrhoij_file)
-       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, &
-&           ohdr%pawrhoij(1)%nspinor, ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, &
-&           qphase=ohdr%pawrhoij(1)%qphase, zeromag=ohdr%pawrhoij(1)%zeromag)
+       call pawrhoij_alloc(pawrhoij_file, ohdr%pawrhoij(1)%cplex_rhoij, ohdr%pawrhoij(1)%nspden, ohdr%pawrhoij(1)%nspinor, &
+            ohdr%pawrhoij(1)%nsppol, ohdr%typat, lmnsize=ohdr%lmn_size, qphase=ohdr%pawrhoij(1)%qphase)
      end if
      if (size(ohdr%pawrhoij) /= size(pawrhoij)) then
        call pawrhoij_copy(ohdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &

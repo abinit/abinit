@@ -144,7 +144,7 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 !scalars
  integer :: cplex_rhoij,dplex,iatom,ii,ind1,ind1new,ind2,ind2new,iq,iq0,irhoij,ispden,itypat,jrhoij,klmn
  integer :: lmn2_size,nselect,nspden_rhoij,optatm,optdyfr,opteltfr,optgr,option,optn,optn2
- integer :: optstr,optv,qphase_rhoij,zeromag_rhoij
+ integer :: optstr,optv,qphase_rhoij
  real(dp) :: a11,a12,a22,a33,alpha,b1,b2,beta,detA,fact,ratio1,ratio2
  logical :: hasmoved,usegauss
  character(len=500) :: message
@@ -361,10 +361,9 @@ subroutine extraprho(atindx,atindx1,cg,cprj,dtset,gmet,gprimd,gsqcut,istep,&
 
    if (ind2==0) then
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-&         zeromag_rhoij=zeromag_rhoij,nspden=dtset%nspden,spnorb=dtset%pawspnorb,&
-&         cpxocc=dtset%pawcpxocc)
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(scf_history%pawrhoij(:,ind1new),cplex_rhoij,nspden_rhoij,&
-&     dtset%nspinor,dtset%nsppol,dtset%typat,zeromag=zeromag_rhoij,pawtab=pawtab,&
+&     dtset%nspinor,dtset%nsppol,dtset%typat,pawtab=pawtab,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
 

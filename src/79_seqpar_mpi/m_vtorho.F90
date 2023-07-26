@@ -364,7 +364,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
- integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev,zeromag_rhoij
+ integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
@@ -1755,10 +1755,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(555,1,tsec)
      if (paral_atom) then
        ABI_MALLOC(pawrhoij_unsym,(natom))
-       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,&
+       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
 &                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
        call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,zeromag=zeromag_rhoij)
+&       dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0)
      else
        pawrhoij_unsym => pawrhoij
      end if
@@ -1782,6 +1782,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call pawcprj_free(cprj_tmp)
        ABI_FREE(cprj_tmp)
      end if
+!TESTMT
+     if (dtset%nspden==1.and.my_natom>=1) then
+       if (pawrhoij_unsym(1)%nspden==4.and.pawrhoij_unsym(1)%cplex_rhoij==2) then
+         do ii=1,my_natom
+           do iplex=1,pawrhoij(ii)%lmn2_size
+             pawrhoij_unsym(ii)%rhoij_(2*iplex-1,2:4)=zero
+           end do
+         end do
+       end if
+     end if
+!TESTMT
      call timab(555,2,tsec)
 !    Build symetrized packed rhoij and compensated pseudo density
      cplex=1;ipert=0;idir=0;qpt(:)=zero

@@ -269,7 +269,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  integer :: ipert,ipositron,iresid,ispden,isppol,istwf_k,izero
  integer :: me_distrb,mpi_comm_sphgrid,my_ikpt,my_nspinor,n1,n2,n3,n4,n5,n6
  integer :: nband_k,nblockbd,nfftotf,nkpg,nkxc,nk3xc,nnlout,npw_k,nspden_rhoij,option
- integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop,zeromag_rhoij
+ integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,usetimerev,with_vxctau
  logical :: non_magnetic_xc,wvlbigdft=.false.
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
@@ -541,10 +541,9 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (paral_atom) then
      ABI_MALLOC(pawrhoij_unsym,(dtset%natom))
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-&         zeromag_rhoij=zeromag_rhoij,nspden=dtset%nspden,spnorb=dtset%pawspnorb,&
-&         cpxocc=dtset%pawcpxocc)
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,pawtab=pawtab,zeromag=zeromag_rhoij,use_rhoijp=0,use_rhoij_=1)
+&     dtset%nsppol,dtset%typat,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
    else
      pawrhoij_unsym => pawrhoij
      call pawrhoij_init_unpacked(pawrhoij_unsym)

@@ -195,7 +195,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  integer :: nbsc,ndij,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw,nhatgrdim,nkxc,nkxc1,nprocs,nscf,nspden_rhoij,nzlmopt,optene
  integer :: optcut,optgr0,optgr1,optgr2,option,option_test,option_dij,optrad,psp_gencond
- integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat,zeromag_rhoij
+ integer :: my_rank,rhoxsp_method,comm,use_aerhor,use_umklp,usexcnhat
  integer :: ioe0j,spin,io,jb,nomega_sigc
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
@@ -442,10 +442,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    cplex_dij = dtset%nspinor; cplex = 1; ndij = 1
 
    ABI_MALLOC(ks_pawrhoij, (cryst%natom))
-   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, zeromag_rhoij=zeromag_rhoij, &
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, &
                              nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=Dtset%pawcpxocc)
-   call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, dtset%nsppol, &
-&                      cryst%typat, zeromag=zeromag_rhoij, pawtab=pawtab)
+   call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, dtset%nsppol, cryst%typat, pawtab=pawtab)
 
    ! Test if we have to call pawinit
    gnt_option = 1; if (dtset%pawxcdev == 2 .or. (dtset%pawxcdev == 1 .and. dtset%positron /= 0)) gnt_option = 2
@@ -4170,7 +4169,7 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
 !scalars
  integer,parameter :: ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: choice,cplex,cplex_rhoij,has_dijU,has_dijso,iat,ider
- integer :: izero,nkxc1,nspden_rhoij,nzlmopt,option,usexcnhat,zeromag_rhoij
+ integer :: izero,nkxc1,nspden_rhoij,nzlmopt, option,usexcnhat
  character(len=500) :: msg
 !arrays
  real(dp) :: k0(3)
@@ -4184,10 +4183,10 @@ subroutine paw_qpscgw(Wfd,nscf,nfftf,ngfftf,Dtset,Cryst,Kmesh,Psps,qp_ebands, &
  usexcnhat=MAXVAL(Pawtab(:)%usexcnhat)
  !
  ! Calculate new rhoij_qp from updated Cprj_ibz, note use_rhoij_=1.
- call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,&
+ call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
                            nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
  call pawrhoij_alloc(QP_pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,&
-                     pawtab=Pawtab,zeromag=zeromag_rhoij,use_rhoij_=1,use_rhoijres=1)
+                     pawtab=Pawtab,use_rhoij_=1,use_rhoijres=1)
 
  ! FIXME kptop should be passed via Kmesh, in GW time reversal is always assumed.
  call wfd%pawrhoij(Cryst,qp_ebands,Dtset%kptopt,QP_pawrhoij,Dtset%pawprtvol)

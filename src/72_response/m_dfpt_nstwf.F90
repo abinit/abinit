@@ -292,7 +292,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
  integer :: ispden,isppol,istwf_k,istr,istr1,itypat,jband,jj,kdir1,kpert1,master,mcgq,mcprjq
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
- integer :: nddir,nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij,zeromag_rhoij
+ integer :: nddir,nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  integer :: nband_me, iband_me, jband_me, iband_
@@ -772,15 +772,14 @@ has_vectornd = (with_vectornd .EQ. 1)
      do kdir1=1,mdir1
        idir1=jdir1(kdir1)
        drho1wfr(:,:,idir1)=zero
-       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,&
-&           zeromag_rhoij=zeromag_rhoij,nspden_rhoij=nspden_rhoij,nspden=dtset%nspden,&
-&           spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+&                            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
        call pawrhoij_alloc(pawdrhoij1(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&       dtset%nsppol,dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
-&       use_rhoijp=1,use_rhoij_=0,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
+&       dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=1,use_rhoij_=0,&
+&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=my_atmtab)
        if (paral_atom) then
          call pawrhoij_alloc(pawdrhoij1_unsym(:,idir1),cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&         dtset%nsppol,dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
+&         dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
 &         use_rhoijp=0,use_rhoij_=1)
        else
          call pawrhoij_init_unpacked(pawdrhoij1_unsym(:,idir1))

@@ -182,7 +182,7 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
  integer :: ndij !,ndim,nfftf,nfftf_tot,nkcalc,gwc_nfft,gwc_nfftot,gwx_nfft,gwx_nfftot
  integer :: ngrvdw, nhatgrdim, nkxc, nspden_rhoij, optene !nzlmopt,
  integer :: optcut, optgr0, optgr1, optgr2, optrad, psp_gencond !option,
- integer :: rhoxsp_method, usexcnhat, zeromag_rhoij !, use_aerhor,use_umklp
+ integer :: rhoxsp_method, usexcnhat !, use_aerhor,use_umklp
  !real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
  real(dp) :: vxcavg !,vxcavg_qp ucvol,
@@ -359,10 +359,9 @@ subroutine gwr_driver(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps,
    cplex_dij = dtset%nspinor; cplex = 1; ndij = 1
 
    ABI_MALLOC(ks_pawrhoij, (cryst%natom))
-   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, zeromag_rhoij=zeromag_rhoij, &
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij, nspden_rhoij=nspden_rhoij, &
                              nspden=dtset%nspden, spnorb=dtset%pawspnorb, cpxocc=dtset%pawcpxocc)
-   call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, &
-&                      dtset%nsppol, cryst%typat, zeromag=zeromag_rhoij, pawtab=pawtab)
+   call pawrhoij_alloc(ks_pawrhoij, cplex_rhoij, nspden_rhoij, dtset%nspinor, dtset%nsppol, cryst%typat, pawtab=pawtab)
 
    ! Test if we have to call pawinit
    gnt_option = 1; if (dtset%pawxcdev == 2 .or. (dtset%pawxcdev == 1 .and. dtset%positron /= 0)) gnt_option = 2

@@ -281,7 +281,7 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
  integer :: ib,ii,ik,isppol,nbandR,nkibzR,nsppolR,unqps,my_rank,ispden
  integer :: ifft,n1,n2,n3,ir1,ir2,ir3,ios
  integer :: cplex_fft,optin,optout,nfft_found
- integer :: iatom,natomR,nspdenR,ntypatR,itypat,zeromagR
+ integer :: iatom,natomR,nspdenR,ntypatR,itypat
  real(dp) :: uerr,nelect_qps,ratio
  logical,parameter :: use_FFT_interpolation=.TRUE.
  logical :: ltest
@@ -467,9 +467,8 @@ subroutine rdqps(BSt,fname,usepaw,nspden,dimrho,nscf,&
          ABI_WARNING(msg)
          call wrtout(ab_out,msg)
          ! Init dummy rhoij just to avoid problems in sigma when rhoij is freed.
-         call pawrhoij_inquire_dim(nspden_rhoij=nspdenR, zeromag_rhoij=zeromagR,nspden=nspden)
-         call pawrhoij_alloc(Pawrhoij,1,nspdenR,BSt%nspinor,BSt%nsppol,Cryst%typat, &
-&                            zeromag=zeromagR,pawtab=Pawtab)
+         call pawrhoij_inquire_dim(nspden_rhoij=nspdenR, nspden=nspden)
+         call pawrhoij_alloc(Pawrhoij,1,nspdenR,BSt%nspinor,BSt%nsppol,Cryst%typat,pawtab=Pawtab)
          close(unqps)
          RETURN
        end if

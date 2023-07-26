@@ -565,7 +565,7 @@ end subroutine pawmkrhoij
 !scalars
  integer :: cplex_rhoij,iatm,iatom,iatom1,ilmn,iplex,iq0,j0lmn,jlmn,klmn,klmn_im,klmn_re
  integer :: mu,my_comm_atom,ncpgr,nspden_rhoij
- logical :: compute_impart,compute_impart_cplex,do_not_force_zero_mag,substract_diagonal
+ logical :: compute_impart,compute_impart_cplex,substract_diagonal
  logical :: my_atmtab_allocated,paral_atom
  real(dp) :: ro11_im,ro11_re,ro12_im,ro12_re,ro21_im,ro21_re,ro22_im,ro22_re,weight,weight_2
  character(len=500) :: message
@@ -621,7 +621,6 @@ end subroutine pawmkrhoij
  end if
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1) weight=half*weight
  if (pawrhoij(1)%nspden==2.and.pawrhoij(1)%nsppol==1.and.nspinor==1.and.present(occ_k_2)) weight_2=half*weight_2
- do_not_force_zero_mag=(pawrhoij(1)%zeromag==0)  ! When pawrhoij%nspden=4 and dtset%nspden=1
 
  if (option==1) then
 
@@ -714,18 +713,14 @@ end subroutine pawmkrhoij
                ro12_re=ro12_re+cpi0(iplex,2)*cpj0(iplex,1)
                ro21_re=ro21_re+cpi0(iplex,1)*cpj0(iplex,2)
              end do
-             if (do_not_force_zero_mag) then
-               pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
-               pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
-             end if
+             pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
+             pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
              if (cplex==2) then
                !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                ro12_im=cpi0(1,2)*cpj0(2,1)-cpi0(2,2)*cpj0(1,1)
                ro21_im=cpi0(1,1)*cpj0(2,2)-cpi0(2,1)*cpj0(1,2)
-               if (do_not_force_zero_mag) then
-                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
-               end if
+               pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
              end if
            end if
            if (present(occ_k_2)) then
@@ -831,18 +826,14 @@ end subroutine pawmkrhoij
                ro12_re=ro12_re+cpj0(iplex,1)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,1)
                ro21_re=ro21_re+cpj0(iplex,2)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,2)
              end do
-             if (do_not_force_zero_mag) then
-               pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
-               pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
-             end if
+             pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
+             pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
              if (cplex==2) then
                !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                ro12_im=cpj0(2,1)*cpi1(1,2)-cpi1(2,2)*cpj0(1,1)+cpi0(1,2)*cpj1(2,1)-cpj1(1,1)*cpi0(2,2)
                ro21_im=cpj0(2,2)*cpi1(1,1)-cpi1(2,1)*cpj0(1,2)+cpi0(1,1)*cpj1(2,2)-cpj1(1,2)*cpi0(2,1)
-               if (do_not_force_zero_mag) then
-                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
-               end if
+               pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
              end if
            end if
            if (compute_impart) then
@@ -952,10 +943,8 @@ end subroutine pawmkrhoij
                    ro21_re=ro21_re-cpi0(iplex,1)*cpj0(iplex,2)
                  end do
                end if
-               if (do_not_force_zero_mag) then
-                 pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
-                 pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
-               end if
+               pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
+               pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
                if (cplex==2) then
                  !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                  ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
@@ -965,9 +954,7 @@ end subroutine pawmkrhoij
                    ro12_im=ro12_im-cpi0(1,2)*cpj0(2,1)+cpi0(2,2)*cpj0(1,1)
                    ro21_im=ro21_im-cpi0(1,1)*cpj0(2,2)+cpi0(2,1)*cpj0(1,2)
                  end if
-                 if (do_not_force_zero_mag) then
-                   pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
-                 end if
+                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
                end if
              end if
              if (compute_impart) then
@@ -1066,18 +1053,14 @@ end subroutine pawmkrhoij
                  ro12_re=ro12_re+dcpi0(iplex,2,mu)*cpj0(iplex,1)+cpi0(iplex,2)*dcpj0(iplex,1,mu)
                  ro21_re=ro21_re+dcpi0(iplex,1,mu)*cpj0(iplex,2)+cpi0(iplex,1)*dcpj0(iplex,2,mu)
                end do
-               if (do_not_force_zero_mag) then
-                 pawrhoij(iatom)%grhoij(mu,klmn_re,4)=pawrhoij(iatom)%grhoij(mu,klmn_re,4)+weight*(ro11_re-ro22_re)
-                 pawrhoij(iatom)%grhoij(mu,klmn_re,2)=pawrhoij(iatom)%grhoij(mu,klmn_re,2)+weight*(ro12_re+ro21_re)
-               end if
+               pawrhoij(iatom)%grhoij(mu,klmn_re,4)=pawrhoij(iatom)%grhoij(mu,klmn_re,4)+weight*(ro11_re-ro22_re)
+               pawrhoij(iatom)%grhoij(mu,klmn_re,2)=pawrhoij(iatom)%grhoij(mu,klmn_re,2)+weight*(ro12_re+ro21_re)
                if (cplex==2) then
                  !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                  ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                  ro12_im=dcpi0(1,2,mu)*cpj0(2,1)+cpi0(1,2)*dcpj0(2,1,mu)-dcpi0(2,2,mu)*cpj0(1,1)-cpi0(2,2)*dcpj0(1,1,mu)
                  ro21_im=dcpi0(1,1,mu)*cpj0(2,2)+cpi0(1,1)*dcpj0(2,2,mu)-dcpi0(2,1,mu)*cpj0(1,2)-cpi0(2,1)*dcpj0(1,2,mu)
-                 if (do_not_force_zero_mag) then
-                   pawrhoij(iatom)%grhoij(mu,klmn_re,3)=pawrhoij(iatom)%grhoij(mu,klmn_re,3)+weight*(ro21_im-ro12_im)
-                 end if
+                 pawrhoij(iatom)%grhoij(mu,klmn_re,3)=pawrhoij(iatom)%grhoij(mu,klmn_re,3)+weight*(ro21_im-ro12_im)
                end if
              end if
              if (compute_impart) then
@@ -1176,7 +1159,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
  integer :: cplex_rhoij,iatom,iatom_rhoij,ilmn,ispden,itypat,j0lmn,jl,jlmn,jspden
  integer :: klmn,klmn1,ln,lnspinat0,my_comm_atom
  integer :: ngrhoij0,nlmnmix0,nselect,nselect1,nspden_rhoij,qphase_rhoij
- integer :: use_rhoij_0,use_rhoijres0,zeromag_rhoij
+ integer :: use_rhoij_0,use_rhoijres0
  real(dp) :: ratio,ro,roshift,zratio,zz
  logical :: my_atmtab_allocated,paral_atom,spinat_zero,test_exexch,test_pawu,test_lnspinat
 !arrays
@@ -1201,7 +1184,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
  call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
  call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-&                zeromag_rhoij=zeromag_rhoij,nspden=nspden,spnorb=pawspnorb,cpxocc=cpxocc,cplex=qphase)
+&                          nspden=nspden,spnorb=pawspnorb,cpxocc=cpxocc,cplex=qphase)
 
  ratio=one;if (nspden_rhoij==2) ratio=half
  spinat_zero=all(abs(spinat(:,:))<tol10)
@@ -1214,12 +1197,10 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
    if (paral_atom) then
      call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,&
 &     ngrhoij=ngrhoij0,nlmnmix=nlmnmix0,use_rhoij_=use_rhoij_0,use_rhoijres=use_rhoijres0,&
-&     qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
-&     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
+&     qphase=qphase_rhoij,pawtab=pawtab,comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
    else
      call pawrhoij_alloc(pawrhoij,cplex_rhoij,nspden_rhoij,nspinor,nsppol,typat,qphase=qphase_rhoij,&
-&     zeromag=zeromag_rhoij,pawtab=pawtab,ngrhoij=ngrhoij0,nlmnmix=nlmnmix0,&
-&     use_rhoij_=use_rhoij_0,use_rhoijres=use_rhoijres0)
+&     pawtab=pawtab,ngrhoij=ngrhoij0,nlmnmix=nlmnmix0,use_rhoij_=use_rhoij_0,use_rhoijres=use_rhoijres0)
    end if
  end if
 
@@ -1282,7 +1263,6 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
          end if
        end if
      else if (nspden_rhoij==4.and.ispden>=2) then
-       if (pawrhoij(iatom_rhoij)%zeromag==1) ratio=zero
        roshift=zero
        if(abs(zz)>tol12)then
          zratio=spinat(ispden-1,iatom)/zz
