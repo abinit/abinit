@@ -293,7 +293,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nddir,nkpg,nkpg1
  integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
- integer :: nband_me
+ integer :: nband_me,zeromag_rhoij
  logical :: has_vectornd,paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -427,10 +427,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  if (psps%usepaw==1.and.iscf_mod>0) then
    if (paral_atom) then
      ABI_MALLOC(pawrhoij1_unsym,(natom))
-     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-&                          nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,&
+&         nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,nspden=dtset%nspden,&
+&         spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,&
+&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
 &     use_rhoijp=0,use_rhoij_=1)
    else
      pawrhoij1_unsym => pawrhoij1

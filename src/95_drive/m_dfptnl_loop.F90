@@ -230,7 +230,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,iatom,idir_dkde,ierr,ii,ireadwf
  integer :: mcg,mpsang,n1,n2,n3,n3xccc,ndir,nfftotf,nhat1grdim,npert_phon,nspden,nspden_rhoij,nwffile
  integer :: option,optene,optfr,optorth,pert1case,pert2case,pert3case
- integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat
+ integer :: qphase_rhoij,rdwrpaw,second_idir,timrev,usexcnhat,zeromag_rhoij
  logical :: non_magnetic_xc
  real(dp) :: dummy_real,dummy_real2, dummy_real3, ecut_eff
  character(len=500) :: message
@@ -314,8 +314,9 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  rdwrpaw=psps%usepaw
 !Allocate 1st-order PAW occupancies (rhoij1)
  if (psps%usepaw==1) then
-   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-&                        nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,&
+&                nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,nspden=dtset%nspden,&
+&                spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
    ABI_MALLOC(pawrhoij1_i1pert,(natom))
    ABI_MALLOC(pawrhoij1_i2pert,(natom))
    ABI_MALLOC(pawrhoij1_i3pert,(natom))
@@ -323,11 +324,14 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
    call pawrhoij_nullify(pawrhoij1_i2pert)
    call pawrhoij_nullify(pawrhoij1_i3pert)
    call pawrhoij_alloc(pawrhoij1_i1pert,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&   dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&       dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
+&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call pawrhoij_alloc(pawrhoij1_i2pert,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&   dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&       dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
+&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call pawrhoij_alloc(pawrhoij1_i3pert,cplex_rhoij,nspden_rhoij,dtset%nspinor,dtset%nsppol,&
-&   dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&       dtset%typat,qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab,&
+&       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  else
    ABI_MALLOC(pawrhoij1_i1pert,(0))
    ABI_MALLOC(pawrhoij1_i2pert,(0))

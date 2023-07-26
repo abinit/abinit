@@ -247,7 +247,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  integer :: idir0,idir_getgh2c,idir_phon,idir_elfd,ipert_phon,ipert_elfd
  integer :: ia,iatm,ibg,ii,ikg,ikg1,ikpt,ilm,isppol,istwf_k,jband
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,nnlout,nsp,nspden_rhoij,npert_phon,npw_k,npw1_k,nzlmopt
- integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,qphase_rhoij,debug_mode
+ integer :: offset_cgi,offset_cgj,offset_eig0,option,paw_opt,qphase_rhoij,zeromag_rhoij,debug_mode
  integer :: signs,size_wf,size_cprj,spaceComm,typat_ipert_phon,usepaw,useylmgr1
  real(dp) :: arg,dot1i,dot1r,dot2i,dot2r,doti,dotr,e3tot,lagi,lagi_paw,lagr,lagr_paw
  real(dp) :: sumi,sum_psi1H1psi1,sum_psi1H1psi1_i
@@ -322,20 +322,22 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
    end if
    ABI_MALLOC(pawrhoij21,(natom))
    call pawrhoij_nullify(pawrhoij21)
-   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
-&                            nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
+   call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij, &
+&           nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,nspden=dtset%nspden, &
+&           spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
    call pawrhoij_alloc(pawrhoij21,cplex_rhoij,nspden_rhoij,nspinor,dtset%nsppol,dtset%typat,&
-&       qphase=qphase_rhoij,pawtab=pawtab,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&                      qphase=qphase_rhoij,zeromag=zeromag_rhoij,pawtab=pawtab, &
+&                      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    ABI_MALLOC(cwaveprj0,(natom,size_cprj))
    ABI_MALLOC(cwaveprj1,(natom,size_cprj))
    call pawcprj_alloc(cwaveprj0,1,gs_hamkq%dimcprj)
    call pawcprj_alloc(cwaveprj1,1,gs_hamkq%dimcprj)
 !   if (paral_atom) then
 !     ABI_MALLOC(pawrhoij1_unsym,(natom))
-!     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,&
+!     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,qphase_rhoij=qphase_rhoij,nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,&
 !&                              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cplex=cplex,cpxocc=dtset%pawcpxocc)
 !     call pawrhoij_alloc(pawrhoij1_unsym,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-!&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,use_rhoijp=0,use_rhoij_=1)
+!&     dtset%nsppol,dtset%typat,qphase=qphase_rhoij,pawtab=pawtab,zeromag=zeromag_rhoij,use_rhoijp=0,use_rhoij_=1)
 !   else
    pawrhoij21_unsym => pawrhoij21
    call pawrhoij_init_unpacked(pawrhoij21_unsym)

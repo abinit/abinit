@@ -224,7 +224,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
  integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
- integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
+ integer :: usexcnhat,use_sym,vloc_method,zeromag_rhoij,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
@@ -712,10 +712,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (rdwrpaw/=0) then
      ABI_MALLOC(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
-     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,zeromag_rhoij=zeromag_rhoij,&
 &              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_read,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&                        dtset%nsppol,dtset%typat,pawtab=pawtab)
+&                        dtset%nsppol,dtset%typat,zeromag=zeromag_rhoij,pawtab=pawtab)
    else
      ABI_MALLOC(pawrhoij_read,(0))
    end if

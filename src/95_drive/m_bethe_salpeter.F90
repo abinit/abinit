@@ -186,7 +186,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  integer :: choice
  integer :: ider
  integer :: usexcnhat,nfft_osc,mgfft_osc
- integer :: isym,izero
+ integer :: isym,izero,zeromag_rhoij
  integer :: optcut,optgr0,optgr1,optgr2,option,optrad,optrhoij,psp_gencond
  integer :: ngrvdw,nhatgrdim,nkxc1,nprocs,nspden_rhoij,nzlmopt,ifft
  integer :: my_rank,rhoxsp_method,comm
@@ -343,8 +343,10 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    ABI_MALLOC(KS_Pawrhoij,(Cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-               nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
-   call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
+&       zeromag_rhoij=zeromag_rhoij,nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,&
+&       cpxocc=Dtset%pawcpxocc)
+   call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,&
+&                      Cryst%typat,zeromag=zeromag_rhoij,pawtab=Pawtab)
 
    ! Initialize values for several basic arrays ===
    gnt_option=1;if (dtset%pawxcdev==2.or.(dtset%pawxcdev==1.and.dtset%positron/=0)) gnt_option=2
