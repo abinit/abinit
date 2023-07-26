@@ -1764,8 +1764,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      if (usecprj_local==1) then
        call pawmkrhoij(atindx,atindx1,cprj,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
-&       mcprj_local,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       mcprj_local,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,&
+&       dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
      else
        mcprj_tmp=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
        ABI_MALLOC(cprj_tmp,(natom,mcprj_tmp))
@@ -1777,22 +1777,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,&
-&       dtset%usewvl,dtset%wtk)
+&       dtset%nspden,dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,&
+&       dtfil%unpaw,dtset%usewvl,dtset%wtk)
        call pawcprj_free(cprj_tmp)
        ABI_FREE(cprj_tmp)
      end if
-!TESTMT
-     if (dtset%nspden==1.and.my_natom>=1) then
-       if (pawrhoij_unsym(1)%nspden==4.and.pawrhoij_unsym(1)%cplex_rhoij==2) then
-         do ii=1,my_natom
-           do iplex=1,pawrhoij(ii)%lmn2_size
-             pawrhoij_unsym(ii)%rhoij_(2*iplex-1,2:4)=zero
-           end do
-         end do
-       end if
-     end if
-!TESTMT
      call timab(555,2,tsec)
 !    Build symetrized packed rhoij and compensated pseudo density
      cplex=1;ipert=0;idir=0;qpt(:)=zero
