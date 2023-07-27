@@ -555,14 +555,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  end do
 
- dtsets(:)%diago_apply_block_sliced=1
- do idtset=1,ndtset_alloc
-    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
-    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
- end do
-
-
 !GPU information
  use_gpu_cuda=ABI_GPU_DISABLED
  dtsets(:)%use_gpu_cuda=ABI_GPU_DISABLED
@@ -651,6 +643,15 @@ end do
    ABI_ERROR(msg)
 #endif
  end if
+
+ dtsets(:)%diago_apply_block_sliced=1
+ if(use_gpu_cuda/=ABI_GPU_DISABLED) dtsets(:)%diago_apply_block_sliced=0
+ do idtset=1,ndtset_alloc
+    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
+    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
+ end do
+
 
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
