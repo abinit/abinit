@@ -2501,6 +2501,10 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        if (ncerr /= nf90_noerr) then
          NCF_CHECK(nf90_def_dim(ncid, "pawrhoij_qphase", my_qphase, qphase_id))
        end if
+       ncerr = nf90_inq_varid(ncid, "pawrhoij_zeromag", zeromag_id)
+       if (ncerr /= nf90_noerr) then
+         NCF_CHECK(nf90_put_var(ncid, zeromag_id, my_zeromag))
+       end if
        if (bsize > 0) then
          ncerr = nf90_inq_dimid(ncid, "rhoijselect_atoms_dim", bsize_id)
          if (ncerr /= nf90_noerr) then
