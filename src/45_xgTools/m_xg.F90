@@ -1728,7 +1728,6 @@ contains
       end select
 #endif
 
-      if(l_use_gpu_cuda==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 #ifdef HAVE_GPU_HIP
       select case(xgBlockA%space)
 
@@ -1736,24 +1735,68 @@ contains
 
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
-        call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
-            c_loc(xgBlockA__vecR),xgBlockA%LDim, &
-            c_loc(xgBlockW__vecR),info)
-        !$OMP END TARGET DATA
+        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockW__vecR)
+        !call abi_gpu_xheevd(1,jobz,uplo,xgBlockA%cols, &
+        !    c_loc(xgBlockA__vecR),xgBlockA%LDim, &
+        !    c_loc(xgBlockW__vecR),info)
+        !!$OMP END TARGET DATA
 
+        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+        !$OMP TARGET UPDATE FROM(xgBlockA__vecR)
+        call dsyevd(jobz,uplo,xgBlockA%cols, &
+          xgBlockA%vecR,xgBlockA%LDim, &
+          xgBlockW%vecR, rwork, lrwork, &
+          iwork, liwork,info)
+        !$OMP TARGET UPDATE TO(xgBlockA__vecR)
+        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
+        if ( rwork(1) > lrwork ) then
+          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+          call checkResize(rwork,lrwork,int(rwork(1)))
+        end if
+        if ( iwork(1) > liwork ) then
+          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+          call checkResize(iwork,liwork,int(iwork(1)))
+        end if
       case (SPACE_C)
 
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockW__vecR)
-        call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
-            c_loc(xgBlockA__vecC),xgBlockA%LDim, &
-            c_loc(xgBlockW__vecR),info)
-        !$OMP END TARGET DATA
+        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockW__vecR)
+        !call abi_gpu_xheevd(2,jobz,uplo,xgBlockA%cols, &
+        !    c_loc(xgBlockA__vecC),xgBlockA%LDim, &
+        !    c_loc(xgBlockW__vecR),info)
+        !!$OMP END TARGET DATA
 
+        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+        call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
+        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+5*xgBlockA%rows+1)
+
+        !$OMP TARGET UPDATE FROM(xgBlockA__vecC)
+        call zheevd(jobz,uplo,xgBlockA%cols, &
+          xgBlockA%vecC,xgBlockA%LDim, &
+        xgBlockW%vecR, &
+        cwork, lcwork, rwork, lrwork, iwork, liwork, info)
+        !$OMP TARGET UPDATE TO(xgBlockA__vecC)
+        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
+
+        if ( int(cwork(1)) > lcwork ) then
+          !write(std_out,*) "Allocate work from", int(lcwork), "to", int(cwork(1))
+          call checkResize(cwork,lcwork,int(cwork(1)))
+        end if
+        if ( rwork(1) > lrwork ) then
+          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+          call checkResize(rwork,lrwork,int(rwork(1)))
+        end if
+        if ( iwork(1) > liwork ) then
+          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+          call checkResize(iwork,liwork,int(iwork(1)))
+        end if
       end select
 #endif
+
+      if(l_use_gpu_cuda==ABI_GPU_KOKKOS) call gpu_device_synchronize()
+
 
     else
 
@@ -2126,14 +2169,31 @@ contains
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
-        call abi_gpu_xhegvd(1, itype, jobz, uplo, &
-          &             xgBlockA%rows, &
-          &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
-          &             c_loc(xgBlockB__vecR), xgBlockB%ldim, &
-          &             c_loc(xgBlockW__vecR), &
-          &             info)
-        !$OMP END TARGET DATA
+        !$OMP TARGET UPDATE FROM(xgBlockA__vecR)
+        !$OMP TARGET UPDATE FROM(xgBlockB__vecR)
+        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+        call checkResize(rwork,lrwork,2*xgBlockA%rows*xgBlockA%rows+6*xgBlockA%rows+1)
+        call dsygvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecR, xgBlockA%ldim, &
+          xgBlockB%vecR, xgBlockB%ldim, xgBlockW%vecR, rwork, lrwork, iwork, liwork, info)
+        !$OMP TARGET UPDATE TO(xgBlockA__vecR)
+        !$OMP TARGET UPDATE TO(xgBlockB__vecR)
+        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
+        if ( rwork(1) > lrwork ) then
+          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+          call checkResize(rwork,lrwork,int(rwork(1)))
+        end if
+        if ( iwork(1) > liwork ) then
+          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+          call checkResize(iwork,liwork,int(iwork(1)))
+        end if
+        !!$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+        !call abi_gpu_xhegvd(1, itype, jobz, uplo, &
+        !  &             xgBlockA%rows, &
+        !  &             c_loc(xgBlockA__vecR), xgBlockA%ldim, &
+        !  &             c_loc(xgBlockB__vecR), xgBlockB%ldim, &
+        !  &             c_loc(xgBlockW__vecR), &
+        !  &             info)
+        !!$OMP END TARGET DATA
 #endif
 
       case (SPACE_C)
@@ -2155,14 +2215,39 @@ contains
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
         xgBlockW__vecR => xgBlockW%vecR
-        !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
-        call abi_gpu_xhegvd(2, itype, jobz, uplo, &
-          &             xgBlockA%rows, &
-          &             c_loc(xgBlockA__vecC), xgBlockA%ldim, &
-          &             c_loc(xgBlockB__vecC), xgBlockB%ldim, &
-          &             c_loc(xgBlockW__vecR), &
-          &             info)
-        !$OMP END TARGET DATA
+        call checkResize(iwork,liwork,5*xgBlockA%rows+3)
+        call checkResize(cwork,lcwork,xgBlockA%rows*xgBlockA%rows+2*xgBlockA%rows)
+        call checkResize(rwork,lrwork,2*(xgBlockA%rows*xgBlockA%rows)+5*xgBlockA%rows+1)
+
+        !$OMP TARGET UPDATE FROM(xgBlockA__vecC)
+        !$OMP TARGET UPDATE FROM(xgBlockB__vecC)
+        call zhegvd(itype, jobz, uplo, xgBlockA%rows, xgBlockA%vecC, xgBlockA%ldim,&
+          xgBlockB%vecC, xgBlockB%ldim, xgBlockW%vecR, cwork, lcwork, &
+          rwork, lrwork, iwork, liwork, info)
+        !$OMP TARGET UPDATE TO(xgBlockA__vecC)
+        !$OMP TARGET UPDATE TO(xgBlockB__vecC)
+        !$OMP TARGET UPDATE TO(xgBlockW__vecR)
+
+        if ( int(cwork(1)) > lcwork ) then
+          !write(std_out,*) "Allocate work from", lcwork, "to", int(cwork(1))
+          call checkResize(cwork,lcwork,int(cwork(1)))
+        end if
+        if ( rwork(1) > lrwork ) then
+          !write(std_out,*) "Allocate work from", lrwork, "to", int(rwork(1))
+          call checkResize(rwork,lrwork,int(rwork(1)))
+        end if
+        if ( iwork(1) > liwork ) then
+          !write(std_out,*) "Allocate work from", liwork, "to", int(iwork(1))
+          call checkResize(iwork,liwork,int(iwork(1)))
+        end if
+    !    !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecR)
+    !    call abi_gpu_xhegvd(2, itype, jobz, uplo, &
+    !      &             xgBlockA%rows, &
+    !      &             c_loc(xgBlockA__vecC), xgBlockA%ldim, &
+    !      &             c_loc(xgBlockB__vecC), xgBlockB%ldim, &
+    !      &             c_loc(xgBlockW__vecR), &
+    !      &             info)
+    !    !$OMP END TARGET DATA
 #endif
 
       end select
