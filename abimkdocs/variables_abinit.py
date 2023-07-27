@@ -2485,7 +2485,7 @@ Typical use is for response to electric field ([[rfelfd]] = 3), but NOT for d/dk
 
 Variable(
     abivarname="diago_apply_block_sliced",
-    varset="rlx",
+    varset="dev",
     vartype="integer",
     topics=['parallelism_expert'],
     dimensions="scalar",
