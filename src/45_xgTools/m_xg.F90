@@ -3170,6 +3170,7 @@ contains
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         dot__vecR => dot%vecR
+#ifdef HAVE_GPU_CUDA
         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlockA__vecR,xgBlockB__vecR) PRIVATE(icol,tmp)
         do icol = 1, cols
           tmp=0
@@ -3181,6 +3182,23 @@ contains
         end do
 
         !$OMP TARGET UPDATE FROM(dot__vecR)
+#endif
+
+#ifdef HAVE_GPU_HIP
+        !$OMP TARGET UPDATE FROM(dot__vecR,xgBlockA__vecR,xgBlockB__vecR)
+        !!$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlockA__vecR,xgBlockB__vecR) PRIVATE(icol,tmp)
+        do icol = 1, cols
+          tmp=0
+          !!$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
+          do i = 1, rows
+            tmp = tmp + xgBlockA__vecR(i,icol)*xgBlockB__vecR(i,icol)
+          end do
+          dot__vecR(icol,1)=tmp
+        end do
+
+        !$OMP TARGET UPDATE TO(dot__vecR)
+#endif
+
         !TODO Port this to GPU (reductions)
         if ( present(max_val) ) then
           max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
@@ -3199,6 +3217,7 @@ contains
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
         dot__vecC => dot%vecC
+#ifdef HAVE_GPU_CUDA
         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
         do icol = 1, cols
           tmp=0
@@ -3208,8 +3227,23 @@ contains
           end do
           dot__vecC(icol,1)=tmp
         end do
-
         !$OMP TARGET UPDATE FROM(dot__vecC)
+#endif
+
+#ifdef HAVE_GPU_HIP
+        !$OMP TARGET UPDATE FROM(dot__vecC,xgBlockA__vecC,xgBlockB__vecC)
+        !!$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
+        do icol = 1, cols
+          tmp=0
+          !!$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
+          do i = 1, rows
+            tmp = tmp + dconjg(xgBlockA__vecC(i,icol))*xgBlockB__vecC(i,icol)
+          end do
+          dot__vecC(icol,1)=tmp
+        end do
+        !$OMP TARGET UPDATE TO(dot__vecC)
+#endif
+
         !TODO Port this to GPU (reductions)
         if ( present(max_val) ) then
           max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
