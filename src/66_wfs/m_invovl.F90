@@ -1449,10 +1449,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  implicit none
 
  integer,intent(in) :: ndat,cplx
- type(invovl_kpt_type), intent(in) :: invovl
+ type(invovl_kpt_type), intent(in), target :: invovl
  real(dp), intent(inout) :: proj(cplx, invovl%nprojs,ndat)
- real(dp), intent(inout) :: sm1proj(cplx, invovl%nprojs, ndat)
- real(dp), intent(inout) :: PtPsm1proj(cplx, invovl%nprojs, ndat)
+ real(dp), intent(inout), target :: sm1proj(cplx, invovl%nprojs, ndat)
+ real(dp), intent(inout), target :: PtPsm1proj(cplx, invovl%nprojs, ndat)
  type(mpi_type), intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in) :: ham
  integer, intent(in) :: block_sliced
@@ -1467,12 +1467,25 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  real(dp) :: convergence_rate,sum_tmp
  integer :: additional_steps_to_take,idat,iproj,icplx
  integer :: Ptsize(3)
+#ifdef HAVE_GPU_HIP
+ real(dp), ABI_CONTIGUOUS pointer :: invovl__gram_projs(:,:,:)
+ type(c_ptr) :: sm1proj_amdcopy
+ type(c_ptr) :: PtPsm1proj_amdcopy
+#endif
 ! *************************************************************************
 
  Ptsize(1) = cplx
  Ptsize(2) = invovl%nprojs
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
+#ifdef HAVE_GPU_HIP
+ invovl__gram_projs => invovl%gram_projs(:,:,:)
+ !$OMP TARGET MAP(to:sm1proj,PtPsm1proj) MAP(from:sm1proj_amdcopy,PtPsm1proj_amdcopy)
+ sm1proj_amdcopy = c_loc(sm1proj)
+ PtPsm1proj_amdcopy = c_loc(PtPsm1proj)
+ !$OMP END TARGET
+#endif
+
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
 
  !FIXME LLVM has trouble with performing team reduction (AOMP 15.0.2)
@@ -1514,10 +1527,20 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
+#ifdef HAVE_GPU_CUDA
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 invovl%gram_projs, nprojs,&
                 sm1proj, nlmntot_this_proc, czero, &
                 PtPsm1proj, nprojs)
+#endif
+#ifdef HAVE_GPU_HIP
+   !$OMP TARGET DATA USE_DEVICE_PTR(invovl__gram_projs, sm1proj, PtPsm1proj)
+   call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
+                c_loc(invovl__gram_projs), nprojs,&
+                sm1proj_amdcopy, nlmntot_this_proc, czero, &
+                PtPsm1proj_amdcopy, nprojs)
+   !$OMP END TARGET DATA
+#endif
 
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
    !$OMP& PRIVATE(idat,iproj,icplx) MAP(to:proj,resid,PtPsm1proj)
