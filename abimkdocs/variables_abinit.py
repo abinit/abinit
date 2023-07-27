@@ -2489,12 +2489,14 @@ Variable(
     vartype="integer",
     topics=['parallelism_expert'],
     dimensions="scalar",
-    defaultval=1,
-    mnemonics="Inverse Overlapp block matrix applied in a sliced fashion",
+    mnemonics="Inverse Overlap block matrix applied in a sliced fashion",
     added_in_version="9.7.2",
+    defaultval=ValueWithConditions({'[[use_gpu_cuda]] > 0': '0', 'defaultval': 1}),
     text=r"""
+Only relevant if: [[wfoptalg]] == 111
 In the Chebyshev-filtered subspace method, one need to apply inverse overlapp matrix.
 This parameter allows to choose between two variants, sliced (1) or non-sliced (0).
+Default value is set wether user request GPU execution and should be optimal.
 """,
 ),
 
