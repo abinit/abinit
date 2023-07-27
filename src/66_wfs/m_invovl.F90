@@ -1633,12 +1633,13 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
   implicit none
 
   integer,intent(in) :: ndat, nprojs, cplx
-  real(dp), intent(inout) :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
+  real(dp), intent(inout), target :: x(cplx, nprojs, ndat), y(cplx, nprojs, ndat)
   type(gs_hamiltonian_type),intent(in) :: ham
-  real(dp), intent(in) :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
+  real(dp), intent(in), target :: mat(cplx, ham%lmnmax, ham%lmnmax, ham%ntypat)
   integer, intent(in) :: block_sliced
 
   integer :: nlmn, shift, itypat, idat
+  real(dp), ABI_CONTIGUOUS pointer :: x_ptr(:, :, :), y_ptr(:, :, :), mat_ptr(:,:,:)
 
 ! *************************************************************************
 
@@ -1675,17 +1676,20 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
     shift = 1
     do itypat=1, ham%ntypat
       nlmn = count(ham%indlmn(3,:,itypat)>0)
+      x_ptr => x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)
+      y_ptr => y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)
+      mat_ptr => mat(:, :, :, itypat)
       !! apply mat to all atoms at once, all idat at once
       ! perform natom multiplications of size nlmn
       ! be careful here matrix extracted from x and y are not memory contiguous
       ! ==> so in the GPU version we will need to adapt leading dimension
-      !$OMP TARGET DATA USE_DEVICE_PTR(mat,x,y)
+      !$OMP TARGET DATA USE_DEVICE_PTR(mat_ptr,x_ptr,y_ptr)
       call abi_gpu_xgemm_strided(cplx, 'N','N', &
               nlmn, ham%nattyp(itypat), nlmn, cone, &
-              c_loc(mat(:, :, :, itypat)), ham%lmnmax, 0, &
-              c_loc(x(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)), nlmn, nprojs, &
+              c_loc(mat_ptr), ham%lmnmax, 0, &
+              c_loc(x_ptr), nlmn, nprojs, &
               czero, &
-              c_loc(y(:, shift:shift+nlmn*ham%nattyp(itypat)-1, :)), nlmn, nprojs, ndat)
+              c_loc(y_ptr), nlmn, nprojs, ndat)
       !$OMP END TARGET DATA
       shift = shift + nlmn*ham%nattyp(itypat)
     end do
