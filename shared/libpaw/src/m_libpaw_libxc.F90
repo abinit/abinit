@@ -57,6 +57,8 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_islda              ! Return TRUE if the set of XC functional(s) is LDA
  public :: libpaw_libxc_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libpaw_libxc_ismgga             ! Return TRUE if the set of XC functional(s) is meta-GGA
+ public :: libpaw_libxc_is_tb09            ! Return TRUE if the XC functional is Tran-Blaha 2009.
+ public :: libpaw_libxc_set_c_tb09         ! Set c parameter for Tran-Blaha 2009 functional
  public :: libpaw_libxc_needs_laplacian    ! Return TRUE if the set of XC functional uses LAPLACIAN
  public :: libpaw_libxc_needs_temperature  ! Return TRUE if the set of XC functional(s) uses the elec. temperature
  public :: libpaw_libxc_set_temperature    ! Set electronic temperature in a set of XC functional(s)
@@ -1000,6 +1002,84 @@ function libpaw_libxc_ismgga(xc_functionals)
  end if
 
 end function libpaw_libxc_ismgga
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libpaw_libxc_funcs/libpaw_libxc_is_tb09
+!! NAME
+!!  libpaw_libxc_is_tb09
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  is Tran-Blaha 2009 or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+logical function libpaw_libxc_is_tb09(xc_functionals) result(ans)
+
+!Arguments ------------------------------------
+ type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ ans  = .false.
+ if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
+
+ if (present(xc_functionals)) then
+   ans = any(xc_functionals%id == libpaw_libxc_getid('XC_MGGA_X_TB09'))
+ else
+   ans = any(paw_xc_global%id == libpaw_libxc_getid('XC_MGGA_X_TB09'))
+ end if
+
+end function libpaw_libxc_is_tb09
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libpaw_libxc_funcs/libpaw_libxcset_c_tb09
+!! NAME
+!!  libpaw_libxc_set_c_tb09
+!!
+!! FUNCTION
+!!  Set c parameter for the Tran-Blaha 2009 functional
+!!
+!! INPUTS
+!! xc_c_tb09= value of the c parameter to set for the TB09 functional
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+subroutine libpaw_libxc_set_c_tb09(xc_tb09_c,xc_functionals)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: xc_tb09_c
+ type(libpaw_libxc_type),intent(inout),optional :: xc_functionals(2)
+!Local variables -------------------------------
+ integer :: ii
+
+! *************************************************************************
+
+ if (present(xc_functionals)) then
+   do ii=1,2
+     if (xc_functionals(ii)%id == libpaw_libxc_getid('XC_MGGA_X_TB09')) then
+       xc_functionals(ii)%xc_tb09_c = xc_tb09_c
+     end if
+   end do
+ else
+   do ii=1,2
+     if (paw_xc_global(ii)%id == libpaw_libxc_getid('XC_MGGA_X_TB09')) then
+       paw_xc_global(ii)%xc_tb09_c = xc_tb09_c
+     end if
+   end do
+ end if
+
+end subroutine libpaw_libxc_set_c_tb09
 !!***
 
 !----------------------------------------------------------------------
@@ -2067,9 +2147,9 @@ end subroutine libpaw_libxc_getvxc
      do ii=1,2
        if (abs(xc_funcs(ii)%xc_tb09_c-99.99_dp)>tol12) cc=xc_funcs(ii)%xc_tb09_c
      end do
-     write(msg,'(2a,f9.6)' ) ch10,&
-&    'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
-     call wrtout(std_out,msg,'COLL')
+     !write(msg,'(2a,f9.6)' ) ch10,&
+&    !'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
+     !call wrtout(std_out,msg,'COLL')
 !  C is computed
    else
      LIBPAW_ALLOCATE(gnon,(npts))
@@ -2086,8 +2166,8 @@ end subroutine libpaw_libxc_getvxc
      end do
      cc= -0.012_dp + 1.023_dp*sqrt(sum(gnon)/npts)
      LIBPAW_DEALLOCATE(gnon)
-     write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
-     call wrtout(std_out,msg,'COLL')
+     !write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
+     !call wrtout(std_out,msg,'COLL')
    end if
 
 !  Set c in XC data structure
@@ -2435,6 +2515,7 @@ module m_libpaw_libxc
 & libxc_functionals_ixc               => libpaw_libxc_ixc, &
 & libxc_functionals_isgga             => libpaw_libxc_isgga, &
 & libxc_functionals_ismgga            => libpaw_libxc_ismgga, &
+& libxc_functionals_is_tb09           => libpaw_libxc_is_tb09, &
 & libxc_functionals_needs_laplacian   => libpaw_libxc_needs_laplacian, &
 & libxc_functionals_needs_temperature => libpaw_libxc_needs_temperature, &
 & libxc_functionals_set_temperature   => libpaw_libxc_set_temperature, &

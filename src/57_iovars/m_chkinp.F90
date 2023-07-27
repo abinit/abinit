@@ -2578,6 +2578,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='optcell' ; cond_values(1)=dt%optcell
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optstress',dt%optstress,1,(/1/),iout)
    end if
+!  TB09 XC functional cannot provide forces/stresses
+   if(dt%optforces/=0 .or. dt%optstress/=0)then
+     write(msg, '(9a)' ) &
+&      'When the selected XC functional is Tran-Blaha 2009 functional (modified Becke-Johnson),',ch10,&
+&        'which is a potential-only functional, calculations cannot be self-consistent',ch10,&
+&        'with respect to the total energy.',ch10, &
+&        'For that reason, neither forces nor stressescan be computed.',ch10,&
+&        'You should set optforces and optstress to 0!'
+     ABI_WARNING(msg)
+  end if
 
   !  orbmag
   ! only values of 0,1,2 are allowed. 0 is the default.
@@ -3866,6 +3876,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  xc_tb09_c
    call chkdpr(0,0,cond_string,cond_values,ierr,'xc_tb09_c',dt%xc_tb09_c,1,0.0_dp,iout)
+   if (dt%xc_tb09_c>99._dp.and.dt%iscf==22) then
+     write(msg, '(a,i4,a,i4,a,a,a,a,a,a)' )&
+&      'TB09 XC functional with variable c is not compatible with ODA mixing (iscf=22)!'
+     ABI_ERROR_NOSTOP(msg,ierr)
+   end if
 
 !  xred
 !  Check that two atoms are not on top of each other

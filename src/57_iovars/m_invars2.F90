@@ -240,7 +240,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
  integer :: tread_brange, tread_erange, tread_kfilter
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
- logical :: xc_is_mgga,xc_need_kden,xc_has_kxc
+ logical :: xc_is_mgga,xc_is_tb09,xc_need_kden,xc_has_kxc
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
@@ -1835,9 +1835,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! Meta-GGA
  if (ixc_here<0) then
    xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
+   xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
    xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
  else
    xc_is_mgga=(ixc_here>=31.and.ixc_here<=35)
+   xc_is_tb09=.false.
    xc_need_kden=(ixc_here==31.or.ixc_here==34.or.ixc_here==35)
  end if
  ! Hybrids 
@@ -1942,6 +1944,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
    !Only potential mixing available for response function
    dtset%iscf=dtset%iscf-10
+ else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and.xc_is_tb09) then
+   !For the TB09 xc functional, the potential mixing seems to be better 
+   dtset%iscf=dtset%iscf-10
+   msg='Automatically switching to potential mixing (iscf<10); seems to be better for TB09 XC...'
+   ABI_COMMENT(msg)
  else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and. &
 &         dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) then
    !In case of density mixing (iscf>=10) and correction of forces (densfor_pred/=0 and 5)
@@ -2126,12 +2133,23 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%ratsm=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
- if(tread==1) dtset%optforces=intarr(1)
+ if(tread==1) then
+   dtset%optforces=intarr(1)
+ else if (xc_is_tb09) then
+   dtset%optforces=0
+   write(msg, '(9a)' ) &
+&      'When the selected XC functional is Tran-Blaha 2009 functional (modified Becke-Johnson),',ch10,&
+&        'which is a potential-only functional, calculations cannot be self-consistent',ch10,&
+&        'with respect to the total energy.',ch10, &
+&        'For that reason, neither forces nor stresses can be computed.',ch10,&
+&        'optforces and optstress are automatically set to 0.'
+   ABI_COMMENT(msg)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optstress',tread,'INT')
  if(tread==1) then
    dtset%optstress=intarr(1)
- else if (xc_is_mgga) then
+ else if (xc_is_mgga.or.xc_is_tb09) then
    dtset%optstress=0  ! This is temporary, hopefully
  end if
 
