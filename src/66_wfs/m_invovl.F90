@@ -1474,19 +1474,29 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
+
+ !FIXME LLVM has trouble with performing team reduction (AOMP 15.0.2)
+#ifdef FC_LLVM
+ !$OMP TARGET UPDATE FROM(proj)
+#endif
+#ifndef FC_LLVM
  !$OMP TARGET TEAMS DISTRIBUTE MAP(to:normprojs,proj) PRIVATE(idat,sum_tmp)
+#endif
  do idat = 1,ndat
   sum_tmp=0
+#ifndef FC_LLVM
   !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:sum_tmp) PRIVATE(iproj,icplx)
+#endif
   do iproj = 1,nprojs
     do icplx = 1,cplx
       sum_tmp = sum_tmp + proj(icplx,iproj,idat)**2
     end do
   end do
-  !$OMP END PARALLEL DO
   normprojs(idat)=sum_tmp
  end do
+#ifndef FC_LLVM
  !$OMP TARGET UPDATE FROM(normprojs)
+#endif
 
  ibeg = 1
  iend = nprojs
@@ -1520,6 +1530,12 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    end do
 
    ! exit check
+#ifdef FC_LLVM
+   !FIXME LLVM has trouble with performing team reduction (v16.0.0 from AMD ROCm 5.6.0)
+   !$OMP TARGET UPDATE FROM(resid)
+   errs = SUM(SUM(resid**2, 1),1)
+#endif
+#ifndef FC_LLVM
    !$OMP TARGET TEAMS DISTRIBUTE MAP(to:errs,resid) PRIVATE(idat,sum_tmp)
    do idat = 1,ndat
      sum_tmp=0
@@ -1529,12 +1545,14 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
          sum_tmp = sum_tmp + resid(icplx,iproj,idat)**2
        end do
      end do
-     !$OMP END PARALLEL DO
      errs(idat)=sum_tmp
    end do
-   ABI_NVTX_END_RANGE()
 
    !$OMP TARGET UPDATE FROM(errs)
+#endif
+
+   ABI_NVTX_END_RANGE()
+
    maxerr = sqrt(MAXVAL(errs/normprojs))
    if(maxerr < precision .or. additional_steps_to_take == 1) then
      exit
