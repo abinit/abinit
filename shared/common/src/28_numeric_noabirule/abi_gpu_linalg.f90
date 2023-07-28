@@ -2724,45 +2724,33 @@ subroutine abi_gpu_xhegvd_cptr(cplx, itype, jobz, uplo, A_nrows, &
   select case(cplx)
   case (1)
 
-    ! resize work array if needed
-#ifdef HAVE_GPU_CUDA
-    call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
-#endif
-#ifdef HAVE_GPU_HIP
-    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-#endif
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
-#endif
-#ifdef HAVE_GPU_HIP
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
       gpu_ptr = gpu_work
 #endif
     end if
   case (2)
 
-    ! resize work array if needed
-#ifdef HAVE_GPU_CUDA
-    call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
-#endif
-#ifdef HAVE_GPU_HIP
-    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
-#endif
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
-#endif
-#ifdef HAVE_GPU_HIP
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
       gpu_ptr = gpu_work
 #endif
     end if
@@ -3039,45 +3027,33 @@ subroutine abi_gpu_xheevd_cptr(cplx, jobz, uplo, A_nrows, &
   select case(cplx)
   case (1)
 
-    ! resize work array if needed
-#ifdef HAVE_GPU_CUDA
-    call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
-#endif
-#ifdef HAVE_GPU_HIP
-    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-#endif
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
-#endif
-#ifdef HAVE_GPU_HIP
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
       gpu_ptr = gpu_work
 #endif
     end if
   case (2)
 
-    ! resize work array if needed
-#ifdef HAVE_GPU_CUDA
-    call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
-#endif
-#ifdef HAVE_GPU_HIP
-    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
-#endif
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
-#endif
-#ifdef HAVE_GPU_HIP
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(2,c_size_t)*bufferSize*dp)
       gpu_ptr = gpu_work
 #endif
     end if
@@ -3325,45 +3301,33 @@ subroutine abi_gpu_xpotrf_cptr(cplx, uplo, A_nrows, &
   select case(cplx)
   case (1)
 
-    ! resize work array if needed
-#ifdef HAVE_GPU_CUDA
-    call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
-#endif
-#ifdef HAVE_GPU_HIP
-    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-#endif
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = c_loc(r_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(r_work,r_work_managed,r_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(r_work))
-#endif
-#ifdef HAVE_GPU_HIP
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
       gpu_ptr = gpu_work
 #endif
     end if
   case (2)
 
-    ! resize work array if needed
-#ifdef HAVE_GPU_CUDA
-    call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
-#endif
-#ifdef HAVE_GPU_HIP
-    call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
-#endif
-
-    ! retrieve work pointer to use
+    ! resize work array if needed and retrieve work pointer to use
     if(abi_linalg_gpu_mode == ABI_GPU_LEGACY &
           .or. abi_linalg_gpu_mode == ABI_GPU_KOKKOS) then
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = c_loc(c_work_managed)
     else if(abi_linalg_gpu_mode == ABI_GPU_OPENMP) then
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_OPENMP_GET_MAPPED_PTR
+      call abi_gpu_work_resize(c_work,c_work_managed,c_work_len,bufferSize)
       gpu_ptr = xomp_get_mapped_ptr(c_loc(c_work))
-#endif
-#ifdef HAVE_GPU_HIP
+#else
+      call abi_gpu_work_resizeCptr(gpu_work,gpu_work_len,INT(1,c_size_t)*bufferSize*dp)
       gpu_ptr = gpu_work
 #endif
     end if
