@@ -7949,7 +7949,7 @@ subroutine gwr_gamma_gw(gwr, nfftf, ngfftf, vpsp)
  integer,parameter :: master = 0, cplex1 = 1, tim_fourdp5 = 5
  integer :: spin, ikcalc, ik_ibz, ib, ib1, ib2, nkibz, nsppol, mband, ierr, b1gw, b2gw
  !real(dp) :: cpu, wall, gflops
- real(dp) :: eh_energy,ekin_energy,evext_energy,den_int,coef_hyb,exc_mbb_energy
+ real(dp) :: evext_energy,den_int !,coef_hyb,exc_mbb_energy eh_energy, ekin_energy,
  real(dp) :: gsqcut,boxcut,ecutf
  character(len=500) :: msg
  type(hdr_type) :: Hdr_sigma
