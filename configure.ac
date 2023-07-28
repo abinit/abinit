@@ -566,7 +566,7 @@ test "${CXX_LIBS}" = "" && \
 # Final adjustments for Fortran
 # Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
 test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_EXTRA} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD}"
+  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA}"
 test "${FC_LDFLAGS}" = "" && \
   FC_LDFLAGS="${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
 test "${FC_LIBS}" = "" && \
