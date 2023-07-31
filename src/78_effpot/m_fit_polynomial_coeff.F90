@@ -194,7 +194,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  type(fit_data_type) :: fit_data
 
  !type(real_array_type) :: gf_array
- character(len=1000) :: message,message2
+ character(len=20000) :: message,message2
  character(len=fnlen) :: filename
  character(len=3)  :: i_char
  character(len=7)  :: j_char
@@ -914,10 +914,6 @@ contains
     end if
 
     if(need_verbose) call wrtout(std_out,message,'COLL')
-
-
-
-
   end subroutine get_ncoeff_preselected
 
   subroutine get_ncoeff_to_select_and_ncoeff_to_fit()
