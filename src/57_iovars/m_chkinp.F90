@@ -35,7 +35,7 @@ module m_chkinp
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
- use m_symtk,          only : chkgrp, chkorthsy, symmetrize_xred
+ use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
  use m_fstrings,       only : string_in, sjoin
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
@@ -451,7 +451,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
           '   Please, read the description of the input variable chksymtnons.',ch10,&
           '   If you are planning cDFT, GW or BSE calculations, such tnons value is very problematic.',ch10,&
           '   Otherwise, you might set chksymtnons=0.',&
-          '   But do not be surprised if ABINIT do not converge for cDFT, or crashes for GW or BSE.',ch10,&
+          '   But do not be surprised if ABINIT does not converge for cDFT, or crashes for GW or BSE.',ch10,&
           '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg)
          if(fixed_mismatch==1)then
@@ -3300,14 +3300,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg, '(a,f8.2,4a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized response function calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
+&      '  the default value of spinmagntarget, and explicit definition of occ. ',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%prtdos==1)then
        write(msg, '(a,f8.2,4a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,& 
+&      '  the default value of spinmagntarget, and explicit definition of occ.',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
@@ -3357,8 +3361,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  symrel and tnons
-!  Check the point group closure (TODO should check the spatial group closure !!)
-   call chkgrp(dt%nsym,dt%symafm,dt%symrel,ierrgrp)
+!  Check the point group closure 
+   call sg_multable(dt%nsym,dt%symafm,dt%symrel,ierrgrp, tnons=dt%tnons, tnons_tol=tol5)
    if (ierrgrp==1) ierr=ierr+1
 
 !  Check the orthogonality of the symmetry operations
@@ -4071,8 +4075,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  iatfixy and iatfixz (diagonal symmetry operations)
 
 !  Should check values of fftalg
-
-!  rfasr=2 possible only when electric field response is computed.
 
 !  Must have nqpt=1 for rfphon=1
 
