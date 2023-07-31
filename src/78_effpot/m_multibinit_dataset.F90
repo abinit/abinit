@@ -952,13 +952,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%dipdip=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
  if(tread==1) multibinit_dtset%dipdip=intarr(1)
- if(multibinit_dtset%dipdip>1.or.multibinit_dtset%dipdip<0)then
-   write(message, '(a,i8,a,a,a,a,a)' )&
-&   'dipdip is',multibinit_dtset%dipdip,', but the only allowed values',ch10,&
-&   'is 1.',ch10,&
-&   'Action: correct dipdip in your input file.'
-   ABI_ERROR(message)
- end if
+! if(multibinit_dtset%dipdip>1.or.multibinit_dtset%dipdip<0)then
+!   write(message, '(a,i8,a,a,a,a,a)' )&
+!&   'dipdip is',multibinit_dtset%dipdip,', but the only allowed values',ch10,&
+!&   'is 1.',ch10,&
+!&   'Action: correct dipdip in your input file.'
+!   ABI_ERROR(message)
+! end if
+
+
 
  multibinit_dtset%dipdip_prt=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip_prt',tread,'INT')
@@ -2567,18 +2569,27 @@ multibinit_dtset%lwf_temperature_start=0.0
  end if
 
 !D
- multibinit_dtset%dipdip_range(:)= (/0,0,0/)
+ multibinit_dtset%dipdip_range(:)= (/-375,-375,-375/)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'dipdip_range',tread,'INT')
  if(tread==1) multibinit_dtset%dipdip_range(1:3)=intarr(1:3)
- do ii=1,3
-   if(multibinit_dtset%dipdip_range(ii)<0.or.multibinit_dtset%dipdip_range(ii)>50)then
-     write(message, '(a,i0,a,i0,4a,i0,a)' )&
-&     'dipdip_range(',ii,') is ',multibinit_dtset%dipdip_range(ii),', which is lower',&
-&     ' than 0 of superior than 50.',&
-&     ch10,'Action: correct dipdip_range(',ii,') in your input file.'
-     ABI_ERROR(message)
-   end if
- end do
+! do ii=1,3
+!   if(multibinit_dtset%dipdip_range(ii)<0.or.multibinit_dtset%dipdip_range(ii)>50)then
+!     write(message, '(a,i0,a,i0,4a,i0,a)' )&
+!&     'dipdip_range(',ii,') is ',multibinit_dtset%dipdip_range(ii),', which is lower',&
+!&     ' than 0 of superior than 50.',&
+!&     ch10,'Action: correct dipdip_range(',ii,') in your input file.'
+!     ABI_ERROR(message)
+!   end if
+! end do
+
+if(any(multibinit_dtset%dipdip_range /=-375)) then
+  ABI_ERROR("The use of the keyword dipdip_range has been deprecated. Please remove it from the input file!") 
+end if
+multibinit_dtset%dipdip_range(:)=[0,0,0]
+
+
+
+
 !E
  multibinit_dtset%eivec=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eivec',tread,'INT')
