@@ -1,21 +1,61 @@
+## v9.12
+
+Version 9.12, released on September 10, 2023.
+List of changes with respect to version 9.10.
+<!-- Release notes updated on XXX YY , 2023. -->
+
+Many thanks to the contributors to the ABINIT project between
+May 2023 and September 2023 (with some late contributions until YYY 2023).
+These release notes
+are relative to modifications/improvements of ABINIT v9.12 with respect to v9.10.
+<!-- TO BE CHANGED Merge requests up to and including MR919. Also, MR923 to MR925 are taken into account. -->
+
+TO BE CHANGED 
+
+The list of contributors includes:
+J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+L. Mac Enulty, D.D. O'Regan, S. Rostami,
+M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+**A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced 
+by [[asr]] and [[chneut]]. The latter variables have been used already for some time for a more detailed imposition of the acoustic sum rule
+and the charge neutrality sum rule in the electron-phonon part of ABINIT, and even for a longer time
+in the ANADDB utility. Actually, rfasr was used to initialize asr and chneut internally. This change was long overdue. 
+The default values for [[asr]] and [[chneut]], namely 1, are however not the same as the previous default value of rfasr, namely 0.
+Thus a large fraction of the reference files of the test have been upgraded to the new default, but in a sizeable number
+the old default value has been specified explicitly.
+
+By X. Gonze (commit XXX).
+
+* * *
+
+
 ## v9.10
 
 Version 9.10, released on June 24, 2023.
 List of changes with respect to version 9.8.
-<!-- Release notes updated on June 14, 2023. -->
+<!-- Release notes updated on July 11, 2023. -->
 
 Many thanks to the contributors to the ABINIT project between
 September 2022 and April 2023 (with some late contributions until June 2023).
 These release notes
 are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
-<!-- Merge requests up to and including MR919. Also, MR XYZ are taken into account. -->
+<!-- Merge requests up to and including MR919. Also, MR923 to MR925 and MR928 are taken into account. -->
 
 The list of contributors includes:
-J. Abreu, J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, D.D. O'Regan, S. Rostami,
+J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+L. Mac Enulty, M. Mignolet, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
-It is worth to read carefully all the modifications that are mentioned in the present file,
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
 This might take some time ...
 
@@ -30,7 +70,7 @@ is now superceded by the tutorial "lruj", see section [B.3](#v9.10.B.3). The nam
 **A.2** The default value for [[dosdeltae@anaddb]] has been changed from 1 cm-1 to 0.2 cm-1, 
 and the default value for [[dossmear@anaddb]] has been changed from 5 cm-1 to 1 cm-1.
 Also, the default values for [[dosdeltae@atdep]] has been changed from 4.5d-6 to 0.2 cm-1.
-This is to allow default calculation of thermal expansion using abipy to be more stable numerically.
+This is to allow default calculations of thermal expansion using abipy to be more stable numerically.
 
 By S. Rostami and X. Gonze (commit 8b7697502c)
 
@@ -61,17 +101,21 @@ By M. Giantomassi (MR875, MR907)
 
 **B.1** Orbital magnetization 
 
-The computation of the orbital magnetization and chemical shielding (converse method, that is, with a nuclear dipole moment added) has been implemented, 
-as described and tested in [[cite:Zwanziger2023]].
-This implementation works for insulators and metals, with [[nspinor]]=1 and 2. However it works with PAW only, not with NC pseudopotentials. 
-Lamb shielding is treated. The PAW atomic dataset generator "Atompaw" has been updated accordingly to compute and output the Lamb shielding in xml files.
+The computation of the orbital magnetization and chemical shielding
+(in the converse method, that is, with a nuclear dipole moment added)
+has been implemented, as described and tested in
+[[cite:Zwanziger2023]].  This implementation works for insulators and
+metals, with [[nspinor]]=1 and 2. However it works with PAW only, not
+with NC pseudopotentials.  Lamb shielding is treated. The PAW atomic
+dataset generator "Atompaw" has been updated accordingly to compute
+and output the Lamb shielding in xml files.
 
 See [[test:v9_44]], [[test:v9_140]], [[test:v9_141]], [[test:v9_142]], [[test:v9_143]], and [[test:nuc_4]],
-(NOTE : description to be provided in the .abi file)  with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
+with input variables [[orbmag]], [[nucdipmom]], [[lambsig]].
 
 The [[tutorial:nuc| tutorial on properties at nuclei]] has been modified to present such computations.
 
-By J. Zwanziger, with some help by M. Torrent and X. Gonze (MR895, 904, 917).
+By J. Zwanziger, M. Torrent and X. Gonze (MR895, 904, 917).
 
 
 **B.2** Natural optical activity tensor, linear response to a vector potential (orbital magnetic field linear response) and other modifications of the longwave driver.
@@ -89,12 +133,11 @@ Related test [[test:v9_147]].
 These are by-products of large modifications of the longwave driver, mimicking the structure of the nonlinear one.
 Other improvements related to the large modifications:
 i) the number of source code lines has been reduced.
-ii) the number of i/o operations has been reduced.
+ii) the number of I/O operations has been reduced.
 iii) symmetries are now used in order to calculate only linearly independent components of the tensors. This also reduces the number of linear-response functions to precalculate.
 iv) the whole structure is now more general, thus facilitating the implementation of future spatial dispersion quantities.
 
 Also, the new input variable [[ffnl_lw]] has been introduced. It allows to reduce memory footprint at the expense of CPU time.
-(A test should be provided).
 
 Finally, a bug has been removed (when all KB energies are negative), and a test introduced [[test:v9_145]].
 
@@ -118,15 +161,15 @@ The computation of the electronic spectral function with electron-phonon couplin
 See [[cite:Nery2018]] and [[cite:Abreu2022]] and other related publications.
 
 Activate it using [[eph_task]]=9 when [[optdriver]] == 7.
-New input variable : [[tolcum]].
+New input variable: [[tolcum]].
 See the [[test:v9_60]].
 
-By M. Giantomassi and  J. Abreu (MR 907)
+By J. Abreu with help from M. Giantomassi (MR 907)
 
 
 **B.5** Support for norm-conserving pseudopotentials in UPF2 format
 
-Abinit now can read NC pseudos in UPF2 format (both scalar and relativistic version) thanks to the UPF parser imported from quantum espresso and an additional
+Abinit can now read NC pseudos in UPF2 format (both scalar and relativistic version) thanks to the UPF parser imported from quantum espresso and an additional
 routine used to convert FR pseudos from (j,kappa) to scalar + SOC term taken from oncvpsp.
 
 The total energy computed with UPF pseudos does not perfectly agree with the one obtained with the corresponding psp8 pseudos.
@@ -138,9 +181,9 @@ See the [[test:v9_130]] and [[test:v9_131]]
 
 By M. Giantomassi (MR896)
 
-**B.6** Initialization of the wavefunctions using atomic orbitals
+**B.6** Initialization of the wavefunctions using atomic pseudo-orbitals
 
-For pseudopotentials that contain the information about atomic local orbitals, like the UPF2 format, the wavefunctions
+For pseudopotentials that contain the information about atomic local pseudo-orbitals, like the UPF2 format, the wavefunctions
 inside ABINIT can be initialized from the Hilbert space spanned by such set of functions,
 using the input variable [[wfinit]]=2.
 
@@ -154,7 +197,7 @@ The following temperature-dependent XC functionals from libXC are now available:
 LDA T-dependent functionals from [[cite:Karasiev2014]], with [[ixc]]=-269, from [[cite:Karasiev2018]],
 with [[ixc]]=-318, and from [[cite:Groth2017]], with [[ixc]]=-577.
 Previously, the IIT temperature-dependent Free Energy functional of [[cite:Ichimaru1987]], with [[ixc]]=50
-had been coded, but not documented.
+had been coded, but not documented. Documentation is delivered in the present release.
 
 See [[test:libxc_22]].
 
@@ -230,7 +273,8 @@ By M. Giantomassi (MR875, MR907)
 
 **D.2** Interface to coupled-cluster CC4S calculations.
 
-The implementation of writing a file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, is on-going.
+The implementation of writing a file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>, 
+is working, but not yet in production.
 By M. Giantomassi (MR 875, 907)
 
 **D.2** Coulomb interaction with 2D cut-off is now working for the total energy and forces.
@@ -261,11 +305,11 @@ Improve the initialization of paral_kgb/wfoptalg/istwfk.
 By M. Torrent (MR918).
 
 **D.8**
-New units are recognized by the input file parser : "meV" (for millielectron-volt) ;  "S", "Sec" or "Second" ; "Kelvin".
+New units are recognized by the input file parser: "meV" (for millielectron-volt);  "S", "Sec" or "Second"; "Kelvin".
 By M. Giantomassi (commit 692a4ee0c6) and X. Gonze (commit 39801af30).
 
 **D.9**
-New tests of the band parallelism in DFPT : [[test:paral_65]] and [[test:paral_66]].
+New tests of the band parallelism in DFPT: [[test:paral_65]] and [[test:paral_66]].
 By M. Giantomassi (commit 31e8aa66d8).
 
 **D.10** Improved developer documentation, section .
@@ -277,6 +321,22 @@ By P. Kesteneer (MR910).
 
 **D.12** New topic [[topic:AtomCentered]] created.
 By X. Gonze (commit 425e8c)
+
+**D.13** Improvements of tutorials base3.md and gw1.md in order to better avoid students to commit mistakes.
+By X. Gonze (commits 1d56e983f and dfd207458) 
+
+**D.14** In m_phgamma.F90, spin-resolved calculations for the case prteliash==3 did not work correctly 
+since phonon linewidths were calculated for spin=1 only. spin>=2 values are filled by NaNs. This small addition fixes the issue.
+Also, a minot format fix.
+By F. Akhmetov (Radioteddy on Github). commit bd76768 on abinit github, but directly ported to the trunk/release-9.10 branch.
+
+**D.15** Fix parser problem. The input would not be parsed correctly when more than one environment variable is present in the input file.
+By M. Mignolet (MR 928 backported to ABINITv9.10)
+
+**D.16** Improvements of documentation for spinmagntarget and occopt, in the case of ferromagnetic insulators.
+Improvements of documentation for rfasr, asr and chneut. Fix timing issues for Fock.
+Update doc about the change from npkpt to np_spkpt. Cross refer between U(J) tutorials
+By X. Gonze (several commits)
 
 * * *
 
@@ -307,7 +367,7 @@ Xavier
 
 ### **A.** Important remarks and warnings. Also, hotfixes for v9.8.3 (A.4 to A.10).
 
-**A.1** Warning : the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
+**A.1** Warning: the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
 
 By J. Zwanziger (MR850)
 
@@ -1042,7 +1102,7 @@ By J. Zwanziger (MR749)
 By G. Petretto
 
 **D.5** Several bug fixes related to the treatment of inaccurate atomic positions (and large tolsym).
-Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
+Several test have been created test:v9_17 to test:v9_20 (NOTE : all these tests are now v9_180 to v9_199).
 
 **D.6** AiiDA+ABINIT developments
 
@@ -1138,7 +1198,7 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
     [[ixcrot]], [[chneut]], [[ntime]], [[prtkden]], [[symsigma]] and [[tolsym]]. In particular the new default value
     of [[tolsym]], 1e-5, is more in line with the tolerances of other codes, so that for users of such
     codes, one barrier to the use of ABINIT is removed. By the same token, some bug in the recognition of symmetries
-    has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_15]] and [[test:v9_16]].
+    has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_190]] and [[test:v9_191]].
     The new input variable [[chksymtnons]] has been introduced, to govern the possible automatic alignment
     of the [[tnons]] with the FFT grid (actually needed for GW calculations).
     By X. Gonze (MR 689 and others)
@@ -1786,7 +1846,7 @@ By R. Outerov and B. Amadon (MR622).
 **D.32** On-going work on refactoring the Coulomb interaction part of ABINIT.
 
 New input variables [[fock_icutcoul]], and [[gw_icutcoul]], that should superceed [[icutcoul]].
-New test added for the mini-Brillouin Zone integration, [[gw_icutcoul]]=14, 15, 16, see [[test:v9_21]].
+New test added for the mini-Brillouin Zone integration, [[gw_icutcoul]]=14, 15, 16, see [[test:v9_181]].
 
 By B. Guster, M. Giantomassi, F. Bruneval and X. Gonze (MR 627, 633, 673, 679, 686).
 

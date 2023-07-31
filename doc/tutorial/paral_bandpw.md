@@ -79,7 +79,7 @@ and use the associated [[max_ncpus]] variable (maximum number of CPU cores you w
 or
 
 * Manually define the number of processes associated to each level of parallelism:
-  [[npkpt]] (number of processes for k points),
+  [[np_spkpt]] (number of processes for spin and k points),
   [[npband]] (number of processes for bands),
   [[npfft]] (number of processes for plane-waves/FFT).
 
@@ -98,7 +98,7 @@ At the end of the output file `tparal_bandpw_01.abo`, you will see:
  Searching for all possible proc distributions for this input with #CPUs<=64:
 
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- |       npkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
+ |    np_spkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
  |    1<<    1|    1<<   22|    1<<   64|    1<<  640|    1<<   64|  <=    64|
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  |           1|           4|          16|          10|          64|    42.328|
@@ -515,12 +515,12 @@ To test the full parallelism, we restart
 with the same input file as in `tparal_bandpw_03.abi` and add a denser *k-point* grid.
 In this case, the system has 4 *k-points* in
 the *irreducible Brillouin zone* (IBZ) so the calculation can be parallelized over (at most) 4 *k-points*
-MPI processes. This is done using the [[npkpt]] input variable:
+MPI processes. This is done using the [[np_spkpt]] input variable:
 
 ```diff
-- nkpt          1
-+ ngkpt         4 4 4
-+ npkpt         4
+-     nkpt          1
++    ngkpt         4 4 4
++ np_spkpt         4
 ```
 
 We need 4 times more processes than before, so run ABINIT over

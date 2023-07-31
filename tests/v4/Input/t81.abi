@@ -19,6 +19,10 @@ kptopt2 2
 tolvrs2 1.0d-10
 
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #comon input data
 

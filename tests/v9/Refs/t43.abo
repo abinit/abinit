@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h10 )
   
 
 ================================================================================
@@ -31,13 +31,30 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.7516427 -9.9524878  0.0000000  G(1)=  0.0869317 -0.0502387  0.0000000
  R(2)=  5.7516427  9.9524878  0.0000000  G(2)=  0.0869317  0.0502387  0.0000000
  R(3)=  0.0000000  0.0000000  9.0914483  G(3)=  0.0000000  0.0000000  0.1099935
  Unit cell volume ucvol=  1.0408464E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.19951902E+02 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.5036991  0.1731798  0.4980169  Na
+    2)    0.1731798  0.5036991  0.4980169  Na
+    3)    0.4963009  0.8268202  0.9980169  Na
+    4)    0.8268202  0.4963009  0.9980169  Na
+    5)    0.8417492  0.8417492  0.4611135  Si
+    6)    0.1582508  0.1582508  0.9611135  Si
+    7)    0.0859587  0.0859587  0.6223103   O
+    8)    0.9140413  0.9140413  0.1223103   O
+    9)    0.5811871  0.8414808  0.5169712   O
+   10)    0.4188129  0.1585192  0.0169712   O
+   11)    0.8414808  0.5811871  0.5169712   O
+   12)    0.1585192  0.4188129  0.0169712   O
+
+ DDB file with 1 blocks has been read.
 
 ================================================================================
 
@@ -48,7 +65,7 @@
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.028874E+00    1.618259E-02   -1.512360E-02
@@ -190,10 +207,10 @@
  Symmetry characters of vibration mode #  36
   1.0 -1.0 -1.0  1.0
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.041  and wall time      0.044 sec
++Total cpu time      0.042  and wall time      0.060 sec
 
  anaddb : the run completed succesfully.
