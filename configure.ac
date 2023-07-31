@@ -278,9 +278,6 @@ ABI_FC_EXTENSIONS
 # Get module file case
 ABI_FC_MOD_CASE
 
-# Determine Fortran-C name mangling scheme
-AC_FC_WRAPPERS
-
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
 if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
@@ -579,6 +576,11 @@ test "${XPPFLAGS}" = "" && \
   XPPFLAGS="${XPPFLAGS_DEBUG} ${XPPFLAGS_OPTIM} ${XPPFLAGS_HINTS} ${XPPFLAGS_EXTRA}"
 test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
   FPPFLAGS="${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
+
+# Determine Fortran-C name mangling scheme
+# This is needed after FCFLAGS has been set as some compilers have extra
+# libraries linked due to optimizations levels or OpenMP
+AC_FC_WRAPPERS
 
 # FIXME: temporary workaround for Macs
 if test "${abi_cpu_platform}" = "apple"; then
