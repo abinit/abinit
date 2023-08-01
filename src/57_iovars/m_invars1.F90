@@ -574,7 +574,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 end do
 
  dtsets(:)%use_nvtx=0
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+#if defined HAVE_GPU && defined HAVE_GPU_MARKERS
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
