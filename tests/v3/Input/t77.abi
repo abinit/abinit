@@ -78,6 +78,11 @@ prtbbb 1
 
  nbdbuf 0
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "56ba.psp_mod, 8o.psp_mod"

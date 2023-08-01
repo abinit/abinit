@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t86/t86.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t86/t86.abi
 - output file    -> t86.abo
 - root for input  files -> t86i
 - root for output files -> t86o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       2.143 Mbytes of memory.
 _ WF disk file :      0.039 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       1.957 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -87,6 +84,8 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0208000000E+01  1.0208000000E+01  1.0208000000E+01 Bohr
               amu      2.80855000E+01
+              asr           0
+           chneut           0
            diemac      3.00000000E+00
              ecut      4.00000000E+00 Hartree
 -          fftalg         312
@@ -354,8 +353,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.16527
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -926,6 +925,8 @@ tolerances: {tolvrs: 1.00E-12, }
  -outvars: echo values of variables after computation  --------
             acell      1.0208000000E+01  1.0208000000E+01  1.0208000000E+01 Bohr
               amu      2.80855000E+01
+              asr           0
+           chneut           0
            diemac      3.00000000E+00
              ecut      4.00000000E+00 Hartree
            etotal1    -8.8323060266E+00
@@ -1236,10 +1237,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          7.0
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.8  wall=          7.0
++Overall time at end (sec) : cpu=          5.3  wall=          5.4

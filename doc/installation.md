@@ -467,7 +467,7 @@ fldiff.report and report files are produced automatically.
 ## For developers
 
 Note the documentation available in the pages labelled [Developers](/developers/git_and_gitlab/),
-as well as the [developer's corner of the Wiki](https://wiki.abinit.org)
+as well as the [developer's corner of the Wiki](https://wiki.abinit.org).
 The following sections are complements for the installation from gitlab, and the generation of the
 ABINIT distribution.
 

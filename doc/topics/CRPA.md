@@ -52,15 +52,28 @@ particular, considerably higher effective values for U are found.
 
 *v7:*
 
+<<<<<<< HEAD
 - [[tests/v7/Input/t23.in]]
 - [[tests/v7/Input/t24.in]]
 - [[tests/v7/Input/t25.in]]
 - [[tests/v7/Input/t78.in]]
 - [[tests/v7/Input/t79.in]]
+=======
+- [[tests/v7/Input/t23.abi]]
+- [[tests/v7/Input/t24.abi]]
+- [[tests/v7/Input/t25.abi]]
+- [[tests/v7/Input/t78.abi]]
+- [[tests/v7/Input/t79.abi]]
+>>>>>>> d9b476d91bc7f433a5ef153086322fa7718a2457
  
 
 ## Tutorials
 
+<<<<<<< HEAD
 * The [[tutorial:ucalc_crpa|tutorial]] on the calculation of effective interactions U and J by the cRPA method shows how to determine the U value with the constrained Random Phase Approximation [[cite:Aryasetiawan2004]] using projected Wannier orbitals. Prerequisite: DFT+U.
 * [[tutorial:udet|The tutorial on the determination of U]] for DFT+U shows how to determine the U value with the linear response method [[cite:Cococcioni2005]], to be used in the DFT+U approach. Prerequisite: DFT+U.
+=======
+* The [[tutorial:ucalc_crpa|tutorial on the calculation of effective interactions U and J by the cRPA method]] shows how to determine the U value with the constrained Random Phase Approximation [[cite:Aryasetiawan2004]] using projected Wannier orbitals. Prerequisite: DFT+U.
+* The [[tutorial:lruj|tutorial on the computation of U from linear response]] for DFT+U shows how to determine the U value with the linear response method [[cite:Cococcioni2005]], to be used in the DFT+U approach. Prerequisite: DFT+U.
+>>>>>>> d9b476d91bc7f433a5ef153086322fa7718a2457
 
