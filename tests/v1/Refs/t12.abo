@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t11-t12-t13-t14-t15-t16-t17-t18-t19-t20/t12.in
-- output file    -> t12.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t11-t12-t13-t14-t15-t16-t17-t18-t19-t20/t12.abi
+- output file    -> t12.abo
 - root for input  files -> t11o
 - root for output files -> t12o
-
 
  Symmetries : space group Pm m m (# 47); Bravais oP (primitive ortho.)
 ================================================================================
@@ -34,18 +33,18 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =       16869          nfft =      262144          nkpt =           1
 ================================================================================
-P This job should need less than                      73.724 Mbytes of memory.
+P This job should need less than                      80.952 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            6 blocks of mpw  integer numbers, for      0.386 Mbytes.
-P           21 blocks of mpw  real(dp)  numbers, for      2.703 Mbytes.
+P           15 blocks of mpw  real(dp)  numbers, for      1.931 Mbytes.
 P            2 blocks of nfft integer numbers, for      2.000 Mbytes.
-P           34 blocks of nfft real(dp)  numbers, for     68.000 Mbytes.
+P           38 blocks of nfft real(dp)  numbers, for     76.000 Mbytes.
 P              Additional     real(dp)  numbers, for      0.404 Mbytes.
 P              With residue estimated to be             0.231 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                73.724 Mbytes.
-P Main chain + nonlop.f + opernl.f     65.660 Mbytes.
+P Main chain + fourwf.f                80.952 Mbytes.
+P Main chain + nonlop.f + opernl.f     72.887 Mbytes.
 P XC chain                             58.834 Mbytes.
 P mkrho chain                          61.343 Mbytes.
 P fourdp chain                         61.086 Mbytes.
@@ -129,8 +128,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -229,7 +228,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   11.509E-11; max=  11.509E-11
    0.2500  0.2500  0.2500    1  1.15088E-10 kpt; spin; max resid(k); each band:
-   1.15E-10
+  1.15E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -335,6 +334,11 @@ P           mkmem           1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -427,5 +431,5 @@ P           mkmem           1
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   6 COMMENTs to log file.
+.Delivered   6 WARNINGs and   7 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.5  wall=          0.5

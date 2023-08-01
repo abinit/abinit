@@ -1068,9 +1068,9 @@ end if
    dscrpt=' Note : temporary (transfer) database '
    call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb%init(dtset, 1, mpert, 27*mpert*mpert*mpert)
+   call ddb%init(dtset, 1, mpert, with_d3E=.true.)
 
-   call ddb%set_d3matr(d3etot, blkflg, iblok=1)
+   call ddb%set_d3matr(1, d3etot, blkflg)
 
    call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
 
