@@ -7,6 +7,7 @@ add_library(44_abitools STATIC
   m_dynmat.F90
   m_integrals.F90
   m_macroave.F90
+  m_nvtx_data.F90
   m_wfutils.F90
   )
 
@@ -32,6 +33,13 @@ target_link_libraries(44_abitools
   32_util
   39_libpaw
   41_geometry)
+
+if(ABINIT_ENABLE_GPU_CUDA)
+  target_link_libraries(44_abitools
+    PUBLIC
+    abinit::17_gpu_toolbox
+    )
+endif()
 
 if(OpenMP_FOUND)
   target_link_libraries(44_abitools

@@ -124,7 +124,7 @@ if(ABINIT_ENABLE_GPU_CUDA)
   # check nvtx library is available
   if (TARGET CUDA::nvToolsExt)
     set(HAVE_GPU_CUDA10 1)
-    set(HAVE_GPU_NVTX_V3 1)
+    set(HAVE_GPU_MARKERS 1)
   endif()
 
 endif()

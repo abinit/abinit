@@ -349,7 +349,7 @@
 /* TODO #cmakedefine HAVE_GPU_MPI */
 
 /* Define to 1 if you have library nvtx (v3). */
-#cmakedefine HAVE_GPU_NVTX_V3 @HAVE_GPU_NVTX_V3@
+#cmakedefine HAVE_GPU_MARKERS @HAVE_GPU_MARKERS@
 
 /* Define to 1 if you have a serial GPU library. */
 #cmakedefine HAVE_GPU_SERIAL @HAVE_GPU_SERIAL@

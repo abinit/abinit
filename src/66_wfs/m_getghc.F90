@@ -42,7 +42,7 @@ module m_getghc
  use m_gemm_nonlop, only : gemm_nonlop_use_gemm
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -52,10 +52,6 @@ module m_getghc
 
 #if defined HAVE_YAKL
  use gator_mod
-#endif
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
- use m_nvtx_data
 #endif
 
 #ifdef HAVE_KOKKOS
