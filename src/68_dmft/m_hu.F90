@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -39,6 +35,7 @@ MODULE m_hu
  private
 
  public :: init_hu
+ public :: copy_hu
  public :: destroy_hu
 ! public :: qmc_hu
  public :: print_hu
@@ -110,12 +107,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUTS
 !!  hu <type(hu_type)>= U interaction
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -303,6 +294,56 @@ subroutine init_hu(cryst_struc,pawtab,hu,t2g,x2my2d)
 end subroutine init_hu
 !!***
 
+!!****f* m_hu/copy_hu
+!! NAME
+!! copy_hu
+!!
+!! FUNCTION
+!!  Allocate variables used in type hu_type.
+!!
+!! INPUTS
+!!  hu <type(hu_type)>= U interaction
+!!
+!! OUTPUTS
+!!  hu_new <type(hu_type)>= U interaction
+!!
+!! SOURCE
+
+subroutine copy_hu(ntypat,hu,hu_new)
+
+ use defs_basis
+ implicit none
+
+!Arguments ------------------------------------
+!type
+ integer, intent(in) :: ntypat
+ type(hu_type), intent(in) :: hu(ntypat)
+ type(hu_type), intent(out) :: hu_new(ntypat)
+!Local variables ------------------------------------
+ integer :: itypat,ndim
+!************************************************************************
+
+ do itypat=1,ntypat
+   hu_new(itypat)%lpawu      = hu(itypat)%lpawu
+   hu_new(itypat)%jmjbasis   = hu(itypat)%jmjbasis
+   hu_new(itypat)%upawu      = hu(itypat)%upawu
+   hu_new(itypat)%jpawu      = hu(itypat)%jpawu
+   hu_new(itypat)%f2_sla     = hu(itypat)%f2_sla
+   hu_new(itypat)%f4of2_sla  = hu(itypat)%f4of2_sla
+   hu_new(itypat)%f6of2_sla  = hu(itypat)%f6of2_sla
+   hu_new(itypat)%jpawu_zero = hu(itypat)%jpawu_zero
+   ndim=2*hu_new(itypat)%lpawu+1
+   ABI_MALLOC(hu_new(itypat)%uqmc,(ndim*(2*ndim-1)))
+   ABI_MALLOC(hu_new(itypat)%udens,(2*ndim,2*ndim))
+   ABI_MALLOC(hu_new(itypat)%vee,(ndim,ndim,ndim,ndim))
+   hu_new(itypat)%vee        = hu(itypat)%vee
+   hu_new(itypat)%udens      = hu(itypat)%udens
+   hu_new(itypat)%uqmc       = hu(itypat)%uqmc
+ enddo ! itypat
+
+end subroutine copy_hu
+!!***
+
 !!****f* m_hu/destroy_hu
 !! NAME
 !! destroy_hu
@@ -315,12 +356,6 @@ end subroutine init_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -374,12 +409,6 @@ end subroutine destroy_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -448,11 +477,6 @@ end subroutine print_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -537,12 +561,6 @@ end subroutine vee2udens_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1023,12 +1041,6 @@ end subroutine rotatevee_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
@@ -1375,12 +1387,6 @@ end subroutine printvee_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine vee2udensatom_hu(ndim,nspinor,udens_atoms,veetemp,basis,prtonly)
@@ -1471,10 +1477,6 @@ end subroutine vee2udensatom_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function reddd(mi,ndim)
@@ -1503,7 +1505,7 @@ end function reddd
 !! from the Slm to the Ylm basis if option==1 or from Ylm to Slm if !option==2
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (BA)
+!! Copyright (C) 1998-2022 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1522,12 +1524,6 @@ end function reddd
 !!  mat_inp_c= Output matrix in Ylm or Slm basis according to option
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1656,7 +1652,7 @@ end subroutine vee_slm2ylm_hu
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (BA)
+!! Copyright (C) 1998-2022 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1673,12 +1669,6 @@ end subroutine vee_slm2ylm_hu
 !!  mat_out_c= real output matrix
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1739,7 +1729,7 @@ end subroutine vee_ndim2tndim_hu_r
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (BA)
+!! Copyright (C) 1998-2022 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1756,12 +1746,6 @@ end subroutine vee_ndim2tndim_hu_r
 !!  mat_out_c= Complex output matrix
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1821,7 +1805,7 @@ end subroutine vee_ndim2tndim_hu
 !! from the Ylm basis to the J,M_J basis if option==1
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (BA)
+!! Copyright (C) 1998-2022 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1838,12 +1822,6 @@ end subroutine vee_ndim2tndim_hu
 !!
 !! NOTES
 !!  usefull only in ndij==4
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1984,7 +1962,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! Condon tables
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (BA)
+!! Copyright (C) 1998-2022 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1997,12 +1975,6 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2259,7 +2231,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! in JMJ Basis
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (BA)
+!! Copyright (C) 1998-2022 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2272,12 +2244,6 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

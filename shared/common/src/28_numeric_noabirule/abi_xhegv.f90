@@ -12,7 +12,7 @@
 !!  B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +28,6 @@
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !!
@@ -138,8 +136,6 @@ end subroutine abi_dhegv
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 !!
 subroutine abi_chegv(itype,jobz,uplo,n,a,lda,b,ldb,w)
@@ -220,8 +216,6 @@ end subroutine abi_chegv
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !!
 !! SOURCE

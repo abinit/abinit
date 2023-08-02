@@ -23,7 +23,7 @@ shiftk  0.5 0.5 0.5
 # Dataset 2
 ############
 optdriver2 8
-getwfk2   1          # Read WKF in the IBZ
+getwfk2   1          # Read WFK in the IBZ
 wfk_task2 "wfk_ddk"  # Activate computation of DDK file
 inclvkb2  0          # Only kinetic part (fast but inaccurate, mainly for convergence studies)
 

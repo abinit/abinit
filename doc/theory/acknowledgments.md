@@ -23,7 +23,7 @@ This will be facilitated if the ABINIT project is mentioned properly in research
 
 2. Some recent ideas and algorithms are coded, and it would be fair to cite these.
 
-3. You might also register on the [ABINIT forum](https://forum.abinit.org). 
+3. You might also register on the [ABINIT discourse forum](https://discourse.abinit.org). 
 Indirectly, this also helps the ABINIT developer group, because the total number of registered people 
 on the forum is often cited as an indicator of the user community size. 
 In agreement with the GNU General Public License, there is no request for co-authorship 

@@ -7,7 +7,7 @@
 !! Module to output atomic projections of phonon modes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (MJV)
+!! Copyright (C) 2011-2022 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,11 +78,6 @@ contains
 !! OUTPUT
 !! t_atprj = container object for atomic projections
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine atprj_init(t_atprj, natom, natprj_bs, iatprj_bs, outfile_radix)
@@ -150,11 +145,6 @@ end subroutine atprj_init
 !! OUTPUT
 !!  writes to files
 !!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine atprj_print(t_atprj, iq, phfrq, eigvec)
@@ -206,11 +196,6 @@ end subroutine atprj_print
 !!
 !! OUTPUT
 !! t_atprj = container object for atomic projections
-!!
-!! PARENTS
-!!      m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

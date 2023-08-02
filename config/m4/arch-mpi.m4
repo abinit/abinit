@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -749,7 +749,7 @@ AC_DEFUN([ABI_MPI_INIT], [
 
   # Allow MPI flavors
   AC_ARG_WITH([mpi-flavor],
-    AC_HELP_STRING([--with-mpi-flavor],
+    AS_HELP_STRING([--with-mpi-flavor],
       [Flavor of MPI to use (default: auto),
        see ~abinit/doc/build/config-template.ac9 for details]),
     [abi_mpi_flavor="${withval}"],

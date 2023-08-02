@@ -20,7 +20,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2022 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -180,11 +180,6 @@ contains  !=============================================================
 !! OUTPUT
 !!  hist <type(abihist)> = The hist to initialize
 !!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
@@ -203,6 +198,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
 !Initialize flags
  hist%isVused=isVUsed
  hist%isARused=isARUsed
+
 
 !Allocate all the histories
  ABI_MALLOC(hist%acell,(3,mxhist))
@@ -250,10 +246,6 @@ end subroutine abihist_init_0D
 !! OUTPUT
 !!  hist(:) <type(abihist)> = The hist to initialize
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine abihist_init_1D(hist,natom,mxhist,isVUsed,isARUsed)
@@ -283,11 +275,6 @@ end subroutine abihist_init_1D
 !!
 !! FUNCTION
 !! Deallocate dynamic memory in a hist structure - Target: scalar
-!!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -321,10 +308,6 @@ end subroutine abihist_free_0D
 !!
 !! FUNCTION
 !! Deallocate dynamic memory in a hist structure - Target: 1D array
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -362,11 +345,6 @@ end subroutine abihist_free_1D
 !!
 !! SIDE EFFECTS
 !!  hist <type(abihist)> = The hist to broadcast
-!!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -562,10 +540,6 @@ end subroutine abihist_bcast_0D
 !! SIDE EFFECTS
 !!  hist(:) <type(abihist)> = The hist to broadcast
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine abihist_bcast_1D(hist,master,comm)
@@ -607,15 +581,6 @@ end subroutine abihist_bcast_1D
 !!
 !! SIDE EFFECTS
 !! hist<type abihist>=Historical record of positions, forces, acell, stresses, and energies,
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_generate_training_set,m_gstateimg,m_mover
-!!      m_pred_bfgs,m_pred_delocint,m_pred_diisrelax,m_pred_fire,m_pred_hmc
-!!      m_pred_isokinetic,m_pred_isothermal,m_pred_langevin,m_pred_lotf
-!!      m_pred_moldyn,m_pred_nose,m_pred_srkna14,m_pred_steepdesc
-!!      m_pred_velverlet,m_pred_verlet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -672,10 +637,6 @@ end subroutine var2hist
 !!
 !! OUTPUT
 !! index = index of the step in the hist file
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -735,14 +696,6 @@ end function abihist_findIndex
 !!  xred(3,natom) = reduced dimensionless atomic coordinates
 !!  acell(3)    = length scales of primitive translations (bohr)
 !!  rprimd(3,3) = dimensional real space primitive translations (bohr)
-!!
-!! PARENTS
-!!      m_gstateimg,m_mover,m_precpred_1geo,m_pred_bfgs,m_pred_delocint
-!!      m_pred_diisrelax,m_pred_fire,m_pred_hmc,m_pred_isokinetic
-!!      m_pred_isothermal,m_pred_langevin,m_pred_lotf,m_pred_moldyn,m_pred_nose
-!!      m_pred_srkna14,m_pred_steepdesc,m_pred_velverlet,m_pred_verlet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -806,11 +759,6 @@ end subroutine hist2var
 !!
 !! SIDE EFFECTS
 !! hist<type abihist>=Historical record of positions, forces, stresses, cell and energies,
-!!
-!! PARENTS
-!!      m_gstateimg,m_mover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -876,11 +824,6 @@ end subroutine vel2hist
 !! SIDE EFFECTS
 !!  hist_out <type(abihist)>
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine abihist_copy(hist_in,hist_out)
@@ -942,11 +885,6 @@ end subroutine abihist_copy
 !!
 !! SIDE EFFECTS
 !!  hist_out <type(abihist)>
-!!
-!! PARENTS
-!!      mover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1071,11 +1009,6 @@ end subroutine abihist_compare_and_copy
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_fit_polynomial_coeff,m_mover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1208,11 +1141,6 @@ end subroutine write_md_hist
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_md_hist_img(hist,filename,ifirst,itime,natom,ntypat,&
@@ -1343,11 +1271,6 @@ end subroutine write_md_hist_img
 !! OUTPUT
 !!  hist<type abihist>=Historical record of positions, forces, stresses, cell dims and energies,
 !!
-!! PARENTS
-!!      m_effective_potential_file,m_mover,m_mover_effpot,m_tdep_readwrite
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine read_md_hist(filename,hist,isVUsed,isARUsed,readOnlyLast)
@@ -1440,11 +1363,6 @@ end subroutine read_md_hist
 !! OUTPUT
 !!  hist(:)<type abihist>=Historical record of positions, forces, stresses, cell dims and energies,
 !!    Size(hist) is equal to a number of images to be read
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1551,11 +1469,6 @@ end subroutine read_md_hist_img
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1754,11 +1667,6 @@ end subroutine def_file_hist
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_abihist,m_tdep_readwrite
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_dims_hist(ncid,natom,ntypat,nimage,time,&
@@ -1835,11 +1743,6 @@ end subroutine get_dims_hist
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1922,11 +1825,6 @@ end subroutine get_varid_hist
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_tdep_readwrite
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine read_csts_hist(ncid,dtion,typat,znucl,amu)
@@ -1993,11 +1891,6 @@ end subroutine read_csts_hist
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2078,11 +1971,6 @@ end subroutine write_csts_hist
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2242,11 +2130,6 @@ end subroutine write_vars_hist
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_abihist
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

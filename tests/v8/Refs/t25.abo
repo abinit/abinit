@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t25/t25.in
-- output file    -> t25.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t25/t25.abi
+- output file    -> t25.abo
 - root for input  files -> t25i
 - root for output files -> t25o
-
 
  DATASET    1 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -36,11 +35,10 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         392          nfft =       18432          nkpt =           1
 ================================================================================
-P This job should need less than                       8.657 Mbytes of memory.
+P This job should need less than                       9.202 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -55,11 +53,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         392          nfft =       18432          nkpt =           1
 ================================================================================
-P This job should need less than                       8.657 Mbytes of memory.
+P This job should need less than                       9.202 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -74,11 +71,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         392          nfft =       18432          nkpt =           1
 ================================================================================
-P This job should need less than                       8.657 Mbytes of memory.
+P This job should need less than                       9.202 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 ================================================================================
-
 
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -93,11 +89,10 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         392          nfft =       18432          nkpt =           1
 ================================================================================
-P This job should need less than                       8.657 Mbytes of memory.
+P This job should need less than                       9.202 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 ================================================================================
-
 
  DATASET    5 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -112,7 +107,7 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         392          nfft =       18432          nkpt =           1
 ================================================================================
-P This job should need less than                       8.657 Mbytes of memory.
+P This job should need less than                       9.202 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
 ================================================================================
@@ -130,6 +125,7 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.143 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.5000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
            chrgat      6.90000000E-01  6.90000000E-01
   constraint_kind1       0
   constraint_kind2       1
@@ -221,8 +217,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.11938
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -426,9 +422,9 @@ tolerances: {tolwfr: 1.00E-14, }
  At SCF step   13   max residual=  3.99E-15 < tolwfr=  1.00E-14 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -446,10 +442,10 @@ etotal    :  -1.04956451E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.12059428E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.33772062E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.54143599E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.54143599E-05, ]
-pressure_GPa:  -2.0065E+00
+- [  1.43238266E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.83080461E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.83080461E-05, ]
+pressure_GPa:  -2.3523E+00
 xred      :
 - [ -7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
 - [  7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
@@ -470,12 +466,12 @@ force_length_stats: {min:   5.58654130E-02, max:   5.58654130E-02, mean:   5.586
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                       0.000000
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius     Potential       B(z)        up pot      down pot
-    1   1.00000     0.000000     0.062628      0.062628    -0.062628
-    2   1.00000     0.000000    -0.062628     -0.062628     0.062628
+ Atom    Radius       grchrg        T(z)      up torque  down torque
+    1   1.00000    -0.000000     0.062628      0.062628    -0.062628
+    2   1.00000    -0.000000    -0.062628     -0.062628     0.062628
  ---------------------------------------------------------------------
   Sum:              0.000000     0.000000      0.000000    -0.000000
 ================================================================================
@@ -528,14 +524,14 @@ band_energy         : -6.24118856032153E-01
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.0065E+00 GPa]
-- sigma(1 1)=  3.93570928E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.04192627E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.04192627E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.3523E+00 GPa]
+- sigma(1 1)=  4.21421457E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.42127155E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.42127155E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -597,9 +593,9 @@ tolerances: {tolwfr: 1.00E-14, }
  At SCF step   16   max residual=  2.86E-15 < tolwfr=  1.00E-14 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33588672E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.59847306E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.59847306E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.41865299E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.71412355E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.71412355E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -617,10 +613,10 @@ etotal    :  -1.04956325E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.11596971E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.33588672E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.59847306E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.59847306E-05, ]
-pressure_GPa:  -2.0159E+00
+- [  1.41865299E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.71412355E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.71412355E-05, ]
+pressure_GPa:  -2.3159E+00
 xred      :
 - [ -7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
 - [  7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
@@ -641,12 +637,12 @@ force_length_stats: {min:   5.72612621E-02, max:   5.72612621E-02, mean:   5.726
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                       0.000000
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius     Potential       B(z)        up pot      down pot
-    1   1.00000    -0.002588     0.062871      0.060282    -0.065459
-    2   1.00000    -0.002588    -0.062871     -0.065459     0.060282
+ Atom    Radius       grchrg        T(z)      up torque  down torque
+    1   1.00000     0.002588     0.062871      0.060282    -0.065459
+    2   1.00000     0.002588    -0.062871     -0.065459     0.060282
  ---------------------------------------------------------------------
   Sum:             -0.005176     0.000000     -0.005176    -0.005176
 ================================================================================
@@ -699,14 +695,14 @@ band_energy         : -6.23193942036565E-01
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33588672E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.59847306E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.59847306E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.41865299E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.71412355E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.71412355E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.0159E+00 GPa]
-- sigma(1 1)=  3.93031375E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.05870715E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.05870715E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.3159E+00 GPa]
+- sigma(1 1)=  4.17382049E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.38694280E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.38694280E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -765,9 +761,9 @@ tolerances: {tolwfr: 1.00E-14, }
  At SCF step   13   max residual=  3.99E-15 < tolwfr=  1.00E-14 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -785,10 +781,10 @@ etotal    :  -1.04956451E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.12059428E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [  1.33772062E-04,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   3.54143599E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   3.54143599E-05, ]
-pressure_GPa:  -2.0065E+00
+- [  1.43238266E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.83080461E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.83080461E-05, ]
+pressure_GPa:  -2.3523E+00
 xred      :
 - [ -7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
 - [  7.3333E-02,   0.0000E+00,   0.0000E+00,  H]
@@ -809,12 +805,12 @@ force_length_stats: {min:   5.58654130E-02, max:   5.58654130E-02, mean:   5.586
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius     Potential       B(z)        up pot      down pot
-    1   1.00000     0.000000     0.062628      0.062628    -0.062628
-    2   1.00000     0.000000    -0.062628     -0.062628     0.062628
+ Atom    Radius       grchrg        T(z)      up torque  down torque
+    1   1.00000    -0.000000     0.062628      0.062628    -0.062628
+    2   1.00000    -0.000000    -0.062628     -0.062628     0.062628
  ---------------------------------------------------------------------
   Sum:              0.000000     0.000000      0.000000    -0.000000
 ================================================================================
@@ -867,14 +863,14 @@ band_energy         : -6.24118856031941E-01
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.33772062E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  3.54143599E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  3.54143599E-05  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.43238266E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  4.83080461E-05  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  4.83080461E-05  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure= -2.0065E+00 GPa]
-- sigma(1 1)=  3.93570928E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.04192627E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.04192627E+00  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure= -2.3523E+00 GPa]
+- sigma(1 1)=  4.21421457E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  1.42127155E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  1.42127155E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -979,12 +975,12 @@ force_length_stats: {min:   7.27856721E-02, max:   7.27856721E-02, mean:   7.278
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
 
- Integrated potential residual in atomic spheres (scalar + magnetic field):
+ Gradient with respect to target (=torque)       (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius     Potential       B(z)        up pot      down pot
-    1   1.00000     0.000000     0.000001      0.000001    -0.000001
-    2   1.00000     0.000000    -0.000001     -0.000001     0.000001
+ Atom    Radius       grchrg        T(z)      up torque  down torque
+    1   1.00000    -0.000000     0.000001      0.000001    -0.000001
+    2   1.00000    -0.000000    -0.000001     -0.000001     0.000001
  ---------------------------------------------------------------------
   Sum:              0.000000     0.000000      0.000000    -0.000000
 ================================================================================
@@ -1052,6 +1048,7 @@ band_energy         : -6.19509458432099E-01
  -outvars: echo values of variables after computation  --------
             acell      1.5000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00794000E+00
+      chksymtnons           3
            chrgat      6.90000000E-01  6.90000000E-01
   constraint_kind1       0
   constraint_kind2       1
@@ -1075,11 +1072,11 @@ band_energy         : -6.19509458432099E-01
             fcart5     7.2785672127E-02 -0.0000000000E+00 -0.0000000000E+00
                       -7.2785672127E-02 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
-           grchrg1     0.0000000000E+00  0.0000000000E+00
-           grchrg2     0.0000000000E+00  0.0000000000E+00
-           grchrg3    -2.5882190701E-03 -2.5882190702E-03
-           grchrg4     0.0000000000E+00  0.0000000000E+00
-           grchrg5     0.0000000000E+00  0.0000000000E+00
+           grchrg1    -0.0000000000E+00 -0.0000000000E+00
+           grchrg2    -0.0000000000E+00 -0.0000000000E+00
+           grchrg3     2.5882190701E-03  2.5882190702E-03
+           grchrg4    -0.0000000000E+00 -0.0000000000E+00
+           grchrg5    -0.0000000000E+00 -0.0000000000E+00
            grspin1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            grspin2     0.0000000000E+00  0.0000000000E+00  6.2628255824E-02
@@ -1114,13 +1111,13 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00 -8.0000000000E-02
            strten1     1.4343867764E-04  3.8315273459E-05  3.8315273459E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     1.3377206180E-04  3.5414359940E-05  3.5414359940E-05
+           strten2     1.4323826590E-04  4.8308046146E-05  4.8308046146E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     1.3358867154E-04  3.5984730588E-05  3.5984730588E-05
+           strten3     1.4186529877E-04  4.7141235481E-05  4.7141235481E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     1.3377206180E-04  3.5414359940E-05  3.5414359940E-05
+           strten4     1.4323826590E-04  4.8308046146E-05  4.8308046146E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten5     1.4343867764E-04  3.8315273459E-05  3.8315273459E-05
+           strten5     1.4343867764E-04  3.8315273462E-05  3.8315273462E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symafm        1   -1   -1    1    1   -1   -1    1    1   -1
                         -1    1    1   -1   -1    1
@@ -1231,10 +1228,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.5  wall=          4.6
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.5  wall=          4.6
+.Delivered  77 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.1  wall=          2.2

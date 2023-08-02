@@ -11,7 +11,7 @@
 !!  This module is deprecated. Use ddkop_t in m_ddk.F90
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG, FB)
+!! Copyright (C) 2008-2022 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,12 +125,6 @@ CONTAINS  !=====================================================================
 !!  vkbr<vkbr_t>=Structure containing arrays needed for calculating <\psi_1|[Vnl,r]\psi_2>.
 !!    Completely initialized in output.
 !!
-!! PARENTS
-!!      m_chi0,m_ddk,m_wfd_optic
-!!
-!! CHILDREN
-!!      ylmcd
-!!
 !! SOURCE
 
 subroutine vkbr_init(vkbr,cryst,psps,inclvkb,istwfk,npw,kpoint,gvec)
@@ -208,12 +202,6 @@ end subroutine vkbr_init
 !! FUNCTION
 !!  Free all memory allocated in a structure of type vkbr_t
 !!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
-!!
 !! SOURCE
 
 subroutine vkbr_free_0D(vkbr)
@@ -239,11 +227,6 @@ end subroutine vkbr_free_0D
 !!
 !! FUNCTION
 !!  Free all memory allocated in a structure of type vkbr_t
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -300,12 +283,6 @@ end subroutine vkbr_free_1D
 !!
 !! TODO
 !!  *) Spinorial case is not implemented.
-!!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -406,12 +383,6 @@ end subroutine add_vnlr_commutator
 !!
 !! TODO
 !!  SOC not implemented.
-!!
-!! PARENTS
-!!      m_iowf,m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 
@@ -532,11 +503,11 @@ end subroutine calc_vkb
 
 !!****f* m_vkbr/nc_ihr_comm
 !! NAME
-!!  nc_pwihr_comm
+!!  nc_ihr_comm
 !!
 !! FUNCTION
 !!  Calculate the matrix elements of the commutator i[H,r]
-!!  For norm conserving potentials the commutator i[Vnl,r] is included depending on inclvkb.
+!!  For NC pseudppotentials, the commutator i[Vnl,r] is included depending on inclvkb.
 !!
 !! INPUTS
 !!  vkbr<vkbr_t>
@@ -561,10 +532,6 @@ end subroutine calc_vkb
 !!
 !! TODO
 !!  *) Spinorial case is not implemented.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -615,7 +582,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
      end do
    end do
  else
-   ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0,G0) term is null.
+   ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0, G0) term is null.
    ABI_CHECK(nspinor == 1, "nspinor != 1")
    do ig=1,npw
      c_tmp = GWPC_CONJG(ug1(ig)) * ug2(ig)
@@ -661,12 +628,6 @@ end function nc_ihr_comm
 !!  Subroutine taken from the EXC code
 !!  All the calculations are done in double precision, but the output arrays fnl and fnld
 !!  are in single precision, should use double precision after modification of the other subroutines
-!!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!      ylmcd
 !!
 !! SOURCE
 

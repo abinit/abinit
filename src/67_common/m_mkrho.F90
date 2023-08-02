@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,6 +27,7 @@ module m_mkrho
  use m_xmpi
  use m_errors
  use m_dtset
+ use m_extfpmd
 
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
@@ -126,24 +123,18 @@ contains
 !!   (if spin polarized, array contains total density in first half and spin-up density in second half)
 !!   (for non-collinear magnetism, first element: total density, 3 next ones: mx,my,mz in units of hbar/2)
 !!
-!! PARENTS
-!!      m_afterscfloop,m_dft_energy,m_gstate,m_longwave,m_nonlinear
-!!      m_respfn_driver,m_scfcv_core,m_vtorho
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
-&                option) !optional
+&                extfpmd,option) !optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mcg,tim_mkrho
  integer,intent(in),optional :: option
  real(dp),intent(in) :: ucvol
+ type(extfpmd_type),intent(in),pointer,optional :: extfpmd
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(paw_dmft_type), intent(in)  :: paw_dmft
@@ -172,6 +163,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nbandc1,nbdblock,nbeta
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
  integer :: iband_me
+ integer :: mband_mem
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
  !character(len=500) :: message
@@ -210,6 +202,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    nbandc1=1
  end if
  use_nondiag_occup_dmft=0
+
 
 !if(dtset%nspinor==2.and.paw_dmft%use_sc_dmft==1) then
 !write(message, '(a,a,a,a)' )ch10,&
@@ -311,6 +304,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        do ikpt=1,dtset%nkpt
 
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         mband_mem = nband_k
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
 
@@ -329,6 +323,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !        Shoulb be changed to treat bands by batch always
 
          if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
+           mband_mem = nband_k/mpi_enreg%nproc_band
            iband_me = 0
            do iband=1,nband_k
 !            if(paw_dmft%use_sc_dmft==1) then
@@ -629,7 +624,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          bdtot_index=bdtot_index+nband_k
 
          if (dtset%mkmem/=0) then
-           icg=icg+npw_k*my_nspinor*nband_k
+           icg=icg+npw_k*my_nspinor*mband_mem !iband_me
            ikg=ikg+npw_k
          end if
 
@@ -729,6 +724,22 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  nfftot=dtset%ngfft(1) * dtset%ngfft(2) * dtset%ngfft(3)
 
+!Add extfpmd free electrons contribution to density
+ if(present(extfpmd)) then
+   if(associated(extfpmd)) then
+     if(extfpmd%version==1.or.extfpmd%version==2.or.extfpmd%version==3.or.extfpmd%version==4) then
+       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
+     else if(extfpmd%version==10) then
+       do ispden=1,dtset%nspden
+         do ifft=1,dtset%nfft
+           rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
+         end do
+       end do
+     end if
+     rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
+   end if
+ end if
+
  select case (ioption)
  case(0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
@@ -811,12 +822,6 @@ end subroutine mkrho
 !! rhog(2,nfft)=initialized total density in reciprocal space
 !! rhor(nfft,nspden)=initialized total density in real space.
 !!         as well as spin-up part if spin-polarized
-!!
-!! PARENTS
-!!      m_gstate,m_positron
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1227,8 +1232,7 @@ end subroutine initro
 !! prtrhomxmn
 !!
 !! FUNCTION
-!! If option==1, compute the maximum and minimum of the density (and spin-polarization
-!! if nspden==2), and print it.
+!! If option==1, compute the maximum and minimum of the density (and spin-polarization if nspden==2), and print it.
 !! If option==2, also compute and print the second maximum or minimum
 !!
 !! INPUTS
@@ -1247,18 +1251,9 @@ end subroutine initro
 !!
 !! OUTPUT
 !!
-!! SIDE EFFECTS
-!!
 !! NOTES
 !!  The tolerance tol12 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
-!!
-!! PARENTS
-!!      m_afterscfloop,m_bethe_salpeter,m_gstate,m_mkrho,m_screening_driver
-!!      m_sigma_driver,m_vtorho
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1636,25 +1631,23 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !            if(iitems==5) write(message,'(a)')' Magnetization (spin up - spin down) [el/Bohr^4]'
 !            if(iitems==6) write(message,'(a)')' Relative magnetization (=zeta, between -1 and 1)   '
          end if
-
-
        end select
 
        call wrtout(iout,message,'COLL')
 
-       write(message,'(a,es13.4,a,3f10.4)') '      Maximum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Maximum= ',&
 &       value(1,1,iitems),'  at reduced coord.',coord(:,1,1,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next maximum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next maximum= ',&
 &         value(2,1,iitems),'  at reduced coord.',coord(:,2,1,iitems)
          call wrtout(iout,message,'COLL')
        end if
-       write(message,'(a,es13.4,a,3f10.4)') '      Minimum= ',&
+       write(message,'(a,es13.4,a,3f10.4)')   ')     Minimum= ',&
 &       value(1,2,iitems),'  at reduced coord.',coord(:,1,2,iitems)
        call wrtout(iout,message,'COLL')
        if(option==2)then
-         write(message,'(a,es13.4,a,3f10.4)')' Next minimum= ',&
+         write(message,'(a,es13.4,a,3f10.4)') ')Next minimum= ',&
 &         value(2,2,iitems),'  at reduced coord.',coord(:,2,2,iitems)
          call wrtout(iout,message,'COLL')
        end if
@@ -1876,7 +1869,7 @@ end subroutine prtrhomxmn
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1895,12 +1888,6 @@ end subroutine prtrhomxmn
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 
@@ -2087,7 +2074,7 @@ end subroutine read_atomden
 !! Units are atomic.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (SM,VR,FJ,MT)
+!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2131,12 +2118,6 @@ end subroutine read_atomden
 !! average, since there is no preferred direction without any
 !! external field (and it's simpler)
 !!
-!!
-!! PARENTS
-!!      m_mkrho
-!!
-!! CHILDREN
-!!      sort_dp,spline,splint,wrtout,xmpi_barrier,xmpi_sum_master
 !!
 !! SOURCE
 

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  subroutines in this module must never call
@@ -135,11 +131,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
 !!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_matlu(natom,nspinor,nsppol,lpawu_natom,matlu)
@@ -193,11 +184,6 @@ end subroutine init_matlu
 !!
 !! OUTPUT
 !!  maltu <type(matlu_type)>= density matrix in the local orbital basis and related variables
-!!
-!! PARENTS
-!!      m_forctqmc,m_green,m_matlu,m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -258,11 +244,6 @@ end subroutine zero_matlu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper,m_self
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_matlu(matlu,natom)
@@ -303,12 +284,6 @@ end subroutine destroy_matlu
 !!
 !! OUTPUT
 !!  maltu2 <type(matlu_type)>= density matrix matlu2 in the local orbital basis and related variables
-!!
-!! PARENTS
-!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
-!!      m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -382,12 +357,6 @@ end subroutine copy_matlu
 !!             /=0  print matrix on ab_out
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_datafordmft,m_dmft,m_forctqmc,m_green,m_hubbard_one,m_matlu,m_oper
-!!      m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -544,7 +513,7 @@ end subroutine print_matlu
 !! Symetrise local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -561,11 +530,6 @@ end subroutine print_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine sym_matlu(cryst_struc,gloc,pawang,paw_dmft)
@@ -813,7 +777,7 @@ end subroutine print_matlu
 !! Inverse local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -829,11 +793,6 @@ end subroutine print_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_oper
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine inverse_matlu(matlu,natom,prtopt)
@@ -906,11 +865,6 @@ end subroutine print_matlu
 !!  toldiff = maximum value for the difference between matlu1 and matlu2
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_datafordmft,m_forctqmc,m_green,m_oper
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine diff_matlu(char1,char2,matlu1,matlu2,natom,option,toldiff,ierr,zero_or_one)
@@ -1020,11 +974,6 @@ end subroutine diff_matlu
 !! OUTPUT
 !!  maltu3 <type(matlu_type)>= density matrix matlu3, sum/substract matlu1 and matlu2
 !!
-!! PARENTS
-!!      m_datafordmft,m_dmft,m_forctqmc,m_green
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine add_matlu(matlu1,matlu2,matlu3,natom,sign_matlu2)
 
@@ -1058,7 +1007,7 @@ end subroutine add_matlu
 !! Change representation of density matrix (useful for nspinor=2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1078,11 +1027,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_matlu
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine chg_repr_matlu(glocspsp,glocnm,natom,option,prtopt)
@@ -1202,11 +1146,6 @@ end subroutine add_matlu
 !!                             trace_loc(iatom,nsppol+1) is
 !!                             the full trace over polarization also.
 !!
-!! PARENTS
-!!      m_green,m_oper
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine trace_matlu(matlu,natom,trace_loc,itau)
 
@@ -1279,6 +1218,20 @@ end subroutine add_matlu
      endif
    endif
  enddo
+ do iatom = 1 , natom
+   lpawu=matlu(iatom)%lpawu
+   if(lpawu/=-1) then
+     !! MAG
+     if(nsppol>1) then
+    ! if(nsppol>1.and.present(itau)) then
+    !   if(itau==1) then
+         write(message,'(8x,a,f12.6)')   'DMFT Cor. El. Mag: ',traceloc(iatom,2)-traceloc(iatom,1)
+         call wrtout(std_out,  message,'COLL')
+    !   endif
+     endif
+
+   endif
+ enddo
  if(.not.present(trace_loc)) then
   ABI_FREE(traceloc)
   traceloc => null()
@@ -1295,7 +1248,7 @@ end subroutine add_matlu
 !! Create new array from matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1313,11 +1266,6 @@ end subroutine add_matlu
 !!  gatherloc(natom) <type(coeff2c_type)> = density matrix where spin and angular momentum are gathered in the same index
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_datafordmft,m_matlu
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine gather_matlu(gloc,gathergloc,natom,option,prtopt)
@@ -1413,7 +1361,7 @@ end subroutine add_matlu
 !! Diagonalize matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1433,11 +1381,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one,m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine diag_matlu(matlu,matlu_diag,natom,prtopt,eigvectmatlu,nsppol_imp,checkstop,optreal,test)
@@ -1903,7 +1846,7 @@ end subroutine add_matlu
 !! Rotate matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1920,11 +1863,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one,m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine rotate_matlu(matlu,rot_mat,natom,prtopt,inverse)
@@ -2126,7 +2064,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2142,11 +2080,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc,m_green,m_self
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine shift_matlu(matlu,natom,shift,signe)
@@ -2198,7 +2131,7 @@ end subroutine add_matlu
 !! Check that matlu is real in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2211,11 +2144,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine checkreal_matlu(matlu,natom,tol)
@@ -2304,7 +2232,7 @@ end subroutine add_matlu
 !! Check that matlu is diagonal in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2317,11 +2245,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_datafordmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine checkdiag_matlu(matlu,natom,tol,nondiag)
@@ -2395,7 +2318,7 @@ end subroutine add_matlu
 !! Do the matrix product of two matlus
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2410,11 +2333,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc,m_oper
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine prod_matlu(matlu1,matlu2,matlu3,natom)
@@ -2471,7 +2389,7 @@ end subroutine add_matlu
 !! conjugate of input matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2482,10 +2400,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine conjg_matlu(matlu1,natom)
@@ -2533,7 +2447,7 @@ end subroutine add_matlu
 !! Compute the logarithm of matlu (only if diagonal for the moment)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2544,10 +2458,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine ln_matlu(matlu1,natom)
@@ -2598,7 +2508,7 @@ end subroutine add_matlu
 !! Transform mat from Slm to Ylm basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2611,11 +2521,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine slm2ylm_matlu(matlu,natom,option,optprt)
@@ -2740,7 +2645,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2756,11 +2661,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine fac_matlu(matlu,natom,fac)
@@ -2809,7 +2709,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2825,11 +2725,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine printplot_matlu(matlu,natom,freq,char1,units,imre)
@@ -2888,7 +2783,7 @@ end subroutine add_matlu
 !! Make the matlu the identity
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2902,11 +2797,6 @@ end subroutine add_matlu
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine identity_matlu(matlu,natom)

@@ -6,15 +6,11 @@
 !!  This module defines basic structures used for Bethe-Salpeter calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2021 ABINIT and EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
+!! Copyright (C) 1992-2022 ABINIT and EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -285,19 +281,12 @@ CONTAINS  !=====================================================================
 !! SIDE EFFECTS
 !!  Bsp<excparam>=All associated pointers are deallocated.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine bs_parameters_free(BSp)
 
 !Arguments ------------------------------------
-!scalars
- type(excparam),intent(inout) :: BSp
+ class(excparam),intent(inout) :: BSp
 
 !************************************************************************
 
@@ -335,22 +324,16 @@ end subroutine bs_parameters_free
 !! OUTPUT
 !!  Only printing.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
+subroutine print_bs_parameters(BSp, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(excparam),intent(in) :: BSp
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(excparam),intent(inout) :: BSp
 
 !Local variables ------------------------------
 !scalars
@@ -506,20 +489,14 @@ end subroutine print_bs_parameters
 !! FUNCTION
 !!  Returns a string with the calculation type.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_bs_defs,m_exc_spectra
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine bsp_calctype2str(BSp,str)
+subroutine bsp_calctype2str(BSp, str)
 
 !Arguments ------------------------------------
 !scalars
+ class(excparam),intent(in) :: BSp
  character(len=500),intent(out) :: str
- type(excparam),intent(in) :: BSp
 
 !************************************************************************
 
@@ -568,16 +545,10 @@ end subroutine bsp_calctype2str
 !!    input:  allocatable array
 !!    output: Trans(max_nreh,nsppol) stores the correspondence t -> (band,kbz,spin) and the transition energy.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,nkibz,nsppol,nspinor,gw_energy,occ,ktab,&
-&  minmax_tene,nreh)
+                            minmax_tene,nreh)
 
 !Arguments ------------------------------------
 !scalars
@@ -678,17 +649,14 @@ end subroutine init_transitions
 !! OUTPUT
 !!  str(len=500)=The string representing the transition.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function repr_1trans(Trans,prtvol) result(str)
+pure function repr_1trans(Trans, prtvol) result(str)
 
 !Arguments ------------------------------------
-!scalars
+ class(transition),intent(in) :: Trans
  integer,optional,intent(in) :: prtvol
  character(len=500) :: str
- type(transition),intent(in) :: Trans
 
 !Local variables ------------------------------
 !scalars
@@ -722,8 +690,6 @@ end function repr_1trans
 !!
 !! OUTPUT
 !!  string(len=500)=The string representing the transition.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -766,23 +732,15 @@ end function repr_2trans
 !! OUTPUT
 !!  Only printing.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_bs_files(BS_files,header,unit,mode_paral,prtvol)
 
 !Arguments ------------------------------------
-!scalars
- type(excfiles),intent(in) :: BS_files
+ class(excfiles),intent(in) :: BS_files
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
-!arrays
 
 !Local variables ------------------------------
 !scalars

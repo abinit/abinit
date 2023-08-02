@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MF, GZ, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -242,16 +238,6 @@ contains
 !!
 !!   for more details about notations please see pdf in /doc/theory/MGGA/
 !!
-!! PARENTS
-!!      m_dft_energy,m_forstr,m_kxc,m_longwave,m_nonlinear,m_odamix,m_prcref
-!!      m_respfn_driver,m_rhotov,m_scfcv_core,m_setvtr,m_vhxc_me,m_xchybrid
-!!
-!! CHILDREN
-!!      dotprod_vn,drivexc,libxc_functionals_end
-!!      libxc_functionals_get_hybridparams,libxc_functionals_init,mean_fftr
-!!      metric,mkdenpos,size_dvxc,timab,xc_vdw_aggregate,xcden,xcmult
-!!      xcpositron,xcpot,xctfw,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
@@ -309,7 +295,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),pointer :: rhocorval(:,:),rhor_(:,:),taucorval(:,:),taur_(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:)
  real(dp) :: deltae_vdw,exc_vdw
- real(dp) :: decdrho_vdw(xcdata%nspden),decdgrho_vdw(3,xcdata%nspden)
+ real(dp) :: decdrho_vdw(nfft,xcdata%nspden),decdgrho_vdw(nfft,3,xcdata%nspden)
  real(dp) :: strsxc_vdw(3,3)
  type(libxc_functional_type) :: xc_funcs_auxc(2)
 
@@ -401,24 +387,21 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  if (with_vxctau) with_vxctau=(size(vxctau)>0)
  if (usekden==1) then
    if (.not.present(taur)) then
-     message=' For mGGA functionals, kinetic energy density is needed. Set input variable usekden to 1.' 
+     message=' For mGGA functionals, kinetic energy density is needed. Set input variable usekden to 1.'
      message=trim(message)//' Also use NC pseudopotentials without non-linear XC core correction.'
      ABI_BUG(message)
    else if (size(taur)/=nfft*nspden) then
-     message=' Invalid size for taur!'
-     ABI_BUG(message)
+     ABI_BUG('Invalid size for taur!')
    end if
    if (present(xcctau3d)) then
      n3xctau=size(xcctau3d)
      if (n3xctau/=0.and.n3xctau/=nfft) then
-       message=' Invalid size for xccctau3d!'
-       ABI_BUG(message)
+       ABI_BUG('Invalid size for xccctau3d!')
      end if
    end if
    if (with_vxctau) then
      if (size(vxctau)/=nfft*nspden*4) then
-       message=' Invalid size for vxctau!'
-       ABI_BUG(message)
+       ABI_BUG('Invalid size for vxctau!')
      end if
    end if
  end if
@@ -463,8 +446,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  end if
  deltae_vdw = zero
  exc_vdw = zero
- decdrho_vdw(:) = zero
- decdgrho_vdw(:,:) = zero
+ decdrho_vdw(:,:) = zero
+ decdgrho_vdw(:,:,:) = zero
  strsxc_vdw(:,:) = zero
 
 
@@ -1310,9 +1293,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 !Add van der Waals terms
 #if defined DEV_YP_VDWXC
  if ( (xcdata%vdw_xc > 0) .and. (xcdata%vdw_xc < 10) .and. (xc_vdw_status()) ) then
-   enxc = enxc + exc_vdw
+   enxc = enxc + exc_vdw + deltae_vdw
    do ispden=1,nspden
-     vxc(:,ispden) = vxc(:,ispden) + decdrho_vdw(ispden)
+     vxc(:,ispden) = vxc(:,ispden) + decdrho_vdw(:,ispden)
    end do
    strsxc(1) = strsxc(1) + strsxc_vdw(1,1)
    strsxc(2) = strsxc(2) + strsxc_vdw(2,2)

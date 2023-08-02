@@ -1,0 +1,85 @@
+# Test cprj_update_lvl and nloc_alg options (PAW, so useylm=1) on AlAs (optforces=1)
+
+  nonlop_ylm_count 1 # enable nonlop counting
+  fft_count 1        # enable fft counting
+
+  ndtset 7
+  # Depending on "cprj_update_lvl" value, cprj are computed (instead of "propagated") in different places in the code:
+  # place A : at the beginning of a run (gstate), or after the move of atoms (scfcv_core)
+  # place B : after orthogonalization of wave-functions (vtowfk)
+  # place C : before the subspace diagonalization of the hamiltonian (vtowfk)
+  # place D : at the end of an iteration in CG algorithm (cgwf_cprj)
+  # place E : at the beginning of CG algorithm (cgwf_cprj)
+  cprj_update_lvl7  4 # A
+  cprj_update_lvl6  3 # A + B (default value)
+  cprj_update_lvl5  2 # A + C
+  cprj_update_lvl4  1 # A + B + C
+  cprj_update_lvl3 -1 # A + B + C + D (for debugging only, poor performance)
+  cprj_update_lvl2 -2 # A + B + C + D + E (for debugging only, poor performance)
+  cprj_update_lvl1  0 # "cprj in memory" implementation is disabled, use of the native implementation instead
+
+  optforces 1
+  optstress 1
+
+# Elementary cell
+#*********************************
+   acell 3*10.64
+   rprim 0.0 0.4 0.5 # slightly distorted cell, so the stress is properly tested
+         0.5 0.0 0.5
+         0.5 0.5 0.1
+
+# Atoms
+#***********************
+   natom 2
+   ntypat 2
+   znucl 13 33
+   typat 1 2
+
+   xred  0.00  0.00  0.00
+         0.24  0.25  0.26 # To have non-zero forces, so they are properly tested too
+
+# SCF procedure
+#*******************************
+   tolvrs   1.0d-12
+   nstep    5 # In order to have a fix number of iterations
+
+# Bands
+#*******************************
+  occopt    1
+   nband    4
+
+# Plane wave basis set
+#**************************************
+       ecut  3.5
+     ecutsm  0
+  pawecutdg  7
+
+# K point grid
+#**************************************
+   ngkpt       2 2 2
+   nshiftk     4
+   shiftk      0.5 0.5 0.5
+               0.5 0.0 0.0
+               0.0 0.5 0.0
+               0.0 0.0 0.5
+
+# Ground state computation
+   kptopt   1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pw_standard/Al.xml, As.LDA_PW-JTH_sp.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_FFTW3
+#%% [files]
+#%% files_to_test = t74.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. Baguet
+#%% keywords = PAW
+#%% description = Quick test on AlAs (PAW) to check that different cprj_update_lvl options give the correct energy.
+#%%               Compute forces at every iteration, compute stress at the end of the run.
+#%%<END TEST_INFO>

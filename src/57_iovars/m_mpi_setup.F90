@@ -6,14 +6,10 @@
 !!  Initialize MPI parameters and datastructures for parallel execution
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (FJ, MT, FD)
+!!  Copyright (C) 1999-2022 ABINIT group (FJ, MT, FD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -37,7 +33,6 @@ module m_mpi_setup
  use defs_abitypes,  only : MPI_type
  use m_fstrings,     only : sjoin, itoa
  use m_time,         only : abi_wtime
- use m_io_tools,     only : flush_unit
  use m_parser,       only : intagm
  use m_geometry,     only : mkrdim, metric
  use m_fftcore,      only : fftalg_for_npfft, getng,  kpgcount
@@ -84,13 +79,6 @@ contains
 !! SIDE EFFECTS
 !!   mpi_enregs=information about MPI parallelization
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
@@ -116,7 +104,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 #ifdef HAVE_LINALG_ELPA
  integer :: icol,irow,np
 #endif
- logical :: fftalg_read,ortalg_read,wfoptalg_read,do_check
+ logical :: fftalg_read,ortalg_read,paral_kgb_read,wfoptalg_read,do_check
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
  character(len=500) :: msg
 !arrays
@@ -160,26 +148,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !  Compute metric for this dataset
    call mkrdim(dtsets(idtset)%acell_orig(1:3,1),dtsets(idtset)%rprim_orig(1:3,1:3,1),rprimd)
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
-   ! Read paral_kgb and disable it if not supported in optdriver.
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_kgb',tread(1),'INT')
-   if (tread(1)==1) dtsets(idtset)%paral_kgb=intarr(1)
-
-   if(xmpi_paral==0.and.dtsets(idtset)%paral_kgb==1)then
-     dtsets(idtset)%paral_kgb=0
-     write(msg, '(5a)' ) &
-     'When ABINIT is compiled without MPI flag,',ch10,&
-     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
-     'Action: modify compilation option or paral_kgb in the input file.'
-     ABI_WARNING(msg)
-   end if
-
-   if ( ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS]) .and. dtsets(idtset)%paral_kgb/=0) then
-     dtsets(idtset)%paral_kgb=0
-     write(msg, '(a,i0,a)') &
-      "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
-     ABI_COMMENT(msg)
-   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'max_ncpus',tread0,'INT')
    if (tread0==1) dtsets(idtset)%max_ncpus=intarr(1)
@@ -245,6 +213,25 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'autoparal',tread0,'INT')
    if(tread0==1) dtsets(idtset)%autoparal=intarr(1)
 
+!  Read paral_kgb and disable it if not supported in optdriver
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'paral_kgb',tread(1),'INT')
+   paral_kgb_read=(tread(1)==1)
+   if (paral_kgb_read) dtsets(idtset)%paral_kgb=intarr(1)
+   if (xmpi_paral==0.and.dtsets(idtset)%paral_kgb==1) then
+     dtsets(idtset)%paral_kgb=0
+     write(msg, '(5a)' ) &
+     'When ABINIT is compiled without MPI flag,',ch10,&
+     'setting paral_kgb/=0 is useless. paral_kgb has been reset to 0.',ch10,&
+     'Action: modify compilation option or paral_kgb in the input file.'
+     ABI_WARNING(msg)
+   end if
+   if (ALL(optdriver /= [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT]) .and. dtsets(idtset)%paral_kgb/=0) then
+     dtsets(idtset)%paral_kgb=0
+     write(msg, '(a,i0,a)') &
+      "paral_kgb != 0 is not available in optdriver ",optdriver,". Setting paral_kgb to 0"
+     ABI_COMMENT(msg)
+   end if
+
    wfoptalg_read=.false.
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfoptalg',tread0,'INT')
    if(tread0==1) then
@@ -264,23 +251,34 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      iexit = iexit + 1
    end if
 
-!  From total number of procs, compute all possible distributions
-!  Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
-   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) then
-       iexit = 0
+   ! From total number of procs, compute all possible distributions
+   ! Ignore exit flag if GW/EPH calculations because autoparal section is performed in screening/sigma/bethe_salpeter/eph
+   if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR, RUNL_NONLINEAR])) then
+     iexit = 0
    else
      call finddistrproc(dtsets,filnam,idtset,iexit,mband_upper,mpi_enregs(idtset),ndtset_alloc,tread)
    end if
-   !if (any(optdriver == [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_NONLINEAR])) iexit = 0
 
-   if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS).and. &
+   call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
+   nproc=mpi_enregs(idtset)%nproc_cell
+
+!  Set paral_kgb to 1 when band-fft parallelism is activated
+   if (ANY(optdriver == [RUNL_GSTATE, RUNL_GWLS, RUNL_RTTDDFT])) then
+     if (mpi_enregs(idtset)%nproc_cell>1) then
+       if (dtsets(idtset)%npband>1.or.dtsets(idtset)%npfft>1) then
+         if (.not.paral_kgb_read) dtsets(idtset)%paral_kgb=1
+       end if
+     end if
+   end if
+     
+   if ((optdriver/=RUNL_GSTATE.and.optdriver/=RUNL_GWLS.and.optdriver/=RUNL_RTTDDFT).and. &
 &   (dtsets(idtset)%np_spkpt/=1   .or.dtsets(idtset)%npband/=1.or.dtsets(idtset)%npfft/=1.or. &
 &   dtsets(idtset)%npspinor/=1.or.dtsets(idtset)%bandpp/=1)) then
 !&   .or.(dtsets(idtset)%iscf<0)) then
      dtsets(idtset)%np_spkpt=1 ; dtsets(idtset)%npspinor=1 ; dtsets(idtset)%npfft=1
      dtsets(idtset)%npband=1; dtsets(idtset)%bandpp=1  ; dtsets(idtset)%nphf=1
      dtsets(idtset)%paral_kgb=0
-     ABI_COMMENT('For non ground state calculation, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
+     ABI_COMMENT('For non ground state calculations, set bandpp, npfft, npband, npspinor, np_spkpt and nphf to 1')
    end if
 
 !  Take into account a possible change of paral_kgb (change of the default algorithm)
@@ -346,16 +344,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%npfft>1.and.usepaw==1) then
      dtsets(idtset)%pawmixdg=1
    end if
-
-   call initmpi_img(dtsets(idtset),mpi_enregs(idtset),-1)
-   nproc=mpi_enregs(idtset)%nproc_cell
-
+     
 !  Cycle if the processor is not used
    if (mpi_enregs(idtset)%me<0.or.iexit>0) then
      ABI_FREE(intarr)
      ABI_FREE(dprarr)
      cycle
    end if
+
+   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
+   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
 
    response=0
    if (dtsets(idtset)%rfddk/=0 .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
@@ -491,11 +489,36 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    end if ! Fock
 
    !When using chebfi, the number of blocks is equal to the number of processors
-   if((dtsets(idtset)%wfoptalg == 1)) then
+   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
      !Nband might have different values for different kpoint, but not bandpp.
      !In this case, we just use the largest nband, and the input will probably fail
      !at the bandpp check later on
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+   end if
+
+   !Check parallelization in case of RTTDDFT
+   !In particular ensure that bandpp = nband / npband
+   if (optdriver == RUNL_RTTDDFT) then
+      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+      if ( tread(8) == 1 ) then
+         write(msg, '(a,a)') 'Setting bandpp is useless in RT-TDDFT because it is automatically set to nband/npband.', ch10
+         ABI_WARNING(msg)
+      end if
+      if (dtsets(idtset)%npfft/=1) then
+         dtsets(idtset)%npfft=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with FFT-parallelization. Remove npfft or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
+      if (dtsets(idtset)%npspinor/=1) then
+         dtsets(idtset)%npspinor=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with spinor parallelization. Remove npspinor or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
+      if (dtsets(idtset)%nphf/=1) then
+         dtsets(idtset)%nphf=1
+         write(msg, '(a,a)') 'RT-TDDFT is not compatible with HF parallelization. Remove nphf or set it to 1.', ch10
+         ABI_ERROR(msg)
+      end if
    end if
 
 !  Set mpi_enreg
@@ -679,7 +702,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        !  mkmem was not set in the input file so default to incore solution
        !write(msg,'(6a)') &
        !'mpi_setup: ',nm_mkmem(ii),' undefined in the input file.','Use default ',nm_mkmem(ii),' = nkpt'
-       !call wrtout(std_out,msg,'COLL')
+       !call wrtout(std_out, msg)
        mkmem=nkpt
      end if
 
@@ -720,14 +743,14 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    if(dtsets(idtset)%paral_kgb==1) mpi_enregs(idtset)%paralbd=0
 
-!  Check if some MPI processes are empty (MBPT code uses a complete different MPI algorithm)
-   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH])
+!  Check if some MPI processes are empty (MBPT codes uses a complete different MPI algorithm)
+   do_check = all(optdriver /= [RUNL_SCREENING, RUNL_SIGMA, RUNL_BSE, RUNL_EPH, RUNL_GWR])
    if (dtsets(idtset)%usewvl == 0 .and. do_check) then
      if (.not.mpi_distrib_is_ok(mpi_enregs(idtset),mband_upper,&
           dtsets(idtset)%nkpt,dtsets(idtset)%mkmem,nsppol,msg=msg)) then
        write(msg,'(5a)') trim(msg),ch10,&
          'YOU ARE STRONGLY ADVISED TO ACTIVATE AUTOMATIC PARALLELIZATION!',ch10,&
-         'PUT "AUTOPARAL=1" IN THE INPUT FILE.'
+         'USE "AUTOPARAL=1" IN THE INPUT FILE.'
        ABI_WARNING(msg)
      end if
    end if
@@ -859,8 +882,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if (usepaw==1) call wrtout(std_out,'getng is called for the coarse grid:')
    kpt=k0; if (response==1.and.usepaw==1) kpt=qphon ! this is temporary
 
-   call getng(dtsets(idtset)%boxcutmin,ecut_eff,gmet,kpt,me_fft,mgfft,nfft,&
-&   ngfft,nproc_fft,nsym,paral_fft,symrel,&
+   call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,ecut_eff,gmet,kpt,me_fft,mgfft,nfft,&
+&   ngfft,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
 &   use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
 
    dtsets(idtset)%ngfft(:)=ngfft(:)
@@ -915,8 +938,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      ngfftc(:) = ngfft(1:3)
      kpt=k0; if (response==1.and.usepaw==1) kpt=qphon  ! this is temporary
 
-     call getng(dtsets(idtset)%bxctmindg,ecutdg_eff,gmet,kpt,me_fft,mgfftdg,&
-&     nfftdg,ngfftdg,nproc_fft,nsym,paral_fft,symrel,ngfftc,&
+     call getng(dtsets(idtset)%bxctmindg,dtsets(idtset)%chksymtnons,&
+&     ecutdg_eff,gmet,kpt,me_fft,mgfftdg,&
+&     nfftdg,ngfftdg,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,ngfftc,&
 &     use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
 
      dtsets(idtset)%ngfftdg(:)=ngfftdg(:)
@@ -1027,13 +1051,6 @@ end subroutine mpi_setup
 !!  dtset%np_slk   = number of processors used in ScaLapack routines
 !!  dtset%gpu_linalg_limit=threshold activating Linear Algebra on GPU
 !!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
-!!
 !! SOURCE
 
  subroutine finddistrproc(dtsets,filnam,idtset,iexit,mband,mpi_enreg,ndtset_alloc,tread)
@@ -1052,9 +1069,9 @@ end subroutine mpi_setup
 !scalars
 !128 should be a reasonable maximum for npfft (scaling is very poor for npfft>20)
  integer,parameter :: ALGO_NOT_SET=-1, ALGO_DEFAULT_PAR=2
- integer,parameter :: ALGO_CG=0, ALGO_LOBPCG_OLD=1, ALGO_LOBPCG_NEW=2, ALGO_CHEBFI=3
+ integer,parameter :: ALGO_CG=0, ALGO_LOBPCG_OLD=1, ALGO_LOBPCG_NEW=2, ALGO_CHEBFI=3, ALGO_CHEBFI_NEW=4
  integer,parameter :: NPFMAX=128,BLOCKSIZE_MAX=3000,MAXBAND_PRINT=10
- integer,parameter :: MAXCOUNT=250,MAXPRINT=10,MAXBENCH=25,MAXABIPY=5,NPF_CUTOFF=20
+ integer,parameter :: MAXCOUNT=250,MAXPRINT=10,MAXBENCH=25,MAXABIPY=25,NPF_CUTOFF=20
  real(dp),parameter :: relative_nband_range=0.025
  integer :: wf_algo,wf_algo_global,bpp,bpp_max,bpp_min,optdriver,autoparal,nblocks,blocksize
  integer :: npi_max,npi_min,npc,npc_max,npc_min
@@ -1105,6 +1122,12 @@ end subroutine mpi_setup
  ! Unit number used for outputting the autoparal sections
  ount = ab_out
 
+ ! From the documentation:
+ !
+ !   If autoparal > 1 and max_ncpus is greater than 0, ABINIT analyzes the
+ !   efficiency of the process distribution for each possible number of processors
+ !   from 2 to max_ncpus. After having printed out the efficiency, the code stops.
+
  ! Handy local variables
  iam_master = (mpi_enreg%me==0)
  optdriver = dtset%optdriver
@@ -1123,8 +1146,10 @@ end subroutine mpi_setup
  if (dtset%wfoptalg==4.or.dtset%wfoptalg==14) wf_algo_global=ALGO_LOBPCG_OLD
  if (dtset%wfoptalg==114) wf_algo_global=ALGO_LOBPCG_NEW
  if (dtset%wfoptalg==1) wf_algo_global=ALGO_CHEBFI
+ if (dtset%wfoptalg==111) wf_algo_global=ALGO_CHEBFI_NEW
 
  ! Some peculiar cases (with direct exit)
+ ! MG: What is the meaning of max_ncpus < 0. This is not documented!
  if (max_ncpus<=0) then
    if (nproc==1.and.max_ncpus<=0) then
      if (tread(1)==0.or.xmpi_paral==0) dtset%paral_kgb= 0
@@ -1139,8 +1164,8 @@ end subroutine mpi_setup
      if (tread(10)==0.or.xmpi_paral==0) dtset%np_slk  = 1000000
      return
    end if
-   if ((dtset%optdriver/=RUNL_GSTATE.and.dtset%optdriver/=RUNL_RESPFN.and.dtset%optdriver/=RUNL_GWLS).or. &
-       (dtset%optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
+   if ((optdriver/=RUNL_GSTATE.and. optdriver/=RUNL_RESPFN.and. optdriver/=RUNL_GWLS).or. &
+       (optdriver==RUNL_GSTATE.and.dtset%usewvl==1)) then
      dtset%paral_kgb= 0
      dtset%npimage  = max(1,dtset%npimage)
      dtset%nppert   = max(1,dtset%nppert)
@@ -1191,7 +1216,7 @@ end subroutine mpi_setup
 
 !Parallelization over perturbations, k-points and spin components (DFPT)
  npp_min=1;npp_max=1;npert_eff=1
- if (optdriver==RUNL_RESPFN) then
+ if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
    if (dtset%paral_rf==1) then
      call dtset%get_npert_rbz(nband_rbz, nkpt_rbz, npert_eff)
      do jj=1,npert_eff
@@ -1204,8 +1229,7 @@ end subroutine mpi_setup
        npp_max=dtset%nppert
        if (npp_max>npert_eff) then
          npp_min=npert_eff;npp_max=npert_eff
-         msg='nppert is bigger than npert; we set nppert=npert'
-         ABI_WARNING(msg)
+         ABI_WARNING('nppert is bigger than npert; we set nppert=npert')
        end if
      end if
      np_sk_min=1
@@ -1233,7 +1257,7 @@ end subroutine mpi_setup
  npb_min=1;npb_max=1
  bpp_min=1;bpp_max=1
  n2=0;n3=0
- if (dtset%optdriver==RUNL_GSTATE) then
+ if (optdriver==RUNL_GSTATE) then
 
 !  >> FFT level
    npf_min=max(1,dtset%npfft)
@@ -1258,7 +1282,7 @@ end subroutine mpi_setup
      npf_min=1;npf_max=1
    end if
    !Deactivate MPI FFT parallelism for multi-threaded LOBPCG / CHEBFI
-   if ((wf_algo_global==ALGO_LOBPCG_NEW.or.wf_algo_global==ALGO_CHEBFI).and.nthreads>1) then
+   if ((wf_algo_global==ALGO_LOBPCG_NEW.or.wf_algo_global==ALGO_CHEBFI.or.wf_algo_global==ALGO_CHEBFI_NEW).and.nthreads>1) then
      npf_min=1;npf_max=1
    end if
 
@@ -1317,6 +1341,8 @@ end subroutine mpi_setup
    if (tread(8)==1) bpp_max=dtset%bandpp
    if (wf_algo_global==ALGO_CHEBFI) bpp_min=1 ! bandpp not used with ChebFi
    if (wf_algo_global==ALGO_CHEBFI) bpp_max=1
+   if (wf_algo_global==ALGO_CHEBFI_NEW) bpp_min=1 ! bandpp not used with ChebFi
+   if (wf_algo_global==ALGO_CHEBFI_NEW) bpp_max=1 ! bandpp not used with ChebFi
 
  end if ! RUNL_GSTATE
 
@@ -1359,7 +1385,7 @@ end subroutine mpi_setup
  if (optdriver==RUNL_GSTATE) then
    ncell_eff=nimage_eff;npc_min=npi_min;npc_max=npi_max
  end if
- if (optdriver==RUNL_RESPFN) then
+ if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
    ncell_eff=npert_eff;npc_min=npp_min;npc_max=npp_max
  end if
 
@@ -1372,7 +1398,7 @@ end subroutine mpi_setup
  if (optdriver==RUNL_GSTATE) then
    ncell_eff=nimage_eff;npc_min=npi_min;npc_max=npi_max
  end if
- if (optdriver==RUNL_RESPFN) then
+ if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
    ncell_eff=npert_eff;npc_min=npp_min;npc_max=npp_max
  end if
 
@@ -1382,8 +1408,8 @@ end subroutine mpi_setup
 
 !  >>>>> K-POINTS
    do np_sk=np_sk_min,np_sk_max
-!    -> for DFPT runs, impose that nsppol divide np_sk
-     if (optdriver==RUNL_RESPFN.and.modulo(np_sk,dtset%nsppol)>0.and.np_sk>1) cycle
+!    -> for DFPT runs, impose that nsppol divides np_sk
+     if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE]) .and. modulo(np_sk,dtset%nsppol)>0.and.np_sk>1) cycle
      acc_k=one;if (np_sk>1) acc_k=0.96_dp*speedup_fdp(nkpt_eff,np_sk)
 
 !    >>>>> SPINORS
@@ -1409,11 +1435,10 @@ end subroutine mpi_setup
 
 !        Change algo if npfft>1
          wf_algo=wf_algo_global
-         if (optdriver==RUNL_GSTATE.and.npf>1.and. &
-&            wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
+         if (optdriver==RUNL_GSTATE.and.npf>1.and. wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
 
 !        FFT parallelism not compatible with multithreading
-         if (wf_algo==ALGO_LOBPCG_NEW.or.wf_algo==ALGO_CHEBFI) then
+         if (wf_algo==ALGO_LOBPCG_NEW.or.wf_algo==ALGO_CHEBFI.or.wf_algo==ALGO_CHEBFI_NEW) then
            if (nthreads>1.and.npf>1) cycle
          end if
 
@@ -1425,8 +1450,7 @@ end subroutine mpi_setup
            if (modulo(mband,npb)>0) cycle
 
 !          Change algo if npband>1
-           if (optdriver==RUNL_GSTATE.and.npb>1.and. &
-&              wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
+           if (optdriver==RUNL_GSTATE.and.npb>1.and. wf_algo_global==ALGO_NOT_SET) wf_algo=ALGO_DEFAULT_PAR
 
 !          Base speedup
            acc_kgb_0=one;if (npb*npf*nthreads>1) acc_kgb_0=0.7_dp*speedup_fdp(mpw,(npb*npf*nthreads))
@@ -1456,7 +1480,7 @@ end subroutine mpi_setup
                if ((bpp>1).and.(modulo(bpp,2)>0)) cycle
                if (one*npb*bpp >max(1.,mband/3.).and.(mband>30)) cycle
                if (npb*npf<=4.and.(.not.first_bpp)) cycle
-             else if (wf_algo==ALGO_CHEBFI) then
+             else if (wf_algo==ALGO_CHEBFI .or. wf_algo==ALGO_CHEBFI_NEW) then
                !Nothing
              else
                if (bpp/=1.or.npb/=1) cycle
@@ -1485,7 +1509,7 @@ end subroutine mpi_setup
              end if
 
 !            CHEBFI: promote npfft=npband and nband>=npfft
-             if (wf_algo==ALGO_CHEBFI) then
+             if (wf_algo==ALGO_CHEBFI .or. wf_algo==ALGO_CHEBFI_NEW) then
                if (npf>1) then
                  if (npb>npf) then
                    acc_kgb=acc_kgb*(one-0.8_dp*0.25_dp*((dble(npb)/dble(npf))-one)**2/(nproc1-one)**2)
@@ -1540,10 +1564,7 @@ end subroutine mpi_setup
 &  'Your input dataset does not let Abinit find an appropriate process distribution with nCPUs=',nproc*nthreads,ch10, &
 &  'Try to comment all the np* vars and set max_ncpus=',nthreads*nproc,' to have advices on process distribution.'
    ABI_WARNING(msg)
-   if (max_ncpus>0) then
-     call wrtout(ab_out,msg)
-     call flush_unit(ab_out)
-   end if
+   if (max_ncpus>0) call wrtout(ab_out,msg, do_flush=.True.)
    iexit=iexit+1
  end if
 
@@ -1561,15 +1582,22 @@ end subroutine mpi_setup
    if (any(my_algo(:)/=ALGO_CG)) paral_kgb=1
  end if
 
- ! Print output for abipy
+ ! ======================================
+ ! Print output for abipy in Yaml format
+ ! ======================================
+
+ ! Please DO NOT CHANGE this part without contacting gmatteo first
+ ! since ANY CHANGE can easily break the interface with AbiPy.
  if (iam_master .and. max_ncpus > 0.and. (mcount>0 .or. wf_algo_global == ALGO_CG)) then
    write(ount,'(2a)')ch10,"--- !Autoparal"
    if (optdriver==RUNL_GSTATE .and. paral_kgb == 0) then
      write(ount,"(a)")"# Autoparal section for GS run (band-by-band CG method)"
    else if (optdriver==RUNL_GSTATE) then
-     write(ount,'(a)')'#Autoparal section for GS calculations with paral_kgb'
+     write(ount,'(a)')'# Autoparal section for GS calculations with paral_kgb 1'
    else if (optdriver==RUNL_RESPFN) then
-     write(ount,'(a)')'#Autoparal section for DFPT calculations'
+     write(ount,'(a)')'# Autoparal section for DFPT calculations'
+   else if (optdriver==RUNL_LONGWAVE) then
+     write(ount,'(a)')'# Autoparal section for LONGWAVE calculations'
    else
      ABI_ERROR(sjoin('Unsupported optdriver:', itoa(optdriver)))
    end if
@@ -1582,6 +1610,7 @@ end subroutine mpi_setup
    write(ount,"(a,i0)")"    nkpt: ",dtset%nkpt
    write(ount,"(a,i0)")"    mband: ",mband
    write(ount,"(a)")"configurations:"
+
    if (optdriver==RUNL_GSTATE.and.paral_kgb==0) then
      work_size = dtset%nkpt * dtset%nsppol
      do ii=1,max_ncpus
@@ -1597,6 +1626,7 @@ end subroutine mpi_setup
          !write(ount,"(a,f12.2)")"      mem_per_cpu: ",mempercpu_mb
        end do
      end do
+
    else if (optdriver==RUNL_GSTATE) then
      omp_ncpus=nthreads
      do jj=mcount,mcount-min(ncount,MAXABIPY)+1,-1
@@ -1619,7 +1649,8 @@ end subroutine mpi_setup
        write(ount,'(a,i0,a)')'            bandpp: ',my_distp(6,ii),','
        write(ount,'(a)')   '            }'
      end do
-   else if (optdriver==RUNL_RESPFN) then
+
+   else if (any(optdriver == [RUNL_RESPFN, RUNL_LONGWAVE])) then
      do jj=mcount,mcount-min(ncount,MAXABIPY)+1,-1
        ii=isort(jj)
        tot_ncpus = my_distp(7,ii)
@@ -1723,7 +1754,8 @@ end subroutine mpi_setup
  if (optdriver==RUNL_GSTATE.and. &
 &    (any(my_algo(1:mcount)==ALGO_LOBPCG_OLD.or. &
 &         my_algo(1:mcount)==ALGO_LOBPCG_NEW.or. &
-&         my_algo(1:mcount)==ALGO_CHEBFI))) then
+&         my_algo(1:mcount)==ALGO_CHEBFI.or. &
+&         my_algo(1:mcount)==ALGO_CHEBFI_NEW))) then
    if (mcount>0) then
      icount=isort(mcount)
      npc=my_distp(1,icount);np_sk=my_distp(2,icount)
@@ -1742,13 +1774,13 @@ end subroutine mpi_setup
    write(strg,'(a,i0)') ' npspinor=',nps;if (with_spinor) msg=trim(msg)//trim(strg)
    write(strg,'(a,i0)') ' npfft='   ,npf;if (with_fft)    msg=trim(msg)//trim(strg)
    call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
-   ib1=mband-int(mband*relative_nband_range);if (my_algo(icount)==ALGO_CHEBFI) ib1=mband
+   ib1=mband-int(mband*relative_nband_range);if (my_algo(icount)==ALGO_CHEBFI .or. my_algo(icount)==ALGO_CHEBFI_NEW) ib1=mband
    ib2=mband+int(mband*relative_nband_range)
    ABI_MALLOC(nproc_best,(1+ib2-ib1))
    ABI_MALLOC(nband_best,(1+ib2-ib1))
    nproc_best(:)=1
    nband_best=(/(ii,ii=ib1,ib2)/)
-   bpp=merge(1,nthreads,my_algo(icount)==ALGO_CHEBFI)
+   bpp=merge(1,nthreads,my_algo(icount)==ALGO_CHEBFI .or. my_algo(icount)==ALGO_CHEBFI_NEW)
    do ii=ib1,ib2
      do jj=1,nproc/nproc1
        ibest=1
@@ -1768,10 +1800,10 @@ end subroutine mpi_setup
      if (nband_best(ii)==mband) kk=nproc_best(ii)
    end do
    if (kk==maxval(nproc_best(:))) then
-     if (my_algo(icount)/=ALGO_CHEBFI) then
+     if (my_algo(icount)/=ALGO_CHEBFI .or. my_algo(icount)/=ALGO_CHEBFI_NEW) then
        write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be the best choice!'
      end if
-     if (my_algo(icount)==ALGO_CHEBFI) then
+     if (my_algo(icount)==ALGO_CHEBFI .or. my_algo(icount)/=ALGO_CHEBFI_NEW) then
        write(msg,'(a,i6,a)') ' >>> The present nband value (',mband,') seems to be a good choice!'
      end if
      call wrtout(std_out,msg);if(max_ncpus>0) call wrtout(ab_out,msg)
@@ -1780,7 +1812,7 @@ end subroutine mpi_setup
    ABI_FREE(nband_best)
  end if
 
- if (optdriver==RUNL_GSTATE.and.(any(my_algo(1:mcount)==ALGO_CHEBFI))) then
+ if (optdriver==RUNL_GSTATE.and.(any(my_algo(1:mcount)==ALGO_CHEBFI .or. my_algo(1:mcount)==ALGO_CHEBFI_NEW))) then
    write(msg,'(5a)') &
 &   ' >>> Note that with the "Chebyshev Filtering" algorithm, it is often',ch10,&
 &   '     better to increase the number of bands (10% more or a few tens more).',ch10,&
@@ -1924,14 +1956,13 @@ end subroutine mpi_setup
 
  DBG_EXIT("COLL")
 
- contains
+contains
 
-   function speedup_fdp(nn,mm)
-   !Expected linear speedup for a nn-sized problem and mm processes
-   real(dp) :: speedup_fdp
-   integer,intent(in) :: nn,mm
-   speedup_fdp=(one*nn)/(one*((nn/mm)+merge(0,1,mod(nn,mm)==0)))
- end function speedup_fdp
+real(dp) pure function speedup_fdp(nn, mm)
+  ! Expected linear speedup for a nn-sized problem and mm processes
+  integer,intent(in) :: nn, mm
+  speedup_fdp = (one*nn) / (one* ((nn / mm) + merge(0, 1, mod(nn, mm) == 0)))
+end function speedup_fdp
 
 end subroutine finddistrproc
 !!***
@@ -1964,13 +1995,6 @@ end subroutine finddistrproc
 !!   This indicator is returned in acc_kgb
 !! This routine can be used to find the optimal values of np_slk parameter (ScaLapack)
 !!   and wheter or not we should use Magma for Linear Algebra in lobpcgwf
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
-!!      abi_linalg_finalize,abi_linalg_init,abi_xhegv,abi_xorthonormalize
-!!      wrtout,xmpi_bcast,xmpi_comm_free
 !!
 !! SOURCE
 

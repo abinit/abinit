@@ -6,14 +6,10 @@
 !!  This module contains basic tools to deal with Fortran IO
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -51,6 +47,7 @@ MODULE m_io_tools
  public :: lock_and_write     ! Write a string to a file with locking mechanism.
  public :: num_opened_units   ! Return the number of opened units.
  public :: show_units         ! Print info on the logical units.
+ public :: write_units        ! Write `string` to a list of Fortran `units`.
 
  interface get_unit
    module procedure get_free_unit
@@ -119,8 +116,6 @@ CONTAINS  !===========================================================
 !!   IO_NO_AVAILABLE_UNIT if no logical unit is free (!)
 !!   IO_FILE_NOT_ASSOCIATED if the file is not linked to a logical unit
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function get_free_unit()
@@ -156,8 +151,6 @@ end function get_free_unit
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function get_unit_from_fname(fname)
@@ -184,22 +177,16 @@ end function get_unit_from_fname
 !!  file_exists
 !!
 !! FUNCTION
-!!  Return .TRUE. if file existent (function version of inquire).
-!!
-!! INPUTS
-!!  fname=The name of the file.
-!!
-!! PARENTS
+!!  Return .TRUE. if file `filepath` exists (function version of inquire).
 !!
 !! SOURCE
 
-logical function file_exists(fname)
+logical function file_exists(filepath)
 
- character(len=*),intent(in) :: fname
-
+ character(len=*),intent(in) :: filepath
 ! *********************************************************************
 
- inquire(file=fname, exist=file_exists)
+ inquire(file=filepath, exist=file_exists)
 
 end function file_exists
 !!***
@@ -226,14 +213,9 @@ end function file_exists
 !! SIDE EFFECTS
 !!  The specified file is deleted.
 !!
-!! PARENTS
-!!      ioprof,m_dvdb,m_io_redirect,m_mlwfovlp,m_nctk,m_wfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine delete_file(fname,ierr)
+subroutine delete_file(fname, ierr)
 
  integer,intent(out) :: ierr
  character(len=*),intent(in) :: fname
@@ -249,14 +231,14 @@ subroutine delete_file(fname,ierr)
 
  if (.not.exists) then
    ierr = 111
-   write(std_out,*)" Asked to delete not existent file: ",TRIM(fname)
+   !write(std_out,*)" Asked to delete non existent file: ",TRIM(fname)
    return
  end if
 
  if (is_open_fname(fname)) then
    tmp_unt = get_unit_from_fname(fname)
    if (tmp_unt == IO_FILE_NOT_ASSOCIATED) then
-    write(std_out,*) "File is opened but no associated unit found!"
+    !write(std_out,*) "File is opened but no associated unit found!"
     ierr = 112; return
    end if
    close(tmp_unt)
@@ -283,8 +265,6 @@ end subroutine delete_file
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -317,8 +297,6 @@ end function is_connected
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 logical function is_open_unit(unit)
@@ -344,8 +322,6 @@ end function is_open_unit
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 logical function is_open_fname(fname)
@@ -370,10 +346,6 @@ end function is_open_fname
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -413,10 +385,6 @@ end subroutine prompt_int0D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_rdp0D(msg,rvalue)
@@ -455,10 +423,6 @@ end subroutine prompt_rdp0D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -508,10 +472,6 @@ end subroutine prompt_string
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_int1D(msg,ivect)
@@ -551,10 +511,6 @@ end subroutine prompt_int1D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_int2D(msg,iarr)
@@ -592,10 +548,6 @@ end subroutine prompt_int2D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -635,10 +587,6 @@ end subroutine prompt_rdp1D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_rdp2D(msg,rarr)
@@ -677,11 +625,6 @@ end subroutine prompt_rdp2D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_io_tools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine prompt_exit()
@@ -718,10 +661,6 @@ end subroutine prompt_exit
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -766,14 +705,6 @@ end function read_string
 !! NOTES
 !!  Available only if the compiler implements this intrinsic procedure.
 !!
-!! PARENTS
-!!      abinit,anaddb,cut3d,fftprof,m_chi0,m_common,m_dmft,m_errors,m_forctqmc
-!!      m_hdr,m_io_redirect,m_io_tools,m_matlu,m_mpi_setup,m_paw_mkaewf
-!!      m_prep_calc_ucrpa,m_specialmsg,m_tdep_shell,m_vtorho,m_xc_vdw,mrggkk
-!!      mrgscr,multibinit,optic,vdw_kernelgen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine flush_unit(unit)
@@ -807,8 +738,6 @@ end subroutine flush_unit
 !!
 !! FUNCTION
 !!  Returns the name of a non-existent file to be used for temporary storage.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -855,8 +784,6 @@ end function pick_aname
 !!  provided that we continue to append the ".nc" string to any NETCDF
 !!  file produced by abinit.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure logical function isncfile(fname)
@@ -900,8 +827,6 @@ end function isncfile
 !!    IO_MODE_MPI if available
 !!    IO_MODE_FORTRAN if HAVE_MPI_IO is not defined.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure integer function iomode_from_fname(fname) result(iomode)
@@ -936,8 +861,6 @@ end function iomode_from_fname
 !! FUNCTION
 !!  Set the value of the enforce_fortran__ global variable.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine enforce_fortran_io(bool)
@@ -961,8 +884,6 @@ end subroutine enforce_fortran_io
 !!
 !! FUNCTION
 !!  Convert iomode to string
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1011,11 +932,6 @@ end function iomode2str
 !!
 !! TODO
 !! One should treat the possible errors of backspace
-!!
-!! PARENTS
-!!      m_wffile,m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1070,11 +986,9 @@ end subroutine mvrecord
 !!  iostat=Exit status
 !!  iomsg=Error message
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) result(iostat)
+function open_file(file, iomsg, unit, newunit, access, form, status, action, recl) result(iostat)
 
 !Arguments ------------------------------------
 !scalars
@@ -1148,8 +1062,6 @@ end function open_file
 !!  iostat=Exit status
 !!  iomsg=Error message
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function close_unit(unit,iomsg,status) result(iostat)
@@ -1208,11 +1120,6 @@ end function close_unit
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_io_tools,m_specialmsg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1289,11 +1196,6 @@ end subroutine write_lines
 !!  string: Input string.
 !!  ierr: Exit status, 0 is string has been written to filename.
 !!
-!! PARENTS
-!!      m_errors
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lock_and_write(filename, string, ierr)
@@ -1337,10 +1239,6 @@ end subroutine lock_and_write
 !!  Return the number of opened units.
 !!  Unit numbers listed in the optional argument `ignore` are not considered.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function num_opened_units(ignore) result(nn)
@@ -1375,11 +1273,6 @@ end function num_opened_units
 !!
 !! FUNCTION
 !!  Print info on the logical units
-!!
-!! PARENTS
-!!      m_errors
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1416,6 +1309,49 @@ subroutine show_units(ount)
  end do
 
 end subroutine show_units
+!!***
+
+!!****f* m_io_tools/write_units
+!! NAME
+!!  write_units
+!!
+!! FUNCTION
+!!  Write `string` to a list of Fortran `units`.
+!!  This function is supposed to be faster than wrtout as there's no check on the MPI rank.
+!!  This also means that this procedure should be called by a single MPI proc.
+!!
+!! INPUTS
+!!  [newlines]: Number of newlines added after string. Default 0
+!!  [pre_newlines]: Number of newlines added before string. Default 0
+!!
+!! SOURCE
+
+subroutine write_units(units, string, newlines, pre_newlines)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+ integer,intent(in) :: units(:)
+ integer,optional,intent(in) :: newlines, pre_newlines
+
+!Local variables-------------------------------
+ integer :: ii, unt
+! *************************************************************************
+
+ do unt=1,size(units)
+   if (present(pre_newlines)) then
+     do ii=1,pre_newlines
+       write(units(unt), "(a)") " "
+     end do
+   end if
+   write(units(unt), "(a)") trim(string)
+   if (present(newlines)) then
+     do ii=1,newlines
+       write(units(unt), "(a)") " "
+     end do
+   end if
+ end do
+
+end subroutine write_units
 !!***
 
 !----------------------------------------------------------------------

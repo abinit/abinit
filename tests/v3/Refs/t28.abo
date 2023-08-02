@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t28/t28.in
-- output file    -> t28.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t28/t28.abi
+- output file    -> t28.abo
 - root for input  files -> t28i
 - root for output files -> t28o
-
 
  DATASET    1 : space group P3 (#143); Bravais hP (primitive hexag.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           7        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.655 Mbytes of memory.
+P This job should need less than                       0.674 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P3_1 (#144); Bravais hP (primitive hexag.)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =           7        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.655 Mbytes of memory.
+P This job should need less than                       0.674 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P3_2 (#145); Bravais hP (primitive hexag.)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =           7        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.655 Mbytes of memory.
+P This job should need less than                       0.674 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group R3 (#146); Bravais hR (rhombohedral)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =           7        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.624 Mbytes of memory.
+P This job should need less than                       0.639 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P-3 (#147); Bravais hP (primitive hexag.)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group R-3 (#148); Bravais hR (rhombohedral)
 ================================================================================
@@ -119,11 +113,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.697 Mbytes of memory.
+P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group P3 1 2 (#149); Bravais hP (primitive hexag.)
 ================================================================================
@@ -136,11 +129,10 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    8 : space group P3 2 1 (#150); Bravais hP (primitive hexag.)
 ================================================================================
@@ -153,11 +145,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group P3_1 1 2 (#151); Bravais hP (primitive hexag.)
 ================================================================================
@@ -170,11 +161,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   10 : space group P3_1 2 1 (#152); Bravais hP (primitive hexag.)
 ================================================================================
@@ -187,11 +177,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   11 : space group P3_2 1 2 (#153); Bravais hP (primitive hexag.)
 ================================================================================
@@ -204,11 +193,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group P3_2 2 1 (#154); Bravais hP (primitive hexag.)
 ================================================================================
@@ -221,11 +209,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group R3 2 (#155); Bravais hR (rhombohedral)
 ================================================================================
@@ -238,11 +225,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.697 Mbytes of memory.
+P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   14 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
 ================================================================================
@@ -255,11 +241,10 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   15 : space group P3 1 m (#157); Bravais hP (primitive hexag.)
 ================================================================================
@@ -272,11 +257,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   16 : space group P3 c 1 (#158); Bravais hP (primitive hexag.)
 ================================================================================
@@ -289,11 +273,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   17 : space group P3 1 c (#159); Bravais hP (primitive hexag.)
 ================================================================================
@@ -306,11 +289,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   18 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -323,11 +305,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.697 Mbytes of memory.
+P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   19 : space group R3 c (#161); Bravais hR (rhombohedral)
 ================================================================================
@@ -340,11 +321,10 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.697 Mbytes of memory.
+P This job should need less than                       0.712 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   20 : space group P-3 1 m (#162); Bravais hP (primitive hexag.)
 ================================================================================
@@ -357,11 +337,10 @@ _ WF disk file :      0.005 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group P-3 1 c (#163); Bravais hP (primitive hexag.)
 ================================================================================
@@ -374,11 +353,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   22 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
@@ -391,11 +369,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group P-3 c 1 (#165); Bravais hP (primitive hexag.)
 ================================================================================
@@ -408,11 +385,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   24 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -425,11 +401,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.863 Mbytes of memory.
+P This job should need less than                       0.878 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   25 : space group R-3 c (#167); Bravais hR (rhombohedral)
 ================================================================================
@@ -442,11 +417,10 @@ _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          14          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.863 Mbytes of memory.
+P This job should need less than                       0.878 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET   26 : space group P6 (#168); Bravais hP (primitive hexag.)
 ================================================================================
@@ -459,11 +433,10 @@ _ WF disk file :      0.007 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   27 : space group P6_1 (#169); Bravais hP (primitive hexag.)
 ================================================================================
@@ -476,11 +449,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   28 : space group P6_5 (#170); Bravais hP (primitive hexag.)
 ================================================================================
@@ -493,11 +465,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   29 : space group P6_2 (#171); Bravais hP (primitive hexag.)
 ================================================================================
@@ -510,11 +481,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   30 : space group P6_4 (#172); Bravais hP (primitive hexag.)
 ================================================================================
@@ -527,11 +497,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   31 : space group P6_3 (#173); Bravais hP (primitive hexag.)
 ================================================================================
@@ -544,11 +513,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   32 : space group P-6 (#174); Bravais hP (primitive hexag.)
 ================================================================================
@@ -561,11 +529,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.730 Mbytes of memory.
+P This job should need less than                       0.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   33 : space group P6/m (#175); Bravais hP (primitive hexag.)
 ================================================================================
@@ -578,11 +545,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   34 : space group P6_3/m (#176); Bravais hP (primitive hexag.)
 ================================================================================
@@ -595,11 +561,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   35 : space group P6 2 2 (#177); Bravais hP (primitive hexag.)
 ================================================================================
@@ -612,11 +577,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   36 : space group P6_1 2 2 (#178); Bravais hP (primitive hexag.)
 ================================================================================
@@ -629,11 +593,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   37 : space group P6_5 2 2 (#179); Bravais hP (primitive hexag.)
 ================================================================================
@@ -646,11 +609,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   38 : space group P6_2 2 2 (#180); Bravais hP (primitive hexag.)
 ================================================================================
@@ -663,11 +625,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   39 : space group P6_4 2 2 (#181); Bravais hP (primitive hexag.)
 ================================================================================
@@ -680,11 +641,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   40 : space group P6_3 2 2 (#182); Bravais hP (primitive hexag.)
 ================================================================================
@@ -697,11 +657,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   41 : space group P6 m m (#183); Bravais hP (primitive hexag.)
 ================================================================================
@@ -714,11 +673,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   42 : space group P6 c c (#184); Bravais hP (primitive hexag.)
 ================================================================================
@@ -731,11 +689,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   43 : space group P6_3 c m (#185); Bravais hP (primitive hexag.)
 ================================================================================
@@ -748,11 +705,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   44 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
@@ -765,11 +721,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   45 : space group P-6 m 2 (#187); Bravais hP (primitive hexag.)
 ================================================================================
@@ -782,11 +737,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   46 : space group P-6 c 2 (#188); Bravais hP (primitive hexag.)
 ================================================================================
@@ -799,11 +753,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   47 : space group P-6 2 m (#189); Bravais hP (primitive hexag.)
 ================================================================================
@@ -816,11 +769,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   48 : space group P-6 2 c (#190); Bravais hP (primitive hexag.)
 ================================================================================
@@ -833,11 +785,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          23        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       0.899 Mbytes of memory.
+P This job should need less than                       0.918 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   49 : space group P6/m m m (#191); Bravais hP (primitive hexag.)
 ================================================================================
@@ -850,11 +801,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          45        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       1.318 Mbytes of memory.
+P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   50 : space group P6/m c c (#192); Bravais hP (primitive hexag.)
 ================================================================================
@@ -867,11 +817,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          45        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       1.318 Mbytes of memory.
+P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   51 : space group P6_3/m c m (#193); Bravais hP (primitive hexag.)
 ================================================================================
@@ -884,11 +833,10 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          45        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       1.318 Mbytes of memory.
+P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   52 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -901,7 +849,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 -    mband =          45        mffmem =           1         mkmem =           1
        mpw =          12          nfft =         640          nkpt =           1
 ================================================================================
-P This job should need less than                       1.318 Mbytes of memory.
+P This job should need less than                       1.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================

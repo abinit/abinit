@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h20 )
+.Starting date : Wed 31 May 2023.
+- ( at 00h19 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_4.in
-- output file    -> teph4zpr_4.out
+- input  file    -> /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/TestBot_MPI1/tutorespfn_teph4zpr_1-teph4zpr_2-teph4zpr_3-teph4zpr_4-teph4zpr_5-teph4zpr_6-teph4zpr_7-teph4zpr_8/teph4zpr_4.abi
+- output file    -> teph4zpr_4.abo
 - root for input  files -> teph4zpr_4i
 - root for output files -> teph4zpr_4o
-
-
+ 
+ 
  Symmetries : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -38,13 +38,13 @@ P This job should need less than                      16.501 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      4.777 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -57,7 +57,7 @@ _ WF disk file :      4.777 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
              ecut      3.50000000E+01 Hartree
       eph_intmeth           1
          eph_task           4
--          fftalg         312
+-          fftalg         512
            istwfk        2    0    3    0    0    0    7    0
               ixc          11
               kpt      0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -127,15 +127,15 @@ P           mkmem           8
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
              zcut      3.67493254E-04 Hartree
             znucl        8.00000   12.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -146,38 +146,45 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: teph4zpr_3o_DS1_WFK
-
+ 
  mkfilename: getddb from: teph4zpr_1_DDB
-
+ 
  mkfilename: getdvdb from: teph4zpr_2_DVDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
+ 
 - Reading GS states from WFK file: teph4zpr_3o_DS1_WFK
 - Reading DDB from file: teph4zpr_1_DDB
 - Reading DVDB from file: teph4zpr_2_DVDB
-
-
-
+ 
+ 
+ 
+ 
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  4.0182362  4.0182362  G(1)= -0.1244327  0.1244327  0.1244327
  R(2)=  4.0182362  0.0000000  4.0182362  G(2)=  0.1244327 -0.1244327  0.1244327
  R(3)=  4.0182362  4.0182362  0.0000000  G(3)=  0.1244327  0.1244327 -0.1244327
  Unit cell volume ucvol=  1.2975866E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
-
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Mg
+    2)    0.5000000  0.5000000  0.5000000   O
+ 
+ DDB file with 8 blocks has been read.
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -187,21 +194,21 @@ meta: {optdriver: 7, eph_task: 4, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2       -0.085945        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3       -0.085945        0.000000
-
+ 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.040887E+00   -1.659033E-16   -1.658285E-16
-         1         2   -1.659033E-16    2.040887E+00    1.659781E-16
-         1         3    1.659033E-16    1.659033E-16    2.040887E+00
-         2         1   -2.040887E+00    1.659033E-16    1.658285E-16
-         2         2    1.659033E-16   -2.040887E+00   -1.659781E-16
-         2         3   -1.659033E-16   -1.659033E-16   -2.040887E+00
+         1         1    2.040887E+00    0.000000E+00    7.479592E-20
+         1         2    0.000000E+00    2.040887E+00    7.479592E-20
+         1         3    0.000000E+00    0.000000E+00    2.040887E+00
+         2         1   -2.040887E+00    0.000000E+00   -7.479592E-20
+         2         2    0.000000E+00   -2.040887E+00   -7.479592E-20
+         2         3    0.000000E+00    0.000000E+00   -2.040887E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4zpr_1_DDB
 - Cannot find quadrupole tensor in DDB file: teph4zpr_1_DDB
@@ -272,20 +279,20 @@ meta: {optdriver: 7, eph_task: 4, }
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
-
+ 
  The interatomic forces have been obtained
  Average speed of sound partial sums:     0.3110268892E-02 (at units)
 -                                   =           6.8043 [km/s]
-
+ 
  Debye frequency from partial sums:     0.2394617452E-02 (Ha)
 -                                 =     0.1575582594E+02 (THz)
 -Debye temperature from partial sums:     0.7561594877E+03 (K)
-
+ 
 - Writing phonon DOS to netcdf file: teph4zpr_4o_PHDOS.nc
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -298,9 +305,9 @@ meta: {optdriver: 7, eph_task: 4, }
              1   -5.135443   -1.451781
              2   -4.371486
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Mg-sp-gw.psp8
+ 
+- pspini: atom type   2  psp file is /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -312,11 +319,11 @@ meta: {optdriver: 7, eph_task: 4, }
              0    2.568049   -0.805950
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
-
+ 
    2.46705647E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
-
-
+ 
+ 
  === Gaps, band edges and relative position wrt Fermi level ===
  Direct band gap semiconductor
  Fundamental gap:     4.479 (eV)
@@ -332,8 +339,8 @@ meta: {optdriver: 7, eph_task: 4, }
  100.0     0.009     7.656     3.167     1.312
  200.0     0.017     7.592     3.102     1.377
  300.0     0.026     7.527     3.037     1.442
-
-
+ 
+ 
 
  Number of bands in e-ph self-energy sum: 30
  From bsum_start: 1 to bsum_stop: 30
@@ -350,7 +357,6 @@ meta: {optdriver: 7, eph_task: 4, }
  asr: 1 chneut: 1
  dipdip: 1 symdynmat: 1
  Number of k-points for self-energy corrections: 1
- Including all final {mk+q} states inside energy window: [4.347 9.112 ] [eV]
  List of k-points for self-energy corrections:
    1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
 
@@ -428,7 +434,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
  QP_gap - KS_gap:   -0.191 (OTMS:   -0.217)
  
 ============================================================================================
-
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -443,7 +449,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T:  300.0 [K], mu_e:    7.527
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
               ixc          11
          kptrlatt        4    0    0      0    4    0      0    0    4
           kptrlen      2.27305763E+01
@@ -504,7 +510,7 @@ P           mkmem           8
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
              zcut      3.67493254E-04 Hartree
             znucl        8.00000   12.00000
-
+ 
 ================================================================================
 
 
@@ -599,10 +605,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.2
-
+- Proc.   0 individual time (sec): cpu=          3.4  wall=          9.2
+ 
 ================================================================================
-
+ 
  Calculation completed.
-.Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.2  wall=          3.2
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.4  wall=          9.2

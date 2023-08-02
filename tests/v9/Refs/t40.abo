@@ -1,8 +1,8 @@
 
-.Version 9.3.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Dec 2020.
-- ( at 16h57 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/v9_t40/t40.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t40/t40.abi
 - output file    -> t40.abo
 - root for input  files -> t40i
 - root for output files -> t40o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          35        mffmem =           1         mkmem =           6
        mpw =         544          nfft =       13824          nkpt =           6
 ================================================================================
-P This job should need less than                       6.538 Mbytes of memory.
+P This job should need less than                       6.935 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.745 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,7 +49,7 @@ _ WF disk file :      1.745 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          25        mffmem =           1         mkmem =           6
        mpw =         544          nfft =       13824          nkpt =           6
 ================================================================================
-P This job should need less than                       6.015 Mbytes of memory.
+P This job should need less than                       6.412 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -213,8 +211,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -245,16 +243,16 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT  1  -8.5120480715600    -8.512E+00 1.538E-02 6.700E+00
  ETOT  2  -8.5167503552013    -4.702E-03 1.654E-05 1.495E-01
  ETOT  3  -8.5167984145944    -4.806E-05 6.286E-06 2.279E-03
- ETOT  4  -8.5167988208874    -4.063E-07 1.501E-07 5.927E-06
- ETOT  5  -8.5167988217454    -8.580E-10 8.086E-10 1.237E-08
- ETOT  6  -8.5167988217478    -2.448E-12 9.084E-11 7.650E-11
+ ETOT  4  -8.5167988208873    -4.063E-07 1.501E-07 5.927E-06
+ ETOT  5  -8.5167988217455    -8.582E-10 8.086E-10 1.237E-08
+ ETOT  6  -8.5167988217478    -2.279E-12 9.084E-11 7.650E-11
 
  At SCF step    6   max residual=  9.08E-11 < tolwfr=  1.00E-10 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -3.78523508E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -3.78523508E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -3.78523508E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -3.78523507E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -3.78523507E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -3.78523507E-06  sigma(2 1)=  0.00000000E+00
 
 
 --- !ResultsGS
@@ -267,14 +265,14 @@ lattice_vectors:
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
-convergence: {deltae: -2.448E-12, res2:  7.650E-11, residm:  9.084E-11, diffor: null, }
+convergence: {deltae: -2.279E-12, res2:  7.650E-11, residm:  9.084E-11, diffor: null, }
 etotal    :  -8.51679882E+00
 entropy   :   0.00000000E+00
 fermie    :   1.78886366E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -3.78523508E-06,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -3.78523508E-06,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -3.78523508E-06, ]
+- [ -3.78523507E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -3.78523507E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.78523507E-06, ]
 pressure_GPa:   1.1137E-01
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
@@ -332,23 +330,23 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.12045494430895E+00
-hartree             :  5.55616846068002E-01
-xc                  : -3.11210245711451E+00
+kinetic             :  3.12045494430753E+00
+hartree             :  5.55616846067229E-01
+xc                  : -3.11210245711406E+00
 Ewald energy        : -8.43581958561899E+00
 psp_core            :  4.00256417160527E-01
-local_psp           : -2.35879832380051E+00
-non_local_psp       :  1.31359333724870E+00
-total_energy        : -8.51679882174784E+00
-total_energy_eV     : -2.31753881996976E+02
-band_energy         : -6.68808233500451E-02
+local_psp           : -2.35879832379603E+00
+non_local_psp       :  1.31359333724598E+00
+total_energy        : -8.51679882174781E+00
+total_energy_eV     : -2.31753881996975E+02
+band_energy         : -6.68808233509297E-02
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -3.78523508E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -3.78523508E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -3.78523508E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -3.78523507E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -3.78523507E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -3.78523507E-06  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  1.1137E-01 GPa]
 - sigma(1 1)= -1.11365442E-01  sigma(3 2)=  0.00000000E+00
@@ -440,7 +438,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000 -17.926  -0.000  -0.044   0.001  -0.048  -0.000  -0.039  -0.000
        -0.000   0.000  -5.025  -0.001  -0.334   0.000  -0.336   0.000  -0.327
@@ -448,7 +446,7 @@ meta: {optdriver: 3, gwcalctyp: 0, }
   chi0(G,G') at the    2 th omega   0.0000  16.7088 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -6.954  -0.000   0.008   0.001   0.005  -0.000   0.012  -0.000
        -0.000   0.000  -1.021  -0.001  -0.174   0.000  -0.175   0.000  -0.168
@@ -472,10 +470,10 @@ meta: {optdriver: 3, gwcalctyp: 0, }
    Upper and lower wings at the    2 th omega   0.0000  16.7088 [eV]
        1       2       3       4       5       6       7       8       9
       0.485   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.007   0.007
-     -0.000   0.007   0.007  -0.022  -0.022   0.022   0.022  -0.007  -0.007
+      0.000   0.007   0.007  -0.022  -0.022   0.022   0.022  -0.007  -0.007
        1       2       3       4       5       6       7       8       9
       0.485   0.007  -0.007  -0.022   0.022   0.022  -0.022  -0.007   0.007
-     -0.000  -0.007  -0.007   0.022   0.022  -0.022  -0.022   0.007   0.007
+      0.000  -0.007  -0.007   0.022   0.022  -0.022  -0.022   0.007   0.007
 
 
 
@@ -655,7 +653,7 @@ P           mkmem           6
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         227
-           strten1    -3.7852350803E-06 -3.7852350803E-06 -3.7852350803E-06
+           strten1    -3.7852350686E-06 -3.7852350686E-06 -3.7852350686E-06
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -721,49 +719,10 @@ P           mkmem           6
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          6.9        0.11      0.002
-- Total wall clock time (s,m,h):          6.9        0.12      0.002
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            6.9, wall_time =            6.9
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   2.931  42.5      2.933  42.4           6989      -1.00        1.00       1.00
-- projbd                         0.597   8.7      0.594   8.6          10618      -1.00        1.01       1.01
-- nonlop(apply)                  0.570   8.3      0.571   8.3           6989      -1.00        1.00       1.00
-- pspini                         0.204   3.0      0.205   3.0              2      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.193   2.8      0.193   2.8             -1      -1.00        1.00       1.00
-- getghc-other                   0.113   1.6      0.123   1.8             -1      -1.00        0.91       0.91
-- timing timab                   0.104   1.5      0.104   1.5             10      -1.00        1.00       1.00
-- invars2                        0.066   1.0      0.066   1.0              2      -1.00        1.00       1.00
-- others (121)                   0.197   2.9      0.201   2.9             -1      -1.00        0.98       0.98
--<END_TIMER>
--
-- subtotal                       4.976  72.2      4.990  72.1                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           6.9, wall_time =           6.9
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   2.931  42.5      2.933  42.4           6989      -1.00        1.00       1.00
-- projbd                         0.597   8.7      0.594   8.6          10618      -1.00        1.01       1.01
-- nonlop(apply)                  0.570   8.3      0.571   8.3           6989      -1.00        1.00       1.00
-- pspini                         0.204   3.0      0.205   3.0              2      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.193   2.8      0.193   2.8             -1      -1.00        1.00       1.00
-- getghc-other                   0.113   1.6      0.123   1.8             -1      -1.00        0.91       0.91
-- timing timab                   0.104   1.5      0.104   1.5             10      -1.00        1.00       1.00
-- invars2                        0.066   1.0      0.066   1.0              2      -1.00        1.00       1.00
-- others (121)                   0.197   2.9      0.201   2.9             -1      -1.00        0.98       0.98
--<END_TIMER>
 
-- subtotal                       4.976  72.2      4.990  72.1                                  1.00       1.00
 
 ================================================================================
 
@@ -843,10 +802,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          6.9  wall=          6.9
+- Proc.   0 individual time (sec): cpu=          6.3  wall=          6.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.9  wall=          6.9
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.3  wall=          6.4

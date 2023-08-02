@@ -6,7 +6,7 @@
 !!  This module the predures used by cut3d
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
+!! Copyright (C) 2008-2022 ABINIT group (XG,MVerstraete,GMR,RC,LSI,JFB,MCote,MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ MODULE m_cut3d
 
  use defs_abitypes,      only : MPI_type
  use m_io_tools,         only : get_unit, iomode_from_fname, open_file, file_exists, read_string
- use m_numeric_tools,    only : interpol3d
+ use m_numeric_tools,    only : interpol3d_0d
  use m_symtk,            only : matr3inv
  use m_fstrings,         only : int2char10, sjoin, itoa
  use m_geometry,         only : xcart2xred, metric
@@ -88,16 +88,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  write the Hirshfeld charge decomposition
-!!
-!! PARENTS
-!!      cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -202,16 +192,6 @@ end subroutine cut3d_hirsh
 !!
 !! OUTPUT
 !!  only writing
-!!
-!! PARENTS
-!!      cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -367,15 +347,15 @@ end subroutine cut3d_hirsh
    rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
    rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
 
-   denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+   denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
    if(nspden==1)then
      write(unt, '(i13,es22.12)' ) k2,denvaltt
      write(std_out,'(i13,es22.12)' ) k2,denvaltt
 
    else if(nspden==2 .or. nspden==4)then
-     denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-     denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-     denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+     denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+     denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+     denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
      write(unt, '(i13,4(es22.12))' ) k2,denvaltt,denvalux,denvaldy,denvalmz
      write(std_out,'(i13,4es22.12)' ) k2,denvaltt,denvalux,denvaldy,denvalmz
    end if
@@ -401,16 +381,6 @@ end subroutine cut3d_lineint
 
 !! SIDE EFFECTS
 !!   v=value to be normalized
-!!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -462,16 +432,6 @@ end subroutine normalize
 !!
 !! OUTPUT
 !!  only writing
-!!
-!! PARENTS
-!!      cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -787,11 +747,11 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
      rr(1)=mod(mod(rr(1),1._dp)+1._dp,1._dp)
      rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
      rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
-     denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+     denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
      if(nspden==2 .or. nspden==4)then
-       denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-       denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-       denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+       denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+       denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+       denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
      end if
      if(nspden==1)then
        write(unt, '(3e16.8)' ) xcoord,ycoord,denvaltt
@@ -826,16 +786,6 @@ subroutine cut3d_planeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,r
 !!
 !! OUTPUT
 !!   only writing
-!!
-!! PARENTS
-!!      cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -902,11 +852,11 @@ subroutine cut3d_pointint(gridt,gridu,gridd,gridm,nr1,nr2,nr3,nspden,rprimd)
 !devalu = spin-up density value
 !devald = spin-down density value
 !devalm = magnetization density value
- denvaltt = interpol3d(rr,nr1,nr2,nr3,gridt)
+ denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridt)
  if(nspden==2 .or. nspden==4)then
-   denvalux = interpol3d(rr,nr1,nr2,nr3,gridu)
-   denvaldy = interpol3d(rr,nr1,nr2,nr3,gridd)
-   denvalmz = interpol3d(rr,nr1,nr2,nr3,gridm)
+   denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridu)
+   denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,gridd)
+   denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridm)
  end if
  write(std_out,*)
  write(std_out,*)'---------------------------------------------'
@@ -939,16 +889,6 @@ end subroutine cut3d_pointint
 !!
 !! OUTPUT
 !! r(3)=position vector in cartesian coordinates
-!!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -994,16 +934,6 @@ end subroutine reduce
 !!
 !! OUTPUT
 !! grid_full(nr1,nr2,nr3)=grid_full matrix
-!!
-!! PARENTS
-!!      cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -1077,16 +1007,6 @@ end subroutine cut3d_rrho
 !! OUTPUT
 !! x3(3)=cross product of x1 * x2
 !!
-!! PARENTS
-!!      m_cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
-!!
 !! SOURCE
 
 subroutine vdot(x1,x2,x3)
@@ -1129,16 +1049,6 @@ end subroutine vdot
 !!
 !! OUTPUT
 !!  only writing
-!!
-!! PARENTS
-!!      cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 
@@ -1625,11 +1535,11 @@ subroutine cut3d_volumeint(gridtt,gridux,griddy,gridmz,natom,nr1,nr2,nr3,nspden,
        rr(2)=mod(mod(rr(2),1._dp)+1._dp,1._dp)
        rr(3)=mod(mod(rr(3),1._dp)+1._dp,1._dp)
 
-       denvaltt = interpol3d(rr,nr1,nr2,nr3,gridtt)
+       denvaltt = interpol3d_0d(rr,nr1,nr2,nr3,gridtt)
        if(nspden==2 .or. nspden==4)then
-         denvalux = interpol3d(rr,nr1,nr2,nr3,gridux)
-         denvaldy = interpol3d(rr,nr1,nr2,nr3,griddy)
-         denvalmz = interpol3d(rr,nr1,nr2,nr3,gridmz)
+         denvalux = interpol3d_0d(rr,nr1,nr2,nr3,gridux)
+         denvaldy = interpol3d_0d(rr,nr1,nr2,nr3,griddy)
+         denvalmz = interpol3d_0d(rr,nr1,nr2,nr3,gridmz)
        end if
 
        if (fileformattype==1) then
@@ -1713,16 +1623,6 @@ end subroutine cut3d_volumeint
 !! It is the wave function for the k point, band and spin polarisation
 !! chosen.  It can be written in different ways. The option are describe
 !! with the option list.  It is possible to output a Data Explorer file.
-!!
-!! PARENTS
-!!      cut3d
-!!
-!! CHILDREN
-!!      cg_getspin,dens_in_sph,destroy_distribfft,destroy_mpi_enreg,fourwf
-!!      getkpgnorm,getph,init_distribfft_seq,initmpi_seq,initylmg,int2char10
-!!      jlspline_free,kpgio,metric,ph1d3d,print_fofr_cube,print_fofr_ri
-!!      print_fofr_xyzri,recip_ylm,sort_dp,sphereboundary,splint,wfk%close
-!!      wfk%read_band_block,wfk_open_read,xcart2xred
 !!
 !! SOURCE
 

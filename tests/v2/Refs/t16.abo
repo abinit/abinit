@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
 
 ================================================================================
@@ -29,8 +29,8 @@
          asr         1
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         0
-      quadqu         0
+      dipqua         1
+      quadqu         1
       ifcana         1
       ifcout        20
       natifc         1
@@ -65,13 +65,20 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0900000  5.0900000  G(1)= -0.0982318  0.0982318  0.0982318
  R(2)=  5.0900000  0.0000000  5.0900000  G(2)=  0.0982318 -0.0982318  0.0982318
  R(3)=  5.0900000  5.0900000  0.0000000  G(3)=  0.0982318  0.0982318 -0.0982318
  Unit cell volume ucvol=  2.6374446E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  no
+    2)    0.2500000  0.2500000  0.2500000  no
+
+ DDB file with 11 blocks has been read.
 
 ================================================================================
 
@@ -96,7 +103,7 @@
        3               3        8.000000        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    0.000000E+00    0.000000E+00    0.000000E+00
@@ -111,7 +118,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.033  and twall      0.042 sec
+-begin at tcpu      0.031  and twall      0.041 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      256
  greater than 80, so only write 20 of them
@@ -1079,10 +1086,10 @@ iatom,iwchan,igqpt2(i),gij error=   3  1     4     4     4   0.00000
 -  1.086272E+02  1.086272E+02  3.723269E+02  4.121226E+02  4.911576E+02
 -  4.911576E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.255  and wall time      0.266 sec
++Total cpu time      0.199  and wall time      0.230 sec
 
  anaddb : the run completed succesfully.

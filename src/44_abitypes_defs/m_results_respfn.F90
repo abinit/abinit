@@ -7,14 +7,10 @@
 !!  to store results from RESPFN calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MT,GG)
+!! Copyright (C) 2008-2022 ABINIT group (MT,GG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -85,11 +81,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  results_respfn(:)=<type(results_respfn_type)>=results_respfn datastructure
 !!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_results_respfn(dtsets,ndtset_alloc,results_respfn)
@@ -151,11 +142,6 @@ end subroutine init_results_respfn
 !!
 !! SIDE EFFECTS
 !!  results_respfn(:)=<type(results_respfn_type)>=results_respfn datastructure
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

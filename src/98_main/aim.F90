@@ -6,7 +6,7 @@
 !! Main routine for Bader Atom-In-Molecule analysis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2021 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2022 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,12 +20,6 @@
 !!
 !! WARNING
 !! ABINIT rules are not yet followed in the present routine.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,adini,aim_shutdown,defad,drvaim,herald
-!!      inpar,int2char4,timein,xmpi_bcast,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

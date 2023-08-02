@@ -4,12 +4,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MVer, FDortu, MVeithen)
+!!  Copyright (C) 2008-2022 ABINIT group (MVer, FDortu, MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -55,11 +53,6 @@ contains
 !!  Only deallocation
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_harmonic_thermo,m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine end_sortph()
@@ -107,11 +100,6 @@ end subroutine end_sortph
 !!
 !! NOTES
 !! Called by one processor only
-!!
-!! PARENTS
-!!      m_harmonic_thermo,m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

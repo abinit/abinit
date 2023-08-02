@@ -13,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 #include "abi_common.h"
 
 module m_spin_primitive_potential
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use m_dynamic_array, only: int_array_type, real_array_type, int2d_array_type
   use m_mathfuncs
   use defs_basis
@@ -43,7 +43,7 @@ module m_spin_primitive_potential
   use m_mpi_scheduler, only: init_mpi_info
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_io_xml, only: xml_read_spin, xml_free_spin
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_primitive_potential, only: primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
@@ -53,11 +53,11 @@ module m_spin_primitive_potential
 
   implicit none
   private
-  !!*** 
+  !!***
 
 
   type, public, extends(primitive_potential_t) :: spin_primitive_potential_t
-     integer :: natoms  
+     integer :: natoms
      integer ::  nspin    ! on every mpi node
      type(ndcoo_mat_t) :: coeff  ! only on master node
      type(int2d_array_type) :: Rlist !only on master node
@@ -74,9 +74,9 @@ module m_spin_primitive_potential
      procedure:: initialize
      procedure:: finalize
      procedure :: set_spin_primcell   ! set primitve cell infor (rprimd, xcart, ...)
-     procedure :: set_bilinear_1term  ! set one (i,j,R) val(3,3) 
+     procedure :: set_bilinear_1term  ! set one (i,j,R) val(3,3)
      procedure:: set_bilinear         ! set list of bilinear terms (ilist, jlist, Rlist, valllist)
-     procedure:: set_exchange         ! set list of exchange terms 
+     procedure:: set_exchange         ! set list of exchange terms
      procedure:: set_dmi              ! set list of dmi terms
      procedure:: set_sia             ! set list of sia terms
      procedure :: add_input_sia       ! add a SIA term from input file
@@ -127,8 +127,8 @@ contains
     real(dp) :: ms(nspin), spin_positions(3, nspin)
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
-    
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+
     ABI_UNUSED_A(unitcell)
 
     self%nspin=nspin
@@ -158,8 +158,8 @@ contains
     character(len=500) :: message
     integer :: ii
     logical:: use_sia, use_exchange, use_dmi, use_bi
-
-    fname=fnames(3)
+    fname=params%spin_pot_fname
+    ABI_UNUSED(fnames)
     if (xmpi_comm_rank(xmpi_world)==0) then
        write(message,'(a,(80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
             &     'reading spin terms.'
@@ -217,7 +217,7 @@ contains
     integer , allocatable:: spin_dmi_Rlist(:,:)
     real(dp), allocatable:: spin_dmi_vallist(:,:)
 
-    
+
     integer :: spin_SIA_nterm
     integer , allocatable:: spin_SIA_ilist(:)
     real(dp), allocatable:: spin_SIA_k1list(:)
@@ -272,7 +272,7 @@ contains
       ref_spin_orientation(1,:)=0.0d0
       ref_spin_orientation(2,:)=0.0d0
       ref_spin_orientation(3,:)=1.0d0
-    endif  
+    endif
 
     !NCF_CHECK_MSG(ierr, "spin_ref_orientation")
     !ierr = nf90_get_var(ncid, varid, ref_spin_orientation)
@@ -442,7 +442,7 @@ contains
        ierr = nf90_get_var(ncid, varid, spin_SIA_k1list)
        NCF_CHECK_MSG(ierr, "spin_SIA_k1list")
 
-       
+
        ierr =nf90_inq_varid(ncid, "spin_SIA_k1dirlist", varid)
        NCF_CHECK_MSG(ierr, "spin_SIA_k1dirlist")
        ierr = nf90_get_var(ncid, varid, spin_SIA_k1dirlist)
@@ -515,7 +515,7 @@ contains
   ! i: index of spin i
   ! j: index of spin j
   ! R: cell vector R (vector3)
-  ! val : a 3*3 matrix. 
+  ! val : a 3*3 matrix.
   !-------------------------------------------------------------------!
   subroutine set_bilinear_1term(self, i, j, R, val)
     class(spin_primitive_potential_t), intent(inout) :: self
@@ -581,7 +581,7 @@ contains
 
   !-------------------------------------------------------------------!
   ! set the DMI term.
-  ! here vallist is a list(n) of 3-vectors. 
+  ! here vallist is a list(n) of 3-vectors.
   !-------------------------------------------------------------------!
   subroutine set_dmi(self, n, ilist, jlist, Rlist, vallist)
     class(spin_primitive_potential_t), intent(inout) :: self
@@ -696,7 +696,7 @@ contains
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     if (iam_master) then
        write(std_out,'(A58)') "Reading parameters from xml file and setting up spin model"
@@ -729,21 +729,21 @@ contains
        call c_f_pointer(p_bi_jlist, bi_jlist, [bi_nnz])
        call c_f_pointer(p_bi_Rlist, bi_Rlist, [bi_nnz*3])
        call c_f_pointer(p_bi_vallist, bi_vallist, [bi_nnz*9])
-       
+
        ! change of units to a.u.
-       
+
        ! unitcell already Bohr
-       
+
        !gyroratios already in a.u. (unit=1)
-       
+
        ! masses already in a.u.
-       
+
        ! J, DMI, k1, bi are in eV
        exc_vallist(:) =exc_vallist(:) * eV_Ha
        dmi_vallist(:) = dmi_vallist(:) * eV_Ha
        uni_amplitude_list(:) = uni_amplitude_list(:) * eV_Ha
        bi_vallist(:) = bi_vallist(:) * eV_Ha
-       
+
        write(std_out,'(A80)') " "
        write(std_out,'(A21)') "Setting up spin model"
        write(std_out,'(A15)') "Setting system"
@@ -797,6 +797,7 @@ contains
        else
          if(.not. usia) write(std_out,'(A34)') " SIA term in xml file not used."
        end if
+
        if(.not. present(use_bi)) then
           ubi=.True.
        else
@@ -830,11 +831,12 @@ contains
   !  scmaker: supercell maker helper class
   !  scpot: supercell potential (a pointer to a abstract potential)
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, params, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     class(spin_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),            intent(inout) :: scmaker
     type(multibinit_dtset_type),        intent(inout) :: params
     class(abstract_potential_t), pointer, intent(inout) :: scpot
+    type(mbsupercell_t), target :: supercell
 
     integer :: nspin, sc_nspin, i, R(3), ind_Rij(3), iR, ii, ij, inz
     integer :: master, my_rank, comm, nproc, ierr
@@ -844,7 +846,7 @@ contains
 
     ABI_UNUSED_A(params)
 
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
 
     nspin=self%nspin
     sc_nspin= nspin * scmaker%ncells
@@ -852,8 +854,9 @@ contains
     !ABI_MALLOC_SCALAR(spin_potential_t::scpot)
     ABI_MALLOC_TYPE_SCALAR(spin_potential_t, scpot)
     select type(scpot) ! use select type because properties only defined for spin_potential is used.
-    type is (spin_potential_t) 
+    type is (spin_potential_t)
       call scpot%initialize(sc_nspin)
+      call scpot%set_supercell(supercell)
       if (iam_master) then
         call self%coeff%sum_duplicates()
         do inz=1, self%coeff%nnz
@@ -868,9 +871,9 @@ contains
           do i=1, scmaker%ncells
             call scpot%add_bilinear_term(i_sc(i), j_sc(i), val_sc(i))
           end do
-          if(allocated(i_sc)) ABI_FREE(i_sc)
-          if(allocated(j_sc)) ABI_FREE(j_sc)
-          if(allocated(Rj_sc)) ABI_FREE(Rj_sc)
+          ABI_SFREE(i_sc)
+          ABI_SFREE(j_sc)
+          ABI_SFREE(Rj_sc)
         end do
       endif
     end select

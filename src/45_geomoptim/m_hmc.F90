@@ -6,16 +6,12 @@
 !!  Auxiliary hmc functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (SPr)
+!!  Copyright (C) 2018-2022 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -63,10 +59,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_kinetic_energy(ab_mover,vel,ekin)
@@ -111,11 +103,6 @@ end subroutine compute_kinetic_energy
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pred_hmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -189,11 +176,6 @@ end subroutine generate_random_velocities
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pred_hmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

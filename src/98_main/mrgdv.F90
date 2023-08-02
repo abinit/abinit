@@ -6,7 +6,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MG)
+!! Copyright (C) 2004-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,14 +19,6 @@
 !!   for each potential:
 !!     Abinit header with info on the perturbation and the FFT mesh
 !!     potential on the FFT mesh
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,dvdb%free,dvdb%list_perts
-!!      dvdb%open_read,dvdb%print,dvdb%qdownsample,dvdb_merge_files
-!!      dvdb_test_ftinterp,dvdb_test_v1complete,dvdb_test_v1rsym
-!!      get_command_argument,herald,ngfft_seq,prompt,wrtout,xmpi_init
 !!
 !! SOURCE
 

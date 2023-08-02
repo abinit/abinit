@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +27,7 @@
 #include "abi_common.h"
 
 module m_spmat_lco
-  use defs_basis  
+  use defs_basis
   use m_xmpi
   use m_errors
   use m_abicore
@@ -78,8 +78,8 @@ contains
        call self%icol(i)%finalize()
        call self%val(i)%finalize()
     end do
-    if(allocated(self%icol)) ABI_FREE(self%icol)
-    if(allocated(self%val)) ABI_FREE(self%val)
+    ABI_SFREE(self%icol)
+    ABI_SFREE(self%val)
     self%nnz=0
     call self%base_mat2d_t%finalize()
   end subroutine finalize

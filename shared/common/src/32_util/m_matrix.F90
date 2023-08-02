@@ -7,16 +7,12 @@
 !!  (sqrt root)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (BA)
+!! Copyright (C) 2009-2022 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -61,10 +57,6 @@ CONTAINS  !===========================================================
 !!  matrix= square root of the matrix
 !!  force_diag = 0 if it no 0 on diagonal
 !!             = nb of zeros found otherwise
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -232,10 +224,6 @@ end subroutine invsqrt_matrix
 !!
 !! OUTPUT
 !!  matrix= square root of the matrix
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -591,10 +579,6 @@ end subroutine blockdiago_fordsyev
 !!
 !! OUTPUT
 !!  matrix= square root of the matrix
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

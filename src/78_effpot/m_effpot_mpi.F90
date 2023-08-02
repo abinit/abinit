@@ -9,7 +9,7 @@
 !! This module is still experimental
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (AM)
+!! Copyright (C) 2010-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -106,11 +106,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !! effpot_mpi<type(effpot_mpi_type)()> = effpot_mpi datatype
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
@@ -130,7 +125,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
  integer :: my_rank,ncell_alone,ncell,nproc
  integer :: npcell,nprpt,virt_rank
  integer :: master = 0
- logical :: iam_master = .false.
+ logical :: iam_master
  character(len=500) :: msg
 !array
  integer :: cell_atom2(3)
@@ -149,6 +144,7 @@ subroutine effpot_mpi_init(index_rpt,sc_size,effpot_mpi,natom,ndiv,nrpt,comm)
 
 !MPI variables
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = .false.
  iam_master = (my_rank == master)
 
 
@@ -284,11 +280,6 @@ end subroutine effpot_mpi_init
 !! effpot_mpi<type(effpot_mpi_type)()> = effpot_mpi datatype
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_effective_potential,m_effpot_mpi
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

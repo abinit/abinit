@@ -7,14 +7,10 @@
 !!      N(\qq) = \sum_{mn\kk} \delta(\ee_{\kpq m}) \delta(\ee_{\kk n})
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG, MJV)
+!! Copyright (C) 2008-2022 ABINIT group (MG, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,7 +28,7 @@ module m_nesting
  use m_krank
  use m_sort
 
- use m_numeric_tools,  only : wrap2_zero_one, interpol3d
+ use m_numeric_tools,  only : wrap2_zero_one, interpol3d_0d
  use m_io_tools,       only : open_file
  use m_bz_mesh,        only : make_path
  use m_pptools,        only : printxsf
@@ -75,12 +71,6 @@ CONTAINS  !=====================================================================
 !! Inspired to nmsq_gam_sumfs and mkqptequiv
 !!  TODO : better use of symmetries to reduce the computational effort
 !! Must be called with kpt = full grid! Reduction by symmetry is not possible for q-dependent quantities (or not easy :)
-!!
-!! PARENTS
-!!      m_elphon,m_nesting
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -164,12 +154,6 @@ end subroutine bfactor
 !!
 !! OUTPUT
 !!   Write data to file.
-!!
-!! PARENTS
-!!      m_ebands,m_elphon
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -282,7 +266,7 @@ subroutine mknesting(nkpt,kpt,kptrlatt,nband,weight,nqpath,&
 
 !fill the datagrid for the nesting factor using the Fortran convention and the conventional unit cell
 !NOTE: the Fortran convention is a must if we want to plot the data
-!in the BXSF format, useful for the linear interpolation since we use interpol3d.F90
+!in the BXSF format, useful for the linear interpolation since we use interpol3d_0d.F90
  ABI_MALLOC(nestordered,(nqptfull))
  nestordered(:)=zero
  do jkpt=1,nqptfull
@@ -324,12 +308,6 @@ end subroutine mknesting
 !!
 !! OUTPUT
 !!  only write to file
-!!
-!! PARENTS
-!!      m_nesting
-!!
-!! CHILDREN
-!!      make_path,printxsf,wrap2_zero_one
 !!
 !! SOURCE
 
@@ -397,7 +375,7 @@ subroutine outnesting(base_name,gmet,gprimd,kptrlatt,nestordered,nkpt,nqpath,prt
  do ipoint=1, npt_tot
    qpt(:) = finepath(:,ipoint)
    call wrap2_zero_one(qpt, tmpkpt, res)
-   kval = interpol3d(tmpkpt, nkx, nky, nkz, nestordered)
+   kval = interpol3d_0d(tmpkpt, nkx, nky, nkz, nestordered)
    write(unit_nest,'(i5,e16.5,1x,3(es11.4,1x))')indx,kval,tmpkpt
    indx = indx + 1
  end do

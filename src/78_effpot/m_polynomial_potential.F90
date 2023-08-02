@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +48,7 @@ module m_polynomial_potential
   !integer, parameter :: displacement = 0, strain=1, spin=2, lwf=3, electron=4
   enum, bind(c)
      enumerator :: null_nature=0, displacement=1, strain=2, spin=3, lwf=4, electron=5
-  endenum
+  end enum
 
   private
   type ,public, extends(abstract_potential_t) :: polynomial_potential_t

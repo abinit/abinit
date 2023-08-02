@@ -8,7 +8,7 @@
 !!  pawtab_type variables define TABulated data for PAW (from pseudopotential)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MT)
+!! Copyright (C) 2013-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -156,6 +156,8 @@ MODULE m_pawtab
   integer :: has_nabla
    ! if 1, onsite matrix elements of the nabla operator are allocated.
    ! if 2, onsite matrix elements of the nabla operator are computed and stored.
+   ! if 3, onsite matrix elements of the nabla operator between valence and core states are computed and stored.
+   ! if 4, onsite matrix elements of the nabla operator between valence and core spinor states are are computed and stored.
 
   integer :: has_nablaphi
    ! if 1, nablaphi are allocated
@@ -225,6 +227,12 @@ MODULE m_pawtab
    ! nproju is the number of projectors for orbitals on which paw+u acts.
    ! Also used for local exact-exchange
 
+  integer :: option_interaction_pawu
+   ! Option for interaction energy (PAW+U) in case of non-collinear magnetism:
+   ! 1: E_int=-J/4.N.(N-2)
+   ! 2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1))    (Nup and Ndn are ill-defined)
+   ! 3: E_int=-J/4.( N.(N-2) + mx^2 + my^2 + mz^2 )
+
   integer :: mesh_size
    ! Dimension of radial mesh for generic arrays contained in this pawtab datastructure
    ! The mesh is usually defined up to the PAW augmentation region boundary
@@ -281,6 +289,7 @@ MODULE m_pawtab
    ! usepawu= 4 ; use PAW+U formalism (FLL) without polarization in the XC
    ! usepawu=-1 ; use PAW+U formalism (FLL) - No use of the occupation matrix - Experimental
    ! usepawu=-2 ; use PAW+U formalism (AMF) - No use of the occupation matrix - Experimental
+   ! usepawu=-4 ; use PAW+U formalism (FLL) without polarization in the XC - No use of the occupation matrix - Experimental
    ! usepawu=10 ; use PAW+U within DMFT
    ! usepawu=14 ; use PAW+U within DMFT without polarization in the XC
 
@@ -336,6 +345,9 @@ MODULE m_pawtab
   real(dp) :: jpawu
    ! jpawu
    ! Value of J parameter for paw+u for a given type.
+  
+   real(dp) :: lamb_shielding=0.0D0
+   ! Lamb shielding used in NMR shielding calcs (see m_orbmag.F90)
 
   real(dp) :: rpaw
    ! Radius of PAW sphere
@@ -390,6 +402,7 @@ MODULE m_pawtab
    ! Also used for local exact-exchange
 
   integer, allocatable :: orbitals(:)
+   ! (basis_size)
    ! gives the l quantum number per basis element
 
 !Real (real(dp)) arrays
@@ -428,9 +441,9 @@ MODULE m_pawtab
    ! Screened Hartree kernel for the on-site terms (E_hartree=Sum_ijkl[rho_ij rho_kl e_ijkl_sr])
    ! Used for screened Fock contributions
 
-  real(dp), allocatable :: euijkl(:,:,:,:,:,:)
-   ! euijkl(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
-   ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_s1s2 Sum_ijkl [rho_ij^s1 rho_kl^s2 euijkl^s1s2] )
+  real(dp), allocatable :: euijkl(:,:,:,:,:)
+   ! euijkl(3,lmn_size,lmn_size,lmn_size,lmn_size)
+   ! PAW+U kernel for the on-site terms ( E_PAW+U = 0.5 * Sum_ijkl Sum_s1s2 [rho_ij^s1 rho_kl^s2 euijkl(s1,s2)] )
    ! Contrary to eijkl and eijkl_sr, euijkl is not invariant with respect to the permutations i <--> j or k <--> l
    ! However, it is still invariant with respect to the permutation i,k <--> j,l, see pawpuxinit.F90
    ! Also, it depends on two spin indexes
@@ -465,6 +478,11 @@ MODULE m_pawtab
   real(dp), allocatable :: nabla_ij(:,:,:)
    ! nabla_ij(3,lmn_size,lmn_size)
    ! Onsite matrix elements <phi|\nabla|phj>-<tphi|\nabla|tphj>
+
+  real(dp), allocatable :: nabla_im_ij(:,:,:)
+   ! nabla_im_ij(3,lmn_size,lmn_size)
+   ! Imaginary part of onsite matrix elements <phi|\nabla|phj>-<tphi|\nabla|tphj>
+   ! Used in case of core spinor wave functions
 
   real(dp), allocatable :: nablaphi(:,:)
    ! nablaphi(partialwave_mesh_size, basis_size)
@@ -638,11 +656,6 @@ CONTAINS !===========================================================
 !!  Pawtab<type(pawtab_type)>=PAW arrays tabulated.
 !!                            Nullified in output
 !!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_nullify_0D(Pawtab)
@@ -694,6 +707,7 @@ subroutine pawtab_nullify_0D(Pawtab)
  Pawtab%lmnmix_sz=0
  Pawtab%lpawu=-1
  Pawtab%nproju=0
+ Pawtab%option_interaction_pawu=0
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
@@ -713,10 +727,6 @@ end subroutine pawtab_nullify_0D
 !!
 !! FUNCTION
 !!  Nullify all pointers in an array of pawtab data structures
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -754,11 +764,6 @@ end subroutine pawtab_nullify_1D
 !! SIDE EFFECTS
 !!  Pawtab<type(pawtab_type)>=PAW arrays tabulated.
 !!  All allocated arrays in Pawtab are deallocated
-!!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -833,6 +838,9 @@ subroutine pawtab_free_0D(Pawtab)
  end if
  if (allocated(Pawtab%nabla_ij))  then
    LIBPAW_DEALLOCATE(Pawtab%nabla_ij)
+ end if
+ if (allocated(Pawtab%nabla_im_ij))  then
+   LIBPAW_DEALLOCATE(Pawtab%nabla_im_ij)
  end if
  if (allocated(Pawtab%nablaphi))  then
    LIBPAW_DEALLOCATE(Pawtab%nablaphi)
@@ -963,6 +971,7 @@ subroutine pawtab_free_0D(Pawtab)
  Pawtab%lmnmix_sz=0
  Pawtab%lpawu=-1
  Pawtab%nproju=0
+ Pawtab%option_interaction_pawu=0
  Pawtab%mesh_size=0
  Pawtab%partialwave_mesh_size=0
  Pawtab%core_mesh_size=0
@@ -982,10 +991,6 @@ end subroutine pawtab_free_0D
 !!
 !! FUNCTION
 !!  Destroy (deallocate) all pointers in an array of pawtab data structures
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1019,10 +1024,6 @@ end subroutine pawtab_free_1D
 !!
 !! FUNCTION
 !!  Set flags controlling optional arrays in a pawtab datastructure
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1079,10 +1080,6 @@ end subroutine pawtab_set_flags_0D
 !!  Set flags controlling optional arrays in an array of pawtab datastructures
 !! if (present(has_tvale))    Pawtab%has_tvale=has_tvale
 
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_set_flags_1D(Pawtab,has_coretau,has_fock,has_kij,has_tproj,has_tvale,has_vhnzc,&
@@ -1147,11 +1144,6 @@ end subroutine pawtab_set_flags_1D
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1250,6 +1242,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
     call wrtout(my_unt,msg,my_mode)
     write(msg,'(a,i4)')'  Number of projectors on which U or EXX acts .... ',Pawtab(ityp)%nproju
     call wrtout(my_unt,msg,my_mode)
+    write(msg,'(a,i4)')'  Option interaction for PAW+U (double-counting).. ',Pawtab(ityp)%option_interaction_pawu
+    call wrtout(my_unt,msg,my_mode)
   end if
   write(msg,'(a,i4)')'  Use potential zero ............................. ',Pawtab(ityp)%usepotzero
   call wrtout(my_unt,msg,my_mode)
@@ -1301,6 +1295,8 @@ subroutine pawtab_print(Pawtab,header,unit,prtvol,mode_paral)
   end if
   write(msg,'(a,es16.8)')'  XC energy for the core density ..................',Pawtab(ityp)%exccore
   call wrtout(my_unt,msg,my_mode)
+  write(msg,'(a,es16.8)')'  Lamb shielding due to core density ..............',Pawtab(ityp)%lamb_shielding
+  call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Radius of the PAW sphere ........................',Pawtab(ityp)%rpaw
   call wrtout(my_unt,msg,my_mode)
   write(msg,'(a,es16.8)')'  Compensation charge radius (if >rshp, g(r)=0) ...',Pawtab(ityp)%rshp !(if r>rshp, g(r)=zero)
@@ -1350,13 +1346,6 @@ end subroutine pawtab_print
 !!
 !! OUTPUT
 !!   l_size_atm(natom)=output array of l_size values (for each atom)
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_nonlinear
-!!      m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  This function returns an allocatable integer array which may be allocated
@@ -1442,11 +1431,6 @@ end subroutine pawtab_get_lsize
 !! SIDE EFFECTS
 !!  pawtab=<type pawtab_type>=a pawtab datastructure
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
@@ -1462,13 +1446,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
  integer :: ierr,ii,me,nn_dpr,nn_dpr_arr,nn_int,nn_int_arr
  integer :: siz_indklmn,siz_indlmn,siz_klmntomn,siz_kmix,siz_lnproju,siz_orbitals
  integer :: siz_coredens,siz_coretau,siz_dij0,siz_dltij,siz_dshpfunc,siz_eijkl,siz_eijkl_sr
- integer :: siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij,siz_gnorm,siz_fock,siz_kij,siz_nabla_ij
- integer :: siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint,siz_ph0phiint,siz_qgrid_shp,siz_qijl
- integer :: siz_rad_for_spline,siz_rhoij0,siz_shape_alpha,siz_shape_q,siz_shapefunc
- integer :: siz_shapefncg,siz_sij,siz_tcoredens,siz_tcoretau,siz_tcorespl,siz_tcoretauspl
- integer :: siz_tnablaphi,siz_tphi,siz_tphitphj,siz_tproj,siz_tvalespl,siz_vee,siz_vex
- integer :: siz_vhtnzc,siz_vhnzc,siz_vminushalf,siz_zioneff,siz_wvlpaw,siz_wvl_pngau
- integer :: siz_wvl_parg,siz_wvl_pfac,siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
+ integer :: siz_euijkl,siz_euij_fll,siz_fk,siz_gammaij,siz_gnorm,siz_fock,siz_kij
+ integer :: siz_nabla_ij,siz_nabla_im_ij,siz_nablaphi,siz_phi,siz_phiphj,siz_phiphjint
+ integer :: siz_ph0phiint,siz_qgrid_shp,siz_qijl,siz_rad_for_spline,siz_rhoij0
+ integer :: siz_shape_alpha,siz_shape_q,siz_shapefunc,siz_shapefncg,siz_sij,siz_tcoredens
+ integer :: siz_tcoretau,siz_tcorespl,siz_tcoretauspl,siz_tnablaphi,siz_tphi,siz_tphitphj
+ integer :: siz_tproj,siz_tvalespl,siz_vee,siz_vex,siz_vhtnzc,siz_vhnzc,siz_vminushalf
+ integer :: siz_zioneff,siz_wvlpaw,siz_wvl_pngau,siz_wvl_parg,siz_wvl_pfac
+ integer :: siz_wvl_rholoc_rad,siz_wvl_rholoc_d,sz1,sz2
  logical :: full_broadcast
  character (len=500) :: msg,msg0
 !arrays
@@ -1500,13 +1485,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 
 !Integers (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
-!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,usespnorb
-   if (full_broadcast) nn_int=nn_int+11
+!  ij_proj,lcut_size,lexexch,lmnmix_sz,lpawu,mqgrid_shp,nproju,useexexch,usepawu,usepotzero,
+!  option_interaction_pawu,usespnorb
+   if (full_broadcast) nn_int=nn_int+12
 
 !Reals (read from psp file)
 !-------------------------------------------------------------------------
-!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,rpaw,rshp,rcore,rcoretau,shape_sigma
-   nn_dpr=nn_dpr+12
+!  beta,dncdq0,d2ncdq0,dnvdq0,dtaucdq0,ex_cc,exccore,lamb_shielding,rpaw,rshp,rcore,rcoretau,shape_sigma
+   nn_dpr=nn_dpr+13
 
 !Reals (depending on the parameters of the calculation)
 !-------------------------------------------------------------------------
@@ -1684,13 +1670,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
 !-------------------------------------------------------------------------
    siz_dltij=0    ; siz_dshpfunc=0
    siz_eijkl=0    ; siz_eijkl_sr=0 ; siz_euijkl=0   ; siz_euij_fll=0
-   siz_fk=0       ; siz_gammaij=0  ; siz_gnorm=0    ; siz_nabla_ij=0
+   siz_fk=0       ; siz_gammaij=0  ; siz_gnorm=0
+   siz_nabla_ij=0 ; siz_nabla_im_ij=0
    siz_phiphj=0   ; siz_phiphjint=0; siz_ph0phiint=0
    siz_qgrid_shp=0; siz_qijl=0     ; siz_rad_for_spline=0
    siz_shapefncg=0; siz_sij=0      ; siz_tphitphj=0
    siz_vee=0      ; siz_vex=0      ; siz_zioneff=0
    if (full_broadcast) then
-     nn_int=nn_int+22
+     nn_int=nn_int+23
      if (allocated(pawtab%dltij)) then
        siz_dltij=size(pawtab%dltij)                   !(lmn2_size)
        if (siz_dltij/=pawtab%lmn2_size) msg=trim(msg)//' dltij'
@@ -1712,8 +1699,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        nn_dpr=nn_dpr+siz_eijkl_sr
      end if
      if (allocated(pawtab%euijkl)) then
-       siz_euijkl=size(pawtab%euijkl)                 !(2,2,lmn_size,lmn_size,lmn_size,lmn_size)
-       if (siz_euijkl/=4*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euijkl'
+       siz_euijkl=size(pawtab%euijkl)                 !(3,lmn_size,lmn_size,lmn_size,lmn_size)
+       if (siz_euijkl/=3*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size*pawtab%lmn_size) msg=trim(msg)//' euijkl'
        nn_dpr=nn_dpr+siz_euijkl
      end if
      if (allocated(pawtab%euij_fll)) then
@@ -1740,6 +1727,11 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        siz_nabla_ij=size(pawtab%nabla_ij)             !(3,lmn_size,lmn_size)
        if (siz_nabla_ij/=pawtab%lmn_size) msg=trim(msg)//' nabla_ij'
        nn_dpr=nn_dpr+siz_nabla_ij
+     end if
+     if (allocated(pawtab%nabla_im_ij)) then
+       siz_nabla_im_ij=size(pawtab%nabla_im_ij)       !(3,lmn_size,lmn_size)
+       if (siz_nabla_im_ij/=pawtab%lmn_size) msg=trim(msg)//' nabla_im_ij'
+       nn_dpr=nn_dpr+siz_nabla_im_ij
      end if
      if (allocated(pawtab%phiphj)) then
        siz_phiphj=size(pawtab%phiphj)                 !(mesh_size,ij_size)
@@ -1983,6 +1975,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=siz_gammaij ;ii=ii+1
      list_int(ii)=siz_gnorm  ;ii=ii+1
      list_int(ii)=siz_nabla_ij  ;ii=ii+1
+     list_int(ii)=siz_nabla_im_ij  ;ii=ii+1
      list_int(ii)=siz_phiphj  ;ii=ii+1
      list_int(ii)=siz_phiphjint  ;ii=ii+1
      list_int(ii)=siz_ph0phiint  ;ii=ii+1
@@ -2003,6 +1996,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      list_int(ii)=pawtab%lpawu  ;ii=ii+1
      list_int(ii)=pawtab%mqgrid_shp  ;ii=ii+1
      list_int(ii)=pawtab%nproju  ;ii=ii+1
+     list_int(ii)=pawtab%option_interaction_pawu ;ii=ii+1
      list_int(ii)=pawtab%useexexch  ;ii=ii+1
      list_int(ii)=pawtab%usepawu  ;ii=ii+1
      list_int(ii)=pawtab%usepotzero ;ii=ii+1
@@ -2159,6 +2153,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      siz_gammaij=list_int(ii)  ;ii=ii+1
      siz_gnorm=list_int(ii)  ;ii=ii+1
      siz_nabla_ij=list_int(ii)  ;ii=ii+1
+     siz_nabla_im_ij=list_int(ii)  ;ii=ii+1
      siz_phiphj=list_int(ii)  ;ii=ii+1
      siz_phiphjint=list_int(ii)  ;ii=ii+1
      siz_ph0phiint=list_int(ii)  ;ii=ii+1
@@ -2179,6 +2174,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      pawtab%lpawu=list_int(ii)  ;ii=ii+1
      pawtab%mqgrid_shp=list_int(ii)  ;ii=ii+1
      pawtab%nproju=list_int(ii)  ;ii=ii+1
+     pawtab%option_interaction_pawu=list_int(ii) ;ii=ii+1
      pawtab%useexexch=list_int(ii)  ;ii=ii+1
      pawtab%usepawu=list_int(ii)  ;ii=ii+1
      pawtab%usepotzero=list_int(ii) ;ii=ii+1
@@ -2248,6 +2244,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    list_dpr(ii)=pawtab%dtaucdq0  ;ii=ii+1
    list_dpr(ii)=pawtab%ex_cc   ;ii=ii+1
    list_dpr(ii)=pawtab%exccore  ;ii=ii+1
+   list_dpr(ii)=pawtab%lamb_shielding  ;ii=ii+1
    list_dpr(ii)=pawtab%rpaw  ;ii=ii+1
    list_dpr(ii)=pawtab%rshp  ;ii=ii+1
    list_dpr(ii)=pawtab%rcore  ;ii=ii+1
@@ -2413,6 +2410,10 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        list_dpr(ii:ii+siz_nabla_ij-1)=reshape(pawtab%nabla_ij,(/siz_nabla_ij/))
        ii=ii+siz_nabla_ij
      end if
+     if (siz_nabla_im_ij>0) then
+       list_dpr(ii:ii+siz_nabla_im_ij-1)=reshape(pawtab%nabla_im_ij,(/siz_nabla_im_ij/))
+       ii=ii+siz_nabla_im_ij
+     end if
      if (siz_phiphj>0) then
        list_dpr(ii:ii+siz_phiphj-1)=reshape(pawtab%phiphj,(/siz_phiphj/))
        ii=ii+siz_phiphj
@@ -2492,6 +2493,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    pawtab%dtaucdq0=list_dpr(ii)  ;ii=ii+1
    pawtab%ex_cc=list_dpr(ii)  ;ii=ii+1
    pawtab%exccore=list_dpr(ii)  ;ii=ii+1
+   pawtab%lamb_shielding=list_dpr(ii)  ;ii=ii+1
    pawtab%rpaw=list_dpr(ii)  ;ii=ii+1
    pawtab%rshp=list_dpr(ii)  ;ii=ii+1
    pawtab%rcore=list_dpr(ii)  ;ii=ii+1
@@ -2764,8 +2766,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_DEALLOCATE(pawtab%euijkl)
      end if
      if (siz_euijkl>0) then
-       LIBPAW_ALLOCATE(pawtab%euijkl,(2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size))
-       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/2,2,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size/))
+       LIBPAW_ALLOCATE(pawtab%euijkl,(3,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size))
+       pawtab%euijkl=reshape(list_dpr(ii:ii+siz_euijkl-1),(/3,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size,pawtab%lmn_size/))
        ii=ii+siz_euijkl
      end if
      if (allocated(pawtab%euij_fll)) then
@@ -2807,6 +2809,14 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
        LIBPAW_ALLOCATE(pawtab%nabla_ij,(3,pawtab%lmn_size,pawtab%lmn_size))
        pawtab%nabla_ij=reshape(list_dpr(ii:ii+siz_nabla_ij-1),(/3,pawtab%lmn_size,pawtab%lmn_size/))
        ii=ii+siz_nabla_ij
+     end if
+     if (allocated(pawtab%nabla_im_ij)) then
+       LIBPAW_DEALLOCATE(pawtab%nabla_im_ij)
+     end if
+     if (siz_nabla_im_ij>0) then
+       LIBPAW_ALLOCATE(pawtab%nabla_im_ij,(3,pawtab%lmn_size,pawtab%lmn_size))
+       pawtab%nabla_im_ij=reshape(list_dpr(ii:ii+siz_nabla_im_ij-1),(/3,pawtab%lmn_size,pawtab%lmn_size/))
+       ii=ii+siz_nabla_im_ij
      end if
      if (allocated(pawtab%phiphj)) then
        LIBPAW_DEALLOCATE(pawtab%phiphj)
@@ -2933,11 +2943,6 @@ end subroutine pawtab_bcast
 !! SIDE EFFECTS
 !!  wvlpaw<type(wvlpaw_type)>=datastructure to be allocated.
 !!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvlpaw_allocate(wvlpaw)
@@ -2971,11 +2976,6 @@ end subroutine wvlpaw_allocate
 !! SIDE EFFECTS
 !!  wvlpaw<type(wvlpaw_type)>=datastructure to be destroyed.
 !!  All allocated arrays are deallocated.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3022,11 +3022,6 @@ end subroutine wvlpaw_free
 !! SIDE EFFECTS
 !!  wvlpaw=datastructure to be nullified
 !!
-!! PARENTS
-!!      m_pawtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wvlpaw_nullify(wvlpaw)
@@ -3059,11 +3054,6 @@ end subroutine wvlpaw_nullify
 !! SIDE EFFECTS
 !!  wvlpaw_rholoc<type(wvlpaw_rholoc_type)>=datastructure to be destroyed.
 !!  All allocated arrays are deallocated.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3099,11 +3089,6 @@ end subroutine wvlpaw_rholoc_free
 !!
 !! SIDE EFFECTS
 !!  wvlpaw_rholoc<type(wvlpaw_rholoc_type)>=datastructure to be nullified.
-!!
-!! PARENTS
-!!      m_pawpsp,m_pawtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

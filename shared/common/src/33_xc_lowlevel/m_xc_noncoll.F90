@@ -7,7 +7,7 @@
 !!  (rotation of the magnetization in order to align it)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (EB, MT, FR, SPr)
+!! Copyright (C) 2001-2022 ABINIT group (EB, MT, FR, SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -86,12 +82,6 @@ CONTAINS
 !!       rho_out(1) = rho_in(1)
 !!       rho_out(2) = half*( rho_in(1) + (mag,rho_in(2:4))/|mag|)
 !!
-!!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 
@@ -225,12 +215,6 @@ end subroutine rotate_mag
 !! OUTPUT
 !!  vxc_out(vectsize,4)=output non-collinear XC potential
 !!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_pawxc
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine rotate_back_mag(vxc_in,vxc_out,mag,vectsize,&
@@ -315,12 +299,6 @@ end subroutine rotate_back_mag
 !! OUTPUT
 !!  vxc1_out(vectsize,4)=output 1st-order non-collinear XC potential
 !!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_pawxc,m_xc_noncoll
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
-!!
 !! SOURCE
 
 subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsize,cplex,&
@@ -398,20 +376,29 @@ subroutine rotate_back_mag_dfpt(option,vxc1_in,vxc1_out,vxc,kxc,rho1,mag,vectsiz
 
 !      Define the U^(0) transformation matrix
        rho_updn=(mag(ipt,1)+(zero,one)*mag(ipt,2))
-       d1=sqrt(( m_norm+mag(ipt,3))**2+rho_updn**2)
-       d2=sqrt((-m_norm+mag(ipt,3))**2+rho_updn**2)
-       d3=sqrt(( m_norm-mag(ipt,3))**2+rho_updn**2)
-       d4=sqrt(( m_norm+mag(ipt,3))**2-rho_updn**2)
+       d1=sqrt(( m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
+       d2=sqrt((-m_norm+mag(ipt,3))**2+abs(rho_updn)**2)
+       d3=sqrt(( m_norm-mag(ipt,3))**2+abs(rho_updn)**2)
+       d4=sqrt(( m_norm+mag(ipt,3))**2-abs(rho_updn)**2)
        u0(1,1)=( m_norm+mag(ipt,3))/d1  ! ( m  + mz)/d1
        u0(2,2)=rho_updn/d2              ! ( mx +imy)/d2
        u0(1,2)=(-m_norm+mag(ipt,3))/d2  ! (-m  + mz)/d2
        u0(2,1)=rho_updn/d1              ! ( mx +imy)/d1
 
 !      Define the inverse of U^(0): U^(0)^-1
-       u0_1(1,1)= half*d1/m_norm
-       u0_1(2,2)= half*d2*(m_norm+mag(ipt,3))/(m_norm*rho_updn)
-       u0_1(1,2)= half*d1*(m_norm-mag(ipt,3))/(m_norm*rho_updn)
-       u0_1(2,1)=-half*d2/m_norm
+       if (abs(rho_updn) > m_norm_min) then
+         u0_1(1,1)= half*d1/m_norm
+         u0_1(2,2)= half*d2*(m_norm+mag(ipt,3))/(m_norm*rho_updn)
+         u0_1(1,2)= half*d1*(m_norm-mag(ipt,3))/(m_norm*rho_updn)
+         u0_1(2,1)=-half*d2/m_norm
+       else
+         u0 = zero
+         u0(1,1) = one
+         u0(2,2) = one
+         u0_1 = zero
+         u0_1(1,1) = one
+         u0_1(2,2) = one
+       end if
 
 !      Diagonalize the GS Vxc^(0): U^(0)^-1 Vxc^(0) U^(0)
 !        (Remember the abinit notation for vxc!)
@@ -868,11 +855,6 @@ end subroutine rotate_back_mag_dfpt
 !! NOTES
 !!
 !!  For debug purposes
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      rotate_back_mag_dfpt
 !!
 !! SOURCE
 

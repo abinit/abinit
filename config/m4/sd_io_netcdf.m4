@@ -35,6 +35,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   sd_netcdf_cxxflags_def="$5"
   sd_netcdf_fcflags_def="$6"
   sd_netcdf_ldflags_def="$7"
+  sd_netcdf_enable_def=""
 
   # Process options
   for kwd in ${sd_netcdf_options}; do
@@ -48,6 +49,10 @@ AC_DEFUN([SD_NETCDF_INIT], [
       fail|skip|warn)
         sd_netcdf_policy="${kwd}"
         ;;
+      mandatory)
+        sd_netcdf_enable="yes"
+        sd_netcdf_enable_def="yes"
+        ;;
       *)
         AC_MSG_ERROR([invalid Steredeg NetCDF option: '${kwd}'])
         ;;
@@ -59,6 +64,7 @@ AC_DEFUN([SD_NETCDF_INIT], [
   test -z "${sd_netcdf_policy}" && sd_netcdf_policy="fail"
   test -z "${sd_netcdf_enable_def}" && sd_netcdf_enable_def="no"
   test -z "${sd_netcdf_libs_def}" && sd_netcdf_libs_def="-lnetcdf"
+  test -z "${sd_netcdf_enable_def}" && sd_netcdf_enable_def="no"
   case "${sd_netcdf_status}" in
     implicit|required)
       sd_netcdf_enable_def="yes"
@@ -260,22 +266,38 @@ AC_DEFUN([_SD_NETCDF_CHECK_USE], [
   AC_MSG_RESULT([${sd_netcdf_ok}])
 
   # Check if we can do parallel I/O
+  #echo "netcdf-c : Check if we can do parallel I/O"
   if test "${sd_netcdf_ok}" = "yes" -a "${sd_mpi_ok}" = "yes"; then
+    #echo -e "\r JMB Check // IO netcdf-c"
     if test "${sd_hdf5_mpi_ok}" = "yes"; then
+      #echo " sd_hdf5_mpi_ok = yes"
+      #echo " whether NetCDF has parallel I/O"
       AC_MSG_CHECKING([whether NetCDF has parallel I/O])
       AC_LANG_PUSH([C])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      AC_LINK_IFELSE([AC_LANG_PROGRAM(
         [[
 #         include <mpi.h>
 #         include <netcdf.h>
+#         include <netcdf_par.h>
+#         include <stdio.h>
         ]],
         [[
+          MPI_Init(NULL,NULL);
           MPI_Comm comm = MPI_COMM_WORLD;
           MPI_Info info = MPI_INFO_NULL;
+
           int ierr, ncid;
-          ierr = nc_create_par(file_name, NC_NETCDF4, comm, info, &ncid);
+          ierr = nc_create_par("conftest.nc", NC_MPIIO | NC_NETCDF4, comm, info, &ncid);
+          printf("  nc_create_par : ierr= %d\n",ierr);
+          ierr = nc_close(ncid);
+          printf("  nc_close : ierr= %d\n",ierr);
+          MPI_Finalize();
+
+          if(ierr != 0) return 1;
+
         ]])], [sd_netcdf_mpi_ok="yes"], [sd_netcdf_mpi_ok="no"])
       AC_LANG_POP([C])
+      echo "  sd_netcdf_mpi_ok = ${sd_netcdf_mpi_ok}"
       AC_MSG_RESULT([${sd_netcdf_mpi_ok}])
     else
       sd_netcdf_mpi_ok="no"

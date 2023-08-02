@@ -7,14 +7,10 @@
 !!  on the sphere using lebedev-laikov angular grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -61,14 +57,25 @@ MODULE m_lebedev
    ! weights(npts)
    ! weights for Spherical integration.
 
+ contains
+
+   procedure :: from_npts  => lebedev_from_npts
+
+   procedure :: from_index  => lebedev_from_index
+     ! Create a lebedev grid for it's index
+     ! Useful if one has to loop over all the grids.
+
+   procedure :: free => lebedev_free
+     ! Free memory
+
  end type lebedev_t
 
- public :: lebedev_new         ! Create a lebedev grid.
- public :: lebedev_free        ! Free memory
+ !public :: lebedev_from_index
+ !public :: lebedev_free
 
 !----------------------------------------------------------------------
 
- integer,public,parameter :: lebedev_ngrids=32
+ integer,public,parameter :: lebedev_ngrids = 32
  ! The number of grids available.
 
  ! The number of points in each grid.
@@ -109,12 +116,56 @@ MODULE m_lebedev
 contains  !===========================================================
 !!***
 
-!!****f* m_lebedev/lebedev_new
+!!****f* m_lebedev/lebedev_from_npts
 !! NAME
-!!  lebedev_new
+!!  lebedev_from_npts
 !!
 !! FUNCTION
-!!  Create a lebedev grid.
+!!  Create a lebedev grid given the number of points. npts
+!!  Exit status:
+!!    0 on success
+!!   -1 if npts is greater than the max number of points supported.
+!!   N > 0 is the first grid with size greater that npts.
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine lebedev_from_npts(new, npts, ierr)
+
+!Arguments ------------------------------------
+!scalars
+ class(lebedev_t),intent(out) :: new
+ integer,intent(in) :: npts
+ integer,intent(out) :: ierr
+
+!Local variables-------------------------------
+ integer :: seq_idx
+! *********************************************************************
+
+ ierr = -1
+ do seq_idx=1, lebedev_ngrids
+   if (lebedev_npts(seq_idx) == npts) then
+     call new%from_index(seq_idx)
+     ierr = 0
+     return
+   else if (lebedev_npts(seq_idx) > npts .and. ierr == -1) then
+     ierr = lebedev_npts(seq_idx)
+   end if
+ end do
+
+end subroutine lebedev_from_npts
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_lebedev/lebedev_from_index
+!! NAME
+!!  lebedev_from_index
+!!
+!! FUNCTION
+!!  Create a lebedev grid from the sequential index.
+!!  Useful if one has to loop over all the grids.
 !!
 !! INPUTS
 !!  seq_idx=Sequential index comprised between 1 and 32 defining the order of the mesh.
@@ -122,18 +173,13 @@ contains  !===========================================================
 !! OUTPUT
 !!  Lgrid<lebedev_t>=The grid fully initialized.
 !!
-!! PARENTS
-!!      m_lebedev
-!!
-!! CHILDREN
-!!      gen_oh
-!!
 !! SOURCE
 
-type(lebedev_t) function lebedev_new(seq_idx) result(new)
+subroutine lebedev_from_index(new, seq_idx)
 
 !Arguments ------------------------------------
 !scalars
+ class(lebedev_t),intent(out) :: new
  integer,intent(in) :: seq_idx
 
 !Local variables-------------------------------
@@ -141,9 +187,9 @@ type(lebedev_t) function lebedev_new(seq_idx) result(new)
  real(dp),allocatable :: xx(:),yy(:),zz(:)
 ! *********************************************************************
 
- call build_lebedev_grid(seq_idx,new%npts,xx,yy,zz,new%weights)
+ call build_lebedev_grid(seq_idx, new%npts, xx, yy, zz, new%weights)
 
- ABI_MALLOC(new%versors,(3,new%npts))
+ ABI_MALLOC(new%versors, (3,new%npts))
  do ii=1,new%npts
    new%versors(:,ii) = [xx(ii), yy(ii), zz(ii)]
  end do
@@ -152,7 +198,7 @@ type(lebedev_t) function lebedev_new(seq_idx) result(new)
  ABI_FREE(yy)
  ABI_FREE(zz)
 
-end function lebedev_new
+end subroutine lebedev_from_index
 !!***
 
 !----------------------------------------------------------------------
@@ -164,19 +210,12 @@ end function lebedev_new
 !! FUNCTION
 !!  Free an instance of lebedev_t
 !!
-!! PARENTS
-!!      m_ifc
-!!
-!! CHILDREN
-!!      gen_oh
-!!
 !! SOURCE
 
 subroutine lebedev_free(lgrid)
 
 !Arguments ------------------------------------
-!scalars
- type(lebedev_t),intent(inout) :: lgrid
+ class(lebedev_t),intent(inout) :: lgrid
 
 ! *********************************************************************
 
@@ -204,12 +243,6 @@ end subroutine lebedev_free
 !!  npts=Number of points
 !!  xx(npts),yy(npts),zz(npts)=The Cartesian coordinates of the knots.
 !!  ww(npts)=The weights.
-!!
-!! PARENTS
-!!      m_lebedev
-!!
-!! CHILDREN
-!!      gen_oh
 !!
 !! SOURCE
 
@@ -316,12 +349,6 @@ end subroutine build_lebedev_grid
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_lebedev
-!!
-!! CHILDREN
-!!      gen_oh
 !!
 !! SOURCE
 

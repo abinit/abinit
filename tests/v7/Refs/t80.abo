@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h33 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t80/t80.in
-- output file    -> t80.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t80/t80.abi
+- output file    -> t80.abo
 - root for input  files -> t80i
 - root for output files -> t80o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           6        mffmem =           1         mkmem =           8
        mpw =         165          nfft =        4096          nkpt =           8
 ================================================================================
-P This job should need less than                       1.711 Mbytes of memory.
+P This job should need less than                       1.828 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
        mpw =          85          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       1.072 Mbytes of memory.
+P This job should need less than                       1.193 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -74,7 +71,6 @@ P This job should need less than                       1.433 Mbytes of memory.
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4 (RF).
@@ -91,7 +87,6 @@ P This job should need less than                       1.433 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -110,7 +105,6 @@ P This job should need less than                       1.433 Mbytes of memory.
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6 (RF).
@@ -127,7 +121,6 @@ P This job should need less than                       1.433 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -146,7 +139,6 @@ P This job should need less than                       1.433 Mbytes of memory.
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    8 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -158,11 +150,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          11        mffmem =           1         mkmem =           1
        mpw =         162          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       1.100 Mbytes of memory.
+P This job should need less than                       1.218 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.029 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -350,15 +341,15 @@ P          mk1mem9          1
         optdriver7          1
         optdriver8          0
         optdriver9          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          1       1       1
-            rfdir8          0       0       0
-            rfdir9          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          1
+           prtpot8          0
+           prtpot9          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -524,8 +515,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -704,7 +695,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.03E-26  9.21E-16  3.76E-17
  -4.0687E-01  5.0055E-02  5.0055E-02  5.0055E-02  7.4687E-02  1.4271E-01
   1.4271E-01  1.4271E-01  2.9754E-01  3.6710E-01  3.6710E-01
-  prteigrs : nnsclo,ikpt=  100    1 max resid (incl. the buffer)=  9.21013E-16
 
 
 --- !ResultsGS
@@ -788,8 +778,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -802,7 +792,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -824,7 +813,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -840,20 +828,20 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342236230     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379186591     -3.695E-05 4.123E-07 0.000E+00
  ETOT  3  -86.300379190368     -3.777E-09 4.822E-09 0.000E+00
- ETOT  4  -86.300379190368     -3.979E-13 8.289E-13 0.000E+00
- ETOT  5  -86.300379190368      0.000E+00 6.625E-14 0.000E+00
- ETOT  6  -86.300379190368      2.842E-14 1.628E-17 0.000E+00
- ETOT  7  -86.300379190368     -4.263E-14 1.834E-18 0.000E+00
- ETOT  8  -86.300379190368      0.000E+00 3.806E-22 0.000E+00
+ ETOT  4  -86.300379190368     -4.121E-13 8.289E-13 0.000E+00
+ ETOT  5  -86.300379190368     -2.842E-14 6.625E-14 0.000E+00
+ ETOT  6  -86.300379190368      5.684E-14 1.628E-17 0.000E+00
+ ETOT  7  -86.300379190368     -2.842E-14 1.834E-18 0.000E+00
+ ETOT  8  -86.300379190368     -2.842E-14 3.806E-22 0.000E+00
  ETOT  9  -86.300379190368      1.421E-14 6.511E-23 0.000E+00
- ETOT 10  -86.300379190368      2.842E-14 4.281E-26 0.000E+00
+ ETOT 10  -86.300379190368     -1.421E-14 4.281E-26 0.000E+00
 
  At SCF step   10   max residual=  4.28E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.723E-27; max=  42.810E-27
+ Mean square residual over all n,k,spin=   16.730E-27; max=  42.810E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -884,7 +872,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -905,8 +892,8 @@ tolerances: {tolwfr: 1.00E-25, }
  ETOT  6  -86.300379191906      8.527E-14 5.389E-18 0.000E+00
  ETOT  7  -86.300379191906     -7.105E-14 1.261E-18 0.000E+00
  ETOT  8  -86.300379191906      2.842E-14 7.537E-22 0.000E+00
- ETOT  9  -86.300379191906     -2.842E-14 2.149E-22 0.000E+00
- ETOT 10  -86.300379191906      2.842E-14 1.397E-25 0.000E+00
+ ETOT  9  -86.300379191906      0.000E+00 2.149E-22 0.000E+00
+ ETOT 10  -86.300379191906     -1.421E-14 1.397E-25 0.000E+00
  ETOT 11  -86.300379191906      0.000E+00 7.815E-26 0.000E+00
 
  At SCF step   11   max residual=  7.81E-26 < tolwfr=  1.00E-25 =>converged.
@@ -914,7 +901,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.590E-27; max=  78.148E-27
+ Mean square residual over all n,k,spin=   24.586E-27; max=  78.148E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -945,7 +932,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -961,13 +947,13 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342235188     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379180435     -3.695E-05 4.165E-07 0.000E+00
  ETOT  3  -86.300379184211     -3.776E-09 3.624E-09 0.000E+00
- ETOT  4  -86.300379184212     -5.258E-13 1.818E-12 0.000E+00
- ETOT  5  -86.300379184212      4.263E-14 1.833E-13 0.000E+00
- ETOT  6  -86.300379184212      0.000E+00 9.577E-17 0.000E+00
- ETOT  7  -86.300379184212     -1.421E-14 1.378E-17 0.000E+00
- ETOT  8  -86.300379184212      1.421E-14 7.639E-21 0.000E+00
- ETOT  9  -86.300379184212     -2.842E-14 1.085E-21 0.000E+00
- ETOT 10  -86.300379184212      2.842E-14 6.101E-25 0.000E+00
+ ETOT  4  -86.300379184212     -4.974E-13 1.818E-12 0.000E+00
+ ETOT  5  -86.300379184212      1.421E-14 1.833E-13 0.000E+00
+ ETOT  6  -86.300379184212      2.842E-14 9.577E-17 0.000E+00
+ ETOT  7  -86.300379184212     -4.263E-14 1.378E-17 0.000E+00
+ ETOT  8  -86.300379184212      2.842E-14 7.639E-21 0.000E+00
+ ETOT  9  -86.300379184212      0.000E+00 1.085E-21 0.000E+00
+ ETOT 10  -86.300379184212      0.000E+00 6.101E-25 0.000E+00
  ETOT 11  -86.300379184212      1.421E-14 9.141E-26 0.000E+00
 
  At SCF step   11   max residual=  9.14E-26 < tolwfr=  1.00E-25 =>converged.
@@ -975,7 +961,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.390E-27; max=  91.405E-27
+ Mean square residual over all n,k,spin=   33.437E-27; max=  91.405E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711230E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1069,7 +1055,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1091,7 +1076,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1107,20 +1091,20 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342236230     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379186591     -3.695E-05 4.123E-07 0.000E+00
  ETOT  3  -86.300379190368     -3.777E-09 4.822E-09 0.000E+00
- ETOT  4  -86.300379190368     -3.979E-13 8.289E-13 0.000E+00
- ETOT  5  -86.300379190368      0.000E+00 6.625E-14 0.000E+00
- ETOT  6  -86.300379190368      2.842E-14 1.628E-17 0.000E+00
- ETOT  7  -86.300379190368     -4.263E-14 1.834E-18 0.000E+00
- ETOT  8  -86.300379190368      0.000E+00 3.806E-22 0.000E+00
+ ETOT  4  -86.300379190368     -4.121E-13 8.289E-13 0.000E+00
+ ETOT  5  -86.300379190368     -2.842E-14 6.625E-14 0.000E+00
+ ETOT  6  -86.300379190368      5.684E-14 1.628E-17 0.000E+00
+ ETOT  7  -86.300379190368     -2.842E-14 1.834E-18 0.000E+00
+ ETOT  8  -86.300379190368     -2.842E-14 3.806E-22 0.000E+00
  ETOT  9  -86.300379190368      1.421E-14 6.511E-23 0.000E+00
- ETOT 10  -86.300379190368      2.842E-14 4.281E-26 0.000E+00
+ ETOT 10  -86.300379190368     -1.421E-14 4.281E-26 0.000E+00
 
  At SCF step   10   max residual=  4.28E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.723E-27; max=  42.810E-27
+ Mean square residual over all n,k,spin=   16.730E-27; max=  42.810E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1151,7 +1135,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1172,8 +1155,8 @@ tolerances: {tolwfr: 1.00E-25, }
  ETOT  6  -86.300379191906      8.527E-14 5.389E-18 0.000E+00
  ETOT  7  -86.300379191906     -7.105E-14 1.261E-18 0.000E+00
  ETOT  8  -86.300379191906      2.842E-14 7.537E-22 0.000E+00
- ETOT  9  -86.300379191906     -2.842E-14 2.149E-22 0.000E+00
- ETOT 10  -86.300379191906      2.842E-14 1.397E-25 0.000E+00
+ ETOT  9  -86.300379191906      0.000E+00 2.149E-22 0.000E+00
+ ETOT 10  -86.300379191906     -1.421E-14 1.397E-25 0.000E+00
  ETOT 11  -86.300379191906      0.000E+00 7.815E-26 0.000E+00
 
  At SCF step   11   max residual=  7.81E-26 < tolwfr=  1.00E-25 =>converged.
@@ -1181,7 +1164,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.590E-27; max=  78.148E-27
+ Mean square residual over all n,k,spin=   24.586E-27; max=  78.148E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1212,7 +1195,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1228,13 +1210,13 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342235188     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379180435     -3.695E-05 4.165E-07 0.000E+00
  ETOT  3  -86.300379184211     -3.776E-09 3.624E-09 0.000E+00
- ETOT  4  -86.300379184212     -5.258E-13 1.818E-12 0.000E+00
- ETOT  5  -86.300379184212      4.263E-14 1.833E-13 0.000E+00
- ETOT  6  -86.300379184212      0.000E+00 9.577E-17 0.000E+00
- ETOT  7  -86.300379184212     -1.421E-14 1.378E-17 0.000E+00
- ETOT  8  -86.300379184212      1.421E-14 7.639E-21 0.000E+00
- ETOT  9  -86.300379184212     -2.842E-14 1.085E-21 0.000E+00
- ETOT 10  -86.300379184212      2.842E-14 6.101E-25 0.000E+00
+ ETOT  4  -86.300379184212     -4.974E-13 1.818E-12 0.000E+00
+ ETOT  5  -86.300379184212      1.421E-14 1.833E-13 0.000E+00
+ ETOT  6  -86.300379184212      2.842E-14 9.577E-17 0.000E+00
+ ETOT  7  -86.300379184212     -4.263E-14 1.378E-17 0.000E+00
+ ETOT  8  -86.300379184212      2.842E-14 7.639E-21 0.000E+00
+ ETOT  9  -86.300379184212      0.000E+00 1.085E-21 0.000E+00
+ ETOT 10  -86.300379184212      0.000E+00 6.101E-25 0.000E+00
  ETOT 11  -86.300379184212      1.421E-14 9.141E-26 0.000E+00
 
  At SCF step   11   max residual=  9.14E-26 < tolwfr=  1.00E-25 =>converged.
@@ -1242,7 +1224,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.390E-27; max=  91.405E-27
+ Mean square residual over all n,k,spin=   33.437E-27; max=  91.405E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711230E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1334,7 +1316,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1356,7 +1337,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1372,20 +1352,20 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342236230     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379186591     -3.695E-05 4.123E-07 0.000E+00
  ETOT  3  -86.300379190368     -3.777E-09 4.822E-09 0.000E+00
- ETOT  4  -86.300379190368     -3.979E-13 8.289E-13 0.000E+00
- ETOT  5  -86.300379190368      0.000E+00 6.625E-14 0.000E+00
- ETOT  6  -86.300379190368      2.842E-14 1.628E-17 0.000E+00
- ETOT  7  -86.300379190368     -4.263E-14 1.834E-18 0.000E+00
- ETOT  8  -86.300379190368      0.000E+00 3.806E-22 0.000E+00
+ ETOT  4  -86.300379190368     -4.121E-13 8.289E-13 0.000E+00
+ ETOT  5  -86.300379190368     -2.842E-14 6.625E-14 0.000E+00
+ ETOT  6  -86.300379190368      5.684E-14 1.628E-17 0.000E+00
+ ETOT  7  -86.300379190368     -2.842E-14 1.834E-18 0.000E+00
+ ETOT  8  -86.300379190368     -2.842E-14 3.806E-22 0.000E+00
  ETOT  9  -86.300379190368      1.421E-14 6.511E-23 0.000E+00
- ETOT 10  -86.300379190368      2.842E-14 4.281E-26 0.000E+00
+ ETOT 10  -86.300379190368     -1.421E-14 4.281E-26 0.000E+00
 
  At SCF step   10   max residual=  4.28E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.723E-27; max=  42.810E-27
+ Mean square residual over all n,k,spin=   16.730E-27; max=  42.810E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1416,7 +1396,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1437,8 +1416,8 @@ tolerances: {tolwfr: 1.00E-25, }
  ETOT  6  -86.300379191906      8.527E-14 5.389E-18 0.000E+00
  ETOT  7  -86.300379191906     -7.105E-14 1.261E-18 0.000E+00
  ETOT  8  -86.300379191906      2.842E-14 7.537E-22 0.000E+00
- ETOT  9  -86.300379191906     -2.842E-14 2.149E-22 0.000E+00
- ETOT 10  -86.300379191906      2.842E-14 1.397E-25 0.000E+00
+ ETOT  9  -86.300379191906      0.000E+00 2.149E-22 0.000E+00
+ ETOT 10  -86.300379191906     -1.421E-14 1.397E-25 0.000E+00
  ETOT 11  -86.300379191906      0.000E+00 7.815E-26 0.000E+00
 
  At SCF step   11   max residual=  7.81E-26 < tolwfr=  1.00E-25 =>converged.
@@ -1446,7 +1425,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.590E-27; max=  78.148E-27
+ Mean square residual over all n,k,spin=   24.586E-27; max=  78.148E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1477,7 +1456,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1493,13 +1471,13 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342235188     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379180435     -3.695E-05 4.165E-07 0.000E+00
  ETOT  3  -86.300379184211     -3.776E-09 3.624E-09 0.000E+00
- ETOT  4  -86.300379184212     -5.258E-13 1.818E-12 0.000E+00
- ETOT  5  -86.300379184212      4.263E-14 1.833E-13 0.000E+00
- ETOT  6  -86.300379184212      0.000E+00 9.577E-17 0.000E+00
- ETOT  7  -86.300379184212     -1.421E-14 1.378E-17 0.000E+00
- ETOT  8  -86.300379184212      1.421E-14 7.639E-21 0.000E+00
- ETOT  9  -86.300379184212     -2.842E-14 1.085E-21 0.000E+00
- ETOT 10  -86.300379184212      2.842E-14 6.101E-25 0.000E+00
+ ETOT  4  -86.300379184212     -4.974E-13 1.818E-12 0.000E+00
+ ETOT  5  -86.300379184212      1.421E-14 1.833E-13 0.000E+00
+ ETOT  6  -86.300379184212      2.842E-14 9.577E-17 0.000E+00
+ ETOT  7  -86.300379184212     -4.263E-14 1.378E-17 0.000E+00
+ ETOT  8  -86.300379184212      2.842E-14 7.639E-21 0.000E+00
+ ETOT  9  -86.300379184212      0.000E+00 1.085E-21 0.000E+00
+ ETOT 10  -86.300379184212      0.000E+00 6.101E-25 0.000E+00
  ETOT 11  -86.300379184212      1.421E-14 9.141E-26 0.000E+00
 
  At SCF step   11   max residual=  9.14E-26 < tolwfr=  1.00E-25 =>converged.
@@ -1507,7 +1485,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.390E-27; max=  91.405E-27
+ Mean square residual over all n,k,spin=   33.437E-27; max=  91.405E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711230E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1643,7 +1621,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1665,7 +1642,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1681,20 +1657,20 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342236230     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379186591     -3.695E-05 4.123E-07 0.000E+00
  ETOT  3  -86.300379190368     -3.777E-09 4.822E-09 0.000E+00
- ETOT  4  -86.300379190368     -3.979E-13 8.289E-13 0.000E+00
- ETOT  5  -86.300379190368      0.000E+00 6.625E-14 0.000E+00
- ETOT  6  -86.300379190368      2.842E-14 1.628E-17 0.000E+00
- ETOT  7  -86.300379190368     -4.263E-14 1.834E-18 0.000E+00
- ETOT  8  -86.300379190368      0.000E+00 3.806E-22 0.000E+00
+ ETOT  4  -86.300379190368     -4.121E-13 8.289E-13 0.000E+00
+ ETOT  5  -86.300379190368     -2.842E-14 6.625E-14 0.000E+00
+ ETOT  6  -86.300379190368      5.684E-14 1.628E-17 0.000E+00
+ ETOT  7  -86.300379190368     -2.842E-14 1.834E-18 0.000E+00
+ ETOT  8  -86.300379190368     -2.842E-14 3.806E-22 0.000E+00
  ETOT  9  -86.300379190368      1.421E-14 6.511E-23 0.000E+00
- ETOT 10  -86.300379190368      2.842E-14 4.281E-26 0.000E+00
+ ETOT 10  -86.300379190368     -1.421E-14 4.281E-26 0.000E+00
 
  At SCF step   10   max residual=  4.28E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.723E-27; max=  42.810E-27
+ Mean square residual over all n,k,spin=   16.730E-27; max=  42.810E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1725,7 +1701,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1746,8 +1721,8 @@ tolerances: {tolwfr: 1.00E-25, }
  ETOT  6  -86.300379191906      8.527E-14 5.389E-18 0.000E+00
  ETOT  7  -86.300379191906     -7.105E-14 1.261E-18 0.000E+00
  ETOT  8  -86.300379191906      2.842E-14 7.537E-22 0.000E+00
- ETOT  9  -86.300379191906     -2.842E-14 2.149E-22 0.000E+00
- ETOT 10  -86.300379191906      2.842E-14 1.397E-25 0.000E+00
+ ETOT  9  -86.300379191906      0.000E+00 2.149E-22 0.000E+00
+ ETOT 10  -86.300379191906     -1.421E-14 1.397E-25 0.000E+00
  ETOT 11  -86.300379191906      0.000E+00 7.815E-26 0.000E+00
 
  At SCF step   11   max residual=  7.81E-26 < tolwfr=  1.00E-25 =>converged.
@@ -1755,7 +1730,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.590E-27; max=  78.148E-27
+ Mean square residual over all n,k,spin=   24.586E-27; max=  78.148E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1786,7 +1761,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1802,13 +1776,13 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342235188     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379180435     -3.695E-05 4.165E-07 0.000E+00
  ETOT  3  -86.300379184211     -3.776E-09 3.624E-09 0.000E+00
- ETOT  4  -86.300379184212     -5.258E-13 1.818E-12 0.000E+00
- ETOT  5  -86.300379184212      4.263E-14 1.833E-13 0.000E+00
- ETOT  6  -86.300379184212      0.000E+00 9.577E-17 0.000E+00
- ETOT  7  -86.300379184212     -1.421E-14 1.378E-17 0.000E+00
- ETOT  8  -86.300379184212      1.421E-14 7.639E-21 0.000E+00
- ETOT  9  -86.300379184212     -2.842E-14 1.085E-21 0.000E+00
- ETOT 10  -86.300379184212      2.842E-14 6.101E-25 0.000E+00
+ ETOT  4  -86.300379184212     -4.974E-13 1.818E-12 0.000E+00
+ ETOT  5  -86.300379184212      1.421E-14 1.833E-13 0.000E+00
+ ETOT  6  -86.300379184212      2.842E-14 9.577E-17 0.000E+00
+ ETOT  7  -86.300379184212     -4.263E-14 1.378E-17 0.000E+00
+ ETOT  8  -86.300379184212      2.842E-14 7.639E-21 0.000E+00
+ ETOT  9  -86.300379184212      0.000E+00 1.085E-21 0.000E+00
+ ETOT 10  -86.300379184212      0.000E+00 6.101E-25 0.000E+00
  ETOT 11  -86.300379184212      1.421E-14 9.141E-26 0.000E+00
 
  At SCF step   11   max residual=  9.14E-26 < tolwfr=  1.00E-25 =>converged.
@@ -1816,7 +1790,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.390E-27; max=  91.405E-27
+ Mean square residual over all n,k,spin=   33.437E-27; max=  91.405E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711230E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -1938,7 +1912,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1960,7 +1933,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1976,20 +1948,20 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342236230     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379186591     -3.695E-05 4.123E-07 0.000E+00
  ETOT  3  -86.300379190368     -3.777E-09 4.822E-09 0.000E+00
- ETOT  4  -86.300379190368     -3.979E-13 8.289E-13 0.000E+00
- ETOT  5  -86.300379190368      0.000E+00 6.625E-14 0.000E+00
- ETOT  6  -86.300379190368      2.842E-14 1.628E-17 0.000E+00
- ETOT  7  -86.300379190368     -4.263E-14 1.834E-18 0.000E+00
- ETOT  8  -86.300379190368      0.000E+00 3.806E-22 0.000E+00
+ ETOT  4  -86.300379190368     -4.121E-13 8.289E-13 0.000E+00
+ ETOT  5  -86.300379190368     -2.842E-14 6.625E-14 0.000E+00
+ ETOT  6  -86.300379190368      5.684E-14 1.628E-17 0.000E+00
+ ETOT  7  -86.300379190368     -2.842E-14 1.834E-18 0.000E+00
+ ETOT  8  -86.300379190368     -2.842E-14 3.806E-22 0.000E+00
  ETOT  9  -86.300379190368      1.421E-14 6.511E-23 0.000E+00
- ETOT 10  -86.300379190368      2.842E-14 4.281E-26 0.000E+00
+ ETOT 10  -86.300379190368     -1.421E-14 4.281E-26 0.000E+00
 
  At SCF step   10   max residual=  4.28E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.723E-27; max=  42.810E-27
+ Mean square residual over all n,k,spin=   16.730E-27; max=  42.810E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -2020,7 +1992,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2041,8 +2012,8 @@ tolerances: {tolwfr: 1.00E-25, }
  ETOT  6  -86.300379191906      8.527E-14 5.389E-18 0.000E+00
  ETOT  7  -86.300379191906     -7.105E-14 1.261E-18 0.000E+00
  ETOT  8  -86.300379191906      2.842E-14 7.537E-22 0.000E+00
- ETOT  9  -86.300379191906     -2.842E-14 2.149E-22 0.000E+00
- ETOT 10  -86.300379191906      2.842E-14 1.397E-25 0.000E+00
+ ETOT  9  -86.300379191906      0.000E+00 2.149E-22 0.000E+00
+ ETOT 10  -86.300379191906     -1.421E-14 1.397E-25 0.000E+00
  ETOT 11  -86.300379191906      0.000E+00 7.815E-26 0.000E+00
 
  At SCF step   11   max residual=  7.81E-26 < tolwfr=  1.00E-25 =>converged.
@@ -2050,7 +2021,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.590E-27; max=  78.148E-27
+ Mean square residual over all n,k,spin=   24.586E-27; max=  78.148E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711231E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -2081,7 +2052,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2097,13 +2067,13 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -86.300342235188     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379180435     -3.695E-05 4.165E-07 0.000E+00
  ETOT  3  -86.300379184211     -3.776E-09 3.624E-09 0.000E+00
- ETOT  4  -86.300379184212     -5.258E-13 1.818E-12 0.000E+00
- ETOT  5  -86.300379184212      4.263E-14 1.833E-13 0.000E+00
- ETOT  6  -86.300379184212      0.000E+00 9.577E-17 0.000E+00
- ETOT  7  -86.300379184212     -1.421E-14 1.378E-17 0.000E+00
- ETOT  8  -86.300379184212      1.421E-14 7.639E-21 0.000E+00
- ETOT  9  -86.300379184212     -2.842E-14 1.085E-21 0.000E+00
- ETOT 10  -86.300379184212      2.842E-14 6.101E-25 0.000E+00
+ ETOT  4  -86.300379184212     -4.974E-13 1.818E-12 0.000E+00
+ ETOT  5  -86.300379184212      1.421E-14 1.833E-13 0.000E+00
+ ETOT  6  -86.300379184212      2.842E-14 9.577E-17 0.000E+00
+ ETOT  7  -86.300379184212     -4.263E-14 1.378E-17 0.000E+00
+ ETOT  8  -86.300379184212      2.842E-14 7.639E-21 0.000E+00
+ ETOT  9  -86.300379184212      0.000E+00 1.085E-21 0.000E+00
+ ETOT 10  -86.300379184212      0.000E+00 6.101E-25 0.000E+00
  ETOT 11  -86.300379184212      1.421E-14 9.141E-26 0.000E+00
 
  At SCF step   11   max residual=  9.14E-26 < tolwfr=  1.00E-25 =>converged.
@@ -2111,7 +2081,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.390E-27; max=  91.405E-27
+ Mean square residual over all n,k,spin=   33.437E-27; max=  91.405E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.0036711230E+01 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -2214,8 +2184,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2319,8 +2289,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10247
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge_lda.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge_lda.fhi
 - Germanium, fhi98PP : Troullier Martins-type, LDA  PW+x, l=1 local
 - 32.00000   4.00000    140700                znucl, zion, pspdat
     6    7    1    1       529   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2333,7 +2303,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS8_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2355,7 +2324,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS8_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2372,21 +2340,21 @@ tolerances: {tolwfr: 1.00E-25, }
  ETOT  2  -10.329110185964     -1.329E-03 2.292E-05 0.000E+00
  ETOT  3  -10.329110244152     -5.819E-08 1.403E-07 0.000E+00
  ETOT  4  -10.329110244162     -9.944E-12 4.364E-10 0.000E+00
- ETOT  5  -10.329110244162     -7.105E-15 3.756E-12 0.000E+00
+ ETOT  5  -10.329110244162     -1.066E-14 3.756E-12 0.000E+00
  ETOT  6  -10.329110244162      1.776E-15 1.277E-14 0.000E+00
  ETOT  7  -10.329110244162      8.882E-15 1.121E-16 0.000E+00
  ETOT  8  -10.329110244162      0.000E+00 3.984E-19 0.000E+00
- ETOT  9  -10.329110244162     -1.776E-15 3.503E-21 0.000E+00
- ETOT 10  -10.329110244162      0.000E+00 1.286E-23 0.000E+00
- ETOT 11  -10.329110244162      1.776E-15 1.132E-25 0.000E+00
- ETOT 12  -10.329110244162      3.553E-15 8.822E-26 0.000E+00
+ ETOT  9  -10.329110244162     -3.553E-15 3.503E-21 0.000E+00
+ ETOT 10  -10.329110244162      3.553E-15 1.286E-23 0.000E+00
+ ETOT 11  -10.329110244162      0.000E+00 1.132E-25 0.000E+00
+ ETOT 12  -10.329110244162      0.000E+00 8.822E-26 0.000E+00
 
  At SCF step   12   max residual=  8.82E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   35.219E-27; max=  88.220E-27
+ Mean square residual over all n,k,spin=   35.211E-27; max=  88.220E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    1.2355383666E+00 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -2417,7 +2385,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS8_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2433,14 +2400,14 @@ tolerances: {tolwfr: 1.00E-25, }
 -ETOT  1  -47.243859165269     -4.724E+01 2.380E-02 0.000E+00
  ETOT  2  -47.247515470313     -3.656E-03 5.772E-05 0.000E+00
  ETOT  3  -47.247516371317     -9.010E-07 2.644E-07 0.000E+00
- ETOT  4  -47.247516371665     -3.482E-10 1.198E-09 0.000E+00
- ETOT  5  -47.247516371665     -1.705E-13 1.080E-11 0.000E+00
- ETOT  6  -47.247516371665     -1.421E-14 6.582E-14 0.000E+00
- ETOT  7  -47.247516371665     -1.421E-14 5.924E-16 0.000E+00
- ETOT  8  -47.247516371665      3.553E-14 3.744E-18 0.000E+00
- ETOT  9  -47.247516371665     -2.842E-14 3.394E-20 0.000E+00
- ETOT 10  -47.247516371665      7.105E-15 2.205E-22 0.000E+00
- ETOT 11  -47.247516371665     -1.421E-14 2.021E-24 0.000E+00
+ ETOT  4  -47.247516371665     -3.483E-10 1.198E-09 0.000E+00
+ ETOT  5  -47.247516371665     -1.847E-13 1.080E-11 0.000E+00
+ ETOT  6  -47.247516371665     -7.105E-15 6.582E-14 0.000E+00
+ ETOT  7  -47.247516371665     -2.132E-14 5.924E-16 0.000E+00
+ ETOT  8  -47.247516371665      2.842E-14 3.744E-18 0.000E+00
+ ETOT  9  -47.247516371665      0.000E+00 3.394E-20 0.000E+00
+ ETOT 10  -47.247516371665     -7.105E-15 2.205E-22 0.000E+00
+ ETOT 11  -47.247516371665     -7.105E-15 2.021E-24 0.000E+00
  ETOT 12  -47.247516371665      0.000E+00 9.840E-26 0.000E+00
 
  At SCF step   12   max residual=  9.84E-26 < tolwfr=  1.00E-25 =>converged.
@@ -2448,7 +2415,7 @@ tolerances: {tolwfr: 1.00E-25, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   54.139E-27; max=  98.401E-27
+ Mean square residual over all n,k,spin=   54.099E-27; max=  98.401E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    5.5939288960E+00 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -2479,7 +2446,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS8_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2496,22 +2462,22 @@ tolerances: {tolwfr: 1.00E-25, }
  ETOT  2  -47.247515444565     -3.658E-03 5.772E-05 0.000E+00
  ETOT  3  -47.247516355963     -9.114E-07 3.126E-07 0.000E+00
  ETOT  4  -47.247516356308     -3.451E-10 1.732E-09 0.000E+00
- ETOT  5  -47.247516356308     -1.279E-13 3.243E-11 0.000E+00
- ETOT  6  -47.247516356308     -2.842E-14 2.165E-13 0.000E+00
+ ETOT  5  -47.247516356308     -1.421E-13 3.243E-11 0.000E+00
+ ETOT  6  -47.247516356308     -2.132E-14 2.165E-13 0.000E+00
  ETOT  7  -47.247516356308      7.105E-15 4.376E-15 0.000E+00
- ETOT  8  -47.247516356308      7.105E-15 3.037E-17 0.000E+00
- ETOT  9  -47.247516356308     -7.105E-15 6.234E-19 0.000E+00
- ETOT 10  -47.247516356308      1.421E-14 4.344E-21 0.000E+00
- ETOT 11  -47.247516356308     -7.105E-15 9.108E-23 0.000E+00
+ ETOT  8  -47.247516356308      0.000E+00 3.037E-17 0.000E+00
+ ETOT  9  -47.247516356308      1.421E-14 6.234E-19 0.000E+00
+ ETOT 10  -47.247516356308     -1.421E-14 4.344E-21 0.000E+00
+ ETOT 11  -47.247516356308      1.421E-14 9.108E-23 0.000E+00
  ETOT 12  -47.247516356308     -7.105E-15 6.322E-25 0.000E+00
- ETOT 13  -47.247516356308      0.000E+00 9.850E-26 0.000E+00
+ ETOT 13  -47.247516356308      7.105E-15 9.850E-26 0.000E+00
 
  At SCF step   13   max residual=  9.85E-26 < tolwfr=  1.00E-25 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   56.546E-27; max=  98.504E-27
+ Mean square residual over all n,k,spin=   56.550E-27; max=  98.504E-27
  dfpt_looppert : ek2=    1.6576423132E+01
           f-sum rule ratio=    5.5939288941E+00 (note : ecutsm/=0)
  prteigrs : about to open file t80t_1WF1_EIG
@@ -2756,15 +2722,15 @@ P          mk1mem9          1
         optdriver7          1
         optdriver8          0
         optdriver9          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          1       1       1
-            rfdir6          1       1       1
-            rfdir7          1       1       1
-            rfdir8          0       0       0
-            rfdir9          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
+           prtpot7          1
+           prtpot8          0
+           prtpot9          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -2953,7 +2919,7 @@ P          mk1mem9          1
 -
 - [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -2992,10 +2958,10 @@ P          mk1mem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  71 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.6  wall=          3.8
+.Delivered  16 WARNINGs and  32 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=          4.0

@@ -14,7 +14,6 @@ getwfk   20      # Read GS wavefunctions from DS20_WFK
 getddb   20      # Read DDB and DVDB files from DS20_DDB and _DVDB
 ddb_ngqpt 4 4 4  # q-mesh used to produce the DDB file (must be consistent with DDB data)
 
-# These are the default values.
 asr        2
 dipdip     1
 chneut     0
@@ -87,7 +86,7 @@ eph_ngqpt_fine4 8 8 8
 ###############
 ## DATASET 5 ##
 ###############
-eph_intmeth5  1       # FS integration with Adaptive Gaussians
+eph_intmeth5  1       # FS integration with Adaptive Gaussian
 eph_fsmear5  -1 eV    # Adaptive Gaussian broadening (negative value)
 
 # Geometry

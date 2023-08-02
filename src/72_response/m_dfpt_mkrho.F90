@@ -6,14 +6,10 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -109,22 +105,16 @@ contains
 !!   (if spin polarized, array contains total density in first half and
 !!    spin-up density in second half)
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
-!!
 !! SOURCE
 
 subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
-& kg,kg1,mband,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
+& kg,kg1,mband,mband_mem,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
 & occ_rbz,phnons,rhog1,rhor1,rprimd,symafm,symrel,tnons,ucvol,wtk_rbz)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,mband,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
+ integer,intent(in) :: cplex,mband,mband_mem,mgfft,mk1mem,mkmem,mpw,mpw1,nfft,nkpt_rbz
  integer,intent(in) :: nspden,nspinor,nsppol,nsym
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
@@ -133,8 +123,8 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  integer,intent(in) :: istwfk_rbz(nkpt_rbz),kg(3,mpw*mkmem),kg1(3,mpw1*mk1mem)
  integer,intent(in) :: nband_rbz(nkpt_rbz*nsppol),ngfft(18),npwar1(nkpt_rbz)
  integer,intent(in) :: npwarr(nkpt_rbz),symafm(nsym),symrel(3,3,nsym)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol),gprimd(3,3)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol),gprimd(3,3)
  real(dp),intent(in) :: occ_rbz(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: phnons(2,nfft**(1-1/nsym),(nspden/nsppol)-3*(nspden/4))
  real(dp),intent(in) :: rprimd(3,3),tnons(3,nsym)
@@ -146,6 +136,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  integer,parameter :: tim_fourwf7=7,tim_rwwf15=15
  integer,save :: nskip=0
  integer :: bdtot_index,i1,i2,i3,iband,icg,icg1,ierr,ifft,ikg,ptr
+ integer :: iband_me
  integer :: ikg1,ikpt,ispden,ispinor,isppol,istwf_k,ptr1,ptr2
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,npw1_k
  integer :: npw_k,spaceworld
@@ -235,14 +226,16 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
        call sphereboundary(gbound1,istwf_k,kg1_k,mgfft,npw1_k)
 
 !    Loop over bands to fft and square for rho(r)
+       iband_me = 0
        do iband=1,nband_k
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) cycle
+         iband_me = iband_me + 1
 !      Only treat occupied states
          if (abs(occ_rbz(iband+bdtot_index))>tol8) then
 !        Treat separately the two spinor components
            do ispinor=1,nspinor
 !          Obtain Fourier transform in fft box and accumulate the density
-             ptr = 1 + (ispinor-1)*npw_k + (iband-1)*npw_k*nspinor + icg
+             ptr = 1 + (ispinor-1)*npw_k + (iband_me-1)*npw_k*nspinor + icg
              call cg_zcopy(npw_k, cg(1,ptr), cwavef)
 
 !      In these two calls, rhoaug, rhoaug1 and weight are dummy variables, and are not modified
@@ -250,7 +243,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 &             istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,ngfft,npw_k,1,n4,n5,n6,0,tim_fourwf7,weight,weight)
 
 ! TODO: here ispinor should be ispinorp to get full matrix and nspden 4
-             ptr = 1 + (ispinor-1)*npw1_k + (iband-1)*npw1_k*nspinor + icg1
+             ptr = 1 + (ispinor-1)*npw1_k + (iband_me-1)*npw1_k*nspinor + icg1
              call cg_zcopy(npw1_k, cg1(1,ptr), cwavef1)
 
              call fourwf(cplex,rhoaug1,cwavef1,dummy,wfraug1,gbound1,gbound1,&
@@ -289,6 +282,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
          else !abs(occ_rbz(iband+bdtot_index))>tol8
            nskip=nskip+1  ! if the state is not occupied. Accumulate the number of one-way 3D ffts skipped
          end if ! abs(occ_rbz(iband+bdtot_index))>tol8
+
        end do ! iband
 
        ABI_FREE(gbound)
@@ -298,9 +292,11 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
        bdtot_index=bdtot_index+nband_k
 
-       icg=icg+npw_k*nband_k
+! only increase indices for my bands on my proc
+       icg=icg+npw_k*mband_mem*nspinor
        ikg=ikg+npw_k
-       icg1=icg1+npw1_k*nband_k
+
+       icg1=icg1+npw1_k*mband_mem*nspinor
        ikg1=ikg1+npw1_k
 
      end do ! ikpt
@@ -355,9 +351,11 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
      call sphereboundary(gbound1,istwf_k,kg1_k,mgfft,npw1_k)
 
 !    Loop over bands to fft and square for rho(r)
+     iband_me = 0
      do iband=1,nband_k
 
        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,1,me)) cycle
+       iband_me = iband_me + 1
 
 !      Only treat occupied states
        if (abs(occ_rbz(iband+bdtot_index))>tol8) then
@@ -377,18 +375,18 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 ! Obtain Fourier transform in fft box and accumulate the density
 ! EB FR How do we manage the following lines for non-collinear????
 ! zero order up and down spins
-         ptr1 = 1 + (iband-1)*npw_k*nspinor + icg
+         ptr1 = 1 + (iband_me-1)*npw_k*nspinor + icg
          call cg_zcopy(npw_k, cg(1,ptr1), cwave0_up)
-         ptr2 = 1 + npw_k + (iband-1)*npw_k*nspinor + icg
+         ptr2 = 1 + npw_k + (iband_me-1)*npw_k*nspinor + icg
          call cg_zcopy(npw_k, cg(1,ptr2), cwave0_down)
 ! first order up and down spins
-         ptr1 = 1 + (iband-1)*npw1_k*nspinor + icg1
+         ptr1 = 1 + (iband_me-1)*npw1_k*nspinor + icg1
          call cg_zcopy(npw1_k, cg1(1,ptr1), cwave1_up)
-         ptr2 = 1 + npw1_k + (iband-1)*npw1_k*nspinor + icg1
+         ptr2 = 1 + npw1_k + (iband_me-1)*npw1_k*nspinor + icg1
          call cg_zcopy(npw1_k, cg1(1,ptr2), cwave1_down)
 
 ! TODO: here ispinor should be ispinorp to get full matrix and nspden 4
-!        ptr = 1 + (ispinor-1)*npw1_k + (iband-1)*npw1_k*nspinor + icg1
+!        ptr = 1 + (ispinor-1)*npw1_k + (iband_me-1)*npw1_k*nspinor + icg1
 !        call cg_zcopy(npw1_k, cg1(1,ptr), cwavef1)
 
 ! EB FR lines to be managed (?????)
@@ -478,10 +476,14 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 
      bdtot_index=bdtot_index+nband_k
 
-     icg=icg+npw_k*nband_k
-     ikg=ikg+npw_k
+! only increase indices for my bands on my proc
+       icg=icg+npw_k*mband_mem*nspinor
+       ikg=ikg+npw_k
 
-     icg1=icg1+npw1_k*nband_k
+       icg1=icg1+npw1_k*mband_mem*nspinor
+       ikg1=ikg1+npw1_k
+
+     ikg=ikg+npw_k
      ikg1=ikg1+npw1_k
 
    end do ! End loop on ikpt
@@ -516,6 +518,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  ABI_FREE(wfraug1)
 
 !Recreate full rhor1 on all proc.
+!TODO : check this sums correctly on bands as well as k
  call timab(48,1,tsec)
  call timab(71,1,tsec)
  call xmpi_sum(rhor1,spaceworld,ierr)
@@ -588,12 +591,6 @@ end subroutine dfpt_mkrho
 !!  perform Fourier transforms, and to treat separately the
 !!  two spinorial components of the wavefunction.
 !!  Was part of dfpt_vtowfk before.
-!!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      fourwf,get_my_atmtab,getcprj,pawaccrhoij,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 

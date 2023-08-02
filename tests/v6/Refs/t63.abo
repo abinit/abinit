@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t63/t63.in
-- output file    -> t63.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t63/t63.abi
+- output file    -> t63.abo
 - root for input  files -> t63i
 - root for output files -> t63o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         365          nfft =        6912          nkpt =           4
 ================================================================================
-P This job should need less than                       3.617 Mbytes of memory.
+P This job should need less than                       3.811 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         365          nfft =        6912          nkpt =           4
 ================================================================================
-P This job should need less than                       1.930 Mbytes of memory.
+P This job should need less than                       2.124 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -74,7 +71,6 @@ P This job should need less than                       3.039 Mbytes of memory.
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4 (RF).
@@ -92,7 +88,6 @@ P This job should need less than                       3.039 Mbytes of memory.
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -104,7 +99,7 @@ _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         365          nfft =        6912          nkpt =           4
 ================================================================================
-P This job should need less than                       3.617 Mbytes of memory.
+P This job should need less than                       3.811 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -125,16 +120,6 @@ _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -145,21 +130,11 @@ _ WF disk file :      0.180 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -237,16 +212,11 @@ P          mk1mem           4
           prepanl3          0
           prepanl4          1
           prepanl5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -351,8 +321,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      7.718   => boxcut(ratio)=   2.07907
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -557,23 +527,23 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
  Non-SCF case, kpt    1 (  0.25000  0.25000  0.25000), residuals and eigenvalues=
   5.76E-23  3.34E-23  4.58E-23  1.64E-19
  -1.8934E-01 -7.9401E-02  9.0793E-02  1.0596E-01
-  prteigrs : nnsclo,ikpt=   16    1 max resid (incl. the buffer)=  1.63824E-19
+  prteigrs : nnsclo,ikpt=   16    1 max resid (excl. the buffer)=  1.63824E-19
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   16    2 max resid (incl. the buffer)=  1.62040E-19
-  prteigrs : nnsclo,ikpt=   16    3 max resid (incl. the buffer)=  1.56784E-19
-  prteigrs : nnsclo,ikpt=   16    4 max resid (incl. the buffer)=  1.65512E-19
+  prteigrs : nnsclo,ikpt=   16    2 max resid (excl. the buffer)=  1.62040E-19
+  prteigrs : nnsclo,ikpt=   16    3 max resid (excl. the buffer)=  1.56784E-19
+  prteigrs : nnsclo,ikpt=   16    4 max resid (excl. the buffer)=  1.65512E-19
 
  SPIN DOWN channel
  Non-SCF case, kpt    1 (  0.25000  0.25000  0.25000), residuals and eigenvalues=
   5.76E-23  3.34E-23  4.58E-23  1.64E-19
  -1.8934E-01 -7.9401E-02  9.0793E-02  1.0596E-01
-  prteigrs : nnsclo,ikpt=   16    1 max resid (incl. the buffer)=  1.63824E-19
+  prteigrs : nnsclo,ikpt=   16    1 max resid (excl. the buffer)=  1.63824E-19
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   16    2 max resid (incl. the buffer)=  1.62040E-19
-  prteigrs : nnsclo,ikpt=   16    3 max resid (incl. the buffer)=  1.56784E-19
-  prteigrs : nnsclo,ikpt=   16    4 max resid (incl. the buffer)=  1.65512E-19
+  prteigrs : nnsclo,ikpt=   16    2 max resid (excl. the buffer)=  1.62040E-19
+  prteigrs : nnsclo,ikpt=   16    3 max resid (excl. the buffer)=  1.56784E-19
+  prteigrs : nnsclo,ikpt=   16    4 max resid (excl. the buffer)=  1.65512E-19
 
 
  scprqt:  WARNING -
@@ -671,7 +641,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      7.718   => boxcut(ratio)=   2.07907
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -693,7 +662,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -769,7 +737,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -845,7 +812,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -966,7 +932,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      7.718   => boxcut(ratio)=   2.07907
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -990,7 +955,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1015,7 +979,7 @@ tolerances: {tolvrs: 1.00E-22, }
  ETOT 10   5.1729654671242     -9.142E-05 3.824E-07 1.023E-02
  ETOT 11   5.1729565165710     -8.951E-06 3.745E-09 2.118E-04
  ETOT 12   5.1729564739658     -4.261E-08 4.162E-09 2.094E-04
- ETOT 13   5.1729563011842     -1.728E-07 9.062E-10 1.612E-05
+ ETOT 13   5.1729563011843     -1.728E-07 9.062E-10 1.612E-05
  ETOT 14   5.1729562870775     -1.411E-08 5.173E-12 3.934E-07
  ETOT 15   5.1729562874242      3.467E-10 1.128E-12 7.381E-07
  ETOT 16   5.1729562868260     -5.982E-10 5.529E-12 9.079E-08
@@ -1060,7 +1024,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1074,11 +1037,11 @@ tolerances: {tolvrs: 1.00E-22, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3837778743045     -2.340E+01 3.796E-02 2.532E+03
- ETOT  2  0.53445794704529     -3.849E+00 4.487E-03 4.359E+02
+ ETOT  2  0.53445794704530     -3.849E+00 4.487E-03 4.359E+02
  ETOT  3 -0.21555523876437     -7.500E-01 2.017E-03 6.937E+00
  ETOT  4 -0.24351502262423     -2.796E-02 2.455E-04 8.315E-01
  ETOT  5 -0.24501455723804     -1.500E-03 5.349E-05 2.351E-01
- ETOT  6 -0.24525650098328     -2.419E-04 3.824E-06 1.105E-01
+ ETOT  6 -0.24525650098329     -2.419E-04 3.824E-06 1.105E-01
  ETOT  7 -0.24546218868636     -2.057E-04 1.992E-07 2.052E-02
  ETOT  8 -0.24548662487908     -2.444E-05 2.622E-07 8.796E-03
  ETOT  9 -0.24549126002944     -4.635E-06 9.189E-09 6.533E-03
@@ -1130,7 +1093,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1144,7 +1106,7 @@ tolerances: {tolvrs: 1.00E-22, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3789816010814     -2.341E+01 3.795E-02 2.531E+03
- ETOT  2  0.53164242444970     -3.847E+00 4.489E-03 4.358E+02
+ ETOT  2  0.53164242444971     -3.847E+00 4.489E-03 4.358E+02
  ETOT  3 -0.21799233038859     -7.496E-01 2.021E-03 6.940E+00
  ETOT  4 -0.24596381894207     -2.797E-02 2.457E-04 8.295E-01
  ETOT  5 -0.24746291299677     -1.499E-03 5.375E-05 2.347E-01
@@ -1156,7 +1118,7 @@ tolerances: {tolvrs: 1.00E-22, }
  ETOT 11 -0.24795218253957     -1.066E-06 2.997E-09 3.022E-04
  ETOT 12 -0.24795246170432     -2.792E-07 1.271E-09 1.592E-04
  ETOT 13 -0.24795276291002     -3.012E-07 1.175E-09 4.511E-05
- ETOT 14 -0.24795283585761     -7.295E-08 8.789E-10 2.677E-05
+ ETOT 14 -0.24795283585762     -7.295E-08 8.789E-10 2.677E-05
  ETOT 15 -0.24795286743709     -3.158E-08 7.232E-11 1.386E-06
  ETOT 16 -0.24795287013348     -2.696E-09 3.750E-11 6.126E-07
 -open ddk wf file :t63o_DS3_1WF7
@@ -1200,7 +1162,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1270,7 +1231,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1284,7 +1244,7 @@ tolerances: {tolvrs: 1.00E-22, }
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3875742773768     -2.340E+01 3.798E-02 2.531E+03
- ETOT  2  0.53955807537505     -3.848E+00 4.483E-03 4.359E+02
+ ETOT  2  0.53955807537506     -3.848E+00 4.483E-03 4.359E+02
  ETOT  3 -0.21017815790891     -7.497E-01 2.008E-03 6.935E+00
  ETOT  4 -0.23812428059727     -2.795E-02 2.459E-04 8.279E-01
  ETOT  5 -0.23961893406202     -1.495E-03 5.342E-05 2.345E-01
@@ -1293,7 +1253,7 @@ tolerances: {tolvrs: 1.00E-22, }
  ETOT  8 -0.24009642590826     -9.595E-06 1.811E-07 5.423E-03
  ETOT  9 -0.24010078586679     -4.360E-06 1.058E-09 3.307E-03
  ETOT 10 -0.24010761386561     -6.828E-06 1.202E-07 2.836E-04
- ETOT 11 -0.24010828015647     -6.663E-07 2.893E-09 5.841E-05
+ ETOT 11 -0.24010828015648     -6.663E-07 2.893E-09 5.841E-05
  ETOT 12 -0.24010839315908     -1.130E-07 6.436E-10 2.766E-05
  ETOT 13 -0.24010844269527     -4.954E-08 5.267E-10 1.012E-05
  ETOT 14 -0.24010846143511     -1.874E-08 4.069E-11 1.360E-06
@@ -1340,7 +1300,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1355,17 +1314,17 @@ tolerances: {tolvrs: 1.00E-22, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4.3827777930088     -2.341E+01 3.796E-02 2.530E+03
  ETOT  2  0.53673999427588     -3.846E+00 4.485E-03 4.357E+02
- ETOT  3 -0.21261784688558     -7.494E-01 2.012E-03 6.938E+00
+ ETOT  3 -0.21261784688559     -7.494E-01 2.012E-03 6.938E+00
  ETOT  4 -0.24057567879464     -2.796E-02 2.461E-04 8.260E-01
- ETOT  5 -0.24206992377585     -1.494E-03 5.368E-05 2.341E-01
+ ETOT  5 -0.24206992377586     -1.494E-03 5.368E-05 2.341E-01
  ETOT  6 -0.24230919442271     -2.393E-04 3.849E-06 1.085E-01
  ETOT  7 -0.24253618428093     -2.270E-04 1.929E-07 9.296E-03
  ETOT  8 -0.24254445821301     -8.274E-06 1.644E-07 6.200E-03
  ETOT  9 -0.24254992497463     -5.467E-06 1.632E-09 3.555E-03
  ETOT 10 -0.24255722606052     -7.301E-06 1.372E-07 3.578E-04
  ETOT 11 -0.24255800012583     -7.741E-07 2.845E-09 7.563E-05
- ETOT 12 -0.24255813335886     -1.332E-07 7.474E-10 4.229E-05
- ETOT 13 -0.24255820857118     -7.521E-08 8.592E-10 1.263E-05
+ ETOT 12 -0.24255813335887     -1.332E-07 7.474E-10 4.229E-05
+ ETOT 13 -0.24255820857119     -7.521E-08 8.592E-10 1.263E-05
  ETOT 14 -0.24255823184764     -2.328E-08 4.650E-11 2.440E-06
  ETOT 15 -0.24255823500659     -3.159E-09 3.146E-11 1.644E-07
  ETOT 16 -0.24255823509180     -8.521E-11 1.617E-12 2.620E-07
@@ -1410,7 +1369,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1474,7 +1432,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1538,7 +1495,6 @@ tolerances: {tolvrs: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t63o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1600,6 +1556,31 @@ tolerances: {tolvrs: 1.00E-22, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -4.754221        0.000000
+       1               2       -0.004380        0.000000
+       1               3       -0.003075        0.000000
+       2               1        0.000008        0.000000
+       2               2      -39.860878        0.000000
+       2               3       -0.000004        0.000000
+       3               1        0.000007        0.000000
+       3               2       -0.000004        0.000000
+       3               3      -39.861617        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    4.767463E-03   -1.756473E-05   -5.220484E-05
+         1         2   -6.482948E-05   -2.046484E-02   -2.126515E-05
+         1         3   -8.516580E-05   -2.125779E-05   -2.046924E-02
+         2         1   -4.767463E-03    1.756473E-05    5.220484E-05
+         2         2    6.482948E-05    2.046484E-02    2.126515E-05
+         2         3    8.516580E-05    2.125779E-05    2.046924E-02
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1702,47 +1683,47 @@ tolerances: {tolvrs: 1.00E-22, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.0517289244         0.0000000000
-   1    1   2    1         0.0000012055         0.0000000000
-   1    1   3    1         0.0000008464         0.0000000000
-   1    1   1    2        -0.0519020677        -0.0000000000
+   1    1   1    1         0.0519020677         0.0000000000
+   1    1   2    1        -0.0000001682         0.0000000000
+   1    1   3    1         0.0000003672         0.0000000000
+   1    1   1    2        -0.0519020677         0.0000000000
    1    1   2    2         0.0000001682         0.0000000000
    1    1   3    2        -0.0000003672         0.0000000000
   
-   2    1   1    1         0.0000000598         0.0000000000
-   2    1   2    1        -0.0068191528         0.0000000000
-   2    1   3    1         0.0000000278         0.0000000000
+   2    1   1    1         0.0000000357         0.0000000000
+   2    1   2    1        -0.0067759121         0.0000000000
+   2    1   3    1        -0.0000000012         0.0000000000
    2    1   1    2        -0.0000000357         0.0000000000
    2    1   2    2         0.0067759121         0.0000000000
-   2    1   3    2         0.0000000012        -0.0000000000
+   2    1   3    2         0.0000000012         0.0000000000
   
-   3    1   1    1         0.0000000516         0.0000000000
-   3    1   2    1         0.0000000278         0.0000000000
-   3    1   3    1        -0.0068871990         0.0000000000
+   3    1   1    1         0.0000000426         0.0000000000
+   3    1   2    1        -0.0000000012         0.0000000000
+   3    1   3    1        -0.0067976776         0.0000000000
    3    1   1    2        -0.0000000426         0.0000000000
-   3    1   2    2         0.0000000012        -0.0000000000
+   3    1   2    2         0.0000000012         0.0000000000
    3    1   3    2         0.0067976776         0.0000000000
   
    1    2   1    1        -0.0519021676         0.0000000000
-   1    2   2    1         0.0000008482        -0.0000000000
-   1    2   3    1         0.0000005172        -0.0000000000
-   1    2   1    2         0.0520954304         0.0000000000
-   1    2   2    2         0.0000002354         0.0000000000
-   1    2   3    2        -0.0000004439         0.0000000000
+   1    2   2    1         0.0000008482         0.0000000000
+   1    2   3    1         0.0000005172         0.0000000000
+   1    2   1    2         0.0519021676         0.0000000000
+   1    2   2    2        -0.0000008482         0.0000000000
+   1    2   3    2        -0.0000005172         0.0000000000
   
-   2    2   1    1         0.0000000185        -0.0000000000
-   2    2   2    1         0.0067757884        -0.0000000000
+   2    2   1    1         0.0000000185         0.0000000000
+   2    2   2    1         0.0067757884         0.0000000000
    2    2   3    1         0.0000000012         0.0000000000
-   2    2   1    2        -0.0000000011         0.0000000000
-   2    2   2    2        -0.0066692695         0.0000000000
-   2    2   3    2        -0.0000000318         0.0000000000
+   2    2   1    2        -0.0000000185         0.0000000000
+   2    2   2    2        -0.0067757884         0.0000000000
+   2    2   3    2        -0.0000000012         0.0000000000
   
-   3    2   1    1         0.0000000278        -0.0000000000
+   3    2   1    1         0.0000000278         0.0000000000
    3    2   2    1         0.0000000012         0.0000000000
-   3    2   3    1         0.0067976207        -0.0000000000
-   3    2   1    2        -0.0000000006         0.0000000000
-   3    2   2    2        -0.0000000318         0.0000000000
-   3    2   3    2        -0.0067373720         0.0000000000
+   3    2   3    1         0.0067976207         0.0000000000
+   3    2   1    2        -0.0000000278         0.0000000000
+   3    2   2    2        -0.0000000012         0.0000000000
+   3    2   3    2        -0.0067976207         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
@@ -1762,98 +1743,98 @@ tolerances: {tolvrs: 1.00E-22, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4        -2.3723429532         0.0000000000
-   2    1   1    4        -0.0000609982         0.0000000000
-   3    1   1    4        -0.0000816783         0.0000000000
-   1    2   1    4        -2.3818778793         0.0000000000
-   2    2   1    4         0.0000686607         0.0000000000
-   3    2   1    4         0.0000886533         0.0000000000
+   1    1   1    4         0.0047674630         0.0000000000
+   2    1   1    4        -0.0000648295         0.0000000000
+   3    1   1    4        -0.0000851658         0.0000000000
+   1    2   1    4        -0.0047674630         0.0000000000
+   2    2   1    4         0.0000648295         0.0000000000
+   3    2   1    4         0.0000851658         0.0000000000
   
-   1    1   2    4        -0.0022077964         0.0000000000
-   2    1   2    4       -19.9509040705         0.0000000000
-   3    1   2    4        -0.0000232705         0.0000000000
-   1    2   2    4        -0.0021726670         0.0000000000
-   2    2   2    4       -19.9099743927         0.0000000000
-   3    2   2    4         0.0000192450         0.0000000000
+   1    1   2    4        -0.0000175647         0.0000000000
+   2    1   2    4        -0.0204648389         0.0000000000
+   3    1   2    4        -0.0000212578         0.0000000000
+   1    2   2    4         0.0000175647         0.0000000000
+   2    2   2    4         0.0204648389         0.0000000000
+   3    2   2    4         0.0000212578         0.0000000000
   
-   1    1   3    4        -0.0015894884         0.0000000000
-   2    1   3    4        -0.0000230607         0.0000000000
-   3    1   3    4       -19.9512778538         0.0000000000
-   1    2   3    4        -0.0014850787         0.0000000000
-   2    2   3    4         0.0000194696         0.0000000000
-   3    2   3    4       -19.9103393683         0.0000000000
+   1    1   3    4        -0.0000522048         0.0000000000
+   2    1   3    4        -0.0000212652         0.0000000000
+   3    1   3    4        -0.0204692428         0.0000000000
+   1    2   3    4         0.0000522048         0.0000000000
+   2    2   3    4         0.0000212652         0.0000000000
+   3    2   3    4         0.0204692428         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -2.3723634205         0.0000000000
-   2    4   1    1         0.0000147496         0.0000000000
-   3    4   1    1        -0.0000237246         0.0000000000
+   1    4   1    1         0.0047649081         0.0000000000
+   2    4   1    1        -0.0000259646         0.0000000000
+   3    4   1    1        -0.0000602702         0.0000000000
   
-   1    4   2    1        -0.0000524659         0.0000000000
-   2    4   2    1       -19.9509281039         0.0000000000
-   3    4   2    1        -0.0000230598         0.0000000000
+   1    4   2    1        -0.0000623421         0.0000000000
+   2    4   2    1        -0.0205475271         0.0000000000
+   3    4   2    1        -0.0000212646         0.0000000000
   
-   1    4   3    1        -0.0000730781         0.0000000000
-   2    4   3    1        -0.0000232686         0.0000000000
-   3    4   3    1       -19.9514592719         0.0000000000
+   1    4   3    1        -0.0000807624         0.0000000000
+   2    4   3    1        -0.0000212572         0.0000000000
+   3    4   3    1        -0.0205867866         0.0000000000
   
-   1    4   1    2        -2.3818932367         0.0000000000
-   2    4   1    2         0.0000666789         0.0000000000
-   3    4   1    2         0.0000968158         0.0000000000
+   1    4   1    2        -0.0047649081         0.0000000000
+   2    4   1    2         0.0000259646         0.0000000000
+   3    4   1    2         0.0000602702         0.0000000000
   
-   1    4   2    2         0.0000722182         0.0000000000
-   2    4   2    2       -19.9098330497         0.0000000000
-   3    4   2    2         0.0000194694         0.0000000000
+   1    4   2    2         0.0000623421         0.0000000000
+   2    4   2    2         0.0205475271         0.0000000000
+   3    4   2    2         0.0000212646         0.0000000000
   
-   1    4   3    2         0.0000884467         0.0000000000
-   2    4   3    2         0.0000192457         0.0000000000
-   3    4   3    2       -19.9102856987         0.0000000000
+   1    4   3    2         0.0000807624         0.0000000000
+   2    4   3    2         0.0000212572         0.0000000000
+   3    4   3    2         0.0205867866         0.0000000000
   
   
   
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -5.156007E-04 -5.138956E-04 -1.666847E-05  1.377868E-05  2.502847E-05
-   1.423994E-03
+  -5.153155E-04 -5.144886E-04  0.000000E+00  0.000000E+00  2.146585E-08
+   1.423923E-03
  Phonon frequencies in cm-1    :
-- -1.131613E+02 -1.127870E+02 -3.658306E+00  3.024071E+00  5.493115E+00
--  3.125305E+02
+- -1.130987E+02 -1.129172E+02  0.000000E+00  0.000000E+00  4.711210E-03
+-  3.125149E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -5.156007E-04 -5.138956E-04 -1.666797E-05  2.502157E-05  1.502609E-04
-   1.423994E-03
+  -5.153155E-04 -5.144886E-04  0.000000E+00  0.000000E+00  2.146584E-08
+   1.423923E-03
  Phonon frequencies in cm-1    :
-- -1.131613E+02 -1.127870E+02 -3.658196E+00  5.491599E+00  3.297846E+01
--  3.125306E+02
+- -1.130987E+02 -1.129172E+02  0.000000E+00  0.000000E+00  4.711208E-03
+-  3.125149E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-  -5.156007E-04 -5.138932E-04 -1.666847E-05  1.379081E-05  2.711436E-04
-   1.423994E-03
+  -5.153155E-04 -5.144885E-04  0.000000E+00  0.000000E+00  2.146586E-08
+   1.423923E-03
  Phonon frequencies in cm-1    :
-- -1.131613E+02 -1.127865E+02 -3.658306E+00  3.026732E+00  5.950915E+01
--  3.125305E+02
+- -1.130987E+02 -1.129172E+02  0.000000E+00  0.000000E+00  4.711211E-03
+-  3.125149E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-  -5.155983E-04 -5.138956E-04  1.377804E-05  2.502847E-05  2.695362E-04
-   1.423994E-03
+  -5.153155E-04 -5.144886E-04  0.000000E+00  0.000000E+00  2.146586E-08
+   1.423923E-03
  Phonon frequencies in cm-1    :
-- -1.131607E+02 -1.127870E+02  3.023931E+00  5.493115E+00  5.915636E+01
--  3.125305E+02
+- -1.130987E+02 -1.129172E+02  0.000000E+00  0.000000E+00  4.711212E-03
+-  3.125149E+02
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -3181,16 +3162,6 @@ meta: {optdriver: 5, }
            diemac      1.00000000E+00
            diemix      3.33333333E-01
           dilatmx      1.05000000E+00
-  d3e_pert1_atpol1          1       1
-  d3e_pert1_atpol2          1       1
-  d3e_pert1_atpol3          1       1
-  d3e_pert1_atpol4          1       1
-  d3e_pert1_atpol5          1       2
-    d3e_pert1_dir1          0       0       0
-    d3e_pert1_dir2          0       0       0
-    d3e_pert1_dir3          0       0       0
-    d3e_pert1_dir4          0       0       0
-    d3e_pert1_dir5          1       1       1
    d3e_pert1_elfd1          0
    d3e_pert1_elfd2          0
    d3e_pert1_elfd3          0
@@ -3201,21 +3172,11 @@ meta: {optdriver: 5, }
    d3e_pert1_phon3          0
    d3e_pert1_phon4          0
    d3e_pert1_phon5          1
-    d3e_pert2_dir1          0       0       0
-    d3e_pert2_dir2          0       0       0
-    d3e_pert2_dir3          0       0       0
-    d3e_pert2_dir4          0       0       0
-    d3e_pert2_dir5          1       1       1
    d3e_pert2_elfd1          0
    d3e_pert2_elfd2          0
    d3e_pert2_elfd3          0
    d3e_pert2_elfd4          0
    d3e_pert2_elfd5          1
-    d3e_pert3_dir1          0       0       0
-    d3e_pert3_dir2          0       0       0
-    d3e_pert3_dir3          0       0       0
-    d3e_pert3_dir4          0       0       0
-    d3e_pert3_dir5          1       1       1
    d3e_pert3_elfd1          0
    d3e_pert3_elfd2          0
    d3e_pert3_elfd3          0
@@ -3305,16 +3266,11 @@ P          mk1mem           4
           prepanl3          0
           prepanl4          1
           prepanl5          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
-            rfdir5          0       0       0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
+           prtpot5          0
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -3362,6 +3318,11 @@ P          mk1mem           4
             znucl       14.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -3452,10 +3413,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.7  wall=         14.8
+- Proc.   0 individual time (sec): cpu=         13.2  wall=         13.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  34 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.7  wall=         14.8
+.Delivered 234 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.2  wall=         13.3

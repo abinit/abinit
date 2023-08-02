@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -75,12 +71,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_GWlanczos,m_gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 
@@ -145,12 +135,6 @@ end subroutine extract_QR
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 
@@ -242,12 +226,6 @@ end subroutine extract_SVD
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 
@@ -390,12 +368,6 @@ end subroutine extract_SVD_lapack
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_QR_factorization
-!!
-!! CHILDREN
-!!      xmpi_allgather,xmpi_sum
 !!
 !! SOURCE
 

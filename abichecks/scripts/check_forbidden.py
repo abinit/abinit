@@ -16,8 +16,7 @@
 # ==    defined communicators: xmpi_world, mpi_enreg(:)%world_comm.   ==
 # ==                                                                  ==
 # == 4- Explicit "allocate" or "deallocate" statements                ==
-# ==    (only macros are allowed: ABI_ALLOCATE, ABI_DEALLOCATE,       ==
-# ==     ABI_DATATYPE_ALLOCATE, ABI_DATATYPE_DEALLOCATE).             ==
+# ==    (only macros are allowed e.g.: ABI_MALLOC, ABI_FREE,          ==
 # ==                                                                  ==
 # == 5- "call" statement not placed at the start of the line          ==
 # ==    (badly interpreted by abilint).                               ==
@@ -119,7 +118,11 @@ IGNORED_ALLOCATE_FILES = [
 "libpaw.h",
 "libtetra.h",
 "malloc.finc",
-"defs.h"
+"defs.h",
+# QE library
+"pseudo_types.F90",
+"read_upf_new.F90",
+"xmltools.F90",
 ]
 
 #List of "call" statements
@@ -246,7 +249,7 @@ def main():
                       nothing_before=(len(line_before) == 0)
                       comment_before=(line_before.find("!") != -1)
                       label_before=(not (re.match('[0-9]+',line_before)==None))
-                      quote_before=((line_before.find("'") != -1) or (line_before.find('"') != -1)) 
+                      quote_before=((line_before.find("'") != -1) or (line_before.find('"') != -1))
                       problem_before=((not nothing_before) and (not label_before) and (not quote_before))
                       problem_after=(re.match('[^\;\:\>\<\=\+\-\*\/\!\,]*(\(.*[\)\&]+|)',line_after)==None)
                       if (not comment_before) and (problem_before or problem_after):
@@ -271,7 +274,7 @@ def main():
   print( '- There are %d F90 or header files in the complete set.' % file_total_count)
   assert file_total_count
 
-  exit_status = (stat_forbidden_write_count + stat_notrecommended_write_count + 
+  exit_status = (stat_forbidden_write_count + stat_notrecommended_write_count +
                  stat_forbidden_commworld_count + stat_forbidden_allocate_count +
                  stat_forbidden_call_count)
 
@@ -316,20 +319,20 @@ def main():
       print( '>>> %d ERROR(s) (forbidden allocate/deallocate statement(s)), appearing in %d different file(s)!\n' % \
             (stat_forbidden_allocate_count,file_forbidden_allocate_count))
       print()
-      print( '   Replace the forbidden allocate statement(s) by the ABI_ALLOCATE macro defined in abi_common.h')
-      print( '   Replace the forbidden deallocate statement(s) by the ABI_DEALLOCATE macro defined in abi_common.h')
-      print( '   You need to add `#include "abi_common.h"` and `use m_errors` to have access to these macros.')        
-      print( '   Note that the syntax of the ABI_ALLOCATE macro is not exactly the same as the allocate statement:\n')
-      print( '       - only one array to be allocated in each ABI_ALLOCATE')
+      print( '   Replace the forbidden allocate statement(s) by the ABI_MALLOC macro defined in abi_common.h')
+      print( '   Replace the forbidden deallocate statement(s) by the ABI_FREE macro defined in abi_common.h')
+      print( '   You need to add `#include "abi_common.h"` and `use m_errors` to have access to these macros.')
+      print( '   Note that the syntax of the ABI_MALLOC macro is not exactly the same as the allocate statement:\n')
+      print( '       - only one array to be allocated in each ABI_MALLOC')
       print( '      - separate the array from the parenthesis and size with a comma')
       print( '      - example: instead of allocate(arr1(3,N), arr2(20)), you should write the allocations separately using:\n')
-      print( '              ABI_ALLOCATE(arr1,(3,N))')
-      print( '              ABI_ALLOCATE(arr2,(20))\n')
-      print( '  Note that the syntax of the ABI_DEALLOCATE macro is not exactly the same as the deallocate statement:\n')
-      print( '      - only one array to be deallocated in each ABI_DEALLOCATE')
+      print( '              ABI_MALLOC(arr1, (3,N))')
+      print( '              ABI_MALLOC(arr2, (20))\n')
+      print( '  Note that the syntax of the ABI_FREE macro is not exactly the same as the deallocate statement:\n')
+      print( '      - only one array to be deallocated in each ABI_FREE')
       print( '      - example: instead of deallocate(arr1,arr2), you should write the deallocations separately using:\n')
-      print( '              ABI_DEALLOCATE(arr1)')
-      print( '              ABI_DEALLOCATE(arr2)\n')
+      print( '              ABI_FREE(arr1)')
+      print( '              ABI_FREE(arr2)\n')
       print( '  Finally, use ABI_MALLOC_SCALAR and ABI_FREE_SCALAR to allocate/free scalar entities.')
       print( '  and ABI_MOVE_ALLOC instead of Fortran move_alloc.')
 

@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2021 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2022 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,7 +123,7 @@ module defs_basis
  integer,public,parameter :: MAX_NSHIFTK = 210
  ! Maximun number of shifts in input k-mesh.
 
-!Real constants
+!Real dp constants
  real(dp), parameter :: zero=0._dp
  real(dp), parameter :: one=1._dp
  real(dp), parameter :: two=2._dp
@@ -136,6 +136,7 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
+!Real sp constants
  real(sp), parameter :: zero_sp=0._sp
  real(sp), parameter :: one_sp=1._sp
 
@@ -172,7 +173,6 @@ module defs_basis
 !real(dp), parameter :: quarter_pi=pi*quarter
 !real(dp), parameter :: two_thirds_pi=two_thirds*pi
 
-
 !Real precision
  real(dp), parameter :: greatest_real = huge(one)
  real(dp), parameter :: smallest_real = -greatest_real
@@ -196,7 +196,7 @@ module defs_basis
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
- real(dp), parameter :: tol30=1.0d-30
+ real(dp), parameter :: tol30=1.0e-30_dp
 
 !real constants derived from sqrt(n.)
  real(dp), parameter :: sqrt2=1.4142135623730950488016887242096939_dp
@@ -215,26 +215,32 @@ module defs_basis
  ! numerical value.
  real(dp),parameter :: MAGIC_UNDEF = 9.9999999999D+99
 
+ ! Max Memory in Mb available for a MPI processor
+ ! This quantity might be used at runtime to determine how to distribute memory.
+ ! The default value (2Gb) can be changed at runtime via the command line interface.
+ real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
+
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
  real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
  real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
  real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
- real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree, in cm^-1
- real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree, in eV
+ real(dp), parameter :: Bohr_cm=Bohr_meter * 100_dp ! 1 Bohr in cm
+ real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree in cm^-1
+ real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree in eV
  real(dp), parameter :: eV_Ha=one/Ha_eV      ! 1 eV in Hartree
- real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree, in meV
- real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree, in Kelvin
- real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree, in THz
- real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree, in s
- real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree, in J
- real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge, in Coulomb
+ real(dp), parameter :: Ha_meV=Ha_eV*1000_dp ! 1 Hartree in meV
+ real(dp), parameter :: Ha_K=315774.65_dp ! 1Hartree in Kelvin
+ real(dp), parameter :: Ha_THz=6579.683920722_dp ! 1 Hartree in THz
+ real(dp), parameter :: Ha_s=Ha_THz*1e12*two_pi ! 1 Hartree in s
+ real(dp), parameter :: Ha_J=4.35974394d-18    !1 Hartree in J
+ real(dp), parameter :: e_Cb=1.602176487d-19 ! minus the electron charge in Coulomb
  real(dp), parameter :: kb_HaK=8.617343d-5/Ha_eV ! Boltzmann constant in Ha/K
- real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value. )
+ real(dp), parameter :: kb_SI=1.380649d-23  ! Boltzmann constant in Joule/K (CODATA 2017 value.)
  real(dp), parameter :: kb_THzK=kb_HaK*Ha_THz ! Boltzmann constant in THz/K
- real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit, in electronic mass
- real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3, in GPa
+ real(dp), parameter :: amu_emass=1.660538782d-27/9.10938215d-31 ! 1 atomic mass unit in electronic mass
+ real(dp), parameter :: HaBohr3_GPa=Ha_eV/Bohr_Ang**3*e_Cb*1.0d+21 ! 1 Ha/Bohr^3 in GPa
  real(dp), parameter :: Avogadro=6.02214179d23 ! per mole
  real(dp), parameter :: Ohmcm=two*pi*Ha_THz*ninth*ten ! 1 Ohm.cm in atomic units
 !real(dp), parameter :: eps0=8.854187817d-12 ! permittivity of free space in F/m
@@ -245,11 +251,11 @@ module defs_basis
  real(dp), parameter :: FineStructureConstant2=0.000053251354478_dp ! Square of fine structure constant
  real(dp), parameter :: Sp_Lt_SI=2.99792458d8 ! speed of light in SI
  real(dp), parameter :: Sp_Lt=Sp_lt_SI/2.1876912633d6 ! speed of light in atomic units
- real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time, in seconds
+ real(dp), parameter :: Time_Sec=2.418884326505D-17 !  Atomic unit of time in seconds
  real(dp), parameter :: BField_Tesla=4.254383d-6 ! Tesla in a.u.
  real(dp), parameter :: dipole_moment_debye=0.393430307_dp ! Debye unit in a.u.
- real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec**2 ! Siemens in SI
- real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI
+ real(dp), parameter :: siemens_SI=e_Cb**2 / Ha_J / Time_Sec ! Siemens in SI: A/V = C^2 / (J * s)
+ real(dp), parameter :: volt_SI=Ha_J/e_Cb ! Volt in SI: J/C
 !EB suppress *0.5_dp  ! Atomic unit of induction field (in Tesla) * mu_B (in atomic units).
  real(dp), parameter :: mu_B_SI=9.274009994D-24   ! Bohr magneton in SI
  real(dp), parameter :: mu_B = 0.5_dp             ! Bohr magneton in atomic units
@@ -301,10 +307,12 @@ module defs_basis
  integer, parameter, public :: RUNL_SCREENING  = 3
  integer, parameter, public :: RUNL_SIGMA      = 4
  integer, parameter, public :: RUNL_NONLINEAR  = 5
+ integer, parameter, public :: RUNL_GWR        = 6
  integer, parameter, public :: RUNL_EPH        = 7
  integer, parameter, public :: RUNL_WFK        = 8
+ integer, parameter, public :: RUNL_RTTDDFT    = 9
  integer, parameter, public :: RUNL_GWLS       = 66
- integer, parameter, public :: RUNL_BSE        = 99 !9
+ integer, parameter, public :: RUNL_BSE        = 99
  integer, parameter, public :: RUNL_LONGWAVE   = 10
 
  ! Integer flags defining the task to be performed in wfk_analyze
@@ -315,7 +323,9 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_EINTERP   = 4
  integer,public,parameter :: WFK_TASK_DDK       = 5
  integer,public,parameter :: WFK_TASK_DDK_DIAGO = 6
+ integer,public,parameter :: WFK_TASK_OPTICS_FULLBZ = 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
+ integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -334,9 +344,10 @@ module defs_basis
   integer,parameter,public :: NLO_MBLKPW = 199
   integer,parameter,public :: NLO_MINCAT = 10
 
-! Parameter to compute the maximum index of the perturbation
+! This is used to compute the maximum index of the perturbation as natom + MPERT_MAX
+! GA: But this is not actually the maximum perturbation,
+!     see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
-
 
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file
@@ -420,26 +431,19 @@ CONTAINS  !=====================================================================
 !!  new_do_write_log=new value for do_write_log
 !!  new_do_write_status=new value for do_write_status
 !!
-!! PARENTS
-!!      m_argparse,m_dtfil
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
- subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
+subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
-!scalars
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
-!Local variables ------------------------------
 
 !************************************************************************
 
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
  if (PRESENT(new_do_write_status)) do_write_status=new_do_write_status
 
- end subroutine abi_log_status_state
+end subroutine abi_log_status_state
 !!***
 
 !----------------------------------------------------------------------
@@ -458,20 +462,11 @@ CONTAINS  !=====================================================================
 !!  new_std_out=new value for standard output unit
 !!  new_io_comm=new value for IO MPI communicator
 !!
-!! PARENTS
-!!      abinit,abitk,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
-!!      fold2Bloch,ioprof,lapackprof,m_driver,m_io_redirect,m_memeval
-!!      m_mpi_setup,m_mpinfo,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit
-!!      optic,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
- subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
+subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
-!scalars
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
 
 !************************************************************************
@@ -480,7 +475,7 @@ CONTAINS  !=====================================================================
  if (PRESENT(new_std_out)) std_out = new_std_out
  if (PRESENT(new_io_comm)) abinit_comm_output = new_io_comm
 
- end subroutine abi_io_redirect
+end subroutine abi_io_redirect
 !!***
 
 !----------------------------------------------------------------------
@@ -495,53 +490,43 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!   unit = Unit number for output file.
 !!
-!! OUTPUT
-!!   Only printing.
-!!
-!! PARENTS
-!!      abinit,m_argparse,m_errors
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
- subroutine print_kinds(unit)
+subroutine print_kinds(unit)
 
 !Arguments-------------------------------------
-!scalars
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
-!scalars
  integer :: my_unt
 
- ! *********************************************************************
+! *********************************************************************
 
-  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
+ my_unt=std_out; if (PRESENT(unit)) my_unt = unit
 
-  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
+ write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
-  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
-    ' REAL:      Data type name: REAL(DP) ',&
-    '            Kind value: ',KIND(0.0_dp),&
-    '            Precision:  ',PRECISION(0.0_dp),&
-    '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
-    '            Smallest positive number:                      ',TINY(0.0_dp),&
-    '            Largest representable number:                  ',HUGE(0.0_dp)
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+   ' REAL:      Data type name: REAL(DP) ',&
+   '            Kind value: ',KIND(0.0_dp),&
+   '            Precision:  ',PRECISION(0.0_dp),&
+   '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
+   '            Smallest positive number:                      ',TINY(0.0_dp),&
+   '            Largest representable number:                  ',HUGE(0.0_dp)
 
-  write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
-    ' INTEGER:   Data type name: INTEGER(default) ', &
-    '            Kind value: ',KIND(0),              &
-    '            Bit size:   ',BIT_SIZE(0),          &
-    '            Largest representable number: ',HUGE(0)
+ write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
+   ' INTEGER:   Data type name: INTEGER(default) ', &
+   '            Kind value: ',KIND(0),              &
+   '            Bit size:   ',BIT_SIZE(0),          &
+   '            Largest representable number: ',HUGE(0)
 
-  write(my_unt,'(a,/,a,i0)')&
-    ' LOGICAL:   Data type name: LOGICAL ',&
-    '            Kind value: ',KIND(.TRUE.)
+ write(my_unt,'(a,/,a,i0)')&
+   ' LOGICAL:   Data type name: LOGICAL ',&
+   '            Kind value: ',KIND(.TRUE.)
 
-  write(my_unt,'(2a,i0)')&
-   ' CHARACTER: Data type name: CHARACTER ',&
-   '            Kind value: ',KIND('C')
+ write(my_unt,'(2a,i0)')&
+  ' CHARACTER: Data type name: CHARACTER ',&
+  '            Kind value: ',KIND('C')
 
 end subroutine print_kinds
 !!***
@@ -553,10 +538,6 @@ end subroutine print_kinds
 !! FUNCTION
 !!  Convert a string into one of the integer flags WFK_TASK_*
 !!  Return WFK_TASK_NONE if string is invalid.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -582,11 +563,39 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_DDK_DIAGO
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
+ case ("optics_fullbz")
+   wfk_task = WFK_TASK_OPTICS_FULLBZ
+ case ("check_symtab")
+   wfk_task = WFK_TASK_CHECK_SYMTAB
  case default
    wfk_task = WFK_TASK_NONE
  end select
 
 end function str2wfktask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* defs_basis/set_mem_per_cpu_mb
+!! NAME
+!! set_mem_per_cpu_mb
+!!
+!! FUNCTION
+!!  Set the value of global variable `mem_per_cpu_mb`
+!!
+!! SOURCE
+
+subroutine set_mem_per_cpu_mb(mem_mb)
+
+!Arguments-------------------------------------
+ real(dp),intent(in) :: mem_mb
+
+! *********************************************************************
+
+ !print *, "Setting mem_per_cpu_mb to", mem_mb
+ mem_per_cpu_mb = mem_mb
+
+end subroutine set_mem_per_cpu_mb
 !!***
 
 !----------------------------------------------------------------------

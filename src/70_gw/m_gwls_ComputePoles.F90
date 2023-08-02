@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -74,13 +70,6 @@ CONTAINS
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      block_lanczos_algorithm,diagonalize_lanczos_banded
-!!      ritz_analysis_general,xmpi_sum
 !!
 !! SOURCE
 
@@ -262,13 +251,6 @@ end subroutine generate_degeneracy_table_for_poles
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      block_lanczos_algorithm,diagonalize_lanczos_banded
-!!      ritz_analysis_general,xmpi_sum
-!!
 !! SOURCE
 
 subroutine clean_degeneracy_table_for_poles()
@@ -296,10 +278,6 @@ end subroutine clean_degeneracy_table_for_poles
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -610,10 +588,6 @@ end function compute_Poles
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE

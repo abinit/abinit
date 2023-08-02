@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t71/t71.in
-- output file    -> t71.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t71/t71.abi
+- output file    -> t71.abo
 - root for input  files -> t71i
 - root for output files -> t71o
-
 
  DATASET    1 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       3.330 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       3.330 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       3.330 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -90,7 +86,6 @@ P This job should need less than                       3.330 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -106,7 +101,6 @@ P This job should need less than                       3.330 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -138,6 +132,8 @@ _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.2000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00800000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      4.50000000E+00 Hartree
@@ -187,18 +183,14 @@ P          mk1mem           1
         optdriver4          0
         optdriver5          0
         optdriver6          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
-            rfdir6          1       0       0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          1
+          rfatpol           2       2
+            rfdir           1       0       0
            rfmeth1          1
            rfmeth2          1
            rfmeth3          1
@@ -297,8 +289,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1085,7 +1077,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t71o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1102,7 +1093,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t71o_DS3_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1123,13 +1113,13 @@ tolerances: {tolvrs: 1.00E-16, }
  ETOT  6   188.92567415981     -4.500E-06 1.378E-08 3.471E-03
  ETOT  7   188.92567364548     -5.143E-07 1.522E-09 5.023E-05
  ETOT  8   188.92567363777     -7.713E-09 2.101E-11 9.377E-07
- ETOT  9   188.92567363777      2.444E-12 2.115E-14 1.333E-07
- ETOT 10   188.92567363774     -2.581E-11 6.972E-14 1.876E-09
- ETOT 11   188.92567363774     -2.601E-12 3.990E-16 6.083E-11
- ETOT 12   188.92567363774      1.137E-12 2.884E-17 3.414E-12
+ ETOT  9   188.92567363777      2.473E-12 2.115E-14 1.333E-07
+ ETOT 10   188.92567363774     -2.582E-11 6.972E-14 1.876E-09
+ ETOT 11   188.92567363774     -2.615E-12 3.990E-16 6.083E-11
+ ETOT 12   188.92567363774      1.123E-12 2.884E-17 3.414E-12
  ETOT 13   188.92567363774     -4.263E-13 7.449E-19 1.716E-14
- ETOT 14   188.92567363774      2.146E-12 4.320E-21 1.860E-15
- ETOT 15   188.92567363774     -7.958E-13 4.327E-22 6.937E-17
+ ETOT 14   188.92567363774      2.160E-12 4.320E-21 1.860E-15
+ ETOT 15   188.92567363774     -7.674E-13 4.327E-22 6.937E-17
 
  At SCF step   15       vres2   =  6.94E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
@@ -1217,7 +1207,7 @@ tolerances: {tolvrs: 1.00E-16, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.864598E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1225,6 +1215,8 @@ tolerances: {tolvrs: 1.00E-16, }
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00800000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix      5.00000000E-01
              ecut      4.50000000E+00 Hartree
@@ -1292,18 +1284,14 @@ P          mk1mem           1
         optdriver4          0
         optdriver5          0
         optdriver6          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          2       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
-            rfdir6          1       0       0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          0
+           prtpot6          1
+          rfatpol           2       2
+            rfdir           1       0       0
            rfmeth1          1
            rfmeth2          1
            rfmeth3          1
@@ -1372,6 +1360,11 @@ P          mk1mem           1
             znucl        1.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -1456,10 +1449,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.8
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.8
+.Delivered  59 WARNINGs and  25 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.6  wall=          1.8

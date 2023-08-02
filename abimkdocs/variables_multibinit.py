@@ -6,7 +6,7 @@ executable = "multibinit"
 from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
 #from abipy.abio.abivar_database.variables import ValueWithUnit, MultipleValue, Range, ValueWithConditions
 ValueWithConditions = dict
-Variable=dict
+Variable = dict
 
 variables = [
 Variable(
@@ -46,7 +46,7 @@ Variable(
     topics=['LatticeModel_expert'],
     dimensions=[3],
     defaultval=0,
-    mnemonics="Dipole-Dipole interaction",
+    mnemonics="Dipole-Dipole range",
     added_in_version="before_v9",
     text=r"""
 Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
@@ -81,6 +81,230 @@ if the energy of the reference is not specified in the DDB,
 or not specified in the XML file), (by default in Hartree).
 """,
 ),
+
+Variable(
+    abivarname="lwf_dynamics@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier Function DYNAMICS",
+    added_in_version="9.8",
+    text=r"""
+Kind of LWF dynamics to run. Currently there is only the option 3.
+
+* 0: Do not run LWF dynamics.
+
+* 3: Run NVT LWF dynamics with the Berendsen thermalstat. 
+
+""",
+),
+
+
+Variable(
+    abivarname="lwf_init_hist_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['LWFModel_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LWF INITIAL state HISTory file name",
+    added_in_version="9.8",
+    text=r"""
+Specify the initial state of the multibinit LWF dynamics calculation, which can be a lwf_hist netcdf file, usually generated from previous LWF dynamics calculations. It is used when [[multibinit:lwf_init_state]]=4 The string must be enclosed between quotation marks, for example:
+
+    lwf_init_hist_fname "last_step_lwf_hist.nc"
+""",
+),
+
+
+Variable(
+    abivarname="lwf_init_state@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Lattice Wannier Function INITial STATE",
+    added_in_version="before_v9",
+    text=r"""
+Flag to initialize spin state.
+
+* 1 --> The LWF amplitudes are homogenous random numbers between -0.1 to 0.1 Bohr.
+
+* 2 --> The LWF amplitudes are 0.
+
+* 4 --> Restart from an input spin hist file, as specified in [[multibinit:lwf_init_hist_fname]]. 
+""",
+),
+
+Variable(
+    abivarname="lwf_constraint@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=["LWFModel_expert"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier Function use CONSTRAINT",
+    added_in_version="9.8",
+    text=r"""
+    Whether to use constraint in Lattice Wannier function dynamics. The constraints are defined in a LWF initial state file by three parameters:
+    n_fixed_lwf: number of fixed LWF.
+    fixed_lwf_ids: indices of fixed LWFs.
+    fixed_lwf_values: values of fixed LWFs.
+""",
+),
+
+Variable(
+    abivarname="lwf_dt@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['LWFModel_basic'],
+    dimensions="scalar",
+    defaultval=100,
+    mnemonics="Lattice Wannier Function Delta Time",
+    added_in_version="9.8",
+    text=r"""
+Time step for lwf dynamics. Default value is 100.
+Default unit is atomic unit (2.419e-17 s).
+S, Sec or Second can be appended as unit. (e.g. 1e-16 Sec).
+""",
+),
+
+
+
+Variable(
+    abivarname="lwf_nctime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier function dynamics NetCdf write per number of TIME steps",
+    added_in_version="before_v9",
+    text=r"""
+Write LWF amplitude into netcdf file in every lwf_nctime of spin dynamics time steps.
+""",
+),
+
+
+
+Variable(
+    abivarname="lwf_ntime@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier function dynamics total Number of TIME steps",
+    added_in_version="9.8",
+    text=r"""
+Total number of lattice Wannier function dynamics time steps.
+""",
+),
+
+Variable(
+    abivarname="lwf_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="Lattice Wannier function POTential File NAME",
+    added_in_version="9.8",
+    text=r"""
+Specify the LWF potential file name in the multibinit lwf dynamics calculation, which is a netcdf file. The string must be enclosed between quotation marks:
+
+    lwf_pot_fname "BaTiO3_lwf_pot.nc"
+"""
+
+),
+
+
+Variable(
+    abivarname="lwf_taut@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LWFModel_basic'],
+    dimensions="scalar",
+    defaultval=1000,
+    mnemonics="Lattice Wannier function dynamics relaxation time TAUT",
+    added_in_version="9.8",
+    text=r"""
+    Parameter used in Berendsen lattice dynamics [[multibinit:lwf_dynamics]] = 3, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of lwf_taut. 
+    The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
+
+    lwf_taut 1d-15 S
+""",
+),
+
+
+
+Variable(
+    abivarname="lwf_temperature_start@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Lattice Wannier function TEMPERATURE START",
+    added_in_version="9.8",
+    text=r"""
+Start point of variable temperature LWF dynamcis calculation (see [[multibinit:lwf_var_temperature]]) in lwf dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="lwf_temperature_end@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=0.0,
+    mnemonics="Lattice Wannier function TEMPERATURE END",
+    added_in_version="9.8",
+    text=r"""
+End point of variable temperature LWF dynamics calculation (see [[multibinit:LWF_var_temperature]]) in LWF dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="lwf_temperature_nstep@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier function TEMPERATURE Number of STEPs",
+    added_in_version="9.8",
+    text=r"""
+Number of steps in the variable temperature LWF dynamics calculation (see [[multibinit:lwf_var_temperature]]) in lwf dynamics calculation.
+""",
+),
+
+Variable(
+    abivarname="lwf_var_temperature@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=["LWFModel_basic"],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Lattice Wannier function VARiable TEMPERATURE",
+    added_in_version="9.8",
+    text=r"""
+Switch for variable temperature calculation in LWF dynamics. 0: off. 1: on.
+If switched on, a series of LWF dynamics calculation with temperatures from
+[[multibinit:lwf_temperature_start]] to [[multibinit:lwf_temperature_end]],
+with number of steps [[multibinit:lwf_temperature_nstep]] will be done.
+The corresponding _lwf_hist.nc  file has the corresponding temperature in the filename.
+""",
+),
+
+
+
+
+
 
 Variable(
     abivarname="ncoeff@multibinit",
@@ -146,13 +370,30 @@ sampling (Warning: not BCC lattice, BCC *sampling*), and 4 for FCC sampling
 ),
 
 Variable(
+    abivarname="prt_GF_csv@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeModel_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Print the Goal-Function values in a CSV file",
+    added_in_version="v9",
+    text=r"""
+* 0 --> do nothing (Default)
+* 1 --> Print the Goal-Function Values (GF) for all coefficients on a given processor
+        at a given fit iteration into a csv file. Each iteration each processor
+        prints a csv file. The colums are the GF on Energy, Force+Stresses, Forces, Stresses.
+""",
+),
+
+Variable(
     abivarname="prt_model@multibinit",
     varset="multibinit",
     vartype="integer",
     topics=['LatticeModel_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Effective potential XML output",
+    mnemonics="PRinT the MODEL",
     added_in_version="before_v9",
     text=r"""
 * 0  -->  do nothing (Default).
@@ -185,9 +426,9 @@ Variable(
     mnemonics="Prt test-set evaluation into file ph_test.nc",
     added_in_version="before_v9",
     text=r"""
-Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc. 
+Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc.
 
-Forces, Energies, Stresses and Atomic Positions are written in ph_test.nc. 
+Forces, Energies, Stresses and Atomic Positions are written in ph_test.nc.
 """,
 ),
 
@@ -219,13 +460,29 @@ Variable(
     mnemonics="FIT on Energy, Forces, and or, Stresses",
     added_in_version="v9",
     text=r"""
-Specifies on which first-principles quantities the anharmonic coefficients will be fitted. 
-The first number flags the fitting on the energies, the second the fitting on the forces, and the third on the stressses. 
+Specifies on which first-principles quantities the anharmonic coefficients will be fitted.
+The first number flags the fitting on the energies, the second the fitting on the forces, and the third on the stressses.
 
 Default value is 0 1 1, so anharmonic coefficients get fitted on Forces and Stresses but not on energies
 """,
 ),
 
+Variable(
+    abivarname="fit_factors@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=[1,1,1],
+    mnemonics="FIT FACTORS for Goal Function of Energy, Forces, and Stresses",
+    added_in_version="v9",
+    text=r"""
+Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+fit process allowing to change the relative weight of the three quantities.
+
+Default value is 1 1 1, equally balancing energy, forces and stresses.
+""",
+),
 
 Variable(
     abivarname="fit_ncoeff@multibinit",
@@ -238,6 +495,21 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Give the number of anharmonic coefficients to add in the model during the fit process
+""",
+),
+
+Variable(
+    abivarname="fit_ncoeff_per_iatom@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FIT Number of COEFFicients per Irreducible ATOM",
+    added_in_version="before_v9",
+    text=r"""
+Give the number of anharmonic coefficients per symmetric irreducible atom to add during fit process.
+[[multibinit:fit_ncoeff]]/(nirred_atoms*fit_ncoeff_per_iatom) gives the number of fitting loops performed during the fit process, where in each loop fit_ncoeff_per_iatom coefficients for each irreducible atom will be added to the anharmonic potential.
 """,
 ),
 
@@ -266,9 +538,9 @@ Variable(
     defaultval=0,
     mnemonics="FIT anharmonic terms around ATOM I",
     added_in_version="before_v9",
-    text=r"""Gives the index of the atom in the reference structure around which the anharmonic terms will be generated. 
-If 0 (default) a loop over all atoms in the reference structure will be perforemed and fit_ncoeff coefficienst will be fitted and selected per atom. 
-If -1 all possible cross terms will be generated (e.G. (A_x-B_x)^2*(C_y-D_y)^1. This options generates much more terms. 
+    text=r"""Gives the index of the atom in the reference structure around which the anharmonic terms will be generated.
+If 0 (default) a loop over all atoms in the reference structure will be perforemed and fit_ncoeff coefficienst will be fitted and selected per atom.
+If -1 all possible cross terms will be generated (e.G. (A_x-B_x)^2*(C_y-D_y)^1. This options generates much more terms.
 """,
 ),
 
@@ -343,6 +615,22 @@ Flag to activate the strain  phonon coupling. This option will add coefficients 
 ),
 
 Variable(
+    abivarname="fit_dispterms@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
+    added_in_version="before_v9",
+    text=r"""
+Flag to activate the generation of pure displacement coefficients. This option will generate coefficients like (Sr-Ti)^2*(Sr-O), where only atomic displacements occur.
+
+Default value: 1 -> displacement terms are generated.
+""",
+),
+
+Variable(
     abivarname="fit_SPC_maxS@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -352,7 +640,7 @@ Variable(
     mnemonics="FIT Strain Phonon Coupling maximum Strain",
     added_in_version="v9",
     text=r"""
-Set maximum power of strain body in strain-phonon coupling terms. 
+Set maximum power of strain body in strain-phonon coupling terms.
 """,
 ),
 
@@ -448,6 +736,40 @@ Indices of the imposed coefficients during the fit process for the model:
 
 
 Variable(
+    abivarname="fit_nimposecoeff@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FIT Number of IMPOSEd COEFFicients",
+    added_in_version="before_v9",
+    text=r"""
+Number of coefficients imposed with fixed value as in the input xml during the fit process for the model:
+
+* -1 -->  fix all the coefficients
+
+* 0  -->  do not fix coefficients
+
+* n  -->  fix n coefficients (requires [[multibinit:fit_imposecoeff]] input variable)
+""",
+),
+
+Variable(
+    abivarname="fit_imposecoeff@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_expert'],
+    dimensions=['[[multibinit:fit_nimposecoeff]]'],
+    defaultval=0,
+    mnemonics="FIT Number of IMPOSEd COEFFicients",
+    added_in_version="before_v9",
+    text=r"""
+Indices of the imposed coefficients with fixed coefficient value during the fit process for the model.
+""",
+),
+
+Variable(
     abivarname="fit_nbancoeff@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -496,6 +818,23 @@ Variable(
 ),
 
 Variable(
+    abivarname="bound_factors@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=[1,1,1],
+    mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during bounding process",
+    added_in_version="v9",
+    text=r"""
+Specify three factors for Energy, Forces and Stresses in the calculation of the Goal Function which is to be minimized during the
+bounding process, allowing to change the relative weights of the three quantities.
+
+Default value is 1 1 1, equally balancing energy, forces and stresses.
+""",
+),
+
+Variable(
     abivarname="bound_model@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -515,7 +854,7 @@ Flag to activate the bound process:
 
 **Related variables:1 and 2** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
 
-*3 --> Check each anharmonic term in the effective potential. If the term contains has a negative coefficient and is even in its displacement or contains odd powers in the displacement generate high order bounding terms of the same combination of displacement within the range of powers defined by the user ([[multibinit:bound_rangePower]]). The coefficients of the added high-order terms are optimized until the precision of the original effective potential is retained. 
+*3 --> Check each anharmonic term in the effective potential. If the term contains has a negative coefficient and is even in its displacement or contains odd powers in the displacement generate high order bounding terms of the same combination of displacement within the range of powers defined by the user ([[multibinit:bound_rangePower]]). The coefficients of the added high-order terms are optimized until the precision of the original effective potential is retained.
 """,
 ),
 
@@ -530,6 +869,20 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Number of maximum additional coefficients for the bound process
+""",
+),
+
+Variable(
+    abivarname="bound_penalty@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=1.001,
+    mnemonics="Goal Function penalty for determination of bounding coefficients",
+    added_in_version="v9",
+    text=r"""
+Relative penalty for the determination of bounding coefficient values. The penalty defines the ration of the goal function before and after adding the coefficient. If the optimum value of the coefficient (-one that decreases the value of the goal function-) is negative a positive value that .
 """,
 ),
 
@@ -705,18 +1058,18 @@ Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via 
 **Cell optimization:** No (Use [[optcell]] = 0 only)
 **Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
 
-* 101 --> NVE ensemble with velocity Verlet algorithm  [[cite:Swope1982]] . 
+* 101 --> NVE ensemble with velocity Verlet algorithm  [[cite:Swope1982]] .
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run. 
+([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run.
 
-* 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] . 
+* 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] .
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the friction [[multibinit:latt_friction]].
-The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term. 
+The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term.
 
 
 * 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.  However, it approches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
@@ -728,8 +1081,8 @@ The atoms are coupled to the heat bath, which is represented by a gauss noise  i
 * 120 --> Dummy mover. Atoms does not move. For testing only.
 """,
 
-# Not yet fully implemented. Need to be properly documented and tested. Disactivated temporarily. 
-#* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled. 
+# Not yet fully implemented. Need to be properly documented and tested. Disactivated temporarily.
+#* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled.
 #**Purpose:** Molecular dynamics
 #**Cell optimization:** No (Use [[optcell]]=0 only)
 #**Related variables:** The time step ([[dtion]]), the temperatures
@@ -750,9 +1103,9 @@ Variable(
     mnemonics="DYNamics CHeK SYMmetry",
     added_in_version="v9",
     text=r"""
-Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.  
-Useful to do symmetry constrained relaxation with structural realxations algorithms. 
-Be cautious to use it with large number of atoms, symmetry detection might take a long time. 
+Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.
+Useful to do symmetry constrained relaxation with structural realxations algorithms.
+Be cautious to use it with large number of atoms, symmetry detection might take a long time.
 
 **Related variables:** Restart flag for multibinit dynamcis ([[multibinit:restartxf]]), symmetry on symmetry finder ([[multibinit:dyn_tolsym]]))
 """,
@@ -797,8 +1150,94 @@ Variable(
     mnemonics="LATTice dynamics FRICTION parameter",
     added_in_version="before_v9",
     text=r"""
-    Parameter of the friction coefficient used in Langevin dynamics [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2. 
+    Parameter of the friction coefficient used in Langevin dynamics [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2.
 """,
+),
+
+Variable(
+    abivarname="latt_anharm_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice HARMornic POTential File NAME",
+    added_in_version="9.8",
+    text=r"""
+Specify the input coefficients from fitted polynomial in multibinit lattice calculation, which can be a xml file. The string must be enclosed between quotation marks:
+
+    lat_anharm_pot_fname "BaTiO3_coeff.xml"
+
+"""
+),
+
+
+Variable(
+    abivarname="latt_harm_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice HARMonic POTential File NAME",
+    added_in_version="9.8",
+    text=r"""
+Specify the input derivative database of reference structure in multibinit lattice calculation, which can be a DDB file or a xml file. The string must be enclosed between quotation marks:
+
+    latt_harm_pot_fname "BaTiO3.ddb"
+
+"""
+),
+
+Variable(
+    abivarname="latt_training_set_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice potential TRAINING SET File NAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the training set file name for building multibinit lattice potential, which is usually a abinit molecular dynamics history  netcdf file. The string must be enclosed between quotation marks:
+
+    latt_training_set_fname "BaTiO3_md_hist.nc"
+
+"""
+),
+
+Variable(
+    abivarname="latt_test_set_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice potential TEST SET File NAME",
+    added_in_version="9.8",
+    text=r"""
+Specify the test set file name for building multibinit lattice potential, which is usually a abinit molecular dynamics history  netcdf file. The string must be enclosed between quotation marks:
+
+    latt_test_set_fname "BaTiO3_md_hist.nc"
+
+"""
+),
+
+
+Variable(
+    abivarname="latt_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="LATTice POTential FileNAME",
+    added_in_version="9.8",
+    text=r"""
+Specify the lattice potential file name in the multibinit lattice dynamics calculation, which can be a netcdf file. This variable is only used in the harmonic-only lattice potential for testing only. The string must be enclosed between quotation marks:
+
+    latt_pot_fname "BaTiO3.nc"
+"""
 ),
 
 
@@ -813,7 +1252,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
     Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =102 and 103, in which the temperature is relaxed exponentially to the target temperature, with the characteristic time of latt_taut.
-    The unit is atomic unit, same as [[dtion]].
+    The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
+
+    latt_taut 1d-15 S
+
 """,
 ),
 
@@ -827,8 +1269,12 @@ Variable(
     mnemonics="LATTice dynamics relaxation time TAUP",
     added_in_version="before_v9",
     text=r"""
-    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
-    The unit is atomic unit, same as [[dtion]].
+    Parameter used in Berendsen lattice dynamics [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup. 
+    The default unit is atomic unit. But it is possible to use the second as the unit by adding Second or S at the end of the line, for example:
+
+    latt_taup 1d-15 S
+
+
 """,
 ),
 
@@ -919,6 +1365,44 @@ Give the size of the supercell for the dynamics
 ),
 
 Variable(
+    abivarname="ncellmat@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions=[3, 3],
+    defaultval=[[1,0,0],[0,1,0], [0,0,1]],
+    mnemonics="Number of superCELL MATtrix",
+    added_in_version="9.5.0",
+    text=r"""
+Give the size of the supercell for the dynamics in the format of a matrix. 
+Currently allowed in spin dynamics and spin and LWF dynamics. 
+It will override the [[multibinit:ncell]] if specified.
+"""
+),
+
+Variable(
+    abivarname="outdata_prefix",
+    varset="multibinit",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="OUTput DATA PREFIX",
+    added_in_version="9.3.3",
+    text=r"""
+Prefix for output files. Replaces the analogous entry in the obsolete *files_file* .
+This variable is used when Abinit is executed with the new syntax:
+
+    multibinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the filename ends with an extension, e.g. `.ext`. (`.abi` is recommended)
+If the input filename does not have a file extension, a default is provided.
+"""
+),
+
+
+Variable(
     abivarname="strfact@multibinit",
     varset="multibinit",
     vartype="real",
@@ -998,14 +1482,14 @@ Variable(
     added_in_version="v9",
     mnemonics="Select on Energy, Forces, and or, Stresses",
     text=r"""
-Specifies on which goal function quantities the anharmonic coefficients will be selected. 
-The first number flags the selecting on the energies, the second the fitting on the forces, and the third on the stressses. 
+Specifies on which goal function quantities the anharmonic coefficients will be selected.
+The first number flags the selecting on the energies, the second the fitting on the forces, and the third on the stressses.
 
 Default value is 0 1 1, so anharmonic coefficients get selected on Forces and Stresses but not on energies
 """,
 ),
 
-# The below are not yet functioning, comment out temporarily. 
+# The below are not yet functioning, comment out temporarily.
 #Variable(
 #    abivarname="spin_calc_correlation_obs@multibinit",
 #    varset="multibinit",
@@ -1146,6 +1630,25 @@ Otherwise, use Depondt-Mertens method can be more efficient.
 ),
 
 Variable(
+    abivarname="spin_init_hist_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="SPIN INITIAL state HISTory file name",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the initial state of the multibinit spin dynamics calculation, which can be a spin_hist netcdf file, usually generated from previous spin dynamics calculations. It is used when [[multibinit:spin_init_state]]=4 The string must be enclosed between quotation marks, for example:
+
+    spin_init_hist_fname "last_step_spin_hist.nc"
+"""
+
+),
+
+
+
+Variable(
     abivarname="spin_init_state@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -1163,7 +1666,7 @@ Flag to initialize spin state.
 
 * 3 --> State with q-vector using [[multibinit:spin_init_qpoint]], [[multibinit:spin_init_rotate_axis]], and [[multibinit:spin_init_orientation]]. Please check default values for those variables.
 
-* 4 --> Restart from last step of input spin hist file. "{output}_spinhist_input.nc". 
+* 4 --> Restart from last step of input spin hist file, as specified in [[multibinit:spin_init_hist_fname]]. 
 """,
 ),
 
@@ -1241,7 +1744,7 @@ Variable(
     text=r"""
 Spin initial orientation. It is used for setting the initial spin in a supercell.
     For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
-    from the initial orientation along the rotate axis. 
+    from the initial orientation along the rotate axis.
     Default is along z(0,0,1) direction.
 """,
 ),
@@ -1261,7 +1764,7 @@ Variable(
     text=r"""
 Spin wave vector. It is used for setting the initial spin in a supercell.
     For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
-    from the initial orientation along the rotate axis. 
+    from the initial orientation along the rotate axis.
     Default is Gamma (0, 0, 0).
 """,
 ),
@@ -1280,12 +1783,27 @@ Variable(
     text=r"""
 Spin initial rotate axis. It is used for setting the initial spin in a supercell.
     For a spin in a cell labeled with R, the rotation angle is $2\pi Q\cdot R$
-    from the initial orientation along the rotate axis. 
+    from the initial orientation along the rotate axis.
     Default is along x axis (1,0,0).
 """,
 ),
 
+Variable(
+    abivarname="spin_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="SPIN POTential File NAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the spin potential file name in the multibinit spin dynamics calculation, which can be either a xml or a netcdf file. The string must be enclosed between quotation marks:
 
+    spin_pot_fname "Fe.xml"
+"""
+
+),
 
 Variable(
     abivarname="spin_projection_qpoint@multibinit",
@@ -1338,7 +1856,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 User defined amplitude of single ion anistropy. Only used when [[multibinit:spin_sia_add]] is not 0.
-The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit, 
+The direction is defined with [[multibinit:spin_sia_k1dir]]. The unit is Ha. To use eV or Ry as unit,
 put eV or Ry at the end.
 """,
 ),
@@ -1495,7 +2013,7 @@ abivarname="analyze_anh_pot@multibinit",
     added_in_version="before_v9",
     text=r"""
 * 0 --> Nothing.
-* 1 --> Print energy contribution of each anharmonic term in the effective Potential. 
+* 1 --> Print energy contribution of each anharmonic term in the effective Potential.
         If it is a Molecular Dynamics (MD) run, the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat .
         If the effective potential is tested against a test set the contribution of each term for each configuration in the test set is printed in TES_anharmonic_terms_energy.dat .
         If the effective potential is fitted, the contribution of each selected term for each configuration in the training set is printed in TRS_anharmonic_terms_energy.dat
@@ -1522,6 +2040,23 @@ Variable(
 ),
 
 Variable(
+    abivarname="opt_factors@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=[1,1,1],
+    mnemonics="FACTORS for Goal Function of Energy, Forces, and Stresses during optimization of coefficients",
+    added_in_version="v9",
+    text=r"""
+Specifies three factors for Energy, Forces and Stresses in the calcluation of the Goal Function which is to be minimized during the
+optimization process allowing to change the relative weight of the three quantities.
+
+Default value is 1 1 1, equally balancing energy, forces and stresses.
+""",
+),
+
+Variable(
   abivarname="opt_ncoeff@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -1531,9 +2066,9 @@ Variable(
     mnemonics="OPTimize NUMBER of COEFFicients",
     added_in_version="before_v9",
     text=r"""
-* Number of anharmonic terms to refit in the effective potential. 
+* Number of anharmonic terms to refit in the effective potential.
 **Related variables:** [[multibinit:opt_coeff]]
-""", 
+""",
 ),
 
 Variable(
@@ -1546,9 +2081,32 @@ Variable(
     mnemonics="OPTimize Cofficients",
     added_in_version="before_v9",
     text=r"""
-Indices of the terms to refit in the effective potential. 
+Indices of the terms to refit in the effective potential.
 """,
 ),
+
+Variable(
+    abivarname="randomseed@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['SpinDynamicsMultibinit_expert'],
+    dimensions='scalar',
+    defaultval=0,
+    mnemonics="RANDOM SEED",
+    added_in_version="9.8",
+    text=r"""
+Random seed to be used in Multibinit spin/LWF dynamics. 
+It should be 0, or a large positive integer.
+The default value 0 means it will use the current clock time.
+DO NOT set this number unless you want to repeat the previous result. If a series
+of dynamics is done with the same seed, the results could be wrong due to the
+artificial periodicity of the random number that is generated. Even [[randomseed@multibinit]] is set, it is not guranteed
+that the previous result can be recovered, as the generation of numbers is also affected by the number of 
+processors, type of type of CPU, compiler,  and version of MULTIBINIT. 
+""",
+),
+
+
 
 Variable(
     abivarname="slc_coupling@multibinit",
@@ -1574,6 +2132,53 @@ Which spin-lattice coupling terms are used in the calculation, different terms c
 """,
 ),
 
+Variable(
+    abivarname="slc_pot_fname@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['SpinDynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="SLC POTential FileNAME",
+    added_in_version="9.3.3",
+    text=r"""
+Specify the spin-lattice-coupling potential file name in the coupled spin-lattice multibinit dynamics calculation, which can be a netcdf file. The string must be enclosed between quotation marks:
+
+    slc_pot_fname "BaTiO3_slc.nc"
+"""
+
+),
+
+Variable(
+    abivarname="outdata_prefix@multibinit",
+    varset="multibinit",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="OUTput DATA PREFIX",
+    added_in_version="9.8.0",
+    text=r"""
+Prefix for output files. Replaces the analogous entry in the obsolete *files_file* .
+This variable is used when MULTIBINIT is executed with the new syntax:
+
+    multibinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the filename ends with an extension, e.g. `.ext`. (`.abi` is recommended)
+If the input filename does not have a file extension, a default is provided.
+
+Example:
+
+    outdata_prefix = "t01_o"
+
+See also [[outdata_prefix@abinit]] and [[outdata_prefix@anaddb]]
+
+"""
+),
+
+
+
+
+
 ]
-
-

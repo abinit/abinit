@@ -6,7 +6,7 @@
 !!  This module contains routines related to the computation of PAW on-site occupancies (rhoij).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2022 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -91,12 +91,6 @@ CONTAINS  !=====================================================================
 !!    pawrhoij(:)%rhoij_(lmn2_size,nspden)=
 !!          Sum_{n,k} {occ(n,k)*conjugate[cprj_nk(ii)].cprj_nk(jj)} (non symetrized)
 !!
-!! PARENTS
-!!      m_afterscfloop,m_scfcv_core,m_vtorho
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawrhoij_alloc,pawrhoij_inquire_dim
-!!
 !! NOTES
 !!  The cprj are distributed over band processors.
 !!  Only the mod((iband-1)/mpi_enreg%bandpp,mpi_enreg%nproc_band) projectors
@@ -106,7 +100,6 @@ CONTAINS  !=====================================================================
 
  subroutine pawmkrhoij(atindx,atindx1,cprj,dimcprj,istwfk,kptopt,mband,mband_cprj,mcprj,mkmem,mpi_enreg,&
 &                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,pawrhoij,unpaw,usewvl,wtk)
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: kptopt,mband,mband_cprj,mcprj,mkmem,natom,nkpt,nspinor,nsppol
@@ -548,12 +541,6 @@ end subroutine pawmkrhoij
 !!        pawrhoij(:)%grhoij(lmn2_size,mu,nspden)=   (non symetrized)
 !!            Sum_{n,k} {occ(n,k)*(conjugate[dcprj_nk(ii)/dr_mu].cprj_nk(jj)
 !!                                +conjugate[cprj_nk(ii)].dcprj_nk(jj)/dr_mu)}
-!!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_mkrho,m_dft_energy,m_paw_occupancies,m_positron,m_wfd
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawrhoij_alloc,pawrhoij_inquire_dim
 !!
 !! SOURCE
 
@@ -1145,12 +1132,6 @@ end subroutine pawaccrhoij
 !! OUTPUT
 !!  pawrhoij(natom) <type(pawrhoij_type)>=rhoij quantities for each atom
 !!                                        in packed storage
-!!
-!! PARENTS
-!!      m_gstate,m_nonlinear,m_positron,m_respfn_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,pawrhoij_alloc,pawrhoij_inquire_dim
 !!
 !! SOURCE
 

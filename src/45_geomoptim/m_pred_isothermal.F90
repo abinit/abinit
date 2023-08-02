@@ -10,14 +10,10 @@
 !! Mol. Phys., 1996, Vol. 87, pp. 1117-1157 [[cite:Martyna1996]]
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JCC, JYR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -82,12 +78,6 @@ contains
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
-!!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 
@@ -289,6 +279,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write(std_out,*) 'Initial temp (mdtemp(1)):',ab_mover%mdtemp(1)
    write(std_out,*) 'Final temp (mdtemp(2)):',ab_mover%mdtemp(2)
    write(std_out,*) 'Delay for atom permutation (delayperm)',ab_mover%delayperm
+   write(std_out,*) 'dtion',ab_mover%dtion
    write(std_out,*) 'nnos:', ab_mover%nnos
    write(std_out,*) 'qmass', ab_mover%qmass(:)
    write(std_out,*) 'bmass',ab_mover%bmass
@@ -617,12 +608,6 @@ end subroutine pred_isothermal
 !!  isotemp_data: updates the thermostat parameters
 !!  vel=update the velocities
 !!
-!! PARENTS
-!!      m_pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
-!!
 !! SOURCE
 
 subroutine isotemp(amass,dtion,ekin,iatfix,ktemp,mttk_vars,natom,nnos,qmass,vel)
@@ -755,12 +740,6 @@ end subroutine isotemp
 !! SIDE EFFECTS
 !!  isotemp_data: updates the thermostat parameters (saved variables: bouh !)
 !!  vel=update the velocities
-!!
-!! PARENTS
-!!      m_pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 
@@ -929,12 +908,6 @@ end subroutine isopress
 !! SIDE EFFECTS
 !!  isotemp_data: updates the thermostat parameters (saved variables: bouh !)
 !!  vel=update the velocities
-!!
-!! PARENTS
-!!      m_pred_isothermal
-!!
-!! CHILDREN
-!!      dsyev
 !!
 !! SOURCE
 

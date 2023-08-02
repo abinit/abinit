@@ -11,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,10 +31,6 @@
 !!  * This module is deprecated and should be used only in the GW/BSE part.
 !!    Some of the routines will be gradually moved to m_kpts
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -43,7 +39,7 @@
 
 #include "abi_common.h"
 
-MODULE m_bz_mesh
+module m_bz_mesh
 
  use defs_basis
  use m_errors
@@ -53,7 +49,7 @@ MODULE m_bz_mesh
 
  use m_fstrings,       only : ltoa, itoa, sjoin, ktoa
  use m_numeric_tools,  only : is_zero, isinteger, imin_loc, imax_loc, bisect, wrap2_pmhalf
- use m_symtk,          only : chkgrp, littlegroup_q
+ use m_symtk,          only : sg_multable, littlegroup_q
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
  use m_kpts,           only : getkgrid
@@ -175,26 +171,33 @@ MODULE m_bz_mesh
   ! to non-symmorphic operations, i.e., e^{-i2\pi k_IBZ.R{^-1}t}=e^{-i2\pi k_BZ cdot t}
   ! where \transpose R{-1}=S and  (S k_IBZ)=\pm k_BZ (depending on tabi)
 
+ contains
+
+   ! Methods
+   procedure :: init => kmesh_init            ! Main creation method.
+   procedure :: free => kmesh_free            ! Free memory
+   procedure :: print => kmesh_print          ! Printout of basic info on the object.
+   procedure :: get_bz_item => get_bz_item    ! Get point in the BZ and other useful quantities.
+   procedure :: get_ibz_item => get_IBZ_item  ! Get point in the IBZ and other useful quantities.
+   procedure :: get_bz_diff => get_BZ_diff    ! Get the difference k1-k2 in the BZ (if any).
+
+
+   procedure :: has_bz_item => has_BZ_item    ! Check if a point belongs to the BZ mesh.
+   procedure :: has_ibz_item => has_IBZ_item  ! Check if a point is in the IBZ
+   procedure :: isirred => bz_mesh_isirred    ! TRUE if ik_bz is in the IBZ (a non-zero umklapp is not allowed)
+
  end type kmesh_t
 
- public :: kmesh_init            ! Main creation method.
- public :: kmesh_free            ! Free memory
- public :: kmesh_print           ! Printout of basic info on the object.
- public :: get_bz_item           ! Get point in the  BZ as well as useful quantities.
- public :: get_IBZ_item          ! Get point in the IBZ as well as useful quantities.
- public :: get_BZ_diff           ! Get the difference k1-k2 in the BZ (if any).
+ public :: make_mesh             ! Initialize the mesh starting from kptrlatt and shift.
+ public :: find_qmesh            ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
+
  public :: isamek                ! Check whether two points are equal within an umklapp G0.
  public :: isequalk              ! Check whether two points are equal within an umklapp G0 (does not report G0)
- public :: has_BZ_item           ! Check if a point belongs to the BZ mesh.
- public :: has_IBZ_item          ! Check if a point is in the IBZ
- public :: bz_mesh_isirred       ! TRUE. if ikbz is in the IBZ (a non-zero umklapp is not allowed)
- public :: make_mesh             ! Initialize the mesh starting from kptrlatt and shift.
+ public :: findqg0               ! Identify q + G0 = k1-k2.
+ public :: findq                 ! Helper routine returning the list of q-points.
+ public :: findnq                ! Helper routine returning the number of q-points.
  public :: identk                ! Find the BZ starting from the irreducible k-points.
  public :: get_ng0sh             ! Calculate the smallest box in RSpace able to treat all possible umklapp processes.
- public :: find_qmesh            ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
- public :: findnq                ! Helper routine returning the number of q-points.
- public :: findq                 ! Helper routine returning the list of q-points.
- public :: findqg0               ! Identify q + G0 = k1-k2.
  public :: box_len               ! Return the length of the vector connecting the origin with one the faces of the unit cell.
 !!***
 
@@ -304,7 +307,7 @@ MODULE m_bz_mesh
   ! Max kinetic energy of G-G0 in case of umklapp.
 
   integer,allocatable :: G0(:,:,:)
-  ! g0(3,timrev,nsym_sg)
+  ! (3,2,nsym_sg)
   ! Reduced coordinates of the umklapp G0 vector.
 
   integer,allocatable :: ibzq(:)
@@ -320,17 +323,17 @@ MODULE m_bz_mesh
   ! The correspondind index in the BZ array
 
   integer,allocatable :: igmG0(:,:,:)
-  ! iumklp(npw,timrev,nsym_sg)
+  ! iumklp(npw,2,nsym_sg)
   ! Index of G-G0 in the FFT array for each operations IS (I=\pm 1).
 
   integer,allocatable :: flag_umklp(:,:)
-  ! flag_umklp(timrev,nsym_sg)
+  ! flag_umklp(2,nsym_sg)
   ! 1 if the operation IS requires a non null G0 vector to preserve q, 0 otherwise.
 
   integer,allocatable :: preserve(:,:)
-  ! preserve(timrev,nsym_sg)
-  ! preserve(1,S) is 1 if the operation S in rec space preserves the external q-point i.e Sq=q+G0
-  ! preserve(2,S) is 1 if -Sq=q+G0. G0 is a reciprocal lattice vector also called "umklapp vector".
+  ! preserve(2, nsym_sg)
+  ! (1,S) is 1 if the operation S in rec space preserves the external q-point i.e Sq=q+G0
+  ! (2,S) is 1 if -Sq=q+G0. G0 is a reciprocal lattice vector also called "umklapp vector".
 
   integer,allocatable :: tab(:)
   ! tab(nbz)
@@ -347,17 +350,21 @@ MODULE m_bz_mesh
   ! considered in the relation kBZ= IS kIBZ_q (1 => only S; -1 => -S).
 
   integer,allocatable :: wtksym(:,:,:)
-  ! wtksym(timrev,nsym_sg,kbz)
-  ! 1 if IS belongs to the little group, 0 otherwise !(should invert firt dimensions.
+  ! (2, nsym_sg, kbz)
+  ! 1 if IS belongs to the little group, 0 otherwise TODO (should invert the first two dimensions)
 
   real(dp) :: ext_pt(3)
   ! The external point defining the little group.
 
+ contains
+
+   procedure :: init => littlegroup_init
+   procedure :: print => littlegroup_print
+   procedure :: free => littlegroup_free_0D
+
  end type littlegroup_t
 
- public :: littlegroup_init
  public :: littlegroup_free
- public :: littlegroup_print
 !!***
 
  interface littlegroup_free
@@ -390,21 +397,15 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Kmesh<kmesh_t>=Datatype gathering information on the k point sampling.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_bz_mesh,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
-!!      m_screening_driver,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symmetry)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(inout) :: Kmesh
  integer,intent(in) :: nkibz,kptopt
  logical,optional,intent(in) :: wrap_1zone,break_symmetry
- type(kmesh_t),intent(inout) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
 !arrays
  real(dp),intent(in) :: kibz(3,nkibz)
@@ -554,19 +555,12 @@ end subroutine kmesh_init
 !! INPUTS
 !! Kmesh<kmesh_t>=The datatype to be freed.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_gwls_hamiltonian,m_mlwfovlp_qp
-!!      m_screening_driver,m_sigma_driver,mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kmesh_free(Kmesh)
 
 !Arguments ------------------------------------
-!scalars
- type(kmesh_t),intent(inout) :: Kmesh
+ class(kmesh_t),intent(inout) :: Kmesh
 
 ! *********************************************************************
 
@@ -610,22 +604,16 @@ end subroutine kmesh_free
 !! OUTPUT
 !!  Only printing.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!      mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,optional,intent(in) :: prtvol,unit
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(kmesh_t),intent(in) :: Kmesh
 
 !Local variables-------------------------------
 !scalars
@@ -646,8 +634,8 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
  call wrtout(my_unt,msg,my_mode)
 
  write(msg,'(a,i5,3a)')&
-&  ' Number of points in the irreducible wedge : ',Kmesh%nibz,ch10,&
-&  ' Reduced coordinates and weights : ',ch10
+  ' Number of points in the irreducible wedge : ',Kmesh%nibz,ch10,&
+  ' Reduced coordinates and weights : ',ch10
  call wrtout(my_unt,msg,my_mode)
 
  write(fmt,*)'(1x,i5,a,2x,3es16.8,3x,f11.5)'
@@ -659,13 +647,13 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
  SELECT CASE (Kmesh%timrev)
  CASE (1)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
-&    ' Together with ',Kmesh%nsym,' symmetry operations (time-reversal symmetry not used) ',ch10,&
-&    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
+    ' Together with ',Kmesh%nsym,' symmetry operations (time-reversal symmetry not used) ',ch10,&
+    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
  CASE (2)
    write(msg,'(2a,i2,3a,i5,a)')ch10,&
-&    ' Together with ',Kmesh%nsym,' symmetry operations and time-reversal symmetry ',ch10,&
-&    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
+    ' Together with ',Kmesh%nsym,' symmetry operations and time-reversal symmetry ',ch10,&
+    ' yields ',Kmesh%nbz,' points in the full Brillouin Zone.'
 
  CASE DEFAULT
    ABI_BUG(sjoin('Wrong value for timrev:', itoa(Kmesh%timrev)))
@@ -673,22 +661,22 @@ subroutine kmesh_print(Kmesh,header,unit,prtvol,mode_paral)
 
  call wrtout(my_unt,msg,my_mode)
 
- if (my_prtvol>0) then
+ if (my_prtvol > 0) then
    write(fmt,*)'(1x,i5,a,2x,3es16.8)'
    do ik=1,Kmesh%nbz
      if (my_prtvol==1 .and. ik>nmaxk) then
        write(msg,'(a)')' prtvol=1, do not print more points.'
-       call wrtout(my_unt,msg,my_mode) ; EXIT
+       call wrtout(my_unt,msg,my_mode); EXIT
      end if
      write(msg,fmt)ik,') ',(Kmesh%bz(ii,ik),ii=1,3)
      call wrtout(my_unt,msg,my_mode)
    end do
  end if
- !
- ! === Additional printing ===
- if (my_prtvol>=10) then
+
+ ! Additional printing
+ if (my_prtvol >= 10) then
    write(msg,'(2a)')ch10,&
-&   '                  Full point  ------->    Irred point -->            through:  Symrec  Time-Rev (1=No,-1=Yes) G0(1:3) '
+   '                  Full point  ------->    Irred point -->            through:  Symrec  Time-Rev (1=No,-1=Yes) G0(1:3) '
    call wrtout(my_unt,msg,my_mode)
    write(fmt,*)'(2x,i5,2x,2(3(f7.4,2x)),i3,2x,i2,3(i3))'
    do ik=1,Kmesh%nbz
@@ -723,11 +711,6 @@ end subroutine kmesh_print
 !! OUTPUT
 !! krottb(k,I,S)=Index of (IS) k in the array bz
 !! krottbm1(k,I,S)=Index of IS^{-1} k
-!!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -876,25 +859,17 @@ end subroutine setup_k_rotation
 !! [umklp(3)]=The umklapp G0 vector such as kbz + G0 = (IS) k_ibz, where kbz is in the BZ.
 !! [isirred]=.TRUE. if the k-point belongs to IBZ.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_calc_ucrpa,m_chi0,m_cohsex,m_dyson_solver
-!!      m_exc_build,m_paw_sym,m_plowannier,m_ppmodel,m_prep_calc_ucrpa
-!!      m_read_plowannier,m_screen,m_screening,m_screening_driver,m_sigc
-!!      m_sigma_driver,m_sigx,m_vcoul,m_wfd,m_wfd_optic
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_bz_item(Kmesh,ik_bz,kbz,ik_ibz,isym,itim,ph_mkbzt,umklp,isirred)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_bz
  integer,intent(out) :: ik_ibz,isym,itim
  complex(dpc),optional,intent(out) :: ph_mkbzt
  logical,optional,intent(out) :: isirred
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,optional,intent(out) :: umklp(3)
  real(dp),intent(out) :: kbz(3)
@@ -943,20 +918,15 @@ end subroutine get_bz_item
 !! TODO
 !!  Add mapping ibz2bz, ibz2star
 !!
-!! PARENTS
-!!      m_paw_sym
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_IBZ_item(Kmesh,ik_ibz,kibz,wtk)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_ibz
  real(dp),intent(out) :: wtk
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  real(dp),intent(out) :: kibz(3)
 
@@ -992,19 +962,14 @@ end subroutine get_IBZ_item
 !!  G0(3)=the umklapp G0 vector required to bring k1-k2 back to the BZ
 !!  nfound= the number of points in the BZ that are equal to k1-k2 (should be 1 if everything is OK)
 !!
-!! PARENTS
-!!      m_chi0
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_BZ_diff(Kmesh,k1,k2,idiff_bz,g0,nfound)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(out) :: idiff_bz,nfound
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: k1(3),k2(3)
@@ -1074,13 +1039,9 @@ end subroutine get_BZ_diff
 !!        .FALSE. if they are different.
 !! G0(3)=if .TRUE. G0(3) is the reciprocal lattice vector such as k1=k2+G0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-logical function isamek(k1,k2,g0)
+logical function isamek(k1, k2, g0)
 
 !Arguments ------------------------------------
 !arrays
@@ -1114,13 +1075,9 @@ end function isamek
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-logical function isequalk(q1,q2)
+logical function isequalk(q1, q2)
 
 !Arguments ------------------------------------
  real(dp),intent(in) :: q1(3),q2(3)
@@ -1154,22 +1111,18 @@ end function isequalk
 !!  ikbz=Index of the k-point in the Kmesh%bz array
 !!  g0(3)=Umklapp vector.
 !!
-!! PARENTS
-!!
 !! FIXME
 !!  Switch to routine version. Due to side-effects the present implementation
 !!  might be source of bugs in logical statements
 !!
-!! CHILDREN
-!!
 !! SOURCE
 
-logical function has_BZ_item(Kmesh,item,ikbz,g0)
+logical function has_BZ_item(Kmesh, item, ikbz, g0)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(out) :: ikbz
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: item(3)
@@ -1218,18 +1171,14 @@ end function has_BZ_item
 !!  ikibz=The index of the k-point in the IBZ.
 !!  g0(3)=The reciprocal lattice vector.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function has_IBZ_item(Kmesh,item,ikibz,g0)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(out) :: ikibz
- type(kmesh_t),intent(in) :: Kmesh
 !arrays
  integer,intent(out) :: g0(3)
  real(dp),intent(in) :: item(3)
@@ -1276,19 +1225,14 @@ end function has_IBZ_item
 !! OUTPUT
 !! bz_mesh_isirred=.TRUE. if the k-point is in the IBZ (a non-zero umklapp is not allowed)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-pure logical function bz_mesh_isirred(Kmesh,ik_bz)
+pure logical function bz_mesh_isirred(Kmesh, ik_bz)
 
 !Arguments ------------------------------------
 !scalars
+ class(kmesh_t),intent(in) :: Kmesh
  integer,intent(in) :: ik_bz
- type(kmesh_t),intent(in) :: Kmesh
-!arrays
 
 !Local variables-------------------------------
 !scalars
@@ -1325,11 +1269,6 @@ end function bz_mesh_isirred
 !!
 !! OUTPUT
 !! Kmesh<kmesh_t>=Object gathering info on the sampling of the Brillouin zone.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1472,11 +1411,6 @@ end subroutine make_mesh
 !!  If symmetrical points are present in the input list, indeed, some the output weights will turn out to be zero.
 !!  An initial check is done at the beginning of the routine to trap this possible error.
 !!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,ktabo,nkbz,wtk,ref_bz)
@@ -1534,8 +1468,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
  !call klist_isirred(nkibz,kibz,Cryst,nimg)
 
  if (.not.is_irred_set) then
-   msg = "Input array kibz does not constitute an irreducible set."
-   ABI_WARNING(msg)
+   ABI_WARNING("Input array kibz does not constitute an irreducible set.")
  end if
  !
  ! === Loop over k-points in IBZ ===
@@ -1661,11 +1594,6 @@ end subroutine identk
 !!
 !! OUTPUT
 !!  opt_ng0(3)=Minimal reduced components of the G0 vectors to account for umklapps.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1795,11 +1723,6 @@ end subroutine get_ng0sh
 !! OUTPUT
 !!  norm = value of the norm
 !!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getkptnorm_bycomponent(vect,factor,norm)
@@ -1854,11 +1777,6 @@ end subroutine getkptnorm_bycomponent
 !!  ndivs(nbounds-1)=Number of division for each segment
 !!  path: allocated inside the routine. When the subroutine returns, path(3,npts) will
 !!    contain the path in reduced coordinates.
-!!
-!! PARENTS
-!!      m_bz_mesh,m_elphon,m_nesting,m_phonons
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1964,12 +1882,6 @@ end subroutine make_path
 !! OUTPUT
 !!  Qmesh<kmesh_t>=datatype gathering information on the q point sampling.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!      mrgscr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine find_qmesh(Qmesh,Cryst,Kmesh)
@@ -2025,11 +1937,6 @@ end subroutine find_qmesh
 !!
 !! OUTPUT
 !!  nqibz=number of q points
-!!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2122,11 +2029,6 @@ end subroutine findnq
 !! OUTPUT
 !!  qibz(3,nqibz)=coordinates of q points by which k points differ
 !!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -2212,24 +2114,17 @@ end subroutine findq
 !!
 !! INPUTS
 !!  kmkp(3)= k - kp input vector
-!!  nqbz=number of q points
-!!  qbz(3,nqbz)=coordinates of q points
-!!  mG0(3)= For each reduced direction gives the max G0 component to account for umklapp processes
+!!  nqbz=number of q points in the BZ
+!!  qbz(3,nqbz)=coordinates of q-points in the BZ
+!!  mG0(3)= For each reduced direction gives the maximum G0 component to account for umklapp processes
 !!
 !! OUTPUT
-!!  iq=index of q vector in BZ table
+!!  iq=index of q in qbz array.
 !!  g0(3)=reciprocal space vector, to be used in igfft
-!!
-!! PARENTS
-!!      m_cohsex,m_exc_build,m_gkk,m_phpi,m_prep_calc_ucrpa,m_sigc,m_sigma
-!!      m_sigx
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
-
-subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
+subroutine findqg0(iq, g0, kmkp, nqbz, qbz, mG0)
 
 !Arguments ------------------------------------
 !scalars
@@ -2252,25 +2147,23 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
 
 ! *************************************************************************
 
- iq=0
+ iq = 0
 
- if (ALL(ABS(kmkp(:))<EPSILON(one))) then
+ if (ALL(ABS(kmkp) < EPSILON(one))) then
    ! Find q close to 0
    do iqbz=1,nqbz
-     if (ALL(ABS(qbz(:,iqbz))<tolq0)) then
-       iq=iqbz
+     if (ALL(ABS(qbz(:,iqbz)) < tolq0)) then
+       iq = iqbz
      end if
    end do
 
-   if (iq==0) then
-     ABI_BUG('Wrong list of q-points: q=0 not present.')
-   end if
-   g0(:)=0; RETURN
+   ABI_CHECK(iq /= 0, 'Wrong list of q-points: q=0 not present.')
+   g0(:) = 0; RETURN
 
  else
    ! q is not zero, find q such as k-kp=q+G0.
 
-   ! Try with G0=0 first.
+   ! Try with G0 = 0 first.
    !do iqbz=1,nqbz
    !  if (ALL(ABS(qbz(:,iqbz)-kmkp)<TOL_KDIFF)) then
    !    iq=iqbz
@@ -2278,7 +2171,7 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
    !  end if
    !end do
 
-#if 1
+   ! Init G0 lists to accelerate search below (small |G0| first)
    glist1(1) = 0
    ig = 2
    do jg01=1,mG0(1)
@@ -2303,17 +2196,18 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
      ig = ig + 2
    end do
 
+  ! Search algorithm.
   g1loop: do jg01=1,2*mG0(1)+1
     rg(1) = glist1(jg01)
     do jg02=1,2*mG0(2)+1
       rg(2) = glist2(jg02)
       do jg03=1,2*mG0(3)+1
          rg(3) = glist3(jg03)
-         !
-         ! * Form q+G0 and check if it is the one.
+
+         ! Form q+G0 and check if it is the one.
          do iqbz=1,nqbz
           qpg0= qbz(:,iqbz) + rg
-          if (ALL(ABS(qpg0-kmkp)<TOL_KDIFF)) then
+          if (ALL(ABS(qpg0-kmkp) < TOL_KDIFF)) then
             iq = iqbz
             g0 = NINT(rg)
             EXIT g1loop
@@ -2324,34 +2218,10 @@ subroutine findqg0(iq,g0,kmkp,nqbz,qbz,mG0)
     end do
   end do g1loop
 
-#else
-   g1loop: do jg01=-mG0(1),mG0(1)
-     rg(1) = DBLE(jg01)
-     do jg02=-mG0(2),mG0(2)
-       rg(2) = DBLE(jg02)
-       do jg03=-mG0(3),mG0(3)
-          rg(3) = DBLE(jg03)
-          !
-          ! * Form q+G0 and check if it is the one.
-          do iqbz=1,nqbz
-           qpg0= qbz(:,iqbz) + rg
-           if (ALL(ABS(qpg0-kmkp)<TOL_KDIFF)) then
-             iq = iqbz
-             g0 = (/jg01,jg02,jg03/)
-             EXIT g1loop
-           end if
-         end do
-
-       end do
-     end do
-   end do g1loop
-#endif
-
-   if (iq==0) then
-     write(msg,'(a,3f9.5)')' q = k-kp+G0 not found. kmkp = ',kmkp
-     ABI_ERROR(msg)
-   end if
-
+  if (iq == 0) then
+    write(msg,'(a, 3f9.5)')' q = k-kp+G0 not found. kmkp:',kmkp
+    ABI_ERROR(msg)
+  end if
  end if
 
 end subroutine findqg0
@@ -2364,70 +2234,41 @@ end subroutine findqg0
 !! littlegroup_init
 !!
 !! FUNCTION
-!!  Finds symmetry operations belonging to the little group associated to an external
-!!  point ext_pt and fills symmetry tables.
+!! Finds symmetry operations belonging to the little group associated to an external
+!! point ext_pt and fills symmetry tables.
 !!
 !! INPUTS
 !! ext_pt(3)= External point in the Brillouin zone in reduce coordinated
-!! Kmesh<kmesh_t>
-!!   %nbz=number of points in the full BZ
-!!   %kbz(3,nbz)=points in the full Brillouin Zon
-!! Cryst<crystal_t>= Info on symmetries and unit cell
-!!   %symrec(3,3,nsym)=symmetry operations in reciprocal space
-!!   %nsym=number of symmetry operations in the space group
-!!   %timrev=if 2 time-reversal can be used; 1 otherwise
-!!   %gmet(3,3)=reciprocal space metric (bohr**-2).
-!! npwvec=number of G vectors
-!! gvec(3,npwvec) coordinates of G vectors
+!! nbz=number of points in the full BZ.
+!! bz(3,nbz)=points in the full BZ.
+!! Cryst<crystal_t>= Info on symmetries and unit cell.
+!! use_umklp=flag to include umklapp G0 vectors in the definition of the little group (0:n0,1:yes)
 !! npwe=If greater than 0, the index of G-Go in the gvec(:,1:npwvec) array will be calculated
 !!  and stored in %igmG0 for each symmetry preserving the external q. Note that G is one of the npwe vectors.
-!! use_umklp=flag to include umklapp G0 vectors in the definition of the little group (0:n0,1:yes)
-!!
-!! OUTPUT
-!! Ltg% <littlegroup_t_datatype>.
-!!  %ibzq(nbz)= 1 if the kpoint belongs to the IBZ defined by ext_pt, 0 otherwise
-!!  %bz2ibz(nbz)= sequential index of the point in the IBZ defined by ext_pt
-!!  %ibz2bz(nibz_Ltg) For each nibz_Ltg the correspondind index in the BZ array
-!!  %igmG0(npwepstimrev,nsym)= index of the uklapp vector G_o in the FFT array
-!!  %flag_umklp(timrev,nsym)= flag for umklapp processes
-!!    1 if operation (IS) requires a G_o to preserve ext_pt, 0 otherwise
-!!  %tab(nbz)=table giving, for each k-point in the BZ (kBZ), the corresponding
-!!   irreducible point (kIBZ) in the irreducible zone defined by the little group of ext_pt,
-!!   i.e kBZ= (IS) kIBZ where I is either the inversion or the identity and S is an
-!!   operation in the little group defined by ext_pt
-!!  %tabo(nbz)=the symmetry operation S in the little group that takes kIBZ to each kBZ
-!!  %tabi(nbz)= defines whether inversion has to be considered in the
-!!   relation kBZ=(IS) kIBZ (1 => only S; -1 => -S)
-!!  %preserve(2,nsym)= 1 if ISq=q, 0 otherwise, the first index is for the identity or the time reversal symmetry,
-!!  %wtksym(2,nsym,nbz)= for each kpoint is equal to 1 if the symmetry operation (with or without time reversal)
-!!   must be considered in the calculation of \chi_o, 0 otherwise
-!!
-!! PARENTS
-!!      m_chi0,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
+!! gvec(3,npwe) coordinates of G vectors
+!! [timrev]=Optional argument to change the value of time-reversal. If not given, the value from cryst is used.
 !!
 !! SOURCE
 
-subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
+subroutine littlegroup_init(Ltg, ext_pt, nbz, bz, Cryst, use_umklp, npwe, gvec, timrev)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npwe,use_umklp
+ class(littlegroup_t),intent(inout) :: Ltg
+ integer,intent(in) :: nbz, npwe, use_umklp
  type(crystal_t),target,intent(in) :: Cryst
- type(kmesh_t),intent(in) :: Kmesh
- type(littlegroup_t),intent(inout) :: Ltg
+ real(dp),intent(in) :: bz(3, nbz)
 !arrays
- !integer,optional,intent(in) :: gvec(3,npwvec)
- integer,optional,intent(in) :: gvec(:,:)
+ integer,optional,intent(in) :: gvec(:,:) ! (3,npwe)
  real(dp),intent(in) :: ext_pt(3)
+ integer,optional,intent(in) :: timrev
 
 !Local variables-------------------------------
 !scalars
  integer :: dummy_timrev,enough,idx,ige,igpw,ik,ind,iold,iout,isym,itest,itim
- integer :: nbz,nkibzq,nsym,nsym_Ltg,ntest,timrev,ierr,npwvec
+ integer :: nkibzq,nsym,nsym_Ltg,ntest,my_timrev,ierr,npwvec
  real(dp) :: G0len,kin,mG0len,max_kin
- logical :: found,found_identity,ltest,use_antiferro
+ logical :: found,found_identity,use_antiferro
  character(len=500) :: msg
 !arrays
  integer :: g0(3),gg(3),gmG0(3),identity(3,3),nop(Cryst%timrev),nopg0(2)
@@ -2439,126 +2280,123 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
 
 !************************************************************************
 
- DBG_ENTER("COLL")
- !
- ! !@littlegroup_t
- ! === Initial check ====
- ltest=(Cryst%timrev==1.or.Cryst%timrev==2)
- ABI_CHECK(ltest,'Wrong value for timrev')
- !
- ! === Get useful data ===
+ ABI_CHECK(any(cryst%timrev == [1, 2]), sjoin("Wrong value for cryst%timrev:", itoa(cryst%timrev)))
+
+ ! Destroy structure if it already exists
+ call Ltg%free()
+
+ ! Copy useful data.
  nsym          =  Cryst%nsym
- !timrev       = 1
- timrev        =  Cryst%timrev
+ my_timrev     =  Cryst%timrev
+ if (present(timrev)) then
+   my_timrev = timrev
+   ABI_CHECK_ILEQ(my_timrev, cryst%timrev, "my_timrev cannot be greater that cryst%timrev")
+ end if
+
  symrec        => Cryst%symrec
  symafm        => Cryst%symafm
  use_antiferro =  Cryst%use_antiferro
 
- nbz =  Kmesh%nbz
- !
- ! === Destroy structure if it already exists ===
- call littlegroup_free(Ltg)
- !
- ! === Store dimensions and useful info ===
- Ltg%nsym_sg  =nsym
- Ltg%timrev   =timrev
- Ltg%nbz      =nbz
+ ! Store dimensions and useful info.
+ Ltg%nsym_sg  = nsym
+ Ltg%timrev   = my_timrev
+ Ltg%nbz      = nbz
  !Ltg%use_umklp=use_umklp ! 1 if umklapp processes are used
  Ltg%ext_pt(:)=ext_pt(:)
 
- ABI_MALLOC(Ltg%G0,(3,timrev,nsym))
- ABI_MALLOC(Ltg%ibzq,(nbz))
- ABI_MALLOC(Ltg%bz2ibz,(nbz))
- ABI_MALLOC(Ltg%preserve,(timrev,nsym))
- ABI_MALLOC(Ltg%wtksym,(timrev,nsym,nbz))
- ABI_MALLOC(Ltg%tab,(nbz))
- ABI_MALLOC(Ltg%tabi,(nbz))
- ABI_MALLOC(Ltg%tabo,(nbz))
- ABI_MALLOC(Ltg%flag_umklp,(timrev,nsym))
- !
+ ABI_MALLOC(Ltg%G0, (3,2,nsym))
+ ABI_MALLOC(Ltg%ibzq, (nbz))
+ ABI_MALLOC(Ltg%bz2ibz, (nbz))
+ ABI_MALLOC(Ltg%preserve, (2, nsym))
+ ABI_MALLOC(Ltg%wtksym, (2, nsym, nbz))
+ ABI_MALLOC(Ltg%tab, (nbz))
+ ABI_MALLOC(Ltg%tabi, (nbz))
+ ABI_MALLOC(Ltg%tabo, (nbz))
+ ABI_MALLOC(Ltg%flag_umklp, (2, nsym))
+
  ! In the old GW implementation we were removing symmetries related by time-reversal and
  ! sometimes it happened that only the inversion was reported in the KSS file (see outkss.F90).
  identity(:,:)=RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/)) ; found_identity=.FALSE.
  do isym=1,nsym
-   if (ALL(symrec(:,:,isym)==identity)) then
-    found_identity=.TRUE. ; EXIT
+   if (ALL(symrec(:,:,isym) == identity)) then
+    found_identity=.TRUE.; EXIT
    end if
  end do
- if (.not.found_identity) then
+ if (.not. found_identity) then
    write(msg,'(5a)')&
-&    'Only the inversion was found in the set of symmetries read from the KSS file ',ch10,&
-&    'Likely you are using a KSS file generated with an old version of Abinit, ',ch10,&
-&    'To run a GW calculation with an old KSS file, use version < 5.5 '
+     'Only the inversion was found in the set of symmetries read from the KSS file ',ch10,&
+     'Likely you are using a KSS file generated with an old version of Abinit, ',ch10,&
+     'To run a GW calculation with an old KSS file, use version < 5.5 '
    ABI_ERROR(msg)
  end if
 
- ! Find operations in the little group as well as umklapp vectors G0 ===
- call littlegroup_q(nsym,ext_pt,symxpt,symrec,symafm,dummy_timrev,prtvol=0)
+ ! Find operations in the little group as well as umklapp vectors G0
+ call littlegroup_q(nsym, ext_pt, symxpt, symrec, symafm, dummy_timrev, prtvol=0)
 
  Ltg%preserve(:,:)=0; Ltg%g0(:,:,:)=0; Ltg%flag_umklp(:,:)=0; mG0len=zero
 
- do itim=1,timrev
+ do itim=1,my_timrev
    do isym=1,nsym
      if (symafm(isym)==-1) CYCLE
 
-     if (symxpt(4,itim,isym)==1) then  !\pm Sq = q+g0
-       if (ANY(symxpt(1:3,itim,isym)/=0).and.use_umklp==0) CYCLE ! Exclude non zero G0 vectors
-       Ltg%preserve(itim,isym)=1
-       g0(:)=symxpt(1:3,itim,isym); Ltg%g0(:,itim,isym)=g0(:)
-       if (ANY(Ltg%g0(:,itim,isym)/=0)) Ltg%flag_umklp(itim,isym)=1
+     if (symxpt(4, itim, isym) == 1) then  !\pm Sq = q+g0
+       if (ANY(symxpt(1:3, itim, isym) /= 0) .and. use_umklp == 0) CYCLE ! Exclude non zero G0 vectors
+       Ltg%preserve(itim, isym) = 1
+       g0(:)=symxpt(1:3, itim, isym); Ltg%g0(:, itim, isym) = g0(:)
+       if (ANY(Ltg%g0(:, itim, isym) /= 0)) Ltg%flag_umklp(itim, isym) = 1
        ! Max radius to be considered to include all G0s
-       G0len=normv(g0,Cryst%gmet,'G')
-       mG0len=MAX(mG0len,G0len)
+       G0len = normv(g0,Cryst%gmet,'G')
+       mG0len = MAX(mG0len, G0len)
      end if
    end do
  end do
 
- nop(:)=0; nopg0(:)=0
- do itim=1,timrev
-   nop  (itim)=SUM(Ltg%preserve  (itim,:))
-   nopg0(itim)=SUM(Ltg%flag_umklp(itim,:))
+ nop(:) = 0; nopg0(:) = 0
+ do itim=1,my_timrev
+   nop  (itim) = SUM(Ltg%preserve  (itim,:))
+   nopg0(itim) = SUM(Ltg%flag_umklp(itim,:))
  end do
- nsym_Ltg=SUM(nop(:))
+ nsym_Ltg = SUM(nop(:))
 
- ! Store little group operations, include time-reversal if present ===
- Ltg%nsym_Ltg=nsym_Ltg
- ABI_MALLOC(symrec_Ltg,(3,3,Ltg%nsym_Ltg))
+ ! Store little group operations, include time-reversal if present.
+ Ltg%nsym_Ltg = nsym_Ltg
+ ABI_MALLOC(symrec_Ltg, (3, 3, Ltg%nsym_Ltg))
 
- ind=1
- do itim=1,timrev
+ ind = 1
+ do itim=1,my_timrev
    do isym=1,nsym
      if (Ltg%preserve(itim,isym)==1) then
-      if (itim==1) symrec_Ltg(:,:,ind)= symrec(:,:,isym)
-      if (itim==2) symrec_Ltg(:,:,ind)=-symrec(:,:,isym)
-      ind=ind+1
+      if (itim==1) symrec_Ltg(:,:,ind) = symrec(:,:,isym)
+      if (itim==2) symrec_Ltg(:,:,ind) =-symrec(:,:,isym)
+      ind = ind+1
      end if
    end do
  end do
 
- ! Check the closure of the (ferromagnetic) little group ===
+ ! Check the closure of the (ferromagnetic) little group
  ABI_MALLOC(symafm_ltg,(Ltg%nsym_Ltg))
- symafm_ltg(:)=1
- call chkgrp(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
- ABI_CHECK(ierr==0,"Error in group closure")
+ symafm_ltg(:) = 1
+ call sg_multable(Ltg%nsym_Ltg,symafm_ltg,symrec_Ltg,ierr)
+ ABI_CHECK(ierr == 0, "Error in group closure")
 
  ABI_FREE(symafm_ltg)
- !
+
  ! Find the irreducible zone associated to ext_pt
  ! Do not use time-reversal since it has been manually introduced previously
- ABI_MALLOC(indkpt1,(nbz))
- ABI_MALLOC(wtk_folded,(nbz))
- ABI_MALLOC(wtk,(nbz))
+ ABI_MALLOC(indkpt1, (nbz))
+ ABI_MALLOC(wtk_folded, (nbz))
+ ABI_MALLOC(wtk, (nbz))
  ABI_MALLOC(bz2ibz_smap, (6, nbz))
  wtk=one; iout=0; dummy_timrev=0
 
- call symkpt(0,Cryst%gmet,indkpt1,iout,Kmesh%bz,nbz,nkibzq,Ltg%nsym_Ltg,symrec_Ltg,dummy_timrev,wtk,wtk_folded, &
-     bz2ibz_smap, xmpi_comm_self)
+ call symkpt(0,Cryst%gmet,indkpt1,iout, bz, nbz, nkibzq, Ltg%nsym_Ltg, symrec_Ltg, dummy_timrev, wtk, wtk_folded, &
+             bz2ibz_smap, xmpi_comm_self)
 
  ABI_FREE(bz2ibz_smap)
  ABI_FREE(indkpt1)
  ABI_FREE(wtk)
 
- Ltg%nibz_Ltg=nkibzq
+ Ltg%nibz_Ltg = nkibzq
  !
  ! === Set up table in the BZ ===
  ! * 0 if the point does not belong to IBZ_xpt, 1 otherwise
@@ -2568,52 +2406,52 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  ind=0; enough=0
  do ik=1,nbz
    if (wtk_folded(ik)>tol8) then
-     ind=ind+1
-     Ltg%ibzq(ik)=1
-     Ltg%bz2ibz(ik) =ind
-     Ltg%ibz2bz(ind)=ik
+     ind = ind + 1
+     Ltg%ibzq(ik) = 1
+     Ltg%bz2ibz(ik) = ind
+     Ltg%ibz2bz(ind)= ik
    end if
  end do
- ABI_CHECK(ind==Ltg%nibz_Ltg," BUG ind/=Ltg%nibz_Ltg")
- !
+ ABI_CHECK_IEQ(ind, Ltg%nibz_Ltg, "BUG: ind /= Ltg%nibz_Ltg")
+
  ! Reconstruct full BZ starting from IBZ_q.
  ! Calculate appropriate weight for each item (point,symmetry operation,time-reversal)
  Ltg%tab=0; Ltg%tabo=0; Ltg%tabi=0; Ltg%wtksym(:,:,:)=0
 
  ! Start with zero no. of k-points found
- ntest=0
- ABI_MALLOC(ktest,(3,nbz))
- ktest=zero
+ ntest = 0
+ ABI_MALLOC(ktest, (3, nbz))
+ ktest = zero
 
  do ik=1,nbz
-   if (Ltg%ibzq(ik)/=1) CYCLE
+   if (Ltg%ibzq(ik) /= 1) CYCLE
    ! * Loop over symmetry operations S and time-reversal.
    ! * Use spatial inversion instead of time reversal whenever possible.
-   do itim=1,timrev
+   do itim=1,my_timrev
      do isym=1,nsym
 
       ! Form IS k only for (IS) pairs in the (ferromagnetic) little group.
       if (symafm(isym)==-1) CYCLE
       if (Ltg%preserve(itim,isym)==0) CYCLE
-      knew(:)=(3-2*itim)*MATMUL(symrec(:,:,isym),Kmesh%bz(:,ik))
+      knew(:)=(3-2*itim)*MATMUL(symrec(:,:,isym), bz(:,ik))
       !
-      ! === Check whether it has already been found (to within a RL vector) ===
+      ! Check whether it has already been found (to within a RL vector)
       iold=0
       do itest=1,ntest
         if (isamek(knew(:),ktest(:,itest),gg)) iold=iold+1
       end do
 
       if (iold==0) then
-        ! == Found new BZ point ===
+        ! Found new BZ point
         ! For this point the operation (isym,itim) must be considered to reconstruct the full BZ
         Ltg%wtksym(itim,isym,ik)=1
         ntest=ntest+1
         ktest(:,ntest)=knew(:)
         !
-        ! === Now find knew in the BZ array ===
+        ! Now find knew in the BZ array
         found=.FALSE.
         do idx=1,nbz
-          if (isamek(knew(:),Kmesh%bz(:,idx),gg)) then ! They are the same within a RL vector
+          if (isamek(knew(:), bz(:,idx), gg)) then ! They are the same within a RL vector
             Ltg%tab (idx)=ik
             Ltg%tabo(idx)=isym
             Ltg%tabi(idx)=3-2*itim
@@ -2637,25 +2475,25 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
    ABI_BUG(sjoin('ntest - nbz = ',itoa(ntest-nbz)))
  end if
 
- if (SUM(Ltg%wtksym)/=nbz) then
+ if (sum(Ltg%wtksym) /= nbz) then
    ABI_BUG(sjoin('sum(Ltg%wtksym)-nbz = ', itoa(SUM(Ltg%wtksym)-nbz)))
  end if
 
  Ltg%max_kin_gmG0=zero
 
- if (npwe>0.and.PRESENT(gvec)) then
+ if (npwe > 0.and. PRESENT(gvec)) then
    npwvec = SIZE(gvec,DIM=2)
    ! This correspond to the case in which we need to know the index of G-Go in the gvec array
    ! where G is one of the npwe vectors. This is required in screening but not in sigma.
    ! The drawback is that the effective G sphere used to calculate the oscillators must be smaller
    ! that gvec if we want to avoid possible aliasing effects. Lifting this constraint would require
    ! a lot of boring coding. (no need to do this if ext_pt=zero, but oh well)
-   ABI_MALLOC(Ltg%igmG0,(npwe,timrev,nsym))
+   ABI_MALLOC(Ltg%igmG0,(npwe,2,nsym))
    Ltg%igmG0(:,:,:)=0
    max_kin=zero
 
    ! Loop over symmetry operations S and time-reversal
-   do itim=1,timrev
+   do itim=1,my_timrev
      do isym=1,nsym
        ! Form IS k only for (IS) pairs in the little group
        if (symafm(isym)==-1) CYCLE
@@ -2673,12 +2511,12 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
                found=.TRUE.; EXIT
              end if
            end do
-           if (.not.found) then
+           if (.not. found) then
              write(msg,'(5a,f8.3,2a,3i5)')&
-&              'Not able to found G-G0 in the largest G-spere ',ch10,&
-&              'Decrease the size of epsilon or, if possible, increase ecutwfn (>ecuteps) ',ch10,&
-&              'Minimum required cutoff energy for G-G0 sphere= ',kin,ch10,&
-&              'G0 = ',g0(:)
+              'Not able to found G-G0 in the largest G-spere ',ch10,&
+              'Decrease the size of epsilon or, if possible, increase ecutwfn (>ecuteps) ',ch10,&
+              'Minimum required cutoff energy for G-G0 sphere= ',kin,ch10,&
+              'G0 = ',g0(:)
              ABI_ERROR(msg)
            end if
          end do
@@ -2689,24 +2527,23 @@ subroutine littlegroup_init(ext_pt,Kmesh,Cryst,use_umklp,Ltg,npwe,gvec)
  end if
  ABI_FREE(symrec_Ltg)
 
-#ifdef DEBUG_MODE
- do ik=1,nbz
-   if (ABS(SUM(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik))>tol6) then
-     write(std_out,*)' sum(Ltg%wtksym,ik)-wtk_folded(ik) = ',sum(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik)
-     write(std_out,*)Ltg%wtksym(1,:,ik),Ltg%wtksym(2,:,ik),wtk_folded(ik)
-     write(std_out,*)ik,Kmesh%bz(:,ik)
-     ABI_BUG("Wrong weight")
-   end if
- end do
- do ik=1,nbz
-   knew = Ltg%tabi(ik) * MATMUL(symrec(:,:,Ltg%tabo(ik)),Kmesh%bz(:,Ltg%tab(ik)))
-   if (.not.isamek(knew,Kmesh%bz(:,ik),gg)) then
-     write(std_out,*)knew,Kmesh%bz(:,ik)
-     write(std_out,*)Ltg%tabo(ik),Ltg%tabi(ik),Ltg%tab(ik)
-     ABI_BUG("Wrong tables")
-   end if
- end do
-#endif
+ ! DEBUG SECTION
+ !do ik=1,nbz
+ !  if (ABS(SUM(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik))>tol6) then
+ !    write(std_out,*)' sum(Ltg%wtksym,ik)-wtk_folded(ik) = ',sum(Ltg%wtksym(1,:,ik)+Ltg%wtksym(2,:,ik))-wtk_folded(ik)
+ !    write(std_out,*)Ltg%wtksym(1,:,ik),Ltg%wtksym(2,:,ik),wtk_folded(ik)
+ !    write(std_out,*)ik, bz(:,ik)
+ !    ABI_BUG("Wrong weight")
+ !  end if
+ !end do
+ !do ik=1,nbz
+ !  knew = Ltg%tabi(ik) * MATMUL(symrec(:,:,Ltg%tabo(ik)), bz(:,Ltg%tab(ik)))
+ !  if (.not.isamek(knew, bz(:,ik),gg)) then
+ !    write(std_out,*)knew, bz(:,ik)
+ !    write(std_out,*)Ltg%tabo(ik),Ltg%tabi(ik),Ltg%tab(ik)
+ !    ABI_BUG("Wrong tables")
+ !  end if
+ !end do
 
  ABI_FREE(wtk_folded)
 
@@ -2729,18 +2566,12 @@ end subroutine littlegroup_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bz_mesh
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine littlegroup_free_0D(Ltg)
 
 !Arguments ------------------------------------
-!scalars
- type(littlegroup_t),intent(inout) :: Ltg
+ class(littlegroup_t),intent(inout) :: Ltg
 
 ! *********************************************************************
 
@@ -2774,17 +2605,12 @@ end subroutine littlegroup_free_0D
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine littlegroup_free_1D(Ltg)
 
 !Arguments ------------------------------------
-!scalars
- type(littlegroup_t),intent(inout) :: Ltg(:)
+ class(littlegroup_t),intent(inout) :: Ltg(:)
 
 !Local variables-------------------------------
  integer :: ipt
@@ -2816,20 +2642,14 @@ end subroutine littlegroup_free_1D
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!      m_chi0,m_cohsex,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
+subroutine littlegroup_print(Ltg, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
-!scalars
+ class(littlegroup_t),intent(in) :: Ltg
  integer,optional,intent(in) :: prtvol,unit
  character(len=4),optional,intent(in) :: mode_paral
- type(littlegroup_t),intent(in) :: Ltg
 
 !Local variables-------------------------------
 !scalars
@@ -2845,11 +2665,11 @@ subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
  my_prtvol=0      ; if (PRESENT(prtvol    )) my_prtvol=prtvol
  my_mode  ='COLL' ; if (PRESENT(mode_paral)) my_mode  =mode_paral
 
- write(msg,'(4a,3es16.8,2a,i5,a,i5,2a,i3,a,i3)')ch10,&
-&  ' ==== Little Group Info ==== ',ch10,&
-&  '  External point ',Ltg%ext_pt,ch10,&
-&  '  Number of points in the IBZ defined by little group  ',Ltg%nibz_Ltg,'/',Ltg%nbz,ch10,&
-&  '  Number of operations in the little group : ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
+ write(msg,'(7a,i0,a,i0,2a,i0,a,i0)')ch10, &
+  ' ==== Little Group Info ==== ', ch10, &
+  '  External point: ',trim(ktoa(Ltg%ext_pt)), ch10, &
+  '  Number of points in the IBZ defined by little group:  ', Ltg%nibz_Ltg, '/', Ltg%nbz,ch10, &
+  '  Number of operations in the little group: ',Ltg%nsym_Ltg,'/',Ltg%nsym_sg
  call wrtout(my_unt,msg,my_mode)
 
  nop=0 ; nopg0=0
@@ -2860,12 +2680,12 @@ subroutine littlegroup_print(Ltg,unit,prtvol,mode_paral)
 
  do itim=1,Ltg%timrev
    if (itim==1) then
-     write(msg,'(a,2(a,i2,a))')ch10,&
+     write(msg,'(2(a,i2,a))') &
        '  No time-reversal symmetry with zero umklapp: ',nop(1)-nopg0(1),ch10,&
        '  No time-reversal symmetry with non-zero umklapp: ',nopg0(1),ch10
      call wrtout(my_unt,msg,my_mode)
    else if (itim==2) then
-     write(msg,'(a,2(a,i2,a))')ch10,&
+     write(msg,'(2(a,i2,a))') &
        '  time-reversal symmetry with zero umklapp: ',nop(2)-nopg0(2),ch10,&
        '  time-reversal symmetry with non-zero umklapp: ',nopg0(2),ch10
      call wrtout(my_unt,msg,my_mode)
@@ -2890,13 +2710,9 @@ end subroutine littlegroup_print
 !!   qpt(3)=The reduced coordinates of the q-point defining the direction. Normalization is not mandatory.
 !!   gprimd(3,3)=Cartesian coordinates of the vectors defining the lattice.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-function box_len(qpt,gprimd)
+function box_len(qpt, gprimd)
 
 !Arguments ------------------------------------
 !scalars
@@ -2913,24 +2729,24 @@ function box_len(qpt,gprimd)
 
 ! *************************************************************************
 
-!Compute reciprocal space metric
+ ! Compute reciprocal space metric
  gmet = MATMUL(TRANSPOSE(gprimd),gprimd)
 
-!Rotate the input q-point such that it is always in the first octant then normalize it.
-!Bravais lattices are invariant under inversion of any of the basis vectors.
+ ! Rotate the input q-point such that it is always in the first octant then normalize it.
+ ! Bravais lattices are invariant under inversion of any of the basis vectors.
  my_qpt = ABS(qpt)/normv(qpt,gmet,"G")
 
-!Check whether the q is along one of the reduced directions.
+ ! Check whether the q is along one of the reduced directions.
  idir=0; if (COUNT(ABS(qpt)<tol16) == 2) idir = imax_loc(ABS(qpt))
 
  if (idir/=0) then ! easy as q is along vector idir.
-   box_len =  normv(gprimd(:,idir),gmet,"G")
+   box_len =  normv(gprimd(:,idir), gmet, "G")
    RETURN
 
  else
    !iplane/=0 means that q is placed on one the planes defined by two reciprocal lattice vectors.
    iplane=0; if (COUNT(ABS(qpt)<tol16) == 1) iplane = imin_loc(ABS(qpt))
-   q0box = (/-1,-1,-1/)
+   q0box = [-1,-1,-1]
 
    if (iplane/=1) then
      x1=one
@@ -2951,7 +2767,7 @@ function box_len(qpt,gprimd)
      if (x1<=one+tol16 .and. x2<=one+tol16) q0box=(/x1,x2,x3/)
    end if
 
-   if (ALL(q0box==(/-1,-1,-1/) )) then
+   if (ALL(q0box == [-1,-1,-1])) then
      ABI_BUG("Cannot found q0box")
    end if
 
@@ -2976,11 +2792,6 @@ end function box_len
 !!  gprimd(3,3)=Reciprocal lattice vectors
 !!  ndivsm=Number of divisions to be used for the smallest segment.
 !!   A negative value activates a specialized mode if with bounds is suppose to supply the full list of k-points.
-!!
-!! PARENTS
-!!      wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3048,10 +2859,6 @@ end function kpath_new
 !! FUNCTION
 !!  Free memory allocated in the object
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine kpath_free(Kpath)
@@ -3088,10 +2895,6 @@ end subroutine kpath_free
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3133,5 +2936,5 @@ end subroutine kpath_print
 
 !----------------------------------------------------------------------
 
-END MODULE m_bz_mesh
+end module m_bz_mesh
 !!***

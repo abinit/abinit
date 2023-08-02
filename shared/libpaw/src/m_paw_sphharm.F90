@@ -7,7 +7,7 @@
 !!  spherical harmonics Ylm (resp. Slm) (and gradients).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MT, FJ, NH, TRangel)
+!! Copyright (C) 2013-2022 ABINIT group (MT, FJ, NH, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,10 +86,6 @@ CONTAINS
 !!  Note the use of double precision complex.
 !!  Case l>3 not implemented.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function ylmc(il,im,kcart)
@@ -108,6 +104,7 @@ function ylmc(il,im,kcart)
  real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi
  !complex(dpc) :: new_ylmc
  character(len=500) :: msg
+ complex(dpc) :: ctmp
 
 ! *************************************************************************
 
@@ -195,7 +192,10 @@ function ylmc(il,im,kcart)
  end select
 !
 !=== Treat the case im < 0 ===
- if (im < 0) ylmc=(-one)**(im)*CONJG(ylmc)
+ if (im < 0) then
+   ctmp = (-one)**(im)*CONJG(ylmc)
+   ylmc = ctmp
+ end if
 
  ! FIXME: Use the piece of code below as it works for arbitrary (l,m)
  ! the implementation above is buggy when the vector is along z!
@@ -244,11 +244,6 @@ end function ylmc
 !!  Note the use of double precision complex.
 !!  Case l>3 not implemented.
 !!
-!! PARENTS
-!!      m_vkbr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ylmcd(il,im,kcart,dth,dphi)
@@ -266,6 +261,7 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
  real(dp),parameter :: PPAD=tol8
  real(dp) :: cosphi,costh,costhreephi,costwophi,r,rxy,sinphi,sinth,sinthreephi,sintwophi,c
  character(len=500) :: msg
+ complex(dpc) :: ctmp 
 
 ! *************************************************************************
 
@@ -356,8 +352,10 @@ subroutine ylmcd(il,im,kcart,dth,dphi)
 !
 !=== Treat the case im < 0 ===
  if (im<0) then
-   dth = (-one)**(im)*CONJG(dth)
-   dphi= (-one)**(im)*CONJG(dphi)
+   ctmp = (-one)**(im)*CONJG(dth)
+   dth = ctmp
+   ctmp= (-one)**(im)*CONJG(dphi)
+   dphi= ctmp
  end if
 
 end subroutine ylmcd
@@ -385,11 +383,6 @@ end subroutine ylmcd
 !!
 !! NOTES
 !!  We are supressing the so-called Condon-Shortley phase
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -533,12 +526,6 @@ end subroutine ylm_cmplx
 !! Remember the expression of real spherical harmonics as linear combination of imaginary spherical harmonics:
 !! $Yr_{lm}(%theta ,%phi)=(Re{Y_{l-m}}+(-1)^m Re{Y_{lm}})/sqrt{2}
 !! $Yr_{l-m}(%theta ,%phi)=(Im{Y_{l-m}}-(-1)^m Im{Y_{lm}})/sqrt{2}
-!!
-!! PARENTS
-!!      m_mlwfovlp,m_paw_finegrid,m_paw_mkrho,m_paw_overlap,m_paw_pwaves_lmn
-!!      m_pawang,m_positron,m_rec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -741,11 +728,6 @@ end subroutine initylmr
 !! Ylm is the standard complex-valued spherical harmonic, Slm is the real spherical harmonic
 !! used througout abinit. 
 !!
-!! PARENTS
-!!      m_epjdos,m_paw_sphharm
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ys(l2,m2,l1,m1,ys_val)
@@ -757,28 +739,33 @@ subroutine ys(l2,m2,l1,m1,ys_val)
 
 !Local variables ---------------------------------------
  !scalars
- integer :: am1
- real(dp) :: pam1,pm1
+ integer :: mp1
 
 ! *********************************************************************
 
+! See Blanco et al., J. Mol Struct. 419, 19-27 (1997) Eq. 19
+! <Y_l2,m2|S_l1,m1> is given by C^l_{m1,m2} where
+! l1 == l2 and |m1| == |m2|, 0 otherwise
 
  ys_val = czero
 
  if ( l2 /= l1 ) return
+ if ( abs(m2) /= abs(m1) ) return
 
- pm1=(-one)**m1
- am1=abs(m1)
- pam1=(-one)**am1
-
- if (m1 > 0) then
-   if (m2 ==  m1) ys_val=pm1*sqrthalf
-   if (m2 == -m1) ys_val=sqrthalf
- else if (m1 == 0) then
-   if (m2 == m1) ys_val = cone
+ mp1=(-1)**abs(m1)
+ 
+ if(m1.EQ.0) then
+   ys_val=cone
+ else if((m1.GT.0).AND.(m2.GT.0)) then
+   ys_val=mp1*sqrthalf
+ else if((m1.GT.0).AND.(m2.LT.0)) then
+   ys_val=sqrthalf
+ else if((m1.LT.0).AND.(m2.GT.0)) then
+   ys_val=-j_dpc*mp1*sqrthalf
+ else if((m1.LT.0).AND.(m2.LT.0)) then
+   ys_val=j_dpc*sqrthalf
  else
-   if (m2 ==  am1) ys_val=-j_dpc*pm1*sqrthalf
-   if (m2 == -am1) ys_val = j_dpc*pm1*sqrthalf*pam1
+   ys_val=czero
  end if
 
 end subroutine ys
@@ -803,11 +790,6 @@ end subroutine ys
 !!  Ylm is the standard complex-valued spherical harmonic,
 !!  idir is the direction in space of L
 !!
-!! PARENTS
-!!      m_paw_sphharm
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine lxyz(lp,mp,idir,ll,mm,lidir)
@@ -827,9 +809,13 @@ subroutine lxyz(lp,mp,idir,ll,mm,lidir)
  if ( lp /= ll ) return
 
  jpme=czero; jmme=czero; jme=czero
- if (mp==mm+1) jpme=-cone*sqrt(half*((ll*(ll+1))-mm*(mm+1)))
- if (mp==mm-1) jmme= cone*sqrt(half*((ll*(ll+1))-mm*(mm-1)))
- if (mp==mm) jme=cone*mm
+ if (mp==mm) then 
+   jme=cone*mm
+ else if (mp==mm+1) then
+   jpme=-cone*sqrt(half*((ll*(ll+1))-mm*(mm+1)))
+ else if (mp==mm-1) then
+   jmme= cone*sqrt(half*((ll*(ll+1))-mm*(mm-1)))
+ end if
 
  select case (idir)
    case (1) ! Lx
@@ -862,11 +848,6 @@ end subroutine lxyz
 !! Slm is the real spherical harmonic used througout abinit,
 !! L_idir is a component of the angular momentum operator.
 !! The subroutine computes <S_l'm'|L_idir|S_lm>
-!!
-!! PARENTS
-!!      m_orbmag,m_paw_nmr,m_pawdij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -916,11 +897,6 @@ end subroutine slxyzs
 !!
 !! OUTPUT
 !!  blm(5,mpsang*mpsang)=coefficients depending on Plm and its derivatives where P_lm is a legendre polynome
-!!
-!! PARENTS
-!!      m_initylmg,m_paw_sphharm
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1023,10 +999,6 @@ end subroutine plm_coeff
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function ass_leg_pol(l,m,xarg)
@@ -1096,11 +1068,6 @@ end function ass_leg_pol
 !!
 !! OUTPUT
 !!  plm_d2t(mpsang*mpsang)
-!!
-!! PARENTS
-!!      m_paw_sphharm
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1180,10 +1147,6 @@ end subroutine plm_d2theta
 !! NOTES
 !!  This routine comes from Function Der_Phi_P(L,m,x)
 !!  (pwpaw code from N. Holzwarth, implemented by Y. Abraham))
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1266,10 +1229,6 @@ end function plm_dphi
 !! NOTES
 !!  This routine comes from Function Der_Theta_P(L,m,x)
 !!  (pwpaw code from N. Holzwarth, implemented by Y. Abraham))
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1354,11 +1313,6 @@ end function plm_dtheta
 !! OUTPUT
 !!  pl_d2(mpsang*mpsang)
 !!
-!! PARENTS
-!!      m_paw_sphharm
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pl_deriv(mpsang,pl_d2,xx)
@@ -1430,11 +1384,6 @@ end subroutine pl_deriv
 !!  of beta when cosbeta was close to one (indeed this is a special case). 
 !!  This has been corrected. Moreover, sinbeta has been made an output in order
 !!  to allow accurate calculations in dbeta. Also, tolerances have been made consistent.
-!!
-!! PARENTS
-!!      m_paw_sphharm
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1542,10 +1491,6 @@ end subroutine mkeuler
 !! OUTPUT
 !!   factorial= N! (double precision)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function dble_factorial(nn)
@@ -1598,11 +1543,6 @@ end function dble_factorial
 !!  - XG20200718 This routine was inaccurate when cosbeta was close to one or minus one. 
 !!    This has been fixed by adding sinbeta argument obtained from mkeuler. 
 !!    Tolerances have been adjusted as well.
-!!
-!! PARENTS
-!!     m_paw_sphharm
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1698,11 +1638,6 @@ end function dbeta
 !!  - This file comes from the file crystal_symmetry.f
 !!    by N.A.W. Holzwarth and A. Tackett for the code pwpaw
 !!
-!! PARENTS
-!!     m_paw_sphharm
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function phim(costheta,sintheta,mm)
@@ -1757,11 +1692,6 @@ pure function phim(costheta,sintheta,mm)
 !!
 !! NOTES
 !!  usefull only in ndij==4
-!!
-!! PARENTS
-!!      m_paw_correlations,m_paw_tools,m_pawang
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2023,11 +1953,6 @@ subroutine mat_mlms2jmj(lcor,mat_mlms,mat_jmj,ndij,option,optspin,prtvol,unitfi,
 !! NOTES
 !!  usefull only in ndij==4
 !!
-!! PARENTS
-!!      m_paw_correlations,m_paw_tools,m_pawang
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mat_slm2ylm(lcor,mat_inp_c,mat_out_c,ndij,option,optspin,prtvol,unitfi,wrt_mode)
@@ -2179,10 +2104,6 @@ end subroutine mat_slm2ylm
 !! NOTES
 !!  useful only in ndij==4
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine create_slm2ylm(lcor,slmtwoylm)
@@ -2237,10 +2158,6 @@ end subroutine create_slm2ylm
 !!
 !! SIDE EFFECTS
 !!  mlms2jmj= rotation matrix
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2354,13 +2271,6 @@ end subroutine create_mlms2jmj
 !!  Blanco M.A., Florez M. and Bermejo M.
 !!  Journal of Molecular Structure: THEOCHEM, Volume 419, Number 1, 8 December 1997 , pp. 19-27(9)
 !!  http://www.unioviedo.es/qcg/art/Theochem419-19-ov-BF97-rotation-matrices.pdf
-!!
-!! PARENTS
-!!      m_berryphase_new,m_bethe_salpeter,m_dfpt_looppert,m_gstate,m_nonlinear
-!!      m_orbmag,m_respfn_driver,m_screening_driver,m_sigma_driver
-!!      m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2509,11 +2419,6 @@ end subroutine setsym_ylm
 !!  NOTES
 !!   See : Mazevet, S., Torrent, M., Recoules, V. and Jollet, F., High Energy Density Physics, 6, 84-88 (2010)
 !!         Calculations of the Transport Properties within the PAW Formalism
-!! PARENTS
-!!      m_paw_onsite
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine setnabla_ylm(ang_phipphj,mpsang)
@@ -2910,10 +2815,6 @@ end subroutine setsym_ylm
 !! OUTPUT
 !!   factorial= n! (real)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function rfactorial(nn)
@@ -2953,10 +2854,6 @@ end function rfactorial
 !!
 !! OUTPUT
 !!   perms= n!/(n-k)!
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3003,8 +2900,6 @@ end function perms
 !!
 !! OUTPUT
 !!   gaunt(ll,mm,l1,l2,m1,m2)=the value of the integral
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3123,11 +3018,6 @@ function gaunt(ll,mm,l1,m1,l2,m2)
 !!                           the coeff. in realgnt(:) array
 !!  ngnt= number of non-zero Gaunt coefficients
 !!  realgnt((2*l_max-1)**2*l_max**4)= non-zero real Gaunt coefficients
-!!
-!! PARENTS
-!!      m_paw_slater,m_pawang,m_pawpwij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3286,11 +3176,6 @@ end subroutine realgaunt
 !! nablagaunt((mpsang**2)**3)= stores the integrals' values
 !!  NOTES
 !!  
-!! PARENTS
-!!      m_pawang
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine nablarealgaunt(mpsang,nnablagnt,nabgauntselect,nablagaunt) 

@@ -1,0 +1,83 @@
+#   Test  iron BCC metallic spin-polarized ferromagnetic collinear and non-collinear
+
+ndtset 7
+
+nsppol1   2   spinat1 0 0 4     nband1 12
+nsppol2   2   spinat2 0 0 4     nband2 12    getwfk2 -1  nstep2  1
+
+nspinor3  2  nspden3  4  spinat3 0 0 4     
+nband3 24    getwfk3 -1  
+#tolvrs3 1.1d-10  # getden3 -1  
+tolvrs3 1.0d-14
+nstep3 12
+#This can be seen to help but was not activated !
+
+# The changes of tolvrs are there only to favor portability.
+nspinor4  2  nspden4  4  spinat4 0 0 4    
+nband4 24    getwfk4 -1  nstep4  1    tolvrs4   2.0d-10
+ 
+nspinor5  2   nspden5  4    spinat5 4 0 0     nband5 24
+nspinor6  2   nspden6  4    spinat6 0 4 0     nband6 24
+nspinor7  2  nspden7  4    spinat7 sqrt(8.0) sqrt(8.0) 0  nband7 24
+
+#
+
+kptopt 3  #    kptopt 4 # Should work as well, but yield convergence problems
+ecut 10.0
+nstep 26
+
+pawecutdg 20.0
+pawspnorb 0    #   This is for testing purposes only : one expect the collinear 
+               #results to be exactly equal to the non-collinear results, 
+               # so spin-orbit coupling must be suppressed
+
+occopt 7
+
+tolvrs    1.0d-10
+
+#Definition of the k-point grid
+ ngkpt 2 2 2   # Much too coarse. Only for testing purposes.
+
+#Definition of the atoms
+natom 1
+typat 1           # This atom is of type 1, that is, Fe
+xred              # This keyword indicate that the location of the atoms
+   0.0  0.0  0.0  # will follow, one triplet of number for each atom
+                  # Triplet giving the REDUCED coordinate of atom 1.
+ntypat 1
+znucl 26
+
+#Definition of the unit cell
+acell   3*4.8
+rprim     -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pbe_standard/Fe.xml"
+ ixc 11   # Imposing use of internal PBE for portability purposes
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t94.abo, tolnlines = 9, tolabs = 4.0, tolrel = 1.0 , fld_options= -ridiculous;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = X. Gonze
+#%% keywords = PAW
+#%% description =
+#%%   BCC iron, ferromagnetic, GGA, PAW.
+#%%   Test collinear treatment as well as non-collinear, with different starting spinat
+#%%   See test v9#41 for DFPT, with the same PAW atomic data, and same usexcnhat=0 (default).
+#%%   The total energy and stress change very little between all calculations. Good !
+#%%   Note however that the SCF convergence is quite slow. Thus the good match was not obtained with 
+#%%   the initial value of nstep 12 (now nstep 30).
+#%%   Also, note that the restart from a collinear calculation of a non-collinear calculation along z does not work well 
+#%%   with getwfk alone (DS3). After tuning the test, the use of getden -1 has been tried (in addition to getwfk -1),
+#%%   and was observed to help significantly, although not being perfect as in DS2 or DS4.
+#%%  Also, the portability of the restart is rather poor. This warrants further investigation.
+#%% topics = PAW
+#%%<END TEST_INFO>

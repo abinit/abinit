@@ -6,14 +6,10 @@
 !!  Thin wrappers and tools for OpenMP parallelization.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -63,12 +59,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      abinit,fftprof,lapackprof
-!!
-!! CHILDREN
-!!      omp_set_num_threads
-!!
 !! SOURCE
 
 subroutine xomp_show_info(unit)
@@ -89,7 +79,7 @@ subroutine xomp_show_info(unit)
  write(my_unt,'(a,i0)') "- Num_threads:       ",xomp_get_num_threads(open_parallel=.True.)
  write(my_unt,'(a,i0)') "- Num_procs:         ",omp_get_num_procs()
  write(my_unt,'(a,l1)') "- Dynamic:           ",omp_get_dynamic()
- write(my_unt,'(a,l1)') "- Nested:            ",omp_get_nested()
+ !write(my_unt,'(a,l1)') "- Nested:            ",omp_get_nested()
  !write(my_unt,'(a,i0)')"- Thread_limit:      ",omp_get_thread_limit()
  !write(my_unt,'(a,i0)')"- Max_active_levels: ",omp_get_max_active_levels()
 #else
@@ -114,16 +104,11 @@ end subroutine xomp_show_info
 !!  Return the maximum number of threads used for the current parallel region that
 !!  does not use the clause num_threads. Return 1 if OMP is disabled.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function xomp_get_max_threads()
 
 !Arguments ------------------------------------
-!scalars
  integer :: xomp_get_max_threads
 
 ! *************************************************************************
@@ -149,10 +134,6 @@ end function xomp_get_max_threads
 !!  In a sequential parts of the program, omp_get_thread_num always returns 0.
 !!  In parallel regions the return value varies from 0 to omp_get_num_threads-1 inclusive.
 !!  The return value of the master thread of a team is always 0.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -193,10 +174,6 @@ end function xomp_get_thread_num
 !!                   will be called inside this region.
 !!                   Default to .FALSE. so that we have consistent with the OMP API.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function xomp_get_num_threads(open_parallel) result(nthreads)
@@ -213,8 +190,8 @@ function xomp_get_num_threads(open_parallel) result(nthreads)
 ! *************************************************************************
 
  do_open = .FALSE.; if (PRESENT(open_parallel)) do_open = open_parallel
-#ifdef HAVE_OPENMP
 
+#ifdef HAVE_OPENMP
  if (do_open .and. .not.xomp_in_parallel()) then
 !$OMP PARALLEL
 !$OMP SINGLE
@@ -248,12 +225,6 @@ end function xomp_get_num_threads
 !! SIDE EFFECTS
 !!  See description.
 !!
-!! PARENTS
-!!      lapackprof,m_argparse,m_fft,m_fft_prof
-!!
-!! CHILDREN
-!!      omp_set_num_threads
-!!
 !! SOURCE
 
 subroutine xomp_set_num_threads(nthreads)
@@ -281,9 +252,6 @@ end subroutine xomp_set_num_threads
 !!
 !! FUNCTION
 !!  This function returns true if are currently running in parallel, false otherwise
-!!
-!! CHILDREN
-!!      omp_in_parallel
 !!
 !! SOURCE
 
@@ -315,11 +283,6 @@ end function xomp_in_parallel
 !! OUTPUT
 !!  Return the maximum number of cores in one shared memory system
 !!  Return 0 if OMP is disabled.
-!!
-!! PARENTS
-!!  m_abi_linalg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

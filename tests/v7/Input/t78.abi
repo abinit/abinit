@@ -79,8 +79,13 @@ ucrpa 2              # The screening will use the Wannier weights to suppress tr
 ucrpa_bands4  12 25  # In principle, it is useless for ucrpa=2. It is however still necessary for technical reasons even if is redundant with dmftbandi and dmftbandf.
 
 # -- Ucrpa: Wannier functions
-dmftbandi3 12       # Precise the definition of Wannier functions (also used for DMFT calculations)
-dmftbandf3 25       # Precise the definition of Wannier functions (also used for DMFT calculations)
+plowan_bandi 12 # First band for Wannier functions
+plowan_bandf 25 # Last band for Wannier functionsions)
+plowan_natom 1 # Number of atoms
+plowan_iatom 1  # Index of atoms
+plowan_nbl 1  # Number of the orbitals
+plowan_lcalc 2  # Index of the orbitals (2 -> d)
+plowan_projcalc 7  # Projector for the orbitals 
 
 # -- DFTU: 1st dataset and definition of correlated angular momentum
 usepawu    1        # DFT+U is used just for printing usefull quantities.
@@ -117,18 +122,16 @@ getwfk3 -1
 nbandkss3 -1         # Number of bands in KSS file (-1 means the maximum possible)
 tolvrs3   1.0d-13
 kssform 3
-# == LDA+DMFT
-usedmft3 1           # usefull to compute Wannier functions.
-dmft_nwlo3 10
-dmft_nwli3 20000
-dmft_iter3 0
-dmft_solv3 2         # usefull to avoid supplementary variables in the input file.
+
+# == Compute Projected Wannier functions
+plowan_compute3 1 # Activate the computation of Wannier functions
 
 #==================================================================================
 ############ FOURTH DATASET:  Calculation of the screening (epsilon^-1 matrix)
 #==================================================================================
  optdriver4     3     # Screening calculation
  getwfk4       -1     # Obtain WFK file from previous dataset
+ plowan_compute4 10   # Read Wannier functions
  nfreqim4       0
  gwcalctyp4 2
  symsigma       0
@@ -142,6 +145,7 @@ dmft_solv3 2         # usefull to avoid supplementary variables in the input fil
  optdriver5  4      # Self-Energy calculation
  getwfk5     3      # Obtain WFK file from dataset 1
  getscr5     4      # Obtain SCR file from previous dataset
+ plowan_compute5 10 # Read Wannier functions
  ppmodel  2         # in order to use only one frequency
  nkptgw5      0     # number of k-point where to calculate the GW correction: all BZ
  gwcalctyp5 2       # activate HF or ucrpa
@@ -163,5 +167,5 @@ dmft_solv3 2         # usefull to avoid supplementary variables in the input fil
 #%% keywords = GW, cRPA, DMFT
 #%% authors =  B. Amadon
 #%% description = For SrVO3, compute cRPA screened interaction U in the d-dp(b) model
-#%% topics = CRPA
+#%% topics = CalcUJ
 #%%<END TEST_INFO>

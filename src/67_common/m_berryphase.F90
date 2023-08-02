@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2021 ABINIT  group (NSAI,XG,MKV)
+!! Copyright (C) 2000-2022 ABINIT  group (NSAI,XG,MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -148,12 +144,6 @@ contains
 !! This routine is not yet memory optimized
 !! It might be also rather time-consuming, since there is a
 !! double loop on the number of plane waves.
-!!
-!! PARENTS
-!!      m_elpolariz
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,matr3inv,wrtout,xred2xcart
 !!
 !! SOURCE
 

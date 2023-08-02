@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MMancini)
+!! Copyright (C) 2005-2022 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,12 +44,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  !--Similar to SWCALC but without the triplets (used for the pair potential part and for the coordination) 
  subroutine phi_n_calc(alpha_dum,nneig,nlist,r0,rv,epot_dum,&
@@ -176,12 +170,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine calc_coord2(nneig,r0,rv,coordatom_dum)
 
@@ -219,12 +207,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine eval_forces_U_n(nneig,nlist,r0,rv,up_list,forc_dum2)
   use pbc_lotf,only : dist_pbc
@@ -269,12 +251,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine eval_forces_U_n_2(alpha_dum,nneig,nlist,&
    r0,rv,up_list,rho_p_sum,forc_dum2)
@@ -353,12 +329,6 @@ contains
  !! FUNCTION
  !!
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine eval_force_devs_new_d(alpha_dum,nneig,nlist,neig2,nlist2,&
    r0,rv,rv2,up_list,upp_list,fact2,ffit,&
@@ -549,12 +519,6 @@ contains
  !! upgraded to use the linked cell method (Knuth) 
  !! 
  !! INPUTS
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine  upd_lis0(tau0,neighl,nneig,niter)   
   use defs_param_lotf,only : lotfvar
@@ -790,12 +754,6 @@ contains
  !!  all the bonds considered here are already 100% in the fitting zone.    
  !!  Here we just need to eliminate bonds or triplets that are too long..
  !! 
- !! PARENTS
-!!      m_lotf
-!!
- !! CHILDREN
-!!      dist_pbc,wrtout
-!!
  !! SOURCE
  subroutine tuneparms(tau0,tfit_int,rcf2_int)
 

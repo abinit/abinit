@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
 
 #
 # MPI detection with Steredeg
@@ -349,7 +349,7 @@ AC_DEFUN([_SD_MPI_INIT_CC], [
       if test "${sd_mpi_cc}" != ""; then
         sd_mpi_cc_set="yes"
       else
-        AC_CHECK_PROGS([sd_mpi_cc], [mpicc])
+        AC_CHECK_PROGS([sd_mpi_cc], [mpiicc mpicc])
         if test "${sd_mpi_cc}" != ""; then
           AC_MSG_NOTICE([setting CC to '${sd_mpi_cc}'])
           CC="${sd_mpi_cc}"
@@ -460,7 +460,7 @@ AC_DEFUN([_SD_MPI_INIT_CXX], [
       if test "${sd_mpi_cxx}" != ""; then
         sd_mpi_cxx_set="yes"
       else
-        AC_CHECK_PROGS([sd_mpi_cxx], [mpic++ mpicxx])
+        AC_CHECK_PROGS([sd_mpi_cxx], [mpiicpc mpic++ mpicxx])
         if test "${sd_mpi_cxx}" != ""; then
           AC_MSG_NOTICE([setting CXX to '${sd_mpi_cxx}'])
           CXX="${sd_mpi_cxx}"
@@ -566,7 +566,7 @@ AC_DEFUN([_SD_MPI_INIT_FC], [
       if test "${sd_mpi_fc}" != ""; then
         sd_mpi_fc_set="yes"
       else
-        AC_CHECK_PROGS([sd_mpi_fc], [mpifort mpif90 mpif95])
+        AC_CHECK_PROGS([sd_mpi_fc], [mpiifort mpifort mpif90 mpif95])
         if test "${sd_mpi_fc}" != ""; then
           AC_MSG_NOTICE([setting FC to '${sd_mpi_fc}'])
           FC="${sd_mpi_fc}"

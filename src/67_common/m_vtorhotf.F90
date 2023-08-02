@@ -6,14 +6,10 @@
 !! Computes the new density from a fixed potential (vtrial) using the Thomas-Fermi functional
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MF, AR, MM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MF, AR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -80,11 +76,6 @@ contains
 !! SIDE EFFECTS
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -183,11 +174,6 @@ subroutine vtorhotf(dtset,ek,enlx,entropy,fermie,gprimd,grnl,&
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtorhotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
   subroutine tf()
 
@@ -267,11 +253,6 @@ end subroutine tf
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtorhotf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
   subroutine tfek()
@@ -338,10 +319,6 @@ end subroutine tf
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -416,10 +393,6 @@ end function zfermim12
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -502,10 +475,6 @@ end function zfermi12
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi1(xx)
@@ -583,10 +552,6 @@ end function zfermi1
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -666,10 +631,6 @@ end function zfermi32
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi2(xx)
@@ -741,10 +702,6 @@ end function zfermi2
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -823,10 +780,6 @@ end function zfermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function zfermi3(xx)
@@ -900,10 +853,6 @@ end function zfermi3
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function ifermim12(ff)
@@ -975,10 +924,6 @@ end function ifermim12
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function ifermi12(ff)
@@ -1046,10 +991,6 @@ end function ifermi12
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1119,10 +1060,6 @@ end function ifermi32
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function ifermi52(ff)
@@ -1189,10 +1126,6 @@ end function ifermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function fp12a1 (x)
@@ -1237,10 +1170,6 @@ end function ifermi52
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1287,10 +1216,6 @@ end function ifermi52
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1339,10 +1264,6 @@ end function ifermi52
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  function fm12a1 (x)
@@ -1387,11 +1308,6 @@ end function ifermi52
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_vtorhotf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

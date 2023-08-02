@@ -6,14 +6,10 @@
 !!   Read/Write wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA,XG,GMR,MVer,MB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -126,13 +122,6 @@ contains
 !!  Some arguments are contained in the wff datastructure, and should be eliminated.
 !!  option 3 should be called -3 (reading -> negative option) and others (-1,1) re-shuffled.
 !!
-!! PARENTS
-!!      m_elpolariz,m_inwffil,m_iowf,m_rwwf,m_wfk
-!!
-!! CHILDREN
-!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
-!!      xderivewrecinit,xderivewrite,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rwwf(cg,eigen,formeig,headform,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
@@ -216,13 +205,6 @@ end subroutine rwwf
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
-!!      xderivewrecinit,xderivewrite,xmpi_sum
-!!
 !! SOURCE
 
 subroutine WffReadSkipK(formeig,headform,ikpt,isppol,mpi_enreg,wff)
@@ -304,13 +286,6 @@ end subroutine WffReadSkipK
 !!  WARNING : occ is not read in the present status of this routine
 !!  WARNING : skipping k-blocks is also done in the randac subroutine
 !!  WARNING : reading the two first records is also done in the rdnpw routine
-!!
-!! PARENTS
-!!      m_rwwf
-!!
-!! CHILDREN
-!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
-!!      xderivewrecinit,xderivewrite,xmpi_sum
 !!
 !! SOURCE
 
@@ -786,13 +761,6 @@ end subroutine readwf
 !! NOTES
 !!  WARNING : skipping k-blocks is also done in the randac subroutine
 !!  WARNING : writing the two first records is also done in the dfpt_vtowfk routine
-!!
-!! PARENTS
-!!      m_rwwf
-!!
-!! CHILDREN
-!!      mpi_bcast,wffreadwrite_mpio,wffwritenpwrec,xderivewrecend
-!!      xderivewrecinit,xderivewrite,xmpi_sum
 !!
 !! SOURCE
 

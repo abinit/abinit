@@ -7,20 +7,20 @@
 !!  The DVDB file is Fortran binary file with a collection of DFPT potentials
 !!  associated to the different phonon perturbations (idir, ipert, qpt).
 !!  DVDB files are produced with the `mrgdv` utility and used in the EPH code
-!!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
+!!  to compute the matrix elements: <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG,GA)
+!! Copyright (C) 2009-2022 ABINIT group (MG, GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! TODO
-!!  Do we still need to support the case in which the potentials are read from file
-!!  without interpolation? We know that IO is gonna be terrible.
-!!
-!! PARENTS
+!!  - Do we still need to support the case in which the potentials are read from file
+!!    without interpolation? We know that IO is gonna be terrible.
+!!  - Check spin and MPI-parallelism. Can we distributed nsppol?
+!!  - Rewrite qcache from scratch, keep only the IBZ of the present iteration
 !!
 !! SOURCE
 
@@ -39,9 +39,7 @@ module m_dvdb
  use m_distribfft
  use m_nctk
  use m_sort
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_ddb
  use m_ddb_hdr
@@ -63,7 +61,7 @@ module m_dvdb
  use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp, zerosym
  use m_crystal,       only : crystal_t
- use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk
+ use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
  use m_pawrhoij,      only : pawrhoij_type
@@ -313,12 +311,19 @@ module m_dvdb
 
   integer :: add_lr = 1
    ! Flag defining the treatment of the long range component in the interpolation of the DFPT potentials.
+   !
    ! 0 --> No treatment
    ! 1 --> Remove LR model when building W(R,r). Add it back after W(R,r) --> v(q) Fourier interpolation
    !       This is the standard approach for polar materials.
    ! -1 --> Remove LR model when building W(R,r). DO NOT reintroduce it after Fourier interpolation.
    !       This procedure should be used for homopolar materials with (spurious) non-zero BECS
    !       in order to remove the long range component from the DFPT potentials.
+   ! 2 --> Similar to 1 but include only the dipole part. Q* are set to zero even if the DDB file contains them.
+   ! 4,5,6,7 --> Use model for the LR part only.
+   !        4: Use dipole + quadrupole part (if available)
+   !        5: Use dipole part only.
+   !        6: Use quadrupole part only.
+   !        7: Use electric field only.
 
   integer :: symv1 = 0
    ! Flag for the symmetrization of v1 potentials.
@@ -567,11 +572,6 @@ contains
 !!   path=DVDB Filename.
 !!   comm=MPI communicator.
 !!
-!! PARENTS
-!!      eph,m_dvdb,mrgdv
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(dvdb_t) function dvdb_new(path, comm) result(new)
@@ -796,11 +796,6 @@ end function dvdb_new
 !!     found in the file. In this case a Fourier interpolation is required.
 !!   comm=MPI communicator
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_open_read(db, ngfft, comm)
@@ -883,11 +878,6 @@ end subroutine dvdb_open_read
 !! FUNCTION
 !! Close the file
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_close(db)
@@ -918,11 +908,6 @@ end subroutine dvdb_close
 !!
 !! FUNCTION
 !! Close the file and release the memory allocated.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -988,11 +973,6 @@ end subroutine dvdb_free
 !! OUTPUT
 !!  Only printing.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
@@ -1024,8 +1004,11 @@ subroutine dvdb_print(db, header, unit, prtvol, mode_paral)
  write(my_unt,"(a)")sjoin(" File path:", db%path)
  write(my_unt,"(a)")sjoin(" Number of v1scf potentials:", itoa(db%numv1))
  write(my_unt,"(a)")sjoin(" Number of q-points in DVDB: ", itoa(db%nqpt))
+ ! TODO
+ !if (with_mpi) then
  write(my_unt,"(a)")sjoin("-P Number of CPUs for parallelism over perturbations:", itoa(db%nprocs_pert))
  write(my_unt,"(a)")sjoin("-P Number of perturbations treated by this CPU:", itoa(db%my_npert))
+ !end if
  write(my_unt,"(a)")sjoin(" Option for symmetrization of v1scf(r):", itoa(db%symv1))
  write(my_unt,"(a)")" List of q-points: min(10, nqpt)"
  do iq=1,min(db%nqpt, 10)
@@ -1140,10 +1123,6 @@ end subroutine dvdb_print
 !!     pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
 !!     pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function dvdb_get_pinfo(db, iqpt, cplex, pinfo) result(nperts)
@@ -1202,10 +1181,6 @@ end function dvdb_get_pinfo
 !!  ierr=Non-zero if error.
 !!  v1scf(cplex*nfft, nspden)=DFT potential associated to (idir, ipert, iqpt).
 !!  msg=String with error message if ierr /= 0.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1343,11 +1318,6 @@ end function dvdb_read_onev1
 !!  cplex=1 if real, 2 if complex.
 !!  v1scf(cplex, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_readsym_allv1(db, iqpt, cplex, nfft, ngfft, v1scf, comm)
@@ -1460,11 +1430,6 @@ end subroutine dvdb_readsym_allv1
 !!  cplex=1 if real, 2 if complex.
 !!  v1scf(cplex, nfft, nspden, db%my_npert)= v1scf potentials on the real-space FFT mesh
 !!   for the db%my_npert perturbations treated by this MPI rank.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1661,10 +1626,6 @@ end subroutine dvdb_readsym_qbz
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, nspden) result(qcache)
@@ -1696,12 +1657,14 @@ type(qcache_t) function qcache_new(nqpt, nfft, ngfft, mbsize, natom3, my_npert, 
    qcache%maxnq = max(min(qcache%maxnq, nqpt), 1)
  end if
 
+ ! TODO: Get rid of maxnq, keep use_3natom_cache only.
+
  ! Allocate cache with all the 3*natom perturbations.
- ! Disable it no parallelism over perturbations.
+ ! Disable it if no parallelism over perturbations.
  ! Disabled as slow FT R --> q seems to be faster.
  qcache%use_3natom_cache = .False.
  !qcache%use_3natom_cache = .True.
- if (my_npert == natom3) qcache%use_3natom_cache = .False.
+ !if (my_npert == natom3) qcache%use_3natom_cache = .False.
  qcache%stored_iqibz_cplex = huge(1)
  if (qcache%use_3natom_cache) then
    ABI_MALLOC(qcache%v1scf_3natom_qibz, (2, nfft, nspden, natom3))
@@ -1740,11 +1703,6 @@ end function qcache_new
 !!  comm=MPI communicator
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -1838,11 +1796,6 @@ end subroutine dvdb_qcache_read
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_qcache_update_from_file(db, nfft, ngfft, ineed_qpt, comm)
@@ -1924,11 +1877,6 @@ end subroutine dvdb_qcache_update_from_file
 !! FUNCTION
 !!  Free dynamic memory.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine qcache_free(qcache)
@@ -1967,11 +1915,6 @@ end subroutine qcache_free
 !! FUNCTION
 !!  Print info on q-cache states and reset counters.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine qcache_report_stats(qcache)
@@ -1983,7 +1926,7 @@ subroutine qcache_report_stats(qcache)
 ! *************************************************************************
 
  if (qcache%maxnq == 0) then
-   write(std_out, "(/,a)")" MPI-distributed q-cache deactivated as maxnq == 0"
+   !write(std_out, "(/,a)")" MPI-distributed q-cache deactivated as maxnq == 0"
    if (qcache%use_3natom_cache) then
      write(std_out, "(a,i0,2x,a,f5.1,a)") &
        " Cache hit in v1scf_3natom_qibz: ", qcache%stats(2), "(", (100.0_dp * qcache%stats(2)) / qcache%stats(1), "%)"
@@ -2017,10 +1960,6 @@ end subroutine qcache_report_stats
 !!
 !! FUNCTION
 !!  Return the (allocated) size of the cache in Mb.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2064,10 +2003,6 @@ end function qcache_get_mbsize
 !!
 !! OUTPUTS
 !!  msg=Warning message if ierr /= 0
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2147,12 +2082,6 @@ end function qcache_make_room
 !!  v1scf(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials.
 !!    in input: filled with the irreducible potentials (corresponding pflag set to 1)
 !!    output: Contains full set of perturbations.
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2393,12 +2322,6 @@ end subroutine v1phq_complete
 !!  itirev_eq
 !!  g0_qpt(3)
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine find_symeq(cryst, idir, ipert, symq, pflag, ipert_eq, isym_eq, itirev_eq, g0_qpt, allow_g0)
@@ -2485,12 +2408,6 @@ end subroutine find_symeq
 !! OUTPUT
 !!  v1r_qbz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space for the q-point in the BZ
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, nspden, &
@@ -2510,7 +2427,7 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp0 = 0
- integer,save :: enough = 0
+ !integer,save :: enough = 0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,my_rank,nproc,ierr,root
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
@@ -2559,11 +2476,10 @@ subroutine v1phq_rotate(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, 
      ! Phase due to L0 + R^{-1}tau
      l0 = cryst%indsym(1:3,isym,ipert)
      tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
-     ! FIXME
-     if (.not. all(abs(tnon) < tol12)) then
-       enough = enough + 1
-       if (enough == 1) ABI_WARNING("tnon must be tested!")
-     end if
+     !if (.not. all(abs(tnon) < tol12)) then
+     !  enough = enough + 1
+     !  if (enough == 1) ABI_WARNING("tnon must be tested!")
+     !end if
 
      ipert_eq = cryst%indsym(4, isym, ipert)
 
@@ -2639,12 +2555,6 @@ end subroutine v1phq_rotate
 !! OUTPUT
 !!  v1r_qbz(cplex*nfft,nspden,3*cryst%natom)=Array with first order potentials in real space for the q-point in the BZ
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex, nfft, nspden, &
@@ -2664,7 +2574,7 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
 !Local variables-------------------------------
 !scalars
  integer,parameter :: tim_fourdp0 = 0
- integer,save :: enough = 0
+ !integer,save :: enough = 0
  integer :: natom3,mu,ispden,idir,ipert,idir_eq,ipert_eq,mu_eq,cnt,tsign,imyp !ierr,
 !arrays
  integer :: symrec_eq(3,3),sm1(3,3),l0(3) !g0_qpt(3), symrel_eq(3,3),
@@ -2703,11 +2613,10 @@ subroutine v1phq_rotate_myperts(cryst, qpt_ibz, isym, itimrev, g0q, ngfft, cplex
    ! Phase due to L0 + R^{-1}tau
    l0 = cryst%indsym(1:3,isym,ipert)
    tnon = l0 + matmul(transpose(symrec_eq), cryst%tnons(:,isym))
-   ! FIXME
-   if (.not. all(abs(tnon) < tol12)) then
-     enough = enough + 1
-     if (enough == 1) ABI_WARNING("tnon must be tested!")
-   end if
+   !if (.not. all(abs(tnon) < tol12)) then
+   !  enough = enough + 1
+   !  if (enough == 1) ABI_WARNING("tnon must be tested!")
+   !end if
 
    ipert_eq = cryst%indsym(4, isym, ipert)
 
@@ -2772,12 +2681,6 @@ end subroutine v1phq_rotate_myperts
 !!
 !! SIDE EFFECTS
 !!  v1r(cplex*nfft,nspden)=Array with first order potentials in real space. Symmetrized in output.
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2851,12 +2754,6 @@ end subroutine v1phq_symmetrize
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -2987,11 +2884,6 @@ end subroutine rotate_fqg
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  comm_rpt = MPI communicator used to distribute R-lattice points.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt)
@@ -3029,8 +2921,8 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  ! with all procs inside comm_rpt to avoid MPI deadlocks.
  db%comm_rpt = comm_rpt; db%nprocs_rpt = xmpi_comm_size(db%comm_rpt); db%me_rpt = xmpi_comm_rank(db%comm_rpt)
 
- if (db%add_lr == 4) then
-   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr = 4")
+ if (db%add_lr >= 4) then
+   call wrtout(std_out, " Skipping construction of W(R,r) because add_lr >= 4. Wll use LR part only!")
    return
  end if
 
@@ -3038,7 +2930,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
 
  call wrtout(std_out, sjoin(ch10, "Building W(R,r) using q-mesh ngqpt: ", ltoa(ngqpt), &
    ", with nprocs_rpt:", itoa(db%nprocs_rpt)), do_flush=.True.)
- call wrtout(std_out, sjoin(" Gaussian filter with qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
+ call wrtout(std_out, sjoin(" Using Gaussian filter with qdamp: ", ftoa(db%qdamp, fmt="(f6.1)")))
  !call wrtout(std_out, " Q-mesh shifts:")
  !do ii=1,nqshift
  !  call wrtout(std_out, ltoa(qshift(:, ii)))
@@ -3056,7 +2948,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  call xmpi_split_work(db%nrtot, db%comm_rpt, my_rstart, my_rstop)
 
  ! Select my_rpoints.
- ! Use REMALLOC so that we can call this routine multiple times i.e. for chaning add_lr
+ ! Use REMALLOC so that we can call this routine multiple times i.e. for changing add_lr
  db%my_nrpt = my_rstop - my_rstart + 1
  ABI_CHECK(db%my_nrpt /= 0, "my_nrpt == 0!")
 
@@ -3082,6 +2974,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, nqshift, qshift, nfft, ngfft, comm_rpt
  write(std_out, "(a, i0)")" Number of R-points treated by this MPI rank: ", db%my_nrpt
  write(std_out, "(a, 3(i0, 1x))")" ngfft: ", ngfft(1:3)
  write(std_out, "(a, i0)")" dvdb_add_lr: ", db%add_lr
+
  ! Allocate potential in the supercell. Memory is MPI-distributed over my_nrpt and my_npert
  call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
             ftoa(two * db%my_nrpt * nfft * db%nspden * db%my_npert * sp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
@@ -3319,6 +3212,7 @@ end subroutine dvdb_get_maxw
 !!
 !! FUNCTION
 !!  Internal helper function used to prepare the Fourier interpolation of the DFPT potentials.
+!!
 
 subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
                             qibz, qbz, indqq, iperm, nqsts, iqs_dvdb, all_rpt, all_wghatm, comm)
@@ -3330,17 +3224,17 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 !arrays
  integer,intent(in) :: ngqpt(3)
  real(dp),intent(in) :: qshift(3,nqshift)
- integer,allocatable,intent(out) :: indqq(:,:),nqsts(:),iqs_dvdb(:), iperm(:)
+ integer,allocatable,intent(out) :: indqq(:,:), nqsts(:), iqs_dvdb(:), iperm(:)
  real(dp),allocatable,intent(out) :: all_rpt(:,:), all_wghatm(:,:,:)
  real(dp),allocatable,intent(out) :: qibz(:,:),qbz(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: timrev1=1, cutmode2=2
+ integer,parameter :: timrev1 = 1, cutmode2 = 2
  integer :: iq_ibz,nqibz,iq_bz,nqbz
  integer :: ii,iq_dvdb
  integer :: iqst,nqst,ix,iy,iz,nq1,nq2,nq3,r1,r2,r3, nrtot
- real(dp) :: dksqmax,r_inscribed_sphere
+ real(dp) :: r_inscribed_sphere
  logical :: found
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
@@ -3386,8 +3280,8 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    end do
 #endif
 
-   ! Compute real-space points in big unit cell
-   ! Use the following indexing (N means ngfft of the adequate direction)
+   ! Compute real-space points in the supercell
+   ! Use the following indexing (N means ngfft on the adequate direction)
    ! 0 1 2 3 ... N/2    -(N-1)/2 ... -1    <= gc
    ! 1 2 3 4 ....N/2+1  N/2+2    ...  N    <= index ig
    nrtot = nqbz
@@ -3429,18 +3323,17 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
  end select
 
  ! Find correspondence BZ --> IBZ. Note:
- ! q --> -q symmetry is always used for phonons.
- ! we use symrec instead of symrel
+ !  - q --> -q symmetry is always used for phonons.
+ !  - we use symrec instead of symrel
 
  ABI_MALLOC(indqq, (6, nqbz))
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- call qrank%free()
 
- if (dksqmax > tol12) then
-   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+ if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
+
+ call qrank%free()
 
  ! Construct sorted mapping BZ --> IBZ to speedup qbz search below.
  ABI_MALLOC(iperm, (nqbz))
@@ -3474,16 +3367,14 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
    end do
 
    ! Check that nqst has been counted properly.
-   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst+1) == iq_ibz, "Wrong iqst")
+   ABI_CHECK(nqst > 0 .and. bz2ibz_sort(iqst + 1) == iq_ibz, "Wrong iqst")
    if (abs(nqst - wtq(iq_ibz) * nqbz) > tol12) then
      write(msg, "(a,i0,a,f5.2)")"Error in q-point star or q-weights. nqst:", nqst, "wtq * nqbz = ", wtq(iq_ibz) * nqbz
      ABI_ERROR(msg)
    end if
 
    ! Check that the q-point has been found in DVDB.
-   if (.not. found) then
-     ABI_ERROR(sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
-   end if
+   ABI_CHECK(found, sjoin("Cannot find symmetric q-point of:", ktoa(qibz(:,iq_ibz)), "in DVDB file"))
 
    iqst = iqst + nqst
    nqsts(iq_ibz) = nqst
@@ -3494,13 +3385,11 @@ subroutine prepare_ftinterp(db, ngqpt, qptopt, nqshift, qshift, &
 
  ! Redo the mapping with the new IBZ
  qrank = krank_from_kptrlatt(nqibz, qibz, qptrlatt, compute_invrank=.False.)
- call qrank%get_mapping(nqbz, qbz, dksqmax, cryst%gmet, indqq, &
-                        cryst%nsym, cryst%symafm, cryst%symrec, timrev1, use_symrec=.True.)
- call qrank%free()
 
- if (dksqmax > tol12) then
-   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map BZ --> IBZ")
+ if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, indqq) /= 0) then
+   ABI_BUG("Something wrong in the generation of the q-points in the BZ! Cannot map qBZ --> qIBZ")
  end if
+ call qrank%free()
 
 end subroutine prepare_ftinterp
 !!***
@@ -3529,12 +3418,6 @@ end subroutine prepare_ftinterp
 !! OUTPUT
 !!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point (periodic part)
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
@@ -3543,7 +3426,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 !scalars
  integer,intent(in) :: nfft, comm_rpt
  integer,optional,intent(in) :: add_lr
- class(dvdb_t),intent(in) :: db
+ class(dvdb_t),intent(inout) :: db
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: qpt(3)
@@ -3555,6 +3438,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  integer :: ispden, imyp, idir, ipert, timerev_q, ierr, my_add_lr !, ifft, ir
  !real(dp) :: qmod
  !real(sp) :: beta_sp !, wr !,wi
+ logical :: prev_has_zeff, prev_has_quadrupoles, prev_has_efield
 !arrays
  integer :: symq(4,2,db%cryst%nsym), rfdir(3)
  integer,allocatable :: pertsy(:,:), rfpert(:), pflag(:,:)
@@ -3569,8 +3453,21 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  !qcart = two_pi * matmul(db%cryst%gprimd, qpt)
  !qmod = sqrt(dot_product(qcart, qcart))
 
- if (my_add_lr == 4) then
+ if (my_add_lr >= 4) then
    ! Use LR part only and return immediately.
+
+   if (my_add_lr > 4) then
+     prev_has_zeff = db%has_zeff
+     prev_has_quadrupoles = db%has_quadrupoles
+     prev_has_efield = db%has_efield
+     db%has_zeff = .False.
+     db%has_quadrupoles = .False.
+     db%has_efield = .False.
+     if (my_add_lr == 5 .and. prev_has_zeff)  db%has_zeff = .True.
+     if (my_add_lr == 6 .and. prev_has_quadrupoles) db%has_quadrupoles = .True.
+     if (my_add_lr == 7 .and. prev_has_efield) db%has_efield = .True.
+   end if
+
    ov1r = zero
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3579,6 +3476,14 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, 1, imyp))
      if (db%nspden /= 1) ov1r(:, :, 2, imyp) = ov1r(:, :, 1, imyp)
    end do
+
+   if (my_add_lr > 4) then
+     ! Restore input flags.
+     db%has_zeff = prev_has_zeff
+     db%has_quadrupoles = prev_has_quadrupoles
+     db%has_efield = prev_has_efield
+   end if
+
    return
  end if
 
@@ -3589,6 +3494,7 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
 
  ! Compute long-range part of the coupling potential.
  if (my_add_lr > 0) then
+   !call wrtout(std_out, "dvdb_ftinterp_qpt: Computing long-range part of the coupling potential.")
    ABI_MALLOC(v1r_lr, (2, nfft, db%my_npert))
    do imyp=1,db%my_npert
      idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
@@ -3604,32 +3510,24 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
  if (db%nprocs_rpt > 1) ov1r = zero
  ABI_MALLOC(ov1r_sp, (2, nfft))
 
-#define DEV_USE_SGEMV
-
-#ifdef DEV_USE_SGEMV
  ABI_MALLOC(weiqr_sp, (db%my_nrpt, 2))
  ABI_MALLOC(eiqr_sp, (db%my_nrpt, 2))
  eiqr_sp = transpose(eiqr)
-#else
- ABI_MALLOC(weiqr_sp, (2, db%my_nrpt))
-#endif
 
  do imyp=1,db%my_npert
    idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
 
-#ifdef DEV_USE_SGEMV
    weiqr_sp(:, 1) = db%my_wratm(:, ipert) * eiqr_sp(:, 1)
    weiqr_sp(:, 2) = db%my_wratm(:, ipert) * eiqr_sp(:, 2)
-#else
-   weiqr_sp(1, :) = db%my_wratm(:, ipert) * eiqr(1, :)
-   weiqr_sp(2, :) = db%my_wratm(:, ipert) * eiqr(2, :)
-#endif
 
    do ispden=1,db%nspden
 
-#ifdef DEV_USE_SGEMV
      ! We need to compute: sum_R W(R, r) e^{iq.R} with W real matrix.
      ! Use BLAS2 to compute ov1r = W (x + iy) but need to handle kind conversion as ov1r is double-precision
+     ! NB: Can use MKL BLAS-like extensions to perform 2 matrix-vector operations:
+     !   call dgem2vu(m, n, alpha, a, lda, x1, incx1, x2, incx2, beta, y1, incy1, y2, incy2)
+     ! unfortunately the API does not support transa so one has to transport db%wsr.
+     ! Alternatively, compute all my_npert with ZGEMM (more memory but it should be more efficient).
 
      call SGEMV("T", db%my_nrpt, nfft, one_sp, db%wsr(1,1,1,ispden,imyp), db%my_nrpt, weiqr_sp(1,1), 1, &
                 zero_sp, ov1r_sp(1,1), 2)
@@ -3637,25 +3535,12 @@ subroutine dvdb_ftinterp_qpt(db, qpt, nfft, ngfft, ov1r, comm_rpt, add_lr)
                 zero_sp, ov1r_sp(2,1), 2)
 
      ov1r(:, :, ispden, imyp) = ov1r_sp(:, :)
-     ! Add the long-range part of the potential
-     if (my_add_lr > 0) ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
 
-#else
-     ! Slow FT with do loops
-     do ifft=1,nfft
-       do ir=1,db%my_nrpt
-         wr = db%wsr(1, ir, ifft, ispden, imyp)
-         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + wr * weiqr_sp(:, ir)
-         !wi = db%wsr(2, ir, ifft, ispden, imyp)
-         !ov1r(1, ifft, ispden, imyp) = ov1r(1, ifft, ispden, imyp) + wr * weiqr_sp(1, ir) ! - wi * weiqr_sp(2, ir)
-         !ov1r(2, ifft, ispden, imyp) = ov1r(2, ifft, ispden, imyp) + wr * weiqr_sp(2, ir) ! + wi * weiqr_sp(1, ir)
-       end do
-       ! Add the long-range part of the potential
-       if (my_add_lr > 0) then
-         ov1r(:, ifft, ispden, imyp) = ov1r(:, ifft, ispden, imyp) + v1r_lr(:, ifft, imyp)
-       end if
-     end do ! ifft
-#endif
+     ! Add the long-range part of the potential
+     if (my_add_lr > 0) then
+       !call wrtout(std_out, "Adding the long-range part of the potential")
+       ov1r(:, :, ispden, imyp) = ov1r(:, :, ispden, imyp) + v1r_lr(:, :, imyp)
+     end if
 
      ! Remove the phase to get the lattice-periodic part.
      call times_eikr(-qpt, ngfft, nfft, 1, ov1r(:, :, ispden, imyp))
@@ -3736,11 +3621,6 @@ end subroutine dvdb_ftinterp_qpt
 !! OUTPUT
 !!  ov1r(2*nfft, nspden, my_npert)=Interpolated DFPT potentials at the given q-point.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1scf, comm)
@@ -3785,7 +3665,10 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
    call xmpi_wait(db%ft_qcache%v1scf_3natom_request, ierr)
  end if
 
+ !print *, "Have_ibz, need_iq_ibz, isirr_q", db%ft_qcache%stored_iqibz_cplex(1), iq_ibz, isirr_q
+
  if (db%ft_qcache%use_3natom_cache .and. db%ft_qcache%stored_iqibz_cplex(1) == iq_ibz .and. .not. isirr_q) then
+   !print *, "hello cache"
 
    ! All 3 natom potentials for qibz are in cache. Symmetrize to get Sq for my_npert perturbations
    db%ft_qcache%stats(2) = db%ft_qcache%stats(2) + 1
@@ -3803,6 +3686,7 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
 
  ! Check whether iq_ibz is in cache.
  incache = .False.
+
  if (db%ft_qcache%maxnq > 0) then
    ! Get number of perturbations computed for this iq_ibz as well as cplex.
    ! Remember that the size of v1scf in qcache depends on db%my_npert
@@ -3935,11 +3819,6 @@ end subroutine dvdb_get_ftqbz
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz, itreatq, comm)
@@ -3968,12 +3847,14 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  call timab(1808, 1, tsec)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
- call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
+ !call db%ft_qcache%free()
  db%ft_qcache = qcache_new(nqibz, nfft, ngfft, mbsize, db%natom3, db%my_npert, db%nspden)
  db%ft_qcache%itreatq(:) = itreatq
 
- ! All procs skip this part is qcache is not used.
+ ! All procs skip this part if qcache is not used.
  if (db%ft_qcache%maxnq /= 0) then
+
+   call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
 
    ! Note that cplex is always set to 2 here
    cplex = 2
@@ -4037,11 +3918,6 @@ end subroutine dvdb_ftqcache_build
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt, comm)
@@ -4067,6 +3943,8 @@ subroutine dvdb_ftqcache_update_from_ft(db, nfft, ngfft, nqibz, qibz, ineed_qpt,
 
  if (db%ft_qcache%maxnq == 0) return
  qcnt = count(ineed_qpt /= 0)
+
+ !ABI_ERROR("Legacy code!")
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
@@ -4128,12 +4006,6 @@ end subroutine dvdb_ftqcache_update_from_ft
 !! OUTPUT
 !!  v1scf_rpt(2,nrpt,nfft,nspden)
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
@@ -4168,6 +4040,8 @@ subroutine dvdb_get_v1scf_rpt(db, cryst, ngqpt, nqshift, qshift, nfft, ngfft, &
  real(dp),allocatable :: v1r_qibz(:,:,:,:),v1r_qbz(:,:,:,:), v1r_lr(:,:)
 
 ! *************************************************************************
+
+ !ABI_ERROR("Legacy code!")
 
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
@@ -4474,12 +4348,6 @@ end subroutine dvdb_get_v1scf_rpt
 !! OUTPUT
 !!  v1scf_qpt(2*nfft, nspden)=Interpolated DFPT potentials at the given q-point.
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
@@ -4506,6 +4374,8 @@ subroutine dvdb_get_v1scf_qpt(db, cryst, qpt, nfft, ngfft, nrpt, nspden, &
  real(dp),allocatable :: eiqr(:,:), v1r_lr(:,:)
 
 ! *************************************************************************
+
+ !ABI_ERROR("Legacy code!")
 
  ABI_UNUSED(cryst%natom)
  ABI_UNUSED(nspden)
@@ -4594,11 +4464,6 @@ end subroutine dvdb_get_v1scf_qpt
 !! OUTPUT
 !!  v1scf(2, nfft, nspden, 3*natom)= v1scf potentials on the real-space FFT mesh for the 3*natom perturbations.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_interpolate_v1scf(db, cryst, qpt, ngqpt, nqshift, qshift, &
@@ -4666,10 +4531,6 @@ end subroutine dvdb_interpolate_v1scf
 !!  [qtol]=Optional tolerance for q-point comparison.
 !!         For each reduced direction the absolute difference between the coordinates must be less that qtol
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
@@ -4689,11 +4550,10 @@ integer pure function dvdb_findq(db, qpt, qtol) result(iqpt)
 ! *************************************************************************
 
  my_qtol = tol6; if (present(qtol)) my_qtol = qtol
-
  iqpt = -1
  do iq=1,db%nqpt
    if (all(abs(db%qpts(:, iq) - qpt) < my_qtol)) then
-      iqpt = iq; exit
+     iqpt = iq; exit
    end if
  end do
 
@@ -4718,10 +4578,6 @@ end function dvdb_findq
 !! OUTPUT
 !!  iq2dvdb(nqpt): index of q-points in dvdb%qpts. Set to -1 if not found
 !!  ierr= Number of points **not** found
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4774,11 +4630,6 @@ end function dvdb_find_qpts
 !!      pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
 !!  comm_pert=MPI communicator used to distribute the 3*natom perturbations
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_set_pert_distrib(self, my_npert, natom3, my_pinfo, pert_table, comm_pert)
@@ -4825,12 +4676,6 @@ end subroutine dvdb_set_pert_distrib
 !!
 !! SIDE EFFECTS
 !!   db<type(dvdb_t)>: modifies db%current_fpos.
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -4920,11 +4765,6 @@ end subroutine dvdb_seek
 !!   Rewind the file and move to the first header. Needed only if dvdb%iomode==IO_MODE_FORTRAN
 !!   Return exit code and error message in msg if ierr != 0
 !!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function dvdb_rewind(db, msg) result(ierr)
@@ -4968,10 +4808,6 @@ end function dvdb_rewind
 !!
 !! NOTES
 !!  Because hdr_skip rewinds the file and I'm not gonna change that ugly code.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5025,11 +4861,6 @@ end function my_hdr_skip
 !! OUTPUT
 !!  npert_miss = Number of missing perturbations.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_list_perts(db, ngqpt, npert_miss, unit)
@@ -5069,8 +4900,7 @@ subroutine dvdb_list_perts(db, ngqpt, npert_miss, unit)
      qptrlatt(ii, ii) = ngqpt(ii)
    end do
 
-   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nshiftq, shiftq, &
-     nqibz, qibz, wtq, nqbz, qbz)
+   call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, nshiftq, shiftq, nqibz, qibz, wtq, nqbz, qbz)
 
    ABI_FREE(qbz)
    ABI_FREE(wtq)
@@ -5199,12 +5029,6 @@ end subroutine dvdb_list_perts
 !! SIDE EFFECTS
 !!   v1files=List of file names to merge. This list could be changed if POT1 files in netcdf format are found.
 !!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
@@ -5269,10 +5093,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    write(std_out,"(a,i0,2a)")"- Reading header of file [",ii,"]: ",trim(v1files(ii))
 
    if (endswith(v1files(ii), ".nc")) then
-#ifdef HAVE_NETCDF
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
       call hdr_ncread(hdr1_list(ii),units(ii),fform)
-#endif
    else
      if (open_file(v1files(ii), msg, newunit=units(ii), form="unformatted", action="read", status="old") /= 0) then
        ABI_ERROR(msg)
@@ -5319,7 +5141,6 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
       if (has_rhog1_g0(jj)) read(units(jj), err=10, iomsg=msg) rhog1_g0
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
    else
-#ifdef HAVE_NETCDF
       ! Netcdf IO
       ! netcdf array has shape [cplex, n1, n2, n3, nspden]
       NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
@@ -5333,15 +5154,12 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
         NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
       end if
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
-#endif
    end if
 
    if (.not. endswith(v1files(ii), ".nc")) then
      close(units(ii))
    else
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_close(units(ii)))
-#endif
    end if
 
    ABI_FREE(v1)
@@ -5381,11 +5199,6 @@ end subroutine dvdb_merge_files
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dvdb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5429,10 +5242,6 @@ end subroutine calc_eiqr
 !!
 !! OUTPUT
 !!   errmsg=String with error message if ierr /= 0
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5494,12 +5303,6 @@ end function dvdb_check_fform
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -5636,12 +5439,6 @@ end subroutine dvdb_test_v1rsym
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
@@ -5655,9 +5452,7 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  integer,parameter :: master = 0
  integer :: iqpt,pcase,idir,ipert,cplex,nfft,ispden,timerev_q,ifft,unt,my_rank, ncid
  integer :: i1,i2,i3,n1,n2,n3,id1,id2,id3,cnt, npert_miss
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  character(len=500) :: msg
  type(crystal_t),pointer :: cryst
  type(dvdb_t),target :: dvdb
@@ -5702,7 +5497,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  if (len_trim(dump_path) /= 0 .and. my_rank == master) then
    write(std_out,"(a)")sjoin("Will write potentials to:", dump_path)
    if (endswith(dump_path, ".nc")) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nctk_open_create(ncid, dump_path, xmpi_comm_self))
      NCF_CHECK(dvdb%cryst%ncwrite(ncid))
      ncerr = nctk_def_dims(ncid, [&
@@ -5722,7 +5516,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts"), dvdb%qpts))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
-#endif
    else
      if (open_file(dump_path, msg, newunit=unt, action="write", status="unknown", form="formatted") /= 0) then
        ABI_ERROR(msg)
@@ -5761,7 +5554,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
    ! Complete potentials
    call v1phq_complete(cryst,qpt,ngfft,cplex,nfft,dvdb%nspden,dvdb%nsppol,dvdb%mpi_enreg,dvdb%symv1,pflag,symm_v1scf)
 
-#ifdef HAVE_NETCDF
    if (ncid /= nctk_noid) then
      work2 = zero
      if (cplex == 1) work2(1,:,:,:) = file_v1scf(1,:,:,:)
@@ -5774,7 +5566,6 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
      NCF_CHECK(ncerr)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "pertsy_qpt"), pertsy, start=[1,1,iqpt]))
    end if
-#endif
 
    ! Compare values.
    do pcase=1,3*cryst%natom
@@ -5843,11 +5634,9 @@ subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
  call dvdb%free()
 
  if (unt /= -1) close(unt)
-#ifdef HAVE_NETCDF
  if (ncid /= nctk_noid) then
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
 end subroutine dvdb_test_v1complete
 !!***
@@ -5877,11 +5666,6 @@ end subroutine dvdb_test_v1complete
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
@@ -5897,9 +5681,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  integer :: nfft, iq, cplex, ispden, comm_rpt, my_rank, idir, ipert, ipc, imyp
  integer :: n1, n2, n3, unt, this_nqpt, interpolated
  integer :: i1, i2, i3, ifft, ig, ngsmall, ii
-#ifdef HAVE_NETCDF
  integer :: ncid, ncerr
-#endif
  real(dp) :: gsq_max, g2
  !type(vdiff_t) :: vd_max
  logical :: write_v1r
@@ -5908,6 +5690,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 !arrays
  integer :: ngfft(18)
  integer, allocatable :: gfft(:,:),ig2ifft(:), gsmall(:,:)
+ real(dp) :: dvdb_qdamp(1)
  real(dp) :: vals2(2)
  real(dp),pointer :: this_qpts(:,:)
  real(dp),allocatable :: file_v1r(:,:,:,:),long_v1r(:,:,:,:),tmp_v1r(:,:,:,:)
@@ -5991,7 +5774,6 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  call wrtout([std_out, ab_out], sjoin(ch10, "- Results stored in: ", out_ncpath))
  call wrtout([std_out, ab_out], " Use `abiopen.py out_V1QAVG.nc -e` to visualize results")
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, out_ncpath, xmpi_comm_self))
    NCF_CHECK(dvdb%cryst%ncwrite(ncid))
@@ -6050,10 +5832,10 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
      "has_dielt", "has_zeff", "has_quadrupoles", "has_efield"], &
      l2int([dvdb%has_dielt, dvdb%has_zeff, dvdb%has_quadrupoles, dvdb%has_efield]))
    NCF_CHECK(ncerr)
-   NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
+   dvdb_qdamp = dvdb%qdamp
+   NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], dvdb_qdamp))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gsmall"), gsmall))
  end if
-#endif
 
  do iq=1,this_nqpt
 
@@ -6093,18 +5875,15 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    ! Compute average and write to file.
    if (my_rank /= master) cycle
 
-#ifdef HAVE_NETCDF
    if (write_v1r .and. iq == 1) then
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_interpolated"), file_v1r))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1r_lrmodel"), long_v1r))
    end if
-#endif
 
    do imyp=1,dvdb%my_npert
      idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
      do ispden=1,dvdb%nspden
 
-#ifdef HAVE_NETCDF
        vals2 = sum(file_v1r(:,:,ispden,imyp), dim=2) / nfft
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1scf_avg"), vals2, &
                             start=[1,ispden,idir,ipert,iq], count=[2,1,1,1,1])
@@ -6148,7 +5927,6 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
        ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1lr_gsmall"), work_gsmall, &
                             start=[1,1,ispden,idir,ipert,iq], count=[2,ngsmall,1,1,1,1])
        NCF_CHECK(ncerr)
-#endif
 
        ! Debugging section.
        !write(std_out, "(a)")"--- !DVDB_LONGRANGE_DIFF"
@@ -6214,13 +5992,11 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    ! Compute max_r |W(R,r)| and write data to file.
    call dvdb%get_maxw(dtset%ddb_ngqpt, all_rpt, all_rmod, maxw)
    if (my_rank == master) then
-#ifdef HAVE_NETCDF
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngqpt"), dtset%ddb_ngqpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rpt"), all_rpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "rmod"), all_rmod))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "maxw"), maxw))
-#endif
    end if
    ABI_FREE(all_rpt)
    ABI_FREE(all_rmod)
@@ -6228,9 +6004,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
  end if
 
  if (my_rank == master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
 end subroutine dvdb_write_v1qavg
@@ -6258,12 +6032,6 @@ end subroutine dvdb_write_v1qavg
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      mrgdv
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
 !!
 !! SOURCE
 
@@ -6494,11 +6262,6 @@ end subroutine dvdb_test_ftinterp
 !! OUTPUT
 !!  v1r_lr = dipole potential
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, add_qphase)
@@ -6577,43 +6340,45 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
  ! TODO: May use zero-padded FFT with small G-sphere
  call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
- !if (db%has_zeff .or. db%has_quadrupoles) then
  ! Compute the long-range potential in G-space due to Z* and Q* (if present)
  v1G_lr = zero
- do ig=1,nfft
-   ! (q + G)
-   qG_red = qpt + gfft(:,ig)
-   qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
-   qG_mod = sqrt(sum(qG_cart ** 2))
-   ! (q + G) . Zeff(:,idir,iatom)
-   qGZ = dot_product(qG_red, Zstar)
-   ! (q + G) . dielt . (q + G)
-   denom = dot_product(qG_red, matmul(dielt_red, qG_red))
-   ! Avoid (q + G) = 0
-   if (denom < tol_denom) cycle
-   denom_inv = one / denom
-   ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
-   !if (half*qG_mod**2 > 1) cycle
-   if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
-   qGS = zero
-   if (db%has_quadrupoles) then
-     do ii=1,3
-       do jj=1,3
-         qGS = qGS + qG_red(ii) * qG_red(jj) * Sstar(ii,jj) / two
+ if (db%has_zeff .or. db%has_quadrupoles) then
+
+   do ig=1,nfft
+     ! (q + G)
+     qG_red = qpt + gfft(:,ig)
+     qG_cart = two_pi * matmul(db%cryst%gprimd, qG_red)
+     qG_mod = sqrt(sum(qG_cart ** 2))
+     ! (q + G) . Zeff(:,idir,iatom)
+     qGZ = dot_product(qG_red, Zstar)
+     ! (q + G) . dielt . (q + G)
+     denom = dot_product(qG_red, matmul(dielt_red, qG_red))
+     ! Avoid (q + G) = 0
+     if (denom < tol_denom) cycle
+     denom_inv = one / denom
+     ! HM hard cutoff, in this case qdamp takes the meaning of an energy cutoff in Hartree (hardcoded to 1 for the moment)
+     !if (half*qG_mod**2 > 1) cycle
+     if (db%qdamp > zero) denom_inv = denom_inv * exp(-qG_mod ** 2 / (four * db%qdamp))
+     qGS = zero
+     if (db%has_quadrupoles) then
+       do ii=1,3
+         do jj=1,3
+           qGS = qGS + qG_red(ii) * qG_red(jj) * Sstar(ii,jj) / two
+         end do
        end do
-     end do
-   end if
+     end if
 
-   ! Phase factor exp(-i (q+G) . tau)
-   qtau = - two_pi * dot_product(qG_red, tau_red)
-   phre = cos(qtau); phim = sin(qtau)
-   !phre = one; phim = zero
+     ! Phase factor exp(-i (q+G) . tau)
+     qtau = - two_pi * dot_product(qG_red, tau_red)
+     phre = cos(qtau); phim = sin(qtau)
+     !phre = one; phim = zero
 
-   re = +fac * qGS * denom_inv !re = zero
-   im = fac * qGZ * denom_inv
-   v1G_lr(1,ig) = phre * re - phim * im
-   v1G_lr(2,ig) = phim * re + phre * im
- end do
+     re = +fac * qGS * denom_inv !re = zero
+     im = fac * qGZ * denom_inv
+     v1G_lr(1,ig) = phre * re - phim * im
+     v1G_lr(2,ig) = phim * re + phre * im
+   end do
+ end if
 
  ! FFT to get the long-range potential in r-space
  call fourdp(2, v1G_lr, v1r_lr, 1, db%mpi_enreg, nfft, 1, ngfft, 0)
@@ -6704,7 +6469,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  type(ddb_type),optional,target,intent(in) :: ddb
 
 !Local variables ------------------------------
- integer,parameter :: master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
+ integer,parameter :: master = 0, rfmeth1 = 1, selectz0 = 0
  integer :: my_rank, iblock_dielt, iblock_dielt_zeff, iblock_quadrupoles
  logical :: free_ddb
  type(crystal_t) :: cryst_ddb
@@ -6712,7 +6477,6 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  type(ddb_type),target :: this_ddb
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
- integer,allocatable :: dummy_atifc(:)
  real(dp) :: dielt(3,3)
  real(dp),allocatable :: zeff(:,:,:), zeff_raw(:,:,:)
 
@@ -6723,11 +6487,9 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  if (present(ddb_filepath)) then
    ! Build ddb object from file. Will release memory before returning.
    ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
-   ABI_CALLOC(dummy_atifc, (dvdb%natom))
-   call ddb_from_file(this_ddb, ddb_filepath, dvdb%brav, dvdb%natom, natifc0, dummy_atifc, ddb_hdr, cryst_ddb, comm, &
-                      prtvol=prtvol)
+   call this_ddb%from_file(ddb_filepath, ddb_hdr, cryst_ddb, comm, prtvol=prtvol)
+   call this_ddb%set_brav(dvdb%brav)
    call ddb_hdr%free()
-   ABI_FREE(dummy_atifc)
    call cryst_ddb%free()
    ddb_ptr => this_ddb
    free_ddb = .True.
@@ -6771,7 +6533,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
  end if
 
  ! Read the quadrupoles
- iblock_quadrupoles = ddb_ptr%get_quadrupoles(1, 3, dvdb%qstar)
+ iblock_quadrupoles = ddb_ptr%get_quadrupoles(ddb_hdr%ddb_version,1, 3, dvdb%qstar)
  if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
  ABI_FREE(zeff)
@@ -6858,11 +6620,6 @@ end subroutine dvdb_load_efield
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf, cryst, &
@@ -6892,9 +6649,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  integer :: nqpt_read, nqpt_interpolate
  integer :: nfft,nfftf, dimv1
  integer :: ount, unt, fform
-#ifdef HAVE_NETCDF
  integer :: ncid, ncerr
-#endif
  logical :: use_netcdf
  real(dp) :: cpu, wall, gflops, cpu_all, wall_all, gflops_all
  character(len=500) :: msg
@@ -7148,7 +6903,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
  ABI_MALLOC(v1, (cplex*nfftf))
 
  use_netcdf = .False.
-#ifdef HAVE_NETCDF
  ! Create temporary netcdf file used to write Fortran file with contiguous perturbations.
  use_netcdf = .True.
  if (my_rank == master) then
@@ -7165,7 +6919,6 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
    !NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("v1scf_rpt", "dp", "two, nrpt, nfft, nspden, natom3")))
    NCF_CHECK(nctk_set_datamode(ncid))
  end if
-#endif
 
  do iat=1,natom
    do idir=1,3
@@ -7197,11 +6950,9 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
        !call wrtout(std_out, sjoin("Writing q-point", itoa(iq)))
        if (my_rank == master) then
          if (use_netcdf) then
-#ifdef HAVE_NETCDF
            ncerr = nf90_put_var(ncid, nctk_idname(ncid, "v1"), v1scf, &
                start=[1,1,idir,iat,iq], count=[dimv1,nspden,1,1,1])
            NCF_CHECK(ncerr)
-#endif
          else
            ! Master writes the file (change also qpt and ipert in hdr%)
            hdr_ref%qptn = qpt
@@ -7233,11 +6984,9 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
          hdr_ref%qptn = qpt
          hdr_ref%pertcase = ipert
          call hdr_ref%fort_write(ount, fform_pot, ierr)
-#ifdef HAVE_NETCDF
          ncerr = nf90_get_var(ncid, nctk_idname(ncid, "v1"), v1scf, &
              start=[1,1,idir,iat,iq], count=[dimv1,nspden,1,1,1])
          NCF_CHECK(ncerr)
-#endif
          do ispden=1,nspden
            v1 = reshape(v1scf(:,:,ispden), [cplex*nfftf])
            write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfftf)
@@ -7246,9 +6995,7 @@ subroutine dvdb_interpolate_and_write(dvdb, dtset, new_dvdb_fname, ngfft, ngfftf
        end do
     end do
    end do
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
    call delete_file(tmp_fname, ierr)
  end if
 
@@ -7302,11 +7049,6 @@ end subroutine dvdb_interpolate_and_write
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      dvdb%hdr_ref%fort_write,kpts_ibz_from_kptrlatt,wrtout,xmpi_barrier
-!!
 !! SOURCE
 
 subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
@@ -7344,8 +7086,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  ! =======================
  ! Generate the list of irreducible q-points in the coarse grid
  qptrlatt = 0; qptrlatt(1,1) = ngqpt(1); qptrlatt(2,2) = ngqpt(2); qptrlatt(3,3) = ngqpt(3)
- call kpts_ibz_from_kptrlatt(dvdb%cryst, qptrlatt, qptopt1, 1, &
-                             [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
+ call kpts_ibz_from_kptrlatt(dvdb%cryst, qptrlatt, qptopt1, 1, [zero, zero, zero], nqibz, qibz, wtq, nqbz, qbz)
 
  ! =======================================
  ! Open DVDB and copy important dimensions

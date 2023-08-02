@@ -17,15 +17,16 @@ kptopt2   2
 iscf2    -3     
 rfelfd2   2    
 tolwfr2   1.0d-20
-rfdir2   1 1 1 
+rfphon2   0
 
 #Set 3: Response function calculation of d2/dkdk wave function
 #*************************************************************
 kptopt3   2
 getddk3   2
 iscf3    -3
-rf2_dkdk3 1
+rf2_dkdk3 3
 tolwfr3   1.0d-20
+rfphon3   0
 
 #Set 4 : Response function calculation of Q=0 phonons and electric field
 #***********************************************************************
@@ -33,10 +34,8 @@ kptopt4   2
 getddk4   2
 rfelfd4   3
 rfphon4   1
-rfatpol4  1 2
-rfdir4   1 1 1
 tolvrs4   1.0d-8
-prepalw4  1
+prepalw4  2
 
 #Set 5 : Dynamic Quadrupoles calculation
 #***************************************
@@ -66,7 +65,6 @@ getwfk   1
 kptopt   3    
 rfphon   1   
 rfatpol   1 2 
-rfdir   1 1 1 
 tolvrs   1.0d-8
 useylm  1
 nqpt   1
@@ -128,7 +126,7 @@ diemac 12.0
 #%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% [files]
 #%% files_to_test = 
-#%%   tlw_4.abo, tolnlines= 11, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
+#%%   tlw_4.abo, tolnlines= 12, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
@@ -137,4 +135,3 @@ diemac 12.0
 #%% description = Dynamic Quadrupoles Calculation for GaP
 #%% topics = longwave
 #%%<END TEST_INFO>
-

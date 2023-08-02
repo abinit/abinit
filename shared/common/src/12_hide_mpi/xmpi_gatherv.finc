@@ -9,7 +9,7 @@
 !!  xmpi_gatherv is the generic function.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (MT,GG)
+!!  Copyright (C) 2001-2022 ABINIT group (MT,GG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -46,7 +46,7 @@ subroutine xmpi_gatherv_int(xval,nelem,recvbuf,recvcounts,displs,root,comm,ier)
 
 !Arguments-------------------------
  integer, DEV_CONTARRD intent(in) :: xval(:)
- integer, DEV_CONTARRD intent(inout)   :: recvbuf(:)
+ integer, DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,root,comm
  integer,intent(out) :: ier
@@ -370,7 +370,7 @@ subroutine xmpi_gatherv_dp(xval,nelem,recvbuf,recvcounts,displs,root,comm,ier)
 
 !Arguments-------------------------
  real(dp), DEV_CONTARRD intent(in) :: xval(:)
- real(dp), DEV_CONTARRD intent(inout)   :: recvbuf(:)
+ real(dp), DEV_CONTARRD intent(inout) :: recvbuf(:)
  integer, DEV_CONTARRD intent(in) :: recvcounts(:),displs(:)
  integer,intent(in) :: nelem,root,comm
  integer,intent(out) :: ier

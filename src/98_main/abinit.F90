@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,21 +60,6 @@
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,bigdft_init_errors
-!!      bigdft_init_timing_categories,chkinp,chkvars,clnmpi_atom,clnmpi_grid
-!!      clnmpi_img,clnmpi_pert,date_and_time,destroy_mpi_enreg
-!!      destroy_results_out,driver,dtsets,dump_config,dump_cpp_options
-!!      dump_optim,f_lib_finalize,f_lib_initialize,flush_unit
-!!      gather_results_out,get_dtsets_pspheads,herald,init_results_out,iofn1
-!!      libpaw_spmsg_getcount,memory_eval,mpi_setup,nctk_test_mpiio,out_acknowl
-!!      outvars,outxml_finalise,outxml_open,print_kinds,setdevice_cuda
-!!      specialmsg_getcount,testfi,timab,timana,timein,unsetdevice_cuda,wrtout
-!!      xmpi_init,xmpi_show_info,xmpi_sum,xomp_show_info,xpapi_init
-!!      xpapi_show_info,xpapi_shutdown
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -82,6 +67,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 program abinit
 
@@ -122,10 +110,16 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
+ use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
  use m_gpu_toolbox
+ use m_manage_cuda
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
 #endif
 
 #if defined HAVE_BIGDFT
@@ -163,6 +157,7 @@ program abinit
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
  integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
+ logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
@@ -231,7 +226,7 @@ program abinit
 !read names of files (input, output, rootinput, rootoutput, roottemporaries),
 !create the name of the status file, initialize the status subroutine.
 
- call timab(41,3,tsec)
+ call timab(101,3,tsec)
  call iofn1(args%input_path, filnam, filstat, xmpi_world)
 
 !------------------------------------------------------------------------------
@@ -261,13 +256,15 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
- call timab(44,1,tsec)
-
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
+ call timab(101,2,tsec)
+
  call get_dtsets_pspheads(args%input_path, filnam(1), ndtset, lenstr, string, &
                           timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
+
+ call timab(103,1,tsec)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -343,12 +340,13 @@ program abinit
 !there are problems with Tv1#93 in parallel, PGI compiler, on Intel/PC
  call abi_io_redirect(new_io_comm=xmpi_world)
 
- call timab(44,2,tsec)
+ call timab(103,2,tsec)
+ call timab(104,3,tsec)
 
 !------------------------------------------------------------------------------
 
 !13) Perform additional checks on input data
- call timab(45,3,tsec)
+
  call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
  ! Check whether the string only contains valid keywords
@@ -366,8 +364,9 @@ program abinit
    call xmpi_show_info(std_out)  ! Info on the MPI environment.
  end if
 
-!Eventually activate GPU
+!Activate GPU is required
  use_gpu_cuda=0
+ use_nvtx=.false.
 #if defined HAVE_GPU_CUDA
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
@@ -375,14 +374,21 @@ program abinit
      use_gpu_cuda=1
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
+   if (dtsets(ii)%use_nvtx==1) then
+      use_nvtx=.true.
+   end if
  end do
  call setdevice_cuda(gpu_devices,use_gpu_cuda)
+
+#ifdef HAVE_GPU_NVTX_V3
+    NVTX_INIT(use_nvtx)
+#endif
 #endif
 
 !------------------------------------------------------------------------------
 
 !15) Perform main calculation
- call timab(45,2,tsec)
+ call timab(104,2,tsec)
 
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
@@ -393,13 +399,15 @@ program abinit
  end if
 
  if(.not.test_exit)then
+   ABI_NVTX_START_RANGE(NVTX_MAIN_COMPUTATION)
    call driver(abinit_version,tcpui,dtsets,filnam,filstat, mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
+   ABI_NVTX_END_RANGE()
  end if
 
 !------------------------------------------------------------------------------
 
  ! 16) Give final echo of coordinates, etc.
- call timab(46,1,tsec)
+ call timab(105,1,tsec)
 
  write(msg,'(a,a,a,62a,80a)') ch10,'== END DATASET(S) ',('=',mu=1,62),ch10,('=',mu=1,80)
  call wrtout([std_out, ab_out], msg)
@@ -419,12 +427,16 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     !  so there is only one call to the latter, for both units)
+     ! both 
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out
        if(ii==2)iounit=std_out
        write(iounit,*)' '
        call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+       if(ii==2)call out_spg_anal (dtsets,(ii-1),ab_out,ndtset,ndtset_alloc,results_out_all)
        if(ii==2)write(std_out,*)' '
      end do
    end if
@@ -455,7 +467,7 @@ program abinit
  strten(:)  =results_out(1)%strten(:,1)
  xred(:,:)  =results_out(1)%xred(:,1:natom,1)
 
- call timab(46,2,tsec)
+ call timab(105,2,tsec)
 
 !------------------------------------------------------------------------------
 
@@ -473,23 +485,19 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 18) Bibliographical recommendations
- if(me==0) then
-   if(test_exit)then
+ if (me == 0) then
+   if (test_exit) then
      write(msg,'(a,a,i0,a)')ch10,' abinit : before driver, prtvol=',prtvol,', debugging mode => will skip acknowledgments'
      call wrtout([std_out, ab_out], msg)
    else
-     do ii=1,2
-       if(ii==1)iounit=ab_out
-       if(ii==2)iounit=std_out
-       call out_acknowl(dtsets,iounit,ndtset_alloc,npsp,pspheads)
-     end do
+     call out_acknowl(dtsets, ab_out, ndtset_alloc, npsp, pspheads)
    end if
- end if ! me==0
+ end if
 
 !------------------------------------------------------------------------------
 
  ! 19) Delete the status file, and, for build-in tests, analyse the correctness of results.
- if (ndtset == 0) then
+ if (ndtset == 0 .and. me == 0 .and. dtsets(1)%builtintest /= 0) then
    call testfi(dtsets(1)%builtintest,etotal,filstat,gred,natom,strten,xred)
  end if
 

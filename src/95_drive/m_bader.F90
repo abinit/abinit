@@ -6,14 +6,10 @@
 !! Procedures used by AIM code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (PCasek,FF,XG)
+!!  Copyright (C) 2008-2022 ABINIT group (PCasek,FF,XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -220,12 +216,6 @@ module m_bader
 !! FUNCTION
 !!  Free memory allocated in the module. Close units. Mainly used to pass the abirules
 !!
-!! PARENTS
-!!      aim
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
  subroutine aim_shutdown()
@@ -273,12 +263,6 @@ end subroutine aim_shutdown
 !!
 !! OUTPUT
 !!  aim_dtset=the structured entity containing all input variables
-!!
-!! PARENTS
-!!      aim
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -771,12 +755,6 @@ end subroutine adini
 !! This file does not follow the ABINIT coding rules (yet) : the use
 !! of a module to transfer data should be avoided
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine addout(aim_dtset)
@@ -935,12 +913,6 @@ end subroutine addout
 !! srch=  (true/false) check if the line is outside or
 !!             inside the atomic surface.
 !! vv(3)= initial point in orthogonal coordinates
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -1283,12 +1255,6 @@ end subroutine aim_follow
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine consist(aim_dtset,tstngr,tstvpt)
@@ -1365,12 +1331,6 @@ end subroutine consist
 !!
 !! TODO
 !! Should combine parts of code that are similar ...
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -2147,12 +2107,6 @@ end subroutine cpdrv
 !! SIDE EFFECTS
 !! vv(3)= starting point and final point
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine critic(aim_dtset,vv,ev,zz,dmax,ires,sort)
@@ -2466,12 +2420,6 @@ end subroutine critic
 !! OUTPUT
 !!  (to be filled)
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 !!
 
@@ -2543,12 +2491,6 @@ end subroutine ordr
 !!
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -2887,12 +2829,6 @@ end subroutine critics
 !! OUTPUT
 !! aim_dtset = the structured entity containing all input variables
 !!
-!! PARENTS
-!!      aim
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine defad(aim_dtset)
@@ -2976,12 +2912,6 @@ end subroutine defad
 !!
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
-!!
-!! PARENTS
-!!      aim
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -3199,12 +3129,6 @@ end subroutine drvaim
 !! OUTPUT
 !!  (written in the untg file)
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine graph(unts,untg)
@@ -3288,12 +3212,6 @@ end subroutine graph
 !!
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -3681,12 +3599,6 @@ end subroutine initaim
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
 !!
-!! PARENTS
-!!      aim
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine inpar(instr,lenstr)
@@ -3794,12 +3706,6 @@ end subroutine inpar
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine inspln(idir,snn,tnn)
@@ -3895,12 +3801,6 @@ end subroutine inspln
 !!
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -4212,12 +4112,6 @@ end subroutine integrho
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine integvol()
@@ -4327,12 +4221,6 @@ end subroutine integvol
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine onestep(vv,chg,grho,hh,np,npmax,deltar)
@@ -4415,12 +4303,6 @@ end subroutine onestep
 !!
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -4521,12 +4403,6 @@ end subroutine plint
 !! OUTPUT
 !! rr= radius
 !! grho(3)= gradient on the surface
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -4697,12 +4573,6 @@ end subroutine rsurf
 !!
 !! WARNING
 !! This file does not follow the ABINIT coding rules (yet)
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -5289,12 +5159,6 @@ end subroutine surf
 !!
 !! SIDE EFFECTS
 !!  This routine also works on the data contained in the defs_aimprom and defs_aimfields modules
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -5910,12 +5774,6 @@ end function vec_prod
 !! FUNCTION
 !! Matrix multiplication cc=aa*bb
 !!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
-!!
 !! SOURCE
 
 subroutine mprod(aa,bb,cc)
@@ -5949,12 +5807,6 @@ end subroutine mprod
 !!
 !! FUNCTION
 !! bschg1: Vector transformation of coordinates
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 
@@ -6000,12 +5852,6 @@ end subroutine bschg1
 !!
 !! FUNCTION
 !! bschg2: Matrix transformation of coordinates
-!!
-!! PARENTS
-!!      m_bader
-!!
-!! CHILDREN
-!!      mprod
 !!
 !! SOURCE
 

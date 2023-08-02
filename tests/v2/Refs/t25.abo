@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
 
 ================================================================================
@@ -29,8 +29,8 @@
          asr         1
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         0
-      quadqu         0
+      dipqua         1
+      quadqu         1
       ifcana         1
       ifcout        21
       natifc         2
@@ -63,13 +63,23 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.7857000  0.0000000  0.0000000  G(1)=  0.1284406  0.0000000  0.0000000
  R(2)=  0.0000000  7.7857000  0.0000000  G(2)=  0.0000000  0.1284406  0.0000000
  R(3)=  0.0000000  0.0000000  7.7857000  G(3)=  0.0000000  0.0000000  0.1284406
  Unit cell volume ucvol=  4.7194675E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  no
+    2)    0.5000000  0.5000000  0.5000000  no
+    3)    0.5000000  0.5000000  0.0000000  no
+    4)    0.5000000  0.0000000  0.5000000  no
+    5)    0.0000000  0.5000000  0.5000000  no
+
+ DDB file with 7 blocks has been read.
 
 ================================================================================
 
@@ -94,7 +104,7 @@
        3               3        0.134899        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    3.903178E+00    0.000000E+00    0.000000E+00
@@ -118,7 +128,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.039  and twall      0.040 sec
+-begin at tcpu      0.034  and twall      0.045 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -497,7 +507,7 @@
    0.00000  0.00000  0.00614   0.00000  0.00000  0.01053   0.00000  0.00000 -0.00439
  Traces (and ratios) :
  -0.03811                   0.00000                  -0.03811
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :       -1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
@@ -518,7 +528,7 @@
    0.00000  0.00000  0.00614   0.00000  0.00000  0.01053   0.00000  0.00000 -0.00439
  Traces (and ratios) :
  -0.03811                   0.00000                  -0.03811
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :        0.000000       -1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
@@ -539,7 +549,7 @@
    0.00000  0.00000 -0.05039   0.00000  0.00000 -0.02107   0.00000  0.00000 -0.02932
  Traces (and ratios) :
  -0.03811                   0.00000                  -0.03811
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :        0.000000        0.000000       -1.000000
  Second local vector :        1.000000        0.000000        0.000000
@@ -560,7 +570,7 @@
    0.00000  0.00000 -0.05039   0.00000  0.00000 -0.02107   0.00000  0.00000 -0.02932
  Traces (and ratios) :
  -0.03811                   0.00000                  -0.03811
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :        0.000000        0.000000        1.000000
  Second local vector :        1.000000        0.000000        0.000000
@@ -581,7 +591,7 @@
    0.00000  0.00000  0.00614   0.00000  0.00000  0.01053   0.00000  0.00000 -0.00439
  Traces (and ratios) :
  -0.03811                   0.00000                  -0.03811
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :        0.000000        1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
@@ -602,7 +612,7 @@
    0.00000  0.00000  0.00614   0.00000  0.00000  0.01053   0.00000  0.00000 -0.00439
  Traces (and ratios) :
  -0.03811                   0.00000                  -0.03811
-  1.00000                   0.00000                   1.00000
+  1.00000                  -0.00000                   1.00000
  Transformation to local coordinates 
  First  local vector :        1.000000        0.000000        0.000000
  Second local vector :        0.000000        1.000000        0.000000
@@ -1216,6 +1226,6 @@
 
 ================================================================================
 
-+Total cpu time      0.344  and wall time      0.348 sec
++Total cpu time      0.315  and wall time      0.337 sec
 
  anaddb : the run completed succesfully.

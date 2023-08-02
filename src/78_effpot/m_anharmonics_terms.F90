@@ -7,7 +7,7 @@
 !! Module with datatype and tools for the anharmonics terms
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (AM)
+!! Copyright (C) 2010-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -119,12 +119,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype to be initialized
 !!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
@@ -165,12 +159,14 @@ subroutine anharmonics_terms_init(anharmonics_terms,natom,ncoeff,&
 
 !Set the 3rd order elastic tensor
  anharmonics_terms%elastic3rd = zero
+ anharmonics_terms%has_elastic3rd = .FALSE.
  if(present(elastic3rd))then
    call anharmonics_terms_setElastic3rd(anharmonics_terms,elastic3rd)
  end if
 
 !Set the 3rd order elastic tensor
  anharmonics_terms%elastic4th = zero
+ anharmonics_terms%has_elastic4th = .FALSE.
  if(present(elastic4th))then
    call anharmonics_terms_setElastic4th(anharmonics_terms,elastic4th)
  end if
@@ -215,12 +211,6 @@ end subroutine anharmonics_terms_init
 !!
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype to be free
-!!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -279,12 +269,6 @@ end subroutine anharmonics_terms_free
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype to be free
 !!
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_freeCoeffs(anharmonics_terms)
@@ -327,12 +311,6 @@ end subroutine anharmonics_terms_freeCoeffs
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
-!!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -393,12 +371,6 @@ end subroutine anharmonics_terms_setCoeffs
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_setElastic3rd(anharmonics_terms,elastics)
@@ -442,12 +414,6 @@ end subroutine anharmonics_terms_setElastic3rd
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
-!!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -493,12 +459,6 @@ end subroutine anharmonics_terms_setElastic4th
 !!
 !! OUTPUT
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
-!!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 
@@ -577,12 +537,6 @@ end subroutine anharmonics_terms_setStrainPhononCoupling
 !! anharmonics_terms<type(anharmonics_terms_type)> = anharmonics_terms datatype
 !!
 !!
-!! PARENTS
-!!      m_anharmonics_terms,m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
-!!
 !! SOURCE
 
 subroutine anharmonics_terms_setElasticDispCoupling(anharmonics_terms,natom,elastic_displacement)
@@ -649,12 +603,6 @@ end subroutine anharmonics_terms_setElasticDispCoupling
 !!   energy = contribution of the ifc to the energy
 !!   fcart(3,natom) = contribution of the ifc to the forces
 !!   strten(6) = contribution to the stress tensor
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 !!
@@ -769,12 +717,6 @@ end subroutine anharmonics_terms_evaluateElastic
 !!
 !! PARENT
 !!   effective_potential_evaluate
-!!
-!! PARENTS
-!!      m_effective_potential
-!!
-!! CHILDREN
-!!      getpbcindexes_supercell,xmpi_sum
 !!
 !! SOURCE
 

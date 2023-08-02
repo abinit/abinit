@@ -8,7 +8,7 @@
 !! of each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (FDortu,MVeithen)
+!! Copyright (C) 1999-2022 ABINIT group (FDortu,MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,12 +19,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,band2eps_dtset_free,instrng,inupper
-!!      invars11,outvars_band2eps,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

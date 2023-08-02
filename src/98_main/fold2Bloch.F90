@@ -6,7 +6,7 @@
 !! Main routine for the unfolding of the wavefuntion.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2021 ABINIT group (AB)
+!! Copyright (C) 2014-2022 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,13 +20,6 @@
 !!
 !! NOTES
 !! folds= Array of folds in X,Y, and Z directions
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,ebands_free
-!!      getargs,newk,progress,prompt,sortc,wfk%close,wfk%read_band_block
-!!      wfk_open_read,xmpi_end,xmpi_init
 !!
 !! SOURCE
 

@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2021 ABINIT group (CE, TR, AR)
+!!  Copyright (C) 2010-2022 ABINIT group (CE, TR, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -73,11 +69,6 @@ contains
 !! OUTPUT
 !!   csix(origmwan,origmwan,nsppol,nsppol) = dispersion coefficient between each pair of MLWF.
 !!   corrvdw           = van der Waals correction to the energy.
-!!
-!! PARENTS
-!!      m_mlwfovlp
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1054,11 +1045,6 @@ end subroutine evdw_wannier
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_evdw_wannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine getFu(sn,sl,rn,rl,occn,occl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
@@ -1126,11 +1112,6 @@ end subroutine getFu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_evdw_wannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine order_wannier(mwan,natom,nwan,nsppol,ord,vdw_typfrag,wanncent,xcart)
 
@@ -1183,11 +1164,6 @@ end subroutine getFu
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_evdw_wannier
-!!
-!! CHILDREN
 !!
 !! SOURCE
  subroutine ovlp_wann(mwan,nwan,nsppol,ord,wanncent,wannspr,xi)
@@ -1337,11 +1313,6 @@ end subroutine getFu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_evdw_wannier
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine vv10limit(sn,sl,rn,rl,fu) ! sn-->spread(n), sl-->spread(l), rn --> rc(n), rl --> rc(l)
@@ -1423,11 +1394,6 @@ end subroutine vv10limit
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_evdw_wannier
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -1,8 +1,8 @@
 
-.Version 9.5.1 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  6 Apr 2021.
-- ( at 23h32 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h04 )
   
 
 ================================================================================
@@ -31,8 +31,8 @@
       chneut         0
  Interatomic Force Constants Inputs :
       dipdip         0
-      dipqua         0
-      quadqu         0
+      dipqua         1
+      quadqu         1
       ifcana         1
       ifcout         0
  Description of grid 1 :
@@ -90,19 +90,26 @@ Phonon band structure files, with atomic projections, will be output
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.5762039  0.0000000  0.0000000  G(1)=  0.1793335  0.1035382  0.0000000
  R(2)= -2.7881019  4.8291342  0.0000000  G(2)=  0.0000000  0.2070765  0.0000000
  R(3)=  0.0000000  0.0000000  8.8543118  G(3)=  0.0000000  0.0000000  0.1129393
  Unit cell volume ucvol=  2.3843101E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ti
+    2)    0.3333333  0.6666667  0.5000000  Ti
+
+ DDB file with 4 blocks has been read.
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.037  and twall      0.047 sec
+-begin at tcpu      0.039  and twall      0.044 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -384,6 +391,6 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
-+Total cpu time      1.250  and wall time      1.272 sec
++Total cpu time      1.293  and wall time      1.307 sec
 
  anaddb : the run completed succesfully.

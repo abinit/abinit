@@ -7,7 +7,7 @@
 !!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MG)
+!! Copyright (C) 2013-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,10 +17,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -65,7 +61,7 @@ program abitk
 !Local variables-----------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands
+ integer :: ii, nargs, comm, my_rank, nprocs, prtvol, fform, rdwr, prtebands, spin
  integer :: kptopt, nshiftk, new_nshiftk, chksymbreak, nkibz, nkbz, intmeth, lenr !occopt,
  integer :: ndivsm, abimem_level, ierr, ntemp, ios, itemp, use_symmetries, ltetra
  real(dp) :: spinmagntarget, extrael, doping, step, broad, abimem_limit_mb, fs_ewin !, tolsym, tsmear
@@ -85,7 +81,7 @@ program abitk
  real(dp) :: skw_params(4), tmesh(3)
  real(dp),allocatable :: bounds(:,:), kTmesh(:), mu_e(:)
  real(dp),allocatable :: shiftk(:,:), new_shiftk(:,:), wtk(:), kibz(:,:), kbz(:,:)
- real(dp),allocatable :: nh(:), ne(:)
+ real(dp),allocatable :: n_ehst(:,:,:)
 
 !*******************************************************
 
@@ -174,7 +170,7 @@ program abitk
    ABI_CHECK(any(kptrlatt /= 0), "kptrlatt or ngkpt must be specified")
 
    call kpts_ibz_from_kptrlatt(cryst, kptrlatt, kptopt, nshiftk, shiftk, nkibz, kibz, wtk, nkbz, kbz, &
-      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk) !, bz2ibz)  ! Optional
+      new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
    new_nshiftk = size(new_shiftk, dim=2)
 
    write(std_out, "(/, a)")" Input_kptrlatt | New_kptrlatt"
@@ -349,37 +345,40 @@ program abitk
    call gaps%print(unit=std_out, header="KS gaps", kTmesh=kTmesh, mu_e=mu_e)
    !stop
 
-   ABI_MALLOC(ne, (ntemp))
-   ABI_MALLOC(nh, (ntemp))
-   call ebands_get_carriers(ebands, ntemp, kTmesh, mu_e, nh, ne)
+   ABI_MALLOC(n_ehst, (2, ebands%nsppol, ntemp))
+   call ebands_get_carriers(ebands, ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-   do itemp=1,ntemp
-     write(std_out, "(a, 2f16.2, 2e16.2)")&
-      " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
-      nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-      ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3
+   do spin=1,ebands%nsppol
+     do itemp=1,ntemp
+       write(std_out, "(a, 2f16.2, 2e16.2)")&
+        " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+        n_ehst(2,spin,itemp) / cryst%ucvol / Bohr_cm**3, &
+        n_ehst(1,spin,itemp) / cryst%ucvol / Bohr_cm**3
+     end do
    end do
 
    ABI_CHECK(get_arg("intmeth", intmeth, msg, default=2) == 0, msg)
    ABI_CHECK(get_arg("step", step, msg, default=0.02 * eV_Ha) == 0, msg)
    ABI_CHECK(get_arg("broad", broad, msg, default=0.06 * eV_Ha) == 0, msg)
+
    edos = ebands_get_edos(ebands, cryst, intmeth, step, broad, comm)
    call edos%print(std_out, header="Electron DOS")
-   call edos%get_carriers(ntemp, kTmesh, mu_e, nh, ne)
+   call edos%get_carriers(ntemp, kTmesh, mu_e, n_ehst)
 
    !write(msg, "(a16,a32,a32)") 'Temperature [K]', 'e/h density [cm^-3]', 'e/h mobility [cm^2/Vs]'
-   do itemp=1,ntemp
-     write(std_out, "(a, 2f16.2, 2e16.2)")&
-      " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
-      nh(itemp) / cryst%ucvol / (Bohr_meter * 100)**3, &
-      ne(itemp) / cryst%ucvol / (Bohr_meter * 100)**3
+   do spin=1,ebands%nsppol
+     do itemp=1,ntemp
+       write(std_out, "(a, 2f16.2, 2e16.2)")&
+        " T (K), mu_e (eV), nh, ne", kTmesh(itemp) / kb_HaK, mu_e(itemp) * Ha_eV, &
+        n_ehst(2, itemp, spin) / cryst%ucvol / Bohr_cm**3, &
+        n_ehst(1, itemp, spin) / cryst%ucvol / Bohr_cm**3
+     end do
    end do
 
    ABI_FREE(kTmesh)
    ABI_FREE(mu_e)
-   ABI_FREE(nh)
-   ABI_FREE(ne)
+   ABI_FREE(n_ehst)
 
  !case ("ebands_dope")
 
@@ -481,10 +480,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine abitk_show_help()
@@ -532,11 +527,6 @@ end subroutine abitk_show_help
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_path_ebands_cryst(path, ebands, cryst, comm, argpos)
@@ -573,11 +563,6 @@ end subroutine get_path_ebands_cryst
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_path_ebands(path, ebands, comm)
@@ -610,11 +595,6 @@ end subroutine get_path_ebands
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine get_path_cryst(path, cryst, comm)
@@ -646,11 +626,6 @@ end subroutine get_path_cryst
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

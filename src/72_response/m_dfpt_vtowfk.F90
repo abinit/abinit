@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2022 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -34,7 +30,6 @@ module m_dfpt_vtowfk
  use m_rf2
  use m_dtset
  use m_dtfil
-
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,  only : MPI_type
@@ -165,12 +160,6 @@ contains
 !!    pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!                                            (cumulative, so input as well as output)
 !!
-!! PARENTS
-!!      m_dfpt_vtorho
-!!
-!! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
-!!
 !! SOURCE
 
 subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
@@ -231,7 +220,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer,parameter :: level=14,tim_fourwf=5
  integer,save :: nskip=0
  integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
- integer :: iband_me,nband_me, unit_me
+ integer :: iband_me,nband_me !, unit_me
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
  integer :: option,opt_gvnlx1,quit,test_ddk
  integer :: tocceig,usedcwavef,ptr,shift_band
@@ -240,7 +229,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  type(rf2_t) :: rf2
 !arrays
  logical,allocatable :: cycle_bands(:)
- integer :: band_procs(nband_k)
+ integer :: rank_band(nband_k), bands_treated_now(nband_k)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:),ghc_vectornd(:,:)
@@ -258,9 +247,8 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  nkpt_max=50; if (xmpi_paral==1) nkpt_max=-1
 
  if(prtvol>2 .or. ikpt<=nkpt_max)then
-   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',&
-&   gs_hamkq%kpt_k(:),'band residuals:'
-   call wrtout(std_out,message,'PERS')
+   write(message,'(2a,i5,2x,a,3f9.5,2x,a)')ch10,' Non-SCF iterations; k pt #',ikpt,'k=',gs_hamkq%kpt_k(:),'band residuals:'
+   call wrtout(std_out,message)
  end if
 
 !Initializations and allocations
@@ -341,7 +329,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  LOOP OVER BANDS ==================================
 !======================================================================
 
- call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
+ call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
  iband_me = 0
@@ -350,10 +338,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !  Skip bands not treated by current proc
    if( (mpi_enreg%proc_distrb(ikpt, iband,isppol)/=me)) cycle
    iband_me = iband_me + 1
- 
-!unit_me = 300+iband
-unit_me = 6
-!  Get ground-state wavefunctions
+
+   !unit_me = 300+iband
+   !Get ground-state wavefunctions
    ptr = 1+(iband_me-1)*npw_k*nspinor+icg
    call cg_zcopy(npw_k*nspinor,cg(1,ptr),cwave0)
 
@@ -435,13 +422,23 @@ unit_me = 6
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 
-       call dfpt_cgwf(iband,iband_me,band_procs,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
-&       rf2,dcwavef,&
-&       eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
-&       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
-&       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
-&       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+       bands_treated_now = 0
+       bands_treated_now(iband) = 1
+       call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+       
+       if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
+         eig1_k = zero 
+         resid = zero
+       else
+         call dfpt_cgwf(iband,iband_me,rank_band,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+&         rf2,dcwavef,&
+&         eig0_k,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
+&         idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
+&         npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
+&         dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
+       end if
        resid_k(iband)=resid
+       
      else
        resid_k(iband)=zero
      end if
@@ -500,31 +497,31 @@ unit_me = 6
 !      Compute the 0-order nuclear dipole contribution (with cwavef)
 !      only relevant for DDK
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(gs_hamkq%vectornd)) ) then
-         ABI_MALLOC(ghc_vectornd,(2,npw_k))
-         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         ABI_MALLOC(ghc_vectornd,(2,npw_k*nspinor))
+         ! ndat hard-coded as 1
          call getghc_nucdip(cwavef,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kpt_k,&
 &          gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
-&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,gs_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+&          gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,gs_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
 !        There is an additional factor of 2 with respect to the bare matrix element
-         end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
-           & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         end0_k(iband)=energy_factor*(DOT_PRODUCT(cwavef(1,1:npw_k*nspinor),ghc_vectornd(1,1:npw_k*nspinor))+&
+           & DOT_PRODUCT(cwavef(2,1:npw_k*nspinor),ghc_vectornd(2,1:npw_k*nspinor)))
          ABI_FREE(ghc_vectornd)
        end if
- 
+
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
 !      only relevant for DDK
        if( (ipert .EQ. natom+1) .AND. (ASSOCIATED(rf_hamkq%vectornd)) ) then
-         ABI_MALLOC(ghc_vectornd,(2,npw_k))
-         ! ndat hard-coded as 1; my_nspinor hard-coded as 1
+         ABI_MALLOC(ghc_vectornd,(2,npw1_k*nspinor))
+         ! ndat hard-coded as 1
          call getgh1ndc(cwave1,ghc_vectornd,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
-           & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,&
-           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,1,rf_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
+           & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw1_k,gs_hamkq%nvloc,&
+           & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,nspinor,rf_hamkq%vectornd,gs_hamkq%use_gpu_cuda)
 !        There is an additional factor of 4 with respect to the bare matrix element
-         end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
-           & DOT_PRODUCT(cwave0(2,1:npw_k),ghc_vectornd(2,1:npw_k)))
+         end1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k*nspinor),ghc_vectornd(1,1:npw_k*nspinor))+&
+           & DOT_PRODUCT(cwave0(2,1:npw_k*nspinor),ghc_vectornd(2,1:npw_k*nspinor)))
          ABI_FREE(ghc_vectornd)
        end if
-! 
+!
 !      Compute eigenvalue part of total energy (with cwavef)
        if (gs_hamkq%usepaw==1) then
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwavef,gsc,mpi_enreg%me_g0,&
@@ -572,7 +569,7 @@ unit_me = 6
 
      end if ! End of non-zero occupation
 
-!    Exit loop over inonsc if converged and if non-self-consistent
+!    Exit loop over inonsc if converged and non-self-consistent
      if (iscf_mod<0 .and. resid<dtset%tolwfr) exit
 
    end do ! End loop over inonsc
@@ -615,21 +612,18 @@ unit_me = 6
 
 ! call xmpi_sum(eig1_k,mpi_enreg%comm_band,ierr)
 
-! NB: no need to sum eXX_k over band communicator here, as it is a sub-comm of kpt, 
+! NB: no need to sum eXX_k over band communicator here, as it is a sub-comm of kpt,
 !   and full mpi_sum will be done higher up.
-
-
 
 !For rf2 perturbation
  if(ipert==natom+10.or.ipert==natom+11) call rf2_destroy(rf2)
-
 
 !Find largest resid over bands at this k point
  residk=maxval(resid_k(:))
  if (prtvol>2 .or. ikpt<=nkpt_max) then
    do ii=0,(nband_k-1)/8
      write(message,'(1p,8e10.2)')(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
-     call wrtout(std_out,message,'PERS')
+     call wrtout(std_out,message)
    end do
  end if
 
@@ -665,12 +659,12 @@ unit_me = 6
  call xmpi_sum(nskip,mpi_enreg%comm_band,ierr)
  if (iscf_mod>0 .and. (prtvol>2 .or. ikpt<=nkpt_max)) then
    write(message,'(a,i0)')' dfpt_vtowfk : number of one-way 3D ffts skipped in vtowfk3 until now =',nskip
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,message)
  end if
 
  if (prtvol<=2 .and. ikpt==nkpt_max+1) then
    write(message,'(3a)') ch10,' dfpt_vtowfk : prtvol=0, 1 or 2, do not print more k-points.',ch10
-   call wrtout(std_out,message,'PERS')
+   call wrtout(std_out,message)
  end if
 
  if (residk>dtset%tolwfr .and. iscf_mod<=0 .and. iscf_mod/=-3) then
@@ -694,7 +688,7 @@ end subroutine dfpt_vtowfk
 !! FUNCTION
 !! Response function calculation only:
 !! Restore the full "active space" contribution to the 1st-order wavefunctions.
-!! The 1st-order WF corrected in this way will no longer be othogonal to the other occupied states.
+!! The 1st-order WF corrected in this way will no longer be orthogonal to the other occupied states.
 !! This routine will be only used in a non self-consistent calculation of the
 !! 1st-order WF for post-processing purposes. Therefore, it does not compute
 !! the contribution of the 2DTE coming from the change of occupations.
@@ -728,12 +722,6 @@ end subroutine dfpt_vtowfk
 !!  cwave1(2,npw1*nspinor)= 1st-order wave-function after correction
 !!  cwaveprj1(natom,nspinor)= 1st-order wave-function after correction
 !!                            projected on NL projectors (PAW)
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
 !!
 !! SOURCE
 
@@ -775,10 +763,10 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
 !At this stage, the 1st order function cwavef is orthogonal to cgq (unlike when it is input to dfpt_cgwf).
 !Here, restore the "active space" content of the 1st-order wavefunction, to give cwave1 .
 
-! New logic 11/11/2019: accumulate correction in cwave1 and cwaveprj1, 
+! New logic 11/11/2019: accumulate correction in cwave1 and cwaveprj1,
 !   then add it to cwavef at the end with a modified blas call
  cwave1 = zero
- 
+
  if (usepaw==1) then
    call pawcprj_set_zero(cwaveprj1)
  end if
@@ -897,12 +885,6 @@ end subroutine full_active_wf1
 !!
 !! NOTES
 !!  Was part of dfpt_vtowfk before.
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!      cg_zcopy,dotprod_g,pawcprj_copy,pawcprj_zaxpby,timab
 !!
 !! SOURCE
 

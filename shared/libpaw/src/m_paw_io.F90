@@ -6,7 +6,7 @@
 !!  PAW I/O related operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2021 ABINIT group (MT, TR)
+!!  Copyright (C) 2012-2022 ABINIT group (MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,12 +80,6 @@ CONTAINS !===========================================================
 !!              No test when test_value<0
 !!  unit=the unit number for output
 !!  Ha_or_eV= 1: output in hartrees, 2: output in eV
-!!
-!! PARENTS
-!!      m_paw_correlations,m_paw_ij,m_paw_slater,m_pawdij,m_pawrhoij
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

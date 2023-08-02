@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -53,7 +49,7 @@ contains
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (DRH, DCA, XG, GMR)
+!! Copyright (C) 1998-2022 ABINIT group (DRH, DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -116,11 +112,6 @@ contains
 !!       5 &    4    &    3
 !!       \end{array} \right)
 !! $$
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

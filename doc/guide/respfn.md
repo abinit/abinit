@@ -138,7 +138,7 @@ Limitations of the present implementation (as of v5.7):
   * Symmetry is presently used to skip redundant k points in the BZ sum, 
     but not to skip redundant strain perturbations.
 
-We also define the index of the perturbation, called *pertcase*, equal to idir + 3*ipert. 
+We also define the index of the perturbation, called *pertcase*, equal to idir + 3 * (ipert - 1). 
 Accordingly, pertcase runs from 1 to 3 * (natom + 4), and will be
 needed to identify output and input files, see section 6.
 
@@ -362,24 +362,27 @@ In the first part, every perturbation is examined, one at a time, separately:
 <a id="5"></a>
 ## 5 List of relevant input variables
   
-A subset of the ABINIT input variables have a modified meaning or a modified
-behaviour in case of RF calculations. Here is the list of these input
-variables, together with the variables that applies only to RF computations.
+Some input variables are new for RF calculations.
+Also, a subset of the ABINIT input variables have a modified meaning or a modified
+behaviour in case of such calculations. Here is the list of the most relevant input
+variables.
 Note that the code will do a RF calculation ([[optdriver]]=1) when one of
-[[rfphon]] or [[rfelfd]] is non-zero.
+[[rfphon]] or [[rfelfd]] or [[rfstrs]] is non-zero.
 
   * [[amu]]
+  * [[asr]]
+  * [[chneut]]
   * [[getwfk]], [[getwfq]], [[get1wf]], [[getddk]] 
   * [[irdwfk]], [[irdwfq]], [[ird1wf]], [[irdddk]] 
   * [[iscf]]
   * [[nkpt]]
   * [[nqpt]], [[qpt]], [[qptnrm]] 
   * [[nsym]]
-  * [[rfasr]]
   * [[rfatpol]]
   * [[rfdir]]
   * [[rfelfd]]
   * [[rfphon]]
+  * [[rfstrs]]
   * [[dfpt_sciss]]
   * [[tolwfr]], [[toldfe]], [[tolvrs]]
 

@@ -10,7 +10,6 @@ variables/index.md
 variables/external_parameters.md
 variables/multibinit.md
 variables/aim.md
-variables/atdep.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -29,11 +28,14 @@ variables/rlx.md
 variables/vdw.md
 variables/w90.md
 variables/optic.md
+variables/atdep.md
 variables/anaddb.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
 topics/Artificial.md
+topics/aTDEP.md
+topics/AtomCentered.md
 topics/AtomManipulator.md
 topics/AtomTypes.md
 topics/Bader.md
@@ -47,7 +49,7 @@ topics/ConstrainedPol.md
 topics/Control.md
 topics/Coulomb.md
 topics/CrossingBarriers.md
-topics/CRPA.md
+topics/CalcUJ.md
 topics/crystal.md
 topics/DFT+U.md
 topics/DeltaSCF.md
@@ -63,6 +65,7 @@ topics/ElPhonInt.md
 topics/ElPhonTransport.md
 topics/ElecDOS.md
 topics/ElecBandStructure.md
+topics/ExtFPMD.md
 topics/FileFormats.md
 topics/FitProcess.md
 topics/ForcesStresses.md
@@ -72,10 +75,13 @@ topics/GeoOpt.md
 topics/Git.md
 topics/GSintroduction.md
 topics/GW.md
+topics/GWR.md
 topics/GWls.md
 topics/Hybrids.md
 topics/k-points.md
 topics/LatticeModel.md
+topics/LatticeWannier.md
+topics/LWFModel.md
 topics/LDAminushalf.md
 topics/longwave.md
 topics/LOTF.md
@@ -111,7 +117,6 @@ topics/SpinDynamicsMultibinit.md
 topics/STM.md
 topics/Susceptibility.md
 topics/TDDFT.md
-topics/a-TDEP.md
 topics/TDepES.md
 topics/Temperature.md
 topics/TransPath.md

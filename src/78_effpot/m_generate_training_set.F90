@@ -8,14 +8,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -76,13 +72,6 @@ contains
 !! hist<type abihist>=Historical record of positions
 !!
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      crystal%free,ifc%free,ifc_init_fromfile,random_number,random_seed
-!!      strain_apply,strain_init,thermal_supercell_free,thermal_supercell_make
-!!      var2hist,wrtout,xcart2xred
-!!
 !! SOURCE
 
 subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom,namplitude,nconfig,&
@@ -94,7 +83,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
  use m_xmpi
  use m_strain
  use m_abihist, only : abihist,var2hist,abihist_findIndex
- use m_ifc, only : ifc_type,ifc_init_fromFile
+ use m_ifc, only : ifc_type
  use m_crystal,     only : crystal_t
  use m_supercell, only : supercell_type
  use m_geometry, only : xcart2xred
@@ -156,7 +145,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff,qdrp_cart,comm)
+  call ifc%from_file(dielt,trim(filename),natom_uc,ngqpt,nqshift,qshift,crystal,zeff,qdrp_cart,comm)
 
   write(message, '(a,I0,a,f10.2,02a)' )' Generation of ',nconfig,' at the temperature ',&
 &                            temperature_K,' K from the phonons',ch10

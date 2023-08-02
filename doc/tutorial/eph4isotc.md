@@ -15,8 +15,8 @@ For a more complete theoretical introduction, see [[cite:Giustino2017]] and refe
 
 It is assumed the user has already completed the two tutorials [RF1](/tutorial/rf1) and [RF2](/tutorial/rf2),
 and that he/she is familiar with the calculation of ground state and vibrational properties **in metals**.
-The user should have read the [fourth lesson on Al](base4) as well
-as the [introduction page for the EPH code](eph_intro) before running these examples.
+The user should have read the [fourth lesson on Al](/tutorial/base4) as well
+as the [introduction page for the EPH code](/tutorial/eph_intro) before running these examples.
 
 This lesson should take about 1.5 hour.
 
@@ -41,7 +41,7 @@ thus the electron energies $\ee$ and the e-ph matrix elements $g$ do not depend 
 
 The real part of $\Pi_\qnu$ gives the correction to the vibrational energies due to e-ph interaction
 while the **phonon linewidth** $\gamma_{\qq\nu}$ (full width at half maximum) is twice
-the imaginary part $\Pi^{''}_\qnu$ evaluated at "bare" phonon frequency $\ww_\qnu$ as computed with DFPT:
+the imaginary part $\Pi^{''}_\qnu$ evaluated at the "bare" phonon frequency $\ww_\qnu$ as computed with DFPT:
 
 $$
 \gamma_{\qq\nu}(T) = 2\, \Pi^{''}_\qnu(\ww=\ww_\qnu, T).
@@ -109,7 +109,7 @@ in which a single Dirac delta is involved.
 
 At the level of the implementation, the [[eph_intmeth]] input variable
 selects the technique for integrating the double delta over the FS:
-[[eph_intmeth]] == 2 (default method) activates the **optimized tetrahedron** scheme [[cite:Kawamura2014]]
+[[eph_intmeth]] == 2 (default) activates the **optimized tetrahedron** scheme [[cite:Kawamura2014]]
 as implemented in the [libtetrabz library](http://libtetrabz.osdn.jp/en/_build/html/index.html)
 while [[eph_intmeth]] == 1 replaces the Dirac distribution with a **Gaussian** function of finite width.
 In the later case, one can choose between a constant broadening $\sigma$
@@ -197,7 +197,7 @@ as the phonon DOS times the positive frequency-dependent prefactor $\alpha^2(\ww
 
 The technique used to compute $\alpha^2F(\ww)$ is defined by [[ph_intmeth]] (note the **ph_** prefix instead of **eph_**).
 Both the Gaussian ([[ph_intmeth]] = 1 with [[ph_smear]] smearing) and
-the linear tetrahedron method by [[cite:Blochl1994]] ([[ph_intmeth]] = 2, default) are implemented.
+the linear tetrahedron method by [[cite:Bloechl1994]] ([[ph_intmeth]] = 2, default) are implemented.
 The $\alpha^2F(\ww)$ function is evaluated on a linear mesh of step [[ph_wstep]] covering the entire
 range of phonon frequencies.
 The total e-ph coupling strength $\lambda$ (a dimensionless measure of the average strength of the e-ph coupling)

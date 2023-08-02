@@ -1,28 +1,46 @@
+******************************************************************************************
+                                Welcome to MULTIBINIT,                         
+ a software platform designed for the construction and use of second-principles models
+                   for lattice, spin and electron degrees of freedom.
 
-.Version 9.3.1 of MULTIBINIT 
+.Version 9.11.2 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
  see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
 
- ABINIT is a project of the Universite Catholique de Louvain,
- Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read https://docs.abinit.org/theory/acknowledgments for suggested
- acknowledgments of the ABINIT effort.
- For more information, see https://www.abinit.org .
+ MULTIBINIT is a software project of the University of Liege
+ (PHYTHEMA & NANOMAT groups), in collaboration with other partners.
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h33 )
+-----------------------------------------------------------------------------------------
+
+                          MULTIBINIT - LATTICE MODELS                   
+
+ Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege
+   (Philippe.Ghosez@uliege.be).
+
+ Main contributors: Alexandre MARTIN, Jordan BIEDER, Michael Marcus SCHMITT,
+   Louis BASTOGNE, Xu HE, Alireza SASANI, Huazhang ZHANG, Subhadeep BANDYOPADHYAY,
+   Philippe GHOSEZ.
+
+ Technical support: Xu HE (X.He@uliege.be)
+
+*****************************************************************************************
+
+
+
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h07 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -44,11 +62,14 @@
           fit_grid  1  1  1
          ts_option  0
     fit_rangePower  3  4
+     fit_dispterms  1
     fit_anhaStrain  0
     fit_SPCoupling  1
       fit_SPC_maxS  1
      fit_nfixcoeff  2
       fit_fixcoeff          1      2
+    fit_nimposecoe  1
+    fit_imposecoef          4
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -72,8 +93,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_sys.xml with Fortran
+-Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml
+-Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml with Fortran
 
  Bound for ifc SR:
 
@@ -160,46 +181,43 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t14_coeffs.xml with Fortran
+-Opening the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_coeffs.xml
+-Reading the file /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t14_coeffs.xml with Fortran
 
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v8/Input/t13_HIST
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t13_HIST
 
 
-================================================================================
+--------------------------------------------------------------------------------
 
  Starting Fit process
 
 --------------------------------------------------------------------------------
 
  The coefficients present in the effective potential will be used for the fit
- Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728496603818279E+01
+
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460720130E-03
-   Forces          :   7.3678367059222868E-03
-   Stresses        :   1.3882954014972593E-04
+   Energy          :   4.0372993354979415E-05
+   Forces+Stresses :   7.4805078532501814E-03
+   Forces          :   7.3678370383271821E-03
+   Stresses        :   1.1267081492299897E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
-    Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     3           8.2581347440E+00  4.0003838705E-03  3.8455523719E-03  1.5483149867E-04
- 4     4           8.5804227752E+00  3.7876180836E-03  3.6336164702E-03  1.5400161341E-04
+    Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
+ 3     3           9.8269214433E-06  3.9567592281E-03  3.8455245457E-03  1.1123468238E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   1.8768485555E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
- 2 =>   1.2509427246E-01 (Sr_x-Ru_x)^4
- 3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
- 4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
+ 1 =>   1.9349535870E+00 (Ru_x-O1_x)^2(Ru_y-O1_y)^2
+ 2 =>   1.3342181626E-01 (Sr_x-Ru_x)^4
+ 3 =>  -5.2764593172E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
 
- Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   8.5804227751882269E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836315487E-03
-   Forces          :   3.6336164702180937E-03
-   Stresses        :   1.5400161341345517E-04
+   Energy          :   9.8269214433002730E-06
+   Forces+Stresses :   3.9567592281207105E-03
+   Forces          :   3.8455245457369664E-03
+   Stresses        :   1.1123468238374463E-04
 
 
 ================================================================================
@@ -213,6 +231,6 @@ dipdip_range         1         1         1
 
 ================================================================================
 
-+Total cpu time      0.639  and wall time      0.641 sec
++Total cpu time      0.627  and wall time      0.629 sec
 
  multibinit : the run completed succesfully.

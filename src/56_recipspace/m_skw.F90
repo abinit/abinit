@@ -6,14 +6,10 @@
 !!  Shankland-Koelling-Wood Fourier interpolation scheme.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -164,11 +160,6 @@ CONTAINS  !=====================================================================
 !!  band_block(2)=Initial and final band index to interpolate. If [0,0], all bands are used
 !!    This is a global variable i.e. all MPI procs MUST call the routine with the same value.
 !!  comm=MPI communicator
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      sort_dp
 !!
 !! SOURCE
 
@@ -414,11 +405,6 @@ end function skw_new
 !! OUTPUT
 !!  only writing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
-!!
 !! SOURCE
 
 subroutine skw_print(skw, unt)
@@ -456,10 +442,6 @@ end subroutine skw_print
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -538,11 +520,6 @@ end function skw_ncwrite
 !!  [oder1(3)]=First-order derivatives wrt k in reduced coordinates.
 !!  [oder2(3,3)]=Second-order derivatives wrt k in reduced coordinates.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
-!!
 !! SOURCE
 
 subroutine skw_eval_bks(skw, band, kpt, spin, oeig, oder1, oder2)
@@ -613,11 +590,6 @@ end subroutine skw_eval_bks
 !! FUNCTION
 !!  Free memory
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
-!!
 !! SOURCE
 
 subroutine skw_free(skw)
@@ -657,12 +629,6 @@ end subroutine skw_free
 !!
 !! OUTPUT
 !!  srk(%nr)=Star function for this k-point.
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -709,12 +675,6 @@ end subroutine mkstar
 !!
 !! OUTPUT
 !!  srk_dk1(%nr,3)=Derivative of the star function wrt k in reduced coordinates.
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -764,12 +724,6 @@ end subroutine mkstar_dk1
 !!
 !! OUTPUT
 !!  srk_dk2(%nr,3,3)=2nd derivatives of the star function wrt k in reduced coordinates.
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 
@@ -836,12 +790,6 @@ end subroutine mkstar_dk2
 !!
 !! OUTPUT
 !!  or2vals(skw%nr)=||R||**2
-!!
-!! PARENTS
-!!      m_skw
-!!
-!! CHILDREN
-!!      get_irredg,sort_dp,xmpi_allgatherv,xmpi_split_work2_i4b,xmpi_sum
 !!
 !! SOURCE
 

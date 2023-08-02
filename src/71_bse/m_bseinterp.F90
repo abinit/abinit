@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (M.Giantomassi, Y. Gillet)
+!!  Copyright (C) 2014-2022 ABINIT group (M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,9 +28,7 @@ MODULE m_bseinterp
  use m_nctk
  use m_haydock_io
  use m_linalg_interfaces
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_fstrings,          only : indent, strcat, sjoin, itoa
  use defs_datatypes,      only : pseudopotential_type
@@ -43,7 +37,7 @@ MODULE m_bseinterp
  use m_crystal,           only : crystal_t
  use m_bz_mesh,           only : kmesh_t
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfdgw_t
  use m_pawtab,            only : pawtab_type
 
  implicit none
@@ -124,11 +118,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
@@ -139,7 +128,7 @@ subroutine interpolator_init(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
  integer,intent(in) :: method
  type(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
- type(wfd_t),intent(inout) :: Wfd_dense, Wfd_coarse
+ type(wfdgw_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
  type(excparam),intent(in) :: BSp
  type(crystal_t),intent(in) :: Cryst
@@ -222,11 +211,6 @@ end subroutine interpolator_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_alloc_work(interpolator, work_size)
@@ -257,11 +241,6 @@ end subroutine int_alloc_work
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_free_work(interpolator)
@@ -272,12 +251,8 @@ subroutine int_free_work(interpolator)
 
 !*****************************************************************************
 
- if( allocated(interpolator%btemp)) then
-   ABI_FREE(interpolator%btemp)
- end if
- if( allocated(interpolator%ctemp)) then
-   ABI_FREE(interpolator%ctemp)
- end if
+ ABI_SFREE(interpolator%btemp)
+ ABI_SFREE(interpolator%ctemp)
 
 end subroutine int_free_work
 !!***
@@ -295,11 +270,6 @@ end subroutine int_free_work
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse, &
@@ -309,7 +279,7 @@ subroutine int_compute_overlaps(interpolator, double_grid, Wfd_dense, Wfd_coarse
 !scalars
  type(interpolator_t),intent(inout) :: interpolator
  type(double_grid_t),intent(in),target :: double_grid
- type(wfd_t),intent(inout) :: Wfd_dense, Wfd_coarse
+ type(wfdgw_t),intent(inout) :: Wfd_dense, Wfd_coarse
  type(kmesh_t),intent(in) :: Kmesh_dense, Kmesh_coarse
  type(excparam),intent(in) :: BSp
  type(crystal_t),intent(in) :: Cryst
@@ -476,11 +446,6 @@ end subroutine int_compute_overlaps
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_preprocess_tables(interpolator,double_grid)
@@ -567,11 +532,6 @@ end subroutine int_preprocess_tables
 !! TODO:
 !!  Some operations are faster if we allocate with shape (8,nreh(spin))
 !!
-!! PARENTS
-!!      m_bseinterp
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine int_compute_corresp(interpolator,BSp,double_grid)
@@ -655,11 +615,6 @@ end subroutine int_compute_corresp
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolator_normalize(interpolator)
@@ -714,11 +669,6 @@ end subroutine interpolator_normalize
 !! OUTPUT
 !!
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine interpolator_free(interpolator)
@@ -728,21 +678,10 @@ subroutine interpolator_free(interpolator)
 
 !*****************************************************************************
 
- if( allocated(interpolator%overlaps) ) then
-   ABI_FREE(interpolator%overlaps)
- end if
-
- if (allocated(interpolator%corresp)) then
-   ABI_FREE(interpolator%corresp)
- end if
-
- if (allocated(interpolator%interp_factors)) then
-   ABI_FREE(interpolator%interp_factors)
- end if
-
- if( associated(interpolator%double_grid) ) then
-   nullify(interpolator%double_grid)
- end if
+ ABI_SFREE(interpolator%overlaps)
+ ABI_SFREE(interpolator%corresp)
+ ABI_SFREE(interpolator%interp_factors)
+ if( associated(interpolator%double_grid) ) nullify(interpolator%double_grid)
 
 end subroutine interpolator_free
 !!***

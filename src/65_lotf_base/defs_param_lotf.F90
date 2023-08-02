@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MMancini)
+!! Copyright (C) 2005-2022 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -65,11 +65,6 @@ CONTAINS !===========================================================
 !!  upd=....
 !!  me,nproc =disabled parallel LOTF
 !!  classic=stick with the adaptable Glue model (rough version)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

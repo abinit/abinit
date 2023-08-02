@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -35,6 +31,7 @@ module m_dft_energy
  use m_xcdata
  use m_cgtools
  use m_dtset
+ use m_extfpmd
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -212,16 +209,10 @@ contains
 !!  There is a large amount of overhead in the way this routine do the computation of the energy !
 !!  For example, the density has already been precomputed, so why to compute it again here ??
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
-!!
 !! SOURCE
 
 subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-& energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
+& energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
@@ -238,6 +229,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(paw_dmft_type), intent(inout) :: paw_dmft
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
@@ -677,7 +669,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
        call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
 &       gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&       gs_hamk%ph3d_k)
+&       gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -811,6 +803,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    if (psps%usepaw==1) etotal=etotal + energies%e_pawdc
  end if
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+!Add the contribution of extfpmd to the entropy
+ if(associated(extfpmd)) then
+   energies%entropy=energies%entropy+extfpmd%entropy
+   energies%e_extfpmd=extfpmd%e_kinetic
+   energies%edc_extfpmd=extfpmd%edc_kinetic
+   if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
+   if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
+ end if
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
 !Additional stuff for electron-positron
@@ -839,7 +839,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  if (psps%usepaw==0) then
    tim_mkrho=3
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs)
+&   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs,&
+&   extfpmd=extfpmd)
    if(dtset%usekden==1)then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
@@ -868,7 +869,9 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    ABI_MALLOC(rhowfg,(2,dtset%nfft))
    rhowfr(:,:)=zero
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs)
+&   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs,&
+&   extfpmd=extfpmd)
+
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,0,dtset%paral_kgb,pawfgr,rhowfg,rhodum,rhowfr,rhor)
    rhor(:,:)=rhor(:,:)+nhat(:,:)
    call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
@@ -931,12 +934,6 @@ end subroutine energy
 !!  resid_k(nband)=residual for each band
 !!   $= \langle C_n \mid H H \mid C_n \rangle- \langle C_n \mid H \mid C_n \rangle^2 $.
 !!
-!! PARENTS
-!!      m_dft_energy
-!!
-!! CHILDREN
-!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
-!!
 !! SOURCE
 
 subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,resid_k)
@@ -960,7 +957,7 @@ subroutine mkresi(cg,eig_k,gs_hamk,icg,ikpt,isppol,mcg,mpi_enreg,nband,prtvol,re
  real(dp) :: tsec(2)
  real(dp),allocatable,target :: cwavef(:,:),ghc(:,:),gsc(:,:),gvnlxc(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: cwavef_ptr(:,:),ghc_ptr(:,:),gsc_ptr(:,:)
- type(pawcprj_type) :: cwaveprj(0,0)
+ type(pawcprj_type) :: cwaveprj(1,1)
 
 ! *************************************************************************
 

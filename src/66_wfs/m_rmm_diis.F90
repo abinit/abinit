@@ -6,14 +6,10 @@
 !!  This module contains routines for the RMM-DIIS eigenvalue solver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2020-2021 ABINIT group (MG)
+!!  Copyright (C) 2020-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -57,6 +53,7 @@ module m_rmm_diis
 !!***
 
  public :: rmm_diis
+ public :: subspace_rotation   ! rayleigh-ritz procedure from gs_hamk
 !!***
 
  type,private :: rmm_diis_t
@@ -143,7 +140,7 @@ contains
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  my_nspinor=number of plane waves at this k point
+!!  my_nspinor=number of spinors treated by this MPI proc
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
@@ -160,11 +157,6 @@ contains
 !!  rmm_diis_status(2): Status of the eigensolver.
 !!    The first entry gives the previous accuracy.
 !!    The second entry gives the number of iterations already performed with this level.
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -709,10 +701,6 @@ end subroutine rmm_diis
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rmm_diis_push_iter(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, cg_bk, residv_bk, gsc_bk, tag)
@@ -762,10 +750,6 @@ end subroutine rmm_diis_push_iter
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -859,10 +843,6 @@ end function rmm_diis_exit_iter
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
@@ -915,10 +895,6 @@ end subroutine rmm_diis_print_block
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1003,10 +979,6 @@ end subroutine getghc_eigresid
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol) result(diis)
@@ -1048,10 +1020,6 @@ end function rmm_diis_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rmm_diis_free(diis)
@@ -1085,10 +1053,6 @@ end subroutine rmm_diis_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1180,10 +1144,6 @@ end subroutine rmm_diis_update_block
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
@@ -1245,10 +1205,6 @@ end subroutine rmm_diis_eval_mats
 !! OUTPUT
 !! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine my_pack_matrix(n, mat_in, mat_out)
@@ -1284,7 +1240,7 @@ end subroutine my_pack_matrix
 !!  The main difference with respect to other similar routines is that this implementation does not require
 !!  the <i|H|j> matrix elements as input so it can be used before starting the wavefunction optimation
 !!  as required e.g. by the RMM-DIIS method.
-!!  Moreover, the routine computes the new rediduals after the subspace rotation by rotating the
+!!  Moreover, the routine computes the new residuals after the subspace rotation by rotating the
 !!  matrix elements of the Hamiltonian in the new basis (requires more memory but client code
 !!  can avoid calling getghc after subspace_rotation.
 !!
@@ -1306,10 +1262,6 @@ end subroutine my_pack_matrix
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
 !!  gsc(2,*)=update <G|S|C>
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1337,8 +1289,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gwork(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:), gsc_bk(:,:)
  real(dp) :: dots(2, nband)
  type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -1370,6 +1321,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  !cplex = 2; if (istwf_k == 2) cplex = 1
 
  ABI_CALLOC(h_ij, (cplex, nband, nband))
+
  ! Allocate full ghc and gvnlxc to be able to rotate residuals and Vnlx matrix elements
  ! after subdiago. More memory but we can save a call to H|psi>.
  if (savemem == 0) then
@@ -1447,7 +1399,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  ! ========================
  ! Subspace diagonalization
  ! =======================
- ! Rotate cg, gsc and compute new eigevalues.
+ ! Rotate cg, gsc and compute new eigenvalues.
  ABI_MALLOC(evec, (2, nband, nband))
  mcg = npwsp * nband; mgsc = npwsp * nband * usepaw
  call subdiago(cg, eig, evec, gsc, 0, 0, istwf_k, mcg, mgsc, nband, npw, my_nspinor, paral_kgb, &

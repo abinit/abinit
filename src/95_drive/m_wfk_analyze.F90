@@ -6,14 +6,10 @@
 !!  Post-processing tools for WFK file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -65,6 +61,7 @@ module m_wfk_analyze
  use m_classify_bands,  only : classify_bands
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
+ use m_iowf,            only : prtkbff
 
  implicit none
 
@@ -107,9 +104,6 @@ contains
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -126,9 +120,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -162,7 +153,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfkfull_path
  logical :: call_pawinit, use_paw_aeur
- type(hdr_type) :: wfk0_hdr
+ type(hdr_type) :: wfk0_hdr, hdr_kfull
  type(crystal_t) :: cryst
  type(ebands_t) :: ebands
  type(pawfgr_type) :: pawfgr
@@ -279,6 +270,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    pawtab(:)%usepawu   = 0
    pawtab(:)%useexexch = 0
    pawtab(:)%exchmix   =zero
+   pawtab(:)%lamb_shielding   =zero
 
    call setsym_ylm(cryst%gprimd,pawang%l_max-1,cryst%nsym,dtset%pawprtvol,cryst%rprimd,cryst%symrec,pawang%zarot)
 
@@ -325,13 +317,28 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  select case (dtset%wfk_task)
 
- case (WFK_TASK_FULLBZ)
+ case (WFK_TASK_FULLBZ, WFK_TASK_OPTICS_FULLBZ)
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
+
+     ! Write KB form factors.
+     if (dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
+       call prtkbff(wfkfull_path, hdr_kfull, psps, dtset%prtvol)
+     end if
+     call hdr_kfull%free()
    end if
    call xmpi_barrier(comm)
+
+   if (dtset%wfk_task == WFK_TASK_OPTICS_FULLBZ) then
+     ! Calculate the DDK matrix elements from the WFK file in the full BZ.
+     ! This is needed fo computing non-linear properties in optics as symmetries are not
+     ! implemented correctly.
+     ds%only_diago = .False.
+     call ds%compute_ddk(wfkfull_path, dtfil%filnam_ds(4), dtset, psps, pawtab, ngfftc, comm)
+     call ds%free()
+   end if
 
  case (WFK_TASK_KPTS_ERANGE)
    call sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, dtfil%filnam_ds(4), comm)
@@ -347,6 +354,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  case (WFK_TASK_EINTERP)
    ! Band structure interpolation from eigenvalues computed on the k-mesh.
    call ebands_interpolate_kpath(ebands, dtset, cryst, [0, 0], dtfil%filnam_ds(4), comm)
+
+ case (WFK_TASK_CHECK_SYMTAB)
+   call wfk_check_symtab(wfk0_path, comm)
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
@@ -431,12 +441,6 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !!
 !! FUNCTION
 !!  Initialize the wavefunction descriptor
-!!
-!! PARENTS
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 

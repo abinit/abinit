@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t36/t36.in
-- output file    -> t36.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t36/t36.abi
+- output file    -> t36.abo
 - root for input  files -> t36i
 - root for output files -> t36o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         182          nfft =        6144          nkpt =           2
 ================================================================================
-P This job should need less than                       2.799 Mbytes of memory.
+P This job should need less than                       2.978 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         359          nfft =        6144          nkpt =           2
 ================================================================================
-P This job should need less than                       2.116 Mbytes of memory.
+P This job should need less than                       2.287 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -74,7 +71,6 @@ P This job should need less than                       3.130 Mbytes of memory.
 _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -86,11 +82,10 @@ _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.049 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =         362          nfft =       12288          nkpt =           1
 ================================================================================
-P This job should need less than                       4.417 Mbytes of memory.
+P This job should need less than                       4.775 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.096 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -103,7 +98,7 @@ _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.096 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           1
        mpw =         362          nfft =       12288          nkpt =           1
 ================================================================================
-P This job should need less than                       4.417 Mbytes of memory.
+P This job should need less than                       4.775 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.096 Mbytes.
 ================================================================================
@@ -125,6 +120,8 @@ _ WF disk file :      0.057 Mbytes ; DEN or POT disk file :      0.096 Mbytes.
             acell4     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
             acell5     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix1     3.33333333E-01
            diemix2     3.33333333E-01
@@ -230,21 +227,26 @@ P          mk1mem5          1
         optdriver3          1
         optdriver4          0
         optdriver5          0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          0
+           prtpot5          0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     0.00000000E+00  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
+          rfatpol1          1       2
+          rfatpol2          1       2
           rfatpol3          2       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+          rfatpol4          1       4
+          rfatpol5          1       4
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
+            rfdir4          1       1       1
+            rfdir5          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -362,8 +364,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.500   => boxcut(ratio)=   2.04358
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -647,7 +649,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.500   => boxcut(ratio)=   2.01963
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -664,10 +665,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t36o_DS2_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    6.000000E+00 and    6.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -683,23 +682,23 @@ tolerances: {toldfe: 1.00E-10, }
 -ETOT  1   17.999003819308     -1.637E+01 3.929E-02 1.626E+03
  ETOT  2   2.0792146211737     -1.592E+01 2.808E-03 1.442E+02
  ETOT  3  0.43600146451768     -1.643E+00 9.871E-04 1.122E+00
- ETOT  4  0.42868326774265     -7.318E-03 1.164E-05 1.853E-01
- ETOT  5  0.42820355312857     -4.797E-04 3.848E-07 1.172E-02
- ETOT  6  0.42808306569026     -1.205E-04 1.412E-07 3.487E-04
- ETOT  7  0.42808038850988     -2.677E-06 1.093E-09 9.644E-06
- ETOT  8  0.42808037367577     -1.483E-08 7.159E-11 2.087E-06
- ETOT  9  0.42808035172486     -2.195E-08 1.267E-11 6.709E-07
- ETOT 10  0.42808035102247     -7.024E-10 8.498E-15 8.061E-09
+ ETOT  4  0.42868326774259     -7.318E-03 1.164E-05 1.853E-01
+ ETOT  5  0.42820355312870     -4.797E-04 3.848E-07 1.172E-02
+ ETOT  6  0.42808306569030     -1.205E-04 1.412E-07 3.487E-04
+ ETOT  7  0.42808038850986     -2.677E-06 1.093E-09 9.644E-06
+ ETOT  8  0.42808037367565     -1.483E-08 7.159E-11 2.087E-06
+ ETOT  9  0.42808035172503     -2.195E-08 1.267E-11 6.709E-07
+ ETOT 10  0.42808035102247     -7.026E-10 8.498E-15 8.061E-09
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  maximum energy difference=  7.024E-10 exceeds toldfe=  1.000E-10
+  maximum energy difference=  7.026E-10 exceeds toldfe=  1.000E-10
 
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.264E-16; max=  84.977E-16
+ Mean square residual over all n,k,spin=   24.263E-16; max=  84.977E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -708,7 +707,7 @@ tolerances: {toldfe: 1.00E-10, }
  loc psp =  -7.14668586E+01  Hartree=   1.59024238E+01     xc=  -7.40150965E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   3.15887195E+00     enl0=   6.33723228E+00   enl1=   3.58522114E+00
+    edocc=   3.15887195E+00     enl0=   6.33723228E+00   enl1=   3.58522113E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -3.39408044E+01
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -718,7 +717,7 @@ tolerances: {toldfe: 1.00E-10, }
  Resulting in :
  2DEtotal=    0.4280803510E+00 Ha. Also 2DEtotal=    0.116486587546E+02 eV
     (2DErelax=   -3.3940804401E+01 Ha. 2DEnonrelax=    3.4368884752E+01 Ha)
-    (  non-var. 2DEtotal :    4.2806602052E-01 Ha)
+    (  non-var. 2DEtotal :    4.2806602053E-01 Ha)
 
 ================================================================================
 
@@ -732,22 +731,22 @@ tolerances: {toldfe: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    2        -0.4126556577         0.0000000000
+   1    1   1    2        -0.4126556577        -0.0000000000
   
    2    1   1    2        -0.0000000726         0.0000000000
   
    3    1   1    2        -0.0000032451         0.0000000001
   
-   1    2   1    1        -0.4126556577        -0.0000000000
+   1    2   1    1        -0.4126556577         0.0000000000
    1    2   2    1        -0.0000000726        -0.0000000000
    1    2   3    1        -0.0000032451        -0.0000000001
    1    2   1    2         0.4280660205         0.0000000000
    1    2   2    2        -0.0000001437        -0.0000000000
-   1    2   3    2         0.0000032967         0.0000000001
+   1    2   3    2         0.0000032968         0.0000000001
   
    2    2   1    2        -0.0000001437         0.0000000000
   
-   3    2   1    2         0.0000032967        -0.0000000001
+   3    2   1    2         0.0000032968        -0.0000000001
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -755,13 +754,13 @@ tolerances: {toldfe: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    2        -0.0034103773         0.0000000000
+   1    1   1    2        -0.0034103773        -0.0000000000
   
    2    1   1    2        -0.0000000006         0.0000000000
   
    3    1   1    2        -0.0000000184         0.0000000000
   
-   1    2   1    1        -0.0034103773        -0.0000000000
+   1    2   1    1        -0.0034103773         0.0000000000
    1    2   2    1        -0.0000000006        -0.0000000000
    1    2   3    1        -0.0000000184        -0.0000000000
    1    2   1    2         0.0035377357         0.0000000000
@@ -780,7 +779,7 @@ tolerances: {toldfe: 1.00E-10, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  3.057504E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1168,6 +1167,8 @@ band_energy         : -2.13298801285219E+00
             acell4     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
             acell5     1.1000000000E+01  1.1000000000E+01  3.2000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix1     3.33333333E-01
            diemix2     3.33333333E-01
@@ -1289,21 +1290,26 @@ P          mk1mem5          1
         optdriver3          1
         optdriver4          0
         optdriver5          0
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          0
+           prtpot5          0
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt3     0.00000000E+00  0.00000000E+00  5.00000000E-01
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     0.00000000E+00  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
+          rfatpol1          1       2
+          rfatpol2          1       2
           rfatpol3          2       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
+          rfatpol4          1       4
+          rfatpol5          1       4
+            rfdir1          1       1       1
+            rfdir2          1       1       1
             rfdir3          1       0       0
-            rfdir4          0       0       0
-            rfdir5          0       0       0
+            rfdir4          1       1       1
+            rfdir5          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -1390,6 +1396,11 @@ P          mk1mem5          1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -1440,7 +1451,7 @@ P          mk1mem5          1
 -
 - [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -1479,10 +1490,10 @@ P          mk1mem5          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  43 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.2  wall=          4.3
+.Delivered  98 WARNINGs and  25 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.7  wall=          3.8

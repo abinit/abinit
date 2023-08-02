@@ -3,23 +3,18 @@
 !! m_lobpcgwf
 !!
 !! FUNCTION
-!! this routine updates the whole wave functions at a given k-point,
+!! This routine updates the whole wave functions at a given k-point,
 !! using the lobpcg method
 !! for a given spin-polarization, from a fixed hamiltonian
 !! but might also simply compute eigenvectors and eigenvalues at this k point.
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (JB)
+!! Copyright (C) 1998-2022 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -49,12 +44,16 @@ module m_lobpcgwf
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_getghc,      only : multithreaded_getghc
+ use m_cgtools,     only : dotprod_g
+
+ use, intrinsic :: iso_c_binding
 
  private
 
  integer, parameter :: l_tim_getghc=5
  double precision, parameter :: inv_sqrt2 = 1/sqrt2
- ! Use in getghc_gsc
+
+ ! For use in getghc_gsc1
  integer,save  :: l_cpopt
  integer,save  :: l_icplx
  integer,save  :: l_istwf
@@ -63,7 +62,6 @@ module m_lobpcgwf
  logical,save  :: l_paw
  integer,save  :: l_prtvol
  integer,save  :: l_sij_opt
- real(dp), allocatable,save :: l_gvnlxc(:,:)
  real(dp), allocatable,save ::  l_pcon(:)
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
@@ -75,9 +73,6 @@ module m_lobpcgwf
 subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid)
 
-
- use m_cgtools, only : dotprod_g
- use iso_c_binding
  implicit none
 
 !Arguments ------------------------------------
@@ -119,6 +114,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
  integer :: iband, shift
  real(dp) :: gsc_dummy(0,0)
+ real(dp), allocatable :: l_gvnlxc(:,:)
 
 ! *********************************************************************
 
@@ -210,7 +206,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
 
- ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
+ !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
  call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
 
@@ -236,11 +232,11 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  if ( .not. l_paw ) then
    !Check l_gvnlxc size
    !if ( size(l_gvnlxc) < 2*nband*l_npw*l_nspinor ) then
-   if ( size(l_gvnlxc) /= 0 ) then
-     ABI_FREE(l_gvnlxc)
+   !if ( size(l_gvnlxc) /= 0 ) then
+   !  ABI_FREE(l_gvnlxc)
      !ABI_MALLOC(l_gvnlxc,(2,nband*l_npw*l_nspinor))
-     ABI_MALLOC(l_gvnlxc,(0,0))
-   end if
+   ABI_MALLOC(l_gvnlxc,(0,0))
+
    !Call nonlop
    if (mpi_enreg%paral_kgb==0) then
 
@@ -266,9 +262,9 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !       call dotprod_g(enl_out(iband),dprod_i,l_gs_hamk%istwf_k,npw*nspinor,1,cg(:, shift+1:shift+npw*nspinor),&
 !  &     l_gvnlxc(:, shift+1:shift+npw*nspinor),mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
 !   end do
+   ABI_FREE(l_gvnlxc)
  end if
 
- ABI_FREE(l_gvnlxc)
 
  ! Free lobpcg
  call lobpcg_free(lobpcg)
@@ -313,6 +309,7 @@ end subroutine lobpcgwf2
   double precision, pointer :: cg(:,:)
   double precision, pointer :: ghc(:,:)
   double precision, pointer :: gsc(:,:)
+  double precision, allocatable :: l_gvnlxc(:,:)
 
   call xgBlock_getSize(X,spacedim,blockdim)
   spacedim = spacedim/l_icplx
@@ -324,16 +321,17 @@ end subroutine lobpcgwf2
   call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
 
   ! scale back cg
- if(l_istwf == 2) then
-   !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
-   call xgBlock_scale(X,inv_sqrt2,1)
-   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
- end if
+  if(l_istwf == 2) then
+    !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
+    call xgBlock_scale(X,inv_sqrt2,1)
+    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+  end if
 
- if ( size(l_gvnlxc) < 2*blockdim*spacedim ) then
-   ABI_FREE(l_gvnlxc)
-   ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
- end if
+  !if ( size(l_gvnlxc) < 2*blockdim*spacedim ) then
+  !  ABI_FREE(l_gvnlxc)
+  !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
+  !end if
+  ABI_MALLOC(l_gvnlxc,(0,0))
 
   if (l_mpi_enreg%paral_kgb==0) then
 
@@ -361,6 +359,8 @@ end subroutine lobpcgwf2
       if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
     end if
   end if
+
+  ABI_FREE(l_gvnlxc)
 
   if ( .not. l_paw ) call xgBlock_copy(X,BX)
 

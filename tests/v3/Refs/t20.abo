@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t20/t20.in
-- output file    -> t20.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t20/t20.abi
+- output file    -> t20.abo
 - root for input  files -> t20i
 - root for output files -> t20o
-
 
  DATASET    1 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         280          nfft =        9600          nkpt =           1
 ================================================================================
-P This job should need less than                       4.495 Mbytes of memory.
+P This job should need less than                       4.776 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -53,11 +51,10 @@ _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         280          nfft =        9600          nkpt =           1
 ================================================================================
-P This job should need less than                       4.711 Mbytes of memory.
+P This job should need less than                       4.991 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group P4/m m m (#123); Bravais tP (primitive tetrag.)
@@ -72,11 +69,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         280          nfft =        9600          nkpt =           1
 ================================================================================
-P This job should need less than                       4.711 Mbytes of memory.
+P This job should need less than                       4.991 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -89,11 +85,10 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         280          nfft =        9600          nkpt =           1
 ================================================================================
-P This job should need less than                       4.496 Mbytes of memory.
+P This job should need less than                       4.776 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
 ================================================================================
-
 
  DATASET    5 : magnetic group, Shubnikov type IV
  Fedorov space group P4/m m m (#123)
@@ -108,11 +103,10 @@ _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.148 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         280          nfft =        9600          nkpt =           1
 ================================================================================
-P This job should need less than                       4.712 Mbytes of memory.
+P This job should need less than                       4.992 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
-
 
  DATASET    6 : magnetic group, Shubnikov type IV
  Fedorov space group P4/m m m (#123)
@@ -127,7 +121,7 @@ _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =         280          nfft =        9600          nkpt =           1
 ================================================================================
-P This job should need less than                       4.712 Mbytes of memory.
+P This job should need less than                       4.992 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
@@ -445,8 +439,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1652,6 +1646,11 @@ P           mkmem           1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -1739,10 +1738,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.8
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          2.8
+.Delivered  76 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.6  wall=          2.8

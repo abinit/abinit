@@ -16,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,7 +37,7 @@ module m_multibinit_manager
   use m_errors
   use m_xmpi
 
-  use m_init10, only: init10
+  use m_init10, only: init10, postfix_fnames
   use m_mathfuncs, only: diag
   use m_hashtable_strval, only: hash_table_t
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
@@ -84,8 +84,20 @@ module m_multibinit_manager
   use m_slc_potential, only : slc_potential_t
   use m_slc_dynamics
 
+  ! LWF
+  use m_lwf_primitive_potential, only: lwf_primitive_potential_t
+  use m_lwf_potential, only: lwf_potential_t
+  use m_lwf_mover, only: lwf_mover_t
+  use m_lwf_mc_mover, only: lwf_mc_t
+  use m_lwf_dummy_mover, only: lwf_dummy_mover_t
+  use m_lwf_berendsen_mover, only: lwf_berendsen_mover_t
+
+  ! lattice-lwf hybrid
+  use m_lattice_lwf_mover, only: lattice_lwf_mover_t
+
   implicit none
   private
+
 
   !!***
 
@@ -93,7 +105,8 @@ module m_multibinit_manager
   ! Multibinit manager
   !-------------------------------------------------------------------!
   type, public :: mb_manager_t
-     character(len=fnlen) :: filenames(17)
+     character(len=fnlen) :: input_path
+     character(len=fnlen) :: filenames(18)
      ! pointer to parameters. it is a pointer because it is initialized outside manager
      type(multibinit_dtset_type), pointer :: params=>null()
      type(supercell_maker_t) :: sc_maker  ! supercell maker
@@ -104,13 +117,13 @@ module m_multibinit_manager
      ! a polymorphic lattice mover so multiple mover could be used.
      class(lattice_mover_t), pointer :: lattice_mover => null()
      ! as for the spin, there is only one mover which has several methods
-     type(spin_mover_t) :: spin_mover
+     type(spin_mover_t), pointer :: spin_mover => null() 
      ! type(lwf_mover_t) :: lwf_mover
 
      type(slc_mover_t) :: slc_mover
+     class(lwf_mover_t), pointer :: lwf_mover => null()
 
      ! spin netcdf hist file
-     type(spin_ncfile_t) :: spin_ncfile
      type(rng_t) :: rng
      type(hash_table_t) :: energy_table
      ! DOC: The energy table contains
@@ -138,15 +151,22 @@ module m_multibinit_manager
      procedure :: initialize
      procedure :: finalize
      procedure :: read_params    ! parse input file
+
      procedure :: prepare_params ! process the parameters. e.g. convert unit, set some flags, etc.
      procedure :: read_potentials ! read primitve cell and potential
      procedure :: fill_supercell
      procedure :: set_movers
+     procedure :: set_spin_mover
      procedure :: set_lattice_mover
+     procedure :: set_lwf_mover
      procedure :: run_spin_dynamics
-     procedure :: run_MvT
+     procedure :: run_spin_varT
      procedure :: run_lattice_dynamics
+     procedure :: run_lattice_varT
      procedure :: run_coupled_spin_latt_dynamics
+     procedure :: run_lwf_dynamics
+     procedure :: run_lwf_varT
+     procedure :: run_lattice_lwf_dynamics
      procedure :: run
      procedure :: run_all
   end type mb_manager_t
@@ -155,18 +175,19 @@ contains
   !-------------------------------------------------------------------!
   ! initialize
   !-------------------------------------------------------------------!
-  subroutine initialize(self, filenames,params)
+  subroutine initialize(self,input_path, filenames,params)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen), intent(inout) :: filenames(17)
+    character(len=fnlen), intent(inout) :: input_path
+    character(len=fnlen), intent(inout) :: filenames(18)
     type(multibinit_dtset_type), target, optional, intent(in) :: params
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     integer :: i
-    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
-
+    integer :: c
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    self%input_path=input_path
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
-
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
     if (present(params)) then
@@ -178,7 +199,13 @@ contains
     endif
 
     ! Initialize the random number generator
-    call self%rng%set_seed([111111_dp, 2_dp])
+    c=self%params%randomseed
+    if(c==0) then
+        call system_clock(c)
+    endif
+    call self%rng%set_seed([int(c, dp), int(c, dp)-111109_dp ])
+
+
     ! use jump so that each cpu generates independent random numbers.
     if(my_rank>0) then
        do i =1,my_rank
@@ -195,10 +222,13 @@ contains
        self%has_strain=.True.
     endif
 
+    if(self%params%lwf_dynamics >0) then
+       self%has_lwf=.True.
+    end if
+
     call self%prepare_params()
     ! read potentials from
 
-    ! lwf
 
     call self%energy_table%init()
 
@@ -207,6 +237,7 @@ contains
 
   !-------------------------------------------------------------------!
   ! Finalize
+  ! NOTE: add a entry here if new type of mover
   !-------------------------------------------------------------------!
   subroutine finalize(self)
     class(mb_manager_t), intent(inout) :: self
@@ -215,7 +246,11 @@ contains
     call self%supercell%finalize()
     call self%prim_pots%finalize()
     call self%pots%finalize()
-    call self%spin_mover%finalize()
+    if (associated(self%spin_mover)) then
+       call self%spin_mover%finalize()
+       ABI_FREE_SCALAR(self%spin_mover)
+       nullify(self%spin_mover)
+    end if
     ! Note that lattice mover is a pointer.
     ! It might be null if there is no lattice part.
     if (associated(self%lattice_mover)) then
@@ -223,15 +258,20 @@ contains
        ABI_FREE_SCALAR(self%lattice_mover)
        nullify(self%lattice_mover)
     end if
+
+    if (associated(self%lwf_mover)) then
+       call self%lwf_mover%finalize()
+       ABI_FREE_SCALAR(self%lwf_mover)
+       nullify(self%lwf_mover)
+    end if
+
     if(.not. self%use_external_params) then
        call multibinit_dtset_free(self%params)
        if (associated(self%params)) then
            ABI_FREE_SCALAR(self%params)
        endif
-       !deallocate(self%params)
     endif
     nullify(self%params)
-    !call self%lwf_mover%finalize()
 
     self%has_displacement=.False.
     self%has_strain=.False.
@@ -254,7 +294,6 @@ contains
     use m_effective_potential_file
     use m_effective_potential
     class(mb_manager_t), intent(inout) :: self
-    character(len=500) :: message
     integer :: lenstr
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
@@ -267,27 +306,6 @@ contains
     nrpt=0
     ntypat=0
     call init_mpi_info(master, iam_master, my_rank, comm, nproc)
-    !To automate a maximum calculation, multibinit reads the number of atoms
-    !in the file (ddb or xml). If DDB file is present in input, the ifc calculation
-    !will be initilaze array to the maximum of atoms (natifc=natom,atifc=1,natom...) in invars10
-    if(iam_master) then
-       write(message, '(6a)' )' Read the information in the reference structure in ',ch10,&
-            & '-',trim(self%filenames(3)),ch10,' to initialize the multibinit input'
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-    end if
-
-
-    !FIXME: This should not be here.
-    ! It is only for lattice potential
-    if(.False.) then
-       call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
-    else
-       natom=0
-       ntypat=0
-       nph1l=0
-       nrpt=0
-    endif
 
     !Read the input file, and store the information in a long string of characters
     !strlen from defs_basis module
@@ -302,21 +320,27 @@ contains
     end if
 
     call xmpi_bcast(string,master, comm, ierr)
+    call xmpi_bcast(raw_string,master, comm, ierr)
     call xmpi_bcast(lenstr,master, comm, ierr)
 
-    !Read the input file
-    call invars10(self%params,lenstr,natom,string)
+    INPUT_STRING=raw_string
 
+    !Read the input file
+    call invars10(self%params,lenstr,natom, string)
+    call postfix_fnames(self%input_path, self%filenames, self%params )
     if (iam_master) then
        !  Echo the inputs to console and main output file
        call outvars_multibinit(self%params,std_out)
        call outvars_multibinit(self%params,ab_out)
     end if
+
   end subroutine read_params
 
   !-------------------------------------------------------------------!
   ! prepare_params: after read, something has to be done:
   ! e.g. unit conversion
+  ! NOTE: add an entry here if there is a new dynamics with
+  !        temperature parameter
   !-------------------------------------------------------------------!
   subroutine prepare_params(self)
     class(mb_manager_t), intent(inout) :: self
@@ -329,19 +353,29 @@ contains
     end if
     if(self%has_displacement) then
        self%params%temperature = self%params%temperature/Ha_K
+       self%params%latt_temperature_start =self%params%latt_temperature_start/Ha_K
+       self%params%latt_temperature_end=self%params%latt_temperature_end/Ha_K
     end if
+    if(self%has_lwf) then
+       self%params%lwf_temperature = self%params%lwf_temperature/Ha_K
+       self%params%lwf_temperature_start=self%params%lwf_temperature_start/Ha_K
+       self%params%lwf_temperature_end=self%params%lwf_temperature_end/Ha_K
+    end if
+
 
   end subroutine prepare_params
 
 
   !-------------------------------------------------------------------!
   ! Read potentials from file, if needed by dynamics
+  ! NOTE: add an entry here if there is a new type of potential
   !-------------------------------------------------------------------!
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
     class(primitive_potential_t), pointer :: spin_pot
     class(primitive_potential_t), pointer :: slc_pot
     class(primitive_potential_t), pointer :: lat_ham_pot
+    class(primitive_potential_t), pointer :: lwf_pot
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
@@ -376,10 +410,23 @@ contains
           call spin_pot%load_from_files(self%params, self%filenames)
           call self%prim_pots%append(spin_pot)
        end select
+
     end if
 
-
-    !LWF : TODO
+    !LWF 
+    if(self%params%lwf_dynamics>0 .or. self%params%latt_lwf_anharmonic==1) then
+       ABI_MALLOC_TYPE_SCALAR(lwf_primitive_potential_t, lwf_pot)
+       select type(lwf_pot)
+       type is (lwf_primitive_potential_t)
+          call lwf_pot%initialize(self%unitcell)
+          if ( trim(self%params%lwf_pot_fname) /='') then
+             call lwf_pot%load_from_files(self%params, [self%params%lwf_pot_fname])
+          else
+             call lwf_pot%load_from_files(self%params, [self%filenames(3)])
+          end if
+          call self%prim_pots%append(lwf_pot)
+       end select
+    end if
 
     ! spin-lattice coupling
     if(self%params%slc_coupling>0) then
@@ -391,10 +438,13 @@ contains
           call self%prim_pots%append(slc_pot)
        end select
     endif
+
+
   end subroutine read_potentials
 
   !-------------------------------------------------------------------!
   ! fill supercell. Both primitive cell and potential
+  ! NOTE: No need to do anything if there is new potential
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
@@ -406,9 +456,8 @@ contains
     ! supercell potential
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
-    call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
-
-    ! why do this twice.
+    call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots, self%supercell)
+    ! why do this twice, because each pot in the supercell is not yet linked to the supercell.
     call self%pots%set_supercell(self%supercell)
     call self%pots%set_params(self%params)
   end subroutine fill_supercell
@@ -425,23 +474,37 @@ contains
 
   !-------------------------------------------------------------------!
   ! initialize movers which are needed.
+  ! NOTE: add a entry here if new type of potential is added
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen) :: fname
     if (self%params%spin_dynamics>0) then
-       fname=trim(self%filenames(2))//"_spinhist_input.nc"
-       call self%spin_mover%initialize(params=self%params,&
-            & supercell=self%supercell, rng=self%rng, &
-            & restart_hist_fname=fname)
+        call self%set_spin_mover()
     end if
 
     if (self%params%dynamics>0) then
        call self%set_lattice_mover()
+
     end if
 
-    ! TODO: LWF MOVER
+    if (self%params%lwf_dynamics>0 .or. self%params%latt_lwf_anharmonic==1) then
+       call self%set_lwf_mover()
+    end if
+
   end subroutine set_movers
+
+  !-------------------------------------------------------------------!
+  !Set_spin_mover
+  !-------------------------------------------------------------------!
+  subroutine set_spin_mover(self)
+    class(mb_manager_t), intent(inout) :: self
+    if (self%params%spin_dynamics>0) then
+       ABI_MALLOC_TYPE_SCALAR(spin_mover_t, self%spin_mover)
+    end if
+    call self%spin_mover%initialize(params=self%params,&
+            & supercell=self%supercell, rng=self%rng)
+   end subroutine set_spin_mover
+
 
 
   !-------------------------------------------------------------------!
@@ -462,11 +525,30 @@ contains
        ABI_MALLOC_TYPE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
-    ! FIXME: should be able to set to different mode using input.
-    ! Mode=1: Using Boltzman's distribution to initialize the velocities.
-    ! Mode=2
     call self%lattice_mover%set_initial_state(mode=1)
   end subroutine set_lattice_mover
+
+  !-------------------------------------------------------------------!
+  !Set_lwf_mover
+  !-------------------------------------------------------------------!
+  subroutine set_lwf_mover(self)
+    class(mb_manager_t), intent(inout) :: self
+    if(self%params%latt_lwf_anharmonic==1) then
+       self%params%lwf_dynamics=2
+    end if
+    select case(self%params%lwf_dynamics)
+    case (1)  ! Metropolis Monte Carlo
+       ABI_MALLOC_TYPE_SCALAR(lwf_mc_t, self%lwf_mover)
+    case (2) ! dummy 
+       ABI_MALLOC_TYPE_SCALAR(lwf_dummy_mover_t, self%lwf_mover)
+    case (3)
+       ABI_MALLOC_TYPE_SCALAR(lwf_berendsen_mover_t, self%lwf_mover)
+    end select
+    call self%lwf_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
+    call self%lwf_mover%set_initial_state(mode=self%params%lwf_init_state )
+    call self%lwf_mover%read_lwf_constraints(trim(self%params%lwf_init_hist_fname))
+
+  end subroutine set_lwf_mover
 
 
   !-------------------------------------------------------------------!
@@ -476,7 +558,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
@@ -485,15 +568,16 @@ contains
   end subroutine run_spin_dynamics
 
 
-  subroutine run_MvT(self)
+  subroutine run_spin_varT(self)
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%read_potentials()
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%run_MvT(self%pots, self%filenames(2), energy_table=self%energy_table)
-  end subroutine run_MvT
+  end subroutine run_spin_varT
 
 
   !-------------------------------------------------------------------!
@@ -503,11 +587,55 @@ contains
     class(mb_manager_t), intent(inout) :: self
     call self%prim_pots%initialize()
     call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
     call self%set_movers()
+    call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
     call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lattice_mover%ncfile%finalize()
   end subroutine run_lattice_dynamics
+
+  
+  !-------------------------------------------------------------------!
+  ! Run lattice only dynamics at various T
+  !-------------------------------------------------------------------!
+  subroutine run_lattice_varT(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    call self%sc_maker%initialize(self%params%ncellmat)
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lattice_mover%run_varT(self%pots, self%filenames(2), energy_table=self%energy_table)
+  end subroutine run_lattice_varT
+
+
+
+  !-------------------------------------------------------------------!
+  ! Run lattice lwf hybrid dynamics
+  !-------------------------------------------------------------------!
+  subroutine run_lattice_lwf_dynamics(self)
+    class(mb_manager_t), intent(inout) :: self
+    type(lattice_lwf_mover_t) :: mover
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+
+    call self%sc_maker%initialize(self%params%ncellmat)
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lattice_mover%set_ncfile_name(self%params, self%filenames(2))
+    call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
+    call mover%initialize(self%lattice_mover, self%lwf_mover)
+    call mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lattice_mover%ncfile%finalize()
+    call self%lwf_mover%ncfile%finalize()
+    call mover%finalize()
+  end subroutine run_lattice_lwf_dynamics
+
+
+
 
   !-------------------------------------------------------------------!
   ! Run coupled lattice spin dynamics
@@ -527,7 +655,7 @@ contains
     call self%prim_pots%initialize()
     call self%read_potentials()
 
-    call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncellmat)
     call self%fill_supercell()
 
     ! calculate various quantities for reference spin structure
@@ -581,27 +709,86 @@ contains
     call self%spin_mover%spin_ncfile%close()
   end subroutine run_coupled_spin_latt_dynamics
 
+  !-------------------------------------------------------------------!
+  ! Run LWF dynamics
+  !-------------------------------------------------------------------!
+  subroutine run_lwf_dynamics(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncellmat)
+    
+    call self%fill_supercell()
+    call self%set_movers()
+    call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
+    call self%lwf_mover%run_time(self%pots, energy_table=self%energy_table)
+    call self%lwf_mover%ncfile%finalize()
+  end subroutine run_lwf_dynamics
+
+  !-------------------------------------------------------------------!
+  ! Run LWF dynamics at various T
+  !-------------------------------------------------------------------!
+  subroutine run_lwf_varT(self)
+    class(mb_manager_t), intent(inout) :: self
+    call self%prim_pots%initialize()
+    call self%read_potentials()
+    !call self%sc_maker%initialize(diag(self%params%ncell))
+    call self%sc_maker%initialize(self%params%ncellmat)
+    call self%fill_supercell()
+    call self%set_movers()
+    !call self%lwf_mover%set_ncfile_name(self%params, self%filenames(2))
+    !call self%lwf_mover%run_varT(self%pots, energy_table=self%energy_table)
+    call self%lwf_mover%run_varT(self%pots, self%filenames(2), energy_table=self%energy_table)
+    !call self%lwf_mover%ncfile%finalize()
+  end subroutine run_lwf_varT
+
+
+
+
 
   !-------------------------------------------------------------------!
   ! Run all jobs
+  ! NOTE: add a entry here if new type of dynamics
   !-------------------------------------------------------------------!
   subroutine run(self)
     class(mb_manager_t), intent(inout) :: self
     ! if ... fit lattice model
     ! if ... fit lwf model
     ! if ... run dynamics...
-    if(self%params%spin_dynamics>0 .and. self%params%dynamics<=0) then
-       if (self%params%spin_var_temperature==0) then
+    ! spin dynamics
+    if(self%params%latt_lwf_anharmonic==1)then    
+        self%params%lwf_dynamics=2
+    end if
+
+    if(self%params%spin_dynamics>0 .and. self%params%dynamics<=0 .and. self%params%lwf_dynamics<=0) then
+       if(self%params%spin_var_temperature==0) then
           call self%run_spin_dynamics()
        elseif (self%params%spin_var_temperature==1) then
-          call self%run_MvT()
+          call self%run_spin_varT()
        end if
-    else if (self%params%dynamics>0 .and. self%params%spin_dynamics<=0) then
-       call self%run_lattice_dynamics()
+    ! lattice
+    else if(self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics<=0)then
+       if(self%params%latt_var_temperature==0) then
+          call self%run_lattice_dynamics()
+       else
+          call self%run_lattice_varT()
+       end if
 
-    else if (self%params%dynamics>0 .and. self%params%spin_dynamics>0) then
+    ! lattice + dummy lwf
+    else if(self%params%dynamics>0 .and. self%params%spin_dynamics<=0 .and. self%params%latt_lwf_anharmonic==1) then
+       call self%run_lattice_lwf_dynamics()
+    ! spin+lattice
+    else if (self%params%dynamics>0 .and. self%params%spin_dynamics>0 .and. self%params%lwf_dynamics<=0) then
        !call self%run_spin_latt_dynamics()
        call self%run_coupled_spin_latt_dynamics()
+    ! lwf
+    else if(self%params%dynamics<=0 .and. self%params%spin_dynamics<=0 .and. self%params%lwf_dynamics>0) then
+       if (self%params%lwf_var_temperature==0) then
+          call self%run_lwf_dynamics()
+       else
+          call self%run_lwf_varT()
+       end if
     end if
 
   end subroutine run
@@ -612,12 +799,18 @@ contains
   !run_all: THE function which does everything
   !         from the very begining to end.
   !-------------------------------------------------------------------!
-  subroutine run_all(self, filenames, params)
+  subroutine run_all(self, input_path, filenames, dry_run)
     class(mb_manager_t), intent(inout) :: self
-    character(len=fnlen), intent(inout) :: filenames(17)
-    type(multibinit_dtset_type), optional, intent(in) :: params
-    call self%initialize(filenames, params=params)
-    call self%run()
+    character(len=fnlen), intent(inout) :: input_path
+    character(len=fnlen), intent(inout) :: filenames(18)
+    integer, intent(in) :: dry_run
+    call self%initialize(input_path, filenames)
+    if (dry_run==0) then
+      call self%run()
+    else
+      call wrtout([std_out, ab_out], "Multibinit in dry_run mode. Exiting after input parser")
+      call xmpi_end()
+    end if
     call self%finalize()
   end subroutine run_all
 

@@ -7,7 +7,7 @@
 !! This is a way to check that the testing capabilities are not lost when the test farm is modified ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017-2021 ABINIT group (XG)
+!! Copyright (C) 2017-2022 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,12 +31,6 @@
 !! input DDB is read twice : first to make a table of blocks,
 !! counting the final number of blocks, and second to merge
 !! the two DDBs. This would save memory.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,test_dummy,test_same_actual_arg
-!!      test_unused_arg,xmpi_init
 !!
 !! SOURCE
 

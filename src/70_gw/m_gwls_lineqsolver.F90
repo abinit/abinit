@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -77,12 +73,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_DielectricArray,m_gwls_polarisability
-!!
-!! CHILDREN
-!!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum
 !!
 !! SOURCE
 
@@ -619,12 +609,6 @@ end subroutine sqmr
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_polarisability
-!!
-!! CHILDREN
-!!      hpsikc,precondition_cplx,unset_precondition,xmpi_sum
 !!
 !! SOURCE
 

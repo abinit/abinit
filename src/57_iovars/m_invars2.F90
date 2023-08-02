@@ -7,14 +7,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG)
+!!  Copyright (C) 1999-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -40,15 +36,18 @@ module m_invars2
 
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
- use m_fstrings,  only : sjoin, itoa, ltoa, tolower
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
  use m_symtk,     only : matr3inv
  use m_parser,    only : intagm, intagm_img
- use m_geometry,   only : mkrdim, metric
- use m_gsphere,    only : setshells
+ use m_geometry,  only : mkrdim, metric
+ use m_gsphere,   only : setshells
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts
  use m_ingeo,     only : invacuum
  use m_ipi,       only : ipi_check_initial_consistency
+ use m_crystal,   only : crystal_t
+ use m_bz_mesh,   only : kmesh_t, find_qmesh
+ use m_drivexc,   only : has_kxc
 
  implicit none
 
@@ -101,14 +100,6 @@ contains
 !! their default value is stored at the index 0 of the last dimension
 !! of their multi-dataset representation.
 !!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
-!!
 !! SOURCE
 
 subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,npsp,pspheads,string, comm)
@@ -125,6 +116,7 @@ subroutine invars2m(dtsets,iout,lenstr,mband_upper_,msym,ndtset,ndtset_alloc,nps
 !Local variables -------------------------------
 !scalars
  integer :: idtset,jdtset,mband_upper,nsheps,nshsigx,nshwfn,usepaw
+ !integer,parameter :: master = 0
  real(dp) :: ucvol
 !arrays
  integer :: bravais(11)
@@ -224,14 +216,6 @@ end subroutine invars2m
 !! in a compressed, standardized, format
 !! At the input, they already contain a default value.
 !!
-!! PARENTS
-!!      m_invars2
-!!
-!! CHILDREN
-!!      dtset%initocc_chkneu,get_auxc_ixc,get_xclevel,inkpts,intagm,intagm_img,invacuum
-!!      libxc_functionals_end,libxc_functionals_get_hybridparams
-!!      libxc_functionals_init,sort_int,timab,wrtout
-!!
 !! SOURCE
 
 subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepaw,zionpsp,ucvol,comm)
@@ -248,29 +232,34 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
 !Local variables-------------------------------
 !scalars
+ integer,parameter :: master = 0
  integer :: bantot,berryopt,dmatsize,ndim,getocc,narr,nprocs
  integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
- integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key, tread_extrael
- integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image
+ integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
+ integer :: tread_brange, tread_erange, tread_kfilter
+ integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
  character(len=500) :: msg
  character(len=fnlen) :: key_value
+ type(crystal_t) :: cryst
+ type(kmesh_t) :: kmesh, qmesh
 !arrays
  integer :: vacuum(3)
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
+ type(libxc_functional_type) :: xcfunc_tmp(2)
 
 ! *************************************************************************
 
  call timab(191,1,tsec)
 
- nprocs = xmpi_comm_size(comm)
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ! Compute the maximum size of arrays intarr and dprarr
  natom=dtset%natom
@@ -399,14 +388,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwmem',tread,'INT')
  if(tread==1) dtset%gwmem=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_sctype',tread,'INT')
- if(tread==1) dtset%gw_sctype=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_nstep',tread,'INT')
+ if(tread==1) dtset%gwr_nstep=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_nstep',tread,'INT')
- if(tread==1) dtset%gw_nstep=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gw_toldfeig',tread,'ENE')
- if(tread==1) dtset%gw_toldfeig=dprarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwr_tolqpe',tread,'ENE')
+ if(tread==1) dtset%gwr_tolqpe=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwls_stern_kmax',tread,'INT')
  if(tread==1) dtset%gwls_stern_kmax=intarr(1)
@@ -468,6 +454,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else
    dtset%gwls_first_seed=dtset%gwls_band_index
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nbcut',tread,'INT')
+ if(tread==1) dtset%extfpmd_nbcut=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nbdbuf',tread,'INT')
+ if(tread==1) dtset%extfpmd_nbdbuf=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)
@@ -588,13 +580,54 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgmcorr',tread,'INT')
  if(tread==1) dtset%gwgmcorr=intarr(1)
 
+ narr = size(dtset%gwr_np_kgts)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_np_kgts', tread, 'INT')
+ if (tread == 1) dtset%gwr_np_kgts = intarr(1:narr)
+
+ narr = size(dtset%gwr_ucsc_batch)
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gwr_ucsc_batch', tread, 'INT')
+ if (tread == 1) dtset%gwr_ucsc_batch = intarr(1:narr)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_ntau', tread,'INT')
+ if (tread == 1) dtset%gwr_ntau = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_chi_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_chi_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_sigma_algo', tread,'INT')
+ if (tread == 1) dtset%gwr_sigma_algo = intarr(1)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_rpa_ncut', tread,'INT')
+ if (tread == 1) dtset%gwr_rpa_ncut = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_boxcutmin', tread, 'DPR')
+ if (tread == 1) dtset%gwr_boxcutmin = dprarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_max_hwtene', tread, 'ENE')
+ if (tread == 1) dtset%gwr_max_hwtene = dprarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gwr_task", tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
+
  ! RESPFN integer input variables (needed here to get the value of response)
- ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
- if(tread==1) dtset%rfasr=intarr(1)
+ ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
+
+!call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
+!if(tread==1) dtset%rfasr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
+ if(tread==1) dtset%asr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
+ if(tread==1) dtset%chneut=intarr(1)
+
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rfatpol',tread,'INT')
  if(tread==1) dtset%rfatpol(1:2)=intarr(1:2)
+ if(dtset%rfatpol(1)==-1)then
+   dtset%rfatpol(1)=1
+ endif
+ if(dtset%rfatpol(2)==-1)then
+   dtset%rfatpol(2)=dtset%natom
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rfdir',tread,'INT')
  if(tread==1) dtset%rfdir(1:3)=intarr(1:3)
@@ -616,6 +649,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs',tread,'INT')
  if(tread==1) dtset%rfstrs=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfstrs_ref',tread,'INT')
+ if(tread==1) dtset%rfstrs_ref=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfuser',tread,'INT')
  if(tread==1) dtset%rfuser=intarr(1)
@@ -654,16 +690,50 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlinear_info',tread,'INT')
  if(tread==1) dtset%nonlinear_info=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nonlop_ylm_count',tread,'INT')
+ if(tread==1) dtset%nonlop_ylm_count=intarr(1)
+
  ! NONLINEAR integer input variables (same definition as for rfarr)
  ! Presently, rf?asr, rf?meth,rf?strs and rf?thrd are not used
  ! --Keep the old input variables for backward compatibility
- if(dtset%optdriver==RUNL_NONLINEAR) then
-   tread_key=0
 
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf1atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_atpol(1:2)=intarr(1:2)
-   if (tread_alt==1) tread_key=1
+ tread_key=0
+
+!Need always to be read, in order to change the default value.
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_atpol',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf1atpol',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert1_atpol(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert1_atpol(1)==-1)then
+   dtset%d3e_pert1_atpol(1)=1
+ endif
+ if(dtset%d3e_pert1_atpol(2)==-1)then
+   dtset%d3e_pert1_atpol(2)=dtset%natom
+ endif
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_atpol',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf2atpol',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert2_atpol(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert2_atpol(1)==-1)then
+   dtset%d3e_pert2_atpol(1)=1
+ endif
+ if(dtset%d3e_pert2_atpol(2)==-1)then
+   dtset%d3e_pert2_atpol(2)=dtset%natom
+ endif
+
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf3atpol',tread_alt,'INT')
+ if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)
+ if (tread_alt==1) tread_key=1
+ if(dtset%d3e_pert3_atpol(1)==-1)then
+   dtset%d3e_pert3_atpol(1)=1
+ endif
+ if(dtset%d3e_pert3_atpol(2)==-1)then
+   dtset%d3e_pert3_atpol(2)=dtset%natom
+ endif
+
+ if(dtset%optdriver==RUNL_NONLINEAR) then
 
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert1_dir',tread,'INT')
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf1dir',tread_alt,'INT')
@@ -680,11 +750,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1.or.tread_alt==1) dtset%d3e_pert1_phon=intarr(1)
    if (tread_alt==1) tread_key=1
 
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf2atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_atpol(1:2)=intarr(1:2)
-   if (tread_alt==1) tread_key=1
-
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert2_dir',tread,'INT')
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2dir',tread_alt,'INT')
    if(tread==1.or.tread_alt==1) dtset%d3e_pert2_dir(1:3)=intarr(1:3)
@@ -698,11 +763,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_phon',tread,'INT')
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2phon',tread_alt,'INT')
    if(tread==1.or.tread_alt==1) dtset%d3e_pert2_phon=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf3atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)
    if (tread_alt==1) tread_key=1
 
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert3_dir',tread,'INT')
@@ -751,6 +811,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
  if(tread==1) dtset%use_yaml=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_oldchi',tread,'INT')
+ if(tread==1) dtset%use_oldchi=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brav',tread,'INT')
  if(tread==1) dtset%brav=intarr(1)
 
@@ -789,6 +852,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtion',tread,'DPR')
  if(tread==1) dtset%dtion=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dtele',tread,'DPR')
+ if(tread==1) dtset%dtele=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecut',tread,'ENE')
  if(tread==1) dtset%ecut=dprarr(1)
@@ -927,8 +993,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_qdrpl',tread,'INT')
    if(tread==1) dtset%lw_qdrpl=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_natopt',tread,'INT')
+   if(tread==1) dtset%lw_natopt=intarr(1)
+
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
    if(tread==1) dtset%prepalw=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ffnl_lw',tread,'INT')
+   if(tread==1) dtset%ffnl_lw=intarr(1)
 ! end if
 
  ! Recursion input variables
@@ -1044,9 +1116,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'inclvkb',tread,'INT')
  if(tread==1) dtset%inclvkb=intarr(1)
- if (dtset%inclvkb == 1) then
-   ABI_ERROR("inclvkb == 1 is not allowed anymore. Choose between 0 and 2.")
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nomegasf',tread,'INT')
  if(tread==1) dtset%nomegasf=intarr(1)
@@ -1062,6 +1131,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getscr_filepath = key_value
 
@@ -1089,6 +1159,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fftgw',tread,'INT')
  if(tread==1) dtset%fftgw=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fft_count',tread,'INT')
+ if(tread==1) dtset%fft_count=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getsuscep',tread,'INT')
  if(tread==1) dtset%getsuscep=intarr(1)
 
@@ -1109,12 +1182,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zcut',tread,'ENE')
  if(tread==1) dtset%zcut = dprarr(1)
- !else
- !  ! Change default value in EPH calculations
- !  !if (dtset%optdriver == RUNL_EPH) then
- !  !  dtset%zcut = 0.001_dp * eV_Ha
- !  !end if
- !end if
 
  ! q-points for long wave-length limit.
  if (dtset%gw_nqlwl>0) then
@@ -1249,7 +1316,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      sum_spinat=zero
      do iatom=1,natom
        zval=zval+dtset%ziontypat(dtset%typat(iatom))
-       sum_spinat=sum_spinat+dtset%spinat(3,dtset%typat(iatom))
+       sum_spinat=sum_spinat+dtset%spinat(3,iatom)
      end do
      zelect=zval-cellcharge_min
      ! Then select the minimum number of bands, and add the required number.
@@ -1265,7 +1332,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nband(ikpt)=nband1
    end do
 
-   ! CP added 
+   ! CP added
    if (occopt==9)then
 ! Read the valence band index
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ivalence',tread,'INT')
@@ -1292,7 +1359,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  !----------------------------------------------------------------------------
  ! Read other parameters
- ! All checking should be done in chkinp.f
+ ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
@@ -1373,6 +1440,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getsigeph_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getsigeph_filepath = key_value
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgstore_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getgstore_filepath = key_value
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getcell',tread,'INT')
  if(tread==1) dtset%getcell=intarr(1)
 
@@ -1386,6 +1456,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf',tread,'INT')
  if(tread==1) dtset%get1wf=intarr(1)
+ ! TODO
+ !call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf_filepath',tread,'KEY', key_value=key_value)
+ !if(tread==1) dtset%get1wf_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddk',tread,'INT')
  if(tread==1) dtset%getddk=intarr(1)
@@ -1412,14 +1485,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%enunit=intarr(1)
 
  ! eph variables
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
- if(tread==1) dtset%asr=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread,'INT')
- if(tread==1) dtset%dipdip=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
- if(tread==1) dtset%chneut=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread_dipdip,'INT')
+ if(tread_dipdip==1) dtset%dipdip=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symdynmat',tread,'INT')
  if(tread==1) dtset%symdynmat=intarr(1)
@@ -1427,8 +1494,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symv1scf',tread,'INT')
  if(tread==1) dtset%symv1scf = intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_prtscratew',tread,'INT')
+ if(tread==1) dtset%eph_prtscratew = intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_restart',tread,'INT')
- if(tread==1) dtset%eph_restart=intarr(1)
+ if(tread==1) dtset%eph_restart = intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_task',tread,'INT')
  if(tread==1) dtset%eph_task=intarr(1)
@@ -1442,6 +1512,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange',tread,'INT')
  if (tread == 1) dtset%eph_phrange = intarr(1:2)
 
+ call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'eph_phrange_w',tread,'ENE')
+ if (tread == 1) dtset%eph_phrange_w = dprarr(1:2)
+
+ if (any(abs(dtset%eph_phrange) /= 0) .and. any(abs(dtset%eph_phrange_w) > tol16)) then
+   ABI_ERROR("eph_phrange and eph_phrange_w are mutually exclusive")
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_intmeth',tread,'INT')
  if (tread == 1) then
    dtset%eph_intmeth = intarr(1)
@@ -1452,7 +1529,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (dtset%eph_task == -4 .and. dtset%symsigma == 0) dtset%eph_intmeth = 1
  end if
 
- ! Allow use to dope the system or shift artificially the Fermi level
+ ! Allow use to dope the system or to shift artificially the Fermi level
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_extrael',tread_extrael,'DPR')
  if (tread_extrael == 1) dtset%eph_extrael = dprarr(1)
 
@@ -1567,6 +1644,19 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extrapwf',tread,'INT')
  if(tread==1) dtset%extrapwf=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_abs_tol',tread,'DPR')
+ if(tread==1) dtset%ibte_abs_tol=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_alpha_mix',tread,'DPR')
+ if(tread==1) dtset%ibte_alpha_mix=dprarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_niter',tread,'INT')
+ if(tread==1) dtset%ibte_niter=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ibte_prep',tread,'INT')
+ ! ibte_prep is only available when we compute the imaginary part.
+ if(tread==1 .and. dtset%eph_task == -4) dtset%ibte_prep=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iboxcut',tread,'INT')
  if(tread==1) dtset%iboxcut=intarr(1)
 
@@ -1623,6 +1713,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'istatimg',tread,'INT')
  if(tread==1) dtset%istatimg=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'quadquad',tread,'INT')
+ if(tread==1) dtset%quadquad=intarr(1)
+
  ! variables for random positions in unit cell
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',tread,'INT')
  if(tread==1) dtset%random_atpos=intarr(1)
@@ -1661,7 +1754,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%ionmov=12
    write(msg, '(4a)' )&
      'LOTF is disabled, ionmov can not be 23.',ch10,&
-    'Set ionmov to 12.',ch10
+     'Set ionmov to 12.',ch10
    ABI_COMMENT(msg)
 #endif
  end if
@@ -1698,21 +1791,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdwfkfine',tread,'INT')
  if(tread==1) dtset%irdwfkfine=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
- if(tread==1) then
-   dtset%iscf=intarr(1)
-   if (dtset%usewvl==1) then
-     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
-     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
-     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
-   end if
- else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
-   dtset%iscf=dtset%iscf-10
- else if (dtset%optdriver==RUNL_GWLS) then
-   dtset%iscf=-2
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'isecur',tread,'INT')
  if(tread==1) dtset%isecur=intarr(1)
@@ -1777,10 +1855,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
      dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
    else if (ixc_current<0) then
-     call libxc_functionals_init(ixc_current,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
+     call libxc_functionals_init(ixc_current,dtset%nspden,xc_functionals=xcfunc_tmp)
      call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
-       hyb_range=dtset%hyb_range_dft)
-     call libxc_functionals_end()
+       hyb_range=dtset%hyb_range_dft,xc_functionals=xcfunc_tmp)
+     call libxc_functionals_end(xc_functionals=xcfunc_tmp)
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
 
@@ -1833,6 +1911,38 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread_fock==1 .and. tread_dft==0)dtset%hyb_range_dft=dtset%hyb_range_fock
    if(tread_fock==0 .and. tread_dft==1)dtset%hyb_range_fock=dtset%hyb_range_dft
 
+ end if
+
+!Note iscf has to be read after ixc, usewvl, optdriver, optforces, densfor_pred
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'iscf',tread,'INT')
+ if(tread==1) then
+   dtset%iscf=intarr(1)
+   if (dtset%usewvl==1) then
+     !wvl_bigdft_comp should be 1 for iscf=0, 0 for iscf>0, except if it is set by the user
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
+     if (tread==0.and.dtset%iscf==0) dtset%wvl_bigdft_comp=1
+     if (tread==0.and.dtset%iscf >0) dtset%wvl_bigdft_comp=0
+   end if
+ else if (dtset%optdriver==RUNL_GWLS) then
+   !For GWLS, iscf=-2 is mandatory
+   dtset%iscf=-2
+ else if (dtset%optdriver==RUNL_RESPFN.and.dtset%iscf>=10) then
+   !Only potential mixing available for response function
+   dtset%iscf=dtset%iscf-10
+ else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and. &
+&         dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) then
+   !In case of density mixing (iscf>=10) and correction of forces (densfor_pred/=0 and 5)
+   !  we need Kxc. If it is not available, we switch to potential mixing (iscf<10)
+   if (dtset%ixc<0) call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_functionals=xcfunc_tmp)
+   if (.not.has_kxc(dtset%ixc,xcfunc_tmp)) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
+     if (dtset%optforces/=0.or.intarr(1)/=0) then
+       dtset%iscf=dtset%iscf-10
+       msg='Automatically switching to potential mixing (iscf<10), because XC functional doesnt provide Kxc!'
+       ABI_COMMENT(msg)
+     end if
+   end if
+   if (dtset%ixc<0) call libxc_functionals_end(xc_functionals=xcfunc_tmp)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
@@ -1909,7 +2019,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(dtset%efmas>0) then
    call intagm(dprarr,intarr,jdtset,marr,2*nkpt,string(1:lenstr),'efmas_bands',tread,'INT')
    if(tread==1) then
-     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt),(/2,nkpt/))
+     dtset%efmas_bands(1:2,1:nkpt)=reshape(intarr(1:2*nkpt), [2,nkpt])
    else
      dtset%efmas_bands(1,:)=1
      dtset%efmas_bands(2,:)=dtset%nband(:)
@@ -1947,9 +2057,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'restartxf',tread,'INT')
  if(tread==1) dtset%restartxf=intarr(1)
- if (dtset%restartxf == 1) then
-   ABI_ERROR("restartxf == 1 has been removed in Abinit8. Use 0,-1,-2-3")
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optcell',tread,'INT')
  if(tread==1) dtset%optcell=intarr(1)
@@ -1984,7 +2091,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nbdbuf = max(nint(abs(dtset%nbdbuf) / 100.0_dp * maxval(dtset%nband)), 1)
    end if
  else
-   if(response/=1 .and. dtset%iscf<0)dtset%nbdbuf=2*dtset%nspinor
+   if(response/=1 .and. dtset%iscf<0) then
+     dtset%nbdbuf=2*dtset%nspinor
+     write(msg, "(5a)") &
+        "nbdbuf is not specified in input, using `nbdbuf = 2*nspinor` that may be too small!", ch10, &
+        "As a consequence, the NSCF cycle may have problems to converge the last bands within nstep iterations.", ch10, &
+        "To avoid this problem specify nbdbuf in the input file and adjust nband accordingly."
+     ABI_WARNING(msg)
+   end if
    if(response==1 .and. 3<=occopt .and. occopt<=8 )dtset%nbdbuf=2*dtset%nspinor
  end if
 
@@ -2002,12 +2116,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
  if(tread==1) dtset%optforces=intarr(1)
- if(dtset%usedmft>0.and.dtset%optforces/=0) then
-   write(msg, '(3a,i0)' )&
-    'When DFT+DMFT is activated ', ch10, &
-    'optforces must be equal to 0 instead of ',dtset%optforces
-   ABI_ERROR(msg)
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optstress',tread,'INT')
  if(tread==1) dtset%optstress=intarr(1)
@@ -2040,10 +2148,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nbandkss',tread,'INT')
  if(tread==1) dtset%nbandkss=intarr(1)
- if ( dtset%usedmft > 0  .and. (dtset%nbandkss==0.or.dtset%iscf<0)) then
-   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
-   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
- end if
+!This overloading of usepawu should be replaced by something cleaner ...
+! if ( dtset%usedmft > 0  .and. (dtset%nbandkss==0.or.dtset%iscf<0)) then
+!   if (dtset%usepawu==4.or.dtset%usepawu==14)  dtset%usepawu=14
+!   if (dtset%usepawu/=4.and.dtset%usepawu/=14) dtset%usepawu=10
+! end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npwkss',tread,'INT')
  if(tread==1) dtset%npwkss=intarr(1)
@@ -2054,6 +2163,24 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_mexcit',tread,'INT')
  if(tread==1) dtset%td_mexcit=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_exp_order',tread,'INT')
+ if(tread==1) dtset%td_exp_order=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_scnmax',tread,'INT')
+ if(tread==1) dtset%td_scnmax=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_prtstr',tread,'INT')
+ if(tread==1) dtset%td_prtstr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_restart',tread,'INT')
+ if(tread==1) dtset%td_restart=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_propagator',tread,'INT')
+ if(tread==1) dtset%td_propagator=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'td_scthr',tread,'DPR')
+ if(tread==1) dtset%td_scthr=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'npvel',tread,'INT')
  if(tread==1) dtset%npvel=intarr(1)
 
@@ -2063,11 +2190,54 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diismemory',tread,'INT')
  if(tread==1) dtset%diismemory=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipquad',tread,'INT')
+ if(tread==1) dtset%dipquad=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'goprecon',tread,'INT')
  if(tread==1) dtset%goprecon=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'goprecprm',tread,'DPR')
  if(tread==1) dtset%goprecprm(1:3)=dprarr(1:3)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_cplex', tread, 'INT')
+ if (tread == 1) dtset%gstore_cplex = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_with_vk', tread, 'INT')
+ if (tread == 1) dtset%gstore_with_vk = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kzone', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_kzone = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_qzone', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_qzone = tolower(key_value)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread_kfilter, 'KEY', key_value=key_value)
+ if (tread_kfilter == 1) dtset%gstore_kfilter = tolower(key_value)
+
+ narr = 2 * nsppol
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')
+ if (tread_brange == 1) then
+   if (nsppol == 1) dtset%gstore_brange(:, 1) = intarr(1:narr)
+   if (nsppol == 2) dtset%gstore_brange = reshape(intarr(1:narr), [2, nsppol])
+ end if
+
+ narr = 2 * nsppol
+ call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_erange', tread_erange, 'ENE')
+ if (tread_erange == 1) then
+   if (nsppol == 1) dtset%gstore_erange(:, 1) = dprarr(1:narr)
+   if (nsppol == 2) dtset%gstore_erange = reshape(dprarr(1:narr), [2, nsppol])
+ end if
+
+ if (tread_erange == 1 .and. tread_brange == 1) then
+   ABI_ERROR("gstore_erange and gstore_brange are mutually exclusive!")
+ end if
+
+ if (tread_erange == 1 .and. tread_kfilter == 1) then
+   ABI_ERROR("gstore_erange and gstore_kfilter are mutually exclusive!")
+ end if
+
+ call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
+ if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nwfshist',tread,'INT')
  if(tread==1) dtset%nwfshist=intarr(1)
@@ -2193,13 +2363,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_dc',tread,'INT')
    if(tread==1) dtset%dmft_dc=intarr(1)
-   if (dtset%usepawu==14.and.dtset%dmft_dc/=5) then
-     write(msg, '(a,a,a)' )&
-      'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 ',ch10,&
-      'imposing dmft_dc = 5'
-     ABI_WARNING(msg)
-     dtset%dmft_dc=5
-   end if
+! XG20220322 - Should not impose dmft_dc on the flight. Should check in m_chkinp, and possibly stop.
+!  if (dtset%usepawu==14.and.dtset%dmft_dc/=5.and.dtset%dmft_dc/=6) then
+!    write(msg, '(a,a,a)' )&
+!     'usepawu == 4 and usedmft == 1, dmft_dc should be equal to 5 or 6 ',ch10,&
+!     'imposing dmft_dc = 5'
+!    ABI_WARNING(msg)
+!    dtset%dmft_dc=5
+!  end if
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_iter',tread,'INT')
    if(tread==1) dtset%dmft_iter=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_kspectralfunc',tread,'INT')
@@ -2258,40 +2429,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(tread==1) dtset%dmft_entropy=intarr(1)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_nlambda',tread,'INT')
    if(tread==1) dtset%dmft_nlambda=intarr(1)
-   if(dtset%dmft_solv>=4) then
+
+   if(dtset%dmft_solv>=5) then
+
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_n',tread,'DPR')
-     if(tread==1) then
-       dtset%dmftqmc_n=dprarr(1)
-     else if(dtset%ucrpa==0) then
-     else
-       write(msg, '(5a)' )&
-        'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
-        'dmftqmc_n MUST be defined.',ch10,&
-        'Action: add dmftqmc_n keyword in input file.'
-       ABI_ERROR(msg)
-     end if
+     if(tread==1) dtset%dmftqmc_n=dprarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_l',tread,'INT')
-     if(tread==1) then
-       dtset%dmftqmc_l=intarr(1)
-     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
-       write(msg, '(5a)' )&
-        'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
-        'dmftqmc_l MUST be defined.',ch10,&
-        'Action: add dmftqmc_l keyword in input file.'
-       ABI_ERROR(msg)
-     end if
+     if(tread==1) dtset%dmftqmc_l=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_seed',tread,'INT')
      if(tread==1) dtset%dmftqmc_seed=intarr(1)
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftqmc_therm',tread,'INT')
-     if(tread==1) then
-       dtset%dmftqmc_therm=intarr(1)
-     else if(dtset%ucrpa==0.and.dtset%dmft_solv/=9) then
-       write(msg, '(5a)' )&
-        'When DFT+DMFT is activated and one of QMC solvers is used,', ch10, &
-        'dmftqmc_therm MUST be defined.',ch10,&
-        'Action: add dmftqmc_therm keyword in input file.'
-       ABI_ERROR(msg)
-     end if
+     if(tread==1) dtset%dmftqmc_therm=intarr(1)
      if(dtset%dmft_solv==5.or.dtset%dmft_solv==8.or.dtset%dmft_solv==9) then
     ! if(dtset%dmft_solv==5) then
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_basis',tread,'INT')
@@ -2304,6 +2452,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        if(tread==1) dtset%dmftctqmc_gmove  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_grnns',tread,'INT')
        if(tread==1) dtset%dmftctqmc_grnns  =intarr(1)
+       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_config',tread,'INT')
+       if(tread==1) dtset%dmftctqmc_config  =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_meas',tread,'INT')
        if(tread==1) dtset%dmftctqmc_meas   =intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmftctqmc_mrka',tread,'INT')
@@ -2363,50 +2513,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useylm',tread,'INT')
- if(tread==1) then
-   dtset%useylm=intarr(1)
-   if (usepaw==1.and.dtset%useylm==0) then
-     write(msg, '(5a)' )&
-      'Pseudopotential file is PAW format (pspcod=7 or 17) while',ch10,&
-      'input variable "useylm" has the incompatible value 0 !',ch10,&
-      'Action: change psp format or "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%tfkinfunc==2.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'You are using recursion method (tfkinfunc=2)  while',ch10,&
-      'input variable "useylm" has the incompatible value 0 !',ch10,&
-      'Action: change  "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%efmas==1.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'The calculation of effective masses requires the input variable, ',ch10,&
-      '"useylm" to be 1, while in your input file, useylm=0',ch10,&
-      'Action: change "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%rf2_dkdk/=0.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'The calculation of 2nd order k perturbation requires the input variable, ',ch10,&
-      '"useylm" to be 1, while in your input file, useylm=0',ch10,&
-      'Action: change "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
-   if (dtset%rf2_dkde/=0.and.dtset%useylm==0) then
-     write(msg, '(a,a,a,a,a)' )&
-      'The calculation of the 2nd order k/Efield perturbation requires the input variable, ',ch10,&
-      '"useylm" to be 1, while in your input file, useylm=0',ch10,&
-      'Action: change "useylm" value in your input file.'
-     ABI_ERROR(msg)
-   end if
- end if
+ if(tread==1) dtset%useylm=intarr(1)
 
  ! Here we set useylm automatically to 1
  if (dtset%use_gemm_nonlop == 1) dtset%useylm = 1
  if (usepaw==1) dtset%useylm=1
  if (usepaw==1 .and. dtset%usewvl==1) dtset%useylm=0
- if (dtset%efmas==1.or.dtset%use_gpu_cuda==1.or.dtset%rf2_dkdk/=0.or.dtset%rf2_dkde/=0) dtset%useylm=1
+ if (dtset%efmas==1 .or. dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0) dtset%useylm=1
+ if (dtset%use_gpu_cuda /= 0 .and. dtset%optdriver /= RUNL_GWR) dtset%useylm=1
  if(dtset%tfkinfunc==2 .and. dtset%usewvl==0 ) then
    dtset%useylm=1
    dtset%userec=1
@@ -2489,6 +2603,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nloalg(3)=abs(intarr(1))-1
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
+ if(tread==1) dtset%cprj_update_lvl=intarr(1)
+
  ! LOOP variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nline',tread,'INT')
  if(tread==1) dtset%nline=intarr(1)
@@ -2525,8 +2642,17 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucefg',tread,'INT')
+ if(tread==1) dtset%nucefg=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nucfc',tread,'INT')
+ if(tread==1) dtset%nucfc=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'orbmag',tread,'INT')
  if(tread==1) dtset%orbmag=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_lorbmag',tread,'INT')
+ if(tread==1) dtset%prt_lorbmag=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ortalg',tread,'INT')
  if(tread==1) then
@@ -2566,9 +2692,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtebands',tread,'INT')
  if(tread==1) dtset%prtebands=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefg',tread,'INT')
- if(tread==1) dtset%prtefg=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtefmas',tread,'INT')
  if(tread==1) dtset%prtefmas=intarr(1)
 
@@ -2580,9 +2703,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prteliash',tread,'INT')
  if(tread==1) dtset%prteliash=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfc',tread,'INT')
- if(tread==1) dtset%prtfc=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtfull1wf',tread,'INT')
  if(tread==1) dtset%prtfull1wf=intarr(1)
@@ -2623,6 +2743,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtnest',tread,'INT')
  if(tread==1) dtset%prtnest=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtocc',tread,'INT')
+ if(tread==1) dtset%prtocc=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtphbands',tread,'INT')
  if(tread==1) dtset%prtphbands=intarr(1)
 
@@ -2639,6 +2762,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%prtprocar=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtpot',tread,'INT')
+ if (dtset%optdriver == RUNL_RESPFN) dtset%prtpot = 1
  if(tread==1) dtset%prtpot=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtpsps',tread,'INT')
@@ -2689,25 +2813,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtwf',tread,'INT')
  if(tread==1) then
    dtset%prtwf=intarr(1)
-   if ((dtset%tfkinfunc==2).and.(dtset%prtwf==1)) then
-     write(msg, '(5a)' )&
-      'You are using recursion method (tfkinfunc=2)  while',ch10,&
-      'input variable "prtwf" has the incompatible value 1 !',ch10,&
-      'Action: change  "prtwf=0" value in your input file.'
-     ABI_ERROR(msg)
-   end if
- end if
- if (dtset%tfkinfunc==2) dtset%prtwf=0
+ else if (dtset%tfkinfunc==2)then
+   dtset%prtwf=0
+ endif
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtwf_full',tread,'INT')
  if (tread==1) dtset%prtwf_full=intarr(1)
-
- if (dtset%prtwf_full == 1 .and. dtset%prtwf == 0) then
-   write(msg, '(3a)' )&
-   'You are using prtwf_full=1 while prtwf=0',ch10,&
-   'Action: set "prtwf=0" in your input file.'
-   ABI_ERROR(msg)
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtxml',tread,'INT')
  if(tread==1) dtset%prtxml=intarr(1)
@@ -2733,6 +2844,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,3*dtset%natsph_extra,string(1:lenstr),'xredsph_extra',tread,'DPR')
  if(tread==1) dtset%xredsph_extra=reshape(dprarr(1:3*dtset%natsph_extra), (/3,dtset%natsph_extra/))
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfinit',tread,'INT')
+ if(tread==1) dtset%wfinit=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wfmix',tread,'DPR')
  if(tread==1) dtset%wfmix=dprarr(1)
 
@@ -2757,17 +2871,282 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tl_radius',tread,'DPR')
  if(tread==1) dtset%tl_radius=dprarr(1)
+ 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%write_files = key_value
+! Print variables
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%write_files = key_value
+ if(dtset%write_files=='default') then
+  !!!EMPTY ON PURPOSE
+ else if(dtset%write_files=='all') then
+   dtset%ncout      = 1 !Already the default but good to keep track
+   dtset%prtddb     = 1
+   dtset%prtden     = 1
+   !dtset%prtdos     = 1
+   dtset%prtebands  = 1 !DEFAULT in all set to xgr
+   dtset%prteig     = 1
+   dtset%prtelf     = 1 ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtevk     = 1  ! TO BE CHECKED FOR CONSISTENCY
+   !dtset%prtfsurf   = 1  ! TO BE CHECKED FOR CONSISTENCY
+   !dtset%prtgden    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtgeo     = 1
+   dtset%prtgkk     = 1
+   dtset%prtgsr     = 1
+   dtset%prthist    = 1
+   dtset%prtkbff    = 1
+   !dtset%prtkden    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtlden    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtpot     = 1
+   !dtset%prtpsps    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   !dtset%prtstm     = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtsuscep  = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtvclmb   = 2  ! NC default
+   dtset%prtvha     = 1
+   dtset%prtvhxc    = 1
+   dtset%prtvhxc    = 1
+   dtset%prtvpsp    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtvxc     = 1
+   !dtset%prtwant    = 1   ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtwf      = 1
+   dtset%prtxml     = 1
+ else if(dtset%write_files=='none') then 
+   dtset%ncout      = 0
+   dtset%prtddb     = 0
+   dtset%prtden     = 0
+   dtset%prtdos     = 0
+   dtset%prtebands  = 0
+   dtset%prteig     = 0
+   dtset%prtelf     = 0 
+   dtset%prtevk     = 0   
+   dtset%prtfsurf   = 0
+   dtset%prtgden    = 0
+   dtset%prtgeo     = 0
+   dtset%prtgkk     = 0
+   dtset%prtgsr     = 0
+   dtset%prthist    = 0
+   dtset%prtkbff    = 0
+   dtset%prtkden    = 0
+   dtset%prtlden    = 0
+   dtset%prtpot     = 0
+   dtset%prtpsps    = 0
+   dtset%prtstm     = 0
+   dtset%prtsuscep  = 0
+   dtset%prtvclmb   = 0
+   dtset%prtvha     = 0
+   dtset%prtvhxc    = 0
+   dtset%prtvhxc    = 0
+   dtset%prtvpsp    = 0
+   dtset%prtvxc     = 0
+   dtset%prtwant    = 0
+   dtset%prtwf      = 0
+   dtset%prtxml     = 0
+ !!!PLEASE ADD IN ALPHABETICAL ORDER THE FUTURE OPTIONS BELOW!!!
+ else if (dtset%write_files.ne.'none' .or. dtset%write_files.ne.'all' .or. dtset%write_files.ne.'default' ) then
+   if (INDEX(dtset%write_files,'ddb') .gt. 0) then
+      dtset%prtddb = 1
+   else
+      dtset%prtddb = 0
+   end if       
+   if (INDEX(dtset%write_files,'den_1') .gt. 0) then
+      dtset%prtden = 1
+   else if (INDEX(dtset%write_files,'den_2') .gt. 0) then
+      dtset%prtden = 2
+   else if (INDEX(dtset%write_files,'den_3') .gt. 0) then
+      dtset%prtden = 3
+   else if (INDEX(dtset%write_files,'den_4') .gt. 0) then
+      dtset%prtden = 4
+   else if (INDEX(dtset%write_files,'den_5') .gt. 0) then
+      dtset%prtden = 5
+   else if (INDEX(dtset%write_files,'den_6') .gt. 0) then
+      dtset%prtden = 6
+   else if (INDEX(dtset%write_files,'den_7') .gt. 0) then
+      dtset%prtden = 7
+   else
+      dtset%prtden = 0
+   end if
+   if ( (INDEX(dtset%write_files,'dos_1') .gt. 0) .AND. (dtset%occopt .ge. 3 .AND. dtset%occopt .le. 7 ) )then
+      dtset%prtdos = 1
+   else if ( (INDEX(dtset%write_files,'dos_1') .gt. 0) .AND. (dtset%iscf .eq. -3 ) )then
+      dtset%prtdos = 1
+   else if ( INDEX(dtset%write_files,'dos_2') .gt. 0 )then
+      dtset%prtdos = 2
+   else if ( INDEX(dtset%write_files,'dos_3') .gt. 0 )then
+      dtset%prtdos = 3
+   else if ( INDEX(dtset%write_files,'dos_4') .gt. 0 )then
+      dtset%prtdos = 4
+   else if ( (INDEX(dtset%write_files,'dos_5') .gt. 0 ) .AND. (dtset%nspinor .eq. 2 ) )then
+      dtset%prtdos = 5
+   else
+      dtset%prtdos = 0
+   end if   
+   if ( (INDEX(dtset%write_files,'dosm_1') .gt. 0) .AND. (dtset%prtdos .eq. 3 ) )then
+      dtset%prtdosm = 1
+      dtset%prtdos  = 3
+   else
+      dtset%prtdosm = 0
+   end if         
+   if (INDEX(dtset%write_files,'ebands_1') .gt. 0) then
+      dtset%prtebands = 1
+   else if (INDEX(dtset%write_files,'ebands_2') .gt. 0) then
+      dtset%prtebands = 2
+   else
+      dtset%prtebands = 0
+   end if   
+   if (INDEX(dtset%write_files,'eig') .gt. 0) then
+      dtset%prteig = 1
+   else
+      dtset%prteig = 0
+   end if
+   if (INDEX(dtset%write_files,'elf') .gt. 0) then
+      dtset%prtelf = 1
+   else
+      dtset%prtelf = 0
+   end if
+   if (INDEX(dtset%write_files,'evk') .gt. 0) then
+      dtset%prtevk = 1
+   end if
+   if (INDEX(dtset%write_files,'fsurf') .gt. 0) then
+      dtset%prtfsurf = 1
+   else
+      dtset%prtfsurf = 0
+   end if   
+   if (INDEX(dtset%write_files,'gden') .gt. 0) then
+      dtset%prtgden = 1
+   else
+      dtset%prtgden = 0
+   end if   
+   if (INDEX(dtset%write_files,'geo') .gt. 0) then
+      dtset%prtgeo = 1
+   else
+      dtset%prtgeo = 0
+   end if   
+   if (INDEX(dtset%write_files,'gkk') .gt. 0) then
+      dtset%prtgkk = 1
+   else
+      dtset%prtgkk = 0
+   end if   
+   if (INDEX(dtset%write_files,'gsr') .gt. 0) then
+      dtset%prtgsr = 1
+   else
+      dtset%prtgsr = 0
+   end if   
+   if (INDEX(dtset%write_files,'hist') .gt. 0) then
+      dtset%prthist = 1
+   else
+      dtset%prthist = 0
+   end if
+   if ( (INDEX(dtset%write_files,'kbff') .gt. 0) .AND. (dtset%iomode .eq. 3) )then
+      dtset%prtkbff = 1
+   else
+      dtset%prtkbff = 0
+   end if   
+   if (INDEX(dtset%write_files,'kden') .gt. 0) then
+      dtset%prtkden = 1
+   else
+      dtset%prtkden = 0
+   end if   
+   if (INDEX(dtset%write_files,'lden') .gt. 0) then
+      dtset%prtlden = 1
+   else
+      dtset%prtlden = 0
+   end if   
+   if (INDEX(dtset%write_files,'ncout') .gt. 0) then
+      dtset%ncout = 1
+   else
+      dtset%ncout = 0
+   end if   
+   if (INDEX(dtset%write_files,'pot') .gt. 0) then
+      dtset%prtpot = 1
+   else
+      dtset%prtpot = 0
+   end if
+   if (INDEX(dtset%write_files,'psps_1') .gt. 0) then
+      dtset%prtpsps = 1
+   else if (INDEX(dtset%write_files,'psps_-1') .gt. 0) then
+      dtset%prtpsps = -1
+   else
+      dtset%prtpsps = 0
+   end if
+   if (INDEX(dtset%write_files,'stm') .gt. 0) then
+      dtset%prtstm = 1
+   else
+      dtset%prtstm = 0
+   end if
+   if (INDEX(dtset%write_files,'suscep') .gt. 0) then
+      dtset%prtsuscep = 1
+   else
+      dtset%prtsuscep = 0
+   end if
+   if (INDEX(dtset%write_files,'vclmb_1') .gt. 0) then
+      dtset%prtvclmb = 1
+   else if (INDEX(dtset%write_files,'vclmb_2') .gt. 0) then
+      dtset%prtvclmb = 2
+   else
+      dtset%prtvha = 0
+   end if 
+   if (INDEX(dtset%write_files,'vha') .gt. 0) then
+      dtset%prtvha = 1
+   else
+      dtset%prtvha = 0
+   end if 
+   if (INDEX(dtset%write_files,'vhxc') .gt. 0) then
+      dtset%prtvhxc = 1
+   else
+      dtset%prtvhxc = 0
+   end if 
+   if (INDEX(dtset%write_files,'vpsp') .gt. 0) then
+      dtset%prtvpsp = 1
+   else
+      dtset%prtvpsp = 0
+   end if 
+   if (INDEX(dtset%write_files,'vxc') .gt. 0) then
+      dtset%prtvxc = 1
+   else
+      dtset%prtvxc = 0
+   end if 
+   if (INDEX(dtset%write_files,'want_1') .gt. 0) then
+      dtset%prtwant = 1
+   else if (INDEX(dtset%write_files,'want_2') .gt. 0) then
+      dtset%prtwant = 2
+   else if (INDEX(dtset%write_files,'want_3') .gt. 0) then
+      dtset%prtwant = 3
+   else
+      dtset%prtwant = 0
+   end if 
+   if (INDEX(dtset%write_files,'wf_1') .gt. 0) then
+      dtset%prtwf = 1
+      if (INDEX(dtset%write_files,'wf_full_1') .gt. 0) then
+         dtset%prtwf_full = 1
+      end if   
+   else if (INDEX(dtset%write_files,'wf_2') .gt. 0) then
+      dtset%prtwf = 2
+   else if (INDEX(dtset%write_files,'wf_3') .gt. 0) then
+      dtset%prtwf = 3
+   else if (INDEX(dtset%write_files,'wf_-1') .gt. 0) then
+      dtset%prtwf = -1
+   else
+      dtset%prtwf = 0
+   end if
+   if (INDEX(dtset%write_files,'xml') .gt. 0) then
+      dtset%prtxml = 1
+   else
+      dtset%prtxml = 0
+   end if   
+ end if
 
  ! Wannier90 interface related variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'w90iniprj',tread,'INT')
  if(tread==1) then
    dtset%w90iniprj=intarr(1)
+!  These checks should be moved to m_chkinp.F90
    if ( usepaw == 0 .and. ( dtset%w90iniprj /= 2  .and. dtset%w90iniprj/=0 .and. dtset%w90iniprj /= 1 )) then
      write(msg, '(a,i0,2a)' )&
       'w90iniprj should be set to 0, 1 or 2, however, it was ',dtset%w90iniprj,ch10,&
       'Action: check the values of w90iniprj.'
      ABI_ERROR(msg)
    end if
+!  These checks should be moved to m_chkinp.F90
    if ( usepaw == 1 .and. ( dtset%w90iniprj < 2 .or. dtset%w90iniprj>6 ) &
       .and. ( dtset%w90iniprj /= 1 .and. dtset%w90iniprj/=0 )) then
      write(msg, '(a,i0,2a)' )&
@@ -2781,12 +3160,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'w90prtunk',tread,'INT')
  if(tread==1) then
    dtset%w90prtunk=intarr(1)
-   if ( dtset%w90prtunk < 0 ) then
-     write(msg, '(4a)' )&
-      'w90prtunk should be greater or equal to zero, however, it was ',dtset%w90prtunk,ch10,&
-      'Action: check the values of w90prtunk.'
-     ABI_ERROR(msg)
-   end if
+!  if ( dtset%w90prtunk < 0 ) then
+!    write(msg, '(4a)' )&
+!     'w90prtunk should be greater or equal to zero, however, it was ',dtset%w90prtunk,ch10,&
+!     'Action: check the values of w90prtunk.'
+!    ABI_ERROR(msg)
+!  end if
  end if
 
  ! Wannier90 - GW quasiparticle interface
@@ -2815,6 +3194,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,dtset%natom,string(1:lenstr),'vdw_typfrag',tread,'INT')
    if(tread==1)then
      dtset%vdw_typfrag(1:dtset%natom)=intarr(1:dtset%natom)
+!    These checks should be moved to m_chkinp.F90
      do ii=1,dtset%natom
        if(dtset%vdw_typfrag(ii)<0)then
          write(msg, '(a,a,a,i0,a,i0,a,a)' )&
@@ -2830,6 +3210,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'vdw_supercell',tread,'INT')
    if(tread==1)then
      dtset%vdw_supercell(1:3)=intarr(1:3)
+!    These checks should be moved to m_chkinp.F90
      if (dtset%vdw_supercell(1)<zero.and.dtset%vdw_supercell(2)<zero) then
        write(msg, '(7a)' )&
         ' only one component of vdw_supercell could be < 0, however, it was ',ch10,&
@@ -2938,6 +3319,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%tolmxde=tolmxde_
    dtset%tolmxf=tolmxf_
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolcum',tread,'DPR',ds_input)
+ if(tread==1) dtset%tolcum=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'focktoldfe',tread,'DPR')
  if(tread==1) dtset%focktoldfe=dprarr(1)
@@ -3195,6 +3579,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
  if(dtset%ngfft(7)==314)ii=1
  if(dtset%usefock==1.and.dtset%optdriver/=RUNL_SIGMA.and.mod(dtset%wfoptalg,10)/=5) ii=1
+ !Enforce istwfk = 1 for all k-points in RT-TDDFT calculations
+ if(dtset%optdriver==RUNL_RTTDDFT) ii=1
 
  call inkpts(bravais,dtset%chksymbreak,dtset%fockdownsampling,iout,iscf,dtset%istwfk(1:nkpt),jdtset,&
    dtset%kpt(:,1:nkpt),dtset%kptns_hf(:,1:nkpthf),kptopt,dtset%kptnrm,&
@@ -3248,23 +3634,24 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! if prtkpt==-2, write the k-points in netcdf format and exit here so that AbiPy can read the data.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkpt',tread,'INT')
  if (tread == 1 .and. intarr(1) == -2) then
-#ifdef HAVE_NETCDF
-   ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
-   NCF_CHECK(ncerr)
-#endif
+   if (my_rank == 0) then
+     ncerr= nctk_write_ibz("kpts.nc", dtset%kptns(:,1:nkpt), dtset%wtk(1:nkpt))
+     NCF_CHECK(ncerr)
+   end if
+   call xmpi_barrier(comm)
    ABI_ERROR_NODUMP("kpts.nc file written. Aborting now")
  end if
 
  if (dtset%nkptgw>0) then
    ! Read bdgw.
    call intagm(dprarr,intarr,jdtset,marr,2*dtset%nkptgw*dtset%nsppol,string(1:lenstr),'bdgw',tread,'INT')
-   if(tread==1) then
+   if (tread==1) then
      dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) =  &
        reshape(intarr(1:2*dtset%nkptgw*dtset%nsppol),[2,dtset%nkptgw,dtset%nsppol])
    end if
 
    ! Test bdgw values.
-   if (dtset%optdriver == RUNL_SIGMA) then
+   if (any(dtset%optdriver == [RUNL_SIGMA, RUNL_EPH])) then
      if (any(dtset%bdgw(1:2,1:dtset%nkptgw,1:dtset%nsppol) <= 0)) then
        ABI_ERROR("bdgw entries cannot be <= 0. Check input file")
      end if
@@ -3514,32 +3901,32 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 ! end if
 
 
-   if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%nbandkss /= 0 .and. dtset%usedmft/=0)) then
-     dtset%plowan_natom=1
-     dtset%plowan_nbl(:)=1
+   if ((dtset%ucrpa > 0 .and. dtset%plowan_compute >=0 )) then
+   !   dtset%plowan_natom=1
+   !   dtset%plowan_nbl(:)=1
      dtset%plowan_nt=1
      dtset%plowan_it(:)=0
      dtset%plowan_realspace=1
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
-     if(tread==1) dtset%dmft_t2g=intarr(1)
-     do iatom=1,dtset%natom
-       lpawu=dtset%lpawu(dtset%typat(iatom))
-       if (lpawu/=-1) then
-         dtset%plowan_lcalc(:)=lpawu
-         dtset%plowan_iatom(:)=iatom
-         dtset%plowan_projcalc(:)=-2
-       end if
-     end do
-     dtset%plowan_bandi=dtset%dmftbandi
-     dtset%plowan_bandf=dtset%dmftbandf
-     if (dtset%nbandkss /= 0 .and. dtset%usedmft/=0) then
-       dtset%plowan_compute=1
-       dtset%usedmft=0
-     else if (dtset%optdriver==3) then
-       dtset%plowan_compute=10
-     else if(dtset%optdriver==4) then
-       dtset%plowan_compute=10
-     end if
+   !   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dmft_t2g',tread,'INT')
+   !   if(tread==1) dtset%dmft_t2g=intarr(1)
+   !   do iatom=1,dtset%natom
+   !     lpawu=dtset%lpawu(dtset%typat(iatom))
+   !     if (lpawu/=-1) then
+   !       dtset%plowan_lcalc(:)=lpawu
+   !       dtset%plowan_iatom(:)=iatom
+   !       dtset%plowan_projcalc(:)=-2
+   !     end if
+   !   end do
+   !   dtset%plowan_bandi=dtset%dmftbandi
+   !   dtset%plowan_bandf=dtset%dmftbandf
+   !   if (dtset%nbandkss /= 0 .and. dtset%usedmft/=0) then
+   !     dtset%plowan_compute=1
+   !     dtset%usedmft=0
+   !   else if (dtset%optdriver==3) then
+   !     dtset%plowan_compute=10
+   !   else if(dtset%optdriver==4) then
+   !     dtset%plowan_compute=10
+   !   end if
    end if
 
  ! band range for self-energy sum
@@ -3552,7 +3939,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! band range for self-energy corrections.
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_erange', tread, 'ENE')
- if (tread == 1) dtset%sigma_erange = dprarr(1:2)
+ if (tread == 1) then
+   dtset%sigma_erange = dprarr(1:2)
+   !if (all(dtset%sigma_erange < zero) .and. .not. tread_dipdip == 1) dtset%dipdip = 0
+ end if
 
  ! IBZ k-points for transport calculation in terms of transport_ngkpt
  call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'transport_ngkpt', tread, 'INT')
@@ -3570,7 +3960,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'sigma_nshiftk', tread, 'INT')
    if (tread == 1) dtset%sigma_nshiftk = intarr(1)
    if (dtset%sigma_nshiftk < 1 .or. dtset%sigma_nshiftk > MAX_NSHIFTK ) then
-     write(msg,  '(a,i0,2a,i0,3a)' )&
+     write(msg, '(a,i0,2a,i0,3a)' ) &
      'The only allowed values of nshiftk are between 1 and ',MAX_NSHIFTK,ch10,&
      'while it is found to be ',dtset%sigma_nshiftk,'.',ch10,&
      'Action: change the value of sigma_nshiftk in your input file, or change kptopt.'
@@ -3585,7 +3975,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end if
  end if
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"wfk_task",tread,'KEY',key_value=key_value)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(key_value))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
    ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
@@ -3593,6 +3983,50 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ABI_FREE(intarr)
  ABI_FREE(dprarr)
+
+ !Now all inputs are read, we can determine if "cprj_in_memory" implementation can be used or not
+ dtset%cprj_in_memory=0
+ if (dtset%cprj_update_lvl/=0) then
+   dtset%cprj_in_memory=1
+   ! Must be ground state computation...
+   if (dtset%optdriver/=0) dtset%cprj_in_memory = 0
+   ! ...with PAW...
+   if (dtset%usepaw/=1) dtset%cprj_in_memory = 0
+   ! ... and Conjugate Gradient...
+   if (dtset%wfoptalg/=10) dtset%cprj_in_memory = 0
+   ! ...without kgb parallelization...
+   if (dtset%paral_kgb/=0) dtset%cprj_in_memory = 0
+   ! ...without RMM-DIIS...
+   if (dtset%rmm_diis/=0) dtset%cprj_in_memory = 0
+   ! ...without electric field...
+   if (dtset%berryopt/=0) dtset%cprj_in_memory = 0
+   ! ...without Fock exchange...
+   if (dtset%usefock/=0) dtset%cprj_in_memory = 0
+   ! ...without nuclear dipolar moments...
+   if (sum(abs(dtset%nucdipmom))>tol16) dtset%cprj_in_memory = 0
+ end if
+
+ if (dtset%nqptdm == -1) then
+   cryst = dtset%get_crystal(1)
+   !call cryst%print(mode_paral='COLL')
+   call Kmesh%init(Cryst, dtset%nkpt, dtset%kptns, Dtset%kptopt, wrap_1zone=.FALSE.)
+
+   ! Some required information are not filled up inside kmesh_init
+   ! So doing it here, even though it is not clean
+   Kmesh%kptrlatt(:,:) =Dtset%kptrlatt(:,:)
+   Kmesh%nshift        =Dtset%nshiftk
+   ABI_MALLOC(Kmesh%shift,(3,Kmesh%nshift))
+   Kmesh%shift(:,:)    =Dtset%shiftk(:,1:Dtset%nshiftk)
+   !call Kmesh%print("K-mesh for the wavefunctions",ab_out, dtset%prtvol)
+   call find_qmesh(Qmesh, Cryst, Kmesh)
+#ifdef HAVE_NETCDF
+   if (my_rank == master) then
+     NCF_CHECK(nctk_write_ibz("qptdms.nc", qmesh%ibz, qmesh%wt))
+   end if
+#endif
+   call xmpi_barrier(comm)
+   ABI_ERROR_NODUMP("Aborting now")
+ end if
 
  call timab(191,2,tsec)
 

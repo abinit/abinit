@@ -8,14 +8,10 @@
 !!  as methods to operate on it.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MT, GJ)
+!! Copyright (C) 2008-2022 ABINIT group (MT, GJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -204,12 +200,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  electronpositron=<type(electronpositron_type)>=electronpositron datastructure
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
-!!
 !! SOURCE
 
 subroutine init_electronpositron(ireadwf,dtset,electronpositron,mpi_enreg,nfft,pawrhoij,pawtab)
@@ -360,12 +350,6 @@ end subroutine init_electronpositron
 !! SIDE EFFECTS
 !!  electronpositron=<type(electronpositron_type)>=electronpositron datastructure
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
-!!
 !! SOURCE
 
 subroutine destroy_electronpositron(electronpositron)
@@ -480,12 +464,6 @@ end subroutine destroy_electronpositron
 !!  rhor(nfft,nspden)=total electron/positron density (el/bohr**3)
 !!  stress(6)=components of the stress tensor (hartree/bohr^3) for the
 !!  vhartr(nfftf)=array for holding Hartree potential
-!!
-!! PARENTS
-!!      m_afterscfloop
-!!
-!! CHILDREN
-!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
 !!
 !! SOURCE
 
@@ -747,10 +725,6 @@ end subroutine exchange_electronpositron
 !! INPUTS
 !!  electronpositron=<type(electronpositron_type)>=electronpositron datastructure
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function electronpositron_calctype(electronpositron)
@@ -808,12 +782,6 @@ end function electronpositron_calctype
 !!
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation
-!!
-!! PARENTS
-!!      m_dft_energy,m_rhotov,m_setvtr
-!!
-!! CHILDREN
-!!      mean_fftr,mkdenpos,xcden,xcpositron,xmpi_sum
 !!
 !! SOURCE
 

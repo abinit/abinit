@@ -7,17 +7,13 @@
 !!  in the Recursion Mathod
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2021 ABINIT group (MMancini)
+!! Copyright (C) 2002-2022 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -66,11 +62,6 @@ CONTAINS  !===========================================================
 !! recpar%max_pt=superior point in-line coordinate on the dine grid
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_rec,m_vtorhorec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine get_pt0_pt1(ngfft,gratio,inf,sup,recpar)
@@ -126,11 +117,6 @@ end subroutine get_pt0_pt1
 !!
 !! OUTPUT
 !! potloc is a cut of pot around trasl
-!!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -189,11 +175,6 @@ end subroutine reshape_pot
 !!  facrec0=used to select irec=0
 !!  error=estimated error of recursion at this step
 !!  prod_b2=numerical factor
-!!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

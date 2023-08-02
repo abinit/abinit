@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t51-t52/t51.in
-- output file    -> t51.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t51-t52/t51.abi
+- output file    -> t51.abo
 - root for input  files -> t51i
 - root for output files -> t51o
-
 
  Symmetries : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -47,8 +46,8 @@ P              Additional     real(dp)  numbers, for      1.947 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 2.690 Mbytes.
-P Main chain + nonlop.f + opernl.f      2.554 Mbytes.
+P Main chain + fourwf.f                 2.864 Mbytes.
+P Main chain + nonlop.f + opernl.f      2.728 Mbytes.
 P XC chain                              2.220 Mbytes.
 P mkrho chain                           2.386 Mbytes.
 P fourdp chain                          2.381 Mbytes.
@@ -143,8 +142,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -488,9 +487,9 @@ force_length_stats: {min:   8.76388327E-03, max:   8.76388327E-03, mean:   8.763
 
  Mean square residual over all n,k,spin=   30.230E-17; max=  72.857E-17
    0.2500  0.2500  0.2500    1  7.28569E-16 kpt; spin; max resid(k); each band:
-   6.84E-16  7.29E-16  1.13E-16  3.91E-16  2.99E-16  2.67E-16  2.38E-16  3.18E-16
-   1.91E-16  2.72E-16  1.51E-16  4.03E-16  3.25E-16  2.57E-16  1.81E-16  2.47E-16
-   4.73E-16  2.53E-16  1.72E-16  8.20E-17
+  6.84E-16 7.29E-16 1.13E-16 3.91E-16 2.99E-16 2.67E-16 2.38E-16 3.18E-16
+  1.91E-16 2.72E-16 1.51E-16 4.03E-16 3.25E-16 2.57E-16 1.81E-16 2.47E-16
+  4.73E-16 2.53E-16 1.72E-16 8.20E-17
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.333333333333      0.000000000000      0.000000000000
@@ -527,10 +526,10 @@ force_length_stats: {min:   8.76388327E-03, max:   8.76388327E-03, mean:   8.763
    5.57210    5.97720    6.26496    6.72669    6.82214    7.25153    7.66490    8.14399
    8.20777    8.46026    8.91724    9.09023
  Total charge density [el/Bohr^3]
-      Maximum=    2.1362E-02  at reduced coord.    0.2083    0.0000    0.0000
- Next maximum=    2.1362E-02  at reduced coord.    0.1250    0.0000    0.0000
-      Minimum=    2.8192E-04  at reduced coord.    0.6667    0.5000    0.5000
- Next minimum=    2.8560E-04  at reduced coord.    0.6667    0.5000    0.4375
+)     Maximum=    2.1362E-02  at reduced coord.    0.2083    0.0000    0.0000
+)Next maximum=    2.1362E-02  at reduced coord.    0.1250    0.0000    0.0000
+)     Minimum=    2.8192E-04  at reduced coord.    0.6667    0.5000    0.5000
+)Next minimum=    2.8560E-04  at reduced coord.    0.6667    0.5000    0.4375
    Integrated=    6.0000E+00
 
 --- !EnergyTerms
@@ -625,6 +624,11 @@ P           mkmem           1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -717,10 +721,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.9  wall=          0.9
+.Delivered  18 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.7  wall=          0.8

@@ -1,8 +1,8 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_intel16.0 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 25 Feb 2020.
-- ( at 00h25 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 11h01 )
   
-- input  file    -> /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Test_suite/bigdft_t14/t14.in
-- output file    -> t14.out
+- input  file    -> /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/TestBot_MPI1/bigdft_t14/t14.abi
+- output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
- 
  
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -37,7 +36,7 @@
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -47,7 +46,7 @@
               amu      4.78800000E+01  2.29897680E+01
            diemix      9.50000000E-01
              ecut      5.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
          icoulomb           1
              iscf          17
            istwfk        1
@@ -120,8 +119,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.14587
  
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/22ti.12.khgh
-- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/22ti.12.khgh
+- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/22ti.12.khgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/22ti.12.khgh
 - Goedecker pseudopotential for Ti
 - 22.00000  12.00000     70301                znucl, zion, pspdat
    10   11    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -160,8 +159,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
              2   -0.006735
  pspatm: atomic psp has been read  and splines computed
  
-- pspini: atom type   2  psp file is /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
-- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
+- pspini: atom type   2  psp file is /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_16.0_mpich/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/11na.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Na,  from PRB58, 3641 (1998)
 - 11.00000   1.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -259,13 +258,13 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.12041714345060E+01
+band_energy         : -1.12041714345067E+01
 'Ion-ion energy'    :  2.54955460188745E+00
 psp_core            :  0.00000000000000E+00
-xc_dc               : -4.97849581916806E+01
-internal            : -5.84395750242992E+01
+xc_dc               : -4.97849581916800E+01
+internal            : -5.84395750242993E+01
 '-kT*entropy'       :  0.00000000000000E+00
-total_energy_dc     : -5.84395750242992E+01
+total_energy_dc     : -5.84395750242993E+01
 ...
 
  
@@ -280,7 +279,7 @@ total_energy_dc     : -5.84395750242992E+01
            etotal     -5.8439575024E+01
             fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
--          fftalg         312
+-          fftalg         512
          icoulomb           1
              iscf          17
            istwfk        1
@@ -322,6 +321,11 @@ total_energy_dc     : -5.84395750242992E+01
             znucl       22.00000   11.00000
  
 ================================================================================
+ 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -366,7 +370,24 @@ total_energy_dc     : -5.84395750242992E+01
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [3] Recent developments in the ABINIT software package.
+- [3] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -384,7 +405,9 @@ total_energy_dc     : -5.84395750242992E+01
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -397,25 +420,10 @@ total_energy_dc     : -5.84395750242992E+01
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=        101.0  wall=        101.3
+- Proc.   0 individual time (sec): cpu=        114.8  wall=        118.0
  
 ================================================================================
  
  Calculation completed.
 .Delivered   4 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        101.0  wall=        101.3
++Overall time at end (sec) : cpu=        114.8  wall=        118.0

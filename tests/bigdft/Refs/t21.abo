@@ -1,8 +1,8 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 17h54 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h49 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t21/t21.in
-- output file    -> t21.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/bigdft_t21/t21.abi
+- output file    -> t21.abo
 - root for input  files -> t21i
 - root for output files -> t21o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        1052          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       5.948 Mbytes of memory.
+P This job should need less than                       6.612 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        1157          nfft =       36864          nkpt =           1
 ================================================================================
-P This job should need less than                       6.644 Mbytes of memory.
+P This job should need less than                       7.389 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.283 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.283 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        1266          nfft =       40960          nkpt =           1
 ================================================================================
-P This job should need less than                       7.340 Mbytes of memory.
+P This job should need less than                       8.166 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.041 Mbytes ; DEN or POT disk file :      0.315 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.041 Mbytes ; DEN or POT disk file :      0.315 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        1157          nfft =       36864          nkpt =           1
 ================================================================================
-P This job should need less than                       6.642 Mbytes of memory.
+P This job should need less than                       7.384 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.283 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.283 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        1266          nfft =       40960          nkpt =           1
 ================================================================================
-P This job should need less than                       7.336 Mbytes of memory.
+P This job should need less than                       8.155 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.041 Mbytes ; DEN or POT disk file :      0.315 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -119,11 +113,10 @@ _ WF disk file :      0.041 Mbytes ; DEN or POT disk file :      0.315 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        1157          nfft =       36864          nkpt =           1
 ================================================================================
-P This job should need less than                       6.642 Mbytes of memory.
+P This job should need less than                       7.384 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.283 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -136,7 +129,7 @@ _ WF disk file :      0.037 Mbytes ; DEN or POT disk file :      0.283 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =        1266          nfft =       40960          nkpt =           1
 ================================================================================
-P This job should need less than                       7.336 Mbytes of memory.
+P This job should need less than                       8.155 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.041 Mbytes ; DEN or POT disk file :      0.315 Mbytes.
 ================================================================================
@@ -255,8 +248,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -520,7 +513,7 @@ xc                  : -2.11172438098964E-01
 psp_core            :  0.00000000000000E+00
 local_psp           : -7.79795133412937E-01
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -5.51913859444424E-01
+total_energy        : -5.51913859444425E-01
 total_energy_eV     : -1.50183398869963E+01
 band_energy         : -3.69714943734084E-01
 ...
@@ -744,7 +737,7 @@ tolerances: {toldfe: 1.00E-08, }
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.06767581E-02  sigma(3 2)= -8.57885572E-09
   sigma(2 2)= -2.64505425E-02  sigma(3 1)= -1.39435333E-08
-  sigma(3 3)= -2.06767727E-02  sigma(2 1)= -8.59613132E-09
+  sigma(3 3)= -2.06767727E-02  sigma(2 1)= -8.59613133E-09
 
 
 --- !ResultsGS
@@ -762,8 +755,8 @@ etotal    :  -5.51913859E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.69714941E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -2.06767581E-02,  -8.59613132E-09,  -1.39435333E-08, ]
-- [ -8.59613132E-09,  -2.64505425E-02,  -8.57885572E-09, ]
+- [ -2.06767581E-02,  -8.59613133E-09,  -1.39435333E-08, ]
+- [ -8.59613133E-09,  -2.64505425E-02,  -8.57885572E-09, ]
 - [ -1.39435333E-08,  -8.57885572E-09,  -2.06767727E-02, ]
 pressure_GPa:   6.6495E+02
 xred      :
@@ -814,7 +807,7 @@ band_energy         : -3.69714941414916E-01
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.06767581E-02  sigma(3 2)= -8.57885572E-09
   sigma(2 2)= -2.64505425E-02  sigma(3 1)= -1.39435333E-08
-  sigma(3 3)= -2.06767727E-02  sigma(2 1)= -8.59613132E-09
+  sigma(3 3)= -2.06767727E-02  sigma(2 1)= -8.59613133E-09
 
 -Cartesian components of stress tensor (GPa)         [Pressure=  6.6495E+02 GPa]
 - sigma(1 1)= -6.08331123E+02  sigma(3 2)= -2.52398607E-04
@@ -1087,7 +1080,7 @@ hartree             :  2.45933224456867E-01
 xc                  : -2.11172174782581E-01
 'Ion-ion energy'    :  0.00000000000000E+00
 psp_core            :  0.00000000000000E+00
-local_psp           : -7.79793858396793E-01
+local_psp           : -7.79793858396792E-01
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -5.51913859725309E-01
 total_energy_eV     : -1.50183398946396E+01
@@ -1157,7 +1150,7 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT 10 -0.54383755211718    -9.972E-07 4.890E-08 5.435E-02
  ETOT 11 -0.54383808153877    -5.294E-07 2.813E-08 2.796E-02
  ETOT 12 -0.54383836236482    -2.808E-07 1.585E-08 1.442E-02
- ETOT 13 -0.54383851109825    -1.487E-07 8.800E-09 7.457E-03
+ ETOT 13 -0.54383851109826    -1.487E-07 8.800E-09 7.457E-03
  ETOT 14 -0.54383858974112    -7.864E-08 4.829E-09 3.865E-03
  ETOT 15 -0.54383863126012    -4.152E-08 2.623E-09 2.008E-03
  ETOT 16 -0.54383865315219    -2.189E-08 1.413E-09 1.045E-03
@@ -1306,19 +1299,19 @@ P           mkmem           1
             prtwf           0
           spgroup           1
            strten1    -2.2439071815E-02 -2.2439077780E-02 -2.2439006556E-02
-                      -1.2471824798E-08 -1.2098437267E-08 -1.3601346516E-08
+                      -1.2471824799E-08 -1.2098437267E-08 -1.3601346516E-08
            strten2    -2.0676796892E-02 -2.0676781754E-02 -2.6450511449E-02
-                      -8.7271720268E-09 -8.8789701028E-09 -1.4294872934E-08
+                      -8.7271720262E-09 -8.8789701028E-09 -1.4294872934E-08
            strten3    -1.9494902485E-02 -1.9494892723E-02 -3.0291123932E-02
-                      -4.1272477556E-09 -4.1189286564E-09 -1.3647812318E-08
+                      -4.1272477562E-09 -4.1189286560E-09 -1.3647812319E-08
            strten4    -2.0676758092E-02 -2.6450542490E-02 -2.0676772730E-02
-                      -8.5788557247E-09 -1.3943533297E-08 -8.5961313248E-09
+                      -8.5788557241E-09 -1.3943533297E-08 -8.5961313255E-09
            strten5    -1.9496003539E-02 -3.0291732930E-02 -1.9496001636E-02
-                      -3.7811596647E-09 -1.4244298227E-08 -2.8196737599E-09
+                      -3.7811596648E-09 -1.4244298227E-08 -2.8196737600E-09
            strten6    -2.6450232530E-02 -2.0676777707E-02 -2.0676746575E-02
-                      -1.3818248287E-08 -8.7499406319E-09 -9.1160153311E-09
+                      -1.3818248287E-08 -8.7499406319E-09 -9.1160153312E-09
            strten7    -3.0291160708E-02 -1.9494876658E-02 -1.9494922811E-02
-                      -1.3699748786E-08 -4.1542843906E-09 -4.4880932115E-09
+                      -1.3699748786E-08 -4.1542843902E-09 -4.4880932115E-09
            toldfe      1.00000000E-08 Hartree
             typat      1
            xangst1     1.3229430215E+00  1.3229430215E+00  1.3229430215E+00
@@ -1339,6 +1332,11 @@ P           mkmem           1
             znucl        1.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -1377,7 +1375,24 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] ABINIT: Overview, and focus on selected capabilities
+- J. Chem. Phys. 152, 124102 (2020).
+- A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
+- G.Brunin, D.Caliste, M.Cote,
+- J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
+- A.Martin, 
+- H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
+- S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
+- Comment: a global overview of ABINIT, with focus on selected capabilities .
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1395,7 +1410,9 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- And optionally:
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1408,25 +1425,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- And optionally:
--
-- [4] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.8
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=          4.8
++Overall time at end (sec) : cpu=          2.9  wall=          3.1

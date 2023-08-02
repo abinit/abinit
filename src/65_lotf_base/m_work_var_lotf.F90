@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2021 ABINIT group (MMancini)
+!! Copyright (C) 2005-2022 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -58,12 +58,6 @@ contains
 !! INPUTS
 !!  natom=number of atoms
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine work_var_set()
@@ -100,12 +94,6 @@ contains
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine work_var_dealloc()
@@ -124,12 +112,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine cutoff_init()
@@ -180,12 +162,6 @@ contains
 !! FUNCTION
 !!
 !! INPUTS
-!! PARENTS
-!!      m_lotf
-!!
-!! CHILDREN
-!!      dist_pbc
-!!
 !! SOURCE
 
  subroutine smallfit(tau0,ndum)

@@ -6,14 +6,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -47,6 +43,7 @@ module m_gstate
  use m_hdr
  use m_ebands
  use m_dtfil
+ use m_extfpmd
 
  use defs_datatypes,     only : pseudopotential_type, ebands_t
  use defs_abitypes,      only : MPI_type
@@ -54,7 +51,7 @@ module m_gstate
  use m_symtk,            only : matr3inv
  use m_io_tools,         only : open_file
  use m_occ,              only : newocc, getnel
- use m_ddb_hdr,          only : ddb_hdr_type, ddb_hdr_init
+ use m_ddb_hdr,          only : ddb_hdr_type
  use m_fstrings,         only : strcat, sjoin
  use m_geometry,         only : fixsym, mkradim, metric
  use m_kpts,             only : tetra_from_kptrlatt
@@ -101,6 +98,9 @@ module m_gstate
  use m_wvl_descr_psp,    only : wvl_descr_psp_set, wvl_descr_free, wvl_descr_atoms_set, wvl_descr_atoms_set_sym
  use m_wvl_denspot,      only : wvl_denspot_set, wvl_denspot_free
  use m_wvl_projectors,   only : wvl_projectors_set, wvl_projectors_free
+ use m_cgprj,            only : ctocprj
+ use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
+ use m_fft,              only : fft_init_counters,fft_output_counters
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -222,13 +222,6 @@ contains
 !! TODO
 !! Not yet possible to use restartxf in parallel when localrdwf==0
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 
 subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
@@ -264,15 +257,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !52  for density rho(r)       (fformr)
 !102 for potential V(r) file. (fformv)  NOT USED
 !scalars
+ logical :: compute_cprj
  integer,parameter :: formeig=0, level=101, response=0 ,cplex1=1, master=0, itime0=0
  integer :: ndtpawuj=0  ! Cannot use parameter because scfargs points to this! Have to get rid of pointers to scalars!
 #if defined HAVE_BIGDFT
  integer :: icoulomb
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
- integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,itypat
- integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
- integer :: nblok,ncpgr,nfftf,nfftot,npwmin
+ integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,iorder_cprj,itypat
+ integer :: ixfh,izero,mband_cprj,mcg,mcprj,me,mgfftf,mpert,mu,my_natom,my_nspinor
+ integer :: nband_k,nbandtot,nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
@@ -281,14 +275,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.
  character(len=500) :: msg
- character(len=fnlen) :: ddbnm,dscrpt,filnam,wfkfull_path
+ character(len=fnlen) :: dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
  type(ebands_t) :: bstruct,ebands
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
- type(hdr_type) :: hdr,hdr_den
- type(macro_uj_type) :: dtpawuj(0)
+ type(hdr_type) :: hdr, hdr_den, hdr_kfull
+ type(extfpmd_type),pointer :: extfpmd => null()
+ type(macro_uj_type) :: dtpawuj(1)
  type(paw_dmft_type) :: paw_dmft
  type(pawfgr_type) :: pawfgr
  type(recursion_type) ::rec_set
@@ -306,7 +301,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp) :: efield_band(3),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),tsec(2)
  real(dp),allocatable :: doccde(:)
- real(dp),allocatable :: ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
+ real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
@@ -319,8 +314,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  DBG_ENTER("COLL")
 
- call timab(1222,1,tsec)
- call timab(1213,3,tsec)
+ call timab(1232,1,tsec)
+ call timab(1211,3,tsec)
 
 !###########################################################
 !### 01. Initializations XML, MPI, WVL, etc
@@ -405,6 +400,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 ! to be generated from the original simulation cell
  rprimd_for_kg=rprimd
  if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
+ if (dtset%optcell/=0.and.dtset%imgmov/=0) rprimd_for_kg=args_gs%rprimd_orig
  call matr3inv(rprimd_for_kg,gprimd_for_kg)
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
@@ -423,7 +419,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    npwtot(:) = 0
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. psps%usepaw == 1) then
    call init_invovl(dtset%nkpt)
  end if
 
@@ -443,7 +439,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ylm_option=0
      if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
      if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
-!     if ((dtset%orbmag.NE.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
 &     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
@@ -462,8 +457,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
  has_to_init=(initialized==0.or.scf_history%history_size<0)
 
- call timab(1213,2,tsec)
- call timab(1211,3,tsec)
+ call timab(1211,2,tsec)
+ call timab(1212,3,tsec)
 
 !###########################################################
 !### 03. Calls pspini
@@ -472,8 +467,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  comm_psp=mpi_enreg%comm_cell;if (dtset%usewvl==1) comm_psp=mpi_enreg%comm_wvl
  if (dtset%nimage>1) psps%mixalch(:,:)=args_gs%mixalch(:,:) ! mixalch can evolve for some image algos
  call pspini(dtset,dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcut_eff,pawrad,pawtab,psps,rprimd,comm_mpi=comm_psp)
- call timab(1211,2,tsec)
- call timab(1213,3,tsec)
+ call timab(1212,2,tsec)
+ call timab(1211,3,tsec)
 
 !In case of isolated computations, ecore must set to zero
 !because its contribution is counted in the ewald energy as the ion-ion interaction.
@@ -658,11 +653,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
  ! Here we count the number of states treated by the proc. if cnt == 0, mcg is then set to 0.
  cnt = 0
+ nbandtot = 0
  do spin=1,dtset%nsppol
    do ikpt=1,dtset%nkpt
-     do band=1,dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+     nband_k = dtset%nband(ikpt + (spin-1) * dtset%nkpt)
+     do band=1,nband_k
        if (.not. proc_distrb_cycle(mpi_enreg%proc_distrb, ikpt, band, band, spin, mpi_enreg%me_kpt)) cnt = cnt + 1
      end do
+     nbandtot = nbandtot + nband_k
    end do
  end do
 
@@ -682,6 +680,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
 &     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
 &     "to decrease the memory requirements. Consider also OpenMP threads."
+!     ii = 0
      ABI_ERROR_NOSTOP(msg,ii)
      write (msg,'(5(a,i0), 2a)')&
 &     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
@@ -767,6 +766,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call pawrhoij_copy(hdr%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
+ ! Now that wavefunctions are initialized, calls of nonlocal operations are possible, so we start the counting (if enabled)
+ if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
+   call nonlop_ylm_init_counters()
+ end if
+ ! Same for fft counters
+ if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
+   call fft_init_counters()
+ end if
+
 !###########################################################
 !### 06. Operations related to restartxf (Old version)
 
@@ -844,9 +852,38 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
  if (has_to_init) xred_old=xred
 
+!Initialize (eventually) extfpmd object
+ if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
+   if(dtset%useextfpmd/=1.and.dtset%extfpmd_nbcut>dtset%mband) then
+     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
+&     "extfpmd_nbcut = ",dtset%extfpmd_nbcut," should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&     "Action: Increase nband or decrease extfpmd_nbcut."
+     ABI_ERROR(msg)
+   else
+     if(dtset%useextfpmd/=1.and.(dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut)>dtset%mband) then
+       write(msg,'(a,i0,a,i0,a,i0,2a,i0,3a)') "(extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf," + extfpmd_nbcut = ",&
+&       dtset%extfpmd_nbcut,") = ",dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut,ch10,&
+&       "should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     else if(dtset%extfpmd_nbdbuf>dtset%mband) then
+       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
+&       " should be less than or equal to nband = ",dtset%mband,".",ch10,&
+&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
+       ABI_WARNING(msg)
+       dtset%extfpmd_nbdbuf = 0
+     end if
+     ABI_MALLOC(extfpmd,)
+     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+&     dtset%nfft,dtset%nspden,rprimd,dtset%useextfpmd)
+   end if
+ end if
+
 !Timing for initialisation period
- call timab(1213,2,tsec)
- call timab(1214,3,tsec)
+ call timab(1211,2,tsec)
+ call timab(1213,3,tsec)
+
 
 !###########################################################
 !### 08. Compute new occupation numbers
@@ -864,21 +901,22 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
 !  Do not take into account the possible STM bias
-! CP modified
-!   call newocc(doccde,eigen,results_gs%energies%entropy,&
-!&   results_gs%energies%e_fermie,&
-!&   dtset%spinmagntarget,dtset%mband,dtset%nband,&
-!&   dtset%nelect,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-!&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
    call newocc(doccde,eigen,results_gs%energies%entropy,&
 &   results_gs%energies%e_fermie,results_gs%energies%e_fermih,dtset%ivalence,&
 &   dtset%spinmagntarget,dtset%mband,dtset%nband,&
 &   dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,&
-&   dtset%occopt,dtset%prtvol,zero,dtset%tphysel,dtset%tsmear,dtset%wtk)
-! End CP modified
+&   dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,&
+&   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
    ABI_FREE(doccde)
+
+   if(associated(extfpmd)) then
+     extfpmd%nelect=zero
+     call extfpmd%compute_nelect(results_gs%energies%e_fermie,extfpmd%nelect,&
+&     dtset%tsmear)
+     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear)
+   end if
 
 !  Transfer occupations to bigdft object:
    if(dtset%usewvl==1 .and. .not. wvlbigdft) then
@@ -987,7 +1025,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  2-Initialize and compute data for DFT+U, EXX, or DFT+DMFT
    if(paw_dmft%use_dmft==1) call print_sc_dmft(paw_dmft,dtset%pawprtvol)
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
-&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%ntypat,pawang,dtset%pawprtvol,&
+&     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
  end if
 
@@ -1004,17 +1042,24 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !###########################################################
 ! Initialisation of cprj
  usecprj=0; mcprj=0;mband_cprj=0
- if (dtset%usepaw==1) then
-   if (associated(electronpositron)) then
-     if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+ compute_cprj=.false.
+ ! PAW keeping cprj in memory : some cases are excluded for now...
+ if (dtset%cprj_in_memory/=0) then
+   compute_cprj=.true.
+   usecprj=1
+ else
+   if (dtset%usepaw==1) then
+     if (associated(electronpositron)) then
+       if (dtset%positron/=0.and.electronpositron%dimcprj>0) usecprj=1
+     end if
+     if (dtset%prtnabla>0) usecprj=1
+     if (dtset%extrapwf>0) usecprj=1
+     if (dtset%pawfatbnd>0)usecprj=1
+     if (dtset%prtdos==3)  usecprj=1
+     if (dtset%usewvl==1)  usecprj=1
+     if (dtset%nstep==0) usecprj=0
+     if (dtset%usefock==1)  usecprj=1
    end if
-   if (dtset%prtnabla>0) usecprj=1
-   if (dtset%extrapwf>0) usecprj=1
-   if (dtset%pawfatbnd>0)usecprj=1
-   if (dtset%prtdos==3)  usecprj=1
-   if (dtset%usewvl==1)  usecprj=1
-   if (dtset%nstep==0) usecprj=0
-   if (dtset%usefock==1)  usecprj=1
  end if
  if (usecprj==0) then
    ABI_MALLOC(cprj,(0,0))
@@ -1029,7 +1074,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
    ABI_MALLOC(cprj,(dtset%natom,mcprj))
    ncpgr=0
-   if (dtset%usefock==1) then
+   if (dtset%usefock==1) then ! Note that compute_cprj = false if usefock/=0
      if (dtset%optforces == 1) then
        ncpgr = 3
      end if
@@ -1040,8 +1085,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    ABI_MALLOC(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
    call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
+   if (compute_cprj) then
+     choice      = 1 ! no derivative...
+     idir        = 0 ! ...so no direction
+     iatom       = 0 ! all atoms
+     iorder_cprj = 0 ! ordered by atom types
+     ncprj       = dtset%natom
+!    Compute structure factor phases and large sphere cut-off (gsqcut):
+     ABI_MALLOC(ph1d,(2,3*(2*dtset%mgfft+1)*dtset%natom))
+     call getph(atindx,dtset%natom,ngfft(1),ngfft(2),ngfft(3),ph1d,xred)
+     call wrtout(std_out,' Computing cprj from initial wavefunctions (gstate)')
+     call ctocprj(atindx,cg,choice,cprj,gmet,gprimd,iatom,idir,&
+&   iorder_cprj,dtset%istwfk,kg,dtset%kptns,mcg,mcprj,dtset%mgfft,dtset%mkmem,mpi_enreg,psps%mpsang,&
+&   dtset%mpw,dtset%natom,nattyp,dtset%nband,ncprj,ngfft,dtset%nkpt,dtset%nloalg,npwarr,dtset%nspinor,&
+&   dtset%nsppol,dtset%nsppol,psps%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,dtfil%unpaw,&
+&   xred,ylm,ylmgr)
+     call wrtout(std_out,' cprj is computed')
+     ABI_FREE(ph1d)
+   end if
  end if
 
+!Timing for initialisation period
+ call timab(1213,2,tsec)
+ call timab(1214,3,tsec)
 
 !###########################################################
 !### 12. Operations dependent of iscf value
@@ -1077,14 +1143,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
        if (rdwrpaw/=0) then
-         ! CP modified
-         !call hdr%update(bantot,etot,fermie,residm,&
-         !  rprimd,occ,pawrhoij,xred,args_gs%amu,&
-         !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
          call hdr%update(bantot,etot,fermie,fermih,residm,&
            rprimd,occ,pawrhoij,xred,args_gs%amu,&
            comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-         ! End CP modified
        end if
 
        ! Read kinetic energy density
@@ -1112,7 +1173,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
 !        write(std_out,*) "mkrhogstate"
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&         extfpmd=extfpmd)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
          if(dtset%usekden==1)then
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
@@ -1123,7 +1185,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          ABI_FREE(rhowfr)
        else
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&         extfpmd=extfpmd)
          if(dtset%usekden==1)then
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &           mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
@@ -1207,6 +1270,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if ! has_to_init
 
+!Timing for initialisation period
+ call timab(1214,2,tsec)
+ call timab(1215,3,tsec)
+
 !###########################################################
 !### 13. If needed, initialize SCF history variables
 
@@ -1262,7 +1329,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
- call timab(1214,2,tsec)
+ call timab(1215,2,tsec)
 
  conv_retcode = 0
 
@@ -1271,10 +1338,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !  ###########################################################
 !  ### 14. Move atoms and acell according to ionmov value
 
-   call timab(1215,3,tsec)
+   call timab(1225,3,tsec)
 
    call scfcv_init(scfcv_args,atindx,atindx1,cg,cprj,cpus,&
-&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,&
+&   args_gs%dmatpawu,dtefield,dtfil,dtpawuj,dtset,ecore,eigen,hdr,extfpmd,&
 &   indsym,initialized,irrzon,kg,mcg,mcprj,mpi_enreg,my_natom,nattyp,ndtpawuj,&
 &   nfftf,npwarr,occ,pawang,pawfgr,pawrad,pawrhoij,&
 &   pawtab,phnons,psps,pwind,pwind_alloc,pwnsfac,rec_set,&
@@ -1326,14 +1393,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    call scfcv_destroy(scfcv_args)
 
-   call timab(1215,2,tsec)
+   call timab(1225,2,tsec)
 
 !  ###########################################################
 !  ### 15. Final operations and output for gstate
 
  end if !  End of the check of hasty exit
 
- call timab(1216,3,tsec)
+ call timab(1226,3,tsec)
 
  write(msg, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
 & ' ----iterations are completed or convergence reached----',ch10
@@ -1364,8 +1431,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! Compute and print the gaps.
  call ebands_report_gap(ebands,header="Gap info",unit=std_out,mode_paral="COLL",gaps=results_gs%gaps)
 
- call timab(1216,2,tsec)
- call timab(1217,3,tsec)
+ call timab(1226,2,tsec)
+ call timab(1227,3,tsec)
 
  if(dtset%nqpt==0)filnam=dtfil%fnameabo_wfk
  if(dtset%nqpt==1)filnam=dtfil%fnameabo_wfq
@@ -1411,12 +1478,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (me == master .and. dtset%prtwf == 1 .and. dtset%prtwf_full == 1 .and. dtset%nqpt == 0) then
    wfkfull_path = strcat(dtfil%filnam_ds(4), "_FULL_WFK")
    if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-   call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path)
+   call wfk_tofullbz(filnam, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
+   call hdr_kfull%free()
    call cryst%free()
  end if
 
- call timab(1217,2,tsec)
- call timab(1218,3,tsec)
+ call timab(1227,2,tsec)
+ call timab(1228,3,tsec)
 
  call clnup1(acell,dtset,eigen,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
 & dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%gred,&
@@ -1427,8 +1495,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
  end if
 
- call timab(1218,2,tsec)
- call timab(1219,3,tsec)
+ call timab(1228,2,tsec)
+ call timab(1229,3,tsec)
 
 !write final electric field components HONG
 
@@ -1467,91 +1535,58 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call wrtout([std_out, ab_out], msg)
  end if
 
- call timab(1219,2,tsec)
- call timab(1220,3,tsec)
+ call timab(1229,2,tsec)
+ call timab(1230,3,tsec)
 
-!Open the formatted derivative database file, and write the preliminary information
-!In the // case, only one processor writes the energy and the gradients to the DDB
-
+!In the // case, only master writes the energy and the gradients to the DDB
  if (me==0.and.dtset%nimage==1.and.((dtset%iscf > 0).or.&
 & (dtset%berryopt == -1).or.(dtset%berryopt) == -3)) then
 
+   ! DDB dimensions
    if (dtset%iscf > 0) then
-     nblok = 2          ! 1st blok = energy, 2nd blok = gradients
+     nblok = 2  ! 1st blok = gradients, 2nd blok = energy
    else
-     nblok = 1
+     nblok = 1  ! 1st blok = gradients
    end if
+   mpert = dtset%natom + 6
 
+   ! Create header and ddb objects
    dscrpt=' Note : temporary (transfer) database '
-   ddbnm=trim(dtfil%filnam_ds(4))//'_DDB'
+   call ddb_hdr%init(dtset,psps,pawtab,dscrpt,nblok,&
+&                    xred=xred,occ=occ,ngfft=ngfft)
 
-   call ddb_hdr_init(ddb_hdr,dtset,psps,pawtab,DDB_VERSION,dscrpt,&
-&   nblok,xred=xred,occ=occ,ngfft=ngfft)
+   call ddb%init(dtset, nblok, mpert, with_d1E=.true.)
 
-   call ddb_hdr%open_write(ddbnm,dtfil%unddb,fullinit=0)
-
-   call ddb_hdr%free()
-
-   choice=2
-   mpert = dtset%natom + 6 ; msize = 3*mpert
-
-!  create a ddb structure with just one blok
-   call ddb%malloc(msize,1,dtset%natom,dtset%ntypat)
-
-   ddb%flg = 0
-   ddb%qpt = zero
-   ddb%nrm = one
-   ddb%val = zero
-
-!  Write total energy to the DDB
-   if (dtset%iscf > 0) then
-     ddb%typ(1) = 0
-     ddb%val(1,1,1) = results_gs%etotal
-     ddb%flg(1,1) = 1
-     call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
-   end if
-
-!  Write gradients to the DDB
-   ddb%typ = 4
-   ddb%flg = 0
-   ddb%val = zero
-   indx = 0
-   if (dtset%iscf > 0) then
-     do iatom = 1, dtset%natom
-       do idir = 1, 3
-         indx = indx + 1
-         ddb%flg(indx,1) = 1
-         ddb%val(1,indx,1) = results_gs%gred(idir,iatom)
-       end do
-     end do
-   end if
-
-   indx = 3*dtset%natom + 3
+   ! Set the electronic polarization
    if ((abs(dtset%berryopt) == 1).or.(abs(dtset%berryopt) == 3)) then
-     do idir = 1, 3
-       indx = indx + 1
-       if (dtset%rfdir(idir) == 1) then
-         ddb%flg(indx,1) = 1
-         ddb%val(1,indx,1) = results_gs%pel(idir)
-       end if
-     end do
+     call ddb%set_pel(results_gs%pel, dtset%rfdir, 1)
    end if
 
-   indx = 3*dtset%natom + 6
    if (dtset%iscf > 0) then
-     ddb%flg(indx+1:indx+6,1) = 1
-     ddb%val(1,indx+1:indx+6,1) = results_gs%strten(1:6)
+
+     ! Set the gradients (forces) in reduced coordinates
+     call ddb%set_gred(results_gs%gred, 1)
+
+     ! Set the stress tensor
+     call ddb%set_strten(results_gs%strten, 1)
+
+     ! Set the total energy
+     call ddb%set_etotal(results_gs%etotal, 2)
    end if
 
-   call ddb%write_block(1,choice,dtset%mband,mpert,msize,dtset%nkpt,dtfil%unddb)
+   if (dtset%prtddb==1) then
+    ! Write the DDB
+     call ddb%write(ddb_hdr, dtfil%fnameabo_ddb, with_psps=0)
+   end if
+
+   ! Free memory
+   call ddb_hdr%free()
    call ddb%free()
 
-!  Close DDB
-   close(dtfil%unddb)
  end if
 
- call timab(1220,2,tsec)
- call timab(1221,3,tsec)
+ call timab(1230,2,tsec)
+ call timab(1231,3,tsec)
 
 
  if (dtset%nstep>0 .and. dtset%prtstm==0 .and. dtset%positron/=1) then
@@ -1559,6 +1594,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   results_gs%grewtn,results_gs%grvdw,results_gs%grxc,dtset%iscf,dtset%natom,&
 &   results_gs%ngrvdw,dtset%optforces,dtset%optstress,dtset%prtvol,start,&
 &   results_gs%strten,results_gs%synlgr,xred)
+ end if
+
+ ! Write nonlop_ylm_counters (if enabled) in outputs
+ if (dtset%useylm==1.and.dtset%nonlop_ylm_count/=0.and.dtset%paral_kgb==0) then
+   call nonlop_ylm_output_counters(dtset%natom,nbandtot,dtset%ntypat,dtset%typat,mpi_enreg)
+ end if
+ ! Write fft_counters (if enabled) in output
+ if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
+   call fft_output_counters(nbandtot,mpi_enreg)
  end if
 
  if(dtset%imgwfstor==1)then
@@ -1613,6 +1657,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! This call should be done inside destroy_sc_dmft
  if ( dtset%usedmft /= 0 ) then
    call data4entropyDMFT_destroy(paw_dmft%forentropyDMFT)
+ end if
+
+!Destroy extfpmd datastructure
+ if(associated(extfpmd)) then
+   call extfpmd%destroy()
+   ABI_FREE(extfpmd)
  end if
 
 !Destroy electronpositron datastructure
@@ -1694,8 +1744,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
  end if
 
- if(dtset%wfoptalg == 1 .and. psps%usepaw == 1) then
-   call destroy_invovl(dtset%nkpt)
+ if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
+   call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
  end if
 
  if(gemm_nonlop_use_gemm) then
@@ -1716,8 +1766,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 #endif
 
- call timab(1221,2,tsec)
- call timab(1222,2,tsec)
+ call timab(1231,2,tsec)
+ call timab(1232,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -1744,13 +1794,6 @@ end subroutine gstate
 !!
 !! OUTPUT
 !!  start(3,natom)=copy of starting xred
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -1874,13 +1917,6 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !! OUTPUT
 !!  (only print and write to disk)
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 ! CP added fermih to the list of arguments
 subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gred,&
@@ -1983,34 +2019,22 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
 
  if(dtset%tfkinfunc==0)then
    if (me == master) then
-     ! CP modified
-     !call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,ab_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
-!     call prteigrs(eigen,dtset%enunit,fermie,fnameabo_eig,std_out,&
-!&     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-!&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
-!&     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
-!&     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,ab_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fnameabo_eig,std_out,&
 &     iscf_dum,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
+&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnonsc,dtset%nsppol,occ,&
 &     dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwf,&
 &     vxcavg,dtset%wtk)
-      ! End CP modified
    end if
 
 #if defined HAVE_NETCDF
    if (dtset%prteig==1 .and. me == master) then
      filename=trim(fnameabo_eig)//'.nc'
-     call write_eig(eigen,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
+     call write_eig(eigen,fermie,filename,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol)
    end if
 #endif
  end if
@@ -2081,13 +2105,6 @@ end subroutine clnup1
 !!
 !! OUTPUT
 !!  (data written to unit iout)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2248,13 +2265,6 @@ end subroutine prtxf
 !!
 !! OUTPUT
 !!  (only print)
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2480,13 +2490,6 @@ end subroutine clnup2
 !!  xred_old(3,natom)= at input, previous reduced dimensionless atomic coordinates
 !!                     at output, current xred is transferred to xred_old
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
-!!
 !! SOURCE
 
 subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred,xred_old)
@@ -2511,9 +2514,10 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  real(dp) :: ures
  !character(len=500) :: msg
 !arrays
- real(dp),allocatable :: cgstart(:,:)
+ !real(dp),allocatable :: cgstart(:,:)
  type(macro_uj_type),allocatable,target :: dtpawuj(:)
 ! *********************************************************************
+
 
  DBG_ENTER("COLL")
 
@@ -2522,48 +2526,34 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end if
 
  ABI_MALLOC(dtpawuj,(0:ndtpawuj))
- ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
+ !ABI_MALLOC(cgstart,(2,scfcv_args%mcg))
 
-!DEBUG
-!write(std_out,*)'pawuj_drive: before ini dtpawuj(:)%iuj ', dtpawuj(:)%iuj
-!END DEBUG
  call pawuj_ini(dtpawuj,ndtpawuj)
 
- cgstart=scfcv_args%cg
+ !cgstart=scfcv_args%cg
  do iuj=1,ndtpawuj
 !  allocate(dtpawuj(iuj)%rprimd(3,3)) ! this has already been done in pawuj_ini
    dtpawuj(iuj)%macro_uj=dtset%macro_uj
    dtpawuj(iuj)%pawprtvol=dtset%pawprtvol
    dtpawuj(iuj)%diemix=dtset%diemix
+   dtpawuj(iuj)%diemixmag=dtset%diemixmag
    dtpawuj(iuj)%pawujat=dtset%pawujat
    dtpawuj(iuj)%nspden=dtset%nspden
    dtpawuj(iuj)%rprimd=dtset%rprimd_orig(1:3,1:3,1)
+   dtpawuj(iuj)%dmatpuopt=dtset%dmatpuopt
  end do
 
-!allocate(dtpawuj(0)%vsh(0,0),dtpawuj(0)%occ(0,0))
+ iuj=1 !LMac Flag to collect occupancies for unperturbed calculation
+ dtpawuj(iuj)%iuj=iuj
 
- do iuj=1,2
-   if (iuj>1) scfcv_args%cg(:,:)=cgstart(:,:)
+ scfcv_args%ndtpawuj=>ndtpawuj
+ scfcv_args%dtpawuj=>dtpawuj
 
-!  DEBUG
-!  write(std_out,*)'drive_pawuj before count dtpawuj(:)%iuj ', dtpawuj(:)%iuj
-!  END DEBUG
-
-   dtpawuj(iuj*2-1)%iuj=iuj*2-1
-
-   scfcv_args%ndtpawuj=>ndtpawuj
-   scfcv_args%dtpawuj=>dtpawuj
-
-   !call scfcv_new(ab_scfcv_in,ab_scfcv_inout,dtset,electronpositron,&
-!&   paw_dmft,rhog,rhor,rprimd,wffnew,wffnow,xred,xred_old,conv_retcode)
-   itimes(1)=itime0 ; itimes(2)=1
-   call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
-
-   scfcv_args%fatvshift=scfcv_args%fatvshift*(-one)
- end do
+ itimes(1)=itime0 ; itimes(2)=1
+ call scfcv_run(scfcv_args,electronpositron,itimes,rhog,rhor,rprimd,xred,xred_old,conv_retcode)
 
 !Calculate Hubbard U (or J)
- call pawuj_det(dtpawuj,ndtpawuj,trim(scfcv_args%dtfil%filnam_ds(4))//"_UJDET.nc",ures)
+ call pawuj_det(dtpawuj, ndtpawuj, dtset, scfcv_args%dtfil, ures, scfcv_args%mpi_enreg%comm_cell)
  dtset%upawu(dtset%typat(dtset%pawujat),1)=ures/Ha_eV
 
 !Deallocations
@@ -2572,7 +2562,7 @@ subroutine pawuj_drive(scfcv_args, dtset,electronpositron,rhog,rhor,rprimd, xred
  end do
 
  ABI_FREE(dtpawuj)
- ABI_FREE(cgstart)
+ !ABI_FREE(cgstart)
 
  DBG_EXIT("COLL")
 
@@ -2587,7 +2577,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT group (MB)
+!! Copyright (C) 2003-2022 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2612,13 +2602,6 @@ end subroutine pawuj_drive
 !!  wff2 = structured info for wavefunctions
 !!  xfhist(3,natom+4,2,ab_xfh%mxfh) = (x,f) history array, also including
 !!   rprim and stress
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      xderiveread,xderiverrecend,xderiverrecinit,xderivewrecend
-!!      xderivewrecinit,xderivewrite
 !!
 !! SOURCE
 
@@ -2654,9 +2637,6 @@ subroutine outxfhist(ab_xfh,natom,option,wff2,ios)
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,*)'outxfhist  : enter, option = ', option
-!ENDDEBUG
  ncid_hdr = wff2%unwff
  xfdim2 = natom+4
 

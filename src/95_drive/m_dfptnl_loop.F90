@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2021 ABINIT group (LB)
+!!  Copyright (C) 2018-2022 ABINIT group (LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -43,7 +39,7 @@ contains
 !! Loop over the perturbations j1, j2 and j3
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (LB)
+!! Copyright (C) 2018-2022 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -128,18 +124,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
-!!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      appdig,ddk_f,dfpt_atm2fft,dfpt_mkcore,dfpt_rhotov,dfpt_vlocal
-!!      dfptnl_pert,fourdp,gs_hamkq%free,hdr_den%free,init_hamiltonian,inwffil
-!!      paw_an_free,paw_an_init,paw_an_nullify,paw_an_reset_flags,paw_ij_free
-!!      paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawdenpot,pawdij,pawdijfr
-!!      pawmknhat,pawnhatfr,pawrhoij_alloc,pawrhoij_free,pawrhoij_inquire_dim
-!!      pawrhoij_nullify,read_rhor,rf2_getidir,symdij,timab,wffclose
-!!      wfk_open_read,wrtout
 !!
 !! SOURCE
 

@@ -5,12 +5,10 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2022 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -94,13 +92,7 @@ contains  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
 !! NOTES
-!!
-!! CHILDREN
-!!      get_kg
 !!
 !! SOURCE
 
@@ -149,6 +141,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  integer :: g0_k(3),symq(4,2,cryst%nsym)
  integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
  real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom)
+ real(dp) :: dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
@@ -383,7 +376,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        "symdynmat", "symv1scf", "dvdb_add_lr", "interpolated"], &
        [dtset%symdynmat, dtset%symv1scf, dtset%dvdb_add_lr, interpolated])
      NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], [dvdb%qdamp]))
+     dvdb_qdamp = dvdb%qdamp
+     NCF_CHECK(nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: "qdamp"], dvdb_qdamp))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpoint"), qpt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart"), dvdb%dielt))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "becs_cart"), dvdb%zeff))
@@ -622,12 +616,6 @@ end subroutine eph_gkk
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      get_kg
-!!
 !! SOURCE
 
 subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
@@ -860,12 +848,6 @@ end subroutine ncwrite_v1qnu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gkk
-!!
-!! CHILDREN
-!!      get_kg
-!!
 !! SOURCE
 
 subroutine v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
@@ -921,13 +903,7 @@ end subroutine v1atm_to_vqnu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gkk
-!!
 !! NOTES
-!!
-!! CHILDREN
-!!      get_kg
 !!
 !! SOURCE
 

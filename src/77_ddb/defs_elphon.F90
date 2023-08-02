@@ -9,7 +9,7 @@
 !!  used, or be written to disk. All combinations should be feasible.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MVer, MG)
+!! Copyright (C) 2004-2022 ABINIT group (MVer, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,10 +19,6 @@
 !!  Contains the following datastructures:
 !!   1) elph_type contains data and dimensions for the kpoints near the
 !!      fermi surface and the $g_{k k+q}$ matrix elements
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -310,12 +306,6 @@ CONTAINS
 !! INPUTS
 !!  elph_ds = elphon datastructure
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      krank%free,wrtout
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -363,12 +353,6 @@ end subroutine elph_ds_clean
 !!
 !! INPUTS
 !!  elph_tr_ds = elphon transport datastructure
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -425,11 +409,6 @@ end subroutine elph_tr_ds_clean
 !!
 !! INPUTS
 !!  elph_k = elphon k-points datastructure
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -498,12 +477,6 @@ end subroutine elph_k_copy
 !! INPUTS
 !!  elph_k = elphon k-points datastructure
 !!
-!! PARENTS
-!!      defs_elphon
-!!
-!! CHILDREN
-!!      krank%free,wrtout
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -552,12 +525,6 @@ end subroutine elph_k_destroy
 !! INPUTS
 !!  nproc = number of k-parallel processors
 !!  elph_k = elphon k-points datastructure
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      krank%free,wrtout
 !!
 !! NOTES
 !!
@@ -628,12 +595,6 @@ end subroutine elph_k_procs
 !! OUTPUT
 !!   gam_now = output gamma matrices multiplied by displacement matrices
 !!
-!! PARENTS
-!!      m_a2ftr,m_elphon,m_iogkk
-!!
-!! CHILDREN
-!!      krank%free,wrtout
-!!
 !! SOURCE
 
 subroutine gam_mult_displ(nbranch, displ_red, gam_bare, gam_now)
@@ -675,12 +636,6 @@ end subroutine gam_mult_displ
 !! OUTPUT
 !! gamma_qpt = in/out: set of gamma matrix elements completed and symmetrized
 !!    gamma_qpt(2,nbranch**2,nsppol,nqpt_full)
-!!
-!! PARENTS
-!!      m_elphon,m_phgamma
-!!
-!! CHILDREN
-!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -922,12 +877,6 @@ end subroutine complete_gamma
 !! OUTPUT
 !! gamma_qpt_tr = in/out: set of gamma matrix elements completed and symmetrized
 !!    gamma_qpt_tr(2,9,nbranch*nbranch,nsppol,nqpt_full)
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      krank%free,wrtout
 !!
 !! SOURCE
 
@@ -1271,12 +1220,6 @@ end subroutine complete_gamma_tr
 !! NOTES
 !!   REMOVED 3/6/2008: much too large matrix, and not used at present
 !!       FStoqpt = mapping of kpoint pairs (1 irreducible and 1 full) to qpoints
-!!
-!! PARENTS
-!!      m_a2ftr,m_elphon
-!!
-!! CHILDREN
-!!      krank%free,wrtout
 !!
 !! SOURCE
 

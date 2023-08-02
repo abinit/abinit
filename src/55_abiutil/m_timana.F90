@@ -6,14 +6,10 @@
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -128,12 +124,6 @@ contains
 !!    NOTE : the number of fourwf calls is equal to
 !!    the # of nonlop (choice=1) calls + the # of nonlop (choice=2) calls
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      timab,time_accu,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
@@ -160,15 +150,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  integer,allocatable :: list(:)
  real(dp) :: ftimes(2,TIMER_SIZE),ftsec(2),mflops(TIMER_SIZE),nflops(TIMER_SIZE),times(2,TIMER_SIZE),tsec(2),my_tsec(2)
  character(len=32) :: names(-1:TIMER_SIZE),entry_name
- character(len=*),parameter :: format01040 ="('- ',a24,f15.3,f6.1,f14.3,f6.1,i15,16x,f7.2,1x,f10.2)"
- character(len=*),parameter :: format01041 ="('- ',a24,f15.3,f6.1,f14.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
- character(len=*),parameter :: format_head1="(a,t38,a,t46,a,t57,a,t66,a,t72,a,t88,a,3x,a7,1x,a10)"
- character(len=*),parameter :: format_head2="(a,t38,a,t46,a,t57,a,t66,a,t72,a,t84,a)"
+ character(len=*),parameter :: format01040 ="('- ',a32,f15.3,f6.1,f14.3,f6.1,i15,16x,f7.2,1x,f10.2)"
+ character(len=*),parameter :: format01041 ="('- ',a32,f15.3,f6.1,f14.3,f6.1,i15,3x,g12.3,1x,f7.2,1x,f10.2)"
+ character(len=*),parameter :: format_head1="(a,t46,a,t54,a,t65,a,t72,a,t80,a,t96,a,3x,a7,1x,a10)"
+ character(len=*),parameter :: format_head2="(a,t46,a,t54,a,t65,a,t72,a,t80,a,t92,a)"
 
 ! *************************************************************************
 
- 01200 format(  '- subtotal             ',f18.3,f6.1,f14.3,f6.1,31x,f7.2,1x,f10.2)
- 01201 format(/,'- subtotal             ',f18.3,f6.1,f14.3,f6.1,31x,f7.2,1x,f10.2)
+ 01200 format(  '- subtotal                     ',f18.3,f6.1,f14.3,f6.1,31x,f7.2,1x,f10.2)
+ 01201 format(/,'- subtotal                     ',f18.3,f6.1,f14.3,f6.1,31x,f7.2,1x,f10.2)
 
  ount = ab_out
 
@@ -202,9 +192,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Channels 700 to 799 are for optdriver=0 (again ...)
 !Channels 800 to 899 are for the detailed analysis of fourwf
 !Channels 900 to 1499 are for optdriver=0 (again ...)
-!Channels 1500 to 1519 are for Hartree-Fock.
+!Channels 1500 to 1599 are for Hartree-Fock.
 !Channels 1700 to 1747 are for GWLS.
-!Channels 1520 and beyond are not yet attributed.
 
  names(1:TIMER_SIZE)='***                             '
 !Basic slots are not overlapping. Their sum should cover most of the code.
@@ -238,33 +227,23 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(38)='ewald2 (+vdw_dftd)              '; basic(38)=1
  names(39)='vtowfk (loop)                   '
  names(40)='cgwf-O(npw)                     '
- names(41)='abinit(1)                       '
- names(42)='abinit(2)                       '; basic(42)=1
- names(43)='indefo+macroin+invars2m         '
- names(44)='abinit(4)                       '
- names(45)='abinit(5)                       '
- names(46)='abinit(6)                       '
  names(47)='ingeo/symgroup                  '
  names(48)='communic.MPI                    '
  names(49)='timana(1)                       '
  names(50)='timing timab                    '; basic(50)=1
  names(51)='total timab                     '
- names(52)='scfcv-scprqt                    '; basic(52)=1
  names(53)='forces-mkcore                   '
  names(54)='scfcv_core(1)                   '
  names(55)='stress-mkcore                   '
- names(56)='scfcv_core-read                 '
  names(57)='rhotov                          '
  names(59)='energy                          '
- names(60)='scfcv_core(etotfor)             '
- names(61)='scfcv_core :synchro             '
+ names(61)='dfpt_scfcv : synchro            '
  names(62)='kpgio :synchro                  '
  names(63)='mkrho :synchro                  '
  names(64)='strkin:synchro                  '
  names(65)='forstrnps:synchr                '
  names(66)='vtorho:synchro                  '; basic(66)=1
  names(67)='wfsinp:synchro                  '
- names(68)='scfcv_core(mix den - newrho)    '
  names(69)='forces                          '; basic(69)=1 ! Actually, should not be basic !
  names(70)='vtorho(symrhg)                  '
  names(71)='mkrho :MPIrhor                  '
@@ -294,11 +273,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(95)='tddft                           '
  names(96)='dieltcel                        '; basic(96)=1
  names(97)='nonlop(total)                   '
- names(98)='getghc-other                    '; basic(98)=1
 
- names(101)='dfpt_nstdy                      '
- names(102)='dfpt_nstwf                      '
- names(108)='dfpt_vtowfk(contrib)            '; basic(108)=1
+ names(101)='abinit(init,iofn1,herald)      '; basic(101)=1
+ names(102)='get_dtsets_pspheads            '; basic(102)=1
+ names(103)='abinit(outvars)                '; basic(103)=1
+ names(104)='abinit(chkinp,chkvars)         '; basic(104)=1
+ names(105)='abinit(after driver)           '; basic(105)=1
+
+ names(111)='dfpt_nstdy                      '
+ names(112)='dfpt_nstwf                      '
+ names(113)='dfpt_vtowfk(contrib)            '; basic(113)=1
  names(118)='dfpt_vtorho (1)                 '; basic(118)=1
  names(120)='dfpt_scfcv                      '
  names(121)='dfpt_vtorho                     '
@@ -340,7 +324,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(182)='dfpt_dyxc1                      '; basic(182)=1
 !names(184)='dfpt_dyxc1(analysis)            '
 
- names(191)='invars2                         '; basic(191)=1
+ names(191)='invars2                         '
  names(192)='inkpts                          '
  names(193)='fresid                          '
 
@@ -349,16 +333,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(197)='getgh1c%dfpt_cgwf               '
  names(198)='getgh1c%dfpt_nstwf              '
  names(199)='getgh1c%dfpt_nstpaw             '
-
- names(200)='getghc                          '
- names(201)='getghc%cgwf                     '
- names(202)='getghc%dfpt_cgwf                '
- names(203)='getghc%mkresi                   '
- names(204)='getghc%kss_ddiago               '
- names(205)='getghc%lobpcgwf                 '
- names(206)='getghc%prep_getghc              '
- names(207)='getghc%other lobpcg             '
- names(208)='getghc%update_mmat              '
 
  names(210)='projbd                          '; basic(210)=1;    ndata(210)=npwnbdmean
  names(211)='projbd%cgwf                     '
@@ -381,19 +355,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(232)='nonlop%prep_nonl%forstrn        '
  names(233)='nonlop%appinvovl                '
  names(234)='nonlop%prep_nonl%energy         '
-
- names(238)='scfcv_core                      '
- names(239)='scfcv_core(Berry)               '
- names(240)='scfcv_core(iniloop, setvtr  )   '
- names(241)='scfcv_core(loop, PAW)           '
- names(242)='scfcv_core(vtorho(f))           '
- names(243)='scfcv_core(rhotov)              '
- names(244)='scfcv_core(qui loop)            '
- names(245)='scfcv_core(mix pot)             '
- names(246)='scfcv_core(just after scf)      '
- names(247)='scfcv_core(afterscfloop)        '
- names(248)='scfcv_core(outscfcv)            '
- names(249)='scfcv_core(free)                '
+ names(235)='nonlop%getchc                   '; basic(235)=1
+ names(236)='nonlop%getcsc                   '; basic(236)=1
+ names(237)='nonlop%fock_getghc              '; basic(237)=1
 
  names(250)='afterscfloop                    '
  names(251)='afterscfloop(wvl)               '
@@ -403,17 +367,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(255)='afterscfloop(elf)               '
  names(256)='afterscfloop(forstr)            '
  names(257)='afterscfloop(final)             '
-
- names(260)='fourdp%(other)                  '
- names(261)='fourdp%rhotwg%ch                '
- names(262)='fourdp%rhotwg%si                '
- names(263)='fourdp%ckxcldag                 '
- names(264)='fourdp%fftwfn%ch                '
- names(265)='fourdp%fftwfn%si                '
- names(266)='fourdp%rec%rho                  '
- names(267)='fourdp%rec%ek                   '
- names(268)='fourdp%newvtr                   '
- names(269)='fourdp%newrho                   '
 
  names(270)='rwwf%(other)                    '
  names(271)='rwwf%vtorho                     '
@@ -459,6 +412,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(331)='cchi0                           '
  names(332)='cchi0(rho_tw_g)                 '
  names(333)='cchi0(assembly)                 '
+<<<<<<< HEAD
  names(334)='cchi0(first_loop)               '
  names(335)='cchi0(second_loop)              '
  names(336)='cchi0(ik_bz)                    '
@@ -477,6 +431,22 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(349)='nkpt_summed                     ' 
  names(400)='cchi0(call_xmpi)                ' 
  
+=======
+
+ names(350)='getghc                          '
+ names(351)='getghc%cgwf                     '
+ names(352)='getghc%dfpt_cgwf                '
+ names(353)='getghc%mkresi                   '
+ names(354)='getghc%kss_ddiago               '
+ names(355)='getghc%lobpcgwf                 '
+ names(356)='getghc%prep_getghc              '
+ names(357)='getghc%other lobpcg             '
+ names(358)='getghc%update_mmat              '
+ names(359)='getghc(/=fourXX,nonlop,fock_XX) '; basic(359)=1
+ names(360)='getghc(fock_XX)                 '
+
+
+>>>>>>> trunk/develop
  names(401)='sigma                           '
  names(402)='sigma(Init1)                    '
  names(403)='setup_sigma                     '
@@ -577,6 +547,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(575)='prep_bandfft_tabs               '; basic(575)=1
 
+ names(578)='vtowfk(cprj_rotate)             '
  names(581)='prep_nonlop(alltoall)           '
  names(583)='vtowfk(pw_orthon)               '
  names(584)='xcopy%lobpcg                    '
@@ -772,6 +743,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(845)='fourwf%dfpt_accrho%dfpt_vtowfk  '
  names(846)='fourwf%mkrho2                   '
  names(847)='fourwf%dfpt_mkrho               '
+ names(850)='fourwf%fock_getghc              '
  names(854)='fourwf%tddft                    '
  names(855)='fourwf%outkss                   '
  names(856)='fourwf%prep_four                '
@@ -780,6 +752,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(862)='fourwf%suskmm !0 part 2         '
  names(871)='fourwf%suskmm !3 part 1         '
  names(872)='fourwf%suskmm !3 part 2         '
+ names(880)='fourwf%cgwf_cprj                '
 
  names(901)='newvtr(before selection)        '
  names(902)='newvtr(bef. prcref_PMA)         '
@@ -794,13 +767,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(914)='forstr(stress)                  '
 
  names(920)='forstrnps                       '
- names(921)='forstrnps(bef.loop spin)        '
+ names(921)='forstrnps(bef.loop k spin)      '
  names(922)='forstrnps(bef.loop band)        '
  names(923)='forstrnps(copy)                 '
- names(924)='forstrnps(kinetic contr)        '
- names(925)='forstrnps(aft.loop kptsp        '
- names(926)='forstrnps(nonlop+prep_ba        '
- names(927)='forstrnps(bef.loop kpt)         '
+ names(924)='forstrnps(nonlop+prep_ba        '
+ names(925)='forstrnps(kinetic contr)        '
+ names(926)='forstrnps(fock_getghc)          '
+ names(927)='forstrnps(aft.loop band block)  '
+ names(928)='forstrnps(aft.loop k spin)      '
 
  names(933)='outkss                          '
  names(934)='outkss(Gsort+hd)                '
@@ -866,8 +840,25 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1008)='initberry(pwind)                '
  names(1009)='initberry(MPI stuff)            '
 
- names(1021)='listkk                          '; basic(1021) = 1
 
+ names(1021)='get_dtsets_pspheads(pspheads)   ';
+ names(1022)='get_dtsets_pspheads(indefo)     ';
+ names(1023)='get_dtsets_pspheads(invars2m)   ';
+ 
+ names(1091)='listkk                          '; basic(1091) = 1
+
+ names(1100)='nonlop_ylm                      '
+ names(1101)='nlo_ylm%opernla                 '
+ names(1102)='nlo_ylm%opernla_mv              '
+ names(1103)='nlo_ylm%opernlb                 '
+ names(1104)='nlo_ylm%opernlb_mv              '
+ names(1105)='nlo_ylm%opernlc                 '
+ names(1106)='nlo_ylm%opernld                 '
+ names(1107)='nlo_ylm%opernld(l)              '
+ names(1108)='nlo_ylm%opernld(l+im)           '
+ names(1119)='nlo_ylm(other)                  '
+
+<<<<<<< HEAD
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
  names(1502)='HF_updatecgocc                  '; basic(1502)=1
@@ -883,6 +874,179 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1511)='HF_getghc-calc_ghc              ';! basic(1511)=1  ! 100 % nested inside 1504
  !===STOP===containers used for testing purposes
  names(1515)='HF_getghc_main                  ';  basic(1515)=1  ! ulterior slot for test
+=======
+ names(1150)='outscfcv                        '
+ names(1151)='outscfcv(preparation)           '
+ names(1152)='outscfcv(mlwfovlp)              '
+ names(1153)='outscfcv([PAW]prtden)           '
+ names(1154)='outscfcv(output GSR)            '
+ names(1155)='outscfcv(output VCLMB)          '
+ names(1156)='outscfcv(prtelf)                '
+ names(1157)='outscfcv(prt grden)             '
+ names(1158)='outscfcv(prt kden)              '
+ names(1159)='outscfcv(prt lden)              '
+ names(1160)='outscfcv(prtpot)                '
+ names(1161)='outscfcv(prtgeo,cif)            '
+ names(1162)='outscfcv(prtstm)                '
+ names(1163)='outscfcv(prt 1dm)               '
+ names(1164)='outscfcv(prtvha,vpsp,... vxc)   '
+ names(1165)='outscfcv(prtdos)                '
+ names(1166)='outscfcv(calcdenmagsph)         '
+ names(1167)='outscfcv(mag_penalty_e)         '
+ names(1168)='outscfcv(pawprt)                '
+ names(1169)='outscfcv(optics)                '
+ names(1170)='outscfcv(pawmkaewf)             '
+ names(1171)='outscfcv(plowf)                 '
+ names(1172)='outscfcv(gw)                    '
+ names(1173)='outscfcv(poslifetime)           '
+ names(1174)='outscfcv(posdoppler)            '
+ names(1175)='outscfcv(outwant)               '
+ names(1176)='outscfcv(calc_efg)              '
+ names(1177)='outscfcv(calc_fc)               '
+ names(1178)='outscfcv(prt_ebands)            '
+ names(1179)='outscfcv(prt_surf)              '
+ names(1180)='outscfcv(prtnest)               '
+ names(1181)='outscfcv(prtdipole)             '
+ names(1182)='outscfcv(prtblztrp)             '
+ names(1183)='outscfcv(ebands_interpol_kpath) '
+
+!names(1190)='outscfcv(gsr1) '
+!names(1191)='outscfcv(gsr2) '
+!names(1192)='outscfcv(gsr3) '
+!names(1193)='outscfcv(gsr4) '
+!names(1194)='outscfcv(gsr5) '
+!names(1195)='outscfcv(gsr6) '
+
+ names(1200)='gstateimg                       '
+ names(1203)='gstateimg(init)                 '
+ names(1204)='gstateimg(bef. loop img)        '
+ names(1205)='gstateimg(bef. gstate)          '
+ names(1206)='gstateimg(aft. gstate)          '
+ names(1208)='gstateimg(leave_test)           '
+ names(1209)='gstateimg(aft. loop img)        '
+ names(1210)='gstateimg(finalize)             '
+
+ names(1211)='gstate(1)                       '
+ names(1212)='gstate(pspini)                  '
+ names(1213)='gstate(2)                       '
+ names(1214)='gstate(init rhor rhog)          '
+ names(1215)='gstate(init history)            '
+ names(1225)='gstate(...scfcv)                '
+ names(1226)='gstate(prt gap)                 '
+ names(1227)='gstate(prtwf)                   '
+ names(1228)='gstate(clnup1)                  '
+ names(1229)='gstate(prtelfield)              '
+ names(1230)='gstate(DDB)                     '
+ names(1231)='gstate(clnup2)                  '
+
+ names(1232)='gstate                          '
+
+ names(1260)='fourdp%(other)                  '
+ names(1261)='fourdp%rhotwg%ch                '
+ names(1262)='fourdp%rhotwg%si                '
+ names(1263)='fourdp%ckxcldag                 '
+ names(1264)='fourdp%fftwfn%ch                '
+ names(1265)='fourdp%fftwfn%si                '
+ names(1266)='fourdp%rec%rho                  '
+ names(1267)='fourdp%rec%ek                   '
+ names(1268)='fourdp%newvtr                   '
+ names(1269)='fourdp%newrho                   '
+ names(1270)='fourdp%fock_getghc              '
+
+ names(1280)='read_rho                        '
+ names(1281)='interpolate_denpot              '
+
+ names(1290)='getcprj(all)                    '
+ names(1291)='getcprj%opernla                 '; basic(1291)=1
+ names(1292)='getcprj%opernla_mv              '; basic(1292)=1
+ names(1293)='getcprj(cgwf_cprj)              '
+ names(1294)='getcprj(ctocprj)                '
+ names(1295)='getcprj(vtowfk)                 '
+ names(1299)='getcprj(other)                  '
+
+ names(1300)='cgwf_cprj                       '
+ names(1301)='cgwf_cprj%other                 '
+ names(1302)='pawcprj(zaxpby)                 '
+ names(1303)='pawcprj(projbd)                 '; basic(1303)=1
+ names(1304)='subham(dotprod_g)               '; basic(1304)=1
+ names(1305)='cgwf_cprj%npw_work              '; basic(1305)=1
+
+ names(1360)='getcsc(all)                     '
+ names(1361)='getcsc%dotprod_g                '; basic(1361)=1
+ names(1362)='getcsc%other                    '
+ names(1363)='getcsc(cgwf_cprj)               '
+ names(1364)='getcsc(subovl)                  '
+
+ names(1370)='getchc                          '
+ names(1371)='getchc%local                    '; basic(1371)=1
+ names(1372)='getchc%kin                      '; basic(1372)=1
+ names(1375)='getchc%other                    '
+
+ names(1440)='scfcv_core                      '
+ names(1441)='scfcv_core(before nstep loop)   '
+ names(1442)='scfcv_core(ini moved atm inside)'
+ names(1443)='scfcv_core(ini fock)            '
+ names(1444)='scfcv_core(fock wfmixing)       '
+ names(1445)='scfcv_core(fock_updatecwaveocc) '
+ names(1446)='scfcv_core(fock2ACE)            '
+ names(1447)='scfcv_core(setup_positron)      '
+ names(1448)='scfcv_core(setvtr)              '
+ names(1449)='scfcv_core(loop, PAW)           '
+ names(1450)='scfcv_core-read                 '
+ names(1451)='scfcv_core(vtorho(f))           '
+ names(1452)='scfcv_core(etotfor)             '
+ names(1453)='scfcv-scprqt                    '; basic(1453)=1
+ names(1454)='scfcv_core(qui loop)            '
+ names(1455)='scfcv_core(mix den - newrho)    '
+ names(1456)='scfcv_core(Berry)               '
+ names(1457)='scfcv_core(rhotov)              '
+ names(1458)='scfcv_core(mix pot)             '
+ names(1459)='scfcv_core(just after scf)      '
+ names(1460)='scfcv_core(afterscfloop)        '
+ names(1461)='scfcv_core(outscfcv)            '
+ names(1462)='scfcv_core(free)                '
+
+ names(1501)='fock_init                       '; basic(1501)=1
+ names(1502)='fock_updatecwaveocc             '; basic(1502)=1
+ names(1503)='fock_updatecwaveocc(MPI)        '; ! 100 % nested inside 1502
+
+ names(1504)='fock_getghc                     '; !1504 = 1505 + 1506 + 1507 
+ names(1505)='fock_getghc(init)               '; ! 100 % nested inside 1504
+ names(1506)='fock_getghc-kmu_loop            '; ! 100 % nested inside 1504, 1506 = 1521+ ... 1528
+ names(1507)='fock_getghc(post-k)             '; ! 100 % nested inside 1504
+ names(1512)='fock_getghc(fourwf)             ' 
+ names(1513)='fock_getghc(fourdp)             ' 
+ names(1514)='fock_getghc(nonlop)             ' 
+ names(1515)='fock_getghc(/=fourXX,nonlop)    ';  basic(1515)=1  ! ulterior slot for test
+
+!Partitioning of the loop on k points inside fock_getghc (1506)
+ names(1521)='fock_getghc(init k loop)        '   
+ names(1522)='fock_getghc(j loop fourwf)      '   
+ names(1523)='fock_getghc(calc_rhor_munu)     '  
+ names(1524)='fock_getghc(calc_rhog_munu)     '  
+ names(1525)='fock_getghc(calc_vloc)          '  
+ names(1526)='fock_getghc(calc_dij_fock_hat)  '
+ names(1527)='fock_getghc(calc_vlocpsi)       '
+ names(1528)='fock_getghc(clean k loop)       '
+
+!Partitioning in small blocs without fourXX and nonlop. One has to add 1521, 1523, 1527, 1528
+ names(1541)='fock_getghc(init wo fourwf)     '; !related to 1505
+ names(1542)='fock_getghc(j loop wo fourwf)   '; !related to 1522  
+ names(1544)='fock_getghc(calc_rhog_munu wo fo'; !related to 1524  
+ names(1545)='fock_getghc(calc_vloc wo fourXX)'; !related to 1525  
+ names(1546)='fock_getghc(calc_dij_fock_hat wo'; !related to 1526
+ names(1547)='fock_getghc(post-k wo fourXX+MPI'; !related to 1507
+ names(1548)='fock_getghc(post-k xmpi_sum)    '; !related to 1507
+
+
+ names(1560)='fock2ACE                        '
+ names(1561)='fock2ACE(init)                  '; basic(1561)=1
+ names(1562)='fock2ACE(main/=fock_getghc)     '; basic(1562)=1
+ names(1563)='fock2ACE(fock_getghc)           '
+ names(1565)='fock2ACE(finalize)              '; basic(1565)=1
+
+ names(1580)='fock_ACE_getghc                 '; basic(1580)=1
+>>>>>>> trunk/develop
 
  ! Chebfi
  names(1600) = 'chebfi                        '; basic(1601) = 1
@@ -909,7 +1073,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1634) = "rmm_diis:band_opt             "; basic(1634) = 1
 
  ! lobpcg2
+<<<<<<< HEAD
  names(1650) = 'lobpcgwf2                     '; basic(1650) = 1
+=======
+ names(1650) = 'lobpcgwf2                     ';
+>>>>>>> trunk/develop
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
  names(1653) = 'lobpcg_run                     '
@@ -1021,34 +1189,66 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1750)='gtdyn9'; basic(1750) = 1
  !names(1751)='dfpt_phfrq'; basic(1751) = 1
 
- names(1780)='cgtk_rotate'; basic(1780) = 1
+ ! chebfi2
+ names(1750) = 'chebfiwf2                     '; basic(1750) = 1
+ names(1751) = 'chebfi2_init                  '
+ names(1752) = 'chebfi2_free                  '
+ names(1753) = 'chebfi2_run                   '
+ names(1754) = 'chebfi2_getAX_BX              '
+ names(1755) = 'chebfi2_invovl                '
+ names(1756) = 'chebfi2_residu                '
+ names(1757) = 'chebfi2_RayleighRitz          '
+ names(1758) = 'chebfi2_pcond                 '
+ names(1759) = 'chebfi2_RR_q                  '
+ names(1760) = 'chebfi2_next_p                '
+ names(1761) = 'chebfi2_swap                  '
+ names(1762) = 'chebfi2_amp_f                 '
+ names(1763) = 'chebfi2_alltoall              '
+
+ names(1780)='ctgk_rotate'; basic(1780) = 1
+
 
  ! DVDB object
- names(1800)='dvdb_new'; basic(1800) = 1
- names(1801)='dvdb_qcache_read'; basic(1801) = 1
- names(1802)='dvdb_readsym_qbz'; basic(1802) = 1
- names(1803)='dvdb_rotate_fqg'; basic(1803) = 1
- names(1804)='v1phq_rotate'; basic(1804) = 1
- names(1805)='dvdb_readsym_allv1'; basic(1805) = 1
- names(1806)='dvdb_collect_v1_3natom'; basic(1806) = 1
- names(1807)='dvdb_qcache_update'; basic(1807) = 1
- names(1808)='dvdb_ftqcache_build'; basic(1808) = 1
- names(1809)='dvdb_get_ftqbz'; basic(1809) = 1
+ names(1800)='dvdb_new                        '; basic(1800) = 1
+ names(1801)='dvdb_qcache_read                '; basic(1801) = 1
+ names(1802)='dvdb_readsym_qbz                '; basic(1802) = 1
+ names(1803)='dvdb_rotate_fqg                 '; basic(1803) = 1
+ names(1804)='v1phq_rotate                    '; basic(1804) = 1
+ names(1805)='dvdb_readsym_allv1              '; basic(1805) = 1
+ names(1806)='dvdb_collect_v1_3natom          '; basic(1806) = 1
+ names(1807)='dvdb_qcache_update              '; basic(1807) = 1
+ names(1808)='dvdb_ftqcache_build             '; basic(1808) = 1
+ names(1809)='dvdb_get_ftqbz                  '; basic(1809) = 1
 
  ! SIGEPH
- !names(1900)='sigph_pre_qloop'; basic(1900) = 1
- !names(1901)='sigph_qloop_preamble'; basic(1901) = 1
- !names(1902)='sigph_qloop_cg_and_h1'; basic(1902) = 1
- names(1903)='sigph_bsum'; basic(1903) = 1
- names(1904)='sigph_bsum_1'; basic(1904) = 1
- names(1905)='sigph_bsum_2'; basic(1905) = 1
- names(1906)='sigph_bsum_3'; basic(1906) = 1
- names(1907)='sigph_bsum_4'; basic(1907) = 1
+ !names(1900)='sigph_pre_qloop                '; basic(1900) = 1
+ !names(1901)='sigph_qloop_preamble           '; basic(1901) = 1
+ !names(1902)='sigph_qloop_cg_and_h1          '; basic(1902) = 1
+ names(1903)='sigph_bsum                      '; basic(1903) = 1
+ names(1904)='sigph_bsum_1                    '; basic(1904) = 1
+ names(1905)='sigph_bsum_2                    '; basic(1905) = 1
+ names(1906)='sigph_bsum_3                    '; basic(1906) = 1
+ names(1907)='sigph_bsum_4                    '; basic(1907) = 1
+ names(1908)='sigph_prep_stern                '; basic(1908) = 1
+ names(1909)='sigph_stern                     '; basic(1909) = 1
+ names(1910)='sigph_post_stern                '; basic(1910) = 1
 
- !names(1904)='rf_transgrid_and_pack'; basic(1904) = 1
- !names(1905)='splfit'; basic(1905) = 1
- !names(1906)='mkkin'; basic(1906) = 1
+ ! GWR code
+ names(1919)='ugb_from_diago                  '; basic(1919) = 1
+ names(1920)='gwr_init                        '; basic(1920) = 1
+ names(1921)='gwr_read_ugb_from_wfk           '; basic(1921) = 1
+ names(1922)='gwr_build_green                 '; basic(1922) = 1
+ names(1923)='gwr_build_tchi                  '; basic(1923) = 1
+ names(1924)='gwr_build_wc                    '; basic(1924) = 1
+ names(1925)='gwr_build_sigmac                '; basic(1925) = 1
+ names(1926)='gwr_build_sigxme                '; basic(1926) = 1
+ names(1927)='gwr_build_head_wings            '; basic(1927) = 1
+ names(1928)='gwr_rpa_energy                  '; basic(1928) = 1
+ !names(1929)='gwr_gk_to_scbox                '; basic(1929) = 1
+ !names(1930)='gwr_wcq_to_scbox               '; basic(1930) = 1
+ !names(1931)='gsph2box                       '; basic(1931) = 1
 
+ ! TIMER_SIZE is 1999. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================
@@ -1056,7 +1256,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  spaceworld= mpi_enreg%comm_world
  nproc     = mpi_enreg%nproc
  me        = mpi_enreg%me
+ nthreads  = 1
  nthreads  = xomp_get_num_threads(open_parallel=.true.)
+ if(nthreads<1) nthreads=1
 
  call timab(49,2,tsec)
 
@@ -1151,7 +1353,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    select case(ii)
 !    Gather the different parts of nonlop  (SHOULD BE REEXAMINED !)
    case(1)
-     tslots(:5)=(/75, 221,223,229,233/)
+     tslots(:6)=(/75, 221,223,229,233,237/)
    case(2)
      tslots(:4)=(/76, 222,225,227/)
    case(3)
@@ -1169,7 +1371,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(8)
      tslots(:4)=(/803, 842,843,846/)
    case(9)
-     tslots(:10)=(/804, 845,847,848,850,854,858,859,861,862/)
+     tslots(:11)=(/804, 845,847,848,850,854,858,859,861,862,880/)
    case(10)
      tslots(:6)=(/805, 849,851,857,871,872/)
    case(11)
@@ -1180,10 +1382,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:3)=(/539, 537,538/)
    case(14)
 !      Gather the different parts of fourdp
-     tslots(:11)=(/9, 260,261,262,263,264,265,266,267,268,269/)
+     tslots(:12)=(/9, 1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1270/)
    case(15)
 !      Gather the different parts of getghc
-     tslots(:9)=(/200, 201,202,203,204,205,206,207,208/)
+     tslots(:9)=(/350,351,352,353,354,355,356,357,358/)
    case(16)
 !      Gather the different parts of projbd
      tslots(:3)=(/210, 211,212/)
@@ -1192,18 +1394,24 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:24)=&
 &     (/14, 270,271,272,273,274,275,276,277,278,279,280,281,282,283,284,285,286,287,288,289,290,291,292/)
    case(18)
-!      Estimate the complement of getghc (non fourwf, non nonlop)
-     tslots(:4)=(/-98, 200,-841,-221/)
+!      Estimate the complement of getghc (non fourwf, non fourdp, non nonlop, non fock_XX)
+     tslots(:8)=(/-359, 350,-221,-235,-236,-841,-360,-1580/)
    case(19)
 !      Estimate the complement of cgwf (non getghc,projbd)
-     tslots(:5)=(/-40, 22,530,-201,-211/)
+     tslots(:6)=(/-40, 22,530,1300,-351,-211/)
    case(20)
 !      Estimate the complement of dfpt_cgwf (non getghc,projbd,nonlop,fourwf)
-     tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)
+!    tslots(:8)=(/-140, 122,-202,-197,-212,-227,-228,-844/)  ! 197 includes some nonlop and fourwf, so there is double counting ...
+     tslots(:7)=(/-140, 122,-352,-212,-227,-228,-844/)
    case(21)
 !      Estimate different complements in vtowfk
+<<<<<<< HEAD
 !      vtowfk(ssdiag) (= vtowfk(loop)    - cgwf )
      tslots(:5)=(/-588, 39,-22,-530, -1600/)
+=======
+!      vtowfk(ssdiag) (= vtowfk(loop)  -cgwf-lobpcgwf_old-cgwf_cprj-lobpcgwf2-chebfi - getcprj(vtowfk) - getcsc(subovl))
+     tslots(:9)=(/-588, 39,-22,-530,-1300,-1600,-1650,-1295,-1364/)
+>>>>>>> trunk/develop
    case(22)
 !      vtowfk(contrib) (= vtowfk (afterloop) - nonlop%vtowfk - fourwf%vtowfk )
      tslots(:4)=(/589, 30,-222,-842/)
@@ -1213,7 +1421,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(24)
 !      Estimate different complements in dfpt_vtowfk
 !      dfpt_vtowfk(contrib) (= vtowfk3(loop) - cgwf - fourwf%vtowfk3 - rwwf%vtowfk3 - corrmetalwf1)
-     tslots(:6)=(/-108, 139,-122,-845,-288,-214/)
+     tslots(:6)=(/-113, 139,-122,-845,-288,-214/)
    case(25)
 !      vtowfk (1) = dfpt_vtowfk - vtowfk3(loop) - vtowfk3 (3)
      tslots(:4)=(/ 131, 128,-139,-130/)
@@ -1265,8 +1473,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      tslots(:7)=(/-788,781,782,783,784,785,786/)
    case(40)
 !      More complements in vtowfk
-!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon
-     tslots(:7)=(/-590,39,-22,-530,-585,-583, -1600/)
+!      vtowfk (2) = vtowfk (loop) - cgwf - lobpcg - subdiago - pw_orthon - cprj_rotate - getcprj(vtowfk)
+     tslots(:10)=(/-590,39,-22,-1300,-1600,-530,-585,-583,-578,-1295/)
    case(41)
 !      vtowfk (3) = vtowfk (afterloop) - nonlop%vtowfk - prep_nonlop%vtowfk - fourwf%vtowfk - prep_fourwf%vtowfk - vtowfk(nonlocalpart)
      tslots(:7)=(/-591,30,-222,-572,-842,-537,-586/)
@@ -1276,6 +1484,27 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(44)
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
+   case(45)
+!      Estimate the complement of nonlop_ylm
+     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
+   case(46)
+!      Sum the calls of getcprj
+     tslots(:4)=(/1290,1293,1294,1295/)
+   case(47)
+!      Estimate the complement of getcprj
+     tslots(:5)=(/1299,1290,-1293,-1294,-1295/)
+   case(48)
+!      Estimate the complement of cgwf_cprj
+     tslots(:12)=(/1301,1300,-1302,-1303,-1304,-1305,-1293,-1363,-1370,-351,-211,-880/)
+   case(49)
+!      Sum calls of getcsc
+     tslots(:3)=(/1360,1363,1364/)
+   case(50)
+!      Estimate the complement of getcsc
+     tslots(:4)=(/1362,1360,-1363,-1364/)
+   case(51)
+!      Estimate the complement of getchc
+     tslots(:5)=(/1375,1370,-235,-1371,-1372/)
 
    case default
      cycle
@@ -1404,13 +1633,17 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    do ilist=1,nlist
      isort = list(ilist)
 
-     if ( (times(1,isort)*cpunm  > percent_limit .and. &
-           times(2,isort)*wallnm > percent_limit) .and. ncount(isort) /= 0) then ! Timing analysis
+     if ( ((times(1,isort)*cpunm  > percent_limit .and.       &
+            times(2,isort)*wallnm > percent_limit      ).or.  &
+!          Also print the name of routines with anomalous negative timing. This is to help debugging.
+            (times(1,isort)*cpunm  < -tol3 .or.                &
+             times(2,isort)*wallnm < -tol3              ))     &
+           .and. ncount(isort) /= 0) then ! Timing analysis
 
+       times(2,isort)=times(2,isort)+tol14
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
          times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
-
      else
        nothers=nothers+1
        other_cpu=other_cpu+times(1,isort)
@@ -1421,8 +1654,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      subwal=subwal+times(2,isort)
    end do
 
-   other_wal = other_wal + tol14
    write(entry_name,"(a,i0,a)")"others (",nothers,")"
+   other_wal = other_wal + tol14
    write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0, &
      other_cpu/other_wal,other_cpu/other_wal/nthreads
    write(ount,"(a)")"-<END_TIMER>"
@@ -1492,6 +1725,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      isort = list(ilist)
      if( (times(1,isort)*cpunm > percent_limit .and. times(2,isort)*wallnm> percent_limit) .and. ncount(isort)/=0 )then
 
+       times(2,isort)=times(2,isort)+tol14
        write(ount,format01041)names(isort),&
          times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
          times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
@@ -1523,31 +1757,39 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        select case(ipart)
 
        case(1)
-         list(:11)=(/1,41,42,43,44,45,640,46,49,50,TIMER_SIZE/)      ; msg='abinit '
+         list(:10)=(/1,101,102,103,104,640,105,49,50,TIMER_SIZE/)      ; msg='abinit '
        case(2)
          list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)  ; msg='driver '
        case(3)
+<<<<<<< HEAD
          list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; msg='gstateimg+gstate '
+=======
+         list(:32)=(/ (ii,ii=1200,1231,1) /)                         ; msg='gstateimg+gstate '
+>>>>>>> trunk/develop
        case(4)
-         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); msg='scfcv_core '
+         list(:24)=(/ (ii,ii=1440,1462,1),TIMER_SIZE/)               ; msg='scfcv_core '
        case(5)
          list(:7)=(/940,941,942,943,944,945,TIMER_SIZE/)             ; msg= 'rhotov '
        case(6)
          list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
          msg= 'vtorho '
        case(7)
-         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,TIMER_SIZE/) ; msg='vtowfk '
+         list(:18)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,578,1295,1300,1600,TIMER_SIZE/) ; msg='vtowfk '
        case(8)
          if(abs(timopt)==3)then
-           list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
+           list(:11)=(/530,354,355,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
          else if(abs(timopt)==4)then
            list(:8)=(/530,520,521,522,523,524,525,526/)               ; msg='lobpcgwf (abs(timopt)==4)'
 !            else
-!            list(:3)=(/530,204,205/)
+!            list(:3)=(/530,354,355/)
 !            msg='lobpcgwf (light analysis: for a deeper one, use abs(timopt)=3 or 4)'
          end if
        case(9)
+<<<<<<< HEAD
          list(:4)=(/22,201,40,211/)                            ; msg='cgwf '
+=======
+         list(:4)=(/22,351,40,211/)                                  ; msg='cgwf '
+>>>>>>> trunk/develop
        case(10)
          list(:8)=(/132,133,134,135,136,137,138,141/)          ; msg='respfn '
        case(11)
@@ -1557,13 +1799,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(13)
          list(:9)=(/121,118,128,126,287,166,129,127,556/)      ; msg='dfpt_vtorho '
        case(14)
+<<<<<<< HEAD
          list(:9)=(/128,131,122,845,288,214,108,130,565/)      ; msg='dfpt_vtowfk '
        case(15)
          list(:8)=(/122,140,202,197,212,227,228,844/)          ; msg='dfpt_cgwf '
        case(16)
          list(:4)=(/200,841,221,98/)                           ; msg='getghc '
+=======
+         list(:9)=(/128,131,122,845,288,214,113,130,565/)            ; msg='dfpt_vtowfk '
+       case(15)
+         list(:8)=(/122,140,352,197,212,227,228,844/)                ; msg='dfpt_cgwf '
+       case(16)
+         list(:8)=(/350,841,221,359,235,236,360,1580/)              ; msg='getghc '
+>>>>>>> trunk/develop
        case(17)
-         list(:20)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858/)
+         list(:21)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858,880/)
          msg='fourwf (upwards partitioning)'
        case(18)
          list(:5)=(/933,934,936,937,938/)                      ; msg='outkss '
@@ -1607,13 +1857,17 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(37)
          list(:2)=(/94,269/)                                   ; msg='newrho '
        case(38)
+<<<<<<< HEAD
          list(:11)=(/9,260,261,262,263,264,265,266,267,268,269/) ; msg=' fourdp (upwards partitioning)'
+=======
+         list(:12)=(/9,1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1270/) ; msg='fourdp (upwards partitioning)'
+>>>>>>> trunk/develop
        case(39)
          list(:8)=(/250,251,252,253,254,255,256,257/)          ; msg='afterscfloop '
        case(40)
          list(:5)=(/910,911,912,913,914/)                      ; msg='forstr '
        case(41)
-         list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; msg='forstrnps '
+         list(:9)=(/920,921,922,923,924,925,926,927,928/)            ; msg='forstrnps '
        case(42)
          list(:4)=(/670,671,672,673/)                          ; msg='exc_build_ham '
        case(43)
@@ -1629,13 +1883,31 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/)
          msg='initberry '
        case(50)
+<<<<<<< HEAD
          list(:3)=(/1501,1502,1515/)                           ; msg='hartreefock '
+=======
+         list(:5)=(/1560,1561,1562,1563,1565/)                       ; msg='fock2ACE '
+       case(51)
+         list(:5)=(/1504,1515,850,1270,237/)                         ; msg='fock_getghc -original'
+       case(52)
+         list(:5)=(/1504,1515,1512,1513,1514/)                       ; msg='fock_getghc -tight'
+       case(53)
+         list(:4)=(/1504,1505,1506,1507/)                            ; msg='fock_getghc big blocs'
+       case(54)
+         list(:11)=(/1504,1505,(ii,ii=1521,1528,1),1507/)            ; msg='fock_getghc small blocs'
+       case(55)
+         list(:15)=(/1504,1512,1513,1514,1541,1521,1542,1523,1544,1545,1546,1527,1528,1547,1548/) 
+             msg='fock_getghc small blocs + fourXX,  nonlop, xmpi_sum '
+>>>>>>> trunk/develop
        case(60)
-         list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/)
-         msg = 'chebfi'
+         list(:13)=(/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
        case(61)
+<<<<<<< HEAD
          list(:3) = (/1620,1621,1622/)
          msg = 'mkinvovl'
+=======
+         list(:3)=(/1620,1621,1622/)                                 ; msg = 'mkinvovl'
+>>>>>>> trunk/develop
        case(70)
          list(:5)=(/1701,1702,1703,1721,1722/)
          msg='gwls GW code'
@@ -1658,11 +1930,26 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
          msg='low-level xgBlock type '
        case(77)
-         list(:5)=(/1690,1691,1692,1693,1694/)
-         msg='low-level xgScalapack type '
+         list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
+<<<<<<< HEAD
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
          msg='low-level xgTransposer type '
+=======
+         list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
+       case(79)
+         list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,351,211,880,1301/) ; msg='cgwf_cprj'
+       case(80)
+         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
+       case(81)
+         list(:5)=(/1290,1293,1294,1295,1299/) ; msg='getcprj'
+       case(82)
+         list(:4)=(/1360,1363,1364,1362/)      ; msg='getcsc'
+       case(83)
+         list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
+       case(84)
+         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
+>>>>>>> trunk/develop
        case default
          cycle ! This allows to disable temporarily some partitionings
 
@@ -1712,8 +1999,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            end if
            if(ncount(isort)/=0)then
              ! Do not write a slot if the wall time ratio is below a threshold
-             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then
-               if ( times(2,isort) < 0.0001 ) times(2,isort) = -1.d0
+             ! However, also identifies when the wall time of a slot (here, a complement) is negative
+             if(times(2,isort)*wallnm>0.02d0 .or. ilist==1 .or. times(2,isort)*wallnm<-tol3)then
+               if((times(2,isort)*wallnm>0.02d0.or.ilist==1).and.times(2,isort) < 0.0001)times(2,isort)=-1.d0
+               times(2,isort)=times(2,isort)+tol14
                write(ount,format01040)names(isort),&
                  times(1,isort),times(1,isort)*cpunm,&
                  times(2,isort),times(2,isort)*wallnm,ncount(isort), &
@@ -1757,17 +2046,18 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      if(xmpi_paral==1)then
        write(ount, '(a,/,a)' )'-','-Synchronisation (=leave_test) and MPI calls '
        nlist=14
-       list(:14)=(/48,61,62,63,64,65,66,67,71,85,86,543,544,787/)
+       list(:nlist)=(/48,61,62,63,64,65,66,67,71,85,86,543,544,787/)
        subcpu=zero; subwal=zero
        if(ncount(list(1))/=0)then
          do ilist=1,nlist
            isort = list(ilist)
 !
            if (ncount(isort)/=0) then
+             times(2,isort)=times(2,isort)+tol14
              write(ount,format01040)names(isort),&
               times(1,isort),times(1,isort)*cpunm,&
               times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-              times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(times(2,isort)+tol14)/nthreads
+              times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
 
              if(ilist/=1)then
                subcpu=subcpu+times(1,isort)
@@ -1783,8 +2073,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if !ncount
      end if !xmpi_paral
 
+<<<<<<< HEAD
      nlist=42
      list(:42)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,334,335,336,337,338,339,340,341,342,343,344,345,346,347,348,349,400/)
+=======
+     nlist=27
+     list(:nlist)=(/47,49,51,801,72,73,74,77,78,79,97,82,87,88,436,437,438,439,443,444,804,805,331,332,333,1280,1281/)
+>>>>>>> trunk/develop
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
@@ -1793,14 +2088,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            write(ount, '(/,a)' ) ' Additional information'
            flag_write=0
          end if
+         times(2,isort)=times(2,isort)+tol14
          write(ount,format01040)names(isort),&
            times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-           times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
+           times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
        end if
      end do
 
      nlist=23
-     list(:23)=(/550,551,552,553,554,555,556,558,559,560,561,562,563,564,565,566,567,593,594,595,596,597,598/)
+     list(:nlist)=(/550,551,552,553,554,555,556,558,559,560,561,562,563,564,565,566,567,593,594,595,596,597,598/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
@@ -1809,9 +2105,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            write(ount, '(/,a)' ) ' Additional information about PAW segments'
            flag_write=0
          end if
+         times(2,isort)=times(2,isort)+tol14
          write(ount,format01040)names(isort),&
            times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-           times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
+           times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
        end if
      end do
 
@@ -1822,7 +2119,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
         '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
         '                                 (sec)                (msec)              (microsec)'
        nlist=8
-       list(:8)=(/802,803,9,75,76,77,210,11/)
+       list(:nlist)=(/802,803,9,75,76,77,210,11/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then

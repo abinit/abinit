@@ -38,8 +38,8 @@ getwfk3     1        # Obtain the KSS file from previous dataset
 awtr3       1        # Take advantage of time reversal symmetry to halve CPU time.
 nband3      30       # Bands to be used in the chi0 calculation
 ecuteps3    5.0      # Cut-off energy of the planewave set to represent the dielectric matrix
-inclvkb3    0        
-                    
+inclvkb3    0
+
 
 # Calculation of the screening and of the RPA correlation energy
 optdriver4  3        # Screening calculation
@@ -50,8 +50,8 @@ getwfk4     1        # Obtain the KSS file from previous dataset
 awtr4       1        # Take advantage of time reversal symmetry to halve CPU time.
 nband4      30       # Bands to be used in the chi0 calculation
 ecuteps4    5.0      # Cut-off energy of the planewave set to represent the dielectric matrix
-inclvkb4    0        
-                     
+inclvkb4    0
+
 gwcomp4     1        # Extrapolar trick to accelerate convergence vs. empty bands
 gwencomp4   1.00
 
@@ -64,8 +64,8 @@ getwfk5     1        # Obtain the KSS file from previous dataset
 awtr5       1        # Take advantage of time reversal symmetry to halve CPU time.
 nband5      30       # Bands to be used in the chi0 calculation
 ecuteps5    5.0      # Cut-off energy of the planewave set to represent the dielectric matrix
-inclvkb5    0        
-                    
+inclvkb5    0
+
 gwcomp5     1        # Extrapolar trick to accelerate convergence vs. empty bands
 gwencomp5   1.00
 
@@ -126,14 +126,14 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t19.abo, tolnlines = 18, tolabs = 1.1e-3, tolrel = 3.0e-3, fld_options =  -medium
 #%% [paral_info]
-#%% max_nprocs = 3
+#%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = F. Bruneval
-#%% keywords = GW, FAILS_IFMPI
-#%% description = 
+#%% keywords = GW
+#%% description =
 #%%   RPA correlation energy calculation in Si:
 #%%   using exact or numerical integration over the coupling constant, using extrapolar trick or not,
 #%%   using the full or long-range only Coulomb interaction

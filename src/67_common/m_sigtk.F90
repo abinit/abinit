@@ -8,12 +8,10 @@
 !!      - Define list of k-points and bands in sel-energy matrix elements from input variables.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -44,7 +42,7 @@ module m_sigtk
  use defs_datatypes, only : ebands_t, pseudopotential_type
  use defs_wvltypes,  only : wvl_internal_type
  use m_pawtab,       only : pawtab_type
- use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt
+ use m_kpts,         only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
 
  implicit none
 
@@ -55,6 +53,20 @@ module m_sigtk
  public :: sigtk_kcalc_from_gaps
  public :: sigtk_kcalc_from_erange
  public :: sigtk_kpts_in_erange
+ public :: sigtk_sigma_tables
+!!***
+
+
+ ! Tables for degenerated KS states.
+ type, public :: bids_t
+   integer, allocatable :: vals(:)
+ end type bids_t
+
+ type, public :: degtab_t
+   type(bids_t), allocatable :: bids(:)
+ end type degtab_t
+
+ public :: degtab_array_free   ! Free array of degtab_t objects.
 !!***
 
 contains  !=====================================================
@@ -76,14 +88,6 @@ contains  !=====================================================
 !!  kcalc(3, nkcalc): List of k-points where the self-energy is computed.
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -159,14 +163,6 @@ end subroutine sigtk_kcalc_from_nkptgw
 !!  kcalc(3, nkcalc): List of k-points where the self-energy is computed.
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -261,14 +257,6 @@ end subroutine sigtk_kcalc_from_qprange
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
@@ -360,14 +348,6 @@ end subroutine sigtk_kcalc_from_gaps
 !!  bstart_ks(nkcalc, nsppol): Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
 !!  nbcalc_ks(nkcalc, nsppol): Number of bands included in self-energy matrix elements for each k-point in kcalc.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks, comm)
@@ -389,7 +369,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
  integer,parameter :: master = 0
  integer :: spin, ik, band, ii, ic, nsppol, tmp_nkpt, timrev, sigma_nkbz, my_rank
  logical :: found
- real(dp) :: cmin, vmax, ee, dksqmax
+ real(dp) :: cmin, vmax, ee
  logical :: assume_gap
  character(len=500) :: msg
  type(krank_t) :: krank
@@ -431,16 +411,15 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
     ABI_MALLOC(indkk, (6, tmp_nkpt))
 
     krank = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
-    call krank%get_mapping(tmp_nkpt, tmp_kcalc, dksqmax, cryst%gmet, indkk, &
-                           cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
-    call krank%free()
 
-    if (dksqmax > tol12) then
-      write(msg, '(a,es16.6,2a)' )&
-        "At least one of the k-points could not be generated from a symmetrical one in the WFK. dksqmax: ",dksqmax, ch10,&
+    if (kpts_map("symrec", timrev, cryst, krank, tmp_nkpt, tmp_kcalc, indkk) /= 0) then
+      write(msg, '(3a)' )&
+        "At least one of the k-points could not be generated from a symmetrical one in the WFK.",ch10,&
         'Action: check your WFK file and the value of sigma_nkpt, sigma_shiftk in the input file.'
       ABI_ERROR(msg)
     end if
+
+    call krank%free()
 
     ABI_MALLOC(sigmak2ebands, (tmp_nkpt))
     sigmak2ebands = indkk(1, :)
@@ -473,6 +452,7 @@ subroutine sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, nkcalc, kcalc, bs
    do ii=1,tmp_nkpt
      ! Index of k-point in ebands.
      ik = sigmak2ebands(ii)
+     ! Will use this initial values to understand if k-point is in energy window.
      ib_work(1, ii, spin) = huge(1)
      ib_work(2, ii, spin) = -huge(1)
      do band=1,ebands%nband(ik + (spin-1) * ebands%nkpt)
@@ -572,14 +552,6 @@ end subroutine sigtk_kcalc_from_erange
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  prefix=Prefix for output file.
 !!  comm: MPI communicator.
-!!
-!! PARENTS
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!      ebands_free,ebands_print,ebands_update_occ,fine_gaps%free
-!!      fine_gaps%print,fine_hdr%free,gaps%free,gaps%print,hdr_init_lowlvl
-!!      wrtout
 !!
 !! SOURCE
 
@@ -699,14 +671,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
  codvsn = ABINIT_VERSION
- ! CP modified
-! call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
-!   dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
-!   dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
-!   dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &
-!   dtset%amu_orig(:, image1), dtset%icoulomb, &
-!   dtset%kptopt, dtset%nelect, dtset%cellcharge(1), fine_kptrlatt, fine_kptrlatt, &
-!   dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
  call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
@@ -714,7 +678,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    dtset%amu_orig(:, image1), dtset%icoulomb, &
    dtset%kptopt, dtset%nelect, dtset%ne_qFD, dtset%nh_qFD, dtset%ivalence, dtset%cellcharge(1), &
    fine_kptrlatt, fine_kptrlatt, dtset%sigma_nshiftk, dtset%sigma_nshiftk, dtset%sigma_shiftk, dtset%sigma_shiftk)
-! End CP modified
 
  ! Find k-points inside sigma_erange energy window.
  ! Set entry to the number of states inside the pocket at (ikpt, spin)
@@ -795,6 +758,11 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
    NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
    ! Write crystalline structure, fine_hdr and fine_ebands defined on the fine k-mesh.
    ! fine_ebands will be used to compare with the ab-initio NSCF eigenvalues.
+   !
+   ! TODO: The size of the KERANGE.nc quickly increases with the k-mesh.
+   ! It is ~700 Mb for a ~ 300^3 grid due to occ and eigens
+   ! But these quantities are now used in inkpts so it may be possible to avoid writing them to disk.
+   !
    NCF_CHECK(fine_hdr%ncwrite(ncid, fform_from_ext("KERANGE.nc"), nc_define=.True.))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(fine_ebands, ncid))
@@ -825,6 +793,209 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call fine_hdr%free()
 
 end subroutine sigtk_kpts_in_erange
+!!***
+
+subroutine degtab_array_free(degtab)
+ type(degtab_t),intent(inout) :: degtab(:,:)
+
+ integer :: jj, ii, ideg
+
+ do jj=1,size(degtab, dim=2)
+   do ii=1,size(degtab, dim=1)
+     if (.not. allocated(degtab(ii, jj)%bids)) cycle
+     do ideg=1,size(degtab(ii, jj)%bids)
+       ABI_SFREE(degtab(ii, jj)%bids(ideg)%vals)
+     end do
+     ABI_SFREE(degtab(ii, jj)%bids)
+   end do
+ end do
+
+end subroutine degtab_array_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_sigtk/sigtk_sigma_tables
+!! NAME
+!!  sigtk_sigma_tables
+!!
+!! FUNCTION
+!!  Build tables with the band indices used to compute the matrix elements of sigma_x and sigma_c
+!!  taking into account the kind of self-energies and symmetries from esymm.
+!!
+!! INPUTS
+!!  nkcalc: Number of k-points to compute
+!!  nkibz: Number of k-points in the IBZ
+!!  nsppol: Number of spins
+!!  bstart_ks, bstop_ks: First and last band for each (ikcalc, spin)
+!!  kcalc2ibz: Mapping kcalc --> IBZ
+!!  only_diago: True if only diagonal matrix elements are wanted
+!!  sigc_is_herm: True is Sigma_c is Hermitian
+!!  [esymm]: Band symmetries
+!!
+!! OUTPUT
+!!  sigxij_tab, sigcij_tab
+!!
+!! SOURCE
+
+subroutine sigtk_sigma_tables(nkcalc, nkibz, nsppol, bstart_ks, bstop_ks, kcalc2ibz, &
+                              only_diago, sigc_is_herm, sigxij_tab, sigcij_tab, esymm)
+
+ use m_gwdefs,        only : sigijtab_t, sigijtab_free
+ use m_esymm,         only : esymm_t, esymm_failed
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nkcalc, nkibz, nsppol
+ integer,intent(in) :: bstart_ks(nkcalc, nsppol), bstop_ks(nkcalc, nsppol)
+ logical,intent(in) :: only_diago, sigc_is_herm
+ integer,intent(in) :: kcalc2ibz(nkcalc)
+ type(sigijtab_t),allocatable,intent(inout) :: Sigxij_tab(:,:), Sigcij_tab(:,:)
+ type(esymm_t),optional,intent(in) :: esymm(nkibz, nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin,ikcalc,ik_ibz,bmin,bmax,bcol,brow
+ integer :: ii,idx_x,idx_c,irr_idx1,irr_idx2
+!arrays
+ integer,allocatable :: sigc_bidx(:), sigx_bidx(:)
+ logical :: use_sym_at(nkibz, nsppol)
+
+! *************************************************************************
+
+ if (allocated(Sigxij_tab)) then
+   call sigijtab_free(Sigxij_tab)
+   ABI_FREE(Sigxij_tab)
+ end if
+ if (allocated(Sigcij_tab)) then
+   call sigijtab_free(Sigcij_tab)
+   ABI_FREE(Sigcij_tab)
+ end if
+
+ ABI_MALLOC(Sigcij_tab, (nkcalc, nsppol))
+ ABI_MALLOC(Sigxij_tab, (nkcalc, nsppol))
+
+ use_sym_at = .FALSE.
+ if (present(esymm)) then
+   ! Create the Sig_ij tables taking advantage of the classification of the bands.
+   do spin=1,nsppol
+     do ikcalc=1,nkcalc
+      ik_ibz = kcalc2ibz(ikcalc)
+      use_sym_at(ik_ibz, spin) = .not. esymm_failed(esymm(ik_ibz, spin))
+     end do
+   end do
+ end if
+
+ do spin=1,nsppol
+   do ikcalc=1,nkcalc
+     ik_ibz = kcalc2ibz(ikcalc)
+
+     if (use_sym_at(ik_ibz, spin)) then
+       if (only_diago) then
+         ABI_ERROR("You should not be here!")
+       end if
+
+       bmin = bstart_ks(ikcalc, spin); bmax = bstop_ks(ikcalc, spin)
+       ABI_MALLOC(Sigxij_tab(ikcalc, spin)%col, (bmin:bmax))
+       ABI_MALLOC(Sigcij_tab(ikcalc, spin)%col, (bmin:bmax))
+
+       do bcol=bmin,bmax
+         ABI_MALLOC(sigc_bidx, (bmax - bmin + 1))
+         ABI_MALLOC(sigx_bidx, (bmax - bmin + 1))
+
+         if (esymm(ik_ibz,spin)%err_status /= 0) then
+           ! Band classification failed.
+           sigc_bidx = [(ii, ii=bmin, bmax)]
+           idx_c = bmax - bmin + 1
+           sigx_bidx = [(ii,ii=bmin,bcol)] ! Hermitian
+           idx_x = bcol - bmin + 1
+         else
+           irr_idx2 = esymm(ik_ibz,spin)%b2irrep(bcol)
+           idx_c = 0
+           do brow=bmin,bmax
+             irr_idx1 = esymm(ik_ibz,spin)%b2irrep(brow)
+             if (sigc_is_herm .and. bcol < brow) CYCLE  ! Only the upper triangle for HF, SEX, or COHSEX.
+             if (irr_idx1 == irr_idx2) then ! same character, add this row to the list.
+               idx_c = idx_c + 1
+               sigc_bidx(idx_c) = brow
+             end if
+           end do
+           idx_x = 0
+           do brow=bmin,bcol
+             irr_idx1 = esymm(ik_ibz,spin)%b2irrep(brow)
+             if (bcol<brow) CYCLE  ! Sig_x is always Hermitian.
+             if (irr_idx1 == irr_idx2) then ! same character, add this row to the list.
+               idx_x = idx_x +1
+               sigx_bidx(idx_x) = brow
+             end if
+           end do
+         end if
+
+         ! Table for Sigma_x matrix elements taking into account symmetries of the bands.
+         ABI_MALLOC(Sigxij_tab(ikcalc, spin)%col(bcol)%bidx, (idx_x))
+
+         Sigxij_tab(ikcalc, spin)%col(bcol)%size1 = idx_x
+         Sigxij_tab(ikcalc, spin)%col(bcol)%bidx(:) = sigx_bidx(1:idx_x)
+         !write(std_out,*)" Sigxij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol
+         !write(std_out,*)" size: ",idx_x,(Sigxij_tab(ikcalc,spin)%col(bcol)%bidx(ii),ii=1,idx_x)
+         !
+         ! Table for Sigma_c matrix elements taking into account symmetries of the bands.
+         ABI_MALLOC(Sigcij_tab(ikcalc, spin)%col(bcol)%bidx, (idx_c))
+
+         Sigcij_tab(ikcalc, spin)%col(bcol)%size1= idx_c
+         Sigcij_tab(ikcalc, spin)%col(bcol)%bidx(:) = sigc_bidx(1:idx_c)
+         !write(std_out,*)" Sigcij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol
+         !write(std_out,*)" size: ",idx_c,(Sigcij_tab(ikcalc,spin)%col(bcol)%bidx(ii), ii=1,idx_c)
+
+         ABI_FREE(sigx_bidx)
+         ABI_FREE(sigc_bidx)
+       end do ! bcol
+
+     else
+       ! Symmetries cannot be used for this (k,s).
+       bmin = bstart_ks(ikcalc, spin); bmax = bstop_ks(ikcalc, spin)
+       ABI_MALLOC(Sigcij_tab (ikcalc, spin)%col, (bmin:bmax))
+       ABI_MALLOC(Sigxij_tab (ikcalc, spin)%col, (bmin:bmax))
+
+       if (only_diago) then
+         ! QP wavefunctions == KS, therefore only diagonal elements are calculated.
+         do bcol=bmin,bmax
+           ABI_MALLOC(Sigcij_tab(ikcalc, spin)%col(bcol)%bidx, (1:1))
+           Sigcij_tab(ikcalc, spin)%col(bcol)%size1= 1
+           Sigcij_tab(ikcalc, spin)%col(bcol)%bidx(1) = bcol
+
+           ABI_MALLOC(Sigxij_tab(ikcalc, spin)%col(bcol)%bidx, (1:1))
+           Sigxij_tab(ikcalc, spin)%col(bcol)%size1 = 1
+           Sigxij_tab(ikcalc, spin)%col(bcol)%bidx(1) = bcol
+         end do
+       else
+         ! Use QP wavefunctions, Sigma_ij matrix is sparse but we have to classify the states in sigma.
+         ! The only thing we can do here is filling the entire matrix taking advantage of Hermiticity (if any).
+         do bcol=bmin,bmax
+           ABI_MALLOC(Sigxij_tab(ikcalc, spin)%col(bcol)%bidx, (bcol-bmin+1))
+           Sigxij_tab(ikcalc, spin)%col(bcol)%size1= bcol-bmin+1
+           Sigxij_tab(ikcalc, spin)%col(bcol)%bidx(:) = [(ii, ii=bmin,bcol)] ! Sigma_x is Hermitian.
+           !write(std_out,*)"Sigxij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol,Sigxij_tab(ikcalc,spin)%col(bcol)%bidx(:)
+
+           ABI_MALLOC(sigc_bidx, (bmax-bmin+1))
+           idx_c = 0
+           do brow=bmin,bmax
+             if (sigc_is_herm .and. bcol < brow) CYCLE  ! Only the upper triangle of Sigc_ij is needed (SEX, COHSEX).
+             idx_c = idx_c +1
+             sigc_bidx(idx_c) = brow
+           end do
+           ABI_MALLOC(Sigcij_tab(ikcalc, spin)%col(bcol)%bidx,(idx_c))
+           Sigcij_tab(ikcalc, spin)%col(bcol)%size1= idx_c
+           Sigcij_tab(ikcalc, spin)%col(bcol)%bidx(:) = sigc_bidx(1:idx_c)
+           ABI_FREE(sigc_bidx)
+           !write(std_out,*)"Sigcij_tab: ikcalc, spin, bcol ",ikcalc,spin,bcol,Sigcij_tab(ikcalc,spin)%col(bcol)%bidx(:)
+         end do
+       end if
+     end if
+
+   end do !ikcalc
+ end do !spin
+
+end subroutine sigtk_sigma_tables
 !!***
 
 end module m_sigtk

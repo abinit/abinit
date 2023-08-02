@@ -6,14 +6,10 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG, DC, DW)
+!!  Copyright (C) 2008-2022 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -73,14 +69,6 @@ contains
 !!
 !! OUTPUT
 !!   printing only
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -167,6 +155,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    symrel(:,:,1:nsym)=dtsets(idtset)%symrel(:,:,1:nsym)
 
 !  Space group output
+   call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup)
    call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 
    if (dtsets(idtset)%toldff>tol16.and.optforces==0) optforces=1
@@ -201,7 +190,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &   dtsets(idtset)%nimage,npsp,dtsets(idtset)%npspalch,ntypat,dtsets(idtset)%ntypalch,pspheads)
 
 !  Treatment of the effect of using a spin-orbit part
-!  Warning : mpspso is different for each dataset; not relevant for PAW
+!  Warning: mpspso is different for each dataset; not relevant for PAW
    mpspso=1
    if (dtsets(idtset)%usepaw==0) then
      do ii=1,npsp
@@ -256,8 +245,9 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      ngfftdiel(1:3)=0 ; ngfftdiel(7)=101 ; ngfftdiel(8:18)=dtsets(idtset)%ngfft(8:18)
      if(iscf==-1)ngfftdiel(7)=102
      ecut_eff=ecutsus*dilatmx**2
-     call getng(dtsets(idtset)%boxcutmin,ecut_eff,gmet,k0,me_fft,mgfftdiel,nfftdiel,&
-&     ngfftdiel,nproc_fft,nsym,paral_fft,symrel,&
+     call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,&
+&     ecut_eff,gmet,k0,me_fft,mgfftdiel,nfftdiel,&
+&     ngfftdiel,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
 &     use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
 !    Compute the size of the dielectric matrix : npwdiel
      kpt_diel(1:3)=(/ 0.0_dp, 0.0_dp, 0.0_dp /)
@@ -288,7 +278,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 
        ! Don't perform memory tests if MBPT.
        mem_test = dtsets(idtset)%mem_test
-       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE, RUNL_EPH])) mem_test = 0
+       if (any(dtsets(idtset)%optdriver == [RUNL_SIGMA, RUNL_SCREENING, RUNL_BSE, RUNL_EPH, RUNL_GWR])) mem_test = 0
 
        call memory(n1xccc,extrapwf,getcell,idtset,dtsets(idtset)%icoulomb,&
 &       intxc,dtsets(idtset)%ionmov,iout,densfor_pred,&
@@ -478,14 +468,6 @@ end subroutine memory_eval
 !!  strnps , mkffnl, mkcore, mklocl, mkrho, prcpot, irrzg, initro, clnup1.
 !! This is because there are allocated arrays in these routines.
 !!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,densfor_pred,iprcel,&
@@ -563,7 +545,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 
  my_natom=natom;if (mpi_enreg%nproc_atom>1) my_natom=mpi_enreg%my_natom
 
- call wrtout(std_out,'memory: analysis of memory needs ','COLL')
+ call wrtout(std_out,'memory: analysis of memory needs ')
 
  if(jdtset>=100)then
    write(msg,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
@@ -575,16 +557,16 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    write(msg,'(80a,a,a)')('=',mu=1,80),ch10,&
     ' Values of the parameters that define the memory need of the present run '
  end if
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  write(msg,'( 4(a,i8),a,4(a,i8) )' ) &
 & '     intxc =',intxc   ,'    ionmov =',ionmov,&
 & '      iscf =',iscf    ,'    lmnmax =',lmnmax,ch10,&
 & '     lnmax =',lnmax   ,'     mgfft =',mgfft,&
 & '  mpssoang =',mpssoang,'    mqgrid =',mqgrid_vl
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  write(msg,'( 4(a,i8),a,4(a,i8),a,4(a,i8) )' ) &
 & '     natom =',natom  ,'  nloc_mem =',nloalg(2)*(nloalg(3)+1),&
@@ -592,28 +574,28 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & '    nsppol =',nsppol ,'      nsym =',nsym,&
 & '    n1xccc =',n1xccc ,'    ntypat =',ntypat,ch10,&
 & '    occopt =',occopt ,'   xclevel =',xclevel
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  write(msg,'(4(3(a,i12),a))') &
 & '-    mband =',mband  ,'        mffmem =',mffmem,&
 & '         mkmem =',mkmem  ,ch10,&
 & '       mpw =',mpw    ,'          nfft =',nfft ,&
 & '          nkpt =',nkpt
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  if (my_natom/=natom)then
    write(msg,'(a,i10)') 'Pmy_natom=',my_natom
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 !Additional information if imgmov is activated (use of replicas of the cell)
  if (nimage>1) then
    write(msg,'(1(a,i10))' ) '  nimage =',nimage
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 !Additional information on FFT grids if PAW
@@ -621,15 +603,15 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    write(msg, '(a,a,a,i10,a,i10)' )&
 &   ' PAW method is used; the additional fine FFT grid is defined by:',ch10,&
 &   '   mgfftf=',mgfftf,'    nfftf =',nfftf
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 !Additional information if GPU
  if (use_gpu_cuda==1) then
 !  write(msg, '(a)' )' GPU method is used'
-!  call wrtout(iout,msg,'COLL')
-!  call wrtout(std_out,msg,'COLL')
+!  call wrtout(iout,msg)
+!  call wrtout(std_out,msg)
  end if
 
 !Additional information needed for the susceptibility and dielectric matrices
@@ -653,8 +635,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 &   ' For the susceptibility and dielectric matrices, or tddft :',ch10,&
 &   '   mgfft =',mgfftdiel,'  nbnd_in_blk=',nbnd_in_blk,'    nfft =',nfftdiel,&
 &   '     npw =',npwdiel
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
    ndiel4=ngfftdiel(4) ; ndiel5=ngfftdiel(5) ; ndiel6=ngfftdiel(6)
    ndiel456=ndiel4*ndiel5*ndiel6
  else
@@ -663,8 +645,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  end if
 
  write(msg,'(80a)') ('=',mu=1,80)
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  if(getcell>0 .or. (getcell<0 .and. idtset+getcell>0) )then
    write(msg,'(a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a)' )ch10,&
@@ -673,8 +655,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 &   '  since getcell = ',getcell,' is non-zero, while idtset=',idtset,'.',ch10,&
 &   '  The following numbers are obtained by supposing that acell and rprim',ch10,&
 &   '  are NOT taken from a previous dataset. You cannot rely on them.',ch10
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 !Compute number of atoms per type for current proc
@@ -813,6 +795,10 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
      cadd(16)=cadd(16)+my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc ! Rhoij and related data
      cadd(17)=cadd(17)+my_nattyp(ii)*(2+lmn2_size(ii))    ! (rhoijselect, ...)
    end do
+   !PAW:cprj
+   do ii=1,ntypat
+     cadd(16)=cadd(16)+2*nattyp(ii)*nkpt*nspinor*mband*nsppol*lmn_size(ii)/max(mpi_enreg%nproc_band,1)
+   end do
  end if
 
 !SCF history (if selected)
@@ -889,7 +875,8 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
        cadd(25)=cadd(25)+my_nattyp(ii)*lmn2_size(ii)*rhoij_nspden*pawcpxocc*n_fftgr*mffmem ! f_paw
      end if
    end do
-   cadd(25)=cadd(25)+(1+3*pawnhatxc*(ngrad/2))*nspden*nfftf       !nhat,nhatgr
+!   cadd(25)=cadd(25)+(1+3*pawnhatxc*(ngrad/2))*nspden*nfftf       !nhat,nhatgr
+   cfftf(29)=cfftf(29)+(1+3*pawnhatxc*(ngrad/2))*nspden       !nhat,nhatgr
  end if
 
 !(3)                     in rhotoxc, xcden -------------------------------
@@ -993,13 +980,13 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  cadd(56)=(14+3*natom)*mband   ; dttyp(56)=8
 !ylm_k
  cmpw(57)=mpsang*mpsang*useylm ; dttyp(57)=8
-!PAW:cprj
- if (usepaw==1) then
-   dttyp(58)=8
-   do ii=1,ntypat
-     cadd(58)=cadd(58)+2*nattyp(ii)*nkpt*nspinor*mband*nsppol*lmn_size(ii)/max(mpi_enreg%nproc_band,1)
-   end do
- end if
+!!PAW:cprj
+! if (usepaw==1) then
+!   dttyp(58)=8
+!   do ii=1,ntypat
+!     cadd(58)=cadd(58)+2*nattyp(ii)*nkpt*nspinor*mband*nsppol*lmn_size(ii)/max(mpi_enreg%nproc_band,1)
+!   end do
+! end if
 
 !(6)                     in vtorho----------------------------------------
 
@@ -1079,7 +1066,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  if(nloalg(2)<=0)matblk=natom
  cmpw(75)=2*matblk             ; dttyp(75)=8
 !gsc(if PAW)
- cmpw(76)=2*mband*nspinor*usepaw          ; dttyp(76)=8
+! cmpw(76)=2*mband*nspinor*usepaw          ; dttyp(76)=8
 !Note : matvnl and mat1 do not belong to a chain defined until now
 !
  if(occopt<3 .and. iscf>0)then
@@ -1093,14 +1080,22 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    cadd(79)=2*(ngfft(4)*ngfft(5)*ngfft(6)-nfft)
  end if
 
+
+!(8)                     in cgwf_cprj-------------------------------------
+
+!conjgr, direc, direc_tmp, gvnlx
+ cmpw(81)=2*4*nspinor          ; dttyp(81)=8
+! cwavef_r,direc_r
+ cfft(82)=2*2*nspinor          ; dttyp(82)=8
+
 !(8)                     in cgwf------------------------------------------
 
-!conjgr, cwavef, direc, gh_direc, gvnlx_direc
- cmpw(81)=2*5*nspinor          ; dttyp(81)=8
-!ghc,gvnlxc
- cmpw(82)=2*2*nspinor          ; dttyp(82)=8
-!PAW: scwavef,direc_tmp,ghc_all
- cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
+!!conjgr, cwavef, direc, gh_direc, gvnlx_direc
+! cmpw(81)=2*5*nspinor          ; dttyp(81)=8
+!!ghc,gvnlxc
+! cmpw(82)=2*2*nspinor          ; dttyp(82)=8
+!!PAW: scwavef,direc_tmp,ghc_all
+! cmpw(83)=2*(2+mband)*nspinor*usepaw  ; dttyp(83)=8
 
 
 !(9a)                    in getghc and fourwf----------------------------
@@ -1130,15 +1125,17 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    cadd(98)=3*mpw*nloalg(3)      ; dttyp(98)=8
  else                                        ! ===== nonlop_ylm
 !  gx + gxfac + gxfac_sij
-   cadd(94)=2*lmnmax*mincat*(mpw+1+usepaw)    ; dttyp(94)=8
+!   cadd(94)=2*lmnmax*mincat*(mpw+1+usepaw)    ; dttyp(94)=8
+   cmpw(94)=2*lmnmax*mincat                   ; dttyp(94)=8
+   cadd(99)=2*lmnmax*mincat*(1+usepaw)        ; dttyp(99)=8
 !  kpg
-   cadd(95)=3*mpw       ; dttyp(95)=8
+   cmpw(95)=3             ; dttyp(95)=8
 !  indlmn_typ, ffnl_typ
    cadd(96)=lmnmax*6; dttyp(96)=4
 !  ffnl_typ
-   cadd(97)=lmnmax*mpw; dttyp(97)=8
+   cmpw(97)=lmnmax; dttyp(97)=8
 !  opernla_ylm: scalar,scali
-   cadd(98)=2*mpw; dttyp(98)=8
+   cmpw(98)=2; dttyp(98)=8
  end if
 
 !(10)                    in suscep and suskmm ----------------------------
@@ -1367,14 +1364,6 @@ end subroutine memory
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
@@ -1477,14 +1466,14 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &   ' memana: BUG -',ch10,&
 &   '  The biggest chain is number',biggest,' while iprcel==20.',ch10,&
 &   '  This is not allowed.'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 
  write(msg, '(a,f11.3,a)' ) &
 & 'P This job should need less than                 ',&
 & mbbiggest+tol10,' Mbytes of memory. '
- call wrtout(std_out,msg,'COLL')
- call wrtout(iout,msg,'COLL')
+ call wrtout(std_out,msg)
+ call wrtout(iout,msg)
 
  if(prtvol>=10)then
    if(biggest==1)write(msg,'(a)')'P Max. in main chain + fourwf.f '
@@ -1497,92 +1486,92 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
    if(biggest==8)write(msg,'(a)')'P Max. in suscep chain '
    if(biggest==9)write(msg,'(a)')'P Max. in dielmt chain '
    if(biggest==10)write(msg,'(a)')'P Max. in tddft chain '
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
 
    write(msg, '(a,i13,a,f11.3,a)' )&
 &   'P',nint(cintmpw(biggest)),' blocks of mpw  integer numbers, for',&
 &   mbintmpw(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    write(msg, '(a,i13,a,f11.3,a)' )&
 &   'P',nint(cdpmpw(biggest)),' blocks of mpw  real(dp)  numbers, for',&
 &   mbdpmpw(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    if (nfft==nfftf) then
      if(mbintfft(biggest)+mbintfftf(biggest)>0.001)then
        write(msg, '(a,i13,a,f11.3,a)' )&
 &       'P',nint(cintfft(biggest)+cintfftf(biggest)),' blocks of nfft integer numbers, for',&
 &       mbintfft(biggest)+mbintfftf(biggest)+tol10,' Mbytes. '
-       call wrtout(iout,msg,'COLL')
+       call wrtout(iout,msg)
      end if
      write(msg, '(a,i13,a,f11.3,a)' )&
 &     'P',nint(cdpfft(biggest)+cdpfftf(biggest)),' blocks of nfft real(dp)  numbers, for',&
 &     mbdpfft(biggest)+mbdpfftf(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    else
      if(mbintfftf(biggest)>0.001)then
        write(msg, '(a,i13,a,f11.3,a)' )&
 &       'P',nint(cintfftf(biggest)),' blocks of nfft (fine grid) integer numbers, for',&
 &       mbintfftf(biggest)+tol10,' Mbytes. '
-       call wrtout(iout,msg,'COLL')
+       call wrtout(iout,msg)
      end if
      write(msg, '(a,i13,a,f11.3,a)' )&
 &     'P',nint(cdpfftf(biggest)),' blocks of nfft (fine grid) real(dp)  numbers, for',&
 &     mbdpfftf(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
      if(mbintfft(biggest)>0.001)then
        write(msg, '(a,i13,a,f11.3,a)' )&
 &       'P',nint(cintfft(biggest)),' blocks of nfft (coarse grid) integer numbers, for',&
 &       mbintfft(biggest)+tol10,' Mbytes. '
-       call wrtout(iout,msg,'COLL')
+       call wrtout(iout,msg)
      end if
      write(msg, '(a,i13,a,f11.3,a)' )&
 &     'P',nint(cdpfft(biggest)),' blocks of nfft (coarse grid) real(dp)  numbers, for',&
 &     mbdpfft(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
    if(mbintadd(biggest)>0.001)then
      write(msg, '(a,13x,a,f11.3,a)' )'P',' Additional     integer numbers, for',mbintadd(biggest)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
    write(msg, '(a,13x,a,f11.3,a)' )'P',' Additional     real(dp)  numbers, for',mbdpadd(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    write(msg, '(a,13x,a,f11.3,a)' )'P',' With residue estimated to be       ',mbother(biggest)+tol10,' Mbytes. '
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    write(msg, '(a)' )'P'
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    write(msg, '(a)' )'P Comparison of the memory needs of different chains'
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
 
    write(msg, '(a,f11.3,a)' )'P Main chain + fourwf.f           ',mbtot(1)+tol10,' Mbytes. '
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    write(msg, '(a,f11.3,a)' )'P Main chain + nonlop.f + opernl.f',mbtot(2)+tol10,' Mbytes. '
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
 
 !  The next chains are not defined in the RF case.
    if(nchain>2)then
      write(msg, '(a,f11.3,a)' )'P XC chain                        ',mbtot(3)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
      write(msg, '(a,f11.3,a)' )&
 &     'P mkrho chain                     ',mbtot(4)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
      write(msg, '(a,f11.3,a)' )&
 &     'P fourdp chain                    ',mbtot(5)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
      if(xmpi_paral==1)then
        write(msg, '(a,f11.3,a)' )&
 &       '- parallel k-point chain          ',mbtot(6)+tol10,' Mbytes. '
-       call wrtout(iout,msg,'COLL')
+       call wrtout(iout,msg)
      end if
      write(msg, '(a,f11.3,a)' )&
 &     'P newvtr chain                    ',mbtot(7)+tol10,' Mbytes. '
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
      if(modulo(iprcel,100)>=20.and.modulo(iprcel,100)<70)then
        write(msg, '(a,f11.3,a)' )&
 &       'P suscep chain                    ',mbtot(8)+tol10,' Mbytes. '
-       call wrtout(iout,msg,'COLL')
+       call wrtout(iout,msg)
        write(msg, '(a,f11.3,a)' )&
 &       'P dielmt chain                    ',mbtot(9)+tol10,' Mbytes. '
-       call wrtout(iout,msg,'COLL')
+       call wrtout(iout,msg)
      end if
      if(iscf==-1)then
        write(msg, '(a,f11.3,a)' )&
@@ -1595,14 +1584,14 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 !--------------------------------------------------------------------
 
  write(msg, '(a)' ) '  Rough estimation (10% accuracy) of disk space for files :'
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  write(msg, '(a,f11.3,a,a,f11.3,a)' ) &
 & '_ WF disk file :',mbdiskwf+tol10,' Mbytes ;',&
 & ' DEN or POT disk file :',mbdiskpd+tol10,' Mbytes.'
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  if(mffmem==0 .and. iscf>0)then
    if(iscf==1)then
@@ -1634,8 +1623,8 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 &     '  mffmem==0, iscf==7 => use of 1 FFT temporary disk file,',ch10,&
 &     '                       (2+2*npulayit) times bigger than a DEN file.'
    end if
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 !Temporary msg - estimation of PAW specific data has to be done...
@@ -1644,13 +1633,13 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
 !write(msg,'(5a)') '  WARNING: You are using PAW formalism;',ch10,&
 !&       '           Above estimations do not take PAW',ch10,&
 !&       '           specific data into account !'
-!call wrtout(iout,msg,'COLL')
-!call wrtout(std_out,msg,'COLL')
+!call wrtout(iout,msg)
+!call wrtout(std_out,msg)
 !end if
 
  write(msg,'(80a,a)') ('=',mu=1,80),ch10
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
 !--------------------------------------------------------------------
 !Here, each processor must test its memory, so use
@@ -1664,12 +1653,12 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
  else if (mbbigarr==mbgylm)then
    write(msg, '(a,f12.4,a)' ) ' Biggest array : pawfgrtab%gylm(gr), with',mbgylm+tol10,' MBytes.'
  end if
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
 !if (mpi_enreg%my_nimage>1) then
 !write(msg, '(a,f12.4,a)' ) &
 !&   ' These estimations take the distribution over replicas (images) of the cell into account.'
-!call wrtout(std_out,msg,'COLL')
+!call wrtout(std_out,msg)
 !end if
 
  quit=0
@@ -1695,11 +1684,10 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
    end if
    if(quit==0)then
      write(msg,'(a,f11.3,a)')' memana : allocated an array of',mbbigarr+tol10,' Mbytes, for testing purposes. '
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end if
-   if(allocated(bigarray)) then
-     ABI_FREE(bigarray)
-   end if
+
+   ABI_SFREE(bigarray)
 
 !  Test the ability to allocate the needed total memory : use 8 segments,
 !  hoping that the maximal segment size is not so much smaller than the
@@ -1732,32 +1720,16 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      write(msg,'(a,f11.3,a,a,a)')&
 &     ' memana: allocated ',mbbiggest,'Mbytes, for testing purposes. ',ch10,&
 &     ' The job will continue.'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end if
-   if(allocated(bigarray1)) then
-     ABI_FREE(bigarray1)
-   end if
-   if(allocated(bigarray2)) then
-     ABI_FREE(bigarray2)
-   end if
-   if(allocated(bigarray3)) then
-     ABI_FREE(bigarray3)
-   end if
-   if(allocated(bigarray4)) then
-     ABI_FREE(bigarray4)
-   end if
-   if(allocated(bigarray5)) then
-     ABI_FREE(bigarray5)
-   end if
-   if(allocated(bigarray6)) then
-     ABI_FREE(bigarray6)
-   end if
-   if(allocated(bigarray7)) then
-     ABI_FREE(bigarray7)
-   end if
-   if(allocated(bigarray8)) then
-     ABI_FREE(bigarray8)
-   end if
+   ABI_SFREE(bigarray1)
+   ABI_SFREE(bigarray2)
+   ABI_SFREE(bigarray3)
+   ABI_SFREE(bigarray4)
+   ABI_SFREE(bigarray5)
+   ABI_SFREE(bigarray6)
+   ABI_SFREE(bigarray7)
+   ABI_SFREE(bigarray8)
 
  end if
 
@@ -1801,9 +1773,7 @@ subroutine memana(cadd,cfft,cfftf,chain,cmpw,dttyp,iout,iprcel,iscf,&
      nquarter_mbytes=dble(nquarter_mbytes)*1.25_dp
      nmbytes=nquarter_mbytes/4.0_dp
    end do
-   if(allocated(bigarray)) then
-     ABI_FREE(bigarray)
-   end if
+   ABI_SFREE(bigarray)
 
    ABI_ERROR_CLASS("in memana with option==2 .and. quit==1", "MemanaError")
  end if !  End the test of the available memory
@@ -1926,14 +1896,6 @@ end subroutine memana
 !! Some BIG approximations, not present in the GS corresponding routine
 !!  have been done : nsym=nsym1, nkpt=nkpt_rbz, mpw=mpw1 ...
 !!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
@@ -1989,7 +1951,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  cmpw(:)=zero ; cfft(:)=zero ; cadd(:)=zero
  dttyp(:)=0
 
- call wrtout(std_out,' memorf : analysis of memory needs ','COLL')
+ call wrtout(std_out,' memorf : analysis of memory needs ')
 
  if(jdtset>=100)then
    write(msg,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
@@ -2001,8 +1963,8 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
    write(msg,'(80a,a,a,a)')('=',mu=1,80),ch10,&
    ' Values of the parameters that define the memory need of the present run',' (RF).'
  end if
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  mkmem=mkmems(1)
  mkqmem=mkmems(2)
@@ -2014,8 +1976,8 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & '    lmnmax =',lmnmax  ,'     lnmax =',lnmax,ch10,&
 & '     mgfft =',mgfft,'  mpssoang =',mpssoang,&
 & '    mqgrid =',mqgrid,'     natom =',natom
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  write(msg,'( 4(a,i8),a,4(a,i8),a,4(a,i8) )' ) &
 & '  nloc_mem =',nloalg(2)*(nloalg(3)+1),'    nspden =',nspden ,&
@@ -2023,8 +1985,8 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & '      nsym =',nsym,'    n1xccc =',n1xccc ,&
 & '    ntypat =',ntypat,'    occopt =',occopt ,ch10,&
 & '   xclevel =',xclevel
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  write(msg,'(4(3(a,i12),a))') &
 & '-    mband =',mband  ,'        mffmem =',mffmem,&
@@ -2032,18 +1994,18 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & '-   mkqmem =',mkqmem ,'        mk1mem =',mk1mem,&
 & '           mpw =',mpw  ,ch10,&
 & '      nfft =',nfft ,'          nkpt =',nkpt
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  if (my_natom/=natom)then
    write(msg,'(a,i10)') 'Pmy_natom=',my_natom
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
  write(msg,'(80a)') ('=',mu=1,80)
- call wrtout(iout,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(iout,msg)
+ call wrtout(std_out,msg)
 
  if(getcell>0 .or. (getcell<0 .and. idtset+getcell>0) )then
    write(msg,'(a,a,a,a,a,a,i3,a,i3,a,a,a,a,a,a)' )ch10,&
@@ -2052,8 +2014,8 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 &   '  since getcell = ',getcell,' is non-zero, while idtset=',idtset,'.',ch10,&
 &   '  The following numbers are obtained by supposing that acell and rprim',ch10,&
 &   '  are NOT taken from a previous dataset. You cannot rely on them.',ch10
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
  n_fftgr=1
@@ -2292,14 +2254,6 @@ end subroutine memorf
 !!  lnmax=maximum number of l,n projectors, not taking into account the spin-orbit
 !!  lnmaxso=maximum number of l,n projectors, taking into account the spin-orbit
 !!
-!! PARENTS
-!!      m_memeval,m_psps
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalch,&
@@ -2409,9 +2363,9 @@ subroutine getdim_nloc(lmnmax,lmnmaxso,lnmax,lnmaxso,mixalch,nimage,npsp,npspalc
 !if (lmnmaxso<llmax) lmnmaxso=llmax
 
  write(msg, '(a,a,i4,a,i4,3a,i4,a,i4,a)' ) ch10,&
-& ' getdim_nloc : deduce lmnmax  =',lmnmax,', lnmax  =',lnmax,',',ch10,&
-& '                      lmnmaxso=',lmnmaxso,', lnmaxso=',lnmaxso,'.'
- call wrtout(std_out,msg,'COLL')
+ ' getdim_nloc: deduce lmnmax  =',lmnmax,', lnmax  =',lnmax,',',ch10,&
+ '                      lmnmaxso=',lmnmaxso,', lnmaxso=',lnmaxso,'.'
+ call wrtout(std_out,msg)
 
  ABI_FREE(lmnproj_typat)
  ABI_FREE(lmnprojso_typat)
@@ -2440,14 +2394,6 @@ end subroutine getdim_nloc
 !!  usepaw=1 if PAW is used, 0 otherwise
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_memeval,m_psps
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
 !!
 !! SOURCE
 
@@ -2550,14 +2496,6 @@ end subroutine setmqgrid
 !! NOTES
 !! The estimator is the one provided by BigDFT.
 !!
-!! PARENTS
-!!      m_memeval
-!!
-!! CHILDREN
-!!      atomic_info,createwavefunctionsdescriptors,deallocate_lr
-!!      memoryestimator,mkradim,wrtout,wvl_descr_atoms_set,wvl_descr_free
-!!      wvl_setboxgeometry,xred2xcart
-!!
 !! SOURCE
 
 subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
@@ -2605,7 +2543,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
    write(msg, '(A,A,A,A,I0,A)') ch10,&
 &   ' wvl_memory : BUG -',ch10,&
 &   '  option=',option,' while the only allowed values are 0, 1, or 2.'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 
  wvl%paw%usepaw=0 !no PAW here
@@ -2619,7 +2557,7 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  nullify(wvl%paw%indlmn)
 
  write(msg,*)' wvl_memory : analysis of memory needs '
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  if(idtset>=100)then
    write(msg,'(80a,a,a,i5,a)')('=',mu=1,80),ch10,&
@@ -2634,15 +2572,15 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
 &   ' Values of the parameters that define the memory need of the present run',&
 &   ' (WVL).'
  end if
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
  write(msg,'( a,f7.3,a,i7,2(a,F7.3),a,a,f7.3,a,i7 )' ) &
 & '  wvl_hgrid =', dtset%wvl_hgrid , '   nwfshist =', dtset%nwfshist, &
 & ' wvl_crmult =', dtset%wvl_crmult, ' wvl_frmult =', dtset%wvl_frmult, ch10,&
 & '  tl_radius =', dtset%tl_radius , '  tl_nprccg =', dtset%tl_nprccg
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
  if (dtset%nsppol == 2) then
    nstates = dtset%nelect
@@ -2652,12 +2590,12 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  write(msg,'(4(a,i7))')&
 & '      natom =', dtset%natom, '     ntypat =', dtset%ntypat, &
 & '    nstates =', nstates,     '     nsppol =', dtset%nsppol
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
  write(msg,'(80a)') ('=',mu=1,80)
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
 !First, use eleconf to get radii_cf().
  ABI_MALLOC(radii_cf,(npsp, 3))
@@ -2701,8 +2639,8 @@ subroutine wvl_memory(dtset, idtset, mpi_enreg, npsp, option, pspheads)
  ABI_FREE(xcart)
 
  write(msg,'(80a,a)') ('=',mu=1,80), ch10
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg)
+ call wrtout(std_out,msg)
 
 #else
  BIGDFT_NOTENABLED_ERROR()

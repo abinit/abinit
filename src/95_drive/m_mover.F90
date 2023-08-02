@@ -6,14 +6,10 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -186,17 +182,11 @@ contains
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
 !!      are set equal to (nfft,ngfft,mgfft) in that case.
 !!
-!! PARENTS
-!!      m_gstate,m_mover_effpot
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size)
 
 !Arguments ------------------------------------
 !scalars
@@ -216,6 +206,7 @@ real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
+integer,optional,intent(in) :: sc_size(3)
 
 !Local variables-------------------------------
 !scalars
@@ -294,7 +285,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 
  if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11) call delocint_ini(deloc)
 
- if (ab_mover%ionmov==13) call mttk_ini(mttk_vars,ab_mover%nnos)
+ if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
+   call mttk_ini(mttk_vars,ab_mover%nnos)
+ end if
 
 !###########################################################
 !### 03. Set the number of iterations ntime
@@ -351,7 +344,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !  If restarxf specifies to start to the last iteration
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      if(present(effective_potential))then
-       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size) ! Map Hist to Ref to order atoms
        xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
        hist%ihist = 1
      end if
@@ -373,7 +366,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
  if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
    ncycle=scfcv_args%dtset%hmctt
    if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
-     ncycle=ncycle+scfcv_args%dtset%hmcsst
+      ncycle=ncycle+scfcv_args%dtset%hmcsst
    endif
  endif
 
@@ -617,7 +610,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
            endif
 
 !DEBUG
- write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
+! write(std_out,'(a,5i4)')' m_mover, before scfcv_run : itimes(1:2)=',itimes(1:2)
 !ENDDEBUG
            call scfcv_run(scfcv_args, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
            if (conv_retcode == -1) then
@@ -629,7 +622,8 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !          For monte carlo don't need to recompute energy here (done in pred_montecarlo)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
-               call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+               if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,&
+&                                                                      need_verbose,sc_size=sc_size)!Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -793,6 +787,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 &           scfcv_args%dtset%strfact,&
 &           scfcv_args%dtset%strtarget,&
 &           hist%strten(:,hist%ihist),&
+&           rprim,&
 &           scfcv_args%dtset%tolmxf)
          else
            call erlxconv(hist,iexit,itime,itime_hist,ntime,scfcv_args%dtset%tolmxde)
@@ -927,6 +922,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 &       scfcv_args%dtset%strfact,&
 &       scfcv_args%dtset%strtarget,&
 &       hist%strten(:,ihist_prev),&
+&       rprim,&
 &       scfcv_args%dtset%tolmxf)
      else
        call erlxconv(hist,iexit,itime,itime_hist,ntime,scfcv_args%dtset%tolmxde)
@@ -967,7 +963,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !One should instead have a datastructure associated with the preconditioner.
  if (ab_mover%goprecon>0) call prec_simple(ab_mover,preconforstr,hist,1,1,1)
 
- if (ab_mover%ionmov==13) call mttk_fin(mttk_vars)
+ if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
+   call mttk_fin(mttk_vars)
+ end if
 
  if (ab_mover%ionmov==10 .or. ab_mover%ionmov==11) call delocint_fin(deloc)
 
@@ -1023,15 +1021,9 @@ contains
 !!  at input  : iexit=  0 if not the last itime,  1 if the last itime
 !!  at output : iexit=  0 if not below tolerance, 1 if below tolerance
 !!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
-subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,tolmxf)
+subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,strten,rprim,tolmxf)
 
 !Arguments ------------------------------------
 !scalars
@@ -1041,16 +1033,19 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
 !arrays
  integer,intent(in) :: iatfix(3,natom)
  real(dp),intent(in) :: fcart(3,natom),strtarget(6),strten(6)
+ real(dp), intent(in) :: rprim(3,3)
 
 !Local variables-------------------------------
 !scalars
  integer :: iatom,idir,istr
- real(dp) :: fmax,strdiag
+ real(dp) :: fmax,strdiag!,fcell
  character(len=500) :: msg
 !arrays
  real(dp) :: dstr(6)
 
 ! *************************************************************************
+
+ABI_UNUSED(rprim)
 
 !Compute maximal component of forces, EXCLUDING any fixed components
  fmax=zero
@@ -1081,8 +1076,33 @@ subroutine fconv(fcart,iatfix,iexit,itime,natom,ntime,optcell,strfact,strtarget,
    do istr=4,6
      if(abs(dstr(istr))*strfact >= fmax ) fmax=abs(dstr(istr))*strfact
    end do
- else if(optcell==4 .or. optcell==5 .or. optcell==6)then
-   if(abs(dstr(optcell-3))*strfact >= fmax ) fmax=abs(dstr(optcell-3))*strfact
+!  else if(optcell==4 .or. optcell==5 .or. optcell==6)then
+!    if(abs(dstr(optcell-3))*strfact >= fmax ) fmax=abs(dstr(optcell-3))*strfact
+ else if(optcell==4) then
+   ! only dstr 1 5 6 are in xfpack_f2vout. The other component shouldn't be checked.
+   !fcell = dstr(1) * rprim(1,1) + dstr(6) * rprim(2,1) + dstr(5) * rprim(3,1)
+   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   !fcell = dstr(6) * rprim(1,1)
+   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   !fcell = dstr(5) * rprim(1,1)
+   !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   fmax = maxval(abs(dstr([1, 5, 6])))*strfact
+ else if(optcell==5) then ! 2 4 6
+    !fcell = dstr(5) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell = dstr(6) * rprim(1,2) + dstr(2) * rprim(2,2) + dstr(4) * rprim(3,2)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell = dstr(4) * rprim(2,2)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+   fmax = maxval(abs(dstr([2, 4, 6])))*strfact
+ else if(optcell==6) then
+    !fcell =  dstr(5) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell =  dstr(4) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    !fcell = dstr(5) * rprim(1,3) + dstr(4) * rprim(2,3) + dstr(3) * rprim(3,3)
+    !if (abs(fcell)*strfact >= fmax) fmax=abs(fcell)*strfact
+    fmax = maxval(abs(dstr([3, 4, 5])))*strfact
  else if(optcell==7)then
    if(abs(dstr(2))*strfact >= fmax ) fmax=abs(dstr(2))*strfact
    if(abs(dstr(3))*strfact >= fmax ) fmax=abs(dstr(3))*strfact
@@ -1138,12 +1158,6 @@ end subroutine fconv
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1232,12 +1246,6 @@ end subroutine mover
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1497,12 +1505,6 @@ subroutine prtxfase(ab_mover,hist,itime,iout,pos)
 !! OUTPUT
 !!  tag = The string to put for each atom
 !!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine gettag(atlist,index,natom,prtallatoms,tag)
@@ -1551,12 +1553,6 @@ subroutine gettag(atlist,index,natom,prtallatoms,tag)
 !!
 !! OUTPUT
 !!  tag = The string to put for aech atom
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -1626,12 +1622,6 @@ end subroutine prtxfase
 !!  -- only printing --
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_mover
-!!
-!! CHILDREN
-!!      metric,wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

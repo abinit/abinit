@@ -5,12 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!! Copyright (C) 2009-2022 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -23,7 +21,6 @@
 MODULE m_exc_diago
 
  use defs_basis
-
  use m_bs_defs
  use m_abicore
  use m_errors
@@ -39,12 +36,13 @@ MODULE m_exc_diago
  use m_io_tools,        only : open_file
  use m_fstrings,        only : int2char4
  use m_numeric_tools,   only : print_arr, hermitianize
+ !use m_slk,             only : matrix_scalapack, processor_scalapack
  use m_crystal,         only : crystal_t
  use m_kpts,            only : listkk
  use m_bz_mesh,         only : kmesh_t
  use m_ebands,          only : ebands_report_gap
  use m_eprenorms,       only : eprenorms_t
- use m_wfd,             only : wfd_t
+ use m_wfd,             only : wfdgw_t
  use m_paw_hr,          only : pawhur_t
  use m_pawtab,          only : pawtab_type
  use m_exc_itdiago,     only : exc_iterative_diago
@@ -84,11 +82,6 @@ contains
 !! OUTPUT
 !!  Eigenvalues and eigenvectors are written on file.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
@@ -104,7 +97,7 @@ subroutine exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps,&
  type(pseudopotential_type),intent(in) :: Psps
  type(kmesh_t),intent(in) :: Kmesh
  type(ebands_t),intent(in) :: KS_BSt,QP_BSt
- type(wfd_t),intent(inout) :: Wfd
+ type(wfdgw_t),intent(inout) :: Wfd
  type(eprenorms_t),intent(in) :: Epren
 !arrays
  type(pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Wfd%usepaw)
@@ -206,11 +199,6 @@ end subroutine exc_diago_driver
 !! OUTPUT
 !!  Eigenvalues and eigenvectors are written on file bseig_fname
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst,elph_lifetime)
@@ -241,8 +229,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
  real(dp),allocatable :: exc_ene(:)
  complex(dpc),allocatable :: exc_mat(:,:),exc_vec(:,:)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
- integer :: amode,mpi_fh,istwf_k,tbloc,tmp_unt
- integer :: itloc,jj,jtloc,itglob,jtglob
+ integer :: amode,mpi_fh,istwf_k,tbloc
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker
  integer :: block_sizes(2,3),array_of_sizes(2),gsub(2,2)
  logical,parameter :: is_fortran_file=.TRUE.
@@ -533,12 +520,11 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    call wrtout(std_out, msg)
    !
    ! Init scaLAPACK environment.
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    !
    ! Init scaLAPACK matrices
-   call init_matrix_scalapack(Slk_mat,exc_size,exc_size,Slk_processor,istwf_k,tbloc=tbloc)
-
-   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwf_k,tbloc=tbloc)
+   call Slk_mat%init(exc_size,exc_size,Slk_processor,istwf_k)
+   call Slk_vec%init(exc_size,exc_size,Slk_processor,istwf_k)
    !
    ! Open the file with MPI-IO and skip the record.
    amode=MPI_MODE_RDONLY
@@ -566,12 +552,11 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
 
    if (do_full_diago) then
      call wrtout(std_out," Performing full diagonalization with scaLAPACK...")
-
-     call slk_pzheev("Vectors","Upper",Slk_mat,Slk_vec,exc_ene)
+     call slk_mat%heev("Vectors","Upper",Slk_vec,exc_ene)
    else
      call wrtout(std_out," Performing partial diagonalization with scaLAPACK...")
      il=1; iu=nstates; abstol=zero !ABSTOL = PDLAMCH(comm,'U')
-     call slk_pzheevx("Vectors","Index","Upper",Slk_mat,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
+     call slk_mat%pzheevx("Vectors","Index","Upper",vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
 
    exc_ene_c(:) = exc_ene(:)
@@ -613,7 +598,7 @@ subroutine exc_diago_resonant(Bsp,BS_files,Hdr_bse,prtvol,comm,Epren,Kmesh,Cryst
    ABI_CHECK_MPI(ierr,"FILE_CLOSE")
 
    call Slk_vec%free()
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    call xmpi_barrier(comm)
 #else
    ABI_BUG("You should not be here!")
@@ -675,11 +660,6 @@ end subroutine exc_diago_resonant
 !! OUTPUT
 !!  exc_gap=Excitonic direct gap.
 !!  Additional info on the Excitonic spectrum are reported on standard output.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -821,11 +801,6 @@ end subroutine exc_print_eig
 !!
 !! OUTPUT
 !!  Excitonic eigenvectors and eigenvalues are written on file BS_files%out_eig.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1085,11 +1060,6 @@ end subroutine exc_diago_coupling
 !! OUTPUT
 !!  Excitonic eigenvectors and eigenvalues are written to file BS_files%out_eig.
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
@@ -1120,9 +1090,9 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  complex(dpc),allocatable :: exc_ham(:,:),exc_rvect(:,:),fmat(:,:),ovlp(:,:)
 #if defined HAVE_LINALG_SCALAPACK && defined HAVE_MPI_IO
  integer,parameter :: istwfk1=1
- integer :: amode,mpi_fh,tbloc,tmp_unt,mene_found,mpi_err,my_nel,nsblocks
- integer :: iloc,jj,jloc,iglob,jglob,etype,slk_mask_type,offset_err,el,rrs_kind,ccs_kind
- integer :: max_r,max_c
+ integer :: amode,mpi_fh,tbloc,mene_found,mpi_err,my_nel,nsblocks
+ integer :: iloc,jloc,iglob,jglob,etype,slk_mask_type,offset_err,el,rrs_kind,ccs_kind
+ !integer :: max_r,max_c
  integer(XMPI_OFFSET_KIND) :: ehdr_offset,fmarker,my_offset
  integer :: gsub(2,2)
  logical,parameter :: is_fortran_file=.TRUE.
@@ -1132,7 +1102,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
  complex(dpc),allocatable :: tmp_cbuffer(:)
  character(50) :: uplo
  real(dp),external :: PDLAMCH
- type(matrix_scalapack)    :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp,Slk_tmp
+ type(matrix_scalapack)    :: Slk_F,Slk_Hbar,Slk_vec,Slk_ovlp !,Slk_tmp
  type(processor_scalapack) :: Slk_processor
 #endif
 
@@ -1358,7 +1328,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    call wrtout([std_out, ab_out], msg, do_flush=.True.)
    !
    ! Init scaLAPACK environment.
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    !
    ! Open the Resonant file with MPI-IO and skip the record.
    amode=MPI_MODE_RDONLY
@@ -1372,7 +1342,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    !
    ! Read  = ( R  - )
    !         ( -  R*)
-   call init_matrix_scalapack(Slk_Hbar,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call Slk_Hbar%init(exc_size,exc_size,Slk_processor,istwfk1)
 
    nullify(myel2loc)
    nsblocks=nsppol
@@ -1497,7 +1467,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
    !
    ! Init scaLAPACK matrix F
-   call init_matrix_scalapack(Slk_F,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call Slk_F%init(exc_size,exc_size,Slk_processor,istwfk1)
    !
    ! Global F = (1  0)
    !            (0 -1)
@@ -1519,17 +1489,17 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ! ===========================================================
    ! ==== Solve generalized EV problem H u = F Hbar u = e u ====
    ! ===========================================================
-   call init_matrix_scalapack(Slk_vec,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call Slk_vec%init(exc_size,exc_size,Slk_processor,istwfk1)
    !
    itype=2; vl=1; vu=1; il=1; iu=nstates
    abstol=zero !ABSTOL = PDLAMCH(comm,'U')
 
 !#if 1
    if (do_full_diago) then
-     call slk_pzhegvx(itype,"Vectors","All","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
+     call slk_F%pzhegvx(itype,"Vectors","All","Upper",Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    else
      ABI_WARNING("Partial diago is still under testing")
-     call slk_pzhegvx(itype,"Vectors","Index","Upper",Slk_F,Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
+     call slk_F%pzhegvx(itype,"Vectors","Index","Upper",Slk_Hbar,vl,vu,il,iu,abstol,Slk_vec,mene_found,exc_ene)
    end if
 !#else
 !   call xhegv(itype,"Vectors","Upper",exc_size,Slk_F%buffer_cplx,Slk_Hbar%buffer_cplx,exc_ene)
@@ -1597,19 +1567,20 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
      ABI_ERROR(" Init of Slk_ovlp is wrong")
    end if
 
-   call init_matrix_scalapack(Slk_ovlp,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   call Slk_ovlp%init(exc_size,exc_size,Slk_processor,istwfk1)
 
    ! Calculate the overlap matrix.
    ! FIXME
-   ! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements; otherwise, results are unpredictable."
+   ! The ESLL manual says that "matrices matrix1 and matrix2 must have no common elements;
+   ! otherwise, results are unpredictable."
    ! However the official scaLAPACK documentation does not report this (severe) limitation.
 
-   !call init_matrix_scalapack(Slk_tmp,exc_size,exc_size,Slk_processor,istwfk1,tbloc=tbloc)
+   !call Slk_tmp%init(exc_size,exc_size,Slk_processor,istwfk1)
    !Slk_tmp%buffer_cplx = Slk_vec%buffer_cplx
-   !call slk_pzgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
+   !call slk_pgemm("C","N",Slk_tmp,cone,Slk_vec,czero,Slk_ovlp)
    !call Slk_tmp%free()
 
-   call slk_pzgemm("C","N",Slk_vec,cone,Slk_vec,czero,Slk_ovlp)
+   call slk_pgemm("C","N",Slk_vec,cone,Slk_vec,czero,Slk_ovlp)
 
 !#ifdef DEV_MG_DEBUG_THIS
 !   ABI_MALLOC(exc_ham,(exc_size,exc_size))
@@ -1644,11 +1615,11 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
 !!END DEBUG
 !
 !#else
-   ! call Slk_ovlp%zdhp_invert(uplo)
+   ! call Slk_ovlp%hpd_invert(uplo)
    ! call hermitianize(Slk_ovlp%buffer_cplx,uplo)
    ! !call slk_symmetrize(Slk_ovlp,uplo,"Hermitian")
 
-   call Slk_ovlp%zinvert()  ! Version for generic complex matrix.
+   call Slk_ovlp%invert()  ! Version for generic complex matrix.
 !#endif
 
 !#ifdef DEV_MG_DEBUG_THIS
@@ -1675,7 +1646,7 @@ subroutine exc_diago_coupling_hegv(Bsp,BS_files,Hdr_bse,prtvol,comm)
    ABI_CHECK_MPI(mpi_err,"FILE_CLOSE")
 
    call Slk_ovlp%free()
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 #else
    ABI_BUG("You should not be here!")
 #endif

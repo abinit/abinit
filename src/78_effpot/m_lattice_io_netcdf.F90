@@ -13,7 +13,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,7 +28,7 @@
 #include "abi_common.h"
 
 module m_lattice_harmonic_primitive_potential
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   !use m_dynamic_array, only: int_array_type, real_array_type, int2d_array_type
   use defs_basis
   use m_abicore
@@ -40,7 +40,7 @@ module m_lattice_harmonic_primitive_potential
   use m_xmpi
   use m_mathfuncs, only: eigensh
   use m_multibinit_dataset, only: multibinit_dtset_type
-  use m_multibinit_cell, only: mbcell_t
+  use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_primitive_potential, only: primitive_potential_t
   use m_abstract_potential, only: abstract_potential_t
   use m_dynamic_array, only: int2d_array_type
@@ -117,8 +117,12 @@ contains
     class(lattice_harmonic_primitive_potential_t), intent(inout) :: self
     type(multibinit_dtset_type), intent(in) :: params
     character(len=fnlen), intent(in) :: fnames(:)
-    call self%load_from_netcdf( fnames(3))
-    ABI_UNUSED_A(params)
+    ABI_UNUSED(fnames)
+    if(trim(params%latt_pot_fname)=='') then
+       call self%load_from_netcdf(fnames(3))
+    else
+        call self%load_from_netcdf(params%latt_pot_fname)
+    end if
   end subroutine load_from_files
 
   !-------------------------------------------------------------------!
@@ -140,7 +144,7 @@ contains
     integer :: varid, i, j
 #if defined HAVE_NETCDF
     ierr=nf90_open(trim(fname), NF90_NOWRITE, ncid)
-    NCF_CHECK_MSG(ierr, "Open netcdf file")
+    NCF_CHECK_MSG(ierr, "Open netcdf file "//trim(fname))
 
     ierr=nctk_get_dim(ncid, "ifc_nR" , nR)
     ierr=nctk_get_dim(ncid, "natom", natom)
@@ -157,7 +161,7 @@ contains
 
     ierr =nf90_inq_varid(ncid, "ref_energy", varid)
     NCF_CHECK_MSG(ierr, "ref_energy")
-    ierr = nf90_get_var(ncid, varid, masses)
+    ierr = nf90_get_var(ncid, varid, ref_energy)
     NCF_CHECK_MSG(ierr, "ref_energy")
 
 
@@ -207,7 +211,7 @@ contains
     do iR =1, nR
        do i=1 , natom3
           do j=1, natom3
-             if (abs(ifc_vallist(j, i, iR))>1e-9) then
+             if (abs(ifc_vallist(j, i, iR))>1e-3) then
                 ! NOTE: in fortran the order of index in reversed when reading netcdf array.
                 call self%coeff%add_entry([iR, i, j], ifc_vallist(j, i, iR))
              end if
@@ -240,13 +244,14 @@ contains
   !         the type of the supercell potential.
   !
   !-------------------------------------------------------------------!
-  subroutine fill_supercell(self, scmaker, params, scpot)
+  subroutine fill_supercell(self, scmaker, params, scpot, supercell)
     use m_spmat_convert, only: COO_to_dense
 
     class(lattice_harmonic_primitive_potential_t) , intent(inout) :: self
     type(supercell_maker_t),                        intent(inout) :: scmaker
     type(multibinit_dtset_type),                    intent(inout) :: params
     class(abstract_potential_t), pointer,           intent(inout) :: scpot
+    type(mbsupercell_t), target :: supercell
 
     integer :: natom, sc_natom
     integer :: inz, iR, R(3), i, j, icell
@@ -254,6 +259,7 @@ contains
     real(dp):: val
 
     ABI_UNUSED_A(params)
+
 
     natom=self%natom
     sc_natom= natom* scmaker%ncells
@@ -267,6 +273,7 @@ contains
     select type(scpot)
     type is (lattice_harmonic_potential_t)
        call scpot%initialize(sc_natom)
+       call scpot%set_supercell(supercell)
        ! IFC is an COO_mat_t, which has the index of R1, R2, R3, i, j and the value of val
        ! list of index R: coeff%ind%data(1, 1:coeff%nnz)
        ! list of i: coeff%ind%data(2, 1:coeff%nnz)
