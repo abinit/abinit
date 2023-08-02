@@ -7,15 +7,11 @@
 !! elements and calculates related properties - Tc, phonon linewidths...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2021 ABINIT group (MVer, BXu, MG, JPC)
+!! Copyright (C) 2004-2022 ABINIT group (MVer, BXu, MG, JPC)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -129,12 +125,6 @@ contains
 !!  brav not taken into account propely in all of the code. (MG?)
 !!
 !!  could choose to make a full 3 dimensional kpt array (:,:,:). Easier for many operations
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -1405,12 +1395,6 @@ end subroutine elphon
 !! OUTPUT
 !!  only write
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine outelph(elph_ds,enunit,fname)
@@ -1762,12 +1746,6 @@ end subroutine outelph
 !!  nband = number of bands for rest of calculation
 !!          should be the same for all kpts
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine rchkGSheader (hdr,natom,nband,unitgkk)
@@ -1837,12 +1815,6 @@ end subroutine rchkGSheader
 !!    but should be for Monkhorst-Pack, efficient grids.
 !!    otherwise you get an error message in interpolate_gkk because
 !!    an FS kpt can not be found in the gkk file.
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -2034,12 +2006,6 @@ end subroutine mkFSkgrid
 !!  a2f_1d = 1D alpha
 !!  dos_phon = density of states for phonons
 !!  elph_ds
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -2585,12 +2551,6 @@ end subroutine mka2f
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine mka2fQgrid(elph_ds,fname)
@@ -2777,12 +2737,6 @@ end subroutine mka2fQgrid
 !!   FSirredtoGS = mapping of irreducible kpoints to GS set
 !!   kptirr = irreducible FS kpoint coordinates
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine order_fs_kpts(kptns, nkpt, kptirr,nkptirr,FSirredtoGS)
@@ -2869,12 +2823,6 @@ end subroutine order_fs_kpts
 !!     %ep_qptlist list of qpoints,
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! NOTES
 !!
@@ -3069,12 +3017,6 @@ end subroutine ep_setupqpt
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -3412,12 +3354,6 @@ end subroutine mkph_linwid
 !!  1) Indeces and dimensions should should be spin dependent.
 !!  2) In the present status of the code, all the k-points in the IBZ are used!
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine get_fs_bands(eigenGS,hdr,fermie,ep_b_min,ep_b_max,minFSband,maxFSband,nkptirr)
@@ -3551,12 +3487,6 @@ end subroutine get_fs_bands
 !! OUTPUT
 !!   elph_ds = calculated |gkk|^2 are in elph_ds%gkk2
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine get_all_gkk2(crystal,ifc,elph_ds,kptirr_phon,kpt_phon)
@@ -3651,12 +3581,6 @@ end subroutine get_all_gkk2
 !!  inspired to some extent by epcouple.f from the DecAFT package by J. Kay Dewhurst
 !!  most inputs taken from mkifc.f
 !!  in anaddb set ifcflag 1 such that the IFC are calculated in atmfrc prior to calling elphon
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -3899,12 +3823,6 @@ end subroutine interpolate_gkk
 !! OUTPUT
 !!   elph_ds%gkq = recip space elphon matrix elements.
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine get_all_gkq (elph_ds,Cryst,ifc,Bst,FSfullpqtofull,nband,n1wf,onegkksize,&
@@ -4059,12 +3977,6 @@ end subroutine get_all_gkq
 !! OUTPUT
 !!   elph_ds%gkr = real space elphon matrix elements.
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine get_all_gkr (elph_ds,gprim,natom,nrpt,onegkksize,rpt,qpt_full,wghatm)
@@ -4180,12 +4092,6 @@ end subroutine get_all_gkr
 !!
 !! OUTPUT
 !! elph_ds%gkk_qpt = gkk matrices for all qpts on a full mesh
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -4516,12 +4422,6 @@ end subroutine complete_gkk
 !!  elph_tr_ds%tmp_gkk_intweight = integration weights at coarse k grid
 !!  elph_tr_ds%tmp_velocwtk = velocity times integration weights at coarse k grid
 !!  elph_tr_ds%tmp_vvelocwtk = velocity square times integration weights at coarse k grid
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5019,12 +4919,6 @@ end subroutine get_nv_fs_en
 !!  elph_tr_ds%dos_n0=DOS(Ef) at looped temperatures
 !!  elph_tr_ds%veloc_sq0=FS averaged velocity at Ef at looped temperatures
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine get_nv_fs_temp(elph_ds,BSt,eigenGS,gprimd,max_occ,elph_tr_ds)
@@ -5145,12 +5039,6 @@ end subroutine get_nv_fs_temp
 !! OUTPUT
 !! elph_tr_ds%FSelecveloc_sq = avergae FS electronic velocity
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
-!!
 !! SOURCE
 
 subroutine get_veloc_tr(elph_ds,elph_tr_ds)
@@ -5216,12 +5104,6 @@ end subroutine get_veloc_tr
 !!
 !! OUTPUT
 !!   elph_ds = modified elph_ds%gamma_qpt and created elph_ds%gamma_rpt
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5343,12 +5225,6 @@ end subroutine integrate_gamma
 !!
 !! OUTPUT
 !!   elph_tr_ds%gamma_qpt_tr and created elph_tr_ds%gamma_rpt_tr
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5507,12 +5383,6 @@ end subroutine integrate_gamma_tr
 !! OUTPUT
 !!   elph_tr_ds%gamma_qpt_trout
 !!   elph_tr_ds%gamma_qpt_trin
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! SOURCE
 
@@ -5717,12 +5587,6 @@ end subroutine integrate_gamma_tr_lova
 !!  = gkk matrices in recip space coming from the Derivative Data Base
 !! gkk_rpt(2,3*natom,nFSband,nFSband,nkpt_phon,nqpt)
 !!  = gkk matrices in real space stored in file unit_gkk_rpt
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      ftgkk
 !!
 !! NOTES
 !!   copied from ftiaf9.f

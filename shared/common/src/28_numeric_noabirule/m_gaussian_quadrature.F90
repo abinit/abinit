@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -65,11 +61,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 
@@ -165,11 +156,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
  subroutine gaussian_quadrature_legendre(integrand,integral,order)
@@ -261,12 +247,6 @@ contains
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_DielectricArray
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
  subroutine get_frequencies_and_weights_legendre(order,frequencies,weights)
@@ -346,12 +326,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 
@@ -451,12 +425,6 @@ end subroutine cdgqf
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_efmas,m_frohlichmodel,m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 
@@ -574,12 +542,6 @@ end subroutine cgqf
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
 subroutine ch_cap ( c )
@@ -630,10 +592,6 @@ end subroutine ch_cap
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -700,12 +658,6 @@ end function ch_eqi
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 
@@ -779,12 +731,6 @@ end subroutine ch_to_digit
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 
@@ -1016,12 +962,6 @@ end subroutine class_matrix
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
 subroutine imtqlx ( n, d, e, z )
@@ -1239,12 +1179,6 @@ end subroutine imtqlx
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
 subroutine parchk ( gaussian_kind, m, alpha, beta )
@@ -1341,10 +1275,6 @@ end subroutine parchk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE
@@ -1597,12 +1527,6 @@ end function r8_gamma_gq
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
 subroutine r8mat_write ( output_filename, m, n, table )
@@ -1690,11 +1614,6 @@ end subroutine r8mat_write
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
 subroutine rule_write ( order, x, w, r, filename )
@@ -1773,11 +1692,6 @@ end subroutine rule_write
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 
@@ -1907,11 +1821,6 @@ end subroutine s_to_i4
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 
@@ -2203,12 +2112,6 @@ end subroutine s_to_r8
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
-!!
 !! SOURCE
 
 subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, beta, a, &
@@ -2451,12 +2354,6 @@ end subroutine scqf
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gaussian_quadrature
-!!
-!! CHILDREN
-!!      imtqlx
 !!
 !! SOURCE
 

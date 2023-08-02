@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (MT)
+!!  Copyright (C) 1998-2022 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -33,6 +29,7 @@ module m_nonlop
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
+ use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_nonlop_pl,   only : nonlop_pl
@@ -323,24 +320,16 @@ contains
 !! * See nonlop_pl and nonlop_ylm to have more comments...
 !! * In the case signs=1, the array vectout is not used.
 !!
-!! PARENTS
-!!      m_cgwf,m_d2frnl,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy,m_fock_getghc
-!!      m_forstr,m_getgh1c,m_getgh2c,m_getghc,m_invovl,m_lobpcgwf,m_nonlop_test
-!!      m_orbmag,m_pead_nl_loop,m_prep_kgb,m_rf2,m_vtowfk
-!!
-!! CHILDREN
-!!      dotprod_g,gpu_nonlop
-!!
 !! SOURCE
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
-&                 enl,iatom_only,only_SO,qdir,select_k) !optional arguments
+&                 cprjin_left,enl,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cpopt,idir,ndat,nnlout,paw_opt,signs,tim_nonlop
- integer,intent(in),optional :: iatom_only,only_SO,qdir,select_k
+ integer,intent(in),optional :: iatom_only,only_SO,qdir,ndat_left,select_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
@@ -348,13 +337,16 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp),intent(in),target,optional :: enl(:,:,:,:)
  real(dp),intent(inout),target :: vectin(:,:)
  real(dp),intent(out),target :: enlout(:),svectout(:,:)
+ real(dp),intent(out),optional :: enlout_im(:)
  real(dp),intent(inout),target :: vectout(:,:)
  type(pawcprj_type),intent(inout),target :: cprjin(:,:)
+ type(pawcprj_type),intent(inout),target,optional :: cprjin_left(:,:)
+
 
 !Local variables-------------------------------
 !scalars
  integer :: dimenl1,dimenl2,dimenl2_,dimekbq,dimffnlin,dimffnlout,dimsij,iatm,iatom_only_,idat
- integer :: ii,ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm
+ integer :: ii,ispden,ispinor,istwf_k,itypat,jspinor,matblk_,my_nspinor,n1,n2,n3,natom_,ncpgr_atm,ndat_left_
  integer :: nkpgin,nkpgout,npwin,npwout,ntypat_,only_SO_,select_k_,shift1,shift2,shift3
  logical :: atom_pert,force_recompute_ph3d,kpgin_allocated,kpgout_allocated,use_gemm_nonlop
  character(len=500) :: msg
@@ -403,7 +395,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      ABI_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
-     ABI_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.')
+     ABI_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm to 1.')
    end if
  end if
  if (hamk%use_gpu_cuda/=0.and.hamk%dimekbq/=1) then
@@ -517,7 +509,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  end if
 !This test is OK only because explicit sizes are passed to nonlop_* routines
  if (size(vectin)<2*npwin*my_nspinor*ndat) then
-   ABI_BUG('Incorrect size for vectin!')
+   !FB: Allow the usage of nonlop from the "linalg" representation where
+   !FB: the cg are distributed over the plane waves with npband > 1
+   !FB: in case signs=1 & choice=1
+   if (signs==1 .and. choice==1) then
+      npwin = size(vectin,2)/ndat/my_nspinor
+   else
+      ABI_BUG('Incorrect size for vectin!')
+   end if
  end if
  if(choice/=0.and.signs==2) then
    if(paw_opt/=3) then
@@ -535,6 +534,16 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if(cpopt>=0) then
    if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
      ABI_BUG('Incorrect size for cprjin!')
+   end if
+ end if
+ ndat_left_ = 1
+ if (present(ndat_left)) then
+   ndat_left_ = ndat_left
+ end if
+ if(present(cprjin_left)) then
+   if (size(cprjin_left)/=hamk%natom*my_nspinor*ndat*ndat_left_) then
+     msg = 'Incorrect size for cprjin_left!'
+     ABI_BUG(msg)
    end if
  end if
 
@@ -656,15 +665,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
 
-! use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-!& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
-!& cpopt < 3 .and. hamk%useylm /= 0 .and. &
-!& (choice < 2 .or. choice == 7) )
-
- use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-& signs == 2 .and. paw_opt /= 2 .and. &
-& cpopt < 3 .and. hamk%useylm /= 0 .and. &
-& (choice < 2 .or. choice == 7) )
+ use_gemm_nonlop=.false.
+ if (gemm_nonlop_use_gemm) then
+   use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
+   use_gemm_nonlop= ( use_gemm_nonlop .or. &
+&      ( signs == 2 .and. paw_opt /= 2 .and. &
+&        cpopt < 3 .and. hamk%useylm /= 0 .and. &
+&        (choice < 2 .or. choice == 7) ) )
+   use_gemm_nonlop= ( use_gemm_nonlop .or. &
+&      ( choice==2.and.signs==1 .and. hamk%useylm/=0 .and. &
+&        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
+ end if
 
  if(use_gemm_nonlop) then
    !call wrtout(std_out, "Calling gemm_nonlop")
@@ -716,8 +727,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      end if
      if (nnlout>0) then
       !enlout_idat => enlout((idat-1)*nnlout+1:(idat*nnlout))
-       b4 = (idat-1)*nnlout+1
-       e4 = (idat*nnlout)
+       b4 = (idat-1)*nnlout*ndat_left_+1
+       e4 = (idat*nnlout*ndat_left_)
      else
       !enlout_idat => enlout
        b4 = lbound(enlout,dim=1)
@@ -735,13 +746,24 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       vectin(:,b0:e0),vectout(:,b1:e1))
 !    Spherical Harmonics version
      else if (hamk%use_gpu_cuda==0) then
-       call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
-&       dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
-&       indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
-&       hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
-&       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
-&       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
-&       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir)
+       if (present(cprjin_left).and.present(enlout_im)) then
+         call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
+&         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
+&         indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
+&         hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
+&         nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
+&         ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
+&         svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir,&
+          cprjin_left=cprjin_left,enlout_im=enlout_im,ndat_left=ndat_left_)
+      else
+         call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
+&         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
+&         indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda(idat),&
+&         hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,natom_,nattyp_,hamk%ngfft,&
+&         nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
+&         ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
+&         svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1),qdir=qdir)
+       end if
 !    GPU version
      else
        call nonlop_gpu(atindx1_,choice,cpopt,cprjin(:,b3:e3),dimenl1,dimenl2_,&
@@ -751,7 +773,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       nkpgin,nkpgout,nloalg_,nnlout,npwin,npwout,my_nspinor,hamk%nspinor,&
 &       ntypat_,paw_opt,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,&
 &       svectout(:,b2:e2),hamk%ucvol,vectin(:,b0:e0),vectout(:,b1:e1))
-     end if
+    end if
+
    end do
    !$omp end parallel do
  end if
@@ -803,7 +826,7 @@ end subroutine nonlop
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2022 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -934,13 +957,8 @@ end subroutine nonlop
 !! * Implementation for spinorial wave functions (nspinor=2)
 !! * Implementation for response function (phonons, ddk, elastic tensor, ...)
 !!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!      dotprod_g,gpu_nonlop
-!!
 !! SOURCE
+
 
  subroutine nonlop_gpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimffnlin,dimffnlout,&
 &                      enl,enlout,ffnlin,ffnlout,gprimd,idir,indlmn,istwf_k,&
@@ -987,11 +1005,11 @@ end subroutine nonlop
  DBG_ENTER("COLL")
 
 !Error on bad choice
- if ((choice<0 .or. choice>3).and. choice/=23 .and. choice/=24) then
+ if ((choice<0 .or. (choice>3.and.choice/=7)).and. choice/=23 .and. choice/=24) then
    write(msg,'(a,i0,a)')'Does not presently support this choice=',choice,'.'
    ABI_BUG(msg)
  end if
- if (cpopt<-1.or.cpopt>1) then
+ if (cpopt<-1.or.cpopt>2) then
    msg='  Bad value for cpopt !'
    ABI_BUG(msg)
  end if
@@ -1000,7 +1018,7 @@ end subroutine nonlop
    ABI_ERROR(msg)
  end if
 
- if ((cpopt==0).or.(cpopt==1))  then
+ if ((cpopt==0).or.(cpopt==1).or.(cpopt==2))  then
    ABI_MALLOC(proj,(2,lmnmax*natom))
    proj=zero;
  end if
@@ -1012,6 +1030,23 @@ end subroutine nonlop
    ABI_MALLOC(svectout_,(2,npwin*nspinor*(paw_opt/3)))
  else
    signs_=signs;vectout_=>vectout;svectout_=>svectout
+ end if
+
+!if cpot==2, the projections are already in memory
+ if (cpopt>=2) then
+   iproj=0
+   do ispinor=1,nspinor
+     iatom=0
+     do itypat=1,ntypat
+       do ia=1,nattyp(itypat)
+         iatom=iatom+1
+         do ilmn=1,cprjin(iatom,1)%nlmn
+           iproj=iproj+1
+           proj(:,iproj)=cprjin(iatom,1)%cp(:,ilmn)
+         end do
+       end do
+     end do
+   end do
  end if
 
 #if defined HAVE_GPU_CUDA
@@ -1050,6 +1085,9 @@ end subroutine nonlop
        end do
      end do
    end do
+ end if
+
+ if (allocated(proj)) then
    ABI_FREE(proj)
  end if
 

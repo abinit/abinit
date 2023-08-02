@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
+## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 #
 # Multi-flavor Fast Fourier Transform support
@@ -86,6 +86,11 @@ AC_DEFUN([SD_FFT_DETECT], [
       dfti)
         _SD_DFTI_DETECT
         if test "${sd_dfti_ok}" = "yes"; then
+          sd_fft_cppflags="${sd_dfti_cppflags}"
+          sd_fft_cflags="${sd_dfti_cflags}"
+          sd_fft_fcflags="${sd_dfti_fcflags}"
+          sd_fft_ldflags="${sd_dfti_ldflags}"
+          sd_fft_libs="${sd_dfti_libs}"
           sd_fft_ok="yes"
         fi
         ;;
@@ -297,6 +302,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
   # Start from the internal implementation
   sd_fft_selected_flavors="goedecker"
+  tmp_fft_has_fftw3=""
   tmp_linalg_has_mkl=`echo "${sd_linalg_flavor}" | grep "mkl"`
 
   # Prepend PFFT if available
@@ -308,7 +314,9 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
   # Prepend FFTW3 if available
   if test "${sd_fftw3_init}" != "" -a "${sd_fftw3_enable}" != "no"; then
-    sd_fft_selected_flavors="fftw3-threads fftw3 ${sd_fft_selected_flavors}"
+    if test "${tmp_linalg_has_mkl}" = ""; then
+      sd_fft_selected_flavors="fftw3-threads fftw3 ${sd_fft_selected_flavors}"
+    fi
   fi
 
   # Prepend DFTI if linear algebra is MKL
@@ -318,7 +326,19 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
   AC_MSG_RESULT([${sd_fft_selected_flavors}])
 
+  # Warn about incompatibilities
+  AC_MSG_WARN([MKL is incompatible with FFTW3
+
+                    Please use DFTI instead and consult
+                    https://software.intel.com/content/www/us/en/develop/documentation/onemkl-developer-reference-fortran/top/fourier-transform-functions.html
+
+                    If you set the FFT flavor to fftw3, the configure script
+                    will abort. Otherwise, your FFTW3 settings will be ignored.
+
+])
+
   # Clean-up the mess
+  unset tmp_fft_has_fftw3
   unset tmp_linalg_has_mkl
 ]) # _SD_FFT_INIT_FLAVORS
 

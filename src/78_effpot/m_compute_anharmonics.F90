@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -52,17 +48,6 @@ contains
 !! OUTPUT
 !! eff_pot<type(effective_potential_type)> = effective_potential datatype to be initialized
 !!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      effective_potential_file_read,effective_potential_free
-!!      effective_potential_setelastic3rd,effective_potential_setelastic4th
-!!      effective_potential_setelasticdispcoupling
-!!      effective_potential_setstrainphononcoupling
-!!      effective_potential_writeabiinput,harmonics_terms_applysumrule
-!!      phonon_strain,strain_free,strain_get,strain_init,wrtout,xmpi_bcast
-!!
 !! SOURCE
 
 subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
@@ -97,9 +82,9 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   real(dp) :: delta,delta1,delta2
   character(len=500) :: message
   character(len=fnlen):: name
-  logical :: files_availables = .True.,has_any_strain = .False.
-  logical :: has_all_strain = .True.
-  logical :: iam_master=.FALSE.
+  logical :: files_availables,has_any_strain
+  logical :: has_all_strain
+  logical :: iam_master
   integer,parameter :: master=0
  !arrays
   integer  :: have_strain(6)
@@ -131,6 +116,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
  !0)Initialisation of variables:
 ! Set MPI local varibaless
   nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+  iam_master = .FALSE.
   iam_master = (my_rank == master)
 
  !==========================================
@@ -248,6 +234,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   write(message,'(a)') ' Strains available after reading the files:'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
+  has_any_strain = .False.
   do ii=1,size(eff_pots)
     if(effpot_strain(ii)%name /= "".and.file_usable(ii)) then
       write(message,'(a,a,a,I2,a,(ES10.2),a)')&
@@ -274,6 +261,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   end if
 
  !First check the strain
+  has_all_strain = .True.
   do ii =1,6
     jj = 0
     jj = count(effpot_strain%direction==ii)
@@ -377,6 +365,7 @@ subroutine compute_anharmonics(eff_pot,filenames,inp,comm)
   write(message,'(a,a)') ch10, ' After analyzing, the strains available are:'
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
+  files_availables = .True.
   if(has_any_strain) then
     do ii=1,6
       if(have_strain(ii)/=0) then

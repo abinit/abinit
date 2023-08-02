@@ -10,7 +10,7 @@
 !!         |Cnk> are wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2021 ABINIT group (MT,JWZ)
+!! Copyright (C) 2012-2022 ABINIT group (MT,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -78,6 +78,7 @@ module m_pawcprj
  public :: pawcprj_copy           ! Copy a cprj datastructure into another
  public :: pawcprj_axpby          ! cprjy(:,:) <- alpha.cprjx(:,:)+beta.cprjy(:,:)
  public :: pawcprj_zaxpby         ! cprjy(:,:) <- alpha.cprjx(:,:)+beta.cprjy(:,:), alpha and beta are COMPLEX scalars
+ public :: pawcprj_projbd         ! cprjy(:,:) <- alpha.cprjx(:,:)+beta.cprjy(:,:), alpha and beta are COMPLEX scalars
  public :: pawcprj_conjg          ! cprj(:,:) <- conjugate(cprj(:,:))
  public :: pawcprj_symkn          ! construct cprj from that at a symmetry related k point
  public :: pawcprj_lincom         ! Compute a LINear COMbination of cprj datastructure:
@@ -117,20 +118,6 @@ CONTAINS
 !!
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_chebfi,m_chi0
-!!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
-!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!      m_dfptnl_pert,m_dft_energy,m_electronpositron,m_epjdos,m_exc_analyze
-!!      m_exc_build,m_extraprho,m_fock,m_fock_getghc,m_forstr,m_getgh1c
-!!      m_getgh2c,m_getghc,m_gstate,m_invovl,m_io_kss,m_ksdiago,m_mlwfovlp_qp
-!!      m_nonlop,m_orbmag,m_paw_mkaewf,m_paw_occupancies,m_paw_optics
-!!      m_paw_overlap,m_paw_sym,m_pawcprj,m_plowannier,m_positron
-!!      m_prep_calc_ucrpa,m_rf2_init,m_scfcv_core,m_sigc,m_sigma_driver,m_sigx
-!!      m_suscep_stat,m_vhxc_me,m_vtorho,m_vtowfk,m_wfd,m_wfd_optic,m_wvl_psi
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -191,21 +178,6 @@ end subroutine pawcprj_alloc
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
-!! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgprj,m_cgwf,m_chebfi,m_chi0
-!!      m_classify_bands,m_cohsex,m_d2frnl,m_datafordmft,m_dfpt_cgwf
-!!      m_dfpt_looppert,m_dfpt_mkrho,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!      m_dfptnl_pert,m_dft_energy,m_efield,m_electronpositron,m_epjdos
-!!      m_exc_analyze,m_exc_build,m_extraprho,m_fock,m_fock_getghc,m_forstr
-!!      m_getgh1c,m_getgh2c,m_getghc,m_gkk,m_gstate,m_invovl,m_io_kss,m_ksdiago
-!!      m_mlwfovlp_qp,m_nonlop,m_orbmag,m_paw_mkaewf,m_paw_occupancies
-!!      m_paw_optics,m_paw_overlap,m_paw_sym,m_pawcprj,m_phgamma,m_phpi
-!!      m_plowannier,m_positron,m_prep_calc_ucrpa,m_rf2_init,m_scf_history
-!!      m_scfcv_core,m_sigc,m_sigma_driver,m_sigmaph,m_sigx,m_suscep_stat
-!!      m_vhxc_me,m_vtorho,m_vtowfk,m_wfd,m_wfd_optic
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_free(cprj)
@@ -249,11 +221,6 @@ end subroutine pawcprj_free
 !!
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
-!!
-!! PARENTS
-!!      m_cgprj,m_dfpt_cgwf,m_fock,m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -303,15 +270,6 @@ end subroutine pawcprj_set_zero
 !!
 !! NOTES
 !!  MG: What about an option to report a pointer to cprj_in?
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf,m_chebfi,m_chi0,m_classify_bands,m_cohsex
-!!      m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv,m_dfpt_vtowfk
-!!      m_electronpositron,m_extraprho,m_fock,m_getghc,m_io_kss,m_nonlop
-!!      m_orbmag,m_paw_sym,m_pawcprj,m_positron,m_prep_calc_ucrpa,m_sigc,m_sigx
-!!      m_vtowfk,m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -413,12 +371,6 @@ end subroutine pawcprj_copy
 !!
 !! SIDE EFFECTS
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
-!!
-!! PARENTS
-!!      m_chebfi,m_dfpt_cgwf,m_dfpt_scfcv,m_extraprho,m_getgh1c,m_invovl
-!!      m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -536,11 +488,6 @@ end subroutine pawcprj_axpby
 !! SIDE EFFECTS
 !!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
 !!
-!! PARENTS
-!!      m_dfpt_vtowfk,m_extraprho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_zaxpby(alpha,beta,cprjx,cprjy)
@@ -563,7 +510,7 @@ end subroutine pawcprj_axpby
  norma=alpha(1)**2+alpha(2)**2
  normb=beta(1) **2+beta(2) **2
  n1dimy=size(cprjy,dim=1);n2dimy=size(cprjy,dim=2);ncpgry=cprjy(1,1)%ncpgr
- if (norma>tol16) then
+ if (norma>tol16*tol16) then
    n1dimx=size(cprjx,dim=1);n2dimx=size(cprjx,dim=2);ncpgrx=cprjx(1,1)%ncpgr
    msg = ""
    if (n1dimx/=n1dimy) msg = TRIM(msg)//"Error in pawcprj_zaxpby: n1 wrong sizes !"//ch10
@@ -574,7 +521,7 @@ end subroutine pawcprj_axpby
    end if
  end if
 
- if (norma<=tol16) then
+ if (norma<=tol16*tol16) then
    do jj=1,n2dimy
      do ii=1,n1dimy
        nlmn=cprjy(ii,jj)%nlmn
@@ -601,7 +548,7 @@ end subroutine pawcprj_axpby
        end do
      end do
    end if
- else if (normb<=tol16) then
+ else if (normb<=tol16*tol16) then
    do jj=1,n2dimx
      do ii=1,n1dimx
        nlmn=cprjx(ii,jj)%nlmn
@@ -625,6 +572,38 @@ end subroutine pawcprj_axpby
        end do
      end do
    end if
+! else if (abs(beta(1)-one)<tol16.and.abs(beta(2))<tol16) then
+!   do jj=1,n2dimx
+!     do ii=1,n1dimx
+!       nlmn=cprjx(ii,jj)%nlmn
+!       cprjy(ii,jj)%nlmn =nlmn
+!       do kk=1,nlmn
+!         cp1=cprjy(ii,jj)%cp(1,kk)
+!         cp2=cprjy(ii,jj)%cp(2,kk)
+!         cp1=cp1+alpha(1)*cprjx(ii,jj)%cp(1,kk)-alpha(2)*cprjx(ii,jj)%cp(2,kk)
+!         cp2=cp2+alpha(1)*cprjx(ii,jj)%cp(2,kk)+alpha(2)*cprjx(ii,jj)%cp(1,kk)
+!         cprjy(ii,jj)%cp(1,kk)=cp1
+!         cprjy(ii,jj)%cp(2,kk)=cp2
+!       end do
+!     end do
+!   end do
+!   if (ncpgrx>0) then
+!     do jj=1,n2dimx
+!       do ii=1,n1dimx
+!         nlmn=cprjx(ii,jj)%nlmn
+!         do kk=1,nlmn
+!           do ll=1,ncpgrx
+!             cp1=cprjy(ii,jj)%dcp(1,ll,kk)
+!             cp2=cprjy(ii,jj)%dcp(2,ll,kk)
+!             cp1=cp1+alpha(1)*cprjx(ii,jj)%dcp(1,ll,kk)-alpha(2)*cprjx(ii,jj)%dcp(2,ll,kk)
+!             cp2=cp2+alpha(1)*cprjx(ii,jj)%dcp(2,ll,kk)+alpha(2)*cprjx(ii,jj)%dcp(1,ll,kk)
+!             cprjy(ii,jj)%dcp(1,ll,kk)=cp1
+!             cprjy(ii,jj)%dcp(2,ll,kk)=cp2
+!           end do
+!         end do
+!       end do
+!     end do
+!   end if
  else
    do jj=1,n2dimx
      do ii=1,n1dimx
@@ -635,6 +614,10 @@ end subroutine pawcprj_axpby
 &         +beta(1) *cprjy(ii,jj)%cp(1,kk)-beta(2) *cprjy(ii,jj)%cp(2,kk)
          cp2=alpha(1)*cprjx(ii,jj)%cp(2,kk)+alpha(2)*cprjx(ii,jj)%cp(1,kk) &
 &         +beta(1) *cprjy(ii,jj)%cp(2,kk)+beta(2) *cprjy(ii,jj)%cp(1,kk)
+!         cp1=beta(1) *cprjy(ii,jj)%cp(1,kk)-beta(2) *cprjy(ii,jj)%cp(2,kk)
+!         cp1=cp1+alpha(1)*cprjx(ii,jj)%cp(1,kk)-alpha(2)*cprjx(ii,jj)%cp(2,kk)
+!         cp2=beta(1) *cprjy(ii,jj)%cp(2,kk)+beta(2) *cprjy(ii,jj)%cp(1,kk)
+!         cp2=cp2+alpha(1)*cprjx(ii,jj)%cp(2,kk)+alpha(2)*cprjx(ii,jj)%cp(1,kk)
          cprjy(ii,jj)%cp(1,kk)=cp1
          cprjy(ii,jj)%cp(2,kk)=cp2
        end do
@@ -650,6 +633,10 @@ end subroutine pawcprj_axpby
 &             +beta(1) *cprjy(ii,jj)%dcp(1,ll,kk)-beta(2) *cprjy(ii,jj)%dcp(2,ll,kk)
              cp2=alpha(1)*cprjx(ii,jj)%dcp(2,ll,kk)+alpha(2)*cprjx(ii,jj)%dcp(1,ll,kk) &
 &             +beta(1) *cprjy(ii,jj)%dcp(2,ll,kk)+beta(2) *cprjy(ii,jj)%dcp(1,ll,kk)
+!             cp1=beta(1) *cprjy(ii,jj)%dcp(1,ll,kk)-beta(2) *cprjy(ii,jj)%dcp(2,ll,kk)
+!             cp1=cp1+alpha(1)*cprjx(ii,jj)%dcp(1,ll,kk)-alpha(2)*cprjx(ii,jj)%dcp(2,ll,kk)
+!             cp2=beta(1) *cprjy(ii,jj)%dcp(2,ll,kk)+beta(2) *cprjy(ii,jj)%dcp(1,ll,kk)
+!             cp2=cp2+alpha(1)*cprjx(ii,jj)%dcp(2,ll,kk)+alpha(2)*cprjx(ii,jj)%dcp(1,ll,kk)
              cprjy(ii,jj)%dcp(1,ll,kk)=cp1
              cprjy(ii,jj)%dcp(2,ll,kk)=cp2
            end do
@@ -660,6 +647,91 @@ end subroutine pawcprj_axpby
  end if
 
 end subroutine pawcprj_zaxpby
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_pawcprj/pawcprj_projbd
+!! NAME
+!! pawcprj_projbd
+!!
+!! FUNCTION
+!! Apply ZAXPBY (blas-like) operation with 2 cprj datastructures:
+!!  cprjy(:,:) <- alpha.cprjx(:,:)+beta.cprjy(:,:)
+!!  alpha and beta are COMPLEX scalars
+!!
+!! INPUTS
+!!  alpha(2),beta(2)= alpha,beta COMPLEX factors
+!!  cprjx(:,:) <type(pawcprj_type)>= input cprjx datastructure
+!!
+!! SIDE EFFECTS
+!!  cprjy(:,:) <type(pawcprj_type)>= input/output cprjy datastructure
+!!
+!! SOURCE
+
+ subroutine pawcprj_projbd(alpha,cprjx,cprjy)
+
+!Arguments ------------------------------------
+!scalars
+ real(dp),intent(in) :: alpha(:,:)
+!arrays
+ type(pawcprj_type),intent(in) :: cprjx(:,:)
+ type(pawcprj_type),intent(inout) :: cprjy(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ia,ii,jj,kk,ll,n1dima,n1dimx,n1dimy,n2dimx,n2dimy,n2dima,ncpgrx,ncpgry,nlmn
+ real(dp) :: cp1,cp2,norma
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ n1dimy=size(cprjy,dim=1);n2dimy=size(cprjy,dim=2);ncpgry=cprjy(1,1)%ncpgr
+ n1dimx=size(cprjx,dim=1);n2dimx=size(cprjx,dim=2);ncpgrx=cprjx(1,1)%ncpgr
+ n1dima=size(alpha,dim=1);n2dima=size(alpha,dim=2)
+ msg = ""
+ if (n1dima/=2) msg = TRIM(msg)//"Error in pawcprj_projbd: alpha n1 wrong sizes !"//ch10
+ if (n1dimx/=n1dimy) msg = TRIM(msg)//"Error in pawcprj_projbd: n1 wrong sizes !"//ch10
+ if (n2dimx/=n2dimy*n2dima) msg = TRIM(msg)//"Error in pawcprj_projbd: n2 wrong sizes !"//ch10
+ if (ncpgrx/=ncpgry) msg = TRIM(msg)//"Error in pawcprj_projbd: ncpgr wrong sizes !"//ch10
+ if (LEN_TRIM(msg) > 0) then
+   LIBPAW_ERROR(msg)
+ end if
+
+ do ia=1,n2dima
+   norma=alpha(1,ia)**2+alpha(2,ia)**2
+   if (norma>tol16*tol16) then
+     do jj=1,n2dimy
+       do ii=1,n1dimx
+         nlmn=cprjy(ii,jj)%nlmn
+         cprjy(ii,jj)%nlmn =nlmn
+         do kk=1,nlmn
+           cp1=alpha(1,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%cp(1,kk)-alpha(2,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%cp(2,kk)
+           cp2=alpha(1,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%cp(2,kk)+alpha(2,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%cp(1,kk)
+           cprjy(ii,jj)%cp(1,kk)=cprjy(ii,jj)%cp(1,kk)+cp1
+           cprjy(ii,jj)%cp(2,kk)=cprjy(ii,jj)%cp(2,kk)+cp2
+         end do
+       end do
+     end do
+     if (ncpgrx>0) then
+       do jj=1,n2dimy
+         do ii=1,n1dimx
+           nlmn=cprjy(ii,jj)%nlmn
+           do kk=1,nlmn
+             do ll=1,ncpgrx
+               cp1=alpha(1,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%dcp(1,ll,kk)-alpha(2,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%dcp(2,ll,kk)
+               cp2=alpha(1,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%dcp(2,ll,kk)+alpha(2,ia)*cprjx(ii,jj+(ia-1)*n2dimy)%dcp(1,ll,kk)
+               cprjy(ii,jj)%dcp(1,ll,kk)=cprjy(ii,jj)%dcp(1,ll,kk)+cp1
+               cprjy(ii,jj)%dcp(2,ll,kk)=cprjy(ii,jj)%dcp(2,ll,kk)+cp2
+             end do
+           end do
+         end do
+       end do
+     end if
+   end if
+ end do
+
+end subroutine pawcprj_projbd
 !!***
 
 !----------------------------------------------------------------------
@@ -703,11 +775,6 @@ end subroutine pawcprj_zaxpby
 !! NOTES
 !!  This routine is based on M. Giantomassi's doctoral dissertation, formula 7.77. It is not clear
 !!  whether it is implemented correctly for nonsymmorphic symmetries.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf,m_fock,m_orbmag
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -834,10 +901,6 @@ end subroutine pawcprj_zaxpby
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= input/output cprj datastructure
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_conjg(cprj)
@@ -900,11 +963,6 @@ end subroutine pawcprj_conjg
 !!
 !! NOTES
 !!  cprj_in and cprj_out must be dimensionned as cprj_in(n1,n2*nn) and cprj_in(n1,n2)
-!!
-!! PARENTS
-!!      m_cgcprj,m_extraprho,m_getgh1c,m_scfcv_core
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -997,30 +1055,33 @@ end subroutine pawcprj_lincom
 !!
 !! INPUTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
+!!  prtgrads :: optional, 1 to print gradients also
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
- subroutine pawcprj_output(cprj)
+ subroutine pawcprj_output(cprj,prtgrads)
 
 !Arguments ------------------------------------
 !scalar
+integer,optional :: prtgrads
 !arrays
  type(pawcprj_type),intent(in) :: cprj(:,:)
 
 !Local variables-------------------------------
 !scalar
  integer :: ii,jj,kk,nlmn,n1dim,n2dim
+ logical :: gradoutput
 
 ! *************************************************************************
 
  n1dim=size(cprj,dim=1)
  n2dim=size(cprj,dim=2)
+ gradoutput = .FALSE.
+ if(present(prtgrads)) then
+   gradoutput = (prtgrads .EQ. 1)
+ end if
 
  write(std_out,'(a)')' pawcprj_output '
 
@@ -1030,6 +1091,11 @@ end subroutine pawcprj_lincom
      nlmn=cprj(ii,jj)%nlmn
      do kk=1,nlmn
        write(std_out,'(2f12.8)')cprj(ii,jj)%cp(1,kk),cprj(ii,jj)%cp(2,kk)
+       if(gradoutput) then
+         write(std_out,'(6f12.8)')cprj(ii,jj)%dcp(1,1,kk),cprj(ii,jj)%dcp(2,1,kk),&
+           &cprj(ii,jj)%dcp(1,2,kk),cprj(ii,jj)%dcp(2,2,kk),&
+           &cprj(ii,jj)%dcp(1,3,kk),cprj(ii,jj)%dcp(2,3,kk)
+       end if
      end do
    end do
  end do
@@ -1081,14 +1147,6 @@ end subroutine pawcprj_output
 !!
 !! OUTPUT
 !!  cprj_k(dimcp,nspinor*nband) <type(pawcprj_type)>= output cprj datastructure
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgcprj,m_cgwf,m_datafordmft,m_dfpt_nstwf
-!!      m_dfpt_scfcv,m_dfpt_vtowfk,m_extraprho,m_fock_getghc,m_forstr,m_orbmag
-!!      m_paw_occupancies,m_paw_optics,m_paw_overlap,m_plowannier,m_positron
-!!      m_rf2_init,m_scfcv_core,m_suscep_stat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1309,12 +1367,6 @@ end subroutine pawcprj_get
 !! SIDE EFFECTS
 !!  cprj(dimcp,nspinor*mband*mkmem*nsppol)=output cprj (used if mkmem/=0)
 !!
-!! PARENTS
-!!      m_berryphase_new,m_cgprj,m_cgwf,m_dfpt_vtowfk,m_extraprho,m_orbmag
-!!      m_scfcv_core,m_vtowfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_put(atind,cprj_k,cprj,dimcp,iband1,ibg,ikpt,iorder,isppol,mband,&
@@ -1511,11 +1563,6 @@ end subroutine pawcprj_put
 !! SIDE EFFECTS
 !!  cprj(:,:) <type(pawcprj_type)>= cprj datastructure
 !!
-!! PARENTS
-!!      m_fock_getghc,m_forstr,m_ksdiago,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine pawcprj_reorder(cprj,atm_indx)
@@ -1601,6 +1648,7 @@ end subroutine pawcprj_reorder
 !!  receiver=ID of the receiver in spaceComm.
 !!  sender=ID of the sender in spaceComm.
 !!  spaceComm=MPI Communicator.
+!!  mtag= message tag
 !!
 !! OUTPUT
 !!  ierr=Error status.
@@ -1610,18 +1658,13 @@ end subroutine pawcprj_reorder
 !!  If sender==receiver, Cprj_send is copied into Cprj_recv.
 !!  It should be easy to avoid this additional copy in the calling routine.
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,receiver,spaceComm,ierr)
+subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,receiver,spaceComm,mtag,ierr)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,n2dim,ncpgr
+ integer,intent(in) :: mtag,natom,n2dim,ncpgr
  integer,intent(in) :: sender,receiver,spaceComm
  integer,intent(out) :: ierr
 !arrays
@@ -1688,9 +1731,9 @@ subroutine pawcprj_mpi_exch(natom,n2dim,nlmn,ncpgr,Cprj_send,Cprj_recv,sender,re
  end if
 
 !=== Transmit data ===
- call xmpi_exch(buffer_cp,2*ntotcp,sender,buffer_cp,receiver,spaceComm,ierr)
+ call xmpi_exch(buffer_cp,2*ntotcp,sender,buffer_cp,receiver,spaceComm,2*mtag,ierr)
  if (ncpgr/=0) then
-   call xmpi_exch(buffer_cpgr,2*ncpgr*ntotcp,sender,buffer_cpgr,receiver,spaceComm,ierr)
+   call xmpi_exch(buffer_cpgr,2*ncpgr*ntotcp,sender,buffer_cpgr,receiver,spaceComm,2*mtag+1,ierr)
  end if
 
 !=== UnPack buffers into Cprj_recv ===
@@ -1738,11 +1781,6 @@ end subroutine pawcprj_mpi_exch
 !! NOTES
 !!   perhaps in general it is more efficient to use pawcprj_mpi_exch but it is
 !!   convenient for coding to have separate send and recieve routines.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_orbmag,m_positron
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1850,11 +1888,6 @@ end subroutine pawcprj_mpi_send
 !!   Perhaps in general it is more efficient to use pawcprj_mpi_exch but it is
 !!   convenient for coding to have separate send and receive routines.
 !!
-!! PARENTS
-!!      m_berryphase_new,m_orbmag,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_mpi_recv(natom,n2dim,nlmn,ncpgr,cprj_in,sender,spaceComm,ierr)
@@ -1952,11 +1985,6 @@ end subroutine pawcprj_mpi_recv
 !!  cprj=the cprj datastructure
 !!  ierr=Error status.
 !!
-!! PARENTS
-!!      m_cgprj
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_mpi_sum(cprj,spaceComm,ierr)
@@ -2053,11 +2081,6 @@ end subroutine pawcprj_mpi_sum
 !! OUTPUT
 !!  cprj_gat=the gathered cprjs
 !!  ierr=Error status.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf,m_paw_optics,m_suscep_stat
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2189,11 +2212,6 @@ end subroutine pawcprj_mpi_allgather
 !!  ierr=Error status.
 !!  Cprj(natom,n2dim)<pawcprj_type>=The datatype to be transmitted by master and received by the others nodes.
 !!
-!! PARENTS
-!!      m_fock,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_bcast(Cprj,natom,n2dim,nlmn,ncpgr,master,spaceComm,ierr)
@@ -2307,10 +2325,6 @@ end subroutine pawcprj_bcast
 !!   To transfer cprj from atom distribution to band distribution, dimensions should be:
 !!    n1indim =natom       n2indim =nband/nproc*nspinor
 !!    n1outdim=natom/nproc n2outdim=nband*nspinor
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2555,11 +2569,6 @@ end subroutine pawcprj_bcast
 !! These quantities were build only if treated by the current proc
 !! the inner quantities being nspinor
 !!
-!! PARENTS
-!!      m_dft_energy,m_paw_occupancies
-!!
-!! CHILDREN
-!!
 !! SOURCE
  subroutine pawcprj_gather_spin(cprj,cprj_gat,natom,n2size,nspinor,nspinortot,&
 &                            spaceComm_spin,ierr)
@@ -2672,13 +2681,6 @@ end subroutine pawcprj_bcast
 !! OUTPUT
 !!  dimcprj(natom)=Number of nlm elements in the <p_{lmn}^i|\psi> matrix elements for i=1,...,natom.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_berryphase_new,m_dfpt_looppert,m_dfpt_scfcv
-!!      m_extraprho,m_fock,m_forstr,m_getghc,m_gstate,m_hamiltonian,m_io_kss
-!!      m_mlwfovlp_qp,m_orbmag,m_paw_overlap,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_getdim(dimcprj,natom,nattyp,ntypat,typat,Pawtab,sort_mode)
@@ -2739,11 +2741,6 @@ end subroutine pawcprj_getdim
 !!     Projected wave functions <Proj_i|Cnk> with all NL projectors for the left and the right wavefunction,respectively.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!  xmpi_sum
 !!
 !! SOURCE
 
@@ -2831,11 +2828,6 @@ end function paw_overlap
 !!  buffer = the data packed, dim : (2, n2dim*sum(nlmn))
 !!  [buffer_gr] = if present the gradient data packed, dim : (2, ncpgr, n2dim*sum(nlmn))
 !!
-!! PARENTS
-!!      m_paw_occupancies
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawcprj_pack(nlmn,cprj,buffer,buffer_gr)
@@ -2909,11 +2901,6 @@ end subroutine pawcprj_pack
 !!
 !! OUTPUT
 !!  cprj=The datatype unpacked
-!!
-!! PARENTS
-!!      m_paw_occupancies
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

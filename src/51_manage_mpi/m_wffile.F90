@@ -7,15 +7,11 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2022 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! NOTES
 !! wffile_type: a handler for dealing with the IO of a wavefunction file
@@ -240,11 +236,6 @@ CONTAINS
 !!  wff=<type(wffile_type)>=structured info for reading/writing the wavefunctions
 !!      only%nbOct_recMarker is changed
 !!
-!! PARENTS
-!!      m_hdr
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine getRecordMarkerLength_wffile(wff)
@@ -390,11 +381,6 @@ end subroutine getRecordMarkerLength_wffile
 !!         updated after the reading (with the length of the record)
 !!  recordmarker= content of the record marker
 !!
-!! PARENTS
-!!      m_hdr,m_wffile
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_MPI_IO
@@ -526,11 +512,6 @@ end subroutine rwRecordMarker
 !! SIDE EFFECTS
 !!  wff=<type(wffile_type)>=structured info for reading/writing
 !!
-!! PARENTS
-!!      m_wffile
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xnullifyOff(wff)
@@ -571,11 +552,6 @@ end subroutine xnullifyOff
 !!
 !! SIDE EFFECTS
 !!  wff=<type(wffile_type)>=structured info for reading/writing
-!!
-!! PARENTS
-!!      m_positron
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -620,11 +596,6 @@ end subroutine xmoveOff
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!      m_gstate,m_ioarr,m_positron,m_rwwf,m_wffile
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  We assume that:
@@ -695,11 +666,6 @@ end subroutine xderiveWRecEnd
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!      m_gstate,m_ioarr,m_positron,m_rwwf,m_wffile
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  We assume that:
 !!    wff%offwff contains the position of the beginning of the record
@@ -763,11 +729,6 @@ end subroutine xderiveWRecInit
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!      m_gstate,m_ioarr,m_rwwf,m_wffile
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  We assume that:
 !!    wff%off_recs contains the position of the beginning of the record
@@ -811,11 +772,6 @@ end subroutine xderiveRRecEnd
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!      m_gstate,m_ioarr,m_rwwf,m_wffile
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!  We assume that:
@@ -869,10 +825,6 @@ end subroutine xderiveRRecInit
 !!  wff=number of unit to which on which file is already opened.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -956,10 +908,6 @@ end subroutine clsopn
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function wff_usef90(wff)
@@ -987,10 +935,6 @@ end function wff_usef90
 !!  1 if a Fortran file is going to be read by this node, 0 otherwise.
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1036,12 +980,6 @@ end function wff_ireadf90
 !! OUTPUT
 !! ier=error code
 !! wff= structured info about the wavefunction file
-!!
-!! PARENTS
-!!      m_conducti,m_elpolariz,m_inwffil,m_ioarr,m_iowf,m_optics_vloc
-!!      m_paw_optics,m_positron,m_wfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1189,13 +1127,6 @@ end subroutine WffOpen
 !! OUTPUT
 !! ierr=error code
 !!
-!! PARENTS
-!!      m_conducti,m_dfpt_looppert,m_dfpt_lw,m_dfptnl_loop,m_elpolariz,m_gstate
-!!      m_ioarr,m_iowf,m_longwave,m_nonlinear,m_optics_vloc,m_paw_optics
-!!      m_pead_nl_loop,m_positron,m_respfn_driver,m_wfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffClose(wff,ier)
@@ -1246,10 +1177,6 @@ end subroutine WffClose
 !!
 !! OUTPUT
 !! ierr=error code
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1302,11 +1229,6 @@ end subroutine WffDelete
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_iowf,m_wfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffKg(wff,optkg)
@@ -1343,11 +1265,6 @@ end subroutine WffKg
 !!
 !! OUTPUT
 !!  ier = error code returned by the MPI call
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1404,10 +1321,6 @@ end subroutine WffOffset
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffReadDataRec_dp1d(dparray,ierr,ndp,wff)
@@ -1461,10 +1374,6 @@ end subroutine WffReadDataRec_dp1d
 !! ierr=error code
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1528,11 +1437,6 @@ end subroutine WffReadDataRec_dp2d
 !! nspinor=number of spinorial components of the wavefunctions
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_rwwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1613,11 +1517,6 @@ end subroutine WffReadNpwRec
 !!
 !! TODO
 !! For the future : one should treat the possible errors of backspace
-!!
-!! PARENTS
-!!      m_gstate,m_rwwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1705,11 +1604,6 @@ end subroutine WffReadSkipRec
 !!
 !!  For MPI-IO library the performance is improved by the use a "view" of the file for each proc.
 
-!! PARENTS
-!!      m_rwwf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffReadWrite_mpio(wff,rdwr,cg,mcg,icg,nband_disk,npwso,npwsotot,depl_mpi_to_seq,ierr)
@@ -2021,10 +1915,6 @@ end subroutine WffReadWrite_mpio
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffWriteDataRec_int2d(intarray,ierr,n1,n2,wff)
@@ -2079,10 +1969,6 @@ end subroutine WffWriteDataRec_int2d
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine WffWriteDataRec_dp1d(dparray,ierr,ndp,wff)
@@ -2136,10 +2022,6 @@ end subroutine WffWriteDataRec_dp1d
 !! ierr=error code
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2198,11 +2080,6 @@ end subroutine WffWriteDataRec_dp2d
 !! ierr=error code
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_rwwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2272,10 +2149,6 @@ end subroutine WffWriteNpwRec
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_int(wff,xval,ierr)
@@ -2332,10 +2205,6 @@ end subroutine xderiveRead_int
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2420,10 +2289,6 @@ end subroutine xderiveRead_int1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
@@ -2505,10 +2370,6 @@ end subroutine xderiveRead_int2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_dp(wff,xval,ierr)
@@ -2563,10 +2424,6 @@ end subroutine xderiveRead_dp
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2651,10 +2508,6 @@ end subroutine xderiveRead_dp1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
@@ -2738,10 +2591,6 @@ end subroutine xderiveRead_dp2d
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2876,10 +2725,6 @@ end subroutine xderiveRead_int2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveRead_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
@@ -3005,10 +2850,6 @@ end subroutine xderiveRead_dp2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveReadVal_char(wff,xval,n,ierr)
@@ -3061,11 +2902,6 @@ end subroutine xderiveReadVal_char
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!      m_rwwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3151,10 +2987,6 @@ end subroutine xmpi_read_int2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_int(wff,xval,ierr)
@@ -3203,10 +3035,6 @@ end subroutine xderiveWrite_int
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3275,10 +3103,6 @@ end subroutine xderiveWrite_int1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
@@ -3342,10 +3166,6 @@ end subroutine xderiveWrite_int2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp(wff,xval,ierr)
@@ -3394,10 +3214,6 @@ end subroutine xderiveWrite_dp
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3463,10 +3279,6 @@ end subroutine xderiveWrite_dp1d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
@@ -3530,10 +3342,6 @@ end subroutine xderiveWrite_dp2d
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp2d_seq(wff,xval,ierr)
@@ -3584,10 +3392,6 @@ end subroutine xderiveWrite_dp2d_seq
 !!
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3704,10 +3508,6 @@ end subroutine xderiveWrite_int2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_dp2d_displ(wff,xval,n1,n2,spaceComm,displace,ierr)
@@ -3822,10 +3622,6 @@ end subroutine xderiveWrite_dp2d_displ
 !! SIDE EFFECTS
 !!  wff= structured info for reading/writing the wavefunctions
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xderiveWrite_char(wff,xval,n,ierr)
@@ -3878,11 +3674,6 @@ end subroutine xderiveWrite_char
 !!
 !! SIDE EFFECTS
 !!  wff <type(wffile_type)> =
-!!
-!! PARENTS
-!!      m_elpolariz
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -172,12 +168,6 @@ contains
 !!
 !! TODO
 !! Not yet possible to use restartxf in parallel when localrdwf==0
-!!
-!! PARENTS
-!!      m_driver,m_gwls_sternheimer
-!!
-!! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -650,7 +640,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    end if
    if (check_conv) then
      do idynimage=1,ndynimage
-       _IBM6("hello world")
        iimage=list_dynimage(idynimage)
        delta_energy=delta_energy &
 &       +abs(results_img(iimage,itimimage)%results_gs%etotal &
@@ -821,12 +810,6 @@ end subroutine gstateimg
 !!
 !! OUTPUT
 !!  (data written to unit iout)
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
 !!
 !! SOURCE
 
@@ -1018,12 +1001,6 @@ end subroutine prtimg
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_dynimage,&
@@ -1059,11 +1036,6 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
 ! *************************************************************************
 
-!DEBUG
-!  write(std_out,'(a)')' m_gstate_img : enter '
-!  call flush(std_out)
-!ENDDEBUG
-
  is_pimd=(imgmov==9.or.imgmov==10.or.imgmov==13)
 
 !Write convergence info
@@ -1097,7 +1069,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 
  end if
 
-!Write the msg 
+!Write the msg
 !Prevent writing if iexit==1, which at present only happens for imgmov==6 algo
  if(imgmov/=6 .or. m1geo_param%iexit==0) call wrtout([std_out, ab_out] ,msg)
 
@@ -1176,12 +1148,6 @@ end subroutine predictimg
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine predict_copy(itimimage_eff,list_dynimage,ndynimage,nimage,&
@@ -1258,12 +1224,6 @@ end subroutine predict_copy
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      hist2var,mkrdim,precpred_1geo,var2hist,vel2hist
-!!
 !! SOURCE
 
 subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
@@ -1291,12 +1251,6 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 
 ! *************************************************************************
 
-!DEBUG
-!write(std_out,'(a)')' m_gstateimg, move_1geo : enter'
-!write(std_out,'(a,i4)')' itimimage_eff=',itimimage_eff
-!call flush(std_out)
-!ENDDEBUG
-
  natom=m1geo_param%ab_mover%natom
  ihist=m1geo_param%hist_1geo%ihist
 
@@ -1310,14 +1264,6 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
  rprim(:,:)   =results_img(1,itimimage_eff)%rprim(:,:)
  vel(:,:)     =results_img(1,itimimage_eff)%vel(:,:)
  vel_cell(:,:)=results_img(1,itimimage_eff)%vel_cell(:,:)
-
-!DEBUG
-!write(std_out,'(a,i4)')' m_gstateimg, move_1geo, init : ionmov=',m1geo_param%ab_mover%ionmov
-!do iatom=1,natom
-!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
-!enddo
-!ENDDEBUG
-
 
  call mkrdim(acell,rprim,rprimd)
 
@@ -1366,7 +1312,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
  nspden=resimg_all(1)%results_gs%nspden
  nsppol=resimg_all(1)%results_gs%nsppol
  call init_results_gs(natom,nspden,nsppol,results_gs_lincomb)
- call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb) 
+ call copy_results_gs(resimg_all(1)%results_gs,results_gs_lincomb)
  results_gs_lincomb%etotal=etotal
  results_gs_lincomb%entropy=entropy
  results_gs_lincomb%fermie=fermie
@@ -1411,7 +1357,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 & m1geo_param%hmctt,&
 & m1geo_param%icycle,&
 & m1geo_param%iexit,&
-& itimimage_eff,&     
+& itimimage_eff,&
 & m1geo_param%mttk_vars,&
 & m1geo_param%nctime,&
 & m1geo_param%ncycle,&
@@ -1440,22 +1386,9 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 !    results_img(iimage,next_itimimage)%vel_cell(:,:)=vel_cell(:,:)
    end do
  endif
-
-!DEBUG
-!write(std_out,'(a,i4)')' m_gstateimg, move_1geo, moved : ionmov=',m1geo_param%ab_mover%ionmov
-!do iatom=1,natom
-!  write(std_out,'(i4,3es14.6)') iatom,xred(1:3,iatom)
-!enddo
-!ENDDEBUG
-
  ABI_FREE(fcart)
  ABI_FREE(vel)
  ABI_FREE(xred)
-
-!DEBUG
-!write(std_out,'(a)')' m_gstateimg, move_1geo : exit'
-!call flush(std_out)
-!ENDDEBUG
 
 end subroutine move_1geo
 !!***

@@ -1,59 +1,41 @@
+# Added by runtests.py
+output_file = "t34.abo"
+indata_prefix = "t34i"
+tmpdata_prefix = "t34t"
+# end runtests.py section
+
 # Test for ionmov = 25 - hybrid Monte Carlo sampling
-# bcc Fe, low ecut, coarse kpt grid
+# with CaTiO3 Multibinit Model 
 
-  chksymbreak 0
-  nsym    1
+# Construction of harmonic lattice part
+ngqpt =  2 2 2
+dipdip  = 1 
+ncell = 2 2 2
 
-  ntypat  1
-  natom   2
-  znucl   26
-  typat   2*1
-  acell   3*5.42
-  rprim   1.0  0.0  0.0
-          0.0  1.0  0.0
-          0.0  0.0  1.0
-  xred    0.0000000000E+00  4.7299432674E-02  2.8356625537E-03
-          5.0000000000E-01  5.0270056733E-01  5.1716433745E-01
+#Inputs for Hybrid Monte Carlo Sampling with NPT ensemble (strain relaxation enabled)
 
-  prtden   0
-  iscf     7
-  toldfe   1.0d-10
-  nstep    10      # This is to improve the portability in the automatic testing
-
-  nband   20
-  ecut    20.0
-  tsmear  0.01
-  occopt  3
-
-  ionmov  25       # HMC sampling (NVT ensemble)
-  mdtemp  300 300  # Starting and final temperature values
+  dynamics  25       # HMC sampling (NPT ensemble)
+  temperature  300 300  # Starting and final temperature values
   hmctt   3        # number of steps per MC trial trajectory
-  dtion   250      # md step magnitude in a.u.
-  optcell 0        # no optimization of cell geometry 
-  hmcsst  0        # number of strain steps (optimization of unit cell geometry)
+  dtion   50      # md step magnitude in a.u.
+  optcell 2        # no optimization of cell geometry 
   ntime   4        # number of HMC sweeps
-
-  kptopt   1
-  ngkpt    2 2 2
-  nshiftk  1
-  shiftk   0.0  0.0  0.0
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "PseudosTM_pwteter/26fe.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
-#%% executable = abinit
+#%% executable = multibinit
+#%% exclude_builders = buda2_gnu_8.2_mpich3
+#%% system_xml = t98_model.xml
 #%% [files]
 #%% files_to_test = 
 #%%   t34.abo, tolnlines = 4, tolabs = 0.001, tolrel = 0.001, fld_options = -easy
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = S. PROKHORENKO
+#%% authors = S. PROKHORENKO, M. Schmitt 
 #%% keywords = MD,MC,Monte Carlo
 #%% description = 
-#%%   Hybrid Monte Carlo Sampling for NVT ensemble   
+#%%   Hybrid Monte Carlo Sampling for NPT ensemble   
 #%% topics = MolecularDynamics
 #%%<END TEST_INFO>
 

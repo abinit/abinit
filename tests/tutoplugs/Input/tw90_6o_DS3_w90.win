@@ -1,0 +1,30 @@
+num_wann = 1
+num_bands = 38
+
+begin projections
+ Cu:dx2-y2
+end projections
+
+write_hr = true
+guiding_centres = true
+postproc_setup = true
+
+exclude_bands = 1-28, 34-38
+dis_win_min = 4
+dis_win_max = 8.5
+dis_froz_min = 6
+dis_froz_max = 8.5
+dis_num_iter = 1000
+dis_conv_tol = 1e-11
+
+num_iter = 1000
+conv_tol = 1e-11
+
+bands_plot = true
+begin kpoint_path
+ G  0.00  0.00  0.00  N  0.25  0.25 -0.25
+ N  0.25  0.25 -0.25  X  0.50  0.00  0.00
+ X  0.50  0.00  0.00  G  0.00  0.00  0.00
+ G  0.00  0.00  0.00  M -0.25  0.25  0.25
+end kpoint_path
+bands_num_points = 20

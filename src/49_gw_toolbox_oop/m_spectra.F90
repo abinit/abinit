@@ -10,7 +10,7 @@
 !! matrix as calculated in the GW part of ABINIT (screening.F90)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG)
+!! Copyright (C) 2008-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -110,11 +110,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_screening
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine spectra_init(Spectra,nomega,omega,nqpts,qpts)
@@ -157,10 +152,6 @@ end subroutine spectra_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine spectra_free(Spectra)
@@ -194,10 +185,6 @@ end subroutine spectra_free
 !!  fname=Name of the file to be written.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -240,7 +227,7 @@ subroutine spectra_write(Spectra,write_bits,fname)
    end do
  end if
  !
- if ( IAND(write_bits,W_EM_LF ) == W_EM_LF ) then
+ if ( IAND(write_bits, W_EM_LF ) == W_EM_LF ) then
    write(unt,'(a)')'#'
    write(unt,'(a)')'# Macroscopic Dielectric Function with local fields included'
    call dump_qlist()
@@ -280,11 +267,6 @@ CONTAINS
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_spectra
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine dump_Qlist()
@@ -312,10 +294,6 @@ end subroutine spectra_write
 !!  Spectra=The Object containing the spectra
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -351,7 +329,7 @@ subroutine spectra_repr(Spectra,str)
    epsilon0_nlf= REAL(Spectra%emacro_nlf(1,iqpt))
    write(msg,'(a,3f9.6,a)')' For q-point: ',Spectra%qpts(:,iqpt),ch10
    format_diel=format_f84
-   if(abs(epsilon0)>1000.0d0 .or. abs(epsilon0_nlf)>1000.0d0) format_diel=format_es135 
+   if(abs(epsilon0)>1000.0d0 .or. abs(epsilon0_nlf)>1000.0d0) format_diel=format_es135
    str = strcat(str,msg)
    write(msg,format_diel)' dielectric constant = ',epsilon0,ch10
    str = strcat(str,msg)

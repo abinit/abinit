@@ -6,12 +6,10 @@
 !!  This module provides routines to read the Haydock file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (YG)
+!!  Copyright (C) 2013-2022 ABINIT group (YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -104,16 +102,9 @@ CONTAINS  !====================================================================
 !! OUTPUT
 !!  haydock_file = file descriptor for the haydock file
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine open_haydock(filename, haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -149,16 +140,9 @@ end subroutine open_haydock
 !! INPUT/OUTPUT
 !!  haydock_file = haydock file descriptor
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine read_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -215,16 +199,9 @@ end subroutine read_dim_haydock
 !! INPUTS
 !!  haydock_file = haydock file descriptor
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
  type(haydock_type),intent(in) :: haydock_file
@@ -252,16 +229,9 @@ end subroutine write_dim_haydock
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_haydock_io
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine skip_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -299,16 +269,9 @@ end subroutine skip_dim_haydock
 !! NOTES
 !!  niter = 0 if the q-point has not been found
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -393,16 +356,9 @@ end subroutine read_haydock
 !!  niter = number of iterations done
 !!  factor = pre-factor used to obtain the green function
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, factor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -444,16 +400,9 @@ end subroutine write_haydock
 !! INPUTS
 !!  haydock_file = haydock file descriptor
 !!
-!! PARENTS
-!!      m_haydock
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine close_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
  type(haydock_type),intent(inout) :: haydock_file
@@ -462,13 +411,8 @@ subroutine close_haydock(haydock_file)
 
  close(haydock_file%unt)
 
- if(allocated(haydock_file%qpoints)) then
-   ABI_FREE(haydock_file%qpoints)
- end if
-
- if(allocated(haydock_file%niter)) then
-   ABI_FREE(haydock_file%niter)
- end if
+ ABI_SFREE(haydock_file%qpoints)
+ ABI_SFREE(haydock_file%niter)
 
 end subroutine close_haydock
 !!***

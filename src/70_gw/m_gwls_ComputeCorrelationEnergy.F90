@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -79,11 +75,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -905,11 +896,6 @@ end subroutine compute_correlations_shift_lanczos
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_correlations_no_model_shift_lanczos(dtset, Sigma_x,Vxc_energy,debug)
@@ -1405,6 +1391,7 @@ call cleanup_Lanczos_basis()
 call cleanup_projected_Sternheimer_epsilon()
 
 call cpu_time(total_time2)
+total_time1 = zero
 total_time = total_time2-total_time1
 write(timing_string,'(A)')  "               TOTAL TIME                           :   "
 call write_timing_log(timing_string,total_time)
@@ -1427,11 +1414,6 @@ end subroutine compute_correlations_no_model_shift_lanczos
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1547,11 +1529,6 @@ end subroutine compute_integrands_shift_lanczos
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1678,11 +1655,6 @@ end subroutine output_results
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine output_epsilon_eigenvalues(lmax,eigenvalues,which_case)
@@ -1753,11 +1725,6 @@ end subroutine output_epsilon_eigenvalues
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

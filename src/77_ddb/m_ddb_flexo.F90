@@ -6,16 +6,12 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2019-2021 ABINIT group (MR,MS)
+!!  Copyright (C) 2019-2022 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -33,6 +29,7 @@ module m_ddb_flexo
  use m_errors
 
  use m_fstrings,       only : itoa,sjoin
+ use m_ddb_hdr
  use m_ddb
  use m_crystal,        only : crystal_t
  use m_dynmat,       only : asria_corr,cart39
@@ -59,12 +56,14 @@ contains
 !!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
 !!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
+!!  ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  filnamddb = name of the ddb file
 !!  flexoflg=  1 -> Computes all contributions to FxE
 !!             2 -> Computes electronic (clamped ion) contribution to FxE
 !!             3 -> Computes mixed contribution to FxE
 !!             4 -> Computes lattice contribution to FxE
+!!  prtvol= if > 1 print all individual quantities of the lattice contribution FxE
 !!  zeff(3,3,natom)= Born Effective charges
 !!
 !! OUTPUT
@@ -73,21 +72,16 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
-subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
+subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg,prtvol,zeff)
     
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer , intent(in)  :: asr,flexoflg
+ integer,intent(in) :: ddb_version
+ integer , intent(in)  :: asr,flexoflg,prtvol
  class(ddb_type),intent(in) :: ddb,ddb_lw
  type(crystal_t),intent(in) :: crystal
  character(len=fnlen) :: filnamddb
@@ -107,6 +101,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp) :: ciflexo(3,3,3,3)
  real(dp) :: intstrn(3,3,3,ddb%natom)
+ real(dp) :: piezofr(3,ddb%natom,3,3)
  real(dp) :: lattflexo(3,3,3,3)
  real(dp) :: mixflexo(3,3,3,3)
  real(dp) :: pol1(3,3,3,ddb%natom)
@@ -137,7 +132,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
   
    write(msg, '(2a)' ) ch10," Extract the electronic flexoelectric coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL') 
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
   
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -145,7 +140,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
      call wrtout(std_out, sjoin("- Cannot find clamped ion FxE tensor in DDB file:", filnamddb))
      call wrtout(std_out, "  flexoflag=1 or 2 requires the DDB file to include the corresponding long wave 3rd derivatives")
    else
-     call dtciflexo(ddb_lw%val(:,:,iblok),ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
+     call dtciflexo(ddb_lw%val(:,:,iblok),ddb_version,ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
    end if
 
  end if
@@ -159,7 +154,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Extract the P^(1) tensor from the DDB
    if (.not.intstrn_only) then
      lwsym=0
-     iblok = ddb_lw%get_quadrupoles(lwsym,33,pol1)
+     iblok = ddb_lw%get_quadrupoles(ddb_version,lwsym,BLKTYP_d3E_lw,pol1)
    end if
 
    rfphon(:)=0
@@ -176,7 +171,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
   
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL') 
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -222,8 +217,8 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    end if
 
    if (iblok/=0.and.jblok/=0) then
-     call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),crystal%gprimd,&
-   & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
+     call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),ddb_version,crystal%gprimd,&
+   & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,piezofr,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
    end if
 
  end if
@@ -246,7 +241,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
 
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL')
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -265,7 +260,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
 
    write(msg, '(2a)' ) ch10," Extract the FxE force response coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL')
-   call ddb_lw%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (jblok == 0) then
      call wrtout(std_out, "  ")
@@ -295,8 +290,8 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    end if
 
    if (iblok/=0.and.jblok/=0) then
-     call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
-   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,psinvdm,crystal%typat,crystal%ucvol,zeff)
+     call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),ddb_version,&
+   & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,piezofr,prtvol,psinvdm,crystal%typat,crystal%ucvol,zeff)
    end if
  end if
 
@@ -344,24 +339,19 @@ end subroutine ddb_flexo
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !! ucvol= unit cell volume
 !!
 !! OUTPUT
 !! ciflexo(3,3,3,3) = type-II Clamped Ion Flexoelectric Tensor
 !!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
-subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
+subroutine dtciflexo(blkval,ddb_version,mpert,natom,ciflexo,ucvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom
+ integer,intent(in) :: ddb_version,mpert,natom
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
@@ -369,7 +359,8 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,istrs,ivarA,strsd,strsd1,strsd2,strst,qvecd
+ integer,parameter :: cvrsio8=20100401
+ integer :: elfd,istrs,ivarA,ri,strsd,strsd1,strsd2,strst,qvecd
  logical :: iwrite
  real(dp) :: fac
  character(len=500) :: msg
@@ -386,8 +377,17 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two/ucvol
+   ri=2
+ else
+   fac=one/ucvol
+   ri=1
+ end if
+
 !Extraction of the clamped-ion flexoelectric coeficients 
- fac=two/ucvol
  do qvecd=1,3
    do istrs=1,6
      strsd1=alpha(istrs)
@@ -395,7 +395,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
      strst=natom+3; if (istrs>3) strst=natom+4
      strsd=istrs; if (istrs>3) strsd=istrs-3
      do elfd=1,3
-       ciflexo(elfd,qvecd,strsd1,strsd2)=-fac*d3cart(2,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
+       ciflexo(elfd,qvecd,strsd1,strsd2)=fac*d3cart(ri,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
        if (istrs>3) ciflexo(elfd,qvecd,strsd2,strsd1)=ciflexo(elfd,qvecd,strsd1,strsd2)
      end do
    end do
@@ -447,10 +447,12 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! blkval1d(2,3,mpert,3,mpert)= 1st derivative wrt atom displacements (at least)
 !! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt two atom displacements (at least)
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for Phi^(1) tensor
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !! gprimd(3,3)= basis vectors in the reciprocal space
 !! intstrn_only= activates only the calculation of the internal strain tensor
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
+!! piezofr(3,natom,3,3)= piezoelectric force response tensor 
 !! pol1(3,3,3,natom)= tensor with the polarization induced by an atomic displacement (P^(1))
 !! rprimd(3,3)= basis vectors in the real space
 !! ucvol= unit cell volume
@@ -460,19 +462,14 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! intstrn(3,3,3,natom) = relaxed-ion internal strain tensor
 !! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix
 !!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
-subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only,mixflexo,mpert,natom,pol1,psinvdm,rprimd,ucvol)
+subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,ddb_version,gprimd,intstrn,intstrn_only, &
+              & mixflexo,mpert,natom,piezofr,pol1,psinvdm,rprimd,ucvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: asr,mpert,natom
+ integer,intent(in) :: asr,ddb_version,mpert,natom
  real(dp),intent(in) :: ucvol
  logical,intent(in) :: intstrn_only
 !arrays
@@ -482,6 +479,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(out) :: intstrn(3,3,3,natom)
+ real(dp),intent(out) :: piezofr(3,natom,3,3)
  real(dp),intent(inout) :: pol1(3,3,3,natom)
  real(dp),intent(out) :: psinvdm(3*natom,3*natom)
  real(dp),intent(in) :: rprimd(3,3)
@@ -489,16 +487,17 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: cvrsio8=20100401
  integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,katd,qvecd,qvecd2
  logical :: iwrite
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
+ real(dp) :: fac
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
  real(dp) :: redforces(3,natom),forces(3,natom)
  real(dp) :: phi1(3,natom,3,natom,3)
- real(dp) :: piezofr(3,natom,3,3)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
  character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
@@ -513,13 +512,21 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !P^(1) lacks the 1/ucvol factor
  pol1=pol1/ucvol
 
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=-one
+ end if
+
 !Extraction of Phi^(1) tensor
  do qvecd=1,3
    do jat=1,natom
      do jatd=1,3
        do iat=1,natom
          do iatd=1,3
-           phi1(iatd,iat,jatd,jat,qvecd)=-two*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
+           phi1(iatd,iat,jatd,jat,qvecd)=fac*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
          end do
        end do
      end do
@@ -681,9 +688,12 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt atom displacements and electric field (at least)
 !! blkvalA(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for FxE force response tensor
 !! blkvalB(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for Phi^(1) tensor
-!! intstrn(3,3,3,natom) = relaxed-ion internal strain tensor
-!! mpert =maximum number of ipert
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
+!! intstrn(3,3,3,natom)= relaxed-ion internal strain tensor
+!! mpert= maximum number of ipert
 !! natom= number of atoms in unit cell
+!! piezofr(3,natom,3,3)= piezoelectric force response tensor (required to compute the Lagrange elastic tensor)
+!! prtvol= if >1 print all tensors entering the structure of lattflexo
 !! psinvdm(3*natom,3*natom) = pseudo inverse of dynamical matrix 
 !! typat(natom)= Type of each atom in the unit cell
 !! ucvol= unit cell volume
@@ -691,20 +701,14 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! OUTPUT
 !! lattflexo(3,3,3,3) = type-II lattice contribution to the Flexoelectric Tensor
 !!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
-!!
 !! SOURCE
 
-subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,&
-                     & ntypat,psinvdm,typat,ucvol,zeff)
+subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflexo,mpert,natom,&
+                     & ntypat,piezofr,prtvol,psinvdm,typat,ucvol,zeff)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,ntypat
+ integer,intent(in) :: ddb_version,mpert,natom,ntypat,prtvol
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -714,12 +718,14 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  real(dp),intent(in) :: blkvalA(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: blkvalB(2,3*mpert*3*mpert*3*mpert)
  real(dp),intent(in) :: intstrn(3,3,3,natom)
+ real(dp),intent(in) :: piezofr(3,natom,3,3)
  real(dp),intent(in) :: psinvdm(3*natom,3*natom)
  real(dp),intent(in) :: zeff(3,3,natom)
  real(dp),intent(out) :: lattflexo(3,3,3,3)
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: cvrsio8=20100401
  integer :: elfd,iat,iatd,istrs,ivar,jat,jatd,jvar,kat,katd,strsd
  integer :: strsd1,strsd2,strst,qvecd,qvecd2
  logical :: iwrite
@@ -734,9 +740,10 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  real(dp) :: flexois(3,natom,3,3,3)
  real(dp) :: flexofr(3,natom,3,3,3)
  real(dp) :: hatCsupkap(3,natom,3,3,3)
+ real(dp) :: lmcelast(3,3,3,3)
  real(dp) :: phi1(3,natom,3,natom,3)
  real(dp) :: ricelast_t2(3,3,3,3)
- real(dp) :: roundbkt(3,3,3,3),roundbkt_k(3,3,3,3,natom)
+ real(dp) :: roundbkt_k(3,3,3,3,natom)
  real(dp) :: sqrbkt_t1(3,3,3,3)
  real(dp) :: stress(3,3)
  character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
@@ -762,12 +769,20 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  d3cart(1,:,:,:,:,:,:) = reshape(blkvalB(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkvalB(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=-one
+ end if
+
  do qvecd=1,3
    do jat=1,natom
      do jatd=1,3
        do iat=1,natom
          do iatd=1,3
-           phi1(iatd,iat,jatd,jat,qvecd)=-two*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
+           phi1(iatd,iat,jatd,jat,qvecd)=fac*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
          end do
        end do
      end do
@@ -795,10 +810,17 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  end do
 
 !Calculate now the Lagrange elastic tensors 
-!First we need to extract the tensor with the q-gradient of the internal strain
-!(a.k.a flexoelectric force response tensor) 
+!First we need to extract the clamped-ion flexoelectric force response tensor
  d3cart(1,:,:,:,:,:,:) = reshape(blkvalA(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkvalA(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
+
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=one
+ end if
 
  do istrs=1,6
    strsd1=alpha(istrs)
@@ -808,7 +830,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
    do qvecd=1,3
      do iat=1,natom
        do iatd=1,3
-         flexofr(iatd,iat,qvecd,strsd1,strsd2)=-two*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
+         flexofr(iatd,iat,qvecd,strsd1,strsd2)=fac*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
          if (istrs>3) flexofr(iatd,iat,qvecd,strsd2,strsd1)=flexofr(iatd,iat,qvecd,strsd1,strsd2)
        end do
      end do
@@ -871,6 +893,11 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  end do
 
 !MR: kept for testing only. If uncommented the resulting elastic tensors must agree with HWRV's ones
+! write(ab_out,*)
+! write(ab_out,*) "Stress tensor"
+! do i=1,3
+!   write(ab_out,*) stress(i,:)
+! end do
 ! do i=1,3
 !   do j=1,3
 !     do k=1,3
@@ -889,19 +916,21 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 !   end do
 ! end do
 
-!Now compute the rount bracketed tensor of Born and Huang 
+!Now compute the contribution to the elastic tensor due to ion relaxations  
 !and sum with the clamped ion elastic tensor to obtain the relaxed ion one
- roundbkt(:,:,:,:)=zero
+ lmcelast(:,:,:,:)=zero
  do strsd2=1,3
    do strsd1=1,3
      do qvecd=1,3
-       do iatd=1,3
-         do iat=1,natom
-           roundbkt(iatd,qvecd,strsd1,strsd2)=roundbkt(iatd,qvecd,strsd1,strsd2) + &
-         & roundbkt_k(iatd,qvecd,strsd1,strsd2,iat)*fac
+       do jatd=1,3
+         do iatd=1,3
+           do iat=1,natom
+             lmcelast(jatd,qvecd,strsd1,strsd2)=lmcelast(jatd,qvecd,strsd1,strsd2) - &
+             intstrn(jatd,qvecd,iatd,iat)*piezofr(iatd,iat,strsd1,strsd2)*fac
+           end do
          end do
-         ricelast_t2(iatd,qvecd,strsd1,strsd2)=frcelast_t2(iatd,qvecd,strsd1,strsd2) + &
-       & roundbkt(iatd,qvecd,strsd1,strsd2)
+         ricelast_t2(jatd,qvecd,strsd1,strsd2)=frcelast_t2(jatd,qvecd,strsd1,strsd2) + &
+       & lmcelast(jatd,qvecd,strsd1,strsd2)
        end do
      end do
    end do
@@ -926,7 +955,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
    end do
  end do
 
-!Then separate the mass-dependent part using the ion relaxed Lagrange elastic tensor
+!Then separate the mass-dependent part 
  mtot=zero
  do iat=1,natom
    mtot=mtot + amu(typat(iat))
@@ -1013,8 +1042,79 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
+   if (prtvol > 1) then
+     write(msg,'(3a)')ch10,' (...)^kappa contribution to the flexoelectric force-response tensor (units: eV)',ch10
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     roundbkt_k(:,:,:,:,:)=roundbkt_k(:,:,:,:,:)*Ha_eV
+     do iat=1,natom
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xx', roundbkt_k(1,1,1,1,iat), roundbkt_k(1,1,2,2,iat), &
+               & roundbkt_k(1,1,3,3,iat),roundbkt_k(1,1,2,3,iat),roundbkt_k(1,1,1,3,iat),roundbkt_k(1,1,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yy', roundbkt_k(2,2,1,1,iat), roundbkt_k(2,2,2,2,iat), &
+               & roundbkt_k(2,2,3,3,iat),roundbkt_k(2,2,2,3,iat),roundbkt_k(2,2,1,3,iat),roundbkt_k(2,2,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zz', roundbkt_k(3,3,1,1,iat), roundbkt_k(3,3,2,2,iat), &
+               & roundbkt_k(3,3,3,3,iat),roundbkt_k(3,3,2,3,iat),roundbkt_k(3,3,1,3,iat),roundbkt_k(3,3,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yz', roundbkt_k(2,3,1,1,iat), roundbkt_k(2,3,2,2,iat), &
+               & roundbkt_k(2,3,3,3,iat),roundbkt_k(2,3,2,3,iat),roundbkt_k(2,3,1,3,iat),roundbkt_k(2,3,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xz', roundbkt_k(1,3,1,1,iat), roundbkt_k(1,3,2,2,iat), &
+               & roundbkt_k(1,3,3,3,iat),roundbkt_k(1,3,2,3,iat),roundbkt_k(1,3,1,3,iat),roundbkt_k(1,3,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', roundbkt_k(1,2,1,1,iat), roundbkt_k(1,2,2,2,iat), &
+               & roundbkt_k(1,2,3,3,iat),roundbkt_k(1,2,2,3,iat),roundbkt_k(1,2,1,3,iat),roundbkt_k(1,2,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', roundbkt_k(3,2,1,1,iat), roundbkt_k(3,2,2,2,iat), &
+               & roundbkt_k(3,2,3,3,iat),roundbkt_k(3,2,2,3,iat),roundbkt_k(3,2,1,3,iat),roundbkt_k(3,2,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', roundbkt_k(3,1,1,1,iat), roundbkt_k(3,1,2,2,iat), &
+               & roundbkt_k(3,1,3,3,iat),roundbkt_k(3,1,2,3,iat),roundbkt_k(3,1,1,3,iat),roundbkt_k(3,1,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', roundbkt_k(2,1,1,1,iat), roundbkt_k(2,1,2,2,iat), &
+               & roundbkt_k(2,1,3,3,iat),roundbkt_k(2,1,2,3,iat),roundbkt_k(2,1,1,3,iat),roundbkt_k(2,1,1,2,iat)
+       call wrtout([ab_out,std_out],msg,'COLL')
+     end do
 
-   write(msg,'(3a)')ch10,' Flexoelectric force response tensor (units: eV)',ch10
+     write(msg,'(3a)')ch10,' [...]^kappa contribution to the flexoelectric force-response tensor (units: eV)',ch10
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     flexofr(:,:,:,:,:)=flexofr(:,:,:,:,:)*Ha_eV
+     do iat=1,natom
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xx', flexofr(1,iat,1,1,1),flexofr(1,iat,1,2,2),flexofr(1,iat,1,3,3),&
+                                                     & flexofr(1,iat,1,2,3),flexofr(1,iat,1,1,3),flexofr(1,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yy', flexofr(2,iat,2,1,1),flexofr(2,iat,2,2,2),flexofr(2,iat,2,3,3),&
+                                                     & flexofr(2,iat,2,2,3),flexofr(2,iat,2,1,3),flexofr(2,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zz', flexofr(3,iat,3,1,1),flexofr(3,iat,3,2,2),flexofr(3,iat,3,3,3),&
+                                                     & flexofr(3,iat,3,2,3),flexofr(3,iat,3,1,3),flexofr(3,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yz', flexofr(2,iat,3,1,1),flexofr(2,iat,3,2,2),flexofr(2,iat,3,3,3),&
+                                                     & flexofr(2,iat,3,2,3),flexofr(2,iat,3,1,3),flexofr(2,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xz', flexofr(1,iat,3,1,1),flexofr(1,iat,3,2,2),flexofr(1,iat,3,3,3),&
+                                                     & flexofr(1,iat,3,2,3),flexofr(1,iat,3,1,3),flexofr(1,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', flexofr(1,iat,2,1,1),flexofr(1,iat,2,2,2),flexofr(1,iat,2,3,3),&
+                                                     & flexofr(1,iat,2,2,3),flexofr(1,iat,2,1,3),flexofr(1,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', flexofr(3,iat,2,1,1),flexofr(3,iat,2,2,2),flexofr(3,iat,2,3,3),&
+                                                     & flexofr(3,iat,2,2,3),flexofr(3,iat,2,1,3),flexofr(3,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', flexofr(3,iat,1,1,1),flexofr(3,iat,1,2,2),flexofr(3,iat,1,3,3),&
+                                                     & flexofr(3,iat,1,2,3),flexofr(3,iat,1,1,3),flexofr(3,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', flexofr(2,iat,1,1,1),flexofr(2,iat,1,2,2),flexofr(2,iat,1,3,3),&
+                                                     & flexofr(2,iat,1,2,3),flexofr(2,iat,1,1,3),flexofr(2,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       end do
+   end if
+
+   write(msg,'(3a)')ch10,' Flexoelectric force-response tensor (units: eV)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
    write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -1038,8 +1138,52 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', Csupkap(1,iat,2,1,1),Csupkap(1,iat,2,2,2),Csupkap(1,iat,2,3,3),&
                                                    & Csupkap(1,iat,2,2,3),Csupkap(1,iat,2,1,3),Csupkap(1,iat,2,1,2)  
      call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', Csupkap(3,iat,2,1,1),Csupkap(3,iat,2,2,2),Csupkap(3,iat,2,3,3),&
+                                                   & Csupkap(3,iat,2,2,3),Csupkap(3,iat,2,1,3),Csupkap(3,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', Csupkap(3,iat,1,1,1),Csupkap(3,iat,1,2,2),Csupkap(3,iat,1,3,3),&
+                                                   & Csupkap(3,iat,1,2,3),Csupkap(3,iat,1,1,3),Csupkap(3,iat,1,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', Csupkap(2,iat,1,1,1),Csupkap(2,iat,1,2,2),Csupkap(2,iat,1,3,3),&
+                                                   & Csupkap(2,iat,1,2,3),Csupkap(2,iat,1,1,3),Csupkap(2,iat,1,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
    end do
-
+   if (prtvol > 1) then 
+     write(msg,'(3a)')ch10,' Flexoelectric force-response tensor minus mass dependent part (units: eV)',ch10
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,*)' atom   dir        xx           yy           zz           yz           xz           xy'
+     call wrtout([ab_out,std_out],msg,'COLL')
+     hatCsupkap(:,:,:,:,:)=hatCsupkap(:,:,:,:,:)*Ha_eV
+     do iat=1,natom
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'xx',hatCsupkap(1,iat,1,1,1),hatCsupkap(1,iat,1,2,2),hatCsupkap(1,iat,1,3,3),&
+                                                     & hatCsupkap(1,iat,1,2,3),hatCsupkap(1,iat,1,1,3),hatCsupkap(1,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'yy',hatCsupkap(2,iat,2,1,1),hatCsupkap(2,iat,2,2,2),hatCsupkap(2,iat,2,3,3),&
+                                                     & hatCsupkap(2,iat,2,2,3),hatCsupkap(2,iat,2,1,3),hatCsupkap(2,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'zz',hatCsupkap(3,iat,3,1,1),hatCsupkap(3,iat,3,2,2),hatCsupkap(3,iat,3,3,3),&
+                                                     & hatCsupkap(3,iat,3,2,3),hatCsupkap(3,iat,3,1,3),hatCsupkap(3,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'yz',hatCsupkap(2,iat,3,1,1),hatCsupkap(2,iat,3,2,2),hatCsupkap(2,iat,3,3,3),&
+                                                     & hatCsupkap(2,iat,3,2,3),hatCsupkap(2,iat,3,1,3),hatCsupkap(2,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'xz',hatCsupkap(1,iat,3,1,1),hatCsupkap(1,iat,3,2,2),hatCsupkap(1,iat,3,3,3),&
+                                                     & hatCsupkap(1,iat,3,2,3),hatCsupkap(1,iat,3,1,3),hatCsupkap(1,iat,3,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'xy',hatCsupkap(1,iat,2,1,1),hatCsupkap(1,iat,2,2,2),hatCsupkap(1,iat,2,3,3),&
+                                                     & hatCsupkap(1,iat,2,2,3),hatCsupkap(1,iat,2,1,3),hatCsupkap(1,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'zy',hatCsupkap(3,iat,2,1,1),hatCsupkap(3,iat,2,2,2),hatCsupkap(3,iat,2,3,3),&
+                                                     & hatCsupkap(3,iat,2,2,3),hatCsupkap(3,iat,2,1,3),hatCsupkap(3,iat,2,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'zx',hatCsupkap(3,iat,1,1,1),hatCsupkap(3,iat,1,2,2),hatCsupkap(3,iat,1,3,3),&
+                                                     & hatCsupkap(3,iat,1,2,3),hatCsupkap(3,iat,1,1,3),hatCsupkap(3,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+       write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat,'yx',hatCsupkap(2,iat,1,1,1),hatCsupkap(2,iat,1,2,2),hatCsupkap(2,iat,1,3,3),&
+                                                     & hatCsupkap(2,iat,1,2,3),hatCsupkap(2,iat,1,1,3),hatCsupkap(2,iat,1,1,2)  
+       call wrtout([ab_out,std_out],msg,'COLL')
+     end do
+   end if
 
    write(msg,'(3a)')ch10,' Displacement-response flexoelectric internal strain tensor (units: Bohr^2)',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
@@ -1063,6 +1207,15 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
      call wrtout([ab_out,std_out],msg,'COLL')
      write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'xy', flexois(1,iat,2,1,1),flexois(1,iat,2,2,2),flexois(1,iat,2,3,3),&
                                                    & flexois(1,iat,2,2,3),flexois(1,iat,2,1,3),flexois(1,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zy', flexois(3,iat,2,1,1),flexois(3,iat,2,2,2),flexois(3,iat,2,3,3),&
+                                                   & flexois(3,iat,2,2,3),flexois(3,iat,2,1,3),flexois(3,iat,2,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'zx', flexois(3,iat,1,1,1),flexois(3,iat,1,2,2),flexois(3,iat,1,3,3),&
+                                                   & flexois(3,iat,1,2,3),flexois(3,iat,1,1,3),flexois(3,iat,1,1,2)  
+     call wrtout([ab_out,std_out],msg,'COLL')
+     write(msg,'(2x,i3,3x,a3,2x,6(f12.6,1x))') iat, 'yx', flexois(2,iat,1,1,1),flexois(2,iat,1,2,2),flexois(2,iat,1,3,3),&
+                                                   & flexois(2,iat,1,2,3),flexois(2,iat,1,1,3),flexois(2,iat,1,1,2)  
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
 
@@ -1109,12 +1262,6 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 !! 
 !! OUTPUT
 !! kmatrix(3*natom,3*natom) = array with the pseudo-inverse of dynamical matrix
-!!
-!! PARENTS
-!!      m_ddb_flexo
-!!
-!! CHILDREN
-!!      asria_corr,wrtout,zhpev
 !!
 !! SOURCE
 

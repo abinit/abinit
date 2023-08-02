@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -120,12 +116,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !! energies_dmft  = structure of data for dmft of type energy_type
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine init_energy(cryst_struc,energies_dmft)
@@ -172,12 +162,6 @@ end subroutine init_energy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
@@ -220,12 +204,6 @@ end subroutine destroy_energy
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -304,12 +282,6 @@ end subroutine print_energy
 !!
 !! SIDE EFFECTS
 !! energies_dmft <type(energy_type)> = DMFT energy structure data
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -478,12 +450,6 @@ end subroutine compute_energy
 !! SIDE EFFECTS
 !!  energies_dmft <type(energy_type)> = DMFT energy structure data
 !!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,fcalc_dft,ecalc_dmft)
@@ -619,12 +585,6 @@ end subroutine compute_band_energy
 !! OUTPUT
 !!  e_hu_mig(natom)= Migdal energy for each atom.
 !!  e_hu_mig_tot= Total Migdal energy.
-!!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -766,12 +726,6 @@ end subroutine compute_migdal_energy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft,m_energy
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,renorm)
@@ -791,6 +745,7 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  integer :: nocc,nsploop,prt_pawuenergy
  real(dp) :: upawu,jpawu
  real(dp) :: edftumdcdc,edftumdc,e_ee,e_dc,e_dcdc,xe1,xe2
+ real(dp) :: edftumdc_for_s,edftumdcdc_for_s,e_ee_for_s,e_dc_for_s,e_dcdc_for_s
  character(len=500) :: message
 ! arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
@@ -806,6 +761,7 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
  nocc=nsploop
  e_ee=zero
  e_dc=zero
+ e_dc_for_s=zero
  e_dcdc=zero
  edftumdc=zero
  edftumdcdc=zero
@@ -902,8 +858,15 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 &                    dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee,e_dc=e_dc,e_dcdc=e_dcdc,&
 &                    u_dmft=upawu,j_dmft=jpawu)
 
-     energies_dmft%e_dc(iatom)=e_dc-xe1
-     energies_dmft%e_hu_dftu(iatom)=e_ee-xe2
+     if(paw_dmft%ientropy==1) then
+       call pawuenergy(iatom,edftumdc_for_s,edftumdcdc_for_s,noccmmp,nocctot,prt_pawuenergy,pawtab_,&
+&                      dmft_dc=paw_dmft%dmft_dc,e_ee=e_ee_for_s,e_dc=e_dc_for_s,e_dcdc=e_dcdc_for_s,&
+&                      u_dmft=paw_dmft%u_for_s/Ha_eV,j_dmft=paw_dmft%j_for_s/Ha_eV)
+     endif
+
+
+     energies_dmft%e_dc(iatom)=e_dc-xe1 ! probably wrong but not used
+     energies_dmft%e_hu_dftu(iatom)=e_ee-xe2 ! idem
 
      ABI_FREE(noccmmp)
      ABI_FREE(nocctot)
@@ -912,8 +875,16 @@ subroutine compute_dftu_energy(cryst_struc,energies_dmft,green,paw_dmft,pawtab,r
 
 ! - gather results
 ! -----------------------------------------------------------------------
- energies_dmft%e_dc_tot=e_dc ! todo_ab: here or not ?
+ energies_dmft%e_dc_tot=e_dc ! this is the onlu quantity used after.
  energies_dmft%e_hu_dftu_tot=e_ee
+ if(paw_dmft%ientropy==1) then
+   write(message,'(a,3(f14.10,3x))') "For entropy calculation E_dc_tot, u_for_s, j_for,s", &
+  & e_dc_for_s,paw_dmft%u_for_s,paw_dmft%j_for_s
+   call wrtout(std_out,message,'COLL')
+   write(message,'(a,3(f14.10,3x))') "Reference   calculation E_dc_tot, upawu  , jpawu  ", &
+  & e_dc,upawu*Ha_eV,jpawu*Ha_eV
+   call wrtout(std_out,message,'COLL')
+ endif
 
 end subroutine compute_dftu_energy
 !!***
@@ -932,11 +903,6 @@ end subroutine compute_dftu_energy
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1035,11 +1001,6 @@ end subroutine compute_noninterentropy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

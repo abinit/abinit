@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (SLeroux, MMancini).
+!!  Copyright (C) 2008-2022 ABINIT group (SLeroux, MMancini).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -98,12 +94,6 @@ contains
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!  rset%efermi= fermi energy
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -946,12 +936,6 @@ end subroutine vtorhorec
 !!  ent_out=entropy at the point
 !!  ent_out1,ent_out2,ent_out3,ent_out4=debug entropy at the point
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
-!!
 !! NOTES
 !!  at this time :
 !!       - multce should be not used
@@ -1268,12 +1252,6 @@ end subroutine entropyrec
 !!  rho=density, recomputed for the new fermi energy
 !!  a, b2 : coefficient given by recursion recomputed for the new fermi energy
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
-!!
 !! NOTES
 !!  at this time :
 !!
@@ -1554,12 +1532,6 @@ end subroutine fermisolverec
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
-!!
 !! NOTES
 !!  at this time :
 !!       - exppot should be replaced by ?
@@ -1672,12 +1644,6 @@ subroutine density_rec(an,bn2,rho_out,nrec, &
 !!  the different path branch contriubutions to the grand-potential.
 !!  In reality it is not the gren potential but the
 !!  grand-potential (omega=-PV) divided by -T
-!!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
 !!
 !! NOTES
 !!  in reality it is not the gren potential but the grand-potential (omega=-PV) divided by -T
@@ -1968,12 +1934,6 @@ end subroutine gran_potrec
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
-!!
 !! SOURCE
 
 subroutine nlenergyrec(rset,enlx,exppot,ngfft,natom,typat,tsmear,trotter,tol)
@@ -2149,7 +2109,7 @@ end subroutine nlenergyrec
 !! compute some quantities which are used in the rest of the calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2021 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2022 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2176,12 +2136,6 @@ end subroutine nlenergyrec
 !!
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      timab
 !!
 !! SOURCE
 
@@ -2406,12 +2360,6 @@ end subroutine first_rec
 !! OUTPUT
 !!  ZT_p=fourier transforme of the Green kernel
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
-!!
 !! NOTES
 !!  at this time :
 !!       - need a rectangular box
@@ -2566,12 +2514,6 @@ end subroutine green_kernel
 !!  an, bn2 : coefficient given by recursion.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
 !!
 !! NOTES
 !!  at this time :
@@ -2794,12 +2736,6 @@ subroutine recursion(exppot,coordx,coordy,coordz,an,bn2,rho_out, &
 !! SIDE EFFECTS
 !!  un(:,:,:)=initial vector on the grid. it is changed in output
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
-!!
 !! NOTES
 !!  at this time :
 !!       - need a rectangular box (rmet diagonal matrix)
@@ -2997,12 +2933,6 @@ end subroutine recursion_nl
 !!
 !! OUTPUT
 !! vn_nl(:,:,:)=the non_local contribution to vn
-!!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      timab
 !!
 !! NOTES
 !!

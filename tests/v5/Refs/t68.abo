@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h02 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t68/t68.in
-- output file    -> t68.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t68/t68.abi
+- output file    -> t68.abo
 - root for input  files -> t68i
 - root for output files -> t68o
-
 
  DATASET    1 : magnetic group, Shubnikov type IV
  Fedorov space group Pm -3 m (#221)
@@ -36,11 +35,10 @@
 -    mband =          25        mffmem =           1         mkmem =           4
        mpw =         296          nfft =        5832          nkpt =           4
 ================================================================================
-P This job should need less than                       3.532 Mbytes of memory.
+P This job should need less than                       3.696 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.454 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type IV
  Fedorov space group Pm -3 m (#221)
@@ -55,11 +53,10 @@ _ WF disk file :      0.454 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           4
        mpw =         296          nfft =        5832          nkpt =           4
 ================================================================================
-P This job should need less than                       3.432 Mbytes of memory.
+P This job should need less than                       3.597 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.363 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type IV
  Fedorov space group Pm -3 m (#221)
@@ -74,7 +71,7 @@ _ WF disk file :      0.363 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           4
        mpw =         296          nfft =        5832          nkpt =           4
 ================================================================================
-P This job should need less than                       3.432 Mbytes of memory.
+P This job should need less than                       3.597 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.363 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -328,8 +325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.18593
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1281,10 +1278,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          3.8  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.2  wall=          4.3
+.Delivered   3 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.8  wall=          3.8

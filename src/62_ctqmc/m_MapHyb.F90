@@ -10,18 +10,12 @@
 !!  map template integer/double
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -42,7 +36,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,7 +80,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,12 +94,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -136,7 +124,7 @@ END SUBROUTINE MapHyb_init
 !!  impose size of the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -150,12 +138,6 @@ END SUBROUTINE MapHyb_init
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -186,7 +168,7 @@ END SUBROUTINE MapHyb_setSize
 !!  enlarge memory space
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -200,12 +182,6 @@ END SUBROUTINE MapHyb_setSize
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -256,7 +232,7 @@ END SUBROUTINE MapHyb_enlarge
 !!  assign this=map
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -270,12 +246,6 @@ END SUBROUTINE MapHyb_enlarge
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -303,7 +273,7 @@ END SUBROUTINE MapHyb_assign
 !!  sort the this with respect to the integer array
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -316,12 +286,6 @@ END SUBROUTINE MapHyb_assign
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -344,7 +308,7 @@ END SUBROUTINE MapHyb_sort
 !!  with the quickSort algo
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -359,12 +323,6 @@ END SUBROUTINE MapHyb_sort
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -421,7 +379,7 @@ END SUBROUTINE MapHyb_quickSort
 !!  print the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -435,12 +393,6 @@ END SUBROUTINE MapHyb_quickSort
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -470,7 +422,7 @@ END SUBROUTINE MapHyb_print
 !!  Clear the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -483,12 +435,6 @@ END SUBROUTINE MapHyb_print
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -508,7 +454,7 @@ END SUBROUTINE MapHyb_clear
 !!  destroy and deallocate the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -521,12 +467,6 @@ END SUBROUTINE MapHyb_clear
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

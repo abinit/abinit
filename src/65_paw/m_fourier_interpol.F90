@@ -7,7 +7,7 @@
 !!  Mainly used in PAW to interpol data from/to the coarse FFT grid from/to the fine FFT grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (FJ, MT, MG)
+!! Copyright (C) 2018-2022 ABINIT group (FJ, MT, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -89,14 +89,6 @@ CONTAINS  !=====================================================================
 !!    rhor(cplex*nfftc,nspden)=output density/potential in r space on the coarse grid
 !!  if optgrid=+1:
 !!    rhorf(cplex*nfftf,nspden)=output density/potential in r space on the fine grid
-!!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_looppert,m_dft_energy,m_fourier_interpol
-!!      m_getgh1c,m_gstate,m_io_kss,m_ksdiago,m_nonlinear,m_orbmag,m_paw_mkrho
-!!      m_respfn_driver,m_scfcv_core,m_vtorho,m_vtorhorec
-!!
-!! CHILDREN
-!!      indgrid,pawfgr_destroy,transgrid
 !!
 !! SOURCE
 
@@ -416,12 +408,6 @@ end subroutine transgrid
 !!  rhor_out(cplex*nfft_out,nspden)=output density/potential in r space on the required FFT mesh.
 !!  if optout=1:
 !!   rhog_out(2,nfftc)=Fourier transform of output density/potential on the coarse grid
-!!
-!! PARENTS
-!!      m_dvdb,m_ioarr,m_qparticles
-!!
-!! CHILDREN
-!!      indgrid,pawfgr_destroy,transgrid
 !!
 !! SOURCE
 

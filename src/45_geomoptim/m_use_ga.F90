@@ -8,7 +8,7 @@
 !! to the next generation. Those are chosen from ga_opt_percent% best fit and (1-ga_opt_percent)% from Genetic rules
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (XG, AHR)
+!! Copyright (C) 2009-2022 ABINIT group (XG, AHR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -45,13 +45,6 @@
 !!   results_img(:,:)%xred(3,natom)
 !!    at input, history of the values of xred for all images
 !!    at output, the predicted values of xred for all images
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      convert_coortogen,convert_gentocoor,initialize_perm,metric,mkradim
-!!      mkrdim,randomize_parent,sort_dp,swap,symanal,symfind,symlatt
 !!
 !! SOURCE
 
@@ -677,41 +670,6 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
  enddo
 
 END FUNCTION checkatomicdist
-
-SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: msym,natom
-  integer,intent(in)  :: typat(natom)
-  integer,intent(out) :: ptgroupma,spgroup
-! Arrays
-  real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
-
-!Local variables ---------------------------------------
-!scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
-  integer :: chkprim,nsym
-! Arrays
-  integer :: bravais(11),ptsymrel(3,3,msym)
-  integer :: symafm(msym),symrel(3,3,msym)
-  real(dp) :: efield(3),gprimd(3,3),spinat(3,natom)
-  real(dp) :: tnons(3,msym)
-  real(dp) :: genafm(3)
-
-! given the acel, rprim and coor
-! this suroutine find the symmetry group
-
-  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
-
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
-
-  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
-
-END SUBROUTINE checksymmetrygroup
 
 DOUBLE PRECISION FUNCTION gaussian_random(idum,sigma)
 

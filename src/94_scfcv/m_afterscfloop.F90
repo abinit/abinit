@@ -7,14 +7,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (XG)
+!!  Copyright (C) 2008-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -36,6 +32,7 @@ module m_afterscfloop
  use m_hdr
  use m_dtset
  use m_dtfil
+ use m_extfpmd
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : mpi_type
@@ -186,6 +183,7 @@ contains
 !!  rhor(nfftf,nspden)=total electron density (including compensation density in PAW)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  stress_needed=1 if stresses are needed, 0 otherwise
+!!  strscondft(6)=cDFT correction to stress
 !!  strsxc(6)=xc correction to stress
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  tollist(12)=list of tolerances
@@ -272,31 +270,19 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
-!!      energies_copy,exchange_electronpositron,forstr,getph,hdr%update
-!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      orbmag,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn,scprqt
-!!      setnoccmmp,spin_current,timab,total_energies,transgrid,write_energies
-!!      wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid,wvl_occ_abi2big
-!!      wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections,wvl_vtrial_abi2big
-!!      xcden,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
 & energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
-& rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
+& rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,taug,&
 & taur,tollist,usecprj,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,wvl,&
 & xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
@@ -316,6 +302,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
  type(hdr_type),intent(inout) :: hdr
+ type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -336,6 +323,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in) :: strscondft(6)
  real(dp),intent(in) :: tollist(12),vpsp(nfftf)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -560,13 +548,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      ABI_MALLOC(lrhor,(nfftf,dtset%nspden))
    end if
    write(message,'(a,a)') ch10, " Compute gradient of the electron density"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    if(dtset%prtlden/=0) then
      write(message,'(a)') " and also Compute Laplacian of the electron density"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
    write(message,'(a)') "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
 
    ABI_MALLOC(qphon,(3))
    qphon(:)=zero
@@ -590,40 +578,40 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    if(dtset%prtgden/=0) then
 !    Print result for grhor
      write(message,'(a,a)') ch10, " Result for gradient of the electron density for each direction (1,2,3):"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a,a,a)') ch10," 1rst direction:",ch10,&
 &     "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,grhor(:,:,1),optrhor=2,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a,a,a)') ch10," 2nd direction:",ch10,&
 &     "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,grhor(:,:,2),optrhor=2,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a,a,a)') ch10," 3rd direction:",ch10,&
 &     "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,grhor(:,:,3),optrhor=2,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
 
    if(dtset%prtlden/=0) then
 !    Print result for lrhor
      write(message,'(a,a)') ch10, " Result for Laplacian of the electron density :"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,lrhor,optrhor=3,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
 
    write(message,'(a)') "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
  end if
 
 !----------------------------------------------------------------------
@@ -643,22 +631,24 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    tim_mkrho=5
    if(dtset%prtelf/=0) then
      write(message,'(a,a)') ch10, " Compute ELF"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
    write(message,'(a,a)') ch10, " Compute kinetic energy density"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
    if (psps%usepaw==0) then
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&     extfpmd=extfpmd,option=1)
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&     extfpmd=extfpmd,option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)
@@ -668,12 +658,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Print result
  if(dtset%prtkden/=0) then
    write(message,'(a,a)') ch10, "Result for kinetic energy density :"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,taur,optrhor=1,ucvol=ucvol)
    write(message,'(a)') "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
  end if
 
 !----------------------------------------------------------------------
@@ -701,7 +691,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        write(message, '(a,a,a,a)' ) ch10,&
 &       ' afterscfloop: ERROR -', ch10, &
 &       '   The density is complex, ELF analysis cannot be performed.'
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,message)
 !      ABI_ERROR(message)
      end if
 
@@ -710,7 +700,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        ishift=0
        ABI_MALLOC(rhonow,(nfftf,dtset%nspden,ngrad*ngrad))
        write(message,'(a,a)') ch10, " Compute gradient of the electron density"
-       call wrtout(ab_out,message,'COLL')
+       call wrtout(ab_out,message)
        ABI_MALLOC(qphon,(3))
        qphon(:)=zero
        call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
@@ -864,9 +854,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    end if ! endif dtset%nspden<=2
 
    write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    write(message,'(a)') " End of ELF section"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
 
    if (dtset%usekden==0) then
      ABI_FREE(taur)
@@ -924,12 +914,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
 &   forold,gred,grchempottn,grcondft,gresid,grewtn,&
-&   grhf,grvdw,grxc,gsqcut,indsym,&
+&   grhf,grvdw,grxc,gsqcut,extfpmd,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
-&   psps,rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,&
+&   psps,rhog,rhor,rprimd,stress_needed,strscondft,strsxc,strten,symrec,synlgr,&
 &   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
  end if
 
@@ -1074,6 +1064,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
+ if (associated(extfpmd)) then
+   results_gs%entropy_extfpmd=extfpmd%entropy
+   results_gs%nelect_extfpmd=extfpmd%nelect
+   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+ end if
 
  results_gs%intgres(:,:)=zero
  results_gs%grcondft(:,:)=zero

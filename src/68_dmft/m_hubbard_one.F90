@@ -7,7 +7,7 @@
 !! Solve Anderson model with the density/density Hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -51,7 +47,7 @@ contains
 !! Solve the hubbard one approximation
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -69,12 +65,6 @@ contains
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      combin,destroy_green,init_green,wrtout
 !!
 !! SOURCE
 
@@ -374,7 +364,7 @@ contains
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -392,12 +382,6 @@ contains
 !!  paw_dmft =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hubbard_one
-!!
-!! CHILDREN
-!!      combin,destroy_green,init_green,wrtout
 !!
 !! SOURCE
 
@@ -784,7 +768,7 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -796,10 +780,6 @@ subroutine green_atomic_hubbard(cryst_struc,green_hubbard,hu,level_diag,paw_dmft
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

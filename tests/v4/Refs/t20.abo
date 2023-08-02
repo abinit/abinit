@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v4_t20/t20.in
-- output file    -> t20.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t20/t20.abi
+- output file    -> t20.abo
 - root for input  files -> t20i
 - root for output files -> t20o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =        2280          nfft =       64000          nkpt =           2
 ================================================================================
-P This job should need less than                      19.659 Mbytes of memory.
+P This job should need less than                      21.508 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.350 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,7 +49,7 @@ _ WF disk file :      0.350 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           3
        mpw =        1138          nfft =       64000          nkpt =           3
 ================================================================================
-P This job should need less than                      11.605 Mbytes of memory.
+P This job should need less than                      13.506 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.419 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
@@ -186,8 +184,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.18583
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/20ca_sic.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/20ca_sic.drh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/20ca_sic.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/20ca_sic.drh
 - ++ EXPERIMENTAL ++ self-interaction-corrected psp for calcium (D. R. Hamann)
 - 20.00000   2.00000     40701                znucl, zion, pspdat
     8    2    2    4       313   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -201,8 +199,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -0.493186
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o_sic.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o_sic.drh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/8o_sic.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/8o_sic.drh
 - ++ EXPERIMENTAL ++ self-interaction-corrected psp for oxygen (D. R. Hamann)
 -  8.00000   6.00000     40701                znucl, zion, pspdat
     8    2    2    2       602   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -378,17 +376,14 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   5.00E-09  4.31E-09  8.15E-09  7.11E-09  5.41E-09  6.34E-09  1.24E-07  2.47E-06
  -9.8877E-01 -2.4631E-01 -2.4631E-01 -2.4631E-01  1.6624E-02  1.5517E-01
   1.5517E-01  1.5517E-01
-  prteigrs : nnsclo,ikpt=   50    1 max resid (incl. the buffer)=  2.46928E-06
  Non-SCF case, kpt    2 (  0.00000  0.50000  0.50000), residuals and eigenvalues=
   6.48E-09  9.93E-09  4.26E-09  7.24E-09  6.08E-09  7.74E-09  1.09E-05  4.62E-09
  -8.2305E-01 -3.3341E-01 -2.7617E-01 -2.7617E-01  7.4891E-02  2.1649E-01
   2.3865E-01  2.6136E-01
-  prteigrs : nnsclo,ikpt=   50    2 max resid (incl. the buffer)=  1.08818E-05
  Non-SCF case, kpt    3 (  0.50000  0.00000  0.00000), residuals and eigenvalues=
   8.30E-09  4.18E-09  4.02E-09  9.36E-09  2.52E-09  5.47E-09  5.36E-07  4.16E-06
  -8.0791E-01 -3.9936E-01 -2.8518E-01 -2.8518E-01  1.7249E-01  2.2292E-01
   2.2292E-01  2.6481E-01
-  prteigrs : nnsclo,ikpt=   50    3 max resid (incl. the buffer)=  4.15553E-06
 
 
 --- !ResultsGS
@@ -629,10 +624,10 @@ P           mkmem2          3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.2
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.2  wall=          4.2
+.Delivered   2 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.9  wall=          4.0

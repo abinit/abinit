@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon, Marc Torrent)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon, Marc Torrent)
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -53,6 +53,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
 
   # MKL BLAS extensions?
   _SD_LINALG_CHECK_BLAS_MKL_EXTS
+
+  # openBLAS BLAS extensions?
+  _SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS
 
   # LAPACK?
   if test "${sd_linalg_has_blas}" = "yes"; then
@@ -688,7 +691,7 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
 
     openblas)
       sd_linalg_vendor_provided="blas"
-      sd_linalg_vendor_blas_libs="-lopenblas"
+      sd_linalg_vendor_blas_libs="-lopenblas -lpthread"
       ;;
 
     plasma)

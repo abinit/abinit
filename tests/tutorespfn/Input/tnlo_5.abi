@@ -34,7 +34,6 @@ xcart3?    2.5240575146E+00  2.5240575146E+00  2.5240575146E+00
 #DATASET3 : ddk on the MP grid of k-points
 #*****************************************
    getwfk?3  -1
-    rfdir?3   1 1 1
     rfddk?3   1
    tolwfr?3   1.0d-22
     nband?3   4
@@ -45,7 +44,6 @@ xcart3?    2.5240575146E+00  2.5240575146E+00  2.5240575146E+00
 #****************************************
    getwfk?4  -2
    getddk?4  -1
-    rfdir?4   1 1 1
    tolvrs?4   1.0d-12
    rfelfd?4   3
     nband?4   4
@@ -106,7 +104,7 @@ nstep 8  # limit number of steps for the tutorial, in general this should be set
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnlo_5.abo, tolnlines= 180, tolabs=  2.0e-6, tolrel= 5e-4 
+#%%   tnlo_5.abo, tolnlines= 190, tolabs=  2.0e-6, tolrel= 5e-4 
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]

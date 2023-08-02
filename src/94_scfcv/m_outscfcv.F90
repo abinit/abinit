@@ -6,14 +6,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2021 ABINIT group (XG)
+!!  Copyright (C) 2005-2022 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -88,6 +84,7 @@ module m_outscfcv
                                 fourier_green,print_green,init_green,destroy_green,init_green_tau
  use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
 
+ use m_paw_correlations, only : loc_orbmom_cal
  implicit none
 
  private
@@ -194,25 +191,6 @@ contains
 !!   to prompt the user. Remember to update varname_from_fname if you add a new file or if you change the
 !!   name of the variable.
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      bonds_lgth_angles,bound_deriv,calc_efg,calc_fc,calcdenmagsph
-!!      compute_coeff_plowannier,compute_green,crystal%free,crystal_init
-!!      datafordmft,denfgr,destroy_dmft,destroy_green,destroy_oper
-!!      destroy_plowannier,destroy_self,dos%free,dos_calcnwrite,ebands_free
-!!      ebands_init,ebands_interpolate_kpath,ebands_prtbltztrp,ebands_write
-!!      fatbands_ncwrite,fftdatar_write,free_my_atmtab,get_my_atmtab,init_dmft
-!!      init_green,init_oper,init_plowannier,initialize_self,ioarr
-!!      mag_penalty_e,mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw
-!!      optics_paw_core,optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
-!!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy,pawrhoij_free
-!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,print_green
-!!      print_plowannier,prt_cif,prtdenmagsph,prtfatbands,read_atomden
-!!      results_gs%yaml_write,rw_self,selfreal2imag_self,simpson_int,sort_dp
-!!      spline,splint,timab,wrtout,xmpi_sum,xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,dtset,&
@@ -277,6 +255,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: iband,nocc,spacecomm,comm_fft,tmp_unt,nfft_tot
  integer :: my_comm_atom
  integer :: opt_imagonly
+ integer :: indsym(4,dtset%nsym,dtset%natom)
 #ifdef HAVE_NETCDF
  integer :: ncid
 #endif
@@ -290,7 +269,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer, pointer :: my_atmtab(:)
  real(dp) :: tsec(2),nt_ntone_norm(nspden),rhomag(2,nspden)
  real(dp),allocatable :: eigen2(:)
- real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:),gr_dum(:,:,:),intgden(:,:)
+ real(dp),allocatable :: elfr_down(:,:),elfr_up(:,:),intgden(:,:)
  real(dp),allocatable :: rhor_paw(:,:),rhor_paw_core(:,:),rhor_paw_val(:,:),vpaw(:,:),vwork(:,:)
  real(dp),allocatable :: rhor_n_one(:,:),rhor_nt_one(:,:),ps_norms(:,:,:)
  real(dp), allocatable :: doccde(:)
@@ -300,11 +279,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp), allocatable :: vh1_corrector(:)
  real(dp), allocatable :: radii(:)
  real(dp), ABI_CONTIGUOUS pointer :: rho_ptr(:,:)
- type(pawrhoij_type) :: pawrhoij_dum(0)
+ type(pawrhoij_type) :: pawrhoij_dum(1)
+ !type(pawrhoij_type) :: pawrhoij_dum(0)
  type(pawrhoij_type),pointer :: pawrhoij_all(:)
  logical :: remove_inv
  logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_zeeman
+ real(dp) :: dmatdum(0,0,0,0)
  real(dp) :: e_fermie, e_fermih ! CP added e_fermih
  type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
@@ -625,7 +606,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    !call timab(1190,2,tsec)
 
    !call timab(1191,1,tsec)
-   NCF_CHECK(hdr%ncwrite(ncid, fform_den, nc_define=.True.))
+   NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
    !call timab(1191,2,tsec)
 
    !call timab(1192,1,tsec)
@@ -826,6 +807,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vtrial",dtfil%fnameabo_app_pot,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vtrial,mpi_enreg,ebands=ebands)
    end if
+   
+!  EIG
+#if defined HAVE_NETCDF
+   if (dtset%prteig==2 .and. me == master) then
+     fname=trim(dtfil%fnameabo_app_eig)//'.nc'
+     call write_eig(eigen,e_fermie,fname,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
+&     results_gs%shiftfactor_extfpmd) ! Optional arguments
+   end if
+#endif
 
    call timab(1160,2,tsec)
    call timab(1161,1,tsec)
@@ -845,7 +835,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call timab(1162,1,tsec)
 
 !  STM
-   if (dtset%prtstm>0) then
+   if (dtset%prtstm/=0) then
      call fftdatar_write("stm",dtfil%fnameabo_app_stm,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,rhor,mpi_enreg,ebands=ebands)
    end if
@@ -995,8 +985,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Output of integrated density inside atomic spheres
  if ((dtset%prtdensph==1.and.dtset%usewvl==0) .or. sum(abs(dtset%zeemanfield)) > tol10) then
    ABI_MALLOC(intgden,(nspden,natom))
-   ABI_MALLOC(gr_dum,(3,nspden,natom))
-   call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,ngfft,nspden,&
+   call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
 &   ntypat,dtset%ratsm,dtset%ratsph,rhor,rprimd,dtset%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
 !  for rhomag:
 !    in collinear case component 1 is total density and 2 is _magnetization_ up-down
@@ -1011,8 +1000,35 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat,dtset%ziontypat)
      endif
      if(any(dtset%constraint_kind(:)/=0))then
-       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+       call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+     endif
+   end if
+
+!!!!!!!!!!!!!!!!!!!!!!!!if prt_lorbmag value is equal 1 and the calculations are noncollinear then the local orbital magnetic moments are calculated
+if (dtset%prt_lorbmag==1) then
+
+    if ((dtset%nspinor .ne. 2) .and. (dtset%nsppol .ne.4)) then
+        write (msg,'(a)')" "
+        call wrtout([std_out, ab_out], msg)
+        write (msg,'(a)')"WARNING*"
+        call wrtout([std_out, ab_out], msg)
+        write (msg,'(a)')"prt_lorbmag=1, To calcualte orbital magnetisation, calculations need to be noncollinear"
+        call wrtout([std_out, ab_out], msg)
+    else
+        if (dtset%usepawu .ne. 0)then
+            call loc_orbmom_cal(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
+            &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,pawrad,dtset%pawprtvol,&
+            &   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+            &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+        else
+            write (msg,'(a)')" "
+            call wrtout([std_out, ab_out], msg)
+            write (msg,'(a)')"WARNING*"
+            call wrtout([std_out, ab_out], msg)
+            write (msg,'(a)')"prt_lorbmag=1, To calcualte orbital magnetisation LDA+U calculations should be activated"
+            call wrtout([std_out, ab_out], msg)
+        end if
      endif
    end if
 
@@ -1036,7 +1052,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call wrtout([std_out, ab_out], msg)
    end if
    ABI_SFREE(intgden)
-   ABI_SFREE(gr_dum)
  end if
 
  call timab(1166,2,tsec)
@@ -1086,11 +1101,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (psps%usepaw==1.and.prtnabla>0) then
    if (prtnabla==1.or.prtnabla==2) then
      call optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen,gprimd,hdr,kg,&
-&     mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,pawrad,pawtab)
+&     mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,pawang,&
+&     pawrad,pawrhoij,pawtab,psps%znuclpsp)
    end if
    if (prtnabla==2.or.prtnabla==3) then
      call optics_paw_core(atindx1,cprj,dimcprj,dtfil,dtset,eigen,psps%filpsp,hdr,&
-&     mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawrad,pawtab)
+&     mband,mcprj,mkmem,mpi_enreg,mpsang,natom,nkpt,nsppol,pawang,pawrad,pawrhoij,pawtab,&
+&     psps%znuclpsp)
    end if
  end if
  if (prtnabla<0) then
@@ -1296,18 +1313,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
 !Optionally provide output for electric field gradient calculation
- if (dtset%prtefg > 0) then
+ if (dtset%nucefg > 0) then
    call timab(1176,1,tsec)
-   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,ntypat,&
-&   paw_an,pawang,pawrad,pawrhoij,pawtab,&
-&   dtset%ptcharge,dtset%prtefg,dtset%quadmom,rhor,rprimd,dtset%symrel,&
+   call calc_efg(mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nspden,dtset%nsym,dtset%nucefg,&
+&   ntypat,paw_an,pawang,pawrad,pawrhoij,pawtab,&
+&   dtset%ptcharge,dtset%quadmom,rhor,rprimd,dtset%symrel,&
 &   dtset%tnons,dtset%typat,ucvol,psps%usepaw,xred,psps%zionpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call timab(1176,2,tsec)
  end if
 
 !Optionally provide output for Fermi-contact term at nuclear positions
- if (dtset%prtfc > 0) then
+ if (dtset%nucfc > 0) then
    call timab(1177,1,tsec)
    call calc_fc(my_natom,natom,nspden,ntypat,pawrad,pawrhoij,pawtab,dtset%typat,psps%usepaw,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)

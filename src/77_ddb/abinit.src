@@ -1,6 +1,6 @@
 # -*- Python -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -34,6 +34,7 @@ sources = [
  "m_band2eps_dataset.F90",
  "m_gruneisen.F90",
  "m_ifc.F90",
+ "m_lwf.F90",
  "m_phonons.F90",
  "m_primcell_ddb_info.F90",
  "m_sortph.F90",

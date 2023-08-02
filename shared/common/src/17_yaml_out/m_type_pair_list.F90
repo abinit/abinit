@@ -7,17 +7,12 @@
 !!  of pair_list. See m_pair_list.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2022 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!   m_pair_list
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -26,7 +21,7 @@
 #endif
 
 module m_type_pair_list
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
 ! type c_pair_list
 ! Represent a list of key-value pairs value can be either
 ! integer, double precision real or string.

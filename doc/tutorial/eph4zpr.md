@@ -60,7 +60,7 @@ The diagonal matrix elements of the FM self-energy in the KS basis set are given
                          {\omega - \emkq  + \wqnu + i \eta} \right.\\
                 & \left. +
                     \frac{n_\qnu(T) + 1 - f_{m\kk+\qq}(\ef,T)}
-                         {\omega - \emkq  - \wqnu + i \eta} \right] ,
+                         {\omega - \emkq  - \wqnu + i \eta} \right],
 \end{split}
 \label{eq:fan_selfen}
 \end{equation}
@@ -228,7 +228,7 @@ some conduction states
 
 ## Typical workflow for ZPR
 
-A typical workflow for ZPR calculations involves the following steps 
+A typical workflow for ZPR calculations involves the following steps
 (see the [introductory e-ph tutorial](/tutorial/eph_intro)):
 
 1. **GS calculation** to obtain the WFK and the DEN file.
@@ -256,7 +256,7 @@ A typical workflow for ZPR calculations involves the following steps
 
 [TUTORIAL_README]
 
-Before beginning, you might consider to work in a different subdirectory as for the other tutorials. 
+Before beginning, you might consider to work in a different subdirectory as for the other tutorials.
 Why not create Work_eph4zpr in $ABI_TESTS/tutorespfn/Input?
 
 ```sh
@@ -635,7 +635,7 @@ The same trick is highly recommended when computing WFK files for $GW$ calculati
     by restricting the NSCF calculation to the $\kk$-points inside the electron (hole) pockets
     relevant for transport.
     Unfortunately, this optimization is not possible when computing the real part of the self-energy
-    as the integration must be performed in the full $\text{IBZ}_\kk$.
+    as the $\qq$-space integration must be performed in the full $\text{IBZ}_\kk$.
     On the other hand, ZPR calculations can take advange of the Sternheimer method to reduce the number
     of empty bands required to converge.
 
@@ -736,7 +736,7 @@ First of all, we find a section that summarizes the most important parameters:
 Then we find another section related to MPI parallelism.
 In this case we are running in sequential but the output will change if we run in parallel
 (see also [[eph_np_pqbks]]).
-The final message informs the user that the EPH code will either read the qpts from file 
+The final message informs the user that the EPH code will either read the qpts from file
 (if the DVDB contains all of them, in case
 [[eph_ngqpt_fine]] is not defined in the input) or interpolate the scattering potentials
 from [[ddb_ngqpt]] to [[eph_ngqpt_fine]].
@@ -824,7 +824,7 @@ Number of k-points in Sigma_{nk}: 1
 sigma_ngkpt: [0 0 0], sigma_erange: [0. 0.]
 Max bstart: 5, min bstop: 9
 Initial ab-initio q-mesh:
-	ngqpt: [4 4 4], with nqibz: 8
+	ddb_ngqpt: [4 4 4]
 q-mesh for self-energy integration (eph_ngqpt_fine): [4 4 4]
 k-mesh for electrons:
 	mpdivs: [4 4 4] with shifts [0. 0. 0.] and kptopt: 1
@@ -874,8 +874,8 @@ In our calculation, the Z factor for the VBM is 0.644 while for the CBM we obtai
 On physical grounds, these values are reasonable as Z corresponds to the area under the QP peak
 in the spectral function and values in [~0.7, 1] indicates a well-defined QP excitations.
 -->
-These values are reasonable, still it's not so uncommon to obtain **unphysical Z factors** in e-ph calculations 
-i.e. values > 1, especially for states far from the band edge as the e-ph self-energy has a lot of structure 
+These values are reasonable, still it's not so uncommon to obtain **unphysical Z factors** in e-ph calculations
+i.e. values > 1, especially for states far from the band edge as the e-ph self-energy has a lot of structure
 in frequency-space and the linearized QP approach is not always justified.
 For this reason, in the rest of the tutorial, **we will be focusing on the analysis of the OTMS results**.
 
@@ -1305,4 +1305,57 @@ Last but not least, one can estimate the correction to the ZPR in polar material
 using a generalized Fr\"ohlich model based on *ab initio* effective masses computed with DFPT [[cite:Laflamme2016]]
 The formalism is detailed in XXX.
 An example of input file is available in [[test:v7_88]].
+-->
+
+
+## Eliashberg function
+
+The Fan-Migdal self-energy can be rewritten in terms of the spectral representation:
+
+\begin{equation}
+\Sigma^\FM_{n\kk}(\ww) =
+\int \dd\ee\dd\ww  \left [
+\frac{n(\ww') + f(\ee)}{\ww - \ee  + \ww' + i \eta} +
+\frac{n(\ww') + 1 - f(\ee)}{\omega - \ee  - \ww' + i \eta}
+\right ]
+\alpha^2 F_\nk(\ee,\ww')
+\end{equation}
+
+where we have introduced the real, positive and T-independent Eliashberg function
+
+\begin{equation}
+\alpha^2 F_\nk(\ee,\ww') =
+\sum_{m,\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} |\gkq|^2
+\delta(\ee - \ee_{m\kq})\delta(\ww - \wqnu).
+\end{equation}
+
+The computation of $\alpha^2 F_\nk$ is activated by setting [[prteliash]] to 3.
+The frequency mesh for phonons is defined by [[ph_wstep]], [[ph_smear]]
+The frequency mesh for electrons is defined by [[dosdeltae]], [[tsmear]]
+
+In the adiabatic approximation the phonon frequencies in the denominator of the Fan-Migdal term are neglected and
+the FM term simplifies to:
+
+\begin{equation}
+\Sigma^{a-\FM}_{n\kk}(\ee_\nk) =
+\sum_{m\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ}
+\dfrac{(2 n_\qnu + 1) |\gkq|^2} {\ee_\nk - \emkq + i \eta}
+\label{eq:adiabatic_fan_selfen}
+\end{equation}
+
+The adiabatic ZPR can also be expressed as:
+
+$$
+\int \dd\ww (2 n(\ww) + 1) F_2(\ww)
+$$
+
+where $F_2^\nk(\ww)$ is given by:
+
+$$
+F_2^\nk(\ww) =
+\sum_{m\nu} \int_\BZ \frac{d\qq}{\Omega_\BZ} (|\gkq|^2 - g_{mn\nu}^{2,\DW}(\kk,\qq))
+\dfrac{\delta(\ww - \wqnu)}{\ee_\nk - \ee_{m\kq}}
+$$
+
+<!--
 -->

@@ -1,0 +1,42 @@
+NormalMode
+#DEFINE_UNITCELL
+brav 3 3
+natom_unitcell 2
+xred_unitcell 0.0 0.0 0.0 -0.2022 0.2022 0.5 #0.0  0.2022 0.0   0.0 0.0 0.5
+typat_unitcell 1 1
+ntypat 1
+amu 2.38028900E+02
+#DEFINE_SUPERCELL
+rprimd  21.5800000 0.0000000 0.0000000 0.0000000 22.1860000 0.0000000 0.0000000 0.0000000 28.1010000
+multiplicity 4 4 0 -2 2 0 0 0 3
+natom  96
+typat 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1 
+temperature 300
+#DEFINE_COMPUTATIONAL_DETAILS
+nstep_max 20
+nstep_min 1
+rcut 10.79
+#OPTIONAL_INPUT_VARIABLES
+use_ideal_positions 1
+enunit 1
+TheEnd
+ 
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = atdep
+#%% md_hist = t13
+#%% [files]
+#%% files_to_test = 
+#%%   t13.abo, tolnlines = 1, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t13omega.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%%   t13thermo.dat, tolnlines = 5, tolabs = 2.e-3, tolrel = 1.e-4, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = F. Bottin & J. Bouchet
+#%% keywords = atdep
+#%% description = 
+#%%   test aTDEP (2nd order)
+#%%   Uranium (C-face centered orthorombic with 2 atoms) with 96 atoms at T = 300 K.
+#%% topics = aTDEP
+#%%<END TEST_INFO>

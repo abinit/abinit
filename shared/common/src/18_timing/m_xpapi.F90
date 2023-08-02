@@ -6,7 +6,7 @@
 !!  Thin wrapper for the PAPI library.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (MG,DC)
+!! Copyright (C) 2009-2022 ABINIT group (MG,DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -22,7 +22,7 @@ MODULE m_xpapi
 
  use defs_basis
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  implicit none
 
@@ -51,12 +51,6 @@ CONTAINS  !===========================================================
 !!  initialize the PAPI library. It must be called before any low level PAPI functions can be used.
 !!  If your application is making use of threads PAPI_thread_init (3) also be called prior to making
 !!  any calls to the library other than PAPI_library_init().
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      papif_is_initialized,papif_perror
 !!
 !! SOURCE
 
@@ -112,12 +106,6 @@ end subroutine xpapi_init
 !!   'COLL' if all procs are calling the routine with the same message to be written once only. Default.
 !!   'PERS' if the procs are calling the routine with different messages each to be written,
 !!          or if one proc is calling the routine: DEFAULT = "COLL"
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      papif_is_initialized,papif_perror
 !!
 !! SOURCE
 
@@ -199,12 +187,6 @@ end subroutine xpapi_show_info
 !!  mflops -- Mflop/s achieved since the previous call
 !!  check = exit status
 !!
-!! PARENTS
-!!      m_time
-!!
-!! CHILDREN
-!!      papif_is_initialized,papif_perror
-!!
 !! SOURCE
 
 subroutine xpapi_flops(real_time,proc_time,flops,mflops,check)
@@ -232,12 +214,6 @@ end subroutine xpapi_flops
 !! FUNCTION
 !!   exit function used by the PAPI Library to free resources and shut down when certain error conditions arise.
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      papif_is_initialized,papif_perror
-!!
 !! SOURCE
 
 subroutine xpapi_shutdown()
@@ -258,11 +234,6 @@ end subroutine xpapi_shutdown
 !!  xpapi_handle_error
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      papif_is_initialized,papif_perror
 !!
 !! SOURCE
 

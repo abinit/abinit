@@ -6,14 +6,10 @@
 !!  This module provides routines to read the Bethe-Salpeter Hamiltonian from file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,11 +28,9 @@ MODULE m_bse_io
 #if defined HAVE_MPI2
  use mpi
 #endif
-#if defined HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_hdr
 
  use m_time,           only : cwtime
@@ -91,12 +85,6 @@ CONTAINS  !====================================================================
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_write_bshdr(funt,Bsp,Hdr)
@@ -144,12 +132,6 @@ end subroutine exc_write_bshdr
 !! OUTPUT
 !!  fform=Integer defining the file format.
 !!  ierr=Status error.
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -211,12 +193,6 @@ end subroutine exc_read_bshdr
 !! SIDE EFFECTS
 !!  Skip the header.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_skip_bshdr(funt,ierr)
@@ -258,12 +234,6 @@ end subroutine exc_skip_bshdr
 !!
 !! SIDE EFFECTS
 !!  ehdr_offset
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_build,m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -315,12 +285,6 @@ end subroutine exc_skip_bshdr_mpio
 !! OUTPUT
 !!  [ene_list(nvec)]=Excitonic energies
 !!  vec_list(hsize,nvec)=Excitonic eigenvectors.
-!!
-!! PARENTS
-!!      m_bse_io,m_exc_analyze
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -424,12 +388,6 @@ end subroutine exc_read_eigen
 !!
 !! TODO
 !! Remove Bsp
-!!
-!! PARENTS
-!!      m_exc_itdiago,m_hexc
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -762,12 +720,6 @@ end subroutine exc_read_rcblock
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_fullh_from_blocks(funt,block_type,nsppol,row_sign,diago_is_real,nreh,exc_size,exc_ham)
@@ -1016,8 +968,6 @@ end subroutine exc_fullh_from_blocks
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function rrs_of_glob(row_glob,col_glob,size_glob)
@@ -1059,8 +1009,6 @@ end function rrs_of_glob
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1106,8 +1054,6 @@ end function ccs_of_glob
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1166,12 +1112,6 @@ end function offset_in_file
 !! OUTPUT
 !!  ierr=Status error
 !!  exc_mat(exc_size,exc_size)=The resonant block.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1288,11 +1228,6 @@ end subroutine exc_read_rblock_fio
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
 !!
 !! SOURCE
 
@@ -1430,11 +1365,6 @@ end subroutine exc_amplitude
 !!      => -1 if NetCDF is not available
 !!      => 1 if NetCDF is available
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
@@ -1453,7 +1383,6 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
  real(dp) :: complex2(2)
  ! *************************************************************************
 
-#ifdef HAVE_NETCDF
  ierr = 1
 
 !1. Create netCDF file
@@ -1510,14 +1439,9 @@ subroutine exc_write_optme(filname,minb,maxb,nkbz,nsppol,nq,opt_cvk,ierr)
    end do
  end do
 
-!7 Close file
-
+ !7 Close file
  NCF_CHECK(nf90_close(ncid))
  ierr = 0
-
-#else
- ierr = -1
-#endif
 
 end subroutine exc_write_optme
 !!***
@@ -1537,12 +1461,6 @@ end subroutine exc_write_optme
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hexc
-!!
-!! CHILDREN
-!!      c_f_pointer
-!!
 !! SOURCE
 
 subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
@@ -1559,7 +1477,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  complex(dpc),target,intent(in) :: diag(hsize)
 
 !Local variables-------------------------------
-#ifdef HAVE_NETCDF
  integer :: ncerr
  integer :: max_nreh, sum_nreh
  real(dp), ABI_CONTIGUOUS pointer :: r2vals(:,:),r3vals(:,:,:)
@@ -1609,10 +1526,6 @@ subroutine exc_ham_ncwrite(ncid,Kmesh,BSp,hsize,nreh,vcks2t,hreso,diag)
  NCF_CHECK(nf90_put_var(ncid, vid("reduced_coordinates_of_kpoints"), kmesh%bz))
  NCF_CHECK(nf90_put_var(ncid, vid("kpoint_weights"), kmesh%wt))
  NCF_CHECK(ncerr)
-
-#else
- ABI_ERROR("netcdf support is not activated. ")
-#endif
 
 contains
  integer function vid(vname)

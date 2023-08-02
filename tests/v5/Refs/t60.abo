@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h27 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h02 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t60/t60.in
-- output file    -> t60.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t60/t60.abi
+- output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         289          nfft =        8000          nkpt =           2
 ================================================================================
-P This job should need less than                       2.870 Mbytes of memory.
+P This job should need less than                       3.101 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.046 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.046 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         289          nfft =        8000          nkpt =           2
 ================================================================================
-P This job should need less than                       1.894 Mbytes of memory.
+P This job should need less than                       2.124 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.046 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.046 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =          10
        mpw =         293          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       2.107 Mbytes of memory.
+P This job should need less than                       2.337 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.226 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.226 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =          28
        mpw =         295          nfft =        8000          nkpt =          28
 ================================================================================
-P This job should need less than                       2.588 Mbytes of memory.
+P This job should need less than                       2.819 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.632 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -102,7 +97,7 @@ _ WF disk file :      0.632 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =          10
        mpw =         293          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       3.083 Mbytes of memory.
+P This job should need less than                       3.314 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.226 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -365,8 +360,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.18216
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -552,10 +547,8 @@ tolerances: {tolwfr: 1.00E-14, }
  Non-SCF case, kpt    1 ( -0.25000  0.50000  0.00000), residuals and eigenvalues=
   3.60E-15  2.94E-15  7.50E-15  3.45E-15  3.64E-13
  -1.2170E-01 -1.5389E-02  8.8092E-02  1.3896E-01  2.7407E-01
-  prteigrs : nnsclo,ikpt=   12    1 max resid (incl. the buffer)=  3.63562E-13
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   12    2 max resid (incl. the buffer)=  2.86569E-10
 
 
 --- !ResultsGS
@@ -677,18 +670,8 @@ tolerances: {tolwfr: 1.00E-14, }
  Non-SCF case, kpt    1 ( -0.12500 -0.25000  0.00000), residuals and eigenvalues=
   1.51E-15  8.69E-15  9.31E-16  1.41E-15  5.01E-10
  -1.9652E-01  1.0240E-01  1.7235E-01  1.7551E-01  2.9883E-01
-  prteigrs : nnsclo,ikpt=   12    1 max resid (incl. the buffer)=  5.01212E-10
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   12    2 max resid (incl. the buffer)=  9.31142E-10
-  prteigrs : nnsclo,ikpt=   12    3 max resid (incl. the buffer)=  3.36823E-10
-  prteigrs : nnsclo,ikpt=   12    4 max resid (incl. the buffer)=  3.78017E-07
-  prteigrs : nnsclo,ikpt=   12    5 max resid (incl. the buffer)=  9.82283E-08
-  prteigrs : nnsclo,ikpt=   12    6 max resid (incl. the buffer)=  8.22573E-14
-  prteigrs : nnsclo,ikpt=   12    7 max resid (incl. the buffer)=  5.96501E-12
-  prteigrs : nnsclo,ikpt=   12    8 max resid (incl. the buffer)=  1.41759E-11
-  prteigrs : nnsclo,ikpt=   12    9 max resid (incl. the buffer)=  3.18997E-07
-  prteigrs : nnsclo,ikpt=   12   10 max resid (incl. the buffer)=  1.99957E-13
 
 
 --- !ResultsGS
@@ -813,33 +796,8 @@ tolerances: {tolwfr: 1.00E-14, }
  Non-SCF case, kpt    1 ( -0.08333 -0.16667  0.00000), residuals and eigenvalues=
   9.51E-15  5.26E-15  4.81E-15  4.60E-14  9.76E-10
  -2.1195E-01  1.5072E-01  1.9228E-01  1.9982E-01  3.0524E-01
-  prteigrs : nnsclo,ikpt=   12    1 max resid (incl. the buffer)=  9.75528E-10
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   12    2 max resid (incl. the buffer)=  2.02340E-07
-  prteigrs : nnsclo,ikpt=   12    3 max resid (incl. the buffer)=  1.01248E-12
-  prteigrs : nnsclo,ikpt=   12    4 max resid (incl. the buffer)=  4.16259E-09
-  prteigrs : nnsclo,ikpt=   12    5 max resid (incl. the buffer)=  3.76427E-14
-  prteigrs : nnsclo,ikpt=   12    6 max resid (incl. the buffer)=  3.28756E-12
-  prteigrs : nnsclo,ikpt=   12    7 max resid (incl. the buffer)=  4.04206E-09
-  prteigrs : nnsclo,ikpt=   12    8 max resid (incl. the buffer)=  2.05715E-13
-  prteigrs : nnsclo,ikpt=   12    9 max resid (incl. the buffer)=  7.65703E-12
-  prteigrs : nnsclo,ikpt=   12   10 max resid (incl. the buffer)=  6.99670E-07
-  prteigrs : nnsclo,ikpt=   12   11 max resid (incl. the buffer)=  1.08246E-12
-  prteigrs : nnsclo,ikpt=   12   12 max resid (incl. the buffer)=  3.95200E-12
-  prteigrs : nnsclo,ikpt=   12   13 max resid (incl. the buffer)=  2.02565E-13
-  prteigrs : nnsclo,ikpt=   12   14 max resid (incl. the buffer)=  2.26896E-10
-  prteigrs : nnsclo,ikpt=   12   15 max resid (incl. the buffer)=  6.02498E-10
-  prteigrs : nnsclo,ikpt=   12   16 max resid (incl. the buffer)=  5.11541E-12
-  prteigrs : nnsclo,ikpt=   12   17 max resid (incl. the buffer)=  4.44746E-07
-  prteigrs : nnsclo,ikpt=   12   18 max resid (incl. the buffer)=  1.50766E-13
-  prteigrs : nnsclo,ikpt=   12   19 max resid (incl. the buffer)=  3.20504E-09
-  prteigrs : nnsclo,ikpt=   12   20 max resid (incl. the buffer)=  1.92325E-10
-  prteigrs : nnsclo,ikpt=   12   23 max resid (incl. the buffer)=  1.06634E-09
-  prteigrs : nnsclo,ikpt=   12   24 max resid (incl. the buffer)=  4.55826E-12
-  prteigrs : nnsclo,ikpt=   12   25 max resid (incl. the buffer)=  7.43607E-11
-  prteigrs : nnsclo,ikpt=   12   26 max resid (incl. the buffer)=  2.13074E-09
-  prteigrs : nnsclo,ikpt=   12   27 max resid (incl. the buffer)=  1.53174E-11
 
 
 --- !ResultsGS
@@ -1377,10 +1335,10 @@ P           mkmem5         10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          2.0
+.Delivered   9 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.7  wall=          1.9

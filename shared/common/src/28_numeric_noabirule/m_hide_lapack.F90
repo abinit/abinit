@@ -23,15 +23,11 @@
 !!  If efficiency is a concern, then the F77 call should be used
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2021 ABINIT group (MG, GMR, XG)
+!! Copyright (C) 1992-2022 ABINIT group (MG, GMR, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! TODO
 !!  1) Use a function to define the size of the Scalapack block according to some heuristic method.
@@ -56,10 +52,12 @@ MODULE m_hide_lapack
  use m_xmpi
  use m_errors
  use m_slk
+
  use m_linalg_interfaces
 
  use m_time,       only : cwtime
  use m_fstrings,   only : firstchar
+ !use m_slk,        only : matrix_scalapack, processor_scalapack
 
  implicit none
 
@@ -221,10 +219,6 @@ CONTAINS  !=====================================================================
 !!          or the upper triangle (if UPLO='U') of A, including the
 !!          diagonal, is destroyed.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrap_CHEEV(jobz, uplo, n, a, w)
@@ -318,10 +312,6 @@ end subroutine wrap_CHEEV
 !!          or the upper triangle (if UPLO='U') of A, including the
 !!          diagonal, is destroyed.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
@@ -344,7 +334,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
  type(processor_scalapack) :: Slk_processor
@@ -386,26 +376,21 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
 
  CASE (.TRUE.)
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc=SLK_BLOCK_SIZE
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-
-   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   call wrtout(std_out,msg,"COLL")
-
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
-   if (want_eigenvectors) then ! Initialize the distributed vectors.
-    call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   if (want_eigenvectors) then
+    ! Initialize the distributed vectors.
+    call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem with scaLAPACK.
-   call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-
+   call slk_mat%heev(jobz, uplo, Slk_vec, w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -415,7 +400,7 @@ subroutine wrap_ZHEEV(jobz, uplo, n, a, w, comm)
     call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    RETURN
 #endif
 
@@ -474,10 +459,6 @@ end subroutine wrap_ZHEEV
 !!          or the upper triangle (if UPLO='U') of A, including the
 !!          diagonal, is destroyed.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
@@ -502,10 +483,10 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k,tbloc
- logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !logical :: want_eigenvectors
+ !type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ !type(processor_scalapack) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -573,26 +554,21 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
 #ifdef HAVE_LINALG_SCALAPACK
    ABI_ERROR("Not coded yet")
 
-   !call init_scalapack(Slk_processor,comm)
+   !call Slk_processor%init(comm)
    !istwf_k=1
    !
    !! Initialize and fill Scalapack matrix from the global one.
-   !tbloc=SLK_BLOCK_SIZE
-   !call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-   !
-   !write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   !call wrtout(std_out,msg,"PERS")
+   !call Slk_mat%init(n,n,Slk_processor,istwf_k)
    !
    !call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
    !
    !want_eigenvectors = firstchar(jobz,(/"V","v"/))
    !if (want_eigenvectors) then ! Initialize the distributed vectors.
-   ! call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   ! call Slk_vec%init(n,n,Slk_processor,istwf_k)
    !end if
    !
    !! Solve the problem with scaLAPACK.
-   !call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-   !
+   !call slk_mat%heev(jobz,uplo,Slk_vec,w)
    !call Slk_mat%free()
    !
    !if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -602,7 +578,7 @@ subroutine xheev_cplex(jobz, uplo, cplex, n, a, w, msg, ierr, comm)
    ! call xmpi_sum(a,comm,ierr)                        ! Fill the remaing entries of the global matrix
    !end if
    !
-   !call end_scalapack(Slk_processor)
+   !call Slk_processor%free()
 
    RETURN
 #endif
@@ -666,10 +642,6 @@ end subroutine xheev_cplex
 !!          the corresponding elements of A, and if UPLO = 'L', the
 !!          diagonal and first subdiagonal of T overwrite the
 !!          corresponding elements of A.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -777,10 +749,6 @@ end subroutine wrap_CHPEV
 !!          diagonal and first subdiagonal of T overwrite the
 !!          corresponding elements of A. Unchanged if ScaLAPACK is used.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
@@ -804,7 +772,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
  type(processor_scalapack) :: Slk_processor
@@ -846,26 +814,21 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc=SLK_BLOCK_SIZE
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-
-   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   call wrtout(std_out,msg,"COLL")
-
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_1Dp(Slk_mat,uplo,ap)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
-   if (want_eigenvectors) then ! Initialize the distributed vectors.
-    call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   if (want_eigenvectors) then
+    ! Initialize the distributed vectors.
+    call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem with scaLAPACK.
-   call slk_pzheev(jobz,uplo,Slk_mat,Slk_vec,w)
-
+   call slk_mat%heev(jobz,uplo,Slk_vec,w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! Collect the eigenvectors.
@@ -875,7 +838,7 @@ subroutine wrap_ZHPEV(jobz, uplo, n, ap, w, z, ldz, comm)
     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    RETURN
 #endif
@@ -949,10 +912,6 @@ end subroutine wrap_ZHPEV
 !!          On exit, if INFO <= N, the part of B containing the matrix is overwritten by the triangular
 !!          factor U or L from the Cholesky factorization B = U**H*U or B = L*L**H.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
@@ -975,7 +934,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: ierr,istwf_k
  type(matrix_scalapack)    :: Slk_matA,Slk_matB
  type(processor_scalapack) :: Slk_processor
 #endif
@@ -1025,19 +984,14 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc=SLK_BLOCK_SIZE
-
-   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   call wrtout(std_out,msg,"COLL")
-
-   call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call Slk_matA%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-   call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call Slk_matB%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
    ! Solve the problem with scaLAPACK.
@@ -1054,7 +1008,7 @@ subroutine wrap_ZHEGV(itype, jobz, uplo, n, a, b, w, comm)
    end if
 
    call Slk_matA%free()
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    RETURN
 #endif
 
@@ -1140,10 +1094,6 @@ end subroutine wrap_ZHEGV
 !!          B = U**T*U or B = L*L**T if CPLEX=1
 !!          B = U**H*U or B = L*L**H if CPLEX=2
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
@@ -1167,9 +1117,9 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
  real(dp),allocatable :: rwork(:), work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k, tbloc
- type(matrix_scalapack)    :: Slk_matA,Slk_matB
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !type(matrix_scalapack)    :: Slk_matA,Slk_matB
+ !type(processor_scalapack) :: Slk_processor
 #endif
 !************************************************************************
 
@@ -1254,19 +1204,14 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 #ifdef HAVE_LINALG_SCALAPACK
 
   ABI_ERROR("Not coded yet")
-  ! call init_scalapack(Slk_processor,comm)
+  ! call Slk_processor%init(comm)
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
-  ! tbloc=SLK_BLOCK_SIZE
-
-  ! write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  ! call wrtout(std_out,msg,"COLL")
-
-  ! call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+  ! call Slk_matA%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-  ! call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+  ! call Slk_matB%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
   ! ! Solve the problem with scaLAPACK.
@@ -1284,7 +1229,7 @@ subroutine xhegv_cplex(itype, jobz, uplo, cplex, n, a, b, w, msg, ierr, comm)
 
   ! call Slk_matA%free()
 
-  ! call end_scalapack(Slk_processor)
+  ! call Slk_processor%free()
 
   RETURN
 #endif
@@ -1407,10 +1352,6 @@ end subroutine xhegv_cplex
 !!          triangle (if UPLO='U') of A, including the diagonal, is
 !!          destroyed.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
@@ -1437,7 +1378,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_mat,Slk_vec
  type(processor_scalapack) :: Slk_processor
@@ -1484,26 +1425,21 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc=SLK_BLOCK_SIZE
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-
-   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   call wrtout(std_out,msg,"COLL")
-
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
-   if (want_eigenvectors) then ! Initialize the distributed vectors.
-     call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   if (want_eigenvectors) then
+     ! Initialize the distributed vectors.
+     call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem.
-   call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
-
+   call slk_mat%pzheevx(jobz,range,uplo,vl,vu,il,iu,abstol,Slk_vec,m,w)
    call Slk_mat%free()
 
    if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -1513,7 +1449,7 @@ subroutine wrap_ZHEEVX(jobz,range,uplo,n,a,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
     call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
    RETURN
 #endif
 
@@ -1639,10 +1575,6 @@ end subroutine wrap_ZHEEVX
 !!          triangle (if UPLO='U') of A, including the diagonal, is
 !!          destroyed.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
@@ -1673,10 +1605,10 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k,tbloc
- logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_mat,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !logical :: want_eigenvectors
+ !type(matrix_scalapack)    :: Slk_mat,Slk_vec
+ !type(processor_scalapack) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -1751,26 +1683,20 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
 
 #ifdef HAVE_LINALG_SCALAPACK
   ABI_ERROR("Not coded yet")
-  ! call init_scalapack(Slk_processor,comm)
+  ! call Slk_processor%init(comm)
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
-  ! tbloc=SLK_BLOCK_SIZE
-  ! call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-
-  ! write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  ! call wrtout(std_out,msg,"COLL")
-
+  ! call Slk_mat%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
   ! want_eigenvectors = firstchar(jobz,(/"V","v"/))
   ! if (want_eigenvectors) then ! Initialize the distributed vectors.
-  !  call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+  !  call Slk_vec%init(n,n,Slk_processor,istwf_k)
   ! end if
 
   ! ! Solve the problem.
-  ! call slk_pzheevx(jobz,range,uplo,Slk_mat,vl,vu,il,iu,abstol,Slk_vec,m,w)
-
+  ! call slk_mat%pzheevx(jobz,range,uplo,vl,vu,il,iu,abstol,Slk_vec,m,w)
   ! call Slk_mat%free()
   !
   ! if (want_eigenvectors) then ! A is overwritten with the eigenvectors
@@ -1780,7 +1706,7 @@ subroutine xheevx_cplex(jobz, range, uplo, cplex, n, a, vl, vu, il, iu, &
   !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
   ! end if
 
-  ! call end_scalapack(Slk_processor)
+  ! call Slk_processor%free()
 
   RETURN
 #endif
@@ -1915,10 +1841,6 @@ end subroutine xheevx_cplex
 !!          On exit, if INFO <= N, the part of B containing the matrix is overwritten by the triangular factor
 !!          U or L from the Cholesky factorization B = U**H*U or B = L*L**H.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,comm)
@@ -1946,7 +1868,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
  real(dp),allocatable :: rwork(:)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,tbloc
+ integer :: ierr,istwf_k
  logical :: want_eigenvectors
  type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
  type(processor_scalapack) :: Slk_processor
@@ -2000,24 +1922,19 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc=SLK_BLOCK_SIZE
-
-   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   call wrtout(std_out,msg,"COLL")
-
-   call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call Slk_matA%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-   call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+   call Slk_matB%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
    want_eigenvectors = firstchar(jobz,(/"V","v"/))
    if (want_eigenvectors) then ! Initialize the distributed vectors.
-     call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+     call Slk_vec%init(n,n,Slk_processor,istwf_k)
    end if
 
    ! Solve the problem.
@@ -2035,7 +1952,7 @@ subroutine wrap_ZHEGVX(itype,jobz,range,uplo,n,a,b,vl,vu,il,iu,abstol,m,w,z,ldz,
      call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
    end if
 
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    RETURN
 #endif
@@ -2178,10 +2095,6 @@ end subroutine wrap_ZHEGVX
 !!          On exit, if INFO <= N, the part of B containing the matrix is overwritten by the triangular factor
 !!          U or L from the Cholesky factorization B = U**H*U or B = L*L**H.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
@@ -2212,10 +2125,10 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
  real(dp),allocatable :: work_real(:)
  complex(dpc),allocatable :: work_cplx(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k,tbloc
- logical :: want_eigenvectors
- type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
- type(processor_scalapack) :: Slk_processor
+ !integer :: istwf_k
+ !logical :: want_eigenvectors
+ !type(matrix_scalapack)    :: Slk_matA,Slk_matB,Slk_vec
+ !type(processor_scalapack) :: Slk_processor
 #endif
 
 !************************************************************************
@@ -2307,24 +2220,19 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
 
 #ifdef HAVE_LINALG_SCALAPACK
   ABI_ERROR("not coded yet")
-  ! call init_scalapack(Slk_processor,comm)
+  ! call Slk_processor%init(comm)
   ! istwf_k=1
 
   ! ! Initialize and fill Scalapack matrix from the global one.
-  ! tbloc=SLK_BLOCK_SIZE
-
-  ! write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  ! call wrtout(std_out,msg,"COLL")
-
-  ! call init_matrix_scalapack(Slk_matA,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+  ! call Slk_matA%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matA,uplo,a)
 
-  ! call init_matrix_scalapack(Slk_matB,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+  ! call Slk_matB%init(n,n,Slk_processor,istwf_k)
   ! call slk_matrix_from_global_dpc_2D(Slk_matB,uplo,b)
 
   ! want_eigenvectors = firstchar(jobz,(/"V","v"/))
   ! if (want_eigenvectors) then ! Initialize the distributed vectors.
-  !  call init_matrix_scalapack(Slk_vec,n,n,Slk_processor,istwf_k,tbloc=tbloc)
+  !  call Slk_vec%init(n,n,Slk_processor,istwf_k)
   ! end if
 
   ! ! Solve the problem.
@@ -2342,7 +2250,7 @@ subroutine xhegvx_cplex(itype, jobz, range, uplo, cplex, n, a, b, &
   !  call xmpi_sum(z,comm,ierr)                        ! Fill the remaing entries of the global matrix
   ! end if
 
-  ! call end_scalapack(Slk_processor)
+  ! call Slk_processor%free()
 
   ! RETURN
 #endif
@@ -2416,10 +2324,6 @@ end subroutine xhegvx_cplex
 !!   A       (input/output) COMPLEX(SPC) array, dimension (LDA,N)
 !!           On entry, the N-by-N matrix A.
 !!           On exit, A has been overwritten.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2535,10 +2439,6 @@ end subroutine wrap_CGEEV
 !!           On entry, the N-by-N matrix A.
 !!           On exit, A has been overwritten.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine wrap_ZGEEV(jobvl,jobvr,n,a,lda,w,vl,ldvl,vr,ldvr)
@@ -2622,10 +2522,6 @@ end subroutine wrap_ZGEEV
 !! TODO
 !!  Add Scalapack version, matrix_scalapack has to be modified by adding a single precision complex buffer.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cginv(a, n, comm)
@@ -2646,10 +2542,10 @@ subroutine cginv(a, n, comm)
  integer,allocatable :: ipiv(:)
  complex(spc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: ierr,istwf_k,ipiv_size,liwork,tbloc
- integer,allocatable :: iwork(:)
- type(matrix_scalapack)    :: Slk_mat
- type(processor_scalapack) :: Slk_processor
+ !integer :: ierr,istwf_k,ipiv_size,liwork
+ !integer,allocatable :: iwork(:)
+ !type(matrix_scalapack)    :: Slk_mat
+ !type(processor_scalapack) :: Slk_processor
 #endif
 
 ! *************************************************************************
@@ -2711,15 +2607,11 @@ subroutine cginv(a, n, comm)
 ! FIXME matrix_scalapack does not have a single precision complex buffer
 
 #ifdef HAVE_LINALG_SCALAPACK
-  call init_scalapack(Slk_processor,comm)
+  call Slk_processor%init(comm)
   istwf_k=1
 
   ! Initialize and fill Scalapack matrix from the global one.
-  tbloc=SLK_BLOCK_SIZE
-  call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-
-  write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-  call wrtout(std_out,msg,"COLL")
+  call Slk_mat%init(n,n,Slk_processor,istwf_k)
 
   ! IMPORTANT NOTE: PZGETRF requires square block decomposition i.e.,  MB_A = NB_A.
   if ( Slk_mat%descript%tab(MB_)/=Slk_mat%descript%tab(NB_) ) then
@@ -2776,7 +2668,7 @@ subroutine cginv(a, n, comm)
   call Slk_mat%free()
 
   call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-  call end_scalapack(Slk_processor)
+  call Slk_processor%free()
 
   RETURN
 #endif
@@ -2811,10 +2703,6 @@ end subroutine cginv
 !! SIDE EFFECTS
 !! a(n,n)= array of complex elements, input, inverted at output
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine zginv(a, n, comm)
@@ -2835,7 +2723,7 @@ subroutine zginv(a, n, comm)
  integer,allocatable :: ipiv(:)
  complex(dpc),allocatable :: work(:)
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k,tbloc,ierr
+ integer :: istwf_k,ierr
  type(matrix_scalapack)    :: Slk_mat
  type(processor_scalapack) :: Slk_processor
 #endif
@@ -2893,20 +2781,15 @@ subroutine zginv(a, n, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc=SLK_BLOCK_SIZE
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-
-   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   call wrtout(std_out,msg,"COLL")
-
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,"All",a)
 
    ! Perform the calculation with scaLAPACK.
-   call Slk_mat%zinvert()
+   call Slk_mat%invert()
 
    ! Reconstruct the global matrix from the distributed one.
    a = czero
@@ -2914,7 +2797,7 @@ subroutine zginv(a, n, comm)
    call Slk_mat%free()
 
    call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    return
 #endif
@@ -2954,10 +2837,6 @@ end subroutine zginv
 !!    triangular part of A is not referenced.
 !!    On exit, the upper or lower triangle of the (Hermitian) inverse of A
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine zhpd_invert(uplo, a, n, comm)
@@ -2977,7 +2856,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
  character(len=500) :: msg
 !arrays
 #ifdef HAVE_LINALG_SCALAPACK
- integer :: istwf_k,tbloc,ierr
+ integer :: istwf_k,ierr
  type(matrix_scalapack)    :: Slk_mat
  type(processor_scalapack) :: Slk_processor
 #endif
@@ -3034,20 +2913,15 @@ subroutine zhpd_invert(uplo, a, n, comm)
  CASE (.TRUE.)
 
 #ifdef HAVE_LINALG_SCALAPACK
-   call init_scalapack(Slk_processor,comm)
+   call Slk_processor%init(comm)
    istwf_k=1
 
    ! Initialize and fill Scalapack matrix from the global one.
-   tbloc = SLK_BLOCK_SIZE
-   call init_matrix_scalapack(Slk_mat,n,n,Slk_processor,istwf_k,tbloc=tbloc)
-
-   write(msg,'(2(a,i0))')" Using scaLAPACK version with nprocs = ",nprocs,"; block size = ",tbloc
-   call wrtout(std_out,msg,"COLL")
-
+   call Slk_mat%init(n,n,Slk_processor,istwf_k)
    call slk_matrix_from_global_dpc_2D(Slk_mat,uplo,a)
 
    ! Perform the calculation with scaLAPACK.
-   call Slk_mat%zdhp_invert(uplo)
+   call Slk_mat%hpd_invert(uplo, full=.False.)
 
    ! Reconstruct the global matrix from the distributed one.
    a = czero
@@ -3055,7 +2929,7 @@ subroutine zhpd_invert(uplo, a, n, comm)
    call Slk_mat%free()
 
    call xmpi_sum(a,comm,ierr)                         ! Fill the remaing entries of the global matrix
-   call end_scalapack(Slk_processor)
+   call Slk_processor%free()
 
    RETURN
 #endif
@@ -3084,12 +2958,6 @@ end subroutine zhpd_invert
 !!
 !! SIDE EFFECTS
 !! a(lda,n)= array of real elements, input, inverted at output
-!!
-!! PARENTS
-!!      m_a2ftr,m_bethe_salpeter,m_ddb_elast,m_ddb_piezo,m_geometry,m_haydock
-!!      m_mlwfovlp,m_paw_optics,m_symtk,m_vcoul,m_wfd_optic
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3207,11 +3075,6 @@ end subroutine matrginv
 !! OUTPUT
 !!  eigval(3)=three eigenvalues
 !!
-!! PARENTS
-!!      m_geometry
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine matr3eigval(eigval,matr)
@@ -3243,7 +3106,6 @@ subroutine matr3eigval(eigval,matr)
 end subroutine matr3eigval
 !!***
 
-
 !!****f* ABINIT/jacobi
 !! NAME
 !!  jacobi
@@ -3263,11 +3125,6 @@ end subroutine matr3eigval
 !!
 !! NOTES
 !!  This routine is deprecated, use Lapack API
-!!
-!! PARENTS
-!!      m_bader,m_conducti
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3389,10 +3246,6 @@ end subroutine jacobi
 !! NOTES
 !!   This routine is depreacted, use lapack API
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 SUBROUTINE ludcmp(a,n,np,indx,id,info)
@@ -3494,10 +3347,6 @@ END SUBROUTINE ludcmp
 !! NOTES
 !!  This routine is deprecated, use lapack API
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 SUBROUTINE lubksb(a,n,np,indx,b)
@@ -3553,11 +3402,6 @@ END SUBROUTINE LUBKSB
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3742,11 +3586,6 @@ end subroutine dzgedi
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_berryphase,m_berrytk,m_dfpt_fef,m_elpolariz,m_pead_nl_loop,m_relaxpol
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4003,10 +3842,6 @@ end subroutine test_xginv
 !!          > 0: if INFO = i, D(i,i) is exactly zero.  The factorization
 !!               has been completed, but the block diagonal matrix D is
 !!               exactly singular, so the solution could not be computed.
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine xhesv_cplex(UPLO, cplex, N, NRHS, A, B, msg, info)

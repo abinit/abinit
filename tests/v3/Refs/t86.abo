@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t86/t86.in
-- output file    -> t86.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t86/t86.abi
+- output file    -> t86.abo
 - root for input  files -> t86i
 - root for output files -> t86o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           6        mffmem =           1         mkmem =           2
        mpw =         100          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       2.044 Mbytes of memory.
+P This job should need less than                       2.143 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.039 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.039 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 -    mband =           6        mffmem =           1         mkmem =          32
        mpw =         100          nfft =        3375          nkpt =          32
 ================================================================================
-P This job should need less than                       1.859 Mbytes of memory.
+P This job should need less than                       1.957 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -87,6 +84,8 @@ _ WF disk file :      0.588 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0208000000E+01  1.0208000000E+01  1.0208000000E+01 Bohr
               amu      2.80855000E+01
+              asr           0
+           chneut           0
            diemac      3.00000000E+00
              ecut      4.00000000E+00 Hartree
 -          fftalg         312
@@ -209,15 +208,12 @@ P          mk1mem3         32
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -357,8 +353,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.16527
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -661,7 +657,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.00338
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t86o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -700,10 +695,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t86o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t86o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -717,15 +710,15 @@ tolerances: {tolvrs: 1.00E-12, }
 -ETOT  1   309.41101157614      2.341E+02 1.273E-01 3.887E+05
  ETOT  2   333.12419126917      2.371E+01 2.277E-01 3.972E+05
  ETOT  3   8.7156717395540     -3.244E+02 8.635E-02 9.351E+02
- ETOT  4   7.8789828604123     -8.367E-01 2.675E-04 2.351E+01
- ETOT  5   7.8639248452240     -1.506E-02 3.345E-06 3.276E-01
+ ETOT  4   7.8789828604124     -8.367E-01 2.675E-04 2.351E+01
+ ETOT  5   7.8639248452239     -1.506E-02 3.345E-06 3.276E-01
  ETOT  6   7.8636245377507     -3.003E-04 7.791E-08 2.580E-03
  ETOT  7   7.8636217044834     -2.833E-06 9.546E-10 8.061E-05
- ETOT  8   7.8636215579229     -1.466E-07 5.484E-11 2.274E-06
+ ETOT  8   7.8636215579228     -1.466E-07 5.484E-11 2.274E-06
  ETOT  9   7.8636215560725     -1.850E-09 1.029E-12 6.916E-07
  ETOT 10   7.8636215555266     -5.459E-10 2.078E-13 3.079E-08
- ETOT 11   7.8636215554999     -2.672E-11 7.487E-15 1.736E-10
- ETOT 12   7.8636215554995     -3.837E-13 7.311E-17 1.228E-11
+ ETOT 11   7.8636215554999     -2.666E-11 7.487E-15 1.736E-10
+ ETOT 12   7.8636215554996     -3.411E-13 7.311E-17 1.228E-11
 
  scprqt:  WARNING -
   nstep=   12 was not enough SCF cycles to converge;
@@ -765,10 +758,8 @@ tolerances: {tolvrs: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t86o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t86o_DS2_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -785,12 +776,12 @@ tolerances: {tolvrs: 1.00E-12, }
  ETOT  4   6.7137927909641     -8.988E-04 4.807E-07 5.975E-02
  ETOT  5   6.7137487666542     -4.402E-05 3.119E-08 2.489E-02
  ETOT  6   6.7137282277290     -2.054E-05 6.934E-09 2.421E-04
- ETOT  7   6.7137280220208     -2.057E-07 6.756E-11 1.286E-06
+ ETOT  7   6.7137280220207     -2.057E-07 6.756E-11 1.286E-06
  ETOT  8   6.7137280209005     -1.120E-09 5.593E-13 1.170E-07
  ETOT  9   6.7137280207994     -1.012E-10 4.391E-14 8.292E-10
- ETOT 10   6.7137280207988     -6.182E-13 7.146E-16 2.887E-10
+ ETOT 10   6.7137280207987     -6.324E-13 7.146E-16 2.887E-10
  ETOT 11   6.7137280207986     -1.492E-13 1.385E-16 3.722E-11
- ETOT 12   6.7137280207988      1.776E-13 1.105E-17 2.888E-13
+ ETOT 12   6.7137280207988      2.345E-13 1.105E-17 2.888E-13
 
  At SCF step   12       vres2   =  2.89E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
@@ -934,6 +925,8 @@ tolerances: {tolvrs: 1.00E-12, }
  -outvars: echo values of variables after computation  --------
             acell      1.0208000000E+01  1.0208000000E+01  1.0208000000E+01 Bohr
               amu      2.80855000E+01
+              asr           0
+           chneut           0
            diemac      3.00000000E+00
              ecut      4.00000000E+00 Hartree
            etotal1    -8.8323060266E+00
@@ -1062,15 +1055,12 @@ P          mk1mem3         32
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     5.00000000E-01  0.00000000E+00  0.00000000E+00
               qpt3     5.00000000E-01  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -1247,10 +1237,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.2
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.2
+.Delivered   5 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.3  wall=          5.4

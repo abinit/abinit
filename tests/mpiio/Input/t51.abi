@@ -17,16 +17,12 @@ qpt   0.00000000E+00  0.00000000E+00  0.00000000E+00
 
 # Dataset 2: Response function calculation of Q=0 phonons
 rfphon2   1        # Do phonon response
-rfatpol2  1 2      # Treat displacements of all atoms
-rfdir2   1 1 1     # Do all directions (symmetry will be used)
 getwfk2  1         # Use GS wave functions from dataset 1
 kptopt2  2         # Use time-reversal symmetry for k-points
 toldfe2 1d-10
 
 # Dataset 3: Restart Response calculation from previous wavefunctions.
 rfphon3   1        # Do phonon response
-rfatpol3  1 2      # Treat displacements of all atoms
-rfdir3   1 1 1     # Do all directions (symmetry will be used)
 getwfk3   1        # Use GS wave functions from dataset 1
 get1wf3  -1        # Use DFPT wave functions from dataset 3
 kptopt3  2         # Use time-reversal symmetry for k-points
@@ -60,6 +56,7 @@ natom 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

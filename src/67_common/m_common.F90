@@ -8,14 +8,10 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -169,14 +165,6 @@ contains
 !! OUTPUT
 !!  quit= 0 if the SCF cycle is not finished; 1 otherwise.
 !!  conv_retcode=Only if choice==3, != 0 if convergence is not achieved.
-!!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_scfcv,m_scfcv_core
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
 !!
 !! SOURCE
 
@@ -523,18 +511,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    ! Print eigenvalues every step if dtset%prtvol>=10 and GS case
    if (my_rank == master .and. (dtset%prtvol>=10 .and. response==0 .and. dtset%tfkinfunc==0 .and. dtset%usewvl==0)) then
      option=1
-     ! CP modified
-!     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-!&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
-!
-!     call prteigrs(eigen,dtset%enunit,fermie,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-!&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,ab_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
-
+&     nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
      call prteigrs(eigen,dtset%enunit,fermie,fermih,fname_eig,std_out,iscf,kpt,dtset%kptopt,dtset%mband,&
-&     nband,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
-     ! End CP modified
+&     nband,dtset%nbdbuf,nkpt,dtset%nnsclo,dtset%nsppol,occ,dtset%occopt,option,dtset%prteig,dtset%prtvol,resid,tolwfr,vxcavg,wtk)
    end if
 
    if(response==0)then
@@ -997,14 +977,6 @@ end subroutine scprqt
 !! NOTES
 !! SHOULD BE CLEANED !
 !!
-!! PARENTS
-!!      m_gstate,m_longwave,m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 subroutine setup1(acell,bantot,dtset,ecut_eff,ecutc_eff,gmet,&
@@ -1126,6 +1098,7 @@ end subroutine setup1
 !!  kptopt=option for the generation of k points
 !!  mband=maximum number of bands
 !!  nband(nkpt)=number of bands at each k point
+!!  nbdbuf= number of buffer bands
 !!  nkpt=number of k points
 !!  nnsclo_now=number of non-self-consistent loops for the current vtrial
 !!    (often 1 for SCF calculation, =nstep for non-SCF calculations)
@@ -1143,25 +1116,14 @@ end subroutine setup1
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_common,m_dfpt_looppert,m_gstate,m_respfn_driver,m_vtorho
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
-!CP added fermih to argument list
 subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,mband,nband,&
-&  nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
-
- use m_io_tools,  only : open_file
+&  nbdbuf,nkpt,nnsclo_now,nsppol,occ,occopt,option,prteig,prtvol,resid,tolwfr,vxcavg,wtk)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nkpt,nnsclo_now,nsppol
+ integer,intent(in) :: enunit,iout,iscf,kptopt,mband,nbdbuf,nkpt,nnsclo_now,nsppol
  integer,intent(in) :: occopt,option,prteig,prtvol
  real(dp),intent(in) :: fermie,fermih,tolwfr,vxcavg ! CP added fermih
  character(len=*),intent(in) :: fname_eig
@@ -1262,7 +1224,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
           write(msg, '(3a,f10.5,a,f10.5,3a,f10.5)' ) &
           ' Fermi energy for thermalized electrons and holes (',trim(strunit2),') =',&
           convrt*fermie,', ',convrt*fermih,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
-       else 
+       else
           write(msg, '(3a,f10.5,3a,f10.5)' ) &
           ' Fermi (or HOMO) energy (',trim(strunit2),') =',convrt*fermie,'   Average Vxc (',trim(strunit2),')=',convrt*vxcavg
        end if
@@ -1287,14 +1249,11 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
 
        ikpt_fmt="i4" ; if(nkpt>=10000)ikpt_fmt="i6" ; if(nkpt>=1000000)ikpt_fmt="i9"
        if (nsppol==2.and.isppol==1) then
-         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
-&         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN UP:'
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' )trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN UP:'
        else if (nsppol==2.and.isppol==2) then
-         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
-&         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN DOWN:'
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' )trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points, SPIN DOWN:'
        else
-         write(msg, '(4a,'//ikpt_fmt//',2x,a)' ) &
-&         trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points:'
+         write(msg, '(4a,'//ikpt_fmt//',2x,a)' )trim(kind_of_output),' (',strunit1,') for nkpt=',nkpt,'k points:'
        end if
        call wrtout(iout,msg)
        if (prteig > 0) call wrtout(temp_unit,msg)
@@ -1313,12 +1272,10 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
          ibnd_fmt="i3" ; if(nband_k>=1000)ibnd_fmt="i6" ; if(nband_k>=1000000)ibnd_fmt="i9"
          if(ikpt<=nkpt_eff)then
            write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
-&           ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
-&           kptns(1:3,ikpt)+tol10,' (reduced coord)'
+&           ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',kptns(1:3,ikpt)+tol10,' (reduced coord)'
            call wrtout(iout,msg,'COLL')
            if (prteig > 0) call wrtout(temp_unit,msg)
            do ii=0,(nband_k-1)/8
-!            write(msg, '(8f15.10)' ) (convrt*eigen(iband+band_index),&
              write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index), iband=1+ii*8,min(nband_k,8+ii*8))
              call wrtout(iout,msg,'COLL')
              if (prteig > 0) call wrtout(temp_unit,msg)
@@ -1339,8 +1296,7 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
            end if
            if (prteig > 0) then
              write(msg, '(a,'//ikpt_fmt//',a,'//ibnd_fmt//',a,f9.5,a,3f8.4,a)' ) &
-&             ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',&
-&             kptns(1:3,ikpt)+tol10,' (reduced coord)'
+&             ' kpt#',ikpt,', nband=',nband_k,', wtk=',wtk(ikpt)+tol10,', kpt=',kptns(1:3,ikpt)+tol10,' (reduced coord)'
              call wrtout(temp_unit,msg)
              do ii=0,(nband_k-1)/8
                write(msg, '(8(f10.5,1x))' ) (convrt*eigen(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
@@ -1403,12 +1359,11 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
          end if
        end if
 
-       ! MG: I don't understand why we should include the buffer in the output.
-       ! It's already difficult to make the tests pass for the residuals without the buffer if nband >> nbocc
-       residk=maxval(resid(band_index+1:band_index+nband_k))
+       ! Don't include the buffer in the output.
+       residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
        if (residk>tolwfr) then
          write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
-&         ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (incl. the buffer)=',residk
+          ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (excl. the buffer)=',residk
          call wrtout(iout,msg)
        end if
 
@@ -1448,14 +1403,6 @@ end subroutine prteigrs
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_gstate,m_scfcv_core
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
 !!
 !! SOURCE
 
@@ -1525,6 +1472,10 @@ subroutine prtene(dtset,energies,iout,usepaw)
      edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
                          width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
+     if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
+       call edoc%add_real('kinetic_extfpmd',energies%e_extfpmd)
+       call edoc%add_real('total_kinetic',energies%e_extfpmd+energies%e_kinetic)
+     end if
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
        ! XG20181025 This should NOT be a part of the semilocal XC energy, but treated separately.
@@ -1616,7 +1567,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
    dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
                           width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
-
+   if(abs(energies%e_extfpmd)>tiny(0.0_dp)) then
+     call dc_edoc%add_real('kinetic_extfpmd_dc',energies%edc_extfpmd)
+   end if
    if (ipositron/=1) then
      !write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
      !  '    '//eneName//'  =',enevalue,ch10,&
@@ -1675,6 +1628,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
      end if
      call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
+
+
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
    !call wrtout(iout,msg,'COLL')
    call dc_edoc%add_real('total_energy_dc', etotaldc)
@@ -1747,14 +1702,6 @@ end subroutine prtene
 !!  pspheads(npsp)=<type pspheader_type>=all the important information from the
 !!   pseudopotential file headers, as well as the psp file names
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      hdr%free,hdr_ncread,hdr_read_from_fname,indefo,inpspheads,invars0
-!!      invars1m,invars2m,macroin,macroin2,parsefile,pspheads_comm,timab
-!!      time_set_papiopt,wfk_read_eigenvalues
-!!
 !! SOURCE
 
 subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
@@ -1806,12 +1753,12 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  dtsets(0)%timopt = 1
  if (xmpi_paral == 1) dtsets(0)%timopt = 0
 
- call timab(41,2,tsec)
  call timab(timopt,5,tsec)
 
  ! Initialize pspheads, that contains the important information
  ! from the pseudopotential headers, as well as the psp filename
- call timab(42,1,tsec)
+ call timab(102,1,tsec)
+ call timab(1021,3,tsec)
 
  usepaw = 0
  ABI_MALLOC(pspheads, (npsp))
@@ -1864,7 +1811,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
 
     if (minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
     if (minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
- end if
+ end if ! me == 0
 
  ABI_FREE(pseudo_paths)
 
@@ -1898,11 +1845,14 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
                msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
  ABI_FREE(zionpsp)
- call timab(42,2,tsec)
- call timab(43,3,tsec)
+ call timab(1021,2,tsec)
+ call timab(1022,3,tsec)
 
  ! Provide defaults for the variables that have not yet been initialized.
  call indefo(dtsets, ndtset_alloc, nprocs)
+
+ call timab(1022,2,tsec)
+ call timab(1023,3,tsec)
 
  ! Perform some global initialization, depending on the value of
  ! pseudopotentials, parallelism variables, or macro input variables
@@ -1923,7 +1873,8 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
     mx%mband = max(dtsets(ii)%mband, mx%mband)
  end do
 
- call timab(43,2,tsec)
+ call timab(1023,2,tsec)
+ call timab(102,2,tsec)
 
  ABI_FREE(mband_upper_)
 
@@ -1943,10 +1894,6 @@ end subroutine get_dtsets_pspheads
 !!  comm: MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2002,10 +1949,6 @@ end function ebands_from_file
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

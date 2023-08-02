@@ -8,14 +8,10 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (MT)
+!! Copyright (C) 2011-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -93,6 +89,9 @@ MODULE m_results_gs
   real(dp) :: diffor
    ! maximal absolute value of changes in the components of force
 
+  real(dp) :: nelect_extfpmd
+   ! Contribution of the Extended FPMD model to the number of electrons for high temperature simulations
+
 ! All the energies are in Hartree, obtained "per unit cell".
   type(energies_type) :: energies
 !!!  real(dp) :: eei      ! local pseudopotential energy (Hartree)
@@ -110,6 +109,8 @@ MODULE m_results_gs
 !!!  real(dp) :: enxcdc   ! exchange-correlation double-counting energy (Hartree)
 !!!  real(dp) :: epaw     ! PAW spherical energy (Hartree)
 !!!  real(dp) :: epawdc   ! PAW spherical double-counting energy (Hartree)
+  real(dp) :: entropy_extfpmd ! Entropy contribution of the Extended FPMD model
+                              ! for high temperature simulations
   real(dp) :: etotal   ! total energy (Hartree)
                        ! for fixed occupation numbers (occopt==0,1,or 2):
                        !   etotal=ek+ehart+enxc+eei+eew+eii+enl+PAW_spherical_part
@@ -192,6 +193,9 @@ MODULE m_results_gs
   real(dp) :: pion(3)
    ! ucvol times the ionic polarization in reduced coordinates
 
+  real(dp) :: shiftfactor_extfpmd
+   ! Energy shift factor of the Extended FPMD model for high temperature simulations
+
   real(dp) :: strten(6)
    ! Stress tensor in cartesian coordinates (Hartree/Bohr^3)
    ! 6 unique components of this symmetric 3x3 tensor:
@@ -244,11 +248,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  results_gs=<type(results_gs_type)>=results_gs datastructure
 !!
-!! PARENTS
-!!      m_mover_effpot,m_results_img
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
@@ -278,11 +277,14 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%deltae =zero
  results_gs%diffor =zero
  results_gs%entropy=zero
+ results_gs%entropy_extfpmd=zero
  results_gs%etotal =zero
  results_gs%fermie =zero
  results_gs%fermih =zero ! CP added for case occopt 9
+ results_gs%nelect_extfpmd=zero
  results_gs%residm =zero
  results_gs%res2   =zero
+ results_gs%shiftfactor_extfpmd=zero
  results_gs%vxcavg =zero
 
  call energies_init(results_gs%energies)
@@ -341,10 +343,6 @@ end subroutine init_results_gs
 !! SIDE EFFECTS
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure 2Darray
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
@@ -383,11 +381,14 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%deltae =zero
        results_gs(jj,ii)%diffor =zero
        results_gs(jj,ii)%entropy=zero
+       results_gs(jj,ii)%entropy_extfpmd=zero
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
        results_gs(jj,ii)%fermih =zero ! CP added for occopt 9 cases
+       results_gs(jj,ii)%nelect_extfpmd=zero
        results_gs(jj,ii)%residm =zero
        results_gs(jj,ii)%res2   =zero
+       results_gs(jj,ii)%shiftfactor_extfpmd=zero
        results_gs(jj,ii)%vxcavg =zero
 
        call energies_init(results_gs(jj,ii)%energies)
@@ -444,11 +445,6 @@ end subroutine init_results_gs_array
 !! SIDE EFFECTS
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure
 !!
-!! PARENTS
-!!      m_mover_effpot,m_results_img
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_results_gs(results_gs)
@@ -497,10 +493,6 @@ end subroutine destroy_results_gs
 !!
 !! SIDE EFFECTS
 !!  results_gs(:)=<type(results_gs_type)>=results_gs datastructure 2D-array
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -561,11 +553,6 @@ end subroutine destroy_results_gs_array
 !!
 !! OUTPUT
 !!  results_gs_out=<type(results_gs_type)>=output results_gs datastructure
-!!
-!! PARENTS
-!!      m_results_img
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -656,11 +643,14 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%deltae =results_gs_in%deltae
  results_gs_out%diffor =results_gs_in%diffor
  results_gs_out%entropy=results_gs_in%entropy
+ results_gs_out%entropy_extfpmd=results_gs_in%entropy_extfpmd
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
  results_gs_out%fermih =results_gs_in%fermih ! CP added for occopt 9
+ results_gs_out%nelect_extfpmd=results_gs_in%nelect_extfpmd
  results_gs_out%residm =results_gs_in%residm
  results_gs_out%res2   =results_gs_in%res2
+ results_gs_out%shiftfactor_extfpmd=results_gs_in%shiftfactor_extfpmd
  results_gs_out%vxcavg =results_gs_in%vxcavg
 
  call energies_copy(results_gs_in%energies,results_gs_out%energies)
@@ -701,12 +691,6 @@ end subroutine copy_results_gs
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_results_gs
-!!
-!! CHILDREN
-!!      energies_ncwrite,results_gs_ncwrite
-!!
 !! SOURCE
 
 integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
@@ -737,7 +721,8 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
 !  "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "residm", "res2"])
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "fermih", "residm", "res2"]) ! CP added fermih
+   "ecut", "pawecutdg", "deltae", "diffor", "entropy", "entropy_extfpmd", "etotal", "fermie", "fermih",&
+&  "nelect_extfpmd", "residm", "res2", "shiftfactor_extfpmd"]) ! CP added fermih
  ! End CP modified
  NCF_CHECK(ncerr)
 
@@ -767,8 +752,10 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 !&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
 !&  datamode=.True.)
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'fermih', 'residm', 'res2'],&
-&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%fermih, res%residm, res%res2],&
+&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'entropy_extfpmd', 'etotal', 'fermie', 'fermih',&
+&  'nelect_extfpmd', 'residm', 'res2', 'shiftfactor_extfpmd'],&
+&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%entropy_extfpmd, res%etotal, res%fermie, res%fermih,&
+&  res%nelect_extfpmd, res%residm, res%res2, res%shiftfactor_extfpmd],&
 &  datamode=.True.)
  ! End CP modified
  NCF_CHECK(ncerr)
@@ -815,10 +802,6 @@ end function results_gs_ncwrite
 !!  [info]: optional info for the final document
 !!  [occopt]: optional Input variable occopt
 !!  [with_conv]: optional True if the convergence dictionary with residuals and diffs should be written.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 ! CP modified argument list

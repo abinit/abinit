@@ -6,14 +6,10 @@
 !!   Simple argument parser used in main programs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -41,7 +37,7 @@ module m_argparse
  use m_io_tools,        only : open_file, file_exists, enforce_fortran_io
  use m_cppopts_dumper,  only : dump_cpp_options
  use m_optim_dumper,    only : dump_optim
- use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, sjoin
+ use m_fstrings,        only : atoi, atof, itoa, firstchar, startswith, endswith, sjoin, find_and_select
  use m_time,            only : str2sec
  use m_libpaw_tools,    only : libpaw_log_flag_set
  use m_ipi,             only : ipi_setup
@@ -83,19 +79,19 @@ module m_argparse
  type,public :: args_t
 
    integer :: exit = 0
-     ! /=0 to exit after having parsed the command line options.
+    ! /=0 to exit after having parsed the command line options.
 
    integer :: abimem_level = 0
     ! Options for memory profiling. See m_profiling_abi
 
    integer :: dry_run = 0
-     ! /= 0 to exit after the validation of the input file.
+    ! /= 0 to exit after the validation of the input file.
 
-   real(dp) :: abimem_limit_mb = 20_dp
-     ! Optional memory limit in Mb. used when abime_level == 3
+   real(dp) :: abimem_limit_mb = 20.0_dp
+    ! Optional memory limit in Mb. used when abimem_level == 3
 
    character(len=500) :: cmdline = ""
-     ! The entire command line
+    ! The entire command line
 
    character(len=fnlen) :: input_path = ""
 
@@ -103,8 +99,7 @@ module m_argparse
    integer :: multibinit_F03_mode = 0
    !1: legacy mode
    !0: use full F03 implementation mode
-   ! TODO: It will be deprecated when everything is ready in
-   ! and the new mode will be default.
+   ! TODO: It will be deprecated when everything is ready in and the new mode will be default.
 
  end type args_t
 
@@ -120,19 +115,16 @@ contains
 !!  args_parser
 !!
 !! FUNCTION
-!!  Simple command line argument parser for abinit.
-!!
-!! PARENTS
-!!      abinit
+!!  Simple command line argument parser for abinit and other main programs.
 !!
 !! SOURCE
 
 type(args_t) function args_parser() result(args)
 
 !Local variables-------------------------------
- integer :: ii, ierr
+ integer :: ii, ierr, ntasks_per_node = -1
  logical :: iam_master, verbose
- real(dp) :: timelimit
+ real(dp) :: timelimit, memb_per_node = -one, memb_per_cpu = -one
  character(len=500) :: arg !,msg
 
 ! *************************************************************************
@@ -151,167 +143,194 @@ type(args_t) function args_parser() result(args)
  ! Store full command line for future reference.
  call get_command(args%cmdline)
 
-  do ii=1,command_argument_count()
-    call get_command_argument(ii, arg)
-    !write(std_out,*)"arg", TRIM(arg)
+ do ii=1,command_argument_count()
+   call get_command_argument(ii, arg)
+   !write(std_out,*)"arg", trim(arg)
 
-    if (ii == 1 .and. .not. firstchar(arg, "-")) then
-      ! `abinit path` syntax reads input from path and deactivates files file mode.
-      args%input_path = trim(arg)
-      if (iam_master) then
-         ABI_CHECK(file_exists(args%input_path), sjoin("Cannot find input file:", args%input_path))
-      end if
-      cycle
-    end if
+   if (ii == 1 .and. .not. firstchar(arg, "-")) then
+     ! `abinit path` syntax reads input from path and deactivates files file mode.
+     args%input_path = trim(arg)
+     if (iam_master) then
+        ABI_CHECK(file_exists(args%input_path), sjoin("Cannot find input file:", args%input_path))
+     end if
+     cycle
+   end if
 
-    if (arg == "-v" .or. arg == "--version") then
-      call wrtout(std_out,TRIM(abinit_version),"COLL")
-      args%exit = args%exit + 1
+   if (arg == "-v" .or. arg == "--version") then
+     call wrtout(std_out, trim(abinit_version))
+     args%exit = args%exit + 1
 
-    else if (arg == "-b" .or. arg == "--build") then
-      call print_kinds(unit=std_out)
-      call xmpi_show_info(unit=std_out)
-      call dump_cpp_options(std_out)
-      call dump_config(std_out)
-      call dump_optim(std_out)
+   else if (arg == "-b" .or. arg == "--build") then
+     call print_kinds(unit=std_out)
+     call xmpi_show_info(unit=std_out)
+     call dump_cpp_options(std_out)
+     call dump_config(std_out)
+     call dump_optim(std_out)
 
-      args%exit = args%exit + 1
+     args%exit = args%exit + 1
 
-    else if (arg == "-d" .or. arg == "--dry-run") then
-      args%dry_run = 1
+   else if (arg == "-d" .or. arg == "--dry-run") then
+     args%dry_run = 1
 
-    else if (arg == "--abimem-level") then
-      call get_command_argument(ii + 1, arg)
-      args%abimem_level = atoi(arg)
+   else if (arg == "--abimem-level") then
+     call get_command_argument(ii + 1, arg)
+     args%abimem_level = atoi(arg)
 
-    else if (arg == "--abimem-limit-mb") then
-      call get_command_argument(ii + 1, arg)
-      args%abimem_limit_mb = atof(arg)
+   else if (arg == "--abimem-limit-mb") then
+     call get_command_argument(ii + 1, arg)
+     args%abimem_limit_mb = atof(arg)
 
-    else if (arg == "-j" .or. arg == "--omp-num-threads") then
-      call get_command_argument(ii + 1, arg)
-      call xomp_set_num_threads(atoi(arg))
+   else if (arg == "-j" .or. arg == "--omp-num-threads") then
+     call get_command_argument(ii + 1, arg)
+     call xomp_set_num_threads(atoi(arg))
 
-    ! timelimit handler.
-    else if (arg == "-t" .or. arg == "--timelimit") then
-      call get_command_argument(ii + 1, arg)
-      timelimit = str2sec(arg)
-      if (timelimit < zero) then
-        write(std_out,*)"Wrong timelimit argument:",trim(arg)
-        args%exit = args%exit + 1
-      else
-        call exit_init(timelimit)
-      end if
+   else if (arg == "-t" .or. arg == "--timelimit") then
+     ! timelimit handler.
+     call get_command_argument(ii + 1, arg)
+     timelimit = str2sec(arg)
+     if (timelimit < zero) then
+       write(std_out,*)"Wrong timelimit argument: ",trim(arg)
+       args%exit = args%exit + 1
+     else
+       call exit_init(timelimit)
+     end if
 
-    ! IEEE exceptions.
-    else if (arg == "--ieee-halt") then
-      call xieee_halt_ifexc(.True.)
-    else if (arg == "--ieee-signal") then
-      call xieee_signal_ifexc(.True.)
+   else if (arg == "--ieee-halt") then
+     ! IEEE exceptions.
+     call xieee_halt_ifexc(.True.)
 
-    ! Enable/disable non-blocking ialltoall in MPI-FFT
-    else if (begins_with(arg, "--fft-ialltoall")) then
-      call fft_allow_ialltoall(parse_yesno(arg, "--fft-ialltoall"))
+   else if (arg == "--ieee-signal") then
+     call xieee_signal_ifexc(.True.)
 
-    else if (begins_with(arg, "--ipi")) then
-      call get_command_argument(ii + 1, arg)
-      call ipi_setup(arg, xmpi_world)
+   else if (begins_with(arg, "--fft-ialltoall")) then
+     ! Enable/disable non-blocking ialltoall in MPI-FFT
+     call fft_allow_ialltoall(parse_yesno(arg, "--fft-ialltoall"))
 
-    ! Enable/disable [Z,C]GEMM3
-    else if (begins_with(arg, "--use-xgemm3m")) then
-      call linalg_allow_gemm3m(parse_yesno(arg, "--use-xgemm3m"), write_msg=iam_master)
+   else if (begins_with(arg, "--ipi")) then
+     call get_command_argument(ii + 1, arg)
+     call ipi_setup(arg, xmpi_world)
 
-    ! Enable/disable usage of MPI_IN_PLACE.
-    else if (begins_with(arg, "--use-mpi-in-place")) then
-      call xmpi_set_inplace_operations(parse_yesno(arg, "--use-mpi-in-place"))
+   else if (begins_with(arg, "--use-xgemm3m")) then
+     ! Enable/disable [Z,C]GEMM3
+     call linalg_allow_gemm3m(parse_yesno(arg, "--use-xgemm3m"), write_msg=iam_master)
 
-    ! Enable/disable PLASMA
-    else if (begins_with(arg, "--plasma")) then
-      call linalg_allow_plasma(parse_yesno(arg, "--plasma"))
+   else if (begins_with(arg, "--use-mpi-in-place")) then
+     ! Enable/disable usage of MPI_IN_PLACE.
+     call xmpi_set_inplace_operations(parse_yesno(arg, "--use-mpi-in-place"))
 
-    else if (arg == "--gnu-mtrace") then
-      if (iam_master) then
-        call clib_mtrace(ierr)
-        ABI_CHECK(ierr == 0, sjoin("clib_mtrace returned ierr:", itoa(ierr)))
-      end if
+   else if (begins_with(arg, "--plasma")) then
+     ! Enable/disable PLASMA
+     call linalg_allow_plasma(parse_yesno(arg, "--plasma"))
 
-    else if (arg == "--log") then
-      ! Enable logging
-      call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
-      call libpaw_log_flag_set(.True.)
+   else if (arg == "--gnu-mtrace") then
+     if (iam_master) then
+       call clib_mtrace(ierr)
+       ABI_CHECK(ierr == 0, sjoin("clib_mtrace returned ierr:", itoa(ierr)))
+     end if
 
-    else if (arg == "--netcdf-classic") then
-      ! Use netcdf classic mode for new files when only sequential-IO needs to be performed
-      call nctk_use_classic_for_seq()
+   else if (arg == "--log") then
+     ! Enable logging
+     call abi_log_status_state(new_do_write_log=.True., new_do_write_status=.True.)
+     call libpaw_log_flag_set(.True.)
 
-    else if (arg == "--enforce-fortran-io") then
-      call enforce_fortran_io(.True.)
+   else if (arg == "--netcdf-classic") then
+     ! Use netcdf classic mode for new files when only sequential-IO needs to be performed
+     call nctk_use_classic_for_seq()
 
-    else if (arg == "--F03") then
-       ! For multibinit only
-       args%multibinit_F03_mode = 1
+   else if (arg == "--enforce-fortran-io") then
+     call enforce_fortran_io(.True.)
 
-    else if (arg == "-h" .or. arg == "--help") then
-      if (iam_master) then
-        ! Document the options.
-        write(std_out,*)"-v, --version              Show version number and exit."
-        write(std_out,*)"-b, --build                Show build parameters and exit."
-        write(std_out,*)"-d, --dry-run              Validate input file and exit."
-        write(std_out,*)"-j, --omp-num-threads      Set the number of OpenMp threads."
-        write(std_out,*)"--use-xgemm3m[=yesno]      Use ZGEMM3M routines instead of ZGEMM. Default: no "
-        write(std_out,*)"--use-mpi-in-place[=yesno] Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum. Default: no"
-        write(std_out,*)"                           Note that some MPI libs e.g. intel-mpi may not implement this feature"
-        write(std_out,*)"                           correctly so it is adviced to test this option with e.g. structural"
-        write(std_out,*)"                           relaxations before running production calculations."
-        write(std_out,*)"--ipi                      Activate socket-driven calculation using i-pi protocol."
-        write(std_out,*)"                           For UNIX socket, use: --ipi {unixsocket}:UNIX"
-        write(std_out,*)"                           For INET socket, use  --ipi {host}:{port}. Usage example:"
-        write(std_out,*)"                           `abinit run.abi --ipi {unixsocket}:UNIX > run.log`"
-        write(std_out,*)"                           NB: Requires ionmov 28 and some tuning of input variables. See:"
-        write(std_out,*)"                           https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html"
-        write(std_out,*)"--log                      Enable log files and status files in parallel execution."
-        write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
-        write(std_out,*)"                           Default is netcdf4/hdf5"
-        write(std_out,*)"--enforce-fortran-io       Use Fortran-IO instead of MPI-IO when operating on Fortran files"
-        write(std_out,*)"                           Useful to read files when the MPI-IO library is not efficient."
-        write(std_out,*)"                           DON'T USE this option when the code needs to write large files e.g. WFK"
-        write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm notation:"
-        write(std_out,*)"                               days-hours"
-        write(std_out,*)"                               days-hours:minutes"
-        write(std_out,*)"                               days-hours:minutes:seconds"
-        write(std_out,*)"                               minutes"
-        write(std_out,*)"                               minutes:seconds"
-        write(std_out,*)"                               hours:minutes:seconds"
-        write(std_out,*)"                           At present only GS, relaxations and MD runs support this option"
-        write(std_out,*)"--verbose                  Enable verbose mode in argparse"
-        write(std_out,*)"-h, --help                 Show this help and exit."
+   else if (begins_with(arg, "--mem-per-cpu=")) then
+     memb_per_cpu = parse_slurm_mem(arg, "--mem-per-cpu=")
+     call set_mem_per_cpu_mb(memb_per_cpu)
 
-        write(std_out,*)"=============================="
-        write(std_out,*)"=== Options for developers ==="
-        write(std_out,*)"=============================="
-        write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
-        write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
-        write(std_out,*)"--fft-ialltoall[=yesno]    Use non-blocking ialltoall in MPI-FFT (used only if ndat > 1 and MPI2+)."
-        write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
-        write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
-        write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
-        ! Multibinit
-        write(std_out,*)"--F03                      Run F03 mode (for Multibinit only)."
-      end if
-      args%exit = args%exit + 1
+   else if (begins_with(arg, "--mem=")) then
+     memb_per_node = parse_slurm_mem(arg, "--mem=")
 
-    else if (arg == "--verbose") then
-      verbose = .True.
+   else if (begins_with(arg, "--ntasks-per-node=")) then
+     call get_command_argument(ii + 1, arg)
+     ntasks_per_node = atoi(arg)
 
-    else
-      if (firstchar(arg, "-")) then
-        ABI_WARNING("Unsupported option: "//trim(arg))
-        args%exit = args%exit + 1
-      else
-        continue
-      end if
-    end if
-  end do
+   else if (arg == "--F03") then
+     ! For multibinit only
+     args%multibinit_F03_mode = 1
+
+   else if (arg == "-h" .or. arg == "--help") then
+     if (iam_master) then
+       ! Document the options.
+       write(std_out,*)"-v, --version              Show version number and exit."
+       write(std_out,*)"-b, --build                Show build parameters and exit."
+       write(std_out,*)"-d, --dry-run              Validate input file and exit."
+       write(std_out,*)"-j, --omp-num-threads      Set the number of OpenMp threads."
+       write(std_out,*)"--use-xgemm3m[=yesno]      Use ZGEMM3M routines instead of ZGEMM. Default: no "
+       write(std_out,*)"--use-mpi-in-place[=yesno] Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum. Default: no"
+       write(std_out,*)"                           Note that some MPI libs e.g. intel-mpi may not implement this feature"
+       write(std_out,*)"                           correctly so it is adviced to test this option with e.g. structural"
+       write(std_out,*)"                           relaxations before running production calculations."
+       write(std_out,*)"--ipi                      Activate socket-driven calculation using i-pi protocol."
+       write(std_out,*)"                           For UNIX socket, use: --ipi {unixsocket}:UNIX"
+       write(std_out,*)"                           For INET socket, use  --ipi {host}:{port}. Usage example:"
+       write(std_out,*)"                           `abinit run.abi --ipi {unixsocket}:UNIX > run.log`"
+       write(std_out,*)"                           NB: Requires ionmov 28 and some tuning of input variables. See:"
+       write(std_out,*)"                           https://wiki.fysik.dtu.dk/ase/dev/ase/calculators/socketio/socketio.html"
+       write(std_out,*)"--log                      Enable log files and status files in parallel execution."
+       write(std_out,*)"--netcdf-classic           Use netcdf classic mode for new files if parallel-IO is not needed."
+       write(std_out,*)"                           Default is netcdf4/hdf5"
+       write(std_out,*)"--enforce-fortran-io       Use Fortran-IO instead of MPI-IO when operating on Fortran files"
+       write(std_out,*)"                           Useful to read files when the MPI-IO library is not efficient."
+       write(std_out,*)"                           DON'T USE this option when the code needs to write large files e.g. WFK"
+       write(std_out,*)"-t, --timelimit            Set the timelimit for the run. Accepts time in Slurm syntax:"
+       write(std_out,*)"                               days-hours"
+       write(std_out,*)"                               days-hours:minutes"
+       write(std_out,*)"                               days-hours:minutes:seconds"
+       write(std_out,*)"                               minutes"
+       write(std_out,*)"                               minutes:seconds"
+       write(std_out,*)"                               hours:minutes:seconds"
+       write(std_out,*)"                           At present only GS, relaxations and MD runs support this option"
+       write(std_out,*)"--mem-per-cpu=<size>[units] Set memory per cpu using Slurm syntax. Default units are megabytes."
+       write(std_out,*)"                           Different units can be specified using the suffix [K|M|G|T]."
+       write(std_out,*)"--mem=<size>[units]        Set memory per node using Slurm syntax. Default units are megabytes."
+       write(std_out,*)"                           Requires `ntasks-per-node`. Not compatibile with `-mem-per-cpu`."
+       write(std_out,*)"--ntasks-per-node=INT      Set number of tasks per node. Used in conjunction with --mem`"
+       write(std_out,*)"--verbose                  Enable verbose mode in argparse"
+       write(std_out,*)"-h, --help                 Show this help and exit."
+
+       write(std_out,*)""
+       write(std_out,*)""
+       write(std_out,*)"=============================="
+       write(std_out,*)"=== Options for developers ==="
+       write(std_out,*)"=============================="
+       write(std_out,*)"--abimem-level NUM         Set memory profiling level. Requires HAVE_MEM_PROFILING"
+       write(std_out,*)"--abimem-limit-mb NUM      Log malloc/free only if size > limit in Megabytes. Requires abimem-level 3"
+       write(std_out,*)"--fft-ialltoall[=yesno]    Use non-blocking ialltoall in MPI-FFT (used only if ndat > 1 and MPI2+)."
+       write(std_out,*)"--gnu-mtrace               Enable mtrace (requires GNU and clib)."
+       write(std_out,*)"--ieee-halt                Halt the code if one of the *usual* IEEE exceptions is raised."
+       write(std_out,*)"--ieee-signal              Signal the occurrence of the *usual* IEEE exceptions."
+       ! Multibinit
+       write(std_out,*)"--F03                      Run F03 mode (for Multibinit only)."
+     end if
+     args%exit = args%exit + 1
+
+   else if (arg == "--verbose") then
+     verbose = .True.
+
+   else
+     if (firstchar(arg, "-")) then
+       ABI_WARNING("Unsupported option: "//trim(arg))
+       args%exit = args%exit + 1
+     else
+       continue
+     end if
+   end if
+ end do
+
+ if (ntasks_per_node /= -1 .or. memb_per_node /= -one) then
+   ! Set mem_per_cpu from node info.
+   ABI_CHECK(ntasks_per_node /= -1, "`mem-per-node` requires `ntasks-per-node`")
+   ABI_CHECK(memb_per_node /= -one, "`ntasks-per-node` requires `mem-per-node`")
+   ABI_CHECK(memb_per_cpu == -one, "`mem-per-cpu` and `mem-per-node` are mutually exclusive!")
+   call set_mem_per_cpu_mb(memb_per_node / ntasks_per_node)
+ end if
 
 #endif
 
@@ -330,8 +349,8 @@ end function args_parser
 pure logical function begins_with(arg, string) result(bool)
 
 !Arguments ------------------------------------
-!scalars
  character(len=*),intent(in) :: arg,string
+! *************************************************************************
 
  bool = .False.; if (len(arg) >= len(string)) bool = (arg(1:len(string)) == string)
 
@@ -354,9 +373,9 @@ end function begins_with
 logical function parse_yesno(arg, optname, default) result(bool)
 
 !Arguments ------------------------------------
-!scalars
  character(len=*),intent(in) :: arg,optname
  logical,optional,intent(in) :: default
+! *************************************************************************
 
  bool = .True.; if (present(default)) bool = default
 
@@ -378,6 +397,52 @@ end function parse_yesno
 
 !----------------------------------------------------------------------
 
+!!****f* m_argparse/parse_slurm_mem
+!! NAME
+!!  parse_slurm_mem
+!!
+!! FUNCTION
+!!  Parse `arg` string with memory given in Slurm syntax. Return value in Mb.
+!!  From https://slurm.schedmd.com/sbatch.html
+!!
+!!  --mem=<size>[units]
+!!
+!!  Default units are megabytes. Different units can be specified using the suffix [K|M|G|T].
+!!
+!!  For a list of slurm env variables that can be used to pass options to Abinit via the submission script, see:
+!!  https://docs.hpc.shef.ac.uk/en/latest/referenceinfo/scheduler/SLURM/SLURM-environment-variables.html
+!!
+!! SOURCE
+
+real(dp) function parse_slurm_mem(arg, optname) result(mem_mb)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: arg,optname
+
+!Local variables-------------------------------
+ integer :: istop, istat
+ real(dp) :: fact
+ character(len=500) :: iomsg
+! *************************************************************************
+
+ fact = one
+ istop = find_and_select(arg, &
+                         ["K", "M", "G", "T"], &
+                         [one/1024._dp, one, 1024._dp, 1024._dp ** 2], fact, iomsg, default=one)
+
+ ABI_CHECK(istop /= -1, iomsg)
+ istop = merge(len_trim(arg), istop - 1, istop == 0)
+
+ read(arg(len(optname) + 1: istop), *, iostat=istat, iomsg=iomsg) mem_mb
+ ABI_CHECK(istat == 0, sjoin("Invalid syntax for memory string:", arg, ch10, "iomsg", iomsg))
+ ABI_CHECK(mem_mb > zero, "mem_mb must be positive!")
+ mem_mb = mem_mb * fact
+
+end function parse_slurm_mem
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_argparse/get_arg_int
 !! NAME
 !!  get_arg_int
@@ -393,8 +458,6 @@ end function parse_yesno
 !! OUTPUT
 !!  argval= Value of argname
 !!  msg= Error message
-!!
-!! FUNCTION
 !!
 !! SOURCE
 
@@ -535,8 +598,7 @@ integer function get_arg_str(argname, argval, msg, default, exclude) result(ierr
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: argname
- character(len=*),intent(out) :: argval
- character(len=*),intent(out) :: msg
+ character(len=*),intent(out) :: argval, msg
  character(len=*),optional,intent(in) :: default
  character(len=*),optional,intent(in) :: exclude
 
@@ -917,11 +979,6 @@ end function get_arg_list_dp
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      abitk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

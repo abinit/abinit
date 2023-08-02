@@ -75,12 +75,15 @@ nbandkss3 -1         # Number of bands in KSS file (-1 means the maximum possibl
 
 kssform 3
 # == LDA+DMFT
-usedmft3 1
-dmftbandi3 21
-dmftbandf3 25
-dmft_nwlo3 100
-dmft_nwli3 200000
-dmft_iter3 0
+# == Compute Projected Wannier functions
+plowan_compute3 1 # Activate the computation of Wannier functions
+plowan_bandi 21 # First band for Wannier functions
+plowan_bandf 25 # Last band for Wannier functions
+plowan_natom 1 # Number of atoms
+plowan_iatom 1  # Index of atoms
+plowan_nbl 1  # Number of the orbitals
+plowan_lcalc 2  # Index of the orbitals (2 -> d)
+plowan_projcalc 7  # Projector for the orbitals 
 
 # == DFT+U
 usepawu    1        # DFT+U is used.
@@ -97,6 +100,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 # getwfk4        3    # Obtain KSS file from previous dataset
  ecutwfn4       3.0   # Cut-off energy of the planewave set to represent the wavefunctions. It would be more convenient to keep the default ecut value.
  ecuteps4       3.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+ plowan_compute4 10
 # ppmfrq4   16.1 eV   # Imaginary frequency where to calculate the screening
  nfreqre4       1
  nfreqim4       0
@@ -143,7 +147,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% keywords = GW, DMFT, cRPA
-#%% authors = T. Applencourt, B. Amadon
+#%% authors = T. Applencourt, B. Amadon, R. Outerovitch
 #%% description = Test the calculation of dielectric function in constrained RPA for SrVO3. Uses KSS file from test 23
-#%% topics = CRPA
+#%% topics = CalcUJ
 #%%<END TEST_INFO>

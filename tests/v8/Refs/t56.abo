@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h35 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t56/t56.in
-- output file    -> t56.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t56/t56.abi
+- output file    -> t56.abo
 - root for input  files -> t56i
 - root for output files -> t56o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                      14.038 Mbytes of memory.
 _ WF disk file :      2.208 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -51,11 +49,10 @@ _ WF disk file :      2.208 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           2
        mpw =         762          nfft =       32768          nkpt =           2
 ================================================================================
-P This job should need less than                       7.739 Mbytes of memory.
+P This job should need less than                       7.742 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -152,9 +149,9 @@ P          mk1mem3          2
         optdriver1          0
         optdriver2          0
         optdriver3          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -248,8 +245,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -263,8 +260,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -459,7 +456,6 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
   6.60E-23  7.22E-23  1.68E-13  2.73E-15
  -1.2001E+00 -5.1849E-01 -5.0567E-01 -5.0567E-01 -3.7739E-01  1.3410E-01
   1.6827E-01  1.6827E-01  3.1677E-01  4.7309E-01  5.0510E-01  5.2767E-01
-  prteigrs : nnsclo,ikpt=  100    2 max resid (incl. the buffer)=  1.68295E-13
 
 
 --- !ResultsGS
@@ -546,8 +542,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -561,8 +557,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -578,7 +574,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -600,7 +595,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -621,23 +615,23 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  6  -28.047327429971     -1.267E-07 5.065E-09 0.000E+00
  ETOT  7  -28.047327434926     -4.955E-09 5.459E-10 0.000E+00
  ETOT  8  -28.047327435124     -1.979E-10 3.731E-11 0.000E+00
- ETOT  9  -28.047327435132     -7.898E-12 2.882E-12 0.000E+00
- ETOT 10  -28.047327435132     -4.050E-13 9.079E-14 0.000E+00
+ ETOT  9  -28.047327435132     -7.869E-12 2.882E-12 0.000E+00
+ ETOT 10  -28.047327435132     -4.192E-13 9.079E-14 0.000E+00
  ETOT 11  -28.047327435132     -3.197E-14 1.315E-14 0.000E+00
- ETOT 12  -28.047327435132      6.040E-14 4.174E-16 0.000E+00
- ETOT 13  -28.047327435132     -2.842E-14 6.912E-17 0.000E+00
- ETOT 14  -28.047327435132     -9.948E-14 2.244E-18 0.000E+00
- ETOT 15  -28.047327435132      4.263E-14 3.711E-19 0.000E+00
+ ETOT 12  -28.047327435132      5.684E-14 4.174E-16 0.000E+00
+ ETOT 13  -28.047327435132     -3.908E-14 6.912E-17 0.000E+00
+ ETOT 14  -28.047327435132     -7.816E-14 2.244E-18 0.000E+00
+ ETOT 15  -28.047327435132      2.487E-14 3.711E-19 0.000E+00
  ETOT 16  -28.047327435132      5.329E-14 1.212E-20 0.000E+00
- ETOT 17  -28.047327435132      1.066E-14 2.001E-21 0.000E+00
- ETOT 18  -28.047327435132      3.553E-15 9.467E-23 0.000E+00
+ ETOT 17  -28.047327435132      3.553E-15 2.001E-21 0.000E+00
+ ETOT 18  -28.047327435132      1.421E-14 9.467E-23 0.000E+00
 
  At SCF step   18   max residual=  9.47E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   48.408E-24; max=  94.669E-24
+ Mean square residual over all n,k,spin=   48.407E-24; max=  94.667E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3608957166E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -670,7 +664,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -691,23 +684,23 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  6  -28.047414713620     -1.353E-07 5.066E-09 0.000E+00
  ETOT  7  -28.047414718477     -4.856E-09 5.153E-10 0.000E+00
  ETOT  8  -28.047414718654     -1.772E-10 4.051E-11 0.000E+00
- ETOT  9  -28.047414718660     -6.516E-12 3.505E-12 0.000E+00
- ETOT 10  -28.047414718661     -2.593E-13 9.071E-14 0.000E+00
- ETOT 11  -28.047414718661     -1.776E-14 1.733E-14 0.000E+00
- ETOT 12  -28.047414718661     -1.066E-14 4.473E-16 0.000E+00
- ETOT 13  -28.047414718661      1.776E-14 9.675E-17 0.000E+00
- ETOT 14  -28.047414718661      5.329E-14 2.543E-18 0.000E+00
- ETOT 15  -28.047414718661     -2.842E-14 5.476E-19 0.000E+00
- ETOT 16  -28.047414718661     -7.105E-15 1.445E-20 0.000E+00
- ETOT 17  -28.047414718661      1.421E-14 3.108E-21 0.000E+00
- ETOT 18  -28.047414718661     -1.066E-14 9.380E-23 0.000E+00
+ ETOT  9  -28.047414718660     -6.498E-12 3.505E-12 0.000E+00
+ ETOT 10  -28.047414718661     -2.700E-13 9.071E-14 0.000E+00
+ ETOT 11  -28.047414718661     -3.553E-15 1.733E-14 0.000E+00
+ ETOT 12  -28.047414718661     -1.421E-14 4.473E-16 0.000E+00
+ ETOT 13  -28.047414718661      2.132E-14 9.675E-17 0.000E+00
+ ETOT 14  -28.047414718661      6.750E-14 2.543E-18 0.000E+00
+ ETOT 15  -28.047414718661     -4.974E-14 5.476E-19 0.000E+00
+ ETOT 16  -28.047414718661      3.553E-15 1.445E-20 0.000E+00
+ ETOT 17  -28.047414718661      7.105E-15 3.108E-21 0.000E+00
+ ETOT 18  -28.047414718661      0.000E+00 9.380E-23 0.000E+00
 
  At SCF step   18   max residual=  9.38E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   53.775E-24; max=  93.803E-24
+ Mean square residual over all n,k,spin=   53.775E-24; max=  93.804E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3609000759E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -740,7 +733,6 @@ tolerances: {tolwfr: 1.00E-22, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t56o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -760,24 +752,24 @@ tolerances: {tolwfr: 1.00E-22, }
  ETOT  5  -28.047414263771     -3.387E-06 2.080E-07 0.000E+00
  ETOT  6  -28.047414390298     -1.265E-07 5.065E-09 0.000E+00
  ETOT  7  -28.047414395231     -4.934E-09 5.094E-10 0.000E+00
- ETOT  8  -28.047414395428     -1.970E-10 4.122E-11 0.000E+00
- ETOT  9  -28.047414395436     -8.004E-12 3.670E-12 0.000E+00
- ETOT 10  -28.047414395437     -2.878E-13 9.444E-14 0.000E+00
- ETOT 11  -28.047414395437     -3.908E-14 1.835E-14 0.000E+00
- ETOT 12  -28.047414395437     -5.684E-14 4.554E-16 0.000E+00
- ETOT 13  -28.047414395437      6.750E-14 1.030E-16 0.000E+00
- ETOT 14  -28.047414395437     -9.237E-14 2.595E-18 0.000E+00
- ETOT 15  -28.047414395437     -3.553E-15 5.859E-19 0.000E+00
- ETOT 16  -28.047414395437      4.619E-14 1.482E-20 0.000E+00
- ETOT 17  -28.047414395437      3.553E-15 3.344E-21 0.000E+00
- ETOT 18  -28.047414395437     -1.066E-14 9.309E-23 0.000E+00
+ ETOT  8  -28.047414395428     -1.969E-10 4.122E-11 0.000E+00
+ ETOT  9  -28.047414395436     -8.043E-12 3.670E-12 0.000E+00
+ ETOT 10  -28.047414395437     -2.665E-13 9.444E-14 0.000E+00
+ ETOT 11  -28.047414395437     -4.619E-14 1.835E-14 0.000E+00
+ ETOT 12  -28.047414395437     -4.619E-14 4.554E-16 0.000E+00
+ ETOT 13  -28.047414395437      6.040E-14 1.030E-16 0.000E+00
+ ETOT 14  -28.047414395437     -8.171E-14 2.595E-18 0.000E+00
+ ETOT 15  -28.047414395437      3.553E-15 5.859E-19 0.000E+00
+ ETOT 16  -28.047414395437      4.263E-14 1.482E-20 0.000E+00
+ ETOT 17  -28.047414395437      1.066E-14 3.344E-21 0.000E+00
+ ETOT 18  -28.047414395437     -1.066E-14 9.310E-23 0.000E+00
 
  At SCF step   18   max residual=  9.31E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   48.984E-24; max=  93.092E-24
+ Mean square residual over all n,k,spin=   48.983E-24; max=  93.095E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3609000570E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -928,7 +920,7 @@ message: |
  Angular average effective mass 1/(<1/m>)=  -1.9935273782
  Angular average effective mass for Frohlich model (<m**0.5>)**2=  -3.3996696996
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 337.2826875824
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 337.2826875823
     2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -1.1246540876
     3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -1.1246540876
     4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -2.3576846797
@@ -1059,9 +1051,9 @@ P          mk1mem3          2
         optdriver1          0
         optdriver2          0
         optdriver3          1
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          2
@@ -1218,10 +1210,10 @@ P          mk1mem3          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         17.7  wall=         17.8
+- Proc.   0 individual time (sec): cpu=         15.3  wall=         15.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.7  wall=         17.8
+.Delivered   4 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         15.3  wall=         15.5

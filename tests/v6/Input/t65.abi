@@ -59,7 +59,6 @@ ngkpt1?   1 1 1
 #DATASET3 : ddk on the MP grid of k-points
 #*****************************************
    getwfk?3   -1
-    rfdir?3    1 1 1
    rfelfd?3    2
    tolwfr?3    1.0d-22
     nband?3    4
@@ -69,9 +68,7 @@ ngkpt1?   1 1 1
    prtden?4    1
    getwfk?4   -2
    getddk?4   -1
-    rfdir?4    1 1 1
    rfphon?4    1
-  rfatpol?4    1 2
    tolvrs?4    1.0d-12
    rfelfd?4    3
     nband?4    4
@@ -87,12 +84,8 @@ ngkpt1?   1 1 1
 optdriver?5    5
   d3e_pert1_elfd?5    1
   d3e_pert1_phon?5    1
- d3e_pert1_atpol?5    1 2
-   d3e_pert1_dir?5    1 1 1
   d3e_pert2_elfd?5    1
-   d3e_pert2_dir?5    1 1 1
   d3e_pert3_elfd?5    1
-   d3e_pert3_dir?5    1 1 1
 
 nbdbuf 0
 

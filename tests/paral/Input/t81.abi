@@ -13,7 +13,7 @@ dipdip_prt = 1
 fit_coeff = 1
 fit_rangePower = 3 3
 fit_cutoff = 5.6
-fit_ncoeff = 2
+fit_ncoeff = 6
 fit_SPCoupling = 1
 fit_iatom = 0 
 

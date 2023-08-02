@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t45/t45.in
-- output file    -> t45.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t45/t45.abi
+- output file    -> t45.abo
 - root for input  files -> t45i
 - root for output files -> t45o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -36,11 +35,10 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      11.879 Mbytes of memory.
+P This job should need less than                      11.894 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -55,11 +53,10 @@ _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      11.879 Mbytes of memory.
+P This job should need less than                      11.894 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -74,11 +71,10 @@ _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      11.879 Mbytes of memory.
+P This job should need less than                      11.894 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -93,11 +89,10 @@ _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      11.879 Mbytes of memory.
+P This job should need less than                      11.894 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -112,7 +107,7 @@ _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        30    nfftf =     27000
 ================================================================================
-P This job should need less than                      11.879 Mbytes of memory.
+P This job should need less than                      11.894 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
@@ -406,8 +401,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     32.000   => boxcut(ratio)=   2.10411
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/28ni.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/28ni.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/28ni.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/28ni.paw
 - Paw atomic data for element Ni - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.0.5
 - 28.00000  18.00000  20061204                znucl, zion, pspdat
     7    7    2    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -427,8 +422,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.2.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/8o.2.paw
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.2.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.2.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Oxygen
 -  8.00000   6.00000  20050722                znucl, zion, pspdat
     7   11    2    0       489   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -731,11 +726,11 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   44.818E-30; max=  27.970E-29
    0.5000  0.5000  0.5000    1  2.79695E-28 kpt; spin; max resid(k); each band:
-   2.80E-28  1.98E-29  1.65E-29  4.52E-29  1.14E-28  2.38E-30  2.46E-30  7.97E-30
-   2.77E-30  1.68E-30  3.45E-29  5.78E-30  8.16E-30  3.58E-29  1.10E-30
+  2.80E-28 1.98E-29 1.65E-29 4.52E-29 1.14E-28 2.38E-30 2.46E-30 7.97E-30
+  2.77E-30 1.68E-30 3.45E-29 5.78E-30 8.16E-30 3.58E-29 1.10E-30
    0.5000  0.5000  0.5000    2  2.26419E-28 kpt; spin; max resid(k); each band:
-   1.69E-28  2.55E-29  1.26E-29  2.39E-29  1.30E-29  2.08E-30  2.03E-30  1.30E-30
-   4.09E-30  1.61E-30  2.26E-28  2.03E-30  4.57E-30  7.07E-29  2.08E-28
+  1.69E-28 2.55E-29 1.26E-29 2.39E-29 1.30E-29 2.08E-30 2.03E-30 1.30E-30
+  4.09E-30 1.61E-30 2.26E-28 2.03E-30 4.57E-30 7.07E-29 2.08E-28
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -777,34 +772,34 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000    1.00000
    1.00000    1.00000    1.00000    0.00022    0.00022    0.00000    0.00000
  Total charge density [el/Bohr^3]
-      Maximum=    1.9885E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.9461E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    8.7072E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    8.7072E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.9885E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.9461E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    8.7072E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    8.7072E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    2.4000E+01
  Spin up density      [el/Bohr^3]
-      Maximum=    1.0442E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.0220E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.1588E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.1588E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.0442E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.0220E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.1588E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.1588E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.3000E+01
  Spin down density    [el/Bohr^3]
-      Maximum=    9.4435E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    9.2407E-01  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.5484E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.5484E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    9.4435E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    9.2407E-01  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.5484E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.5484E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.1000E+01
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    2.2009E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    2.1360E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -6.9602E-04  at reduced coord.    0.4333    0.0000    0.0000
- Next minimum=   -6.9602E-04  at reduced coord.    0.5667    0.0000    0.0000
+)     Maximum=    2.2009E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    2.1360E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -6.9602E-04  at reduced coord.    0.4333    0.0000    0.0000
+)Next minimum=   -6.9602E-04  at reduced coord.    0.5667    0.0000    0.0000
    Integrated=    1.9991E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    2.0478E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    2.0471E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -4.4750E-02  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=   -4.4750E-02  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    2.0478E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    2.0471E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -4.4750E-02  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=   -4.4750E-02  at reduced coord.    0.2333    0.2667    0.2333
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -1188,11 +1183,11 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   49.101E-28; max=  14.671E-26
    0.5000  0.5000  0.5000    1  1.46713E-25 kpt; spin; max resid(k); each band:
-   1.17E-28  1.29E-29  9.20E-30  7.58E-30  5.84E-29  4.38E-30  1.46E-30  1.32E-30
-   4.55E-30  8.83E-31  3.31E-29  4.24E-30  2.20E-30  1.68E-29  1.47E-25
+  1.17E-28 1.29E-29 9.20E-30 7.58E-30 5.84E-29 4.38E-30 1.46E-30 1.32E-30
+  4.55E-30 8.83E-31 3.31E-29 4.24E-30 2.20E-30 1.68E-29 1.47E-25
    0.5000  0.5000  0.5000    2  8.99760E-29 kpt; spin; max resid(k); each band:
-   9.00E-29  2.70E-29  5.23E-30  2.13E-29  5.77E-29  2.06E-30  1.59E-30  2.17E-30
-   1.47E-30  9.44E-31  1.41E-29  4.07E-30  3.71E-30  9.94E-30  7.59E-29
+  9.00E-29 2.70E-29 5.23E-30 2.13E-29 5.77E-29 2.06E-30 1.59E-30 2.17E-30
+  1.47E-30 9.44E-31 1.41E-29 4.07E-30 3.71E-30 9.94E-30 7.59E-29
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1224,34 +1219,34 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.99688    0.99786    0.99786    0.99787    0.99903    0.99932    0.99938    0.99938
    0.99949    0.99949    0.99953    0.01318    0.01318    0.00060    0.00074
  Total charge density [el/Bohr^3]
-      Maximum=    1.9863E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.9439E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    8.7400E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    8.7400E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.9863E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.9439E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    8.7400E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    8.7400E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    2.4000E+01
  Spin up density      [el/Bohr^3]
-      Maximum=    1.0424E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.0203E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.1749E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.1749E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.0424E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.0203E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.1749E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.1749E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.2986E+01
  Spin down density    [el/Bohr^3]
-      Maximum=    9.4390E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    9.2363E-01  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.5651E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.5651E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    9.4390E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    9.2363E-01  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.5651E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.5651E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.1014E+01
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    2.1756E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    2.1114E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -6.9659E-04  at reduced coord.    0.4333    0.0000    0.0000
- Next minimum=   -6.9659E-04  at reduced coord.    0.5667    0.0000    0.0000
+)     Maximum=    2.1756E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    2.1114E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -6.9659E-04  at reduced coord.    0.4333    0.0000    0.0000
+)Next minimum=   -6.9659E-04  at reduced coord.    0.5667    0.0000    0.0000
    Integrated=    1.9724E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    2.0206E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    2.0199E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -4.4651E-02  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=   -4.4651E-02  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    2.0206E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    2.0199E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -4.4651E-02  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=   -4.4651E-02  at reduced coord.    0.2333    0.2667    0.2333
 
 --- !EnergyTerms
 iteration_state     : {dtset: 2, }
@@ -1635,11 +1630,11 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   10.723E-23; max=  28.277E-22
    0.5000  0.5000  0.5000    1  2.97272E-22 kpt; spin; max resid(k); each band:
-   1.40E-23  3.72E-25  3.72E-25  5.50E-24  2.78E-23  8.37E-25  7.56E-28  7.55E-28
-   3.58E-28  3.55E-28  7.16E-25  1.37E-25  1.37E-25  1.13E-24  2.97E-22
+  1.40E-23 3.72E-25 3.72E-25 5.50E-24 2.78E-23 8.37E-25 7.56E-28 7.55E-28
+  3.58E-28 3.55E-28 7.16E-25 1.37E-25 1.37E-25 1.13E-24 2.97E-22
    0.5000  0.5000  0.5000    2  2.82775E-21 kpt; spin; max resid(k); each band:
-   1.79E-23  3.76E-25  3.76E-25  3.74E-24  1.35E-23  9.50E-25  1.39E-28  1.37E-28
-   5.36E-28  5.35E-28  3.09E-24  1.26E-25  1.26E-25  6.58E-25  2.83E-21
+  1.79E-23 3.76E-25 3.76E-25 3.74E-24 1.35E-23 9.50E-25 1.39E-28 1.37E-28
+  5.36E-28 5.35E-28 3.09E-24 1.26E-25 1.26E-25 6.58E-25 2.83E-21
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1671,34 +1666,34 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.99687    0.99785    0.99785    0.99786    0.99902    0.99930    0.99899    0.99899
    0.99917    0.99917    0.99931    0.01409    0.01409    0.00060    0.00093
  Total charge density [el/Bohr^3]
-      Maximum=    1.9859E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.9435E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    8.5343E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    8.5343E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.9859E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.9435E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    8.5343E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    8.5343E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    2.4000E+01
  Spin up density      [el/Bohr^3]
-      Maximum=    1.0432E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.0210E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.0750E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.0750E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.0432E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.0210E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.0750E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.0750E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.2986E+01
  Spin down density    [el/Bohr^3]
-      Maximum=    9.4273E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    9.2249E-01  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.4593E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.4593E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    9.4273E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    9.2249E-01  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.4593E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.4593E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.1014E+01
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    2.1203E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    2.0577E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -6.9531E-04  at reduced coord.    0.4333    0.0000    0.0000
- Next minimum=   -6.9531E-04  at reduced coord.    0.5667    0.0000    0.0000
+)     Maximum=    2.1203E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    2.0577E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -6.9531E-04  at reduced coord.    0.4333    0.0000    0.0000
+)Next minimum=   -6.9531E-04  at reduced coord.    0.5667    0.0000    0.0000
    Integrated=    1.9718E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.9678E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    1.9670E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -4.5028E-02  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=   -4.5028E-02  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.9678E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    1.9670E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -4.5028E-02  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=   -4.5028E-02  at reduced coord.    0.2333    0.2667    0.2333
 
 --- !EnergyTerms
 iteration_state     : {dtset: 3, }
@@ -2080,11 +2075,11 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   49.101E-28; max=  14.671E-26
    0.5000  0.5000  0.5000    1  1.46713E-25 kpt; spin; max resid(k); each band:
-   1.17E-28  1.29E-29  9.20E-30  7.58E-30  5.84E-29  4.38E-30  1.46E-30  1.32E-30
-   4.55E-30  8.83E-31  3.31E-29  4.24E-30  2.20E-30  1.68E-29  1.47E-25
+  1.17E-28 1.29E-29 9.20E-30 7.58E-30 5.84E-29 4.38E-30 1.46E-30 1.32E-30
+  4.55E-30 8.83E-31 3.31E-29 4.24E-30 2.20E-30 1.68E-29 1.47E-25
    0.5000  0.5000  0.5000    2  8.99760E-29 kpt; spin; max resid(k); each band:
-   9.00E-29  2.70E-29  5.23E-30  2.13E-29  5.77E-29  2.06E-30  1.59E-30  2.17E-30
-   1.47E-30  9.44E-31  1.41E-29  4.07E-30  3.71E-30  9.94E-30  7.59E-29
+  9.00E-29 2.70E-29 5.23E-30 2.13E-29 5.77E-29 2.06E-30 1.59E-30 2.17E-30
+  1.47E-30 9.44E-31 1.41E-29 4.07E-30 3.71E-30 9.94E-30 7.59E-29
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -2116,34 +2111,34 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.99687    0.99785    0.99785    0.99786    0.99902    0.99930    0.99874    0.99874
    0.99916    0.99916    0.99942    0.01434    0.01434    0.00060    0.00081
  Total charge density [el/Bohr^3]
-      Maximum=    1.9822E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.9400E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    8.6242E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    8.6242E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.9822E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.9400E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    8.6242E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    8.6242E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    2.4000E+01
  Spin up density      [el/Bohr^3]
-      Maximum=    1.0425E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.0204E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.1192E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.1192E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.0425E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.0204E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.1192E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.1192E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.2986E+01
  Spin down density    [el/Bohr^3]
-      Maximum=    9.3971E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    9.1953E-01  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.5050E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.5050E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    9.3971E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    9.1953E-01  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.5050E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.5050E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.1014E+01
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    2.0704E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    2.0091E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -7.0464E-04  at reduced coord.    0.4333    0.0000    0.0000
- Next minimum=   -7.0464E-04  at reduced coord.    0.5667    0.0000    0.0000
+)     Maximum=    2.0704E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    2.0091E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -7.0464E-04  at reduced coord.    0.4333    0.0000    0.0000
+)Next minimum=   -7.0464E-04  at reduced coord.    0.5667    0.0000    0.0000
    Integrated=    1.9719E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    1.9068E-01  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    1.9058E-01  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -4.4738E-02  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=   -4.4738E-02  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.9068E-01  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    1.9058E-01  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -4.4738E-02  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=   -4.4738E-02  at reduced coord.    0.2333    0.2667    0.2333
 
 --- !EnergyTerms
 iteration_state     : {dtset: 4, }
@@ -2525,11 +2520,11 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Mean square residual over all n,k,spin=   49.101E-28; max=  14.671E-26
    0.5000  0.5000  0.5000    1  1.46713E-25 kpt; spin; max resid(k); each band:
-   1.17E-28  1.29E-29  9.20E-30  7.58E-30  5.84E-29  4.38E-30  1.46E-30  1.32E-30
-   4.55E-30  8.83E-31  3.31E-29  4.24E-30  2.20E-30  1.68E-29  1.47E-25
+  1.17E-28 1.29E-29 9.20E-30 7.58E-30 5.84E-29 4.38E-30 1.46E-30 1.32E-30
+  4.55E-30 8.83E-31 3.31E-29 4.24E-30 2.20E-30 1.68E-29 1.47E-25
    0.5000  0.5000  0.5000    2  8.99760E-29 kpt; spin; max resid(k); each band:
-   9.00E-29  2.70E-29  5.23E-30  2.13E-29  5.77E-29  2.06E-30  1.59E-30  2.17E-30
-   1.47E-30  9.44E-31  1.41E-29  4.07E-30  3.71E-30  9.94E-30  7.59E-29
+  9.00E-29 2.70E-29 5.23E-30 2.13E-29 5.77E-29 2.06E-30 1.59E-30 2.17E-30
+  1.47E-30 9.44E-31 1.41E-29 4.07E-30 3.71E-30 9.94E-30 7.59E-29
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -2561,34 +2556,34 @@ force_length_stats: {min: null, max: null, mean: null, }
    0.99692    0.99790    0.99790    0.99792    0.99907    0.99934    0.98805    0.98805
    0.99489    0.99489    0.99890    0.28598    0.28598    0.00066    0.00102
  Total charge density [el/Bohr^3]
-      Maximum=    1.9805E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    1.9383E+00  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    8.5357E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    8.5357E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.9805E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    1.9383E+00  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    8.5357E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    8.5357E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    2.4000E+01
  Spin up density      [el/Bohr^3]
-      Maximum=    1.0213E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    9.9962E-01  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.0691E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.0691E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    1.0213E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    9.9962E-01  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.0691E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.0691E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.2473E+01
  Spin down density    [el/Bohr^3]
-      Maximum=    9.5927E-01  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    9.3869E-01  at reduced coord.    0.0000    0.0333    0.9667
-      Minimum=    4.4666E-03  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=    4.4666E-03  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    9.5927E-01  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    9.3869E-01  at reduced coord.    0.0000    0.0333    0.9667
+)     Minimum=    4.4666E-03  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=    4.4666E-03  at reduced coord.    0.2333    0.2667    0.2333
    Integrated=    1.1528E+01
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    8.2869E-02  at reduced coord.    0.5000    0.5000    0.5000
- Next maximum=    8.0233E-02  at reduced coord.    0.5000    0.5000    0.5333
-      Minimum=   -1.2506E-03  at reduced coord.    0.7000    0.3000    0.2667
- Next minimum=   -1.2506E-03  at reduced coord.    0.7333    0.3000    0.2667
+)     Maximum=    8.2869E-02  at reduced coord.    0.5000    0.5000    0.5000
+)Next maximum=    8.0233E-02  at reduced coord.    0.5000    0.5000    0.5333
+)     Minimum=   -1.2506E-03  at reduced coord.    0.7000    0.3000    0.2667
+)Next minimum=   -1.2506E-03  at reduced coord.    0.7333    0.3000    0.2667
    Integrated=    9.4504E-01
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    8.9471E-02  at reduced coord.    0.2000    0.8000    0.8000
- Next maximum=    8.9471E-02  at reduced coord.    0.8000    0.2000    0.8000
-      Minimum=   -4.6564E-02  at reduced coord.    0.2667    0.2333    0.2333
- Next minimum=   -4.6564E-02  at reduced coord.    0.2333    0.2667    0.2333
+)     Maximum=    8.9471E-02  at reduced coord.    0.2000    0.8000    0.8000
+)Next maximum=    8.9471E-02  at reduced coord.    0.8000    0.2000    0.8000
+)     Minimum=   -4.6564E-02  at reduced coord.    0.2667    0.2333    0.2333
+)Next minimum=   -4.6564E-02  at reduced coord.    0.2333    0.2667    0.2333
 
 --- !EnergyTerms
 iteration_state     : {dtset: 5, }
@@ -3004,10 +2999,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.7  wall=         14.8
+- Proc.   0 individual time (sec): cpu=         14.3  wall=         14.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  39 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.7  wall=         14.8
+.Delivered  38 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         14.3  wall=         14.5

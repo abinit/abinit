@@ -1,0 +1,45 @@
+!Input file for the anaddb code. Analysis of the C DDB
+
+!Flags
+ ifcflag   1     ! Interatomic force constant flag
+ ifcout 0
+ thmflag 3
+ telphint 1
+ ntemper 20
+ tempermin 1
+ temperinc 50
+
+!Wavevector grid number 1 (coarse grid, from DDB)
+ brav    1         ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+ ngqpt   1 1 1     ! Monkhorst-Pack indices
+ nqshft  1         ! number of q-points in repeated basic q-cell
+ q1shft  3*0.0
+
+!Effective charges
+ chneut   1     ! Charge neutrality requirement for effective charges.
+
+!Interatomic force constant info
+ dipdip  0      ! Dipole-dipole interaction treatment
+
+!Wavevector list number 1 (Reduced coordinates and normalization factor)
+ nph1l    1     ! Number of phonons in list 1
+ qph1l    0.0 0.0 0.0  1.0
+
+## After modifying the following section, one might need to regenerate the pickle database with runtests.py -r
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% need_cpp_vars = HAVE_NETCDF
+#%% test_chain =  teph_tdep_legacy_1.in, teph_tdep_legacy_2.in, teph_tdep_legacy_3.in,  teph_tdep_legacy_4.in
+#%% input_ddb = teph_tdep_legacy_1o_DS3_DDB
+#%% input_gkk = teph_tdep_legacy_1o_DS3_EIGR2D
+#%% [files]
+#%% files_to_test =
+#%%   teph_tdep_legacy_2.out , tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = S. Ponc\'e
+#%% keywords = NC, DFPT, EPH
+#%% description =  Input file for the anaddb code. Analysis of the C DDB
+#%%<END TEST_INFO>

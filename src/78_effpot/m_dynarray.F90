@@ -15,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (hexu)
+!! Copyright (C) 2010-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,11 +87,13 @@ module m_dynamic_array
   !!
   !! SOURCE
   type , public::int2d_array_type
-     integer:: size=0, capacity=0
+     integer:: size=0, capacity=0, size1=-1
      logical :: sorted=.False.
      integer, allocatable :: data(:,:)
    CONTAINS
      procedure :: push => int2d_array_type_push
+     procedure :: concate => int2d_array_type_concate
+     procedure :: tostatic => int2d_array_type_tostatic
      procedure :: push_unique => int2d_array_type_push_unique
      procedure :: sort => int2d_array_type_sort
      procedure :: binsearch =>int2d_array_type_binsearch
@@ -99,8 +101,22 @@ module m_dynamic_array
   end type int2d_array_type
   !!***
 
+  !public :: mpi_gather_int_array
   public::  dynamic_array_unittest
 CONTAINS
+
+!  subroutine merge_int_array(x1, x2, y)
+!    class(int_array_type), intent(in) :: x
+!    class(int_array_type),  :: y
+
+!  end subroutine gather_int_array
+
+  !subroutine mpi_gather_int_array(a, comm, y, ny)
+  !  class(int_array_type) :: a
+  !  integer :: comm
+  !  integer, allocatable, intent(out) :: y(:, :)
+  !  integer, intent(out) :: ny
+  !end subroutine mpi_gather_int_array
 
 
 !****f* m_dynarray/real_array_type_push
@@ -116,11 +132,6 @@ CONTAINS
 !! val= data to be pushed
 !! OUTPUT
 !! real_array<type(real_array_type)()> = real_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine real_array_type_push(self, val)
 
@@ -155,11 +166,6 @@ end subroutine real_array_type_push
 !! self= real_array_type object
 !! OUTPUT
 !! real_array<type(real_array_type)()> = real_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine real_array_type_finalize(self)
 
@@ -184,11 +190,6 @@ end subroutine real_array_type_finalize
 !! val= data to be pushed
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int_array_type_push(self, val)
 
@@ -284,7 +285,7 @@ end subroutine int_array_type_insertion_sort
 subroutine int_array_type_sort(self, order)
   class(int_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
-  integer :: work(self%size/2), work_order(self%size/2)
+  integer :: work((self%size+1)/2), work_order((self%size+1)/2)
   call MergeSort(self%data(:self%size), work, order, work_order)
 end subroutine int_array_type_sort
 
@@ -302,11 +303,6 @@ end subroutine int_array_type_sort
 !! self= int_array_type object
 !! OUTPUT
 !! int_array<type(int_array_type)()> = int_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int_array_type_finalize(self)
 
@@ -333,19 +329,17 @@ end subroutine int_array_type_finalize
 !! val= data to be pushed
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int2d_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int2d_array_type_push(self, val)
 
     class(int2d_array_type), intent(inout):: self
     integer :: val(:)
-
     integer, allocatable :: temp(:,:)
-
+    if(self%size1<0) then
+      self%size1=size(val)
+    else if(self%size1 /= size(val)) then
+      ABI_BUG("The size of  the array is inconsistent with the 2d dynamic array")
+    end if
     self%size=self%size+1
     if(self%size==1) then
       self%capacity=8
@@ -359,6 +353,47 @@ subroutine int2d_array_type_push(self, val)
     self%data(:,self%size)=val
 end subroutine int2d_array_type_push
 !!***
+
+!****f* m_dynarray/int2d_array_type_concate
+!!
+!! NAME
+!! int2d_array_type_concate
+!!
+!! FUNCTION
+!! concate int2d_array to a int2d_array_type
+!!
+!! INPUTS
+!! self = int2d_array_type object
+!! array= array to be concateed
+!! OUTPUT
+!! int_array<type(real_array_type)()> = int2d_array_type data
+!! SOURCE
+subroutine int2d_array_type_concate(self, array)
+  class(int2d_array_type), intent(inout):: self
+  class(int2d_array_type), intent(in):: array
+  integer :: i
+  do i=1, array%size
+    call self%push(array%data(:, i))
+  end do
+end subroutine int2d_array_type_concate
+!!***
+
+
+subroutine int2d_array_type_tostatic(self, a, size1)
+  class(int2d_array_type), intent(inout):: self
+  integer, allocatable :: a(:, :)
+  integer, optional :: size1
+  if(self%size>0) then
+    ABI_MALLOC(a, (self%size1, self%size))
+    a(:, :) = self%data(:, :self%size)
+  else if(present(size1)) then
+    ABI_MALLOC(a, (size1, self%size))
+  else
+    ABI_BUG("the size of the 2darray is unkown.")
+  end if
+end subroutine int2d_array_type_tostatic
+!!***
+
 
 
 
@@ -375,11 +410,6 @@ end subroutine int2d_array_type_push
 !! val= data to be pushed
 !! OUTPUT
 !! int_array<type(real_array_type)()> = int2d_array_type data
-!! PARENTS
-!!      m_dynarray
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine int2d_array_type_push_unique(self, val, position)
 
@@ -417,11 +447,6 @@ subroutine int2d_array_type_push_unique(self, val, position)
 !! self= int2d_array_type object
 !! OUTPUT
 !! int_array<type(int2d_array_type)()> = int2d_array_type data
-!! PARENTS
-!!
-!! CHILDREN
-!!      binsearch_test,insertion_sort_int_test,int2d_array_test
-!!
 !! SOURCE
 subroutine int2d_array_type_finalize(self)
 
@@ -483,13 +508,13 @@ end subroutine int2d_array_type_insertion_sort
 subroutine int2d_array_type_sort(self, order)
   class(int2d_array_type), intent(inout):: self
   integer, optional, intent(inout):: order(self%size)
-  integer :: work(size(self%data, dim=1), self%size/2), work_order(self%size/2)
+  integer :: work(size(self%data, dim=1), (self%size+1)/2), work_order((self%size+1)/2)
   call MergeSort2D(self%data(:, :self%size), work, order, work_order )
 end subroutine int2d_array_type_sort
 
 
 !----------------------------------------------------------------------
-!> @brief binary search 
+!> @brief binary search
 !>
 !> @param[in] self: the 2D array to be searched from
 !> @param[in] val: the value to be searched
@@ -539,6 +564,7 @@ subroutine dynamic_array_unittest()
   call insertion_sort_int_test()
   call int2d_array_test()
 end subroutine dynamic_array_unittest
+
 
 end module m_dynamic_array
 !!***

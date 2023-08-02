@@ -266,7 +266,7 @@
       <strain power=" 1" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="2" value="   0.2348990031E+01" text="(Ti_y-O1_y)^6">
+  <coefficient number="2" value="   0.2573157827E+01" text="(Ti_y-O1_y)^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -304,7 +304,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="3" value="   0.1689010498E-01" text="(Ti_y-O1_y[1 1 0])^6">
+  <coefficient number="3" value="   0.1770703285E-01" text="(Ti_y-O1_y[1 1 0])^6">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="6">
         <cell_a>0 0 0</cell_a>
@@ -450,7 +450,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="4" value="   0.7547891673E-01" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2">
+  <coefficient number="4" value="   0.6205137227E-01" text="(Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="4">
         <cell_a>0 0 0</cell_a>
@@ -692,7 +692,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="5" value="   0.2686815417E-01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4">
+  <coefficient number="5" value="   0.2458076009E-01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -934,7 +934,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="6" value="   0.4583702314E+01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^2">
+  <coefficient number="6" value="   0.6852618002E+01" text="(Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^2">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -1200,7 +1200,7 @@
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="7" value="   0.1000000000E+07" text="(eta_1)^6">
+  <coefficient number="7" value="   0.1000000000E+01" text="(eta_1)^6">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 1"/>
     </term>
@@ -1211,7 +1211,7 @@
       <strain power=" 6" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="8" value="   0.1000000000E+07" text="(eta_1)^4(eta_2)^2">
+  <coefficient number="8" value="   0.1000000000E+01" text="(eta_1)^4(eta_2)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -1237,7 +1237,7 @@
       <strain power=" 2" voigt=" 2"/>
     </term>
   </coefficient>
-  <coefficient number="9" value="   0.1000000000E+07" text="(eta_1)^4(eta_4)^2">
+  <coefficient number="9" value="   0.1000000000E+01" text="(eta_1)^4(eta_4)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -1251,7 +1251,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="10" value="   0.1000000000E+07" text="(eta_1)^4(eta_5)^2">
+  <coefficient number="10" value="   0.1000000000E+01" text="(eta_1)^4(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 1"/>
       <strain power=" 2" voigt=" 5"/>
@@ -1277,14 +1277,14 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="11" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_3)^2">
+  <coefficient number="11" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_3)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
       <strain power=" 2" voigt=" 3"/>
     </term>
   </coefficient>
-  <coefficient number="12" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_4)^2">
+  <coefficient number="12" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_4)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -1316,7 +1316,7 @@
       <strain power=" 2" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="13" value="   0.1000000000E+07" text="(eta_1)^2(eta_2)^2(eta_6)^2">
+  <coefficient number="13" value="   0.1000000000E+01" text="(eta_1)^2(eta_2)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 2"/>
@@ -1333,7 +1333,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="14" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^4">
+  <coefficient number="14" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^4">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 4" voigt=" 4"/>
@@ -1347,7 +1347,7 @@
       <strain power=" 4" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="15" value="   0.1000000000E+07" text="(eta_1)^2(eta_4)^2(eta_5)^2">
+  <coefficient number="15" value="   0.1000000000E+01" text="(eta_1)^2(eta_4)^2(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 4"/>
@@ -1379,7 +1379,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="16" value="   0.1000000000E+07" text="(eta_1)^2(eta_5)^4">
+  <coefficient number="16" value="   0.1000000000E+01" text="(eta_1)^2(eta_5)^4">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 4" voigt=" 5"/>
@@ -1405,7 +1405,7 @@
       <strain power=" 4" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="17" value="   0.1000000000E+07" text="(eta_1)^2(eta_5)^2(eta_6)^2">
+  <coefficient number="17" value="   0.1000000000E+01" text="(eta_1)^2(eta_5)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 1"/>
       <strain power=" 2" voigt=" 5"/>
@@ -1422,7 +1422,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="18" value="   0.1000000000E+07" text="(eta_4)^6">
+  <coefficient number="18" value="   0.1000000000E+01" text="(eta_4)^6">
     <term weight=" 1.000000">
       <strain power=" 6" voigt=" 4"/>
     </term>
@@ -1433,7 +1433,7 @@
       <strain power=" 6" voigt=" 6"/>
     </term>
   </coefficient>
-  <coefficient number="19" value="   0.1000000000E+07" text="(eta_4)^4(eta_5)^2">
+  <coefficient number="19" value="   0.1000000000E+01" text="(eta_4)^4(eta_5)^2">
     <term weight=" 1.000000">
       <strain power=" 4" voigt=" 4"/>
       <strain power=" 2" voigt=" 5"/>
@@ -1459,7 +1459,7 @@
       <strain power=" 2" voigt=" 5"/>
     </term>
   </coefficient>
-  <coefficient number="20" value="   0.1000000000E+07" text="(eta_4)^2(eta_5)^2(eta_6)^2">
+  <coefficient number="20" value="   0.1000000000E+01" text="(eta_4)^2(eta_5)^2(eta_6)^2">
     <term weight=" 1.000000">
       <strain power=" 2" voigt=" 4"/>
       <strain power=" 2" voigt=" 5"/>

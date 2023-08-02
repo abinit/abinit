@@ -1,4 +1,6 @@
-# GW band gap of diamond with bootstrap kernel in W
+# GW band gap of diamond with bootstrap and LR+ALDA kernel
+# Results are meaningless due to the very low cutoff
+# and the small number of bands
 ndtset 10
 jdtset 1 2 4 5 6 7 11 12 21 22
 
@@ -7,7 +9,7 @@ rprim   0.0 0.5 0.5
         0.5 0.0 0.5
         0.5 0.5 0.0
 
-natom   2 
+natom   2
 ntypat  1
 typat   2*1
 znucl   6
@@ -16,7 +18,7 @@ xred
 0.25  0.25  0.25
 
 ecut    54 Ry
-ngkpt   3 3 3 
+ngkpt   3 3 3
 nshiftk 1
 shiftk  0. 0. 0.
 istwfk  *1
@@ -28,7 +30,7 @@ toldfe1 1.0d-10
 nband1  8
 getwfk1 0
 
-# nscf 
+# nscf
 iscf2   -2
 getden2 -1
 nband2   16
@@ -37,9 +39,9 @@ nstep2   30
 getwfk2  0
 
 # QSGW loop
-getwfk     2  
-inclvkb    2  
-gwcalctyp  29  
+getwfk     2
+inclvkb    2
+gwcalctyp  29
 ppmodel    0
 nfreqre    6
 nfreqim    4
@@ -47,7 +49,8 @@ freqremax  4
 awtr       1
 gwgamma   -4   # bootstrap kernel in TC-TC dielectric function
 gwgamma1? -6   # bootstrap (head-only) kernel in TC-TC dielectric function
-gwgamma2? -8   # rpa bootstrap kernel in TC-TC dielectric function
+gwgamma2? -11  # LR+ALDA kernel
+use_oldchi 0
 
 gwpara     2
 symchi     1
@@ -57,7 +60,7 @@ gw_icutcoul  7   # Gygi-Baldereschi auxiliary function
 nband      16
 ecutwfn    54 Ry
 ecutsigx   54 Ry
-ecuteps    4  Ry  
+ecuteps    4  Ry
 rhoqpmix   0.2
 
 # QSGW 1st iteration
@@ -78,10 +81,10 @@ getqps1?     7
 optdriver12  4
 getscr12    -1
 
-# one-shot rpa-type bootstrap
-optdriver21  3                                                                   
-getqps2?     7                                                                   
-optdriver22  4                                                                   
+# LR+ALDA kernel
+optdriver21  3
+getqps2?     7
+optdriver22  4
 getscr22    -1
 
 # kpts and bands to be included
@@ -104,13 +107,13 @@ bdgw
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t36.abo,   tolnlines = 50 , tolabs = 1.0e-2, tolrel = 1.0e-2, fld_options = -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors =  W. Chen
 #%% keywords = NC, GW, GWGamma
-#%% description = 
+#%% description =
 #%%  Diamond: GW band gap with vertex corrections in W; Gygi-Baldereschi aux function
 #%%<END TEST_INFO>

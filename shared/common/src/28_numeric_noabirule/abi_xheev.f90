@@ -9,7 +9,7 @@
 !!  symmetric or hermitian matrix A.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,8 +25,6 @@
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 !!
@@ -209,8 +207,6 @@ end subroutine abi_cheev
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

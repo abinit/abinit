@@ -8,7 +8,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2021 ABINIT group (MT)
+!! Copyright (C) 2011-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -16,10 +16,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -215,11 +211,6 @@ CONTAINS !===========================================================
 !!      pawrhoij, pawrhoij_last, rhor_last, taur_last, xreddiff, xred_last.
 !!    The wfs arrays that are possibly allocated are : cg, cprj and eigen
 !!
-!! PARENTS
-!!      m_gstate,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
@@ -340,11 +331,6 @@ end subroutine scf_history_init
 !! SIDE EFFECTS
 !!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
 !!
-!! PARENTS
-!!      m_gstateimg,m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine scf_history_free(scf_history)
@@ -430,11 +416,6 @@ end subroutine scf_history_free
 !!
 !! SIDE EFFECTS
 !!  scf_history(:)=<type(scf_history_type)>=scf_history datastructure
-!!
-!! PARENTS
-!!      m_gstateimg,m_scf_history
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

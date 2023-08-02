@@ -6,14 +6,10 @@
 !!  LDA or LDA-like XC functionals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, LG, MF, JFD, LK)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LG, MF, JFD, LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -71,12 +67,6 @@ contains
 !!  exc(npt)=exchange-correlation energy density (hartree)
 !!  vxc(npt)=xc potential (d($\rho$*exc)/d($\rho$)) (hartree)
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
-!!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
 !!
 !! SOURCE
 
@@ -240,12 +230,6 @@ end subroutine xcpzca
 !! rs = $(3/(4\pi))^{1/3} * \rho(r)^{-1/3}$
 !! zeta = $(\rho\uparrow-\rho\downarrow)/(\rho\uparrow+\rho\downarrow)$
 !! b1 must be 1 and a0 must be $(3/4)(3/(2\pi))^{2/3}$.
-!!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
 !!
 !! SOURCE
 
@@ -737,12 +721,6 @@ end subroutine xcspol
 !!   with $N4=d(N3)/d(rs), D4=d(D3)/d(rs)$.
 !!  $d^2(Vxc)/d(\rho)^2= rs/(3*\rho)^2)*(4*d(Vxc)/d(rs)+rs*d^2(Vxc)/d(rs)^2)$.
 !!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
-!!
 !! SOURCE
 
 subroutine xctetr(exc,npt,order,rhor,rspts,vxc,& !Mandatory arguments
@@ -901,12 +879,6 @@ end subroutine xctetr
 !!  vxc(npt)=xc potential (d($\rho$*exc)/d($\rho$)) (hartree)
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
 !!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
-!!
 !! SOURCE
 
 subroutine xcwign(exc,npt,order,rspts,vxc,& !Mandatory arguments
@@ -1011,12 +983,6 @@ end subroutine xcwign
 !!  vxc(npt)=xc potential (d($\rho$*exc)/d($\rho$)) (hartree)
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
 !!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
-!!
 !! SOURCE
 
 subroutine xchelu(exc,npt,order,rspts,vxc,dvxc)  ! dvxc is optional
@@ -1106,12 +1072,6 @@ end subroutine xchelu
 !!  exc(npt)=exchange-correlation energy density (hartree)
 !!  vxc(npt)=xc potential (d($\rho$*exc)/d($\rho$)) (hartree)
 !!  if(order>1) dvxc(npt)=derivative d(vxc)/d($\rho$) (hartree*bohr^3)
-!!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
 !!
 !! SOURCE
 
@@ -1210,12 +1170,6 @@ end subroutine xcxalp
 !!  vxci(npts,nspden)=input xc potential to which Leeuwen-Baerends correction
 !!   is added at output.
 !!
-!! PARENTS
-!!      m_drivexc
-!!
-!! CHILDREN
-!!      invcb
-!!
 !! SOURCE
 
 subroutine xclb(grho2_updn,npts,nspden,rho_updn,vxci)
@@ -1292,12 +1246,6 @@ end subroutine xclb
 !!  exci(npts)=exchange-correlation energy density
 !!  fxci(npts)=free energy energy density
 !!  vxci(npts,nspden)=exchange-correlation potential
-!!
-!! PARENTS
-!!      m_rhotoxc
-!!
-!! CHILDREN
-!!      invcb
 !!
 !! SOURCE
 

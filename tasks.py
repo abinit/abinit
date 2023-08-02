@@ -18,7 +18,7 @@ from contextlib import contextmanager
 try:
     from invoke import task
 except ImportError:
-    raise ImportError("Cannot import invoke package. Use `pip install invoke`")
+    raise ImportError("Cannot import invoke package. Use `pip install invoke --user`")
 
 from tests.pymods.testsuite import find_top_build_tree
 from tests.pymods.devtools import number_of_cpus
@@ -53,7 +53,7 @@ ALL_BINARIES = [
     "optic",
     "tdep",
     "testtransposer",
-    "ujdet",
+    "lruj",
 ]
 
 
@@ -234,7 +234,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R --langmap=fortran:+.finc.f90 shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90,c:.c.cu shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)
@@ -250,7 +250,7 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc]" "%s" src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp]" "%s" src shared' % pattern
         #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
@@ -301,6 +301,7 @@ def env(ctx):
     print(f"export ABI_PSPDIR={ABINIT_ROOTDIR}/tests/Psps_for_tests")
     print(f"export PATH={binpath}:$PATH")
 
+
 @task
 def diff2(ctx, filename="run.abo"):
     """
@@ -336,6 +337,17 @@ def diff3(ctx, filename="run.abo"):
 def add_trunk(ctx):
     """Register trunk as remote."""
     cmd = "git remote add trunk git@gitlab.abinit.org:trunk/abinit.git"
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+
+
+@task
+def remote_add(ctx, remote):
+    """Register `remote` as remote branch and fetch it"""
+    cmd = f"git remote add {remote} git@gitlab.abinit.org:{remote}/abinit.git"
+    print("Executing:", cmd)
+    ctx.run(cmd, pty=True)
+    cmd = f"git fetch {remote}"
     print("Executing:", cmd)
     ctx.run(cmd, pty=True)
 
@@ -420,9 +432,8 @@ def submodules(ctx):
     """Update submodules."""
     with cd(ABINIT_ROOTDIR):
         # https://stackoverflow.com/questions/1030169/easy-way-to-pull-latest-of-all-git-submodules
-        ctx.run("git submodule update --remote --init")
-        #ctx.run("git submodule update --remote")
-        ctx.run("git submodule update --recursive --remote")
+        ctx.run("git submodule update --remote --init", pty=True)
+        ctx.run("git submodule update --recursive --remote", pty=True)
 
 @task
 def branchoff(ctx, start_point):
@@ -444,6 +455,27 @@ def branchoff(ctx, start_point):
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")
     run("git push origin HEAD")
+
+
+@task
+def dryrun_merge(ctx, start_point):
+    """"Merge `remote/branch` in dry-run mode."""
+
+    def run(cmd):
+        cprint(f"Executing: `{cmd}`", color="green")
+        ctx.run(cmd)
+
+    run(f"git merge --no-commit --no-ff {start_point}")
+
+    print("""
+To examine the staged changes:
+
+    $ git diff --cached
+
+And you can undo the merge, even if it is a fast-forward merge:
+
+$ git merge --abort
+""")
 
 
 @task

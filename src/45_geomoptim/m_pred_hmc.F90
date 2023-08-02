@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2021 ABINIT group (SPr)
+!!  Copyright (C) 2017-2022 ABINIT group (SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -63,16 +59,9 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      generate_random_velocities,hist2var,metropolis_check,pred_velverlet
-!!      var2hist,wrtout
-!!
 !! SOURCE
 
-subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
+subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iexit)
 
  use defs_basis
  use m_errors
@@ -85,11 +74,13 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  use m_geometry,  only : xred2xcart
  use m_numeric_tools,  only : uniformrandom
  use m_pred_velverlet,     only : pred_velverlet
+ use m_pred_isothermal,     only : pred_isothermal
  implicit none
 
 !Arguments ------------------------------------
  type(abimover),intent(in)   :: ab_mover
  type(abihist),intent(inout) :: hist
+ type(mttk_type),intent(inout) :: mttk_vars
  integer,intent(in)          :: itime
  integer,intent(in)          :: icycle
  integer,intent(in)          :: ntime
@@ -98,12 +89,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  logical,intent(in)          :: zDEBUG
 
 !Local variables-------------------------------
-
  integer,save  :: seed                                   ! seed for rnd generator
- integer       :: iacc !ii,jj                             ! dummy integers for loop indexes and acceptance decision flag
+ integer       :: iacc                                   ! dummy integers for loop indexes and acceptance decision flag
  real(dp)      :: etotal,epot,ekin,de                    ! total, potential (electronic), kinetic (ionic) energies and energy difference
  !real(dp)      :: mv2tot,factor                          ! dummies used for rescaling of velocities
- !real(dp)      :: rnd
  real(dp)      :: xred(3,ab_mover%natom)                 ! reduced coordinates of all ions
  real(dp)      :: vel(3,ab_mover%natom)                  ! ionic velocities in Cartesian coordinates
  !real(dp)      :: mvtot(3)                               ! total momentum of the cell used to rescale velocities
@@ -112,9 +101,6 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  real(dp)      :: rprimd(3,3)                            ! lattice vectors
 
  real(dp),save :: etotal_hmc_prev,epot_hmc_prev          ! total energy of the initial state
- !real(dp),save :: acell_hmc_prev(3)                      !
- !real(dp),save :: rprimd_hmc_prev(3,3)                   !
- !real(dp),save :: strain_hmc_prev(3,3)                   !
  real(dp),save :: strain(3,3),dstrain                    ! strain tensor
  real(dp),save :: rprimd_original(3,3)                   ! initial lattice vectors <= itime=1,icycle=1
  real(dp),allocatable,save :: xred_hmc_prev(:,:)         ! reduced coordinates of the ions corresponding to the initial state
@@ -125,7 +111,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  integer,save  :: strain_steps
  logical       :: strain_sweep
 
- character(len=500) :: message
+! character(len=500) :: message
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -155,7 +141,8 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
    if (allocated(fcart_hmc_prev))  then
      ABI_FREE(fcart_hmc_prev)
    end if
-   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! this is needed to deallocate vel_prev array allocated in pred_velverlet
+   !call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! this is needed to deallocate vel_prev array allocated in pred_velverlet
+   call pred_isothermal(ab_mover,hist,icycle,mttk_vars,ncycle,zDEBUG,iexit)
    return
  end if
 
@@ -209,7 +196,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      de = etotal - etotal_hmc_prev
      call metropolis_check(seed,de,kbtemp,iacc)
 !DEBUG
-     write(std_out,*)' m_pred_hmc, after metropolis_check : seed,de,kbtemp,iacc=',seed,de,kbtemp,iacc
+!     write(std_out,*)' m_pred_hmc, after metropolis_check : seed,de,kbtemp,iacc=',seed,de,kbtemp,iacc
 !ENDDEBUG
    end if
 
@@ -223,23 +210,24 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      epot_hmc_prev   = epot         !update reference potential energy
    end if
 
-   write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
-&   epot,' ekin=',ekin,' de=',de
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+!   write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
+!&   epot,' ekin=',ekin,' de=',de
+!   call wrtout(ab_out,message,'COLL')
+!   call wrtout(std_out,message,'COLL')
 
-   call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
-   hist%vel(:,:,hist%ihist)=vel(:,:)
-   call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
-   etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
+   !call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
+   !hist%vel(:,:,hist%ihist)=vel(:,:)
+   hist%vel(:,:,hist%ihist)=0
+   !call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+   !etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
 
-   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
+   !call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
+   call pred_isothermal(ab_mover,hist,icycle,mttk_vars,ncycle,zDEBUG,iexit)
 
- else !icycle/=1
+ elseif(icycle > 1 .and. icycle <= ncycle)then !icycle/=1
 
-   call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
-
- end if
+   !call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
+   call pred_isothermal(ab_mover,hist,icycle,mttk_vars,ncycle,zDEBUG,iexit)
 
  !end if
  !END OF ATOMIC COORDINATES SWEEP************************************************
@@ -247,13 +235,13 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 ! else if(icycle>ncycle) then ! strain update
 !   strain_updated = .TRUE.
 !   strain_steps   = strain_steps + 1
- ! Metropolis update of lattice vectors and parameters in case optcell/=0
+!! Metropolis update of lattice vectors and parameters in case optcell/=0
 !   if(icycle==ncycle+1.and.xred_updated) then
 !     !save rprimd_hmc_prev and total electronic energy etotal_hmc_prev
 !     call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
 !     etotal_hmc_prev = hist%etot(hist%ihist)
 !     strain_hmc_prev(:,:) = strain(:,:)
-
+!
 !     select case (ab_mover%optcell)
 !     case (1) !volume optimization only
 !       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
@@ -291,7 +279,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
 !     case(6)
 !       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case default
+!     !case default
 !     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
 !     !  ABI_ERROR(message)
 !     end select
@@ -313,7 +301,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !         iacc=1
 !       end if
 !     end if
-
+!
 !     if(iacc==0) then
 !      strain(:,:)=strain_hmc_prev(:,:)
 !      acell(:)=acell_hmc_prev(:)
@@ -322,8 +310,8 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !      strain_hmc_prev(:,:) = strain(:,:)
 !      etotal_hmc_prev=etotal
 !     endif
-
-     !suggest new acell/rprimd values depending on the optcell value
+!
+!    !suggest new acell/rprimd values depending on the optcell value
 !     select case (ab_mover%optcell)
 !     case (1) !volume optimization only
 !       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
@@ -371,8 +359,8 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
 !
 !   endif
-!
-! end if
+
+ end if
 
 end subroutine pred_hmc
 !!***

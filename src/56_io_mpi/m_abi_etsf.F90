@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (DCA,YP,MJV,MG)
+!! Copyright (C) 2006-2022 ABINIT group (DCA,YP,MJV,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +31,7 @@ module m_abi_etsf
  use m_errors
  use m_atomdata
  use m_nctk
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  use m_fstrings,     only : endswith
  use defs_datatypes, only : pseudopotential_type
@@ -73,11 +73,6 @@ CONTAINS  !===========================================================
 !!
 !! OUTPUT
 !!  Data written in file whose name is filapp//'-etsf.nc'
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -128,11 +123,6 @@ end subroutine abi_etsf_init
 !!
 !! SIDE EFFECTS
 !!  New dimensions and variables are added to the initial NetCDF file.
-!!
-!! PARENTS
-!!      m_abi_etsf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h47 )
+.Starting date : Sun 16 Jul 2023.
+- ( at 07h49 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI4/paral_t02_MPI4/t02.in
-- output file    -> t02_MPI4.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI4/paral_t02_MPI4/t02.abi
+- output file    -> t02_MPI4.abo
 - root for input  files -> t02_MPI4i
 - root for output files -> t02_MPI4o
-
 
  Symmetries : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =           4        mffmem =           1         mkmem =          15
        mpw =         188          nfft =        4096          nkpt =          60
 ================================================================================
-P This job should need less than                       2.054 Mbytes of memory.
+P This job should need less than                       2.171 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.690 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -189,8 +188,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.03365
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.psp
 -   Si  Fri Oct 08 11:18:59 1993
 - 14.00000   4.00000    930920                znucl, zion, pspdat
     1    1    2    2      2001   0.00050      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -446,26 +445,32 @@ P           mkmem          15
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          3.9        0.07      0.001
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
+- Total cpu        time (s,m,h):          3.9        0.06      0.001
 - Total wall clock time (s,m,h):          3.9        0.07      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
+-  as well as % of the time and number of calls for node 0
+-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
 - cpu_time =            1.0, wall_time =            1.0
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- pspini                         0.249   6.4      0.250   6.4              1      -1.00        1.00       1.00
-- invars2                        0.193   4.9      0.193   4.9              1      -1.00        1.00       1.00
-- fourwf%(pot)                   0.096   2.5      0.096   2.5            960      -1.00        1.00       1.00
-- vtorho(MPI)                    0.059   1.5      0.059   1.5              2      -1.00        1.00       1.00
-- abinit(2)                      0.047   1.2      0.048   1.2              1      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.028   0.7      0.028   0.7             -1      -1.00        1.00       1.00
-- others (121)                   0.087   2.2      0.087   2.2             -1      -1.00        1.00       1.00
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                    0.266   6.8         0.267   6.8              1      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.235   6.0         0.236   6.0              1      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.116   3.0         0.117   3.0              1      -1.00        1.00       1.00
+- fourwf%(pot)                              0.113   2.9         0.114   2.9            960      -1.00        1.00       1.00
+- abinit(outvars)                           0.027   0.7         0.029   0.7              1      -1.00        0.93       0.93
+- nonlop(apply)                             0.023   0.6         0.023   0.6            960      -1.00        0.99       0.99
+- others (154)                              0.114   2.9         0.121   3.1             -1      -1.00        0.94       0.94
 -<END_TIMER>
 -
-- subtotal                       0.758  19.4      0.761  19.4                                  1.00       1.00
+- subtotal                                  0.895  23.0         0.907  23.0                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -473,25 +478,26 @@ P           mkmem          15
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
 - cpu_time =           3.9, wall_time =           3.9
 -
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- pspini                         1.053  27.0      1.056  26.9              4      -1.00        1.00       1.00
-- invars2                        0.794  20.3      0.796  20.3              4      -1.00        1.00       1.00
-- fourwf%(pot)                   0.423  10.8      0.424  10.8           3840      -1.00        1.00       1.00
-- abinit(2)                      0.194   5.0      0.195   5.0              4      -1.00        1.00       1.00
-- vtorho(MPI)                    0.169   4.3      0.170   4.3              8      -1.00        1.00       1.00
-- nonlop(apply)                  0.085   2.2      0.086   2.2           3840      -1.00        0.99       0.99
-- ewald                          0.057   1.5      0.058   1.5              4      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.056   1.4      0.056   1.4             -4      -1.00        1.00       1.00
-- stress                         0.045   1.2      0.045   1.1              4      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.042   1.1      0.042   1.1              4      -1.00        1.00       1.00
-- fourwf%(den)                   0.032   0.8      0.032   0.8            480      -1.00        0.99       0.99
-- projbd                         0.027   0.7      0.027   0.7           5760      -1.00        0.99       0.99
-- getghc-other                   0.023   0.6      0.022   0.6             -4      -1.00        1.04       1.04
-- others (114)                   0.062   1.6      0.062   1.6             -1      -1.00        1.00       1.00
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- pspini                                    1.069  27.4         1.072  27.2              4      -1.00        1.00       1.00
+- get_dtsets_pspheads                       0.990  25.4         0.993  25.2              4      -1.00        1.00       1.00
+- abinit(chkinp,chkvars)                    0.464  11.9         0.466  11.8              4      -1.00        1.00       1.00
+- fourwf%(pot)                              0.455  11.7         0.457  11.6           3840      -1.00        0.99       0.99
+- nonlop(apply)                             0.093   2.4         0.094   2.4           3840      -1.00        0.99       0.99
+- abinit(outvars)                           0.069   1.8         0.071   1.8              4      -1.00        0.97       0.97
+- ewald                                     0.061   1.6         0.061   1.6              4      -1.00        1.00       1.00
+- abinit(init,iofn1,herald)                 0.046   1.2         0.048   1.2              4      -1.00        0.96       0.96
+- stress                                    0.044   1.1         0.044   1.1              4      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)                        0.040   1.0         0.041   1.0              4      -1.00        1.00       1.00
+- fourwf%(den)                              0.034   0.9         0.035   0.9            480      -1.00        0.99       0.99
+- newkpt(excl. rwwf   )                     0.034   0.9         0.034   0.9             -4      -1.00        1.00       1.00
+- projbd                                    0.027   0.7         0.027   0.7           5760      -1.00        0.99       0.99
+- getghc(/=fourXX,nonlop,fock_XX)           0.022   0.6         0.021   0.5             -4      -1.00        1.04       1.04
+- others (146)                              0.095   2.5         0.101   2.6             -1      -1.00        0.94       0.94
 -<END_TIMER>
 
-- subtotal                       3.061  78.4      3.069  78.2                                  1.00       1.00
+- subtotal                                  3.545  91.0         3.566  90.4                                  0.99       0.99
 
 ================================================================================
 

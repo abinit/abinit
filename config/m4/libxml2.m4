@@ -156,10 +156,11 @@ main()
           echo "*** Could not run libxml test program, checking why..."
           CPPFLAGS="$CPPFLAGS $XML_CPPFLAGS"
           LIBS="$LIBS $XML_LIBS"
-          AC_TRY_LINK([
+          AC_LINK_IFELSE(
+          [AC_LANG_PROGRAM([[
 #include <libxml/xmlversion.h>
 #include <stdio.h>
-],      [ LIBXML_TEST_VERSION; return 0;],
+]],     [[ LIBXML_TEST_VERSION; return 0;]])],
         [ echo "*** The test program compiled, but did not run. This usually means"
           echo "*** that the run-time linker is not finding LIBXML or finding the wrong"
           echo "*** version of LIBXML. If it is not finding LIBXML, you'll need to set your"

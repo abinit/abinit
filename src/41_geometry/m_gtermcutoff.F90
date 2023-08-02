@@ -1,19 +1,15 @@
-!!****m* ABINIT/m_gtermcutoff
+!!****zeroi* ABINIT/m_gtermcutoff
 !! NAME
 !!  m_gtermcutoff
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group ()
+!! Copyright (C) 1999-2022 ABINIT group ()
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -61,7 +57,7 @@ module m_gtermcutoff
 !!!  real(dp) :: ucvol
 !!!  ! Volume of the unit cell
 
-!!!   ! integer :: pdir(3)
+!!!   ! integer :: periodic_dir(3)
 !!!   ! 1 if the system is periodic along this direction
 
 !!!   ! real(dp) :: boxcenter(3)
@@ -98,7 +94,7 @@ contains
 !!
 !! FUNCTION
 !!   Apply a cut-off term to the 1/G**2-like terms that appears throughout
-!!   the code at the ground-state level as follows: Ewald, NC-PSP, Hartee.
+!!   the code at the ground-state level as follows: Ewald, NC-PSP, Hartree.
 !!
 !! INPUTS
 !!   gsqcut     = cutoff on (k+G)^2 (bohr^-2) (sphere for density and potential) (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
@@ -117,12 +113,6 @@ contains
 !!  the cut-off part of the Coulomb potential, unlike what is done
 !!  in barevcoul module.
 !!  2. Fock term has its own legacy cut-off for the moment.
-!!
-!! PARENTS
-!!      m_atm2fft,m_ewald,m_mklocl,m_spacepar
-!!
-!! CHILDREN
-!!      calck0,calck1,caljy0,caljy1,metric,paw_jbessel,quadrature,wrtout
 !!
 !! SOURCE
 
@@ -144,7 +134,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
  integer            :: i1,i2,i23,i3,ierr,id(3),ii,ig,ing
  integer            :: c1,c2,opt_cylinder
  integer            :: n1,n2,n3,nfft
- integer            :: test,opt_surface !opt_cylinder
+ integer            :: test,opt_slab !opt_cylinder
  real(dp)           :: alpha_fac, ap1sqrt, log_alpha
  real(dp)           :: cutoff,rcut_loc,rcut2,check,rmet(3,3)
  real(dp)           :: gvecg2p3,gvecgm12,gvecgm13,gvecgm23,gs2,gs3
@@ -158,9 +148,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 ! type(gcut_t)       :: gcut  !
 
 !arrays
+ integer              :: periodic_dir(3)
  real(dp)             :: a1(3),a2(3),a3(3),b1(3),b2(3),b3(3)
  real(dp)             :: gcart(3),gmet(3,3),gprimd(3,3)
- real(dp)             :: pdir(3),alpha(3)
+ real(dp)             :: alpha(3)
  real(dp),allocatable :: gvec(:,:),gpq(:),gpq2(:)
  real(dp),allocatable,intent(inout) :: gcutoff(:)
 
@@ -198,7 +189,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
  if (icutcoul==0) mode='SPHERE'
  if (icutcoul==1) mode='CYLINDER'
- if (icutcoul==2) mode='SURFACE'
+ if (icutcoul==2) mode='SLAB'
  if (icutcoul==3) mode='CRYSTAL'
  if (icutcoul==4) mode='ERF'
  if (icutcoul==5) mode='ERFC'
@@ -245,9 +236,10 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      do ig=1,nfft
        if(abs(gpq(ig))<tol4) then
-          gcutoff(ig)=zero
+          gcutoff(ig)=0.0
        else
           gcutoff(ig)=one-cos(rcut_loc*sqrt(four_pi/gpq2(ig)))
+          !gcutoff(ig)=one-cos(rcut_loc/sqrt(gpq2(ii)))
       end if
      end do
 
@@ -281,11 +273,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
      ! === Beigi method is the default one, i.e infinite cylinder of radius rcut ===
      ! * Negative values to use Rozzi method with finite cylinder of extent hcyl.
-     opt_cylinder=1; hcyl=zero; pdir(:)=0
+     opt_cylinder=1; hcyl=zero; periodic_dir(:)=0
      do ii=1,3
        check=vcutgeo(ii)
        if (ABS(check)>tol6) then
-         pdir(ii)=1
+         periodic_dir(ii)=1
          if (check<zero) then  ! use Rozzi's method.
            hcyl=ABS(check)*SQRT(SUM(rprimd(:,ii)**2))
            opt_cylinder=2
@@ -305,7 +297,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      endif
 
      if (opt_cylinder==1) then
-       ABI_CHECK(ALL(pdir == (/0,0,1/)),"The cylinder must be along the z-axis")
+       ABI_CHECK(ALL(periodic_dir == (/0,0,1/)),"The cylinder must be along the z-axis")
      end if
 
      rcut_= rcut_loc
@@ -320,11 +312,11 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      hcyl_    =hcyl     ! Lenght of cylinder along z, only if method==2
 
      write(msg,'(3a,2(a,i5,a),a,f8.5)')ch10,&
-&      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
-&      '  Quadrature scheme      = ',qopt_,ch10,&
-&      '  Max number of attempts = ',ntrial_,ch10,&
-&      '  Fractional accuracy    = ',accuracy_
-     call wrtout(std_out,msg,'COLL')
+      ' cutoff_cylinder: Info on the quadrature method : ',ch10,&
+      '  Quadrature scheme      = ',qopt_,ch10,&
+      '  Max number of attempts = ',ntrial_,ch10,&
+      '  Fractional accuracy    = ',accuracy_
+     call wrtout(std_out,msg)
 
      SELECT CASE (opt_cylinder)
 
@@ -333,14 +325,14 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      ! === Infinite cylinder, interaction is zeroed outside the Wigner-Seitz cell ===
      ! * Beigi"s expression holds only if the BZ is sampled only along z.
      write(msg,'(2(a,f8.4))')' cutoff_cylinder: Using Beigi''s Infinite cylinder '
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
      ! * Check if Bravais lattice is orthorombic and parallel to the Cartesian versors.
      !   In this case the intersection of the W-S cell with the x-y plane is a rectangle with -ha_<=x<=ha_ and -hb_<=y<=hb_
      if ( (ANY(ABS(rprimd(2:3,  1))>tol6)).or.&
 &         (ANY(ABS(rprimd(1:3:2,2))>tol6)).or.&
 &         (ANY(ABS(rprimd(1:2,  3))>tol6))    &
 &       ) then
-       msg = ' Bravais lattice should be orthorombic and parallel to the cartesian versors '
+       msg = ' Bravais lattice should be orthorhombic and parallel to the cartesian verctors '
        ABI_ERROR(msg)
      end if
 
@@ -394,7 +386,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      if (ABS(hcyl_)>tol12) then
 
        write(msg,'(2(a,f8.4))')' cutoff_cylinder: using finite cylinder of length= ',hcyl,' rcut= ',rcut_loc
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        hcyl_=hcyl
        hcyl2=hcyl**2.0_dp
        rcut2=rcut_loc**2.0_dp
@@ -492,7 +484,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
       ABI_BUG(sjoin('Wrong value for cylinder method:',itoa(opt_cylinder)))
      END SELECT
 
-   CASE('SURFACE')
+   CASE('SLAB')
 
      test=COUNT(vcutgeo/=zero)
      ABI_CHECK(test==2,"Wrong vcutgeo")
@@ -502,30 +494,27 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
      a2=rprimd(:,2); b2=two_pi*gprimd(:,2)
      a3=rprimd(:,3); b3=two_pi*gprimd(:,3)
 
-     !SURFACE Default - Beigi
-     opt_surface=1; alpha(:)=zero
-     ! Otherwsise use Rozzi's method
-     if (ANY(vcutgeo<zero)) opt_surface=2
-     pdir(:)=zero
+     !SLAB Default - Beigi
+     opt_slab=1; alpha(:)=zero
+     ! Otherwise use Rozzi's method
+     if (ANY(vcutgeo<zero) .or. rcut>tol8) opt_slab=2
+     periodic_dir(:)=0
      do ii=1,3
        check=vcutgeo(ii)
-       if (ABS(check)>zero) then ! Use Rozzi"s method with a finite surface along x-y
-         pdir(ii)=1
+       if (ABS(check)>zero) then 
+         periodic_dir(ii)=1
+         !For Rozzi"s method
          if (check<zero) alpha(ii)=normv(check*rprimd(:,ii),rmet,'R')
        end if
      end do
 
-     SELECT CASE (opt_surface)
+     SELECT CASE (opt_slab)
 
-       !CASE SURFACE 1 - Beigi
+       !CASE SLAB 1 - Beigi
        CASE(1)
 
        ! Calculate rcut for each method !
-       if(rcut>tol4) then
-          rcut_loc = rcut
-       else
-          rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
-       endif
+       rcut_loc = half*SQRT(DOT_PRODUCT(a3,a3))
 
        do i3=1,n3
         do i2=1,n2
@@ -535,6 +524,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
            gcart(:)=b1(:)*gvec(1,i1)+b2(:)*gvec(2,i2)+b3(:)*gvec(3,i3)
            gcart_para=SQRT(gcart(1)**2+gcart(2)**2) ; gcart_perp = gcart(3)
            if(gcart_para<tol4.and.ABS(gcart_perp)<tol4) then
+           !if(gcart_para<tol12.and.ABS(gcart_perp)<tol12) then
              gcutoff(ii)=zero
            else
              gcutoff(ii)=one-EXP(-gcart_para*rcut_loc)*COS(gcart_perp*rcut_loc)
@@ -543,7 +533,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
         end do !i2
        end do !i3
 
-       !CASE SURFACE 2 - Rozzi
+       !CASE SLAB 2 - Rozzi
        CASE(2)
 
        !Set the cut-off radius
@@ -583,7 +573,7 @@ subroutine termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
        end do !i3
 
        CASE DEFAULT
-         write(msg,'(a,i3)')' Wrong value of surface method: ',opt_surface
+         write(msg,'(a,i3)')' Wrong value of slab method: ',opt_slab
          ABI_BUG(msg)
        END SELECT
 

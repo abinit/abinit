@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.8.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h17 )
+.Starting date : Fri  4 Nov 2022.
+- ( at 13h34 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t20/t20.in
-- output file    -> t20.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/TestBot_MPI1/libxc_t20/t20.abi
+- output file    -> t20.abo
 - root for input  files -> t20i
 - root for output files -> t20o
 
@@ -34,7 +34,7 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                       9.574 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -153,7 +153,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -170,7 +170,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -187,7 +187,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -204,7 +204,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -221,7 +221,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -238,7 +238,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -255,7 +255,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -272,7 +272,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -289,7 +289,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -306,7 +306,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -323,7 +323,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -340,7 +340,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -357,7 +357,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -374,7 +374,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -391,7 +391,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -408,7 +408,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -425,7 +425,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -442,7 +442,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -459,7 +459,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -476,7 +476,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -493,7 +493,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -506,11 +506,11 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
      lnmax =       1     mgfft =      32  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       2
+    occopt =       1   xclevel =       1
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -527,7 +527,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -544,7 +544,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -561,7 +561,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -578,7 +578,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -595,7 +595,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        2118          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      10.461 Mbytes of memory.
+P This job should need less than                      10.477 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -645,7 +645,7 @@ _ WF disk file :      0.034 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
               ixc32   -106153
               ixc33   -106159
               ixc35       -93
-              ixc36       -94
+              ixc36         1
               ixc37       -95
               ixc38       -96
               ixc44      -194
@@ -794,8 +794,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -948,8 +948,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1101,8 +1101,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1254,8 +1254,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1407,8 +1407,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1560,8 +1560,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1713,8 +1713,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1866,8 +1866,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2019,8 +2019,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2172,8 +2172,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2325,8 +2325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2478,8 +2478,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2631,8 +2631,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2784,8 +2784,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2937,8 +2937,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3090,8 +3090,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3243,8 +3243,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3396,8 +3396,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3549,8 +3549,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3702,8 +3702,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3855,8 +3855,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4008,8 +4008,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4161,8 +4161,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4314,8 +4314,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4467,8 +4467,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4620,8 +4620,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4773,8 +4773,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4926,8 +4926,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5068,6 +5068,11 @@ electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.0000
 meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 ...
 
+ Exchange-correlation functional for the present dataset will be:
+  LDA: new Teter (4/93) with spin-polarized option - ixc=1
+ Citation for XC functional:
+  S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  5.0000000  0.0000000  0.0000000  G(1)=  0.2000000  0.0000000  0.0000000
  R(2)=  0.0000000  5.0000000  0.0000000  G(2)=  0.0000000  0.2000000  0.0000000
@@ -5079,8 +5084,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5112,17 +5117,17 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -1.9204225834671    -1.920E+00 6.119E-01 1.538E+05
+ ETOT  1  -2.7457391985107    -2.746E+00 5.035E-01 2.260E+01
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.95653785E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.95653785E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.95653785E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.64970769E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.64970769E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.64970769E-04  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
-  maximum residual=  6.119E-01 exceeds tolwfr=  1.000E-14
+  maximum residual=  5.035E-01 exceeds tolwfr=  1.000E-14
 
 
 --- !ResultsGS
@@ -5135,15 +5140,15 @@ lattice_vectors:
 lattice_lengths: [   5.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.2500000E+02
-convergence: {deltae: -1.920E+00, res2:  1.538E+05, residm:  6.119E-01, diffor: null, }
-etotal    :  -1.92042258E+00
+convergence: {deltae: -2.746E+00, res2:  2.260E+01, residm:  5.035E-01, diffor: null, }
+etotal    :  -2.74573920E+00
 entropy   :   0.00000000E+00
-fermie    :  -8.01522081E-01
+fermie    :  -4.92870930E-01
 cartesian_stress_tensor: # hartree/bohr^3
-- [ -1.95653785E-03,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,  -1.95653785E-03,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,  -1.95653785E-03, ]
-pressure_GPa:   5.7563E+01
+- [ -1.64970769E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.64970769E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.64970769E-04, ]
+pressure_GPa:   4.8536E+00
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, He]
 cartesian_forces: # hartree/bohr
@@ -5154,12 +5159,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
-    1        2.00000          1.27555146
+    1        2.00000          1.91809473
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   61.185E-02; max=  61.185E-02
+ Mean square residual over all n,k,spin=   50.354E-02; max=  50.354E-02
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -5177,36 +5182,36 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.000000000000  5.000000000000  5.000000000000 bohr
               =  2.645886042950  2.645886042950  2.645886042950 angstroms
- Fermi (or HOMO) energy (hartree) =  -0.80152   Average Vxc (hartree)=   0.85466
+ Fermi (or HOMO) energy (hartree) =  -0.49287   Average Vxc (hartree)=  -0.17143
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
-  -0.80152
+  -0.49287
 
 --- !EnergyTerms
 iteration_state     : {dtset: 36, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.46014110459896E+00
-hartree             :  3.24401146231751E-01
-xc                  : -1.07614894447775E+00
+kinetic             :  2.73983853925060E+00
+hartree             :  1.00342902569120E+00
+xc                  : -9.98708646553029E-01
 Ewald energy        : -1.13491899179226E+00
 psp_core            :  2.01061929829747E-07
-local_psp           : -2.49389709908969E+00
+local_psp           : -4.35537932616910E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -1.92042258346707E+00
-total_energy_eV     : -5.22573560921353E+01
-band_energy         : -1.60304416255589E+00
+total_energy        : -2.74573919851066E+00
+total_energy_eV     : -7.47153633101223E+01
+band_energy         : -9.85741860749026E-01
 ...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.95653785E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.95653785E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.95653785E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.64970769E-04  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.64970769E-04  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.64970769E-04  sigma(2 1)=  0.00000000E+00
 
--Cartesian components of stress tensor (GPa)         [Pressure=  5.7563E+01 GPa]
-- sigma(1 1)= -5.75633212E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)= -5.75633212E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)= -5.75633212E+01  sigma(2 1)=  0.00000000E+00
+-Cartesian components of stress tensor (GPa)         [Pressure=  4.8536E+00 GPa]
+- sigma(1 1)= -4.85360678E+00  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)= -4.85360678E+00  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)= -4.85360678E+00  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 37 ==================================================================
@@ -5232,8 +5237,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5385,8 +5390,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5538,8 +5543,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5691,8 +5696,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5844,8 +5849,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_libxc6/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6010,7 +6015,7 @@ band_energy         : -1.34143905467915E+00
            etotal32   -2.8135566619E+00
            etotal33   -2.8944961202E+00
            etotal35   -2.8324221089E+00
-           etotal36   -1.9204225835E+00
+           etotal36   -2.7457391985E+00
            etotal37   -2.8571150191E+00
            etotal38   -2.8340361963E+00
            etotal44   -2.7966344729E+00
@@ -6079,7 +6084,7 @@ band_energy         : -1.34143905467915E+00
               ixc32   -106153
               ixc33   -106159
               ixc35       -93
-              ixc36       -94
+              ixc36         1
               ixc37       -95
               ixc38       -96
               ixc44      -194
@@ -6162,7 +6167,7 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten35    4.8822701559E-05  4.8822701559E-05  4.8822701559E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten36   -1.9565378509E-03 -1.9565378509E-03 -1.9565378509E-03
+           strten36   -1.6497076909E-04 -1.6497076909E-04 -1.6497076909E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten37   -2.0102525007E-05 -2.0102525007E-05 -2.0102525007E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -6297,10 +6302,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.3  wall=          7.6
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          8.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered 107 WARNINGs and 140 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.3  wall=          7.6
+.Delivered 101 WARNINGs and 141 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.8  wall=          8.7

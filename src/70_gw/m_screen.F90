@@ -6,12 +6,10 @@
 !!   Screening object used in the BSE code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2021 ABINIT group (MG)
+!!  Copyright (C) 2014-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -39,11 +37,10 @@ MODULE m_screen
  use m_numeric_tools,  only : print_arr
  use m_geometry,       only : normv
  use m_crystal,        only : crystal_t
- use m_bz_mesh,        only : kmesh_t, get_BZ_item, has_bz_item
+ use m_bz_mesh,        only : kmesh_t
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
- use m_io_screening,   only : hscr_free, hscr_io, read_screening, write_screening, hscr_print, &
-&                             hscr_copy, hscr_t, hscr_bcast, hscr_from_file, ncname_from_id, em1_ncname, chi0_ncname
+ use m_io_screening,   only : read_screening, hscr_t, ncname_from_id, em1_ncname
  use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer
 
  implicit none
@@ -333,12 +330,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  Only printing
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
@@ -405,12 +396,6 @@ end subroutine screen_info_print
 !! FUNCTION
 !!  Free memory.
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine fgg_free_0D(Fgg)
@@ -441,11 +426,6 @@ end subroutine fgg_free_0D
 !!
 !! INPUT
 !!  [keep_q(:)]=Optional logical mask used to select the q-points that are deallocated.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -485,12 +465,6 @@ end subroutine fgg_free_1D
 !!
 !! SIDE EFFECTS
 !!  Fgg, See function description
-!!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -538,12 +512,6 @@ end subroutine fgg_init
 !!
 !! NOTES
 !!  iq_bz and nqlwl are not used if how="Pointer".
-!!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -626,10 +594,6 @@ end subroutine screen_fgg_qbz_set
 !! NOTES
 !!   A zero index can be used to inquire the status of the full set of q-points.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 pure function screen_ihave_fgg(W,iq_ibz,how)
@@ -683,12 +647,6 @@ end function screen_ihave_fgg
 !! SIDE EFFECTS
 !! W<screen_t>=The data structure to be nullified.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine screen_nullify(W)
@@ -723,12 +681,6 @@ end subroutine screen_nullify
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine screen_free(W)
@@ -742,32 +694,18 @@ subroutine screen_free(W)
  !@screen_t
  !
  ! integer
- if (allocated(W%gvec)) then
-   ABI_FREE(W%gvec)
- end if
+ ABI_SFREE(W%gvec)
  !
  !real
- if (allocated(W%ae_rhor)) then
-   ABI_FREE(W%ae_rhor)
- end if
-
- if (allocated(W%qibz)) then
-   ABI_FREE(W%qibz)
- end if
-
- if (allocated(W%qlwl)) then
-   ABI_FREE(W%qlwl)
- end if
+ ABI_SFREE(W%ae_rhor)
+ ABI_SFREE(W%qibz)
+ ABI_SFREE(W%qlwl)
  !
  !complex
- if (allocated(W%omega)) then
-   ABI_FREE(W%omega)
- end if
+ ABI_SFREE(W%omega)
 
  ! logical
- if (allocated(W%keep_q)) then
-   ABI_FREE(W%keep_q)
- end if
+ ABI_SFREE(W%keep_q)
  !
  ! types ------------------------------------------
  !
@@ -831,12 +769,6 @@ end subroutine screen_free
 !!
 !! OUTPUT
 !!  W<screen_t>=The structure initialized with basic dimensions and arrays.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
 !!
 !! SOURCE
 
@@ -972,9 +904,9 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    ! Open file and check its content.
    if (endswith(W%fname, ".nc")) W%iomode = IO_MODE_ETSF
 
-   call hscr_from_file(hscr,W%fname,fform,comm)
+   call hscr%from_file(W%fname, fform, comm)
    ! Echo of the header
-   if (my_rank == master .and. W%prtvol>0) call hscr_print(hscr)
+   if (my_rank == master .and. W%prtvol>0) call hscr%print()
 
    ! Communicate the header and copy basic parameters.
    !call hscr_bcast(Hscr,master,my_rank,comm)
@@ -1107,7 +1039,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      nqlwl=0; is_qeq0= (normv(W%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
      !
      ! Calculate the model. Note that mdielf awaits an index in the BZ.
-     found = has_bz_item(Qmesh,Qmesh%ibz(:,iq_ibz),iq_bz,g0)
+     found = qmesh%has_bz_item(Qmesh%ibz(:,iq_ibz),iq_bz,g0)
      if (.not.found.or.ANY(g0/=0)) then
        ABI_ERROR("Problem in retrieving ibz point")
      end if
@@ -1158,7 +1090,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    call fgg_free(W%Fgg,keep_q=W%keep_q)
  end if
 
- if (from_file) call hscr_free(Hscr)
+ if (from_file) call Hscr%free()
 
  DBG_EXIT("COLL")
 
@@ -1195,12 +1127,6 @@ end subroutine screen_init
 !!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required
 !!  to reconstruct the BZ.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
@@ -1230,7 +1156,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
 
  npw = W%npw; nqibz = W%nqibz; nomega = W%nomega
 
- call get_bz_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
  !
  ! ========================================================
  ! ==== Branching for in-core or out-of-core solutions ====
@@ -1346,12 +1272,6 @@ end subroutine screen_symmetrizer
 !!   *
 !!   *  where alpha and beta are scalars, x and y are vectors and A is an m by n matrix.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out_ket)
@@ -1453,12 +1373,6 @@ end subroutine screen_w0gemv
 !!    The invariance under exchange of the real space position E(1,2) = E(2,1) leads to:
 !!    $ E_{-G2,-G1}(-q) = E_{G1,G2)
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
@@ -1484,7 +1398,7 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 ! *********************************************************************
 
  ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  if (q_isirred) RETURN ! Nothing to do
 
@@ -1552,12 +1466,6 @@ end subroutine em1_symmetrize_ip
 !!    The invariance under exchange of the real space position E(1,2) = E(2,1) leads to:
 !!    $ E_{-G2,-G1}(-q) = E_{G1,G2)
 !!
-!! PARENTS
-!!      m_screen
-!!
-!! CHILDREN
-!!      get_bz_item,sqmat_itranspose
-!!
 !! SOURCE
 
 subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
@@ -1581,8 +1489,8 @@ subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
 
 ! *********************************************************************
 
- ! * Get iq_ibz, and symmetries from iq_ibz.
- call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
+ ! Get iq_ibz, and symmetries from iq_ibz.
+ call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  if (q_isirred) then
    out_epsm1 = in_epsm1; return

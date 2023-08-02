@@ -13,18 +13,11 @@ post-processing tools
 - dynamic_pol.f
     Compute the frequency-dependent polarisability from the TDDFT output.
 
-- ElectronPhononCoupling
-    Python module to analyze electron-phonon related quantities such as
-    temperature dependence, zero-point motion renormalization and broadening.
-
 - get_irreps.py
     Find the irreducible representation to which the Gamma phonons belong.
 
 - matLab_data_analysis/
     Various scripts for MaLab treatment of the output.
-
-- merge_ddb_nc.py 
-    Merge several DDB.nc files, belonging to the same q-point.
 
 - phondisp2abi.py
     Calculate frozen phonon frequencies, free energies, etc...
@@ -43,14 +36,6 @@ post-processing tools
 - rf_mods_seq.py
     Sequential version to be used if the memory required is too large
 
-- temperature_para.py
-    Compute the temperature dependence, zero-point motion renormalization 
-    and broadening from _EIGR2D.nc and _EIGI2D.nc files. This script 
-    produces a _EP.nc file that can be later used.
-
-- temperature_para_seq.py
-    Sequential version to be used if the memory required is too large
-
 - wannier_bandstructure.py
     Plot the bandstructure from _EIG.nc file.
 
@@ -67,3 +52,7 @@ post-processing tools
     output file. Program is documented internally.
 
 
+- compare_phbands.py
+    Script to plot the phonon band structure and compare with the LWF phonon
+    band structure from the anaddb output file. The code is documented internally.
+    --help option is also available.                                                  

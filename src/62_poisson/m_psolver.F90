@@ -6,14 +6,10 @@
 !!  Poisson solver
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR,TRangel).
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR,TRangel).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -82,12 +78,6 @@ contains
 !!  But in ABINIT (dtset%usewvl != 1) rhor(:,1) = total density and
 !!                                    rhor(:,2) = density up .
 !!  In ABINIT (dtset%usewvl != 1), the same convention is used as in psolver.
-!!
-!! PARENTS
-!!      m_dft_energy,m_rhotov,m_scfcv_core,m_setvtr
-!!
-!! CHILDREN
-!!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout
 !!
 !! SOURCE
 
@@ -542,12 +532,6 @@ end subroutine psolver_rhohxc
 !!                                    rhor(:,2) = density up .
 !!  In ABINIT (dtset%usewvl != 1), the same convention is used as in PSolver.
 !!
-!! PARENTS
-!!      m_forstr,m_mklocl_realspace
-!!
-!! CHILDREN
-!!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout
-!!
 !! SOURCE
 
 subroutine psolver_hartree(enhartr, hgrid, icoulomb, me, mpi_comm, nfft, ngfft, nproc, &
@@ -670,12 +654,6 @@ end subroutine psolver_hartree
 !!
 !! OUTPUT
 !!  kernel= associated kernel on build (iaction = 1) and get action (iaction = 2).
-!!
-!! PARENTS
-!!      m_gstate,m_mklocl_realspace,m_psolver,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      deallocate_coulomb_operator,nullify_coulomb_operator,pkernel_set,wrtout
 !!
 !! SOURCE
 

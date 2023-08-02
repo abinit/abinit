@@ -7,7 +7,7 @@
 !!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2021 ABINIT group (MG)
+!! Copyright (C) 2010-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +29,7 @@ module m_ptgroups
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
- use m_symtk,          only : mati3inv
+ use m_symtk,          only : mati3inv, sg_multable
 
 ! Import group tables
  use m_ptg_C1
@@ -108,12 +108,6 @@ CONTAINS  !===========================================================
 !! sym(3,3,nsym)=Elements of the point group ordered by classe.
 !! class_ids(2,nclass)=Initial and final index in sym, for each
 !! Irreps(nclass)=Datatype gathering data on the different irreducible representations.
-!!
-!! PARENTS
-!!      m_ptgroups,m_unittests
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -246,12 +240,6 @@ end subroutine get_point_group
 !!
 !!  * The routine assumes that anti-ferromagnetic symmetries (if any) have been removed by the caller.
 !!
-!! PARENTS
-!!      m_esymm,m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
@@ -268,11 +256,12 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,jsym,ksym,identity_idx !,ierr
+ integer :: isym,jsym,ksym,identity_idx,ierr
  character(len=500) :: msg
 !arrays
  integer :: cjg(3,3),ss(3,3),xx(3,3),xxm1(3,3),test(3,3)
  integer :: identity(3,3)
+ integer :: dummy_symafm(nsym)
  logical :: found(nsym),found_identity
 
 !************************************************************************
@@ -291,11 +280,10 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 &  'check set of symmetry operations '
   ABI_ERROR(msg)
  end if
- !
- ! Is it a group? Note that I assume that AFM sym.op (if any) have been pruned in the caller.
- !dummy_symafm=1
- !call chkgrp(nsym,dummy_symafm,sym,ierr)
- !ABI_CHECK(ierr==0,"Error in group closure")
+  
+ dummy_symafm=1
+ call sg_multable(nsym,dummy_symafm,sym,ierr)
+ ABI_CHECK(ierr==0,"Error in group closure")
 
  nclass=0; nelements(:)=0; elements_idx(:,:)=0; found(:)=.FALSE.
  do isym=1,nsym
@@ -337,11 +325,6 @@ end subroutine get_classes
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -385,12 +368,6 @@ end subroutine show_character_tables
 !!
 !! FUNCTION
 !!  Deallocate all memory allocated in the point_group_t datatype.
-!!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -438,12 +415,6 @@ end subroutine point_group_free
 !! OUTPUT
 !!  The datatype completely initialized.
 !!
-!! PARENTS
-!!      m_esymm,m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 
@@ -477,12 +448,6 @@ end subroutine point_group_init
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -567,12 +532,6 @@ end subroutine point_group_print
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine locate_sym(Ptg,asym,sym_idx,cls_idx,ierr)
@@ -644,11 +603,6 @@ end subroutine locate_sym
 !! OUTPUT
 !!  mtab(nsym,nsym)=The index of the product S_i * S_j in the input set sym.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine mult_table(nsym,sym,mtab)
@@ -712,11 +666,6 @@ end subroutine mult_table
 !!
 !! TODO
 !!   This is a stub. I still have to complete the fileformat for the Bilbao database.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -877,12 +826,6 @@ end subroutine groupk_from_file
 !! FUNCTION
 !!  Deallocate all memory allocated in the irrep_t datatype.
 !!
-!! PARENTS
-!!      m_ptgroups
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine irrep_free_0d(Irrep)
@@ -914,11 +857,6 @@ end subroutine irrep_free_0d
 !! FUNCTION
 !!  Deallocate all memory allocated in the irrep_t datatype.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
-!!
 !! SOURCE
 
 subroutine irrep_free_1d(Irrep)
@@ -948,12 +886,6 @@ end subroutine irrep_free_1d
 !! FUNCTION
 !!  Perform a copy of a set of irrep_t datatypes. Optionally one can multiply
 !!  by a phase factor.
-!!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 
@@ -1022,10 +954,6 @@ end subroutine copy_irrep
 !! OUTPUT
 !!  Irrep<irrep_t>=
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_irrep(Irrep,nsym,irr_dim,irr_name)
@@ -1070,10 +998,6 @@ end subroutine init_irrep
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1131,11 +1055,6 @@ end function sum_irreps
 !!
 !! FUNCTION
 !!  Deallocate all memory allocate in the group_k_t.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      irrep_free
 !!
 !! SOURCE
 

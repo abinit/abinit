@@ -9,7 +9,7 @@
 !! Subroutines:
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,7 +24,7 @@
 #include "abi_common.h"
 
 module m_multibinit_io_xml
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use m_mathfuncs
   use defs_basis
   use m_abicore

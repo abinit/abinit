@@ -1,7 +1,7 @@
 /* cuda_common.h */
 
 /*
- * Copyright (C) 2008-2021 ABINIT Group (MMancini)
+ * Copyright (C) 2008-2022 ABINIT Group (MMancini)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -10,10 +10,10 @@
  */
 
 
-/** 
+/**
  * Language standards requires the existance of pre-defined macros
- * TODO 
- * Microsoft Visual C++ does not define __STDC__, 
+ * TODO
+ * Microsoft Visual C++ does not define __STDC__,
  * Sun Workshop 4.2 supports C94 without setting __STDC_VERSION__ to the proper value
 **/
 
@@ -25,7 +25,7 @@
 
 #undef HAVE_VARMACROS
 
-#ifdef HAVE_GPU_CUDA_DP 
+#ifdef HAVE_GPU_CUDA_DP
 # define  CUDA_KIND (1.0_dp)
 # define  cuzero   0.0
 # define  cuone    1.0

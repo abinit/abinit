@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t77/t77.in
-- output file    -> t77.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t77/t77.abi
+- output file    -> t77.abo
 - root for input  files -> t77i
 - root for output files -> t77o
-
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,18 +33,18 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          63          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.050 Mbytes of memory.
+P This job should need less than                       1.099 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P            9 blocks of mpw  integer numbers, for      0.002 Mbytes.
-P           39 blocks of mpw  real(dp)  numbers, for      0.019 Mbytes.
+P           33 blocks of mpw  real(dp)  numbers, for      0.016 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
-P           31 blocks of nfft real(dp)  numbers, for      0.409 Mbytes.
+P           35 blocks of nfft real(dp)  numbers, for      0.461 Mbytes.
 P              Additional     real(dp)  numbers, for      0.369 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.045 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.050 Mbytes.
+P Main chain + fourwf.f                 1.095 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.099 Mbytes.
 P XC chain                              1.026 Mbytes.
 P mkrho chain                           0.966 Mbytes.
 P fourdp chain                          0.965 Mbytes.
@@ -54,7 +53,6 @@ P newvtr chain                          0.956 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -67,18 +65,18 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         108          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       1.504 Mbytes of memory.
+P This job should need less than                       1.602 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            9 blocks of mpw  integer numbers, for      0.004 Mbytes.
-P           39 blocks of mpw  real(dp)  numbers, for      0.032 Mbytes.
+P           33 blocks of mpw  real(dp)  numbers, for      0.027 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.026 Mbytes.
-P           35 blocks of nfft real(dp)  numbers, for      0.901 Mbytes.
+P           39 blocks of nfft real(dp)  numbers, for      1.004 Mbytes.
 P              Additional     real(dp)  numbers, for      0.303 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.504 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.463 Mbytes.
+P Main chain + fourwf.f                 1.602 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.561 Mbytes.
 P XC chain                              1.481 Mbytes.
 P mkrho chain                           1.354 Mbytes.
 P fourdp chain                          1.353 Mbytes.
@@ -87,7 +85,6 @@ P newvtr chain                          1.353 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -100,18 +97,18 @@ _ WF disk file :      0.015 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =         174          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.740 Mbytes of memory.
+P This job should need less than                       1.857 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            9 blocks of mpw  integer numbers, for      0.006 Mbytes.
-P           39 blocks of mpw  real(dp)  numbers, for      0.052 Mbytes.
+P           33 blocks of mpw  real(dp)  numbers, for      0.044 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.031 Mbytes.
-P           35 blocks of nfft real(dp)  numbers, for      1.094 Mbytes.
+P           39 blocks of nfft real(dp)  numbers, for      1.219 Mbytes.
 P              Additional     real(dp)  numbers, for      0.319 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.740 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.669 Mbytes.
+P Main chain + fourwf.f                 1.857 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.786 Mbytes.
 P XC chain                              1.697 Mbytes.
 P mkrho chain                           1.552 Mbytes.
 P fourdp chain                          1.549 Mbytes.
@@ -227,8 +224,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.17656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -438,9 +435,9 @@ force_length_stats: {min:   1.82896515E-25, max:   1.82896515E-25, mean:   1.828
 
  Mean square residual over all n,k,spin=   37.183E-18; max=  75.772E-18
    0.2500  0.2500  0.2500    1  4.52685E-17 kpt; spin; max resid(k); each band:
-   3.42E-17  4.53E-17  1.49E-17  1.44E-17
+  3.42E-17 4.53E-17 1.49E-17 1.44E-17
    0.2500  0.5000  0.5000    1  7.57720E-17 kpt; spin; max resid(k); each band:
-   4.57E-17  7.58E-17  6.29E-17  4.26E-18
+  4.57E-17 7.58E-17 6.29E-17 4.26E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -477,10 +474,10 @@ force_length_stats: {min:   1.82896515E-25, max:   1.82896515E-25, mean:   1.828
  kpt#   2, nband=  4, wtk=  0.75000, kpt=  0.2500  0.5000  0.5000 (reduced coord)
   -2.68760    0.24461    2.88481    4.26591
  Total charge density [el/Bohr^3]
-      Maximum=    8.8098E-02  at reduced coord.    0.1667    0.1667    0.5833
- Next maximum=    8.8098E-02  at reduced coord.    0.0833    0.1667    0.5833
-      Minimum=    3.9714E-03  at reduced coord.    0.7500    0.7500    0.7500
- Next minimum=    3.9714E-03  at reduced coord.    0.5000    0.5000    0.5000
+)     Maximum=    8.8098E-02  at reduced coord.    0.1667    0.1667    0.5833
+)Next maximum=    8.8098E-02  at reduced coord.    0.0833    0.1667    0.5833
+)     Minimum=    3.9714E-03  at reduced coord.    0.7500    0.7500    0.7500
+)Next minimum=    3.9714E-03  at reduced coord.    0.5000    0.5000    0.5000
    Integrated=    8.0000E+00
 
 --- !EnergyTerms
@@ -557,8 +554,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.320   => boxcut(ratio)=   2.12687
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -688,9 +685,9 @@ force_length_stats: {min:   1.68290326E-30, max:   1.68290326E-30, mean:   1.682
 
  Mean square residual over all n,k,spin=   59.818E-21; max=  11.916E-20
    0.2500  0.2500  0.2500    1  6.63357E-20 kpt; spin; max resid(k); each band:
-   6.56E-20  6.63E-20  3.08E-20  3.08E-20
+  6.56E-20 6.63E-20 3.08E-20 3.08E-20
    0.2500  0.5000  0.5000    1  1.19155E-19 kpt; spin; max resid(k); each band:
-   1.19E-19  1.11E-19  5.11E-20  3.87E-21
+  1.19E-19 1.11E-19 5.11E-20 3.87E-21
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -727,10 +724,10 @@ force_length_stats: {min:   1.68290326E-30, max:   1.68290326E-30, mean:   1.682
  kpt#   2, nband=  4, wtk=  0.75000, kpt=  0.2500  0.5000  0.5000 (reduced coord)
   -2.68760    0.24461    2.88481    4.26591
  Total charge density [el/Bohr^3]
-      Maximum=    9.3109E-02  at reduced coord.    0.1333    0.1333    0.6000
- Next maximum=    9.3109E-02  at reduced coord.    0.1333    0.6000    0.1333
-      Minimum=    4.0851E-03  at reduced coord.    0.7333    0.7333    0.7333
- Next minimum=    4.0851E-03  at reduced coord.    0.8000    0.7333    0.7333
+)     Maximum=    9.3109E-02  at reduced coord.    0.1333    0.1333    0.6000
+)Next maximum=    9.3109E-02  at reduced coord.    0.1333    0.6000    0.1333
+)     Minimum=    4.0851E-03  at reduced coord.    0.7333    0.7333    0.7333
+)Next minimum=    4.0851E-03  at reduced coord.    0.8000    0.7333    0.7333
    Integrated=    8.0000E+00
 
 --- !EnergyTerms
@@ -807,8 +804,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.880   => boxcut(ratio)=   2.07291
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -938,9 +935,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   43.003E-23; max=  10.366E-22
    0.2500  0.2500  0.2500    1  5.45082E-22 kpt; spin; max resid(k); each band:
-   5.45E-22  5.04E-22  9.95E-23  9.95E-23
+  5.45E-22 5.04E-22 9.95E-23 9.95E-23
    0.2500  0.5000  0.5000    1  1.03655E-21 kpt; spin; max resid(k); each band:
-   1.04E-21  8.64E-22  2.84E-22  7.87E-24
+  1.04E-21 8.64E-22 2.84E-22 7.87E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -977,10 +974,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#   2, nband=  4, wtk=  0.75000, kpt=  0.2500  0.5000  0.5000 (reduced coord)
   -2.68760    0.24461    2.88481    4.26591
  Total charge density [el/Bohr^3]
-      Maximum=    9.3837E-02  at reduced coord.    0.1250    0.1250    0.6250
- Next maximum=    9.3837E-02  at reduced coord.    0.1250    0.6250    0.1250
-      Minimum=    3.9714E-03  at reduced coord.    0.5000    0.5000    0.5000
- Next minimum=    3.9714E-03  at reduced coord.    0.7500    0.7500    0.7500
+)     Maximum=    9.3837E-02  at reduced coord.    0.1250    0.1250    0.6250
+)Next maximum=    9.3837E-02  at reduced coord.    0.1250    0.6250    0.1250
+)     Minimum=    3.9714E-03  at reduced coord.    0.5000    0.5000    0.5000
+)Next minimum=    3.9714E-03  at reduced coord.    0.7500    0.7500    0.7500
    Integrated=    8.0000E+00
 
 --- !EnergyTerms
@@ -1105,6 +1102,11 @@ P           mkmem           2
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -1192,10 +1194,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.3
+.Delivered  18 WARNINGs and   8 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.2

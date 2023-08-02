@@ -7,7 +7,7 @@
 # v1, v2, ... directories.
 # Before running this script, read README in this directory.
 
-# Copyright (C) 2004-2021 ABINIT group (LSi)
+# Copyright (C) 2004-2022 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
@@ -334,7 +334,7 @@ $CODE_OPTIC = &perlpath("$abinit_bindir/optic$XSUFX");	# codename for optic
 $CODE_OPTIC = "$timeout_cmd$CODE_OPTIC";
 $CODE_MACROAVE = &perlpath("$abinit_bindir/macroave$XSUFX");	# codename for macroave
 $CODE_MACROAVE = "$timeout_cmd$CODE_MACROAVE";
-$CODE_UJDET = &perlpath("$abinit_bindir/ujdet$XSUFX");    # codename for ujdet
+$CODE_LRUJ = &perlpath("$abinit_bindir/lruj$XSUFX");    # codename for lruj
 $CODE_UJDET = "$timeout_cmd$CODE_UJDET";
 $CODE_LWF = &perlpath("$abinit_bindir/lwf$XSUFX");	# codename for lwf
 $CODE_LWF = "$timeout_cmd$CODE_LWF";
@@ -394,7 +394,7 @@ $FLDIFF = &perlpath("$PERL $top_testdir/scripts/fldiff.pl");	# to scripts direct
 #		mrggkk
 #		mrgscr
 #               ncdump
-#               ujdet
+#               lruj
 #
 #   For all the tests, use unix-style file paths, they will be converted
 # by function transpath if necessary. File paths can contain the perl variable
@@ -451,8 +451,8 @@ while (<CONF>) {
 	elsif ($prgcmd eq 'cut3d') {
 		&docut3dtest($CurTest,$P1,$P2,$P3,$P4,$P5);
 		}
-        elsif ($prgcmd eq 'ujdet') {
-                &doujdettest($CurTest,$P1,$P2,$P3,$P4,$P5);
+        elsif ($prgcmd eq 'lruj') {
+                &dolrujtest($CurTest,$P1,$P2,$P3,$P4,$P5);
                 }
 	elsif ($prgcmd eq 'aim') {
 		&doaimtest($CurTest,$P1,$P2,$P3,$P4,$P5,$P6);
@@ -1642,20 +1642,20 @@ sub dofftproftest {
         }
 
 # ****************************************
-sub doujdettest {
+sub dolrujtest {
         local($TID) = @_;
 #
-# purpose: exercise ujdet
+# purpose: exercise lruj
 # arguments:
 #               $TID = test identification (1 to 3 characters string)
 #               $p1,$p2,$p3 = parameters [re]defining the file names fn1 to fn3 that will
-# be put into the "files" file named "ujdet.run";
+# be put into the "files" file named "lruj.run";
 # the parameters format is: fnI=path
-#               $fn1 = input to ujdet
+#               $fn1 = input to lruj
 #               $fn2 = output file name that will be compared with reference.
 #       $fn3 will be used as suffix to diff and prefix to log file names
 # set default files names derived from $TID:
-        $fn2 = "ujdet.out";
+        $fn2 = "lruj.out";
         $fn3 = "t$TID";
         $fn4 = "t$TID.out";
 # set new file names or options according to the parameters
@@ -1669,7 +1669,7 @@ sub doujdettest {
                 return ;
                 }
 # Remove existing files related to this test case:
-        $RUNfile = 'ujdet.run'; # files file for conducti
+        $RUNfile = 'lruj.run'; # files file for conducti
         $logfn = $fn3.'.log';           # t79.log
         $errfn = $fn3.'.err';           # t79.err
         $difffn = 'diff.'.$fn3;         # diff.t79
@@ -1677,7 +1677,7 @@ sub doujdettest {
         unlink($RUNfile,$difffn,$logfn,$errfn,$outfn);
 
 # Run the test case
-        print "\n[$TestDir][t$TID] Starting ujdet";
+        print "\n[$TestDir][t$TID] Starting lruj";
         if ($OStype eq 'MacOS') {
                 system ("$CODE_UJDET \xb7 $logfn ");
                 }
@@ -1689,7 +1689,7 @@ sub doujdettest {
 
 # Compare with reference files
         $REFoutfn = &transpath("$REF/$fn4");
-        print "[$TestDir][t$TID] Finished ujdet, comparing $outfn with $REFoutfn";
+        print "[$TestDir][t$TID] Finished lruj, comparing $outfn with $REFoutfn";
         system ("$DIFF_COMMAND $outfn $REFoutfn > $difffn");
         &dofldiff("Case_$TID","$fn2","$REF/$fn4",$fldopt);  # compare floating point numbers
         return;                 # go read next line from configuration file

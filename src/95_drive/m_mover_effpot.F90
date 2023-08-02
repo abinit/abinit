@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (AM)
+!!  Copyright (C) 2008-2022 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -49,14 +45,14 @@ module m_mover_effpot
  use m_multibinit_dataset,    only : multibinit_dtset_type
  use m_effective_potential,   only : effective_potential_type
  use m_fit_polynomial_coeff,  only : polynomial_coeff_writeXML, &
-   fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
+   fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive !,fit_polynomial_coeff_getCoeffBound
  use m_polynomial_coeff,only : polynomial_coeff_getNorder
 ! use m_pawang,       only : pawang_type, pawang_free
 ! use m_pawrad,       only : pawrad_type, pawrad_free
 ! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
 ! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
 !&                       paw_setup_copy, paw_setup_free, getecutfromxml
- use m_abihist 
+ use m_abihist
  use m_ewald
  use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
  use m_copy            , only : alloc_copy
@@ -101,17 +97,11 @@ contains
 !! NOTES
 !!
 !!
-!! PARENTS
-!!      m_multibinit_driver
-!!
-!! CHILDREN
-!!      matr3inv,symanal,symfind,symlatt
-!!
 !! SOURCE
 
 subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
- use m_scup_dataset,       only : scup_dtset_type 
+ use m_scup_dataset,       only : scup_dtset_type
 
 !Arguments --------------------------------
 !scalar
@@ -134,7 +124,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  logical :: iam_master,isVused,isARused,readOnlyLast
  integer, parameter:: master=0
  logical :: verbose,writeHIST,file_opened
- !type 
+ !type
  type(scup_dtset_type) :: scup_inp
  !real(dp) :: cpui
 !character(len=8) :: codvsn
@@ -172,7 +162,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename,md_hist_name
- character(len=fnlen) :: name_file 
+ character(len=fnlen) :: name_file
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
 ! type(pspheader_type),allocatable :: pspheads(:)
@@ -228,7 +218,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !  Generate supercell for the simulation
    call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
 
-ABI_FREE(xred) 
+ABI_FREE(xred)
 ABI_FREE(xcart)
 
 !***************************************************************
@@ -277,7 +267,7 @@ ABI_FREE(xcart)
    dtset%ph_nqshift = inp%nqshft
    dtset%prtxml = 0     ! print the xml
    dtset%signperm = 1   ! SIGN of PERMutation potential
-   dtset%strprecon = 1  ! STRess PRECONditioner
+   dtset%strprecon = inp%strprecon  ! STRess PRECONditioner
    dtset%supercell_latt(:) = 0
    do ii=1,3
      dtset%supercell_latt(ii) = sc_size(ii)
@@ -310,7 +300,7 @@ ABI_FREE(xcart)
  !    Need to init some values
 !   dtset%nsym = 1       ! Number of SYMmetry operations
 !   ABI_MALLOC(symrel,(3,3,dtset%nsym))
-!   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
+!   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel))
 !   call alloc_copy(symrel,dtset%symrel)
 !   ABI_MALLOC(tnons,(3,dtset%nsym))
 !   tnons = zero
@@ -320,14 +310,14 @@ ABI_FREE(xcart)
 !   ABI_FREE(symrel)
 !   ABI_FREE(tnons)
 !   end if
- !Find symmetry for simulation 
-   if(inp%dyn_chksym == 1)then 
+ !Find symmetry for simulation
+   if(inp%dyn_chksym == 1)then
        write(message,'(2a)')&
 &       ' Check Symmetry of Start Structure and Impose it for dynamics run',ch10
        call wrtout(std_out,message,"COLL")
        call wrtout(ab_out,message,"COLL")
-      !read md_hist 
-      if(inp%restartxf < 0)then 
+      !read md_hist
+      if(inp%restartxf < 0)then
          md_hist_name=trim(filnam(2))//'_HIST.nc'
          write(message,'(3a)')&
 &         ' Restart from external structure stored in file: ',md_hist_name,ch10
@@ -362,10 +352,10 @@ ABI_FREE(xcart)
       scfcv_args%indsym => indsym
       call abihist_free(hist_tmp)
       ABI_FREE(symrec)
-   else 
+   else
       dtset%nsym = 1       ! Number of SYMmetry operations
       ABI_MALLOC(symrel,(3,3,dtset%nsym))
-      symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
+      symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel))
       call alloc_copy(symrel,dtset%symrel)
       ABI_MALLOC(tnons,(3,dtset%nsym))
       tnons = zero
@@ -388,6 +378,8 @@ ABI_FREE(xcart)
    dtset%mixalch_orig(:,:,:)=zero
    ABI_MALLOC(dtset%ph_qshift,(3,dtset%ph_nqshift))
    dtset%ph_qshift = inp%q1shft
+   dtset%hmctt = inp%hmctt
+   dtset%hmcsst = inp%hmcsst
    if(option  > 0)then
      verbose = .TRUE.
      writeHIST = .TRUE.
@@ -416,7 +408,7 @@ ABI_FREE(xcart)
    end if
 
 !  Set the barostat and thermonstat if ionmov == 13
-   if(dtset%ionmov == 13)then
+   if(dtset%ionmov == 13 .or. dtset%ionmov == 25)then
 
 !    Select frequency of the barostat as a function of temperature
 !    For small temperature, we need huge barostat and inversely
@@ -569,10 +561,10 @@ ABI_FREE(xcart)
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
      ! Open File and write header
      ncoeff = effective_potential%anharmonics_terms%ncoeff
-     name_file='MD' 
+     name_file='MD'
      if(inp%analyze_anh_pot == 1)then
        call effective_potential_writeAnhHead(ncoeff,name_file,&
-&                        effective_potential%anharmonics_terms)      
+&                        effective_potential%anharmonics_terms)
      end if
 
      call wrtout(ab_out,message,'COLL')
@@ -580,7 +572,7 @@ ABI_FREE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp)     
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:))
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
@@ -622,7 +614,8 @@ ABI_FREE(xcart)
 
 !        Get the additional coeff
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
-&         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
+&         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,inp%fit_nimposecoeff,inp%fit_imposecoeff,&
+&         1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
 &         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
@@ -671,7 +664,8 @@ ABI_FREE(xcart)
 !          Reset the simulation and set the coefficients of the model
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&           -1,1,comm,verbose=.true.,positive=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+&           -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.true.,positive=.false.,&
+&            fit_on=inp%fit_on,sel_on=inp%sel_on)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -856,7 +850,7 @@ ABI_FREE(xcart)
                  call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,&
 &                 ncoeff+ii)
                  call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
-&                 -1,1,comm,verbose=.false.,positive=.false.)
+&                 -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,positive=.false.)
                  call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
                  acell(:) = one
@@ -920,7 +914,7 @@ ABI_FREE(xcart)
          do ii=1,ncoeff_bound
            call polynomial_coeff_free(coeffs_bound(ii))
          end do
-         if(allocated(coeffs_bound)) ABI_FREE(coeffs_bound)
+         ABI_SFREE(coeffs_bound)
 
        end if
 
@@ -937,7 +931,7 @@ ABI_FREE(xcart)
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&       -1,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
+&       -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')
@@ -956,12 +950,12 @@ ABI_FREE(xcart)
        do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_tmp(ii))
        end do
-       if(allocated(coeffs_tmp)) ABI_FREE(coeffs_tmp)
+       ABI_SFREE(coeffs_tmp)
 
        do ii=1,ncoeff_max
          call polynomial_coeff_free(coeffs_all(ii))
        end do
-       if(allocated(coeffs_all)) ABI_FREE(coeffs_all)
+       ABI_SFREE(coeffs_all)
 
      end if
 
@@ -1033,20 +1027,20 @@ end subroutine mover_effpot
 !! checksymmetrygroup
 !!
 !! FUNCTION
-!! Find the ptgroup and symmetry relations (symre,tnons) of crystal by the lattice constants 
+!! Find the ptgroup and symmetry relations (symre,tnons) of crystal by the lattice constants
 !! rprimd and the reduced coordinates
 !!
 !! INPUTS
-!! rprimd 
-!! xred 
-!! typat 
+!! rprimd
+!! xred
+!! typat
 !! msym : maximum symmetries defines sizes of symrel and tnons
-!! natom 
+!! natom
 !!
 !!
 !! OUTPUT
-!! ptgroupma 
-!! spgroup: index of spacegroup 
+!! ptgroupma
+!! spgroup: index of spacegroup
 !! symrel(3,3,msym): symmetry relations
 !! tnons(3,msym): translations
 !!
@@ -1055,12 +1049,6 @@ end subroutine mover_effpot
 !!
 !! NOTES
 !!
-!!
-!! PARENTS
-!!      m_mover_effpot
-!!
-!! CHILDREN
-!!      matr3inv,symanal,symfind,symlatt
 !!
 !! SOURCE
 
@@ -1081,40 +1069,35 @@ subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,sym
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab,noncoll,nptsym,nzchempot,use_inversion
+  integer :: nptsym,use_inversion
   integer :: chkprim
 ! Arraiys
   integer :: bravais(11),ptsymrel(3,3,msym)
   integer :: symafm(msym),symrel(3,3,msym)
-  real(dp) :: efield(3)=0,gprimd(3,3),spinat(3,natom)
+  real(dp) :: gprimd(3,3),spinat(3,natom)
   real(dp) :: tnons(3,msym)
   real(dp) :: genafm(3)
 
 ! given the acel, rprim and coor
 ! this suroutine find the symmetry group
-berryopt = 0 
-jellslab = 0
-noncoll  = 0 
-nzchempot= 0
 spinat   = 0
-efield   = 0
 chkprim  = 0
 use_inversion = 0
 
 !write(std_out,*) "tolsym", tolsym, "tol3", tol3
- 
-  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol4)
+
+  call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tol4)
 !write(std_out,*) 'nptsym', nptsym
 
   call matr3inv(rprimd,gprimd)
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+  call symfind(gprimd,msym,natom,nptsym,0,nsym,&
+&           0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !write(std_out,*) 'nsym', nsym
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
 
 !write(std_out,*) 'nsym', nsym
-symrel_out = symrel 
+symrel_out = symrel
 tnons_out  = tnons
 
 

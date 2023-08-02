@@ -8,14 +8,10 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2022 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,9 +27,10 @@ MODULE m_fft_mesh
  use m_errors
  use m_abicore
  use m_hide_blas
+ use, intrinsic :: iso_c_binding
 
  use defs_fftdata,     only : size_goed_fft
- use m_fstrings,       only : sjoin, itoa
+ use m_fstrings,       only : sjoin, itoa, ltoa
  use m_numeric_tools,  only : denominator, mincm, iseven, pfactorize
  use m_symtk,          only : mati3inv
  use m_geometry,       only : xred2xcart
@@ -58,6 +55,7 @@ MODULE m_fft_mesh
  public :: calc_ceikr          ! e^{ik.r} on the FFT mesh (complex valued).
  public :: times_eigr          ! Multiply an array on the real-space mesh by e^{iG0.r}
  public :: times_eikr          ! Multiply an array on the real-space mesh by e^{ik.r}
+ public :: ctimes_eikr         ! Version for complex array
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
  public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
 
@@ -65,6 +63,17 @@ MODULE m_fft_mesh
    module procedure calc_ceigr_spc
    module procedure calc_ceigr_dpc
  end interface calc_ceigr
+
+ interface calc_ceikr
+   module procedure calc_ceikr_spc
+   module procedure calc_ceikr_dpc
+ end interface calc_ceikr
+
+
+ !interface times_eikr
+ !  module procedure times_eikr_dp
+ !  module procedure ctimes_eikr_dpc
+ !end interface times_eikr
 !!***
 
 !----------------------------------------------------------------------
@@ -121,11 +130,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  zpad<type(zpad_t)>
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
@@ -143,14 +147,14 @@ subroutine zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
 
 ! *************************************************************************
 
- g3_min = gbound(3,2)
- g3_max = gbound(4,2)
+ g3_min = gbound(3, 2)
+ g3_max = gbound(4, 2)
 
  zpad%n_zplanes = g3_max - g3_min + 1
 
- ABI_MALLOC(zpad%zplane,      (2,nz))
- ABI_MALLOC(zpad%linex2ifft_yz, (2,nx*ny*nz))
- !
+ ABI_MALLOC(zpad%zplane,      (2, nz))
+ ABI_MALLOC(zpad%linex2ifft_yz, (2, nx*ny*nz))
+
  ! Loop over the z-planes intersecting the G-sphere.
  nlinex = 0
  do gg3=1,zpad%n_zplanes
@@ -205,11 +209,6 @@ end subroutine zpad_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine zpad_free(zpad)
@@ -261,7 +260,7 @@ end subroutine zpad_free
 !! Four methods are implemented for the calculation of the mesh:
 !!  method=0 --> FFT mesh defined by the user, useful for debugging.
 !!  method=1     Roughly takes the FFT box which encloses the larger of the two spheres of radius
-!!               aliasing_factor*rwfn and rsigx, where rwfn and rsigx are the radius of the spheres
+!!               aliasing_factor * rwfn and rsigx, where rwfn and rsigx are the radius of the spheres
 !!               with npwwfn and npwsigx planewaves respectively. The default aliasing_factor is 1.
 !!  method=2 --> Calculates the optimal FFT grid which allows aliasing only outside the sphere of the
 !!               npwsigx planewaves (finer than method=1 with aliasing_factor=1).
@@ -270,15 +269,9 @@ end subroutine zpad_free
 !!
 !!  See defs_fftdata for a list of allowed sizes of FFT.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
-subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst,enforce_sym,unit)
+subroutine setmesh(gmet, gvec, ngfft, npwvec, npwsigx, npwwfn, nfftot, method, mG0, Cryst, enforce_sym, unit)
 
 !Arguments ------------------------------------
 !scalars
@@ -308,13 +301,12 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 
  DBG_ENTER("COLL")
 
- if (ANY(mg0<0)) then
-   write(msg,'(a,3(i0,1x))')' called with wrong value of mG0 = ',mG0
-   ABI_BUG(msg)
+ if (any(mg0 < 0)) then
+   ABI_BUG(sjoin('Wrong mG0:', trim(ltoa(mG0))))
  end if
 
  tnons_warn = "Check your fractional translations tnons. "//ch10//&
-   "Components should be a rational fraction in 1/8th nor in 1/12th."//ch10//&
+   "Components should be a rational fraction in 1/8th or in 1/12th."//ch10//&
    "You may need to polish the structure by running AbiPy `abistruct.py abisanitize` on the input file."//ch10//&
    "to get rid of spurious tnons"
 
@@ -323,20 +315,20 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  nsym   =  Cryst%nsym
  symrel => Cryst%symrel
  tnons  => Cryst%tnons
- !
+
  ! Calculate the limits of the sphere of npwwfn G-vectors in each direction.
- m1=MAXVAL(ABS(gvec(1,1:npwwfn)))
- m2=MAXVAL(ABS(gvec(2,1:npwwfn)))
- m3=MAXVAL(ABS(gvec(3,1:npwwfn)))
- !
+ m1 = MAXVAL(ABS(gvec(1,1:npwwfn)))
+ m2 = MAXVAL(ABS(gvec(2,1:npwwfn)))
+ m3 = MAXVAL(ABS(gvec(3,1:npwwfn)))
+
  ! Calculate the limits of the sphere of npsigx G-vectors in each direction.
  ! Ensure that G+G0 will fit into the FFT grid, where G is any of the npwsigx/npweps vectors
  ! and G0 is (i,j,k) [-nG0shell<i,j,k<nG0shell]. This is required when npwsigx>npwwfn since
  ! we have to take into account umklapp G0 vectors to evaluate the oscillator matrix elements
  ! (see rho_tw_g) or to symmetrize these quantities (see also cigfft).
- mm1=MAXVAL(ABS(gvec(1,1:npwsigx)))
- mm2=MAXVAL(ABS(gvec(2,1:npwsigx)))
- mm3=MAXVAL(ABS(gvec(3,1:npwsigx)))
+ mm1 = MAXVAL(ABS(gvec(1,1:npwsigx)))
+ mm2 = MAXVAL(ABS(gvec(2,1:npwsigx)))
+ mm3 = MAXVAL(ABS(gvec(3,1:npwsigx)))
 
  mm1=mm1+mG0(1)
  mm2=mm2+mG0(2)
@@ -353,7 +345,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
   ' setmesh: npwwfn        = ',npwwfn, '; Max (m1,m2,m3)   = ',m1,m2,m3,ch10,&
   '          npweps/npwsigx= ',npwsigx,'; Max (mm1,mm2,mm3)= ',mm1,mm2,mm3,ch10,&
   '          mG0 added     = ',mG0(:)
- call wrtout(ount,msg,'COLL')
+ call wrtout(ount, msg)
  !
  ! === Different FFT grids according to method ==
  select case (method)
@@ -379,7 +371,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  case (1)
    aliasing_factor=1
    write(msg,'(2a,i3)')ch10,' using method 1 with aliasing_factor = ',aliasing_factor
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    m1=m1*aliasing_factor
    m2=m2*aliasing_factor
    m3=m3*aliasing_factor
@@ -412,7 +404,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    write(msg,'(a,f7.3,3a,f7.3,a)')&
     ' calculated ecutwfn          = ',ecutwfn, ' [Ha] ',ch10,&
     ' calculated ecutsigx/ecuteps = ',ecutsigx,' [Ha]'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    !
    ! In the calculation of the GW self-energy or of the RPA dielectric matrix,
    ! we have products $ \rho_{12}(r)=u_1*(r) u_2(r) $ of wavefunctions whose Fourier
@@ -429,7 +421,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    gsqmax=reff**2
 
    write(msg,'(a,i2,a,f7.3,a)')' using method = ',method,' with ecuteff = ',ecuteff,' [Ha]'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    !
    ! === Search the limits of the reff sphere in each direction ===
    !ig1max=2*m1+1
@@ -485,11 +477,14 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
 
  if (enforce_sym==0) then
    ! === Determine the best size for the FFT grid *without* considering the symm ops ===
-   ! * Ideally n=2*m+1 but this  could not be allowed by the FFT library.
-   call size_goed_fft(m1,n1,ierr)
-   call size_goed_fft(m2,n2,ierr)
-   call size_goed_fft(m3,n3,ierr)
+   ! * Ideally n=2*m+1 but this could not be allowed by the FFT library.
+   call size_goed_fft(m1, n1, ierr)
    ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
+   call size_goed_fft(m2, n2, ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
+   call size_goed_fft(m3, n3, ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
+
    nfftot=n1*n2*n3
 
    ! * Check if the FFT is compatible, write ONLY a warning if it breaks the symmetry
@@ -508,7 +503,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
    !
    ! * Warn if not compatibile with tnons or rotational part.
    if (.not.fft_ok) then
-    ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
+     ABI_WARNING('FFT mesh is not compatible with non-symmorphic translations')
    end if
    if (.not.(check_rot_fft(nsym,symrel,n1,n2,n3))) then
      ABI_WARNING('FFT mesh is not compatible with rotations')
@@ -517,7 +512,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  else
    ! === Determine the best size for the FFT grid considering symm ops ===
    ! * Ideally n=2*m+1 but this could not be allowed by the FFT library (at present only Goedecker)
-   call wrtout(ount,' Finding a FFT mesh compatible with all the symmetries','COLL')
+   call wrtout(ount,' Finding a FFT mesh compatible with all the symmetries')
 
    ! 1) Find a FFT mesh compatible with the non-symmorphic operations
    fftnons(:)=1
@@ -529,14 +524,17 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
      end do
    end do
    write(msg,'(a,3(i0,1x))')' setmesh: divisor mesh ',fftnons(:)
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount, msg)
    !
    ! 2) Check if also rotations preserve the grid.
    ! * Use previous m values as Initial guess.
    call size_goed_fft(m1,fftsym(1),ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    call size_goed_fft(m2,fftsym(2),ierr)
+   ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
    call size_goed_fft(m3,fftsym(3),ierr)
    ABI_CHECK(ierr == 0, sjoin("size_goed_fft failed", ch10, tnons_warn))
+
    mdum(1)=m1
    mdum(2)=m2
    mdum(3)=m3
@@ -572,8 +570,8 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  write(msg,'(3(a,i5),2a,i12,a)')&
   ' setmesh: FFT mesh size selected  = ',n1,'x',n2,'x',n3,ch10,&
   '          total number of points  = ',nfftot,ch10
- call wrtout(ount,msg,'COLL')
- if (ount /= dev_null) call wrtout(ab_out,msg,'COLL')
+ call wrtout(ount, msg)
+ if (ount /= dev_null) call wrtout(ab_out, msg)
 
  ngfft(1)=n1
  ngfft(2)=n2
@@ -587,7 +585,7 @@ subroutine setmesh(gmet,gvec,ngfft,npwvec,npwsigx,npwwfn,nfftot,method,mG0,Cryst
  ! * Presently only Goedecker"s library or FFTW3 are allowed, see size_goed_fft.F90
  fftalg=ngfft(7); fftalga=fftalg/100; fftalgc=MOD(fftalg,10)
 
- if ( ALL(fftalga /= (/FFT_SG,FFT_FFTW3, FFT_DFTI/)) ) then
+ if ( ALL(fftalga /= [FFT_SG, FFT_FFTW3, FFT_DFTI]) ) then
    write(msg,'(6a)')ch10,&
     "Only Goedecker's routines with fftalg=1xx or FFTW3/DFTI routines are allowed in GW calculations. ",ch10,&
     "Action : check the value of fftalg in your input file, ",ch10,&
@@ -686,11 +684,6 @@ end function check_rot_fft
 !!  err(3,nsym)=The max error for each symmetry. (given in terms of the FFT vectors)
 !!  isok=.FALSE. if the FFT mesh does not fulfil all symmetry properties of the crystal.
 !!
-!! PARENTS
-!!      m_shirley
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function fft_check_rotrans(nsym,symrel,tnons,ngfft,err) result(isok)
@@ -778,7 +771,7 @@ end function fft_check_rotrans
 !!  ngfft(18)=Information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
-!!  irottb(ngfftot,nsym)=Indeces of $R^{-1}(r-\tau)$ in the FFT box.
+!!  irottb(ngfftot,nsym)=Indices of $R^{-1}(r-\tau)$ in the FFT box.
 !!  preserve=.FALSE. if the FFT mesh does not fulfil all symmetry properties of the crystal.
 !!
 !! NOTES
@@ -788,16 +781,9 @@ end function fft_check_rotrans
 !!  is the closest one to $R^{-1}(r-\tau)$. This might lead to inaccuracies in the
 !!  final results, in particular in the description of degenerate states.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_chi0,m_classify_bands,m_cohsex,m_dvdb,m_fft_mesh
-!!      m_prep_calc_ucrpa,m_screening_driver,m_sigc,m_sigx,m_wfd
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
-subroutine rotate_fft_mesh(nsym,symrel,tnons,ngfft,irottb,preserve)
+subroutine rotate_fft_mesh(nsym, symrel, tnons, ngfft, irottb, preserve)
 
 !Arguments ------------------------------------
 !scalars
@@ -893,10 +879,6 @@ end subroutine rotate_fft_mesh
 !! OUTPUT
 !!  out_rhor(cplex * nfftot * nspden)=Output array
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine denpot_project(cplex,  ngfft, nspden, in_rhor, one_symrel, one_tnons, out_rhor)
@@ -961,11 +943,6 @@ end subroutine denpot_project
 !!  it gives the FFT grid index of the G-G0 vector.
 !! ierr=Number of G-G0 vectors falling outside the inout FFT box.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
 subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
@@ -990,8 +967,7 @@ subroutine cigfft(mG0,npwvec,ngfft,gvec,igfft,ierr)
  DBG_ENTER("COLL")
 
  if (ANY(mg0<0)) then
-   write(msg,'(a,3i4)')' Found negative value of mg0= ',mg0
-   ABI_BUG(msg)
+   ABI_BUG(sjoin('Found negative value of mg0:', trim(ltoa(mg0))))
  end if
 
  n1=ngfft(1)
@@ -1146,13 +1122,6 @@ end function g2ifft
 !!  gsq_max=Max value of (k+G)^2 for G in the FFT box
 !!  gfft(3,nfft_tot) = The reduced components of the G in the FFT mesh (nfft_tot=PRODUCT(ngfft(1:3))
 !!
-!! PARENTS
-!!      bethe_salpeter,calc_sigc_me,cchi0,cchi0q0,cohsex_me,screening,sigma
-!!      m_dvdb
-!!
-!! CHILDREN
-!!      xcopy
-!!
 !! SOURCE
 
 pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
@@ -1215,14 +1184,9 @@ end subroutine get_gftt
 !! OUTPUT
 !!  ceigr(nfft*nspinor)=e^{ik.r} on the FFT mesh.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
-subroutine calc_ceigr_spc(gg,nfft,nspinor,ngfft,ceigr)
+subroutine calc_ceigr_spc(gg, nfft, nspinor, ngfft, ceigr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1249,8 +1213,8 @@ subroutine calc_ceigr_spc(gg,nfft,nspinor,ngfft,ceigr)
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
-&                     +gg(2)*(iy/DBLE(ngfft(2))) &
-&                     +gg(3)*(iz/DBLE(ngfft(3))) )
+                      +gg(2)*(iy/DBLE(ngfft(2))) &
+                      +gg(3)*(iz/DBLE(ngfft(3))) )
        fft_idx = fft_idx+1
        ceigr(fft_idx)=CMPLX(DCOS(gdotr),DSIN(gdotr), KIND=spc)
      end do
@@ -1285,14 +1249,9 @@ end subroutine calc_ceigr_spc
 !! OUTPUT
 !!  ceigr(nfft*nspinor)=e^{ik.r} on the FFT mesh.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
-subroutine calc_ceigr_dpc(gg,nfft,nspinor,ngfft,ceigr)
+subroutine calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1318,8 +1277,8 @@ subroutine calc_ceigr_dpc(gg,nfft,nspinor,ngfft,ceigr)
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
-&                     +gg(2)*(iy/DBLE(ngfft(2))) &
-&                     +gg(3)*(iz/DBLE(ngfft(3))) )
+                      +gg(2)*(iy/DBLE(ngfft(2))) &
+                      +gg(3)*(iz/DBLE(ngfft(3))) )
        fft_idx = fft_idx+1
        ceigr(fft_idx)=DCMPLX(DCOS(gdotr),DSIN(gdotr))
      end do
@@ -1353,14 +1312,9 @@ end subroutine calc_ceigr_dpc
 !! OUTPUT
 !!  eigr(2*nfft)=e^{ig.r} on the FFT mesh.
 !!
-!! PARENTS
-!!      m_fft_prof
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-pure subroutine calc_eigr(gg,nfft,ngfft,eigr)
+pure subroutine calc_eigr(gg, nfft, ngfft, eigr)
 
 !Arguments ------------------------------------
 !scalars
@@ -1388,11 +1342,11 @@ pure subroutine calc_eigr(gg,nfft,ngfft,eigr)
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
        gdotr= two_pi*( gg(1)*(ix/DBLE(ngfft(1))) &
-&                     +gg(2)*(iy/DBLE(ngfft(2))) &
-&                     +gg(3)*(iz/DBLE(ngfft(3))) )
+                      +gg(2)*(iy/DBLE(ngfft(2))) &
+                      +gg(3)*(iz/DBLE(ngfft(3))) )
        eigr(fft_idx  )=DCOS(gdotr)
        eigr(fft_idx+1)=DSIN(gdotr)
-       fft_idx = fft_idx+2
+       fft_idx = fft_idx + 2
      end do
    end do
  end do
@@ -1402,63 +1356,120 @@ end subroutine calc_eigr
 
 !----------------------------------------------------------------------
 
-!!****f* m_fft_mesh/calc_ceikr
-!! NAME
-!! calc_ceikr
+!!****f* m_fft_mesh/calc_ceikr_dpc
+!! name
+!! calc_ceikr_dpc
 !!
-!! FUNCTION
-!!  Helper function to calculate e^{ik.r} on the FFT mesh.
+!! function
+!!  calculate e^{ik.r} on the fft mesh.
 !!
-!! INPUTS
+!! inputs
 !!  kk(3)=k-point in reduced coordinates.
-!!  nfft=Total number of points in the FFT mesh.
-!!  ngfft(18)=information about 3D FFT,
+!!  nfft=total number of points in the fft mesh.
+!!  ngfft(18)=information about 3d fft,
+!!  nspinor=number of spinor components.
 !!
-!! OUTPUT
-!!  ceikr(nfft)=e^{ik.r} on the FFT mesh.
+!! output
+!!  ceikr(nfft*nspinor) = e^{ik.r} on the fft mesh.
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!
-!! SOURCE
+!! source
 
-pure subroutine calc_ceikr(kk,nfft,ngfft,ceikr)
+pure subroutine calc_ceikr_dpc(kk, ngfft, nfft, nspinor, ceikr)
 
-!Arguments ------------------------------------
+!arguments ------------------------------------
 !scalars
- integer,intent(in) :: nfft
+ integer,intent(in) :: nfft, nspinor
 !arrays
  real(dp),intent(in) :: kk(3)
  integer,intent(in) :: ngfft(18)
- complex(dpc),intent(out) :: ceikr(nfft)
+ complex(dpc),intent(out) :: ceikr(nfft*nspinor)
 
-!Local variables-------------------------------
+!local variables-------------------------------
 !scalars
- integer :: ix,iy,iz,fft_idx
+ integer :: ix, iy, iz, fft_idx
  real(dp) :: kdotr
 
 ! *************************************************************************
 
- !if (ALL(ABS(kk<tol12)) then
- !  ceikr=cone; RETURN
- !end if
+ if (all(abs(kk) < tol12)) then
+   ceikr = cone; return
+ end if
 
- fft_idx=0
+ fft_idx = 0
  do iz=0,ngfft(3)-1
    do iy=0,ngfft(2)-1
      do ix=0,ngfft(1)-1
-       kdotr= two_pi*( kk(1)*(ix/DBLE(ngfft(1))) &
-&                     +kk(2)*(iy/DBLE(ngfft(2))) &
-&                     +kk(3)*(iz/DBLE(ngfft(3))) )
-       fft_idx = fft_idx+1
-       ceikr(fft_idx)=DCMPLX(DCOS(kdotr),DSIN(kdotr))
+       kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
+                       +kk(2) * (iy / dble(ngfft(2))) &
+                       +kk(3) * (iz / dble(ngfft(3))) )
+       fft_idx = fft_idx + 1
+       ceikr(fft_idx) = dcmplx(cos(kdotr), sin(kdotr))
      end do
    end do
  end do
 
-end subroutine calc_ceikr
+ if (nspinor > 1) ceikr(nfft+1:) = ceikr(1:nfft)
+
+end subroutine calc_ceikr_dpc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fft_mesh/calc_ceikr_spc
+!! name
+!! calc_ceikr_spc
+!!
+!! function
+!!  calculate e^{ik.r} on the fft mesh.
+!!
+!! inputs
+!!  kk(3)=k-point in reduced coordinates.
+!!  nfft=total number of points in the fft mesh.
+!!  ngfft(18)=information about 3d fft,
+!!  nspinor=number of spinor components.
+!!
+!! output
+!!  ceikr(nfft*nspinor) = e^{ik.r} on the fft mesh.
+!!
+!! source
+
+pure subroutine calc_ceikr_spc(kk, ngfft, nfft, nspinor, ceikr)
+
+!arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft, nspinor
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: ngfft(18)
+ complex(spc),intent(out) :: ceikr(nfft*nspinor)
+
+!local variables-------------------------------
+!scalars
+ integer :: ix, iy, iz, fft_idx
+ real(dp) :: kdotr
+
+! *************************************************************************
+
+ if (all(abs(kk) < tol12)) then
+   ceikr = cone; return
+ end if
+
+ fft_idx = 0
+ do iz=0,ngfft(3)-1
+   do iy=0,ngfft(2)-1
+     do ix=0,ngfft(1)-1
+       kdotr = two_pi*( kk(1) * (ix / dble(ngfft(1))) &
+                       +kk(2) * (iy / dble(ngfft(2))) &
+                       +kk(3) * (iz / dble(ngfft(3))) )
+       fft_idx = fft_idx + 1
+       ceikr(fft_idx) = cmplx(cos(kdotr), sin(kdotr), kind=spc)
+     end do
+   end do
+ end do
+
+ if (nspinor > 1) ceikr(nfft+1:) = ceikr(1:nfft)
+
+end subroutine calc_ceikr_spc
 !!***
 
 !----------------------------------------------------------------------
@@ -1479,13 +1490,9 @@ end subroutine calc_ceikr
 !! SIDE EFFECTS
 !!  ur(2,nfft,ndat)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-pure subroutine times_eigr(gg,ngfft,nfft,ndat,ur)
+pure subroutine times_eigr(gg, ngfft, nfft, ndat, ur)
 
 !Arguments ------------------------------------
 !scalars
@@ -1535,7 +1542,8 @@ end subroutine times_eigr
 !! times_eikr
 !!
 !! FUNCTION
-!!  Multiply an array on the real-space mesh by e^{ik.r} where k is a real(dp) vector in reduced coordinates
+!!  Multiply an array on the real-space mesh by e^{ik.r} where k
+!!  is a real(dp) vector in reduced coordinates
 !!
 !! INPUTS
 !!  kk(3)=k-vector in reduced coordinates.
@@ -1544,16 +1552,11 @@ end subroutine times_eigr
 !!  ndat=Number of arrays to transform
 !!
 !! SIDE EFFECTS
-!!  ur(2,nfft)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
-!!
-!! PARENTS
-!!  m_dvdb
-!!
-!! CHILDREN
+!!  ur(2,nfft,ndat)= contains u(r) in input. output: u(r) e^{ig.r} on the real-space FFT mesh.
 !!
 !! SOURCE
 
-pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
+subroutine times_eikr(kk, ngfft, nfft, ndat, ur)
 
 !Arguments ------------------------------------
 !scalars
@@ -1564,16 +1567,14 @@ pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
  real(dp),intent(inout) :: ur(2,nfft,ndat)
 
 !Local variables-------------------------------
-!scalars
  integer :: ix,iy,iz,ifft,idat
- real(dp) :: kr
-!arrays
- real(dp) :: ph(2),val(2)
+ real(dp) :: kr, ph(2),val(2)
 
 ! *************************************************************************
 
  if (all(abs(kk) < tol12)) return
 
+ !$OMP PARALLEL DO IF (ndat > 1) PRIVATE(ifft, kr, ph, val)
  do idat=1,ndat
    ifft = 0
    do iz=0,ngfft(3)-1
@@ -1596,6 +1597,28 @@ pure subroutine times_eikr(kk,ngfft,nfft,ndat,ur)
 end subroutine times_eikr
 !!***
 
+! Version for double precision complex arrays.
+subroutine ctimes_eikr(kk, ngfft, nfft, ndat, ur)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nfft,ndat
+!arrays
+ real(dp),intent(in) :: kk(3)
+ integer,intent(in) :: ngfft(18)
+ complex(dp),target,intent(inout) :: ur(nfft,ndat)
+
+!Local variables-------------------------------
+ real(dp),contiguous,pointer :: ur_ptr(:,:,:)
+
+! *************************************************************************
+
+ call c_f_pointer(c_loc(ur), ur_ptr, shape=[2, nfft, ndat])
+ call times_eikr(kk, ngfft, nfft, ndat, ur_ptr)
+
+end subroutine ctimes_eikr
+!!***
+
 !!****f* m_fft_mesh/phase
 !! NAME
 !! phase
@@ -1615,15 +1638,9 @@ end subroutine times_eikr
 !! the invariance between n and -n, that was broken for n=ngfft/2 if ngfft even.
 !! Simply suppresses the corresponding sine.
 !!
-!! PARENTS
-!!      m_xctk
-!!
-!! CHILDREN
-!!      xred2xcart
-!!
 !! SOURCE
 
-subroutine phase(ngfft,ph)
+subroutine phase(ngfft, ph)
 
 !Arguments ------------------------------------
 !scalars
@@ -1663,12 +1680,6 @@ end subroutine phase
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mklocl_realspace
-!!
-!! CHILDREN
-!!      xred2xcart
 !!
 !! SOURCE
 

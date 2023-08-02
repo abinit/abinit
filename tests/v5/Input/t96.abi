@@ -20,23 +20,23 @@ nsppol 2
 #
 #  qpoint Gamma
 #
-rfatpol2  1 1 rfdir2  1 0 0 rfphon2  1 tolvrs2   1.0e-5 getwfk2  1  kptopt2  3 nqpt2  1 qpt2   0.0 0.0 0.0
-rfatpol3  1 1 rfdir3  0 1 0 rfphon3  1 tolvrs3   1.0e-5 getwfk3  1  kptopt3  3 nqpt3  1 qpt3   0.0 0.0 0.0
-rfatpol4  1 1 rfdir4  0 0 1 rfphon4  1 tolvrs4   1.0e-5 getwfk4  1  kptopt4  3 nqpt4  1 qpt4   0.0 0.0 0.0
+rfdir2  1 0 0 rfphon2  1 tolvrs2   1.0e-5 getwfk2  1  kptopt2  3 nqpt2  1 qpt2   0.0 0.0 0.0
+rfdir3  0 1 0 rfphon3  1 tolvrs3   1.0e-5 getwfk3  1  kptopt3  3 nqpt3  1 qpt3   0.0 0.0 0.0
+rfdir4  0 0 1 rfphon4  1 tolvrs4   1.0e-5 getwfk4  1  kptopt4  3 nqpt4  1 qpt4   0.0 0.0 0.0
 
 #
 #  qpoint 1/2 0 0
 #
-rfatpol5  1 1 rfdir5  1 0 0 rfphon5  1 tolvrs5   1.0e-5 getwfk5  1  kptopt5  3 nqpt5  1 qpt5   0.5 0.0 0.0
-rfatpol6  1 1 rfdir6  0 1 0 rfphon6  1 tolvrs6   1.0e-5 getwfk6  1  kptopt6  3 nqpt6  1 qpt6   0.5 0.0 0.0
-rfatpol7  1 1 rfdir7  0 0 1 rfphon7  1 tolvrs7   1.0e-5 getwfk7  1  kptopt7  3 nqpt7  1 qpt7   0.5 0.0 0.0
+rfdir5  1 0 0 rfphon5  1 tolvrs5   1.0e-5 getwfk5  1  kptopt5  3 nqpt5  1 qpt5   0.5 0.0 0.0
+rfdir6  0 1 0 rfphon6  1 tolvrs6   1.0e-5 getwfk6  1  kptopt6  3 nqpt6  1 qpt6   0.5 0.0 0.0
+rfdir7  0 0 1 rfphon7  1 tolvrs7   1.0e-5 getwfk7  1  kptopt7  3 nqpt7  1 qpt7   0.5 0.0 0.0
 
 #
 #  qpoint X= 1/2 1/2 0
 #
-rfatpol8  1 1 rfdir8  1 0 0 rfphon8  1 tolvrs8   1.0e-5 getwfk8  1  kptopt8  3 nqpt8  1 qpt8   0.5 0.5 0.0
-rfatpol9  1 1 rfdir9  0 1 0 rfphon9  1 tolvrs9   1.0e-5 getwfk9  1  kptopt9  3 nqpt9  1 qpt9   0.5 0.5 0.0
-rfatpol10 1 1 rfdir10 0 0 1 rfphon10 1 tolvrs10  1.0e-5 getwfk10 1  kptopt10 3 nqpt10 1 qpt10  0.5 0.5 0.0
+rfdir8  1 0 0 rfphon8  1 tolvrs8   1.0e-5 getwfk8  1  kptopt8  3 nqpt8  1 qpt8   0.5 0.5 0.0
+rfdir9  0 1 0 rfphon9  1 tolvrs9   1.0e-5 getwfk9  1  kptopt9  3 nqpt9  1 qpt9   0.5 0.5 0.0
+rfdir10 0 0 1 rfphon10 1 tolvrs10  1.0e-5 getwfk10 1  kptopt10 3 nqpt10 1 qpt10  0.5 0.5 0.0
 
 #
 #  Common data
@@ -77,6 +77,11 @@ xred 0.00 0.00 0.00
 nstep 800
 ntypat 1
 znucl 28
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosTM_pwteter/28ni.pspnc"

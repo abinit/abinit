@@ -7,17 +7,13 @@
 !!  and the functions needed to extract them
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2021 ABINIT group (MMancini, MT, FDahm)
+!!  Copyright (C) 2009-2022 ABINIT group (MMancini, MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
 !!  Is an experimental development
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -87,11 +83,6 @@ CONTAINS !===========================================================
 !! FUNCTION
 !! Print information about GPU device
 !!
-!! PARENTS
-!!      m_initcuda
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine prt_device_info(device)
@@ -158,11 +149,6 @@ CONTAINS !===========================================================
 !! FUNCTION
 !! Print information about GPU device
 !!
-!! PARENTS
-!!      m_hidecudarec,m_initcuda
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine InitGPU(gpuinfo,device)
@@ -200,11 +186,6 @@ CONTAINS !===========================================================
 !! FUNCTION
 !! Give the number of device with capability>=1.2
 !!
-!! PARENTS
-!!      m_gpu_detect,m_invars1
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine Get_ndevice(ndevice)
@@ -236,10 +217,6 @@ CONTAINS !===========================================================
 !! OUTPUT
 !! max_mem_dev
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine Get_Mem_Dev(device,max_mem_dev)
@@ -265,11 +242,6 @@ end subroutine Get_Mem_Dev
 !!
 !! FUNCTION
 !! Print information about GPU device
-!!
-!! PARENTS
-!!      m_hidecudarec,m_initcuda
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -304,11 +276,6 @@ end subroutine Get_Mem_Dev
 !!
 !! SIDE EFFECTS
 !!  use_gpu_cuda= 1 if CUDA is on; will be set to 0 if no GPU device is free.
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -396,11 +363,6 @@ end subroutine Get_Mem_Dev
 !! FUNCTION
 !! Deactivate a GPU device from current CPU core
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine unsetdevice_cuda(use_gpu_cuda)
@@ -431,11 +393,6 @@ end subroutine Get_Mem_Dev
 !! FUNCTION
 !! In case of multiple devices, sort them by performances
 !! and output the resulting list of devices.
-!!
-!! PARENTS
-!!      m_initcuda
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -519,11 +476,6 @@ contains
 !! FUNCTION
 !!  Small sorting routine: change iperm array
 !!  according to list1 values then list2 values
-!!
-!! PARENTS
-!!      m_initcuda
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

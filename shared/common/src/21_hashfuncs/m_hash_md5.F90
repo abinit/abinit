@@ -6,14 +6,10 @@
 !!  This module provides resources to calculate MD5 checksums.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2021 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2016-2022 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -25,7 +21,7 @@
 
 module m_hash_md5
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use m_abicore
 
   implicit none
@@ -97,10 +93,6 @@ contains  !===========================================================
 !!  Created a function to be able to add more operations than just checking
 !!  the equality of the sums.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function md5_check(sum1,sum2)
@@ -133,10 +125,6 @@ end function md5_check
 !!
 !! OUTPUT
 !!  String representing the MD5 sum of the file
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -183,10 +171,6 @@ end function md5_sum_from_file
 !! OUTPUT
 !!  String representing the MD5 sum of the argument
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function md5_sum_from_string(text)
@@ -221,11 +205,6 @@ end function md5_sum_from_string
 !!
 !! OUTPUT
 !!  retval = string containing the MD5 checksum
-!!
-!! PARENTS
-!!      m_hash_md5
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -265,11 +244,6 @@ end subroutine hash_final
 !!  Created a function to be able to add more operations than just checking
 !!  the equality of the sums.
 !!
-!! PARENTS
-!!      m_hash_md5
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine hash_init(ctx)
@@ -301,11 +275,6 @@ end subroutine hash_init
 !!
 !! SIDE EFFECTS
 !!  ctx gets updated with the new data
-!!
-!! PARENTS
-!!      m_hash_md5
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

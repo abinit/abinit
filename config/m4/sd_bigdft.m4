@@ -1,7 +1,7 @@
-## Copyright (C) 2019-2021 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
 
 #
-# Maximally-Localized Wannier Functions library (BigDFT)
+# Wavelet BigDFT library (BigDFT)
 #
 
 
@@ -56,7 +56,7 @@ AC_DEFUN([SD_BIGDFT_INIT], [
   done
 
   # Set reasonable defaults if not provided
-  test -z "${sd_bigdft_libs_def}" && sd_bigdft_libs_def="-lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
+  test -z "${sd_bigdft_libs_def}" && sd_bigdft_libs_def="-lbigdft-1 -labinit -lpaw_bigdft -lyaml"
   test -z "${sd_bigdft_policy}" && sd_bigdft_policy="fail"
   test -z "${sd_bigdft_status}" && sd_bigdft_status="optional"
   test -z "${sd_bigdft_enable_def}" && sd_bigdft_enable_def="no"

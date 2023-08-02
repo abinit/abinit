@@ -1,0 +1,76 @@
+# Fe LDA+U
+# Tests various usepawu (>0 and <0)
+
+#OPTIONS AND DATASETS
+prtvol 3
+pawprtvol -3
+iscf 3 
+nline 8
+tolvrs 1.0d-15
+chksymbreak 0
+
+nstep 15
+
+ndtset 6
+usepawu1  1 
+usepawu2 -1 
+usepawu3  2 
+usepawu4 -2 
+usepawu5  4 
+usepawu6 -4 
+
+# SPIN 
+nsppol  2
+nspinor 1
+nspden  2
+spinmagntarget 4.0
+
+# CONVERGENCE PARAM
+ecut 14
+pawecutdg  30
+nband  12
+occopt 7
+tsmear 1600 K
+
+
+# PHYSICAL DATA
+natom 1 ntypat  1 typat  1  
+znucl  26.0 
+xred  0.d0   0.d0   0.d0
+
+#Definition of the unit cell
+acell   3*5.42
+rprim     -0.5  0.5  0.5
+           0.5 -0.5  0.5
+           0.5  0.5 -0.5
+
+# POINTSK 
+kptopt 3  
+ngkpt 1 1 1
+nshiftk 1
+shiftk 0.0 0.0 0.0
+
+# DFT+U
+dmatpuopt 2
+lpawu   2
+upawu  6.0000 eV
+jpawu  3.0000 eV
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "26fe.lda2.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t77.abo, tolnlines = 0, tolabs = 0.000e-00, tolrel = 0.000e-00
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = L. Baguet
+#%% keywords = PAW, DFTU
+#%% description =
+#%%  Tests various usepawu on Fe. usepaw=X should give the same result than usepawu=-X.
+#%% topics = DFT+U
+#%%<END TEST_INFO>

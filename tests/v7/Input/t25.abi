@@ -75,12 +75,15 @@ nbandkss3 -1         # Number of bands in KSS file (-1 means the maximum possibl
 
 kssform 3
 # == LDA+DMFT
-usedmft3 1
-dmftbandi3 21
-dmftbandf3 25
-dmft_nwlo3 100
-dmft_nwli3 200000
-dmft_iter3 0
+# == Compute Projected Wannier functions
+plowan_compute3 1 # Activate the computation of Wannier functions
+plowan_bandi 21 # First band for Wannier functions
+plowan_bandf 25 # Last band for Wannier functions
+plowan_natom 1 # Number of atoms
+plowan_iatom 1  # Index of atoms
+plowan_nbl 1  # Number of the orbitals
+plowan_lcalc 2  # Index of the orbitals (2 -> d)
+plowan_projcalc 7  # Projector for the orbitals 
 
 # == DFT+U
 usepawu    1        # DFT+U is used.
@@ -97,6 +100,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
  getwfk4       -1     # Obtain KSS file from previous dataset
  ecutwfn4       4.0   # Cut-off energy of the planewave set to represent the wavefunctions. It would be more convenient to keep the default ecut value.
  ecuteps4       4.0   # Cut-off energy of the planewave set to represent the dielectric matrix. It is important to adjust this parameter.
+ plowan_compute4 10
 # ppmfrq4   16.1 eV   # Imaginary frequency where to calculate the screening
  nfreqre4       1
  nfreqim4       0
@@ -117,6 +121,7 @@ jpawu      0.0000000000000000  0.0  0.0  eV
  irdscr5     1     
  ecutwfn5    2.0    # Planewaves to be used to represent the wavefunctions. It would be ore convenient to keep the default ecut value.
  ecutsigx5   2.0    # Dimension of the G sum in Sigma_x. It would be better to keep the default ecut value.
+ plowan_compute5 10
                     #(the dimension in Sigma_c is controlled by ecuteps)
  ppmodel  3         # in order to use only one frequency
  gwcalctyp5 2
@@ -140,8 +145,8 @@ jpawu      0.0000000000000000  0.0  0.0  eV
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% keywords = GW, DMFT, FAILS_IFMPI, cRPA
-#%% authors = T. Applencourt, B. Amadon
+#%% authors = T. Applencourt, B. Amadon, R. Outerovitch
 #%% description = Test the computation of U in CRPA for SrVO3 for t2g and eg orbitals. 
 #%%   Uses KSS and SCR file from tests 23 and 24.
-#%% topics = CRPA
+#%% topics = CalcUJ
 #%%<END TEST_INFO>

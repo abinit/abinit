@@ -6,7 +6,7 @@
 !! This directory contains routines used to treat the electron-hole interaction within ABINIT,
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (MG)
+!! Copyright (C) 1998-2022 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,6 +14,7 @@
 !!
 !! CHILDREN
 !! interfaces_78_eph.F90
+!! m_cumulant.F90
 !! m_frohlichmodel.F90
 !! m_gkk.F90
 !! m_phgamma.F90

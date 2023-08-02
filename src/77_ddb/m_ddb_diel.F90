@@ -6,14 +6,10 @@
 !! This module provides routines for the calculation of the dielectric constant (anaddb)
 !! 
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (XG,XW, MVeithen, EB)
+!!  Copyright (C) 1999-2022 ABINIT group (XG,XW, MVeithen, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -96,11 +92,6 @@ contains
 !! 3. frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
 !! mode effective charges for the different eigenmodes,
 !! for different direction of the electric field
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -399,11 +390,6 @@ end subroutine ddb_diel
 !!
 !! OUTPUT
 !! 
-!! PARENTS
-!!      m_ddb_diel
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_diel_elec(iout,epsinf)
@@ -476,11 +462,6 @@ end subroutine ddb_diel_elec
 !! oscstr(2,3,3,3*natom)=oscillator strengths, following
 !!  the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
 !! 
-!! PARENTS
-!!      m_ddb_diel
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid,my_rank)
@@ -653,11 +634,6 @@ end subroutine ddb_oscstr
 !!  the displacements of atoms in cartesian coordinates.
 !!  The eigendisplacements of degenerate modes have been aligned along
 !!  the cartesian axes.
-!!
-!! PARENTS
-!!      m_ddb_diel
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

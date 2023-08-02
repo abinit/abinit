@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t31-t32/t31.in
-- output file    -> t31.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t31-t32/t31.abi
+- output file    -> t31.abo
 - root for input  files -> t31i
 - root for output files -> t31o
-
 
  Symmetries : space group Pm m m (# 47); Bravais oP (primitive ortho.)
 ================================================================================
@@ -34,18 +33,18 @@
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =        4323          nfft =       91125          nkpt =           1
 ================================================================================
-P This job should need less than                      26.507 Mbytes of memory.
+P This job should need less than                      29.090 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            6 blocks of mpw  integer numbers, for      0.099 Mbytes.
-P           27 blocks of mpw  real(dp)  numbers, for      0.891 Mbytes.
+P           21 blocks of mpw  real(dp)  numbers, for      0.693 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.695 Mbytes.
-P           35 blocks of nfft real(dp)  numbers, for     24.333 Mbytes.
+P           39 blocks of nfft real(dp)  numbers, for     27.114 Mbytes.
 P              Additional     real(dp)  numbers, for      0.257 Mbytes.
 P              With residue estimated to be             0.231 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                26.507 Mbytes.
-P Main chain + nonlop.f + opernl.f     23.787 Mbytes.
+P Main chain + fourwf.f                29.090 Mbytes.
+P Main chain + nonlop.f + opernl.f     26.370 Mbytes.
 P XC chain                             25.829 Mbytes.
 P mkrho chain                          22.419 Mbytes.
 P fourdp chain                         22.353 Mbytes.
@@ -132,8 +131,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     14.000   => boxcut(ratio)=   2.17692
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/50sn.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/50sn.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/50sn.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/50sn.pspnc
 -  Troullier-Martins psp for element  Sn        Thu Oct 27 17:43:32 EDT 1994
 - 50.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -306,7 +305,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Mean square residual over all n,k,spin=   11.094E-15; max=  16.663E-15
    0.2500  0.2500  0.2500    1  1.66634E-14 kpt; spin; max resid(k); each band:
-   7.71E-15  1.67E-14  4.12E-15  1.59E-14
+  7.71E-15 1.67E-14 4.12E-15 1.59E-14
  reduced coordinates (array xred) for    1 atoms
        0.500000000000      0.500000000000      0.500000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -334,10 +333,10 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
  -10.31717   -3.42838   -3.38300   -3.38299
  Total charge density [el/Bohr^3]
-      Maximum=    3.6614E-02  at reduced coord.    0.5111    0.6444    0.5111
- Next maximum=    3.6614E-02  at reduced coord.    0.4889    0.6444    0.5111
-      Minimum=    7.2746E-06  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    7.3211E-06  at reduced coord.    0.0222    0.0000    0.0000
+)     Maximum=    3.6614E-02  at reduced coord.    0.5111    0.6444    0.5111
+)Next maximum=    3.6614E-02  at reduced coord.    0.4889    0.6444    0.5111
+)     Minimum=    7.2746E-06  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    7.3211E-06  at reduced coord.    0.0222    0.0000    0.0000
    Integrated=    4.0000E+00
 
 --- !EnergyTerms
@@ -420,6 +419,11 @@ P           mkmem           1
             znucl       50.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -508,10 +512,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.2
+.Delivered   9 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.2

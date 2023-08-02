@@ -49,16 +49,12 @@
 
   getwfq4  3
      qpt4  0.25d0 0.25d0 0.0d0
- rfatpol4  1 1
-   rfdir4  1 1 1
   rfphon4  1
   tolvrs4  1.0d-10
 
 #Dataset 5 : RF at q=0 0 0   (this is always needed for IFCs)
 
      qpt5  0.0 0.0 0.0
- rfatpol5  1 1
-   rfdir5  1 1 1
   rfphon5  1
   tolvrs5  1.0d-10
 #  frzfermi5 1   should only be used for testing purposes
@@ -73,8 +69,6 @@
 
   getwfq7  6
      qpt7  0.5d0 0.5d0 0.0d0
- rfatpol7  1 1
-   rfdir7  1 1 1
   rfphon7  1
   tolvrs7  1.0d-10
 
@@ -88,8 +82,6 @@
 
   getwfq9  8
      qpt9  0.5d0 0.0d0 0.0d0
- rfatpol9  1 1
-   rfdir9  1 1 1
   rfphon9  1
   tolvrs9  1.0d-10
 
@@ -103,8 +95,6 @@
 
   getwfq11  10
      qpt11  0.5d0 0.25d0 0.25d0
- rfatpol11  1 1
-   rfdir11  1 1 1
   rfphon11  1
   tolvrs11  1.0d-10
 
@@ -118,10 +108,12 @@
 
   getwfq13  12
      qpt13  0.5d0 -0.25d0 0.25d0
- rfatpol13  1 1
-   rfdir13  1 1 1
   rfphon13  1
   tolvrs13  1.0d-10
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
 
 
 #Common data

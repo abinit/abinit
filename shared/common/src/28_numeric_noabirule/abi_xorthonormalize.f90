@@ -9,7 +9,7 @@
 !!  and orthonormalizes it:
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (LNguyen,FDahm (CS), FBottin, GZ, AR, MT)
+!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm (CS), FBottin, GZ, AR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,11 +47,6 @@
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction.
 !!
-!!
-!! PARENTS
-!!      lobpcgwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -142,12 +137,6 @@ end subroutine xorthonormalize
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction.
 !!
-!! PARENTS
-!!      lobpcgIIwf,m_lobpcg,m_lobpcgIIIwf,pw_orthon
-!!
-!! CHILDREN
-!!      abi_xgemm,abi_xpotrf,abi_xtrsm,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine ortho_reim(blockvectorx,blockvectorbx,blocksize,spaceComm,sqgram,vectsize)
@@ -216,12 +205,6 @@ end subroutine ortho_reim
 !!                  (e.g block of wavefunction)
 !!  blockvectorx  = on output, orthonormalized wavefunction.
 !!
-!!
-!! PARENTS
-!!      lobpcgccIIIwf,lobpcgccIIwf,m_lobpcg,pw_orthon
-!!
-!! CHILDREN
-!!      wrtout,xmpi_sum,zgemm,zpotrf,ztrsm
 !!
 !! SOURCE
 

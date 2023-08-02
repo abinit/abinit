@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2023 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -38,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.5.1],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.11.2],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -656,7 +656,7 @@ ABI_MSG_SECTION([Initialization of optional features])
 # Init HDF5
 #SD_HDF5_INIT([optional fail no-fortran])
 #SD_HDF5_INIT([optional warn no-fortran])
-SD_HDF5_INIT([mandatory warn no-fortran])
+SD_HDF5_INIT([required no-fortran warn])
 
 # Init FFTW3
 SD_FFTW3_INIT([optional skip])
@@ -670,15 +670,15 @@ SD_LIBPSML_INIT([optional warn])
 
 # Init LibXC
 #SD_LIBXC_INIT([no-fortran optional fail])
-SD_LIBXC_INIT([no-fortran optional warn])
+SD_LIBXC_INIT([required no-fortran warn])
 
 # Init NetCDF
 #SD_NETCDF_INIT([optional fail])
-SD_NETCDF_INIT([optional warn])
+SD_NETCDF_INIT([required warn])
 
 # Init NetCDF-Fortran
 #SD_NETCDF_FORTRAN_INIT([optional fail])
-SD_NETCDF_FORTRAN_INIT([optional warn])
+SD_NETCDF_FORTRAN_INIT([required warn])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
@@ -1056,6 +1056,11 @@ if test ! -z "${status}" -o ! -z "${mandatory}"; then
 fi
 
 # Always generate a build script for required fallbacks
+#AC_CONFIG_FILES([fallbacks/INSTALL fallbacks/README])
+# AC_CONFIG_FILES([fallbacks/build-abinit-fallbacks.sh])
+#AC_CONFIG_COMMANDS([chmod +x fallbacks/build-abinit-fallbacks.sh])
+#AC_OUTPUT
+# Old formulation: AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
 AC_OUTPUT([fallbacks/INSTALL fallbacks/README fallbacks/build-abinit-fallbacks.sh],[chmod +x fallbacks/build-abinit-fallbacks.sh])
 
 # Check that we have all required fallbacks
@@ -1220,6 +1225,10 @@ fi
 if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
   ABI_MSG_NOTICE([gpu-without-magma],
     [Suboptimal GPU configuration])
+fi
+if test "${sd_libxc_kxc_ok}" = "no"; then
+  ABI_MSG_NOTICE([libxc-kxc],
+    [Suboptimal libxc configuration])
 fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END

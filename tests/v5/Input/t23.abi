@@ -11,7 +11,6 @@ ndtset 3
    toldfe1   1.0d-10
     nband1   4
  berryopt1   -1
-    rfdir1   1 1 1
 
 # Dataset #2 ground state in electric field *******
    nband2    4
@@ -23,8 +22,6 @@ ndtset 3
 
 # Dataset #3 Response-function calculation
   rfphon3   1
- rfatpol3   1 2
-   rfdir3   1 1 1
     nqpt3   1
   kptopt3   3
 berryopt3   4
@@ -35,6 +32,11 @@ berryopt3   4
      qpt3   0.0 0.0 0.0
    prtwf3   0
   rfelfd3   3
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #Common input variables
 acell 3*10.62

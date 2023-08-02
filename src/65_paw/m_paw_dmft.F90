@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2021 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -91,6 +87,10 @@ MODULE m_paw_dmft
   integer :: dmftcheck
   ! Check various part of the implementation
 
+  integer :: dmft_entropy
+  ! = 0: do not compute entropy
+  ! = 1: compute entropy
+
   integer :: dmft_log_freq
   ! = 0: do not use log frequencies
   ! = 1: use log frequencies
@@ -141,6 +141,10 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_grnns
   ! CTQMC: compute green function noise for each imaginary time
   ! 0 : nothing, 1 : activated
+
+  integer :: dmftctqmc_config
+  ! CTQMC: Enables histogram of occupations.
+  ! 0 : nothing, 1 enabled
 
   integer :: dmftctqmc_meas
   ! CTQMC: every each dmftctqmc_meas step energy is measured
@@ -230,6 +234,9 @@ MODULE m_paw_dmft
 
   integer  :: use_fixed_self
 
+  integer :: ientropy
+  ! activate evaluation of terms for alternative calculation of entropy in DMFT
+
   real(dp) :: edmft
 
   real(dp) :: dmft_charge_prec
@@ -251,6 +258,14 @@ MODULE m_paw_dmft
   ! DMFT cycle (integrate_green) => ichargeloc_cv
 
   real(dp) :: fermie
+
+  real(dp) :: u_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
+
+  real(dp) :: j_for_s
+  ! Variable for evaluation of correlation energy for U=0 in the entropic
+  ! calculation
 
 
   real(dp) :: fermie_dft
@@ -341,11 +356,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUTS
 !! paw_dmft  = structure of data for dmft
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -539,11 +549,6 @@ end subroutine init_sc_dmft
 !!  nspinor    = number of spinorial component
 !!
 !!
-!! PARENTS
-!!      m_outscfcv,m_vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 !!
 !! NOTE
@@ -634,6 +639,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%natom=dtset%natom
  paw_dmft%temp=dtset%tsmear!*unit_e
  paw_dmft%dmft_iter=dtset%dmft_iter
+ paw_dmft%dmft_entropy=dtset%dmft_entropy
  paw_dmft%dmft_kspectralfunc=dtset%dmft_kspectralfunc
  paw_dmft%dmft_dc=dtset%dmft_dc
  paw_dmft%dmft_wanorthnorm=dtset%dmft_wanorthnorm
@@ -643,6 +649,11 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmft_tolfreq = dtset%dmft_tolfreq
  paw_dmft%dmft_lcpr = dtset%dmft_tollc
  paw_dmft%dmft_charge_prec = dtset%dmft_charge_prec
+
+! for entropy (alternate external calculation)
+ paw_dmft%ientropy  =  0
+ paw_dmft%u_for_s   =  4.1_dp
+ paw_dmft%j_for_s   =  0.5_dp
 
 !=======================
 !==  Fixed self for input
@@ -727,6 +738,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
  paw_dmft%dmftctqmc_mrka  =dtset%dmftctqmc_mrka
  paw_dmft%dmftctqmc_mov   =dtset%dmftctqmc_mov
  paw_dmft%dmftctqmc_order =dtset%dmftctqmc_order
+ paw_dmft%dmftctqmc_config =dtset%dmftctqmc_config
  paw_dmft%dmftctqmc_triqs_nleg =dtset%dmftctqmc_triqs_nleg
 
  if ( paw_dmft%dmft_solv >= 4 ) then
@@ -867,6 +879,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
        call CtqmcInterface_setOpts(paw_dmft%hybrid(iatom),&
                                    opt_Fk      =1,&
 &                                  opt_order   =paw_dmft%dmftctqmc_order ,&
+&                                  opt_histo   =paw_dmft%dmftctqmc_config ,&
 &                                  opt_movie   =paw_dmft%dmftctqmc_mov   ,&
 &                                  opt_analysis=paw_dmft%dmftctqmc_correl,&
 &                                  opt_check   =paw_dmft%dmftctqmc_check ,&
@@ -901,11 +914,6 @@ end subroutine init_dmft
 !!
 !! OUTPUTS
 !!  omegali(1:nwli)=computed frequencies
-!!
-!! PARENTS
-!!      m_green,m_paw_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -958,11 +966,6 @@ end subroutine construct_nwli_dmft
 !! INPUTS
 !!  paw_dmft=structure for dmft calculation
 !!
-!!
-!! PARENTS
-!!      m_paw_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -1248,11 +1251,6 @@ end subroutine construct_nwlo_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_outscfcv,m_vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_dmft(paw_dmft)
@@ -1312,11 +1310,6 @@ end subroutine destroy_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine destroy_sc_dmft(paw_dmft)
@@ -1365,11 +1358,6 @@ end subroutine destroy_sc_dmft
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_outscfcv,m_vtorho
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1457,11 +1445,6 @@ end subroutine print_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine print_sc_dmft(paw_dmft,pawprtvol)
@@ -1522,11 +1505,6 @@ end subroutine print_sc_dmft
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine saveocc_dmft(paw_dmft)
@@ -1583,11 +1561,6 @@ end subroutine saveocc_dmft
 !!
 !! OUTPUT
 !!  paw_dmft: occnd
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1665,11 +1638,6 @@ end subroutine readocc_dmft
 !! OUTPUT
 !!  paw_dmft: bandc_proc, use_bandc
 !!
-!! PARENTS
-!!      m_paw_dmft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
@@ -1713,11 +1681,6 @@ end subroutine init_sc_dmft_paralkgb
 !!  paw_dmft   = data structure
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_paw_dmft
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

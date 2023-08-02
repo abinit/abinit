@@ -7,14 +7,10 @@
 !!  Special messages= WARNING, COMMENT, EXIT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2021 ABINIT group (MT)
+!! Copyright (C) 2008-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -77,12 +73,6 @@ CONTAINS  !===========================================================
 !! OUTPUT
 !!  (only counters updated)
 !!
-!! PARENTS
-!!      m_specialmsg
-!!
-!! CHILDREN
-!!      flush_unit,specialmsg_setcount,write_lines
-!!
 !! SOURCE
 
 subroutine specialmsg_setcount(n_add_comment,n_add_warning,n_add_exit)
@@ -118,12 +108,6 @@ end subroutine specialmsg_setcount
 !!  nwarning= number of WARNINGs in log file
 !!  nexit= 1 if exit requested
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      flush_unit,specialmsg_setcount,write_lines
-!!
 !! SOURCE
 
 subroutine specialmsg_getcount(ncomment,nwarning,nexit)
@@ -154,12 +138,6 @@ end subroutine specialmsg_getcount
 !!
 !! OUTPUT
 !!  (only counters updated)
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -203,13 +181,6 @@ end subroutine specialmsg_mpisum
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      abinit,aim,anaddb,cut3d,fftprof,ioprof,lapackprof,mrgddb,mrgdv,mrggkk
-!!      mrgscr,multibinit,optic,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!      flush_unit,specialmsg_setcount,write_lines
-!!
 !! SOURCE
 
 subroutine herald(code_name,code_version,iout)
@@ -233,8 +204,8 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2021
- mm_rel=03
+ year_rel=2023
+ mm_rel=07
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -248,7 +219,7 @@ subroutine herald(code_name,code_version,iout)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
- '.Copyright (C) 1998-2021 ABINIT group . ',&
+ '.Copyright (C) 1998-2022 ABINIT group . ',&
  ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
  ' It is free software, and you are welcome to redistribute it',&
  ' under certain conditions (GNU General Public License,',&
@@ -340,12 +311,6 @@ end subroutine herald
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_specialmsg
-!!
-!! CHILDREN
-!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 
@@ -444,11 +409,6 @@ end subroutine wrtout_unit
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      flush_unit,specialmsg_setcount,write_lines
-!!
 !! SOURCE
 
 subroutine wrtout_units(units, msg, mode_paral, do_flush, newlines, pre_newlines)
@@ -508,12 +468,6 @@ end subroutine wrtout_units
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_specialmsg
-!!
-!! CHILDREN
-!!      flush_unit,specialmsg_setcount,write_lines
 !!
 !! SOURCE
 

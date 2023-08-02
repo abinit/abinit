@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
 
 ================================================================================
@@ -28,8 +28,8 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         1
-      dipqua         0
-      quadqu         0
+      dipqua         1
+      quadqu         1
       ifcana         0
       ifcout         0
  Description of grid 1 :
@@ -39,8 +39,8 @@
       q1shft
                      0.00000000E+00  0.00000000E+00  0.00000000E+00
  Phonon DOS information :
-   dosdeltae  4.55633525E-06
-    dossmear  2.27816763E-05
+   dosdeltae  9.11267051E-07
+    dossmear  4.55633525E-06
  Description of grid 2 (Fourier interp. or BZ sampling):
       ng2qpt        10        10        10
       ngrids         4
@@ -56,13 +56,22 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= 12.3168655 -3.2694241  0.0000000  G(1)=  0.0405947 -0.1529321 -0.0830553
  R(2)= 12.3168655  3.2694241  0.0000000  G(2)=  0.0405947  0.1529321 -0.0830553
  R(3)= 11.4490201  0.0000000  5.5959134  G(3)=  0.0000000  0.0000000  0.1787018
  Unit cell volume ucvol=  4.5068432E+02 bohr^3
  Angles (23,13,12)=  2.97318683E+01  2.97318683E+01  2.97318683E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Rb
+    2)    0.5000000  0.5000000  0.5000000   Y
+    3)    0.7745048  0.7745048  0.7745048   O
+    4)    0.2254952  0.2254952  0.2254952   O
+
+ DDB file with 44 blocks has been read.
 
 ================================================================================
 
@@ -87,7 +96,7 @@
        3               3       -0.001592        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.710113E+00   -7.919866E-17    9.734351E-02
@@ -108,7 +117,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.059  and twall      0.060 sec
+-begin at tcpu      0.048  and twall      0.058 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      343
  greater than 80, so only write 20 of them
@@ -249,10 +258,10 @@
 -  1.514377E+02  2.462455E+02  3.483226E+02  3.483226E+02  3.535302E+02
 -  4.679175E+02  5.121605E+02
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.0
+- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.1
 
 ================================================================================
 
-+Total cpu time      7.940  and wall time      7.965 sec
++Total cpu time      9.052  and wall time      9.098 sec
 
  anaddb : the run completed succesfully.

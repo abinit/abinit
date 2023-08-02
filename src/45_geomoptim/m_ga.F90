@@ -7,12 +7,10 @@
 !!  Genetic algorithm stochastic search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2021 ABINIT group (MT)
+!! Copyright (C) 2012-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -82,11 +80,6 @@ CONTAINS !===========================================================
 !!  ga_param=datastructure of type ga_type.
 !!            several parameters for Genetic Algorithm random search.
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ga_init(dtset,ga_param)
@@ -128,11 +121,6 @@ end subroutine ga_init
 !!  ga_param=datastructure of type ga_type.
 !!            parameters for Genetic algorithm search.
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ga_destroy(ga_param)
@@ -167,11 +155,6 @@ end subroutine ga_destroy
 !! SIDE EFFECTS
 !!  ga_param=datastructure of type ga_type.
 !!            several parameters for Genetic algorithm search.
-!!
-!! PARENTS
-!!      m_ga
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

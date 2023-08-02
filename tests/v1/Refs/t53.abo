@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t53/t53.in
-- output file    -> t53.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t53/t53.abi
+- output file    -> t53.abo
 - root for input  files -> t53i
 - root for output files -> t53o
-
 
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -36,17 +35,17 @@
  For the susceptibility and dielectric matrices, or tddft :
    mgfft =        18  nbnd_in_blk=     4    nfft =      2592     npw =        59
 ================================================================================
-P This job should need less than                       3.624 Mbytes of memory.
+P This job should need less than                       3.975 Mbytes of memory.
 P Max. in main chain + fourwf.f
 P            6 blocks of mpw  integer numbers, for      0.008 Mbytes.
-P           55 blocks of mpw  real(dp)  numbers, for      0.142 Mbytes.
-P           27 blocks of nfft real(dp)  numbers, for      2.472 Mbytes.
+P           49 blocks of mpw  real(dp)  numbers, for      0.126 Mbytes.
+P           31 blocks of nfft real(dp)  numbers, for      2.838 Mbytes.
 P              Additional     real(dp)  numbers, for      0.764 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 3.624 Mbytes.
-P Main chain + nonlop.f + opernl.f      3.304 Mbytes.
+P Main chain + fourwf.f                 3.975 Mbytes.
+P Main chain + nonlop.f + opernl.f      3.655 Mbytes.
 P XC chain                              2.792 Mbytes.
 P mkrho chain                           3.012 Mbytes.
 P fourdp chain                          2.808 Mbytes.
@@ -144,8 +143,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -540,9 +539,9 @@ force_length_stats: {min:   1.24072673E-01, max:   1.24072673E-01, mean:   1.240
 
  Mean square residual over all n,k,spin=   27.853E-11; max=  22.282E-10
    0.0000  0.0000  0.0000    1  2.22820E-09 kpt; spin; max resid(k); each band:
-   2.74E-17  2.05E-18  2.00E-17  9.84E-19  9.81E-19  9.45E-18  1.33E-16  2.23E-09
+  2.74E-17 2.05E-18 2.00E-17 9.84E-19 9.81E-19 9.45E-18 1.33E-16 2.23E-09
    0.0000  0.0000  0.0000    2  2.22820E-09 kpt; spin; max resid(k); each band:
-   2.74E-17  2.05E-18  2.00E-17  9.84E-19  9.81E-19  9.45E-18  1.33E-16  2.23E-09
+  2.74E-17 2.05E-18 2.00E-17 9.84E-19 9.81E-19 9.45E-18 1.33E-16 2.23E-09
  reduced coordinates (array xred) for    2 atoms
       -0.176833333333      0.000000000000      0.000000000000
        0.176833333333      0.000000000000      0.000000000000
@@ -581,34 +580,34 @@ force_length_stats: {min:   1.24072673E-01, max:   1.24072673E-01, mean:   1.240
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.57595    2.47842    4.93900    6.93058    6.93058    8.81645   10.13563   10.13563
  Total charge density [el/Bohr^3]
-      Maximum=    7.6336E-02  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    7.3953E-02  at reduced coord.    0.0333    0.0000    0.0000
-      Minimum=    4.7712E-04  at reduced coord.    0.0000    0.5000    0.5000
- Next minimum=    5.0493E-04  at reduced coord.    0.0333    0.5000    0.5000
+)     Maximum=    7.6336E-02  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    7.3953E-02  at reduced coord.    0.0333    0.0000    0.0000
+)     Minimum=    4.7712E-04  at reduced coord.    0.0000    0.5000    0.5000
+)Next minimum=    5.0493E-04  at reduced coord.    0.0333    0.5000    0.5000
    Integrated=    8.0000E+00
  Spin up density      [el/Bohr^3]
-      Maximum=    3.8168E-02  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    3.7364E-02  at reduced coord.    0.0000    0.0000    0.0500
-      Minimum=    2.3856E-04  at reduced coord.    0.0000    0.5000    0.5000
- Next minimum=    2.5247E-04  at reduced coord.    0.0333    0.5000    0.5000
+)     Maximum=    3.8168E-02  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    3.7364E-02  at reduced coord.    0.0000    0.0000    0.0500
+)     Minimum=    2.3856E-04  at reduced coord.    0.0000    0.5000    0.5000
+)Next minimum=    2.5247E-04  at reduced coord.    0.0333    0.5000    0.5000
    Integrated=    5.0000E+00
  Spin down density    [el/Bohr^3]
-      Maximum=    3.8168E-02  at reduced coord.    0.0000    0.0000    0.0000
- Next maximum=    3.6976E-02  at reduced coord.    0.0333    0.0000    0.0000
-      Minimum=    2.3856E-04  at reduced coord.    0.0000    0.5000    0.5000
- Next minimum=    2.5247E-04  at reduced coord.    0.0333    0.5000    0.5000
+)     Maximum=    3.8168E-02  at reduced coord.    0.0000    0.0000    0.0000
+)Next maximum=    3.6976E-02  at reduced coord.    0.0333    0.0000    0.0000
+)     Minimum=    2.3856E-04  at reduced coord.    0.0000    0.5000    0.5000
+)Next minimum=    2.5247E-04  at reduced coord.    0.0333    0.5000    0.5000
    Integrated=    3.0000E+00
  Magnetization (spin up - spin down) [el/Bohr^3]
-      Maximum=    1.5371E-02  at reduced coord.    0.1333    0.8500    0.9000
- Next maximum=    1.5371E-02  at reduced coord.    0.1333    0.1500    0.9000
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    0.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
+)     Maximum=    1.5371E-02  at reduced coord.    0.1333    0.8500    0.9000
+)Next maximum=    1.5371E-02  at reduced coord.    0.1333    0.1500    0.9000
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    0.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
    Integrated=    2.0000E+00
  Relative magnetization (=zeta, between -1 and 1)
-      Maximum=    6.2860E-01  at reduced coord.    0.0000    0.7000    0.7000
- Next maximum=    6.2860E-01  at reduced coord.    0.0000    0.3000    0.7000
-      Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
- Next minimum=    0.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
+)     Maximum=    6.2860E-01  at reduced coord.    0.0000    0.7000    0.7000
+)Next maximum=    6.2860E-01  at reduced coord.    0.0000    0.3000    0.7000
+)     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
+)Next minimum=    0.0000E+00  at reduced coord.    0.0333    0.0000    0.0000
 
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
@@ -708,6 +707,11 @@ P           mkmem           1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -800,10 +804,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.0
+.Delivered  19 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.8  wall=          0.8

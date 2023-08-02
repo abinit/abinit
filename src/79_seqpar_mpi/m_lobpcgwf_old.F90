@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group ()
+!!  Copyright (C) 2008-2022 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -48,7 +44,7 @@ contains
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2021 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! Copyright (C) 1998-2022 ABINIT group (FBottin,GZ,AR,MT,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,15 +75,6 @@ contains
 !! SIDE EFFECTS
 !!  cg(2,mcg)=updated wavefunctions
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      abi_xcopy,abi_xgemm,abi_xheev,abi_xhegv,abi_xorthonormalize,abi_xtrsm
-!!      alloc_on_gpu,copy_from_gpu,copy_on_gpu,dealloc_on_gpu,getghc,gpu_xgemm
-!!      gpu_xorthonormalize,gpu_xtrsm,prep_getghc,setwfparameter,timab,wfcopy
-!!      wrtout,xmpi_sum,xprecon
-!!
 !! SOURCE
 
 subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
@@ -101,7 +88,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_wfutils
  use m_xmpi
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_dtset
 
  use defs_abitypes, only : mpi_type

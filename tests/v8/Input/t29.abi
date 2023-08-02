@@ -1,6 +1,6 @@
 # Hydrogen diatomic molecule for tests--constrained DFT
 
- ndtset 5
+ ndtset 7
 
 #Constrained DFT 
  constraint_kind1  11  0
@@ -8,6 +8,8 @@
  constraint_kind3  11  2 
  constraint_kind4  11  3  
  constraint_kind5  11  12  
+ constraint_kind6  11  4
+ constraint_kind7  11  14
 
 #Constrained DFT data
  magcon_lambda      2   
@@ -25,6 +27,7 @@
  so_psp 0 0
  natom 2
  typat  1 2
+ chksymtnons 3    # The default value for chksymtnons (which is 1) is not admitted in case of cDFT calculations.
 
  nspden 4  nspinor 2   # Non-collinear case
  nband 2

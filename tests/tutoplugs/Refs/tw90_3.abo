@@ -1,8 +1,8 @@
 
-.Version 9.3.3 of ABINIT
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer)
+.Version 9.8.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group .
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 18 Dec 2020.
-- ( at 02h53 )
-
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/TestBot_MPI1/tutoplugs_tw90_3/tw90_3.abi
+.Starting date : Wed 21 Dec 2022.
+- ( at 21h06 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutoplugs_tw90_3/tw90_3.abi
 - output file    -> tw90_3.abo
 - root for input  files -> tw90_3i
 - root for output files -> tw90_3o
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =        1875          nfft =       32768          nkpt =           1
 ================================================================================
-P This job should need less than                      11.112 Mbytes of memory.
+P This job should need less than                      12.026 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.145 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.145 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           8
        mpw =        1888          nfft =       32768          nkpt =           8
 ================================================================================
-P This job should need less than                       8.053 Mbytes of memory.
+P This job should need less than                       8.966 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.924 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
@@ -60,10 +60,10 @@ _ WF disk file :      0.924 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
-- outvars: echo of selected default values                                     
+- outvars: echo of selected default values                                      
 -   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
-- outvars: echo of global parameters not present in the input file             
+- outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
 -
  -outvars: echo values of preprocessed input variables --------
@@ -187,8 +187,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Si.psp8
 - Si    ONCVPSP-3.3.0  r_core=   1.60303   1.72197   1.91712
 - 14.00000   4.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -202,8 +202,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -2.124804   -0.444604
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/amadon_beauty/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -232,13 +232,13 @@ tolerances: {tolvrs: 1.00E-10, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -6.3887512964737    -6.389E+00 2.899E-03 8.755E+00 3.635E-02 3.635E-02
  ETOT  2  -6.3939006892067    -5.149E-03 4.819E-05 3.773E-01 4.774E-03 3.158E-02
- ETOT  3  -6.3939599224466    -5.923E-05 1.040E-05 8.530E-02 2.021E-03 2.956E-02
- ETOT  4  -6.3940736787680    -1.138E-04 3.293E-06 2.476E-02 1.358E-03 3.092E-02
+ ETOT  3  -6.3939599224465    -5.923E-05 1.040E-05 8.530E-02 2.021E-03 2.956E-02
+ ETOT  4  -6.3940736787679    -1.138E-04 3.293E-06 2.476E-02 1.358E-03 3.092E-02
  ETOT  5  -6.3940849148776    -1.124E-05 1.533E-07 1.540E-04 3.588E-04 3.056E-02
  ETOT  6  -6.3940850667808    -1.519E-07 7.960E-09 3.405E-06 3.121E-05 3.053E-02
- ETOT  7  -6.3940850682156    -1.435E-09 1.114E-10 9.392E-09 3.564E-06 3.053E-02
- ETOT  8  -6.3940850682183    -2.695E-12 1.095E-11 1.469E-10 3.054E-09 3.053E-02
- ETOT  9  -6.3940850682179     3.579E-13 3.086E-13 1.664E-12 3.397E-10 3.053E-02
+ ETOT  7  -6.3940850682155    -1.435E-09 1.114E-10 9.392E-09 3.564E-06 3.053E-02
+ ETOT  8  -6.3940850682183    -2.778E-12 1.095E-11 1.469E-10 3.054E-09 3.053E-02
+ ETOT  9  -6.3940850682179     4.565E-13 3.086E-13 1.664E-12 3.397E-10 3.053E-02
 
  At SCF step    9       vres2   =  1.66E-12 < tolvrs=  1.00E-10 =>converged.
 
@@ -258,7 +258,7 @@ lattice_vectors:
 lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.7280000E+03
-convergence: {deltae:  3.579E-13, res2:  1.664E-12, residm:  3.086E-13, diffor:  3.397E-10, }
+convergence: {deltae:  4.565E-13, res2:  1.664E-12, residm:  3.086E-13, diffor:  3.397E-10, }
 etotal    :  -6.39408507E+00
 entropy   :   0.00000000E+00
 fermie    :  -2.46147939E-01
@@ -274,12 +274,12 @@ xred      :
 - [ -1.6638E-01,   1.6638E-01,  -1.6638E-01,  H]
 - [ -1.6638E-01,  -1.6638E-01,   1.6638E-01,  H]
 cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -2.77555756E-18,  -1.38777878E-18,  -5.55111512E-18, ]
 - [ -3.05302099E-02,  -3.05302099E-02,  -3.05302099E-02, ]
 - [ -3.05302099E-02,   3.05302099E-02,   3.05302099E-02, ]
 - [  3.05302099E-02,  -3.05302099E-02,   3.05302099E-02, ]
 - [  3.05302099E-02,   3.05302099E-02,  -3.05302099E-02, ]
-force_length_stats: {min:   0.00000000E+00, max:   5.28798746E-02, mean:   4.23038997E-02, }
+force_length_stats: {min:   6.35960131E-18, max:   5.28798746E-02, mean:   4.23038997E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -325,10 +325,10 @@ force_length_stats: {min:   0.00000000E+00, max:   5.28798746E-02, mean:   4.230
 
  cartesian forces (eV/Angstrom) at end:
     1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -1.56992638072576    -1.56992638072576    -1.56992638072576
-    3     -1.56992638072576     1.56992638072576     1.56992638072576
-    4      1.56992638072576    -1.56992638072576     1.56992638072576
-    5      1.56992638072576     1.56992638072576    -1.56992638072576
+    2     -1.56992638072580    -1.56992638072580    -1.56992638072580
+    3     -1.56992638072580     1.56992638072580     1.56992638072580
+    4      1.56992638072580    -1.56992638072580     1.56992638072580
+    5      1.56992638072580     1.56992638072580    -1.56992638072580
  frms,max,avg= 1.4041848E+00 1.5699264E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 12.000000000000 12.000000000000 bohr
               =  6.350126503080  6.350126503080  6.350126503080 angstroms
@@ -341,16 +341,16 @@ force_length_stats: {min:   0.00000000E+00, max:   5.28798746E-02, mean:   4.230
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.95892847830075E+00
-hartree             :  3.05184313828319E+00
-xc                  : -2.57061971501753E+00
+kinetic             :  2.95892847830074E+00
+hartree             :  3.05184313828322E+00
+xc                  : -2.57061971501751E+00
 Ewald energy        : -1.45331328559999E+00
 psp_core            :  3.74523207340227E-02
-local_psp           : -8.79228946966728E+00
-non_local_psp       :  3.73913464748898E-01
-total_energy        : -6.39408506821793E+00
-total_energy_eV     : -1.73991903224772E+02
-band_energy         : -2.31133974328917E+00
+local_psp           : -8.79228946966726E+00
+non_local_psp       :  3.73913464748915E-01
+total_energy        : -6.39408506821787E+00
+total_energy_eV     : -1.73991903224771E+02
+band_energy         : -2.31133974328919E+00
 ...
 
 
@@ -425,8 +425,8 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-  Calculation of overlap and call to wannier90 library
-  to obtain maximally localized wannier functions
+  Calculation of overlap and call to wannier90 library 
+  to obtain maximally localized wannier functions 
 
   - tw90_3o_DS2_w90.win is a mandatory secondary input
   - tw90_3o_DS2_w90.wout is the output for the library
@@ -437,7 +437,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ---------------------------------------------------------------
 
-   mlwfovlp:  you should give k-point in the full brillouin zone
+   mlwfovlp:  you should give k-point in the full brillouin zone 
    with explicit k-points (or kptopt=3) and istwfk 1
 
    mlwfovlp :  mlwfovlp_setup done -
@@ -446,30 +446,30 @@ force_length_stats: {min: null, max: null, mean: null, }
    Writing top of the overlap matrix: M_mn(ikb,ik)
    m=n=1:3, ikb=1, ik=1
 
-;   (   0.999971   0.000000 ,   0.000016  -0.000002 ,   0.000001  -0.000000 ,    )
+;   (   0.999971  -0.000000 ,   0.000016  -0.000002 ,   0.000001  -0.000000 ,    )
 ;   (  -0.000004   0.000001 ,   0.999968   0.000000 ,  -0.000000  -0.000000 ,    )
 ;   (  -0.000002  -0.000000 ,   0.000000   0.000002 ,   0.999967   0.000000 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (   0.552016  -0.344160 ,   0.073435  -0.235264 ,   0.019686  -0.063021 ,    )
-;   (   0.089212  -0.236583 ,   0.503577  -0.126328 ,  -0.029304  -0.172509 ,    )
-;   (   0.023885  -0.063383 ,  -0.029381  -0.172498 ,   0.605248   0.471392 ,    )
+;   (   0.552016  -0.344160 ,   0.073426  -0.235264 ,   0.019657  -0.063041 ,    )
+;   (   0.089220  -0.236577 ,   0.503580  -0.126313 ,  -0.029391  -0.172520 ,    )
+;   (   0.023922  -0.063381 ,  -0.029302  -0.172537 ,   0.605245   0.471377 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
 ;   (   0.839624   0.301457 ,   0.843200  -0.100767 ,   0.843200  -0.100767 ,    )
 ;   (   0.169768  -0.910774 ,   0.095989   0.311050 ,   0.095989   0.311050 ,    )
-;   (   0.000000   0.000000 ,  -0.007145  -0.233469 ,  -0.019330  -0.637686 ,    )
+;   (  -0.000000   0.000000 ,  -0.007022  -0.233436 ,  -0.019419  -0.637710 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
 ;   (  -0.117132   0.310352 ,  -0.117132   0.310352 ,  -0.117132   0.310352 ,    )
-;   (   0.009818  -0.234069 ,   0.027002  -0.639311 ,  -0.036820   0.873380 ,    )
-;   (   0.036819  -0.873354 ,  -0.027005   0.639383 ,  -0.009814   0.233971 ,    )
+;   (   0.009938  -0.234027 ,   0.026914  -0.639342 ,  -0.036852   0.873369 ,    )
+;   (   0.036852  -0.873362 ,  -0.026915   0.639359 ,  -0.009937   0.234003 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see tw90_3o_DS2_w90.wout for details.
@@ -511,14 +511,14 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+  
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  1.2000000000E+01  1.2000000000E+01 Bohr
               amu      2.80855000E+01  1.00794000E+00
            diemac      2.00000000E+00
              ecut      8.00000000E+00 Hartree
            etotal1    -6.3940850682E+00
-            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart1    -2.7755575616E-18 -1.3877787808E-18 -5.5511151231E-18
                       -3.0530209861E-02 -3.0530209861E-02 -3.0530209861E-02
                       -3.0530209861E-02  3.0530209861E-02  3.0530209861E-02
                        3.0530209861E-02 -3.0530209861E-02  3.0530209861E-02
@@ -651,7 +651,7 @@ P           mkmem2          8
 - S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
 - Comment: the fifth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
@@ -668,12 +668,12 @@ P           mkmem2          8
 - G.Brunin, D.Caliste, M.Cote,
 - J.Denier, C. Dreyer, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
 - D.R.Hamann, G.Hautier, F.Jollet, G. Jomard,
-- A.Martin,
+- A.Martin, 
 - H.P.C. Miranda, F.Naccarato, G.Petretto, N.A. Pike, V.Planes,
 - S.Prokhorenko, T. Rangel, F.Ricci, G.-M.Rignanese, M.Royo, M.Stengel, M.Torrent,
 - M.J.van Setten, B.Van Troeye, M.J.Verstraete, J.Wiktor, J.W.Zwanziger, and X.Gonze.
 - Comment: a global overview of ABINIT, with focus on selected capabilities .
-- Note that a version of this paper, that is not formatted for J. Chem. Phys
+- Note that a version of this paper, that is not formatted for J. Chem. Phys 
 - is available at https://www.abinit.org/sites/default/files/ABINIT20_JPC.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
@@ -691,15 +691,15 @@ P           mkmem2          8
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          4.0
+.Delivered   4 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.0  wall=          4.1

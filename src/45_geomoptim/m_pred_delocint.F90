@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
+!!  Copyright (C) 1998-2022 ABINIT group (MVer, DCA, XG, GMR, JCC, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -88,12 +84,6 @@ contains
 !! SIDE EFFECTS
 !! hist <type(abihist)> : History of positions,forces acell, rprimd, stresses
 !!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,iexit)
@@ -147,24 +137,12 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
-   if (allocated(u_matrix))     then
-     ABI_FREE(u_matrix)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(hessin)
+   ABI_SFREE(u_matrix)
    return
  end if
 
@@ -173,8 +151,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !### 01. Debugging and Verbose
 
  if(DEBUG)then
-   write(std_out,'(a,3a,38a,39a)') ch10,('-',kk=1,3),&
-&   'Debugging and Verbose for pred_deloint',('-',kk=1,39)
+   write(std_out,'(a,3a,38a,39a)') ch10,('-',kk=1,3),'Debugging and Verbose for pred_deloint',('-',kk=1,39)
    write(std_out,*) 'ionmov: ',ionmov
    write(std_out,*) 'itime:  ',itime
  end if
@@ -188,15 +165,10 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
  ndim=ndeloc
  deloc_int(:)=zero
  deloc_gred(:)=zero
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
  if(DEBUG) write(std_out,*) 'Dimension of vin, vout and hessian (ndim): ',ndim
 
@@ -207,27 +179,17 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !Notice thqt vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))        then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))       then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))   then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vout_prev))  then
-     ABI_FREE(vout_prev)
-   end if
-   if (allocated(hessin))     then
-     ABI_FREE(hessin)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vout_prev)
+   ABI_SFREE(hessin)
+
    ABI_MALLOC(vin,(ndim))
    ABI_MALLOC(vout,(ndim))
    ABI_MALLOC(vin_prev,(ndim))
    ABI_MALLOC(vout_prev,(ndim))
    ABI_MALLOC(hessin,(ndim,ndim))
-
  end if
 
 
@@ -399,7 +361,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 !Initialize input vectors : first vin, then vout
 !The values of vin from the previous iteration
 !should be the same
- call xfpack_x2vin(acell, acell0, ab_mover%natom-1, ndim,&
+ call xfpack_x2vin(acell, ab_mover%natom-1, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprimd, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, deloc_int)
 !end if
@@ -450,7 +412,7 @@ subroutine pred_delocint(ab_mover,ab_xfh,deloc,forstr,hist,ionmov,itime,zDEBUG,i
 
    if (ab_mover%restartxf/=0) then
 
-     call xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
+     call xfh_recover_deloc(ab_xfh,ab_mover,acell,cycl_main,&
 &     residual,hessin,ndim,rprimd,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 &     vout,vout_prev,xred,deloc,deloc_int,deloc_gred,bt_inv_matrix,gprimd,prim_int,&
 &     u_matrix)
@@ -681,12 +643,6 @@ end subroutine pred_delocint
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine deloc2xcart(deloc,natom,rprimd,xcart,deloc_int,btinv,u_matrix)
@@ -855,12 +811,6 @@ end subroutine deloc2xcart
 !! deloc_gred(3*(natom-1))=delocalized gradients from reduced coordinate ones
 !! gred(3,natom)=delocalized gradients in reduced coordinates
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine gred2gdeloc(btinv,deloc_gred,gred,natom,gprimd)
@@ -931,12 +881,6 @@ end subroutine gred2gdeloc
 !! OUTPUT
 !! b_matrix(ninternal,3*natom)=matrix of derivatives of internal coordinates
 !!   wrt cartesians
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1070,12 +1014,6 @@ end subroutine calc_b_matrix
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 !!
 
@@ -1103,12 +1041,6 @@ end subroutine dbond_length_d1
 !! dang_d1
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1168,12 +1100,6 @@ end subroutine dang_d1
 !!
 !! FUNCTION
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 !!
 
@@ -1231,12 +1157,6 @@ end subroutine dang_d2
 !! ddihedral_d1
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1336,12 +1256,6 @@ end subroutine ddihedral_d1
 !! ddihedral_d2
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 !!
@@ -1490,12 +1404,6 @@ end subroutine ddihedral_d2
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
 subroutine xcart2deloc(deloc,natom,rprimd,xcart,bt_inv_matrix,u_matrix,deloc_int,prim_int)
@@ -1564,15 +1472,9 @@ end subroutine xcart2deloc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
 !! NOTES
 !!   bt_inv_matrix is inverse transpose of the delocalized
 !!    coordinate B matrix. b_matrix is the primitive internal B matrix
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
 !!
 !! SOURCE
 
@@ -1663,12 +1565,6 @@ end subroutine calc_btinv_matrix
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
  subroutine align_u_matrices(natom,ninternal,u_matrix,u_matrix_old,s_matrix,f_eigs)
@@ -1748,15 +1644,9 @@ end subroutine align_u_matrices
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_pred_delocint
-!!
-!! CHILDREN
-!!      gred2gdeloc,hessupdt,xcart2deloc,xfpack_f2vout,xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 
-subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,acell0,cycl_main,&
+subroutine xfh_recover_deloc(ab_xfh,ab_mover,acell,cycl_main,&
 & gred,hessin,ndim,rprim,rprimd0,strten,ucvol,ucvol0,vin,vin_prev,&
 & vout,vout_prev,xred,deloc,deloc_int,deloc_gred,btinv,gprimd,prim_int,&
 & u_matrix)
@@ -1774,7 +1664,6 @@ type(delocint),intent(in) :: deloc
 
 !arrays
 real(dp),intent(inout) :: acell(3)
-real(dp),intent(in) :: acell0(3)
 real(dp),intent(inout) :: hessin(:,:)
 real(dp),intent(inout) :: xred(3,ab_mover%natom)
 real(dp),intent(inout) :: rprim(3,3)
@@ -1839,7 +1728,7 @@ real(dp) :: xcart(3,ab_mover%natom)
      call gred2gdeloc(btinv,deloc_gred,gred,ab_mover%natom,gprimd)
 
 !    Transfer it in vin, vout
-     call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+     call xfpack_x2vin(acell,ab_mover%natom-1,&
 &     ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &     ab_mover%symrel,ucvol,ucvol0,vin,deloc_int)
      call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&
@@ -1865,7 +1754,7 @@ real(dp) :: xcart(3,ab_mover%natom)
        call gred2gdeloc(btinv,deloc_gred,gred,ab_mover%natom,gprimd)
 
 !      Tranfer it in vin_prev, vout_prev
-       call xfpack_x2vin(acell,acell0,ab_mover%natom-1,&
+       call xfpack_x2vin(acell,ab_mover%natom-1,&
 &       ndim,ab_mover%nsym,ab_mover%optcell,rprim,rprimd0,&
 &       ab_mover%symrel,ucvol,ucvol0,vin_prev,deloc_int)
        call xfpack_f2vout(deloc_gred,ab_mover%natom-1,&

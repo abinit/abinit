@@ -7,7 +7,7 @@
 !!  Minimal Energy Path (MEP) search implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2021 ABINIT group (MT)
+!! Copyright (C) 2012-2022 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -15,10 +15,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -112,12 +108,6 @@ CONTAINS
 !!  mep_param=datastructure of type mep_type.
 !!            several parameters for Minimal Energy Path (MEP) search.
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_init(dtset,mep_param)
@@ -168,12 +158,6 @@ end subroutine mep_init
 !! SIDE EFFECTS
 !!  mep_param=datastructure of type mep_type.
 !!            several parameters for Minimal Energy Path (MEP) search.
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -228,12 +212,6 @@ end subroutine mep_destroy
 !!                        before and after time evolution
 !!  xred(3,natom,nimage)=reduced coordinates of atoms in each image along the path
 !!                       before and after time evolution
-!!
-!! PARENTS
-!!      m_predict_neb,m_predict_steepest,m_predict_string
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -326,12 +304,6 @@ end subroutine mep_steepest
 !!                        before and after time evolution
 !!  xred(3,natom,nimage)=reduced coordinates of atoms in each image along the path
 !!                       before and after time evolution
-!!
-!! PARENTS
-!!      m_predict_neb
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -453,12 +425,6 @@ end subroutine mep_qmin
 !!
 !! NOTES
 !!  Could see Numerical Recipes (Fortran), 1986, page 307.
-!!
-!! PARENTS
-!!      m_predict_neb
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -637,12 +603,6 @@ end subroutine mep_lbfgs
 !! NOTES
 !!  Could see Numerical Recipes (Fortran), 1986, page 307.
 !!  Has to work in cartesian coordinates
-!!
-!! PARENTS
-!!      m_predict_neb
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
 !!
 !! SOURCE
 
@@ -961,12 +921,6 @@ end subroutine mep_gbfgs
 !!  xred(3,natom,nimage)=reduced coordinates of atoms in each image along the path
 !!                       before and after time evolution
 !!
-!! PARENTS
-!!      m_predict_string
-!!
-!! CHILDREN
-!!      wrtout,xcart2xred,xred2xcart
-!!
 !! SOURCE
 
 subroutine mep_rk4(fcart,itime,list_dynimage,mep_param,natom,ndynimage,nimage,rprimd,xcart,xred)
@@ -1120,10 +1074,6 @@ end subroutine mep_rk4
 !! OUTPUT
 !!  mep_img_dotp=dot product
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -1167,10 +1117,6 @@ end function mep_img_dotp
 !! OUTPUT
 !!  mep_img_norm=norm
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !!
 !! SOURCE
 
@@ -1207,10 +1153,6 @@ end function mep_img_norm
 !!
 !! OUTPUT
 !!  mep_img_dotp_red=dot product
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1262,10 +1204,6 @@ end function mep_img_dotp_red
 !!
 !! OUTPUT
 !!  mep_img_norm_red=norm
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !!
 !! SOURCE

@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2021 ABINIT group (MVeithen)
+!!  Copyright (C) 1999-2022 ABINIT group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -108,12 +104,6 @@ contains
 !! In case no symmetry is used to reduce the number of k-points,
 !! the arrays kpt2 and kpt3 are equal.
 !!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      dgelss,getkgrid,wrtout,xmpi_max
-!!
 !! SOURCE
 
 subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
@@ -137,9 +127,10 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  integer :: bis,flag,ier,ii,ikpt,ikpt2,ikpt3,ineigh,info,irank,is1,ishell
  integer :: jj,kptopt_used,mkmem_cp,nkpt_computed,nshell,nsym1,orig
  integer :: wtkflg, coord1, coord2, coord3
- real(dp) :: dist_,kptrlen,last_dist,max_dist,resdm,s1
- character(len=500) :: message
+ real(dp) :: dist_,kptrlen,last_dist,max_dist,resdm,s1, max_err, my_tol
+ character(len=500) :: msg
 !arrays
+ integer :: unts(2)
  integer :: neigh(0:6,nkpt2),symafm_dummy(1),vacuum(3)
  integer,allocatable :: symrel1(:,:,:)
  real(dp) :: dist(6),dk(3),dk_(3),mat(6,6),rvec(6),sgval(6)
@@ -155,6 +146,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  else
    mkmem_max = mkmem
  end if
+
+ unts = [std_out, ab_out]
 
 !------------- In case kptopt = 2 set up the whole k-point grid -------------
 
@@ -187,15 +180,15 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    vacuum(:) = 0
 
    call getkgrid(0,0,ii,kpt3,kptopt_used,kptrlatt,&
-&   kptrlen,nsym1,nkpt3,nkpt_computed,nshiftk,nsym1,&
-&   rprimd,shiftk_,symafm_dummy,symrel1,&
-&   vacuum,wtk3)
+     kptrlen,nsym1,nkpt3,nkpt_computed,nshiftk,nsym1,&
+     rprimd,shiftk_,symafm_dummy,symrel1,&
+     vacuum,wtk3)
 
    if (nkpt_computed /= nkpt3) then
-     write(message,'(a,a,a,a,i4,a,a,i4)')&
-&     ' The number of k-points in the whole BZ, nkpt_computed= ',nkpt_computed,ch10,&
-&     ' is not twice the number of k-points in half the BZ, nkpt3=',nkpt3
-     ABI_BUG(message)
+     write(msg,'(a,a,a,a,i0,a,a,i0)')&
+      ' The number of k-points in the whole BZ, nkpt_computed= ',nkpt_computed,ch10,&
+      ' is not twice the number of k-points in half the BZ, nkpt3=',nkpt3
+     ABI_BUG(msg)
    end if
 
    kptindex(:,:) = 0
@@ -211,7 +204,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 !      with this comment
 
 !
-!  here k3 = k2 + G 
+!  here k3 = k2 + G
 !
        dk_(:) = kpt3(:,ikpt3) - kpt2(:,ikpt2)
        dk(:) = dk_(:) - nint(dk_(:))
@@ -266,14 +259,13 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      end do     ! ikpt2
 
      if (flag == 1) then
-       write(message,'(a,i0)')' Could not find a symmetric k-point for ikpt3=  ',ikpt3
-       ABI_BUG(message)
+       write(msg,'(a,i0)')' Could not find a symmetric k-point for ikpt3=  ',ikpt3
+       ABI_BUG(msg)
      end if
    end do    ! ikpt3
 
  else
-   message = ' the only values for kptopt that are allowed are 2 and 3 '
-   ABI_ERROR(message)
+   ABI_ERROR(' the only values for kptopt that are allowed are 2 and 3 ')
  end if   ! condition on kptopt
 
 
@@ -412,8 +404,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 !  ENDDEBUG
 
    if (max_dist-dist(ishell)<tol8) then
-     write(message,'(a,i0)')' Cannot find shell number',ishell
-     ABI_BUG(message)
+     write(msg,'(a,i0)')' Cannot find shell number',ishell
+     ABI_BUG(msg)
    end if
 
    last_dist = dist(ishell)
@@ -513,25 +505,24 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    end do
 
    if (flag == 0) then
-     write(message,'(a,i0,a,a)')&
-&     ' The number of points in shell number',ishell,' is not the same',&
-&     ' for each k-point.'
-     ABI_BUG(message)
+     write(msg,'(a,i0,a,a)')&
+     ' The number of points in shell number',ishell,' is not the same',&
+     ' for each k-point.'
+     ABI_BUG(msg)
    end if
 
    if (nneigh == 0) then
-     write(message,'(a,a,a,a)') ch10,&
-&     ' getshell: BUG - ',ch10,&
-&     ' Cannot find enough neighbor shells'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg,'(a,a,a,a)') ch10,&
+     ' getshell: BUG - ',ch10,&
+     ' Cannot find enough neighbor shells'
+     call wrtout(unts, msg)
      wtkflg = 1
    end if
 
 !  Calculate the total number of neighbors
    nneigh = sum(neigh(1:ishell,1))
 !  DEBUG
-   write(std_out,*)'ishell = ',ishell,'nneigh = ',nneigh
+   !write(std_out,*)'ishell = ',ishell,'nneigh = ',nneigh
 !  ENDDEBUG
 
 !  Find the weights needed to compute the finite difference expression
@@ -569,20 +560,20 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    rvec(6) = rmet(3,1)
 
 !  DEBUG
-   write(std_out,*) " mat(1:6, 1:ishell) : rmet(1:6) for all 6 products dx^2... dxdy..."
-   do ii = 1, 6
-     write(std_out,*) mat(ii,1:ishell), ' : ', rvec(ii)
-   end do
+   !write(std_out,*) " mat(1:6, 1:ishell) : rmet(1:6) for all 6 products dx^2... dxdy..."
+   !do ii = 1, 6
+   !  write(std_out,*) mat(ii,1:ishell), ' : ', rvec(ii)
+   !end do
 !  ENDDEBUG
 
 !  Solve the linear least square problem
    call dgelss(6,ishell,1,mat,6,rvec,6,sgval,tol8,irank,work,30,info)
 
    if( info /= 0 ) then
-     write(message,'(3a,i0,a)')&
-&     ' Singular-value decomposition of the linear system determining the',ch10,&
-&     ' weights failed (info).',info,ch10
-     ABI_COMMENT(message)
+     write(msg,'(3a,i0,a)')&
+     ' Singular-value decomposition of the linear system determining the',ch10,&
+     ' weights failed (info).',info,ch10
+     ABI_COMMENT(msg)
      wtkflg = 1
    end if
 
@@ -596,22 +587,22 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      end do
 
      if( ishell == 6 .and. resdm > tol8 ) then
-       write(message,'(4a)')&
-&       ' Linear system determining the weights could not be solved',ch10,&
-&       ' This should not happen.',ch10
-       ABI_COMMENT(message)
+       write(msg,'(4a)')&
+       ' Linear system determining the weights could not be solved',ch10,&
+       ' This should not happen.',ch10
+       ABI_COMMENT(msg)
        wtkflg = 1
      end if
    else
 !    The system is rank deficient
      ishell = ishell - 1
 !    DEBUG
-     write(std_out,*) 'Shell not linear independent from previous shells. Skipped.'
+     !write(std_out,*) 'Shell not linear independent from previous shells. Skipped.'
 !    ENDDEBUG
    end if
 
 !  DEBUG
-   write(std_out,*) "ishell, nneigh, irank, resdm ", ishell, nneigh, irank, resdm
+   !write(std_out,*) "ishell, nneigh, irank, resdm ", ishell, nneigh, irank, resdm
 !  ENDDEBUG
 
 !  end of loop over shells
@@ -635,6 +626,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
 !Check the computed weights
  if (wtkflg == 0) then
+   max_err = zero
+   my_tol = five * tol6
    do ikpt = 1, nkpt2
      do ii = 1,3
        do jj = 1,3
@@ -645,7 +638,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
            dk(:) = dk(:) + real(kg_neigh(ineigh,ikpt,:),dp)
            s1 = s1 + dk(ii)*dk(jj)*mvwtk(ineigh,ikpt)
          end do
-         if (abs(s1 - rmet(ii,jj)) > tol6) then
+         if (abs(s1 - rmet(ii,jj)) > my_tol) then
+           max_err = max(max_err, abs(s1 - rmet(ii,jj)))
            wtkflg = 1
          end if
        end do
@@ -653,87 +647,77 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    end do
 
    if (wtkflg /= 0) then
-     write(message,'(a,a,a,a)') ch10,&
-&     ' getshell : BUG -',ch10,&
-&     ' The calculated weights do not solve the linear system for all k-points.'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg,'(5a, 2(a, es16.8))') ch10,&
+     ' getshell: BUG -',ch10,&
+     ' The calculated weights do not solve the linear system for all k-points.', ch10, &
+     " max_err: ", max_err, " > tolerance: ", my_tol
+     call wrtout(unts, msg)
    end if
  end if
 
  if (wtkflg /= 0) then
 
-   message = ' There is a problem with the finite difference expression of the ddk '//ch10&
-&        //' If you are very close to a symmetric structure, you might be confusing the algorithm with'//ch10&
-&        //' sets of k-points which are not quite part of the same shell. Try rectifying angles and acell.'
-   ABI_BUG(message)
+   msg = ' There is a problem with the finite difference expression of the ddk '//ch10&
+        //' If you are very close to a symmetric structure, you might be confusing the algorithm with'//ch10&
+        //' sets of k-points which are not quite part of the same shell. Try rectifying angles and acell.'
+   ABI_BUG(msg)
 
  else
 
    nshell = ishell
 
-   write(message,'(a,a,a,a,a,a,a,i3,a,a,f16.7)') ch10,&
-&   ' getshell : finite difference formula of Marzari and Vanderbilt',ch10,&
-&   '            (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)',& ! [[cite:Marzari1997]]
-&   ch10,ch10,&
-&   '            number of first neighbours  : ', neigh(1,1),ch10,&
-&   '            weight : ',mvwtk(1,1)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,  message,'COLL')
+   write(msg,'(a,a,a,a,a,a,a,i3,a,a,f16.7)') ch10,&
+   ' getshell : finite difference formula of Marzari and Vanderbilt',ch10,&
+   '            (see Marzari and Vanderbilt, PRB 56, 12847 (1997), Appendix B)',& ! [[cite:Marzari1997]]
+   ch10,ch10,&
+   '            number of first neighbours  : ', neigh(1,1),ch10,&
+   '            weight : ',mvwtk(1,1)
+   call wrtout(unts, msg)
 
    if (nshell > 1) then
      is1 = neigh(1,1) + 1
-     write(message,'(a,a,i3,a,a,f16.7)')ch10,&
-&     '            number of second neighbours  : ', neigh(2,1),ch10,&
-&     '            weight : ',mvwtk(is1,1)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg,'(a,a,i3,a,a,f16.7)')ch10,&
+     '            number of second neighbours  : ', neigh(2,1),ch10,&
+     '            weight : ',mvwtk(is1,1)
+     call wrtout(unts, msg)
    end if
 
    if (nshell > 2) then
      is1 = sum(neigh(1:2,1)) + 1
-     write(message,'(a,a,i3,a,a,f16.7)')ch10,&
-&     '            number of third neighbours  : ', neigh(3,1),ch10,&
-&     '            weight : ',mvwtk(is1,1)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg,'(a,a,i3,a,a,f16.7)')ch10,&
+      '            number of third neighbours  : ', neigh(3,1),ch10,&
+      '            weight : ',mvwtk(is1,1)
+     call wrtout(unts, msg)
    end if
 
    if (nshell > 3) then
      is1 = sum(neigh(1:3,1)) + 1
-     write(message,'(a,a,i3,a,a,f16.7)')ch10,&
-&     '            number of fourth neighbours  : ', neigh(4,1),ch10,&
-&     '            weight : ',mvwtk(is1,1)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg,'(a,a,i3,a,a,f16.7)')ch10,&
+      '            number of fourth neighbours  : ', neigh(4,1),ch10,&
+      '            weight : ',mvwtk(is1,1)
+     call wrtout(unts, msg)
    end if
 
    if (nshell > 4) then
      is1 = sum(neigh(1:4,1)) + 1
-     write(message,'(a,a,i3,a,a,f16.7)')ch10,&
-&     '            number of fifth neighbours  : ', neigh(5,1),ch10,&
-&     '            weight : ',mvwtk(is1,1)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg,'(a,a,i3,a,a,f16.7)')ch10,&
+      '            number of fifth neighbours  : ', neigh(5,1),ch10,&
+      '            weight : ',mvwtk(is1,1)
+     call wrtout(unts, msg)
    end if
 
    if (nshell > 5) then
      is1 = sum(neigh(1:5,1)) + 1
-     write(message,'(a,a,i3,a,a,f16.7)')ch10,&
-&     '            number of sixth neighbours  : ', neigh(6,1),ch10,&
-&     '            weight : ',mvwtk(is1,1)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg,'(a,a,i3,a,a,f16.7)')ch10,&
+     '            number of sixth neighbours  : ', neigh(6,1),ch10,&
+     '            weight : ',mvwtk(is1,1)
+     call wrtout(unts, msg)
    end if
 
  end if
 
- if (allocated(tnons1))  then
-   ABI_FREE(tnons1)
- end if
- if (allocated(symrel1))  then
-   ABI_FREE(symrel1)
- end if
+ ABI_SFREE(tnons1)
+ ABI_SFREE(symrel1)
 
  ABI_FREE(wtk3)
 

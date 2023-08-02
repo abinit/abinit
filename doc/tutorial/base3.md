@@ -14,10 +14,10 @@ This tutorial aims at showing you how to get the following physical properties, 
 
 You will learn about the use of k-points, as well as the smearing of the plane-wave kinetic energy cut-off.
 
-Visualisation tools are NOT covered in this tutorial.
-Powerful visualisation procedures have been developed in the Abipy context,
+You will also use the powerful visualisation procedures that have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+Other visualization tools are available, but will not be covered.
 
 This tutorial should take about 1 hour.
 
@@ -48,12 +48,15 @@ You should edit it, read it carefully, have a look at the following **new input 
 * [[rprim]]
 * [[xred]] (used instead of [[xcart]])
 * [[kptopt]], [[ngkpt]], [[nshiftk]], [[shiftk]], [[kptrlatt]] (not easy, take your time!)
-* [[diemac]] (a different value is used for this variable compare to previous calculations where isolated molecules were considered).
+* [[diemac]] (with respect to previous calculations where isolated molecules were considered, a different value is used for this variable).
 
 Note also the following: you will work at fixed [[ecut]] (12Ha).
 It is implicit that in *real life*, you should do a convergence test with respect to *ecut*.
 Here, a suitable *ecut* is given to you; it corresponds to the suggested *ecut* for this pseudopotential according to the [PseudoDojo website](http://www.pseudo-dojo.org/) where the silicon pseudopotential was taken.
 When we will relax the lattice parameter, it will result in a lattice parameter that is 0.2% off of the experimental value.
+Such convergence study has to be made for each physical property that is the target of your interest. While the
+value of [[ecut]] giving converged properties usually do not depend much on the property, this is not true
+for the convergence with respect to k points.
 
 When you have read the input file, you can run the code, as usual:
 
@@ -171,10 +174,18 @@ The difference between dataset 3 and dataset 4 is rather small.
 Even the dataset 2 gives an accuracy of about 0.0001 Ha. So, our converged value for the total energy,
 at fixed [[acell]], fixed [[ecut]], is -8.8251 Ha.
 
+!!! note
+    ABINIT never outputs the value of input variable [[ngkpt]], but instead uses [[kptrlatt]], a 3x3 matrix of integers.
+    In the simplest case, with [[nshiftk]]=1, [[kptrlatt]] will simply be a diagonal matrix with diagonal values equal to the
+    input [[ngkpt]]. However, if [[nshiftk]] is not 1, but the combination of [[ngkpt]] and [[shiftk]] allows ABINIT
+    to generate an homogeneous k point grid with different basis vercotr in reciprocal space, [[nshiftk]] might
+    be reduced to 1, and [[kptrlatt]] will not be a simple diagonal matrix. Nevertheless, both the input
+    and the echoed grids are equivalent.
+
 ## Determination of the lattice parameters
 
 The input variable [[optcell]] governs the automatic optimisation of cell shape and volume.
-For the automatic optimisation of cell volume, use:
+For the automatic optimisation of cell volume in this cubic crystal, use:
 
     optcell 1
     ionmov 2
@@ -182,7 +193,10 @@ For the automatic optimisation of cell volume, use:
     dilatmx 1.05
     ecutsm 0.5
 
-You should read the indications about [[dilatmx]] and [[ecutsm]].
+You should read the indications about [[optcell]], [[dilatmx]] and [[ecutsm]].
+In particular, while [[optcell]] is adequate for cubic crystals, for the majority of materials,
+the optimal geometry must include deformations of the cell shape, not simply global rescaling,
+so the most usual value of [[optcell]] to be used is 2.
 Do not test all the k-point grids, only those with **nkpt** 2 and 10.
 
 The input file *$ABI_TESTS/tutorial/Input/tbase3_4.abi* is an example,
@@ -219,9 +233,17 @@ or the [NIST database](https://physics.nist.gov/cgi-bin/cuu/Value?asil|search_fo
 
 ## Computing the band structure
 
-We fix the parameters [[acell]] to the theoretical value of 3 * 10.195,
-and we fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid).
-We will ask for 8 bands (4 valence and 4 conduction).
+For the computation of the electronic band structurre, we fix the parameters [[acell]] to the theoretical value of 3 * 10.195 (we might also examine the band structure at the experimental value - it is the user's choice).
+We use the same [[ecut]] than the one used to determine this theoretical value.
+It is implicit that you should check the sensitivity of the electronic band structure
+with respect to *ecut*. Perhaps you will need to raise the value of *ecut* to obtain the electronic band structure
+at your target precision. In general, however, as Kohn-Sham band structure suffer inherently of the DFT band gap problem
+with usual XC functionals, the common practice is to use the same *ecut* value as the one used for detemining the lattice parameters.
+We fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid). 
+The same sensitivity check of the electronic band structure with respect to the choice of grid of k-points should also be made.
+
+We will ask for 8 bands (4 valence and 4 conduction). Whether this choice of conduction band number is adequate depends on the range of energy
+above the highest occupied state that you want to analyze/represent. In the next section, we will criticize this choice.
 
 A band structure can be computed by solving the Kohn-Sham equation for many different k-points,
 along different segments of the Brillouin zone. The potential that enters the Kohn-Sham must be
@@ -312,10 +334,14 @@ The last $\Gamma$ is exactly equivalent to the first $\Gamma$.
 It can be checked that the top of the valence band
 is obtained at $\Gamma$ (=4.87519 eV). The width of the valence band is 12.1 eV, the lowest unoccupied state at X
 is 0.585 eV higher than the top of the valence band, at $\Gamma$.
+Note that the zero of eigenenergies is not fixed at the top of the valence band.
+Instead, the top of the valence band is by default the expectation value of the corresponding eigenfunction for the Kohn-Sham potential
+with zero average macroscopic Hartree potential (other choices can be made, but this is a topic for experts). 
+
 
 The Si is described as an indirect band gap material (this is correct),
 with a band-gap of about 0.585 eV (this is quantitatively quite wrong: the experimental value 1.17 eV is at 25 degree Celsius).
-The minimum of the conduction band is even slightly displaced with respect to X, see kpt # 21.
+The minimum of the conduction band is slightly displaced with respect to X, see kpt # 21 (this is correct).
 This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
 Theory: use the GW approximation. This is described in [the first GW tutorial](/tutorial/gw1).
@@ -389,6 +415,49 @@ To visualize the band structure stored in the *GSR.nc* file, use the |abiopen| s
     abiopen.py tbase3_5o_DS2_GSR.nc --expose -sns=talk
 
 ![](base3_assets/abiopen_tbase3_5o_DS2_GSR.png)
+
+You obtain the visualization of the Brillouin Zone (with the notation for several high-symmetry wavevectors), 
+the representation of the primitive cell with location of atoms, and the sought graphical
+representation of the electronic band structure.
+
+Concerning the latter, AbiPy has performed a shift of the computed eigenenergies, to have the top of the
+valence bands approximately at zero. Note that this shift is not the exact one: the top of the valence
+band that happen at $\Gamma$ is not exactly zero. This is because the computation of the occupied states
+during the self-consistent DFT calculation was done with a k point grid that did not include the $\Gamma$ point.
+ABINIT determined the energy of the highest occupied state for the points of that k point grid.
+The subsequent non-self-consistent calculation of the band eigenenergies, that included calculation
+at $\Gamma$, was not associated with occupation numbers. Hence, the value of the top of the valence band could not be corrected.
+In order to obtain an electronic band structure with the top of the valence band aligned with zero using AbiPy, the
+corresponding k point must belong to the grid used for self-consistent calculations.
+However, this point with the highest occupied state is not known a priori. 
+
+If this is a mandatory target of the electronic structure representation, the user has the choice.
+He/she can make his/her own post-treatment of the data contained in the GSR file.
+Alternatively, for the automatic generation of the correcly aligned band structure using AbiPy, 
+the user should proceed with more steps: after the self-consistent calculation with a particular k point grid,
+the band structure at high symmetry points is scanned, the k point for which the top of the valence band is obtained
+is determined, and, if not included in the initial grid for self-consistent calculation, a new self-consistent
+calculation must be done, with a more appropriate grid. Since the top of the valence bands often happens
+at $\Gamma$, one might also from the very start decide to make self-consistent calculations with grids that include
+$\Gamma$, although such grids are usually not as efficient as the shifted grids.
+
+
+Although the electronic band structure obtained with AbiPy looks nice in the above figure, there is a pitfall. 
+Indeed, AbiPy decided to represent
+the energy range from about -13 eV to about +12 eV, while, as given in the input file above, 4 valence bands and 4 conduction bands
+were computed. The representation of valence bands is fine, but apparently, there is no electronic state above +10 eV.
+Is this correct ? Please, perform a calculation of the band structure with many more bands, for example 20 bands.
+You will observe that the representation of the band structure up to +12 eV obtained with 8 bands 
+is indeed incomplete: more conduction bands connect
+to the four ones initially represented, and they fill the energy range up to +12 eV, and much beyond. 
+There is no gap between the four conduction bands that had already been computed and the additional higher ones.
+AbiPy by default chooses a range larger than all the bands that have been computed. So, this pitfall is present by default ! 
+
+The aim of the user 
+might be to have a quick look at the band structure, in which case the default representation by AbiPy is fine.
+However, if the user wants to place a band structure in a report, he/she would better cut the band structure from above
+in order to avoid showing an incomplete set of bands, falsely picturing a gap between the represented conduction bands
+and those not represented.
 
 It is also possible to compare multiple GSR files with the |abicomp| script and the syntax
 

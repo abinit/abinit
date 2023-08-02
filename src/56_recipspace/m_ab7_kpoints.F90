@@ -4,12 +4,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (DC)
+!!  Copyright (C) 2008-2022 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -62,11 +60,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
-!!
 !! SOURCE
 
   subroutine kpoints_get_irreductible_zone(irrzon, phnons, &
@@ -110,12 +103,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
 !!
 !! SOURCE
 
@@ -169,12 +156,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
-!!
 !! SOURCE
   subroutine kpoints_binding_mp_k_2(symid, nkpt, kpt, wkpt, &
        & kptrlatt, kptrlen, nshiftk, shiftk, errno)
@@ -219,11 +200,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
 !!
 !! SOURCE
   subroutine kpoints_get_mp_k_grid(symid, nkpt, kpt, wkpt, &
@@ -271,12 +247,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
 !!
 !! SOURCE
   subroutine kpoints_binding_auto_k_1(symid, nkpt, kptrlatt, kptrlen, &
@@ -336,12 +306,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_ab7_kpoints
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
-!!
 !! SOURCE
 
   subroutine kpoints_binding_auto_k_2(symid, nkpt, kpt, wkpt, kptrlatt, kptrlen, &
@@ -387,11 +351,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      kpoints_binding_auto_k_1,kpoints_binding_auto_k_2
 !!
 !! SOURCE
   subroutine kpoints_get_auto_k_grid(symid, nkpt, kpt, wkpt, &

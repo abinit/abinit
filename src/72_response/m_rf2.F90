@@ -7,14 +7,10 @@
 !! equation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2021 ABINIT group (LB,MT)
+!!  Copyright (C) 2015-2022 ABINIT group (LB,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -147,11 +143,6 @@ CONTAINS  !=====================================================================
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dfptnl_loop,m_dfptnl_pert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rf2_getidir(idir1,idir2,idir)
@@ -186,11 +177,6 @@ end subroutine rf2_getidir
 !!  idir2 : index of the 2nd direction (1<=idir2<=3)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_dfpt_scfcv,m_rf2_init
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -267,14 +253,10 @@ end subroutine rf2_getidirs
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-                                 jband,debug_mode,vi,v1j,v2j)
+                                 jband,debug_mode,vi,v1j,v2j,factor_in)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -282,6 +264,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
  type(rf2_t),intent(inout) :: rf2
  type(gs_hamiltonian_type),intent(in) :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
+ real(dp), intent(in) :: factor_in
 
 !arrays
  real(dp),intent(in) :: vi(2,rf2%size_wf),v1j(2,rf2%size_wf),v2j(2,rf2%size_wf)
@@ -289,7 +272,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 !Local variables ---------------------------------------
 !scalars
  integer :: nband_k,size_wf
- real(dp) :: dotr,dot2r,doti,dot2i,factor
+ real(dp) :: dotr,dot2r,doti,dot2i
  character(len=500) :: msg
  character(len=15) :: bra_i,ket_j,op1,op2
  character(len=2) :: pert1,pert2
@@ -300,8 +283,6 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
 
  nband_k = rf2%nband_k
  size_wf = rf2%size_wf
- factor = one
- if(rf2%ndir==1 .and. choice /= 3) factor = two ! in order to not compute same terms twice
 
  call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v1j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
@@ -344,7 +325,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
    call wrtout(std_out,msg)
  end if
 
- rf2%lambda_mn(:,iband+(jband-1)*nband_k) = factor*(/dotr,doti/) + rf2%lambda_mn(:,iband+(jband-1)*nband_k)
+ rf2%lambda_mn(:,iband+(jband-1)*nband_k) = factor_in*(/dotr,doti/) + rf2%lambda_mn(:,iband+(jband-1)*nband_k)
 
  if (choice == 1 .or. gs_hamkq%usepaw==1) then
    call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,vi,v2j,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -356,7 +337,7 @@ subroutine rf2_accumulate_bands(rf2,choice,gs_hamkq,mpi_enreg,iband,idir1,idir2,
      call wrtout(std_out,msg)
    end if
 
-   rf2%amn(:,iband+(jband-1)*nband_k) = factor*(/dotr,doti/) + rf2%amn(:,iband+(jband-1)*nband_k)
+   rf2%amn(:,iband+(jband-1)*nband_k) = factor_in*(/dotr,doti/) + rf2%amn(:,iband+(jband-1)*nband_k)
 
  end if ! end choice
 
@@ -428,11 +409,6 @@ end subroutine rf2_accumulate_bands
 !!    <Proj_i^(0)|u^(0)> and <Proj_i^(1)|u^(0)> (dir=1,2 and 3) for all wavefunctions u^(0) or
 !!    <Proj_i^(0)|u^(1)> and <Proj_i^(1)|u^(1)> (dir=1,2 and 3) for all 1st-order wavefunctions u^(1).
 !!    Note that <Proj_i^(2)|u^(0)> is always computed on the fly.
-!!
-!! PARENTS
-!!      m_dfptnl_pert,m_rf2_init
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -793,10 +769,6 @@ end subroutine rf2_apply_hamiltonian
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

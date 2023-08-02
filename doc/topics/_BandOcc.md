@@ -1,15 +1,15 @@
 ---
-description: How to to specify bands and occupation numbers, for metals or insulators
+description: How to specify bands and occupation numbers, for metals or insulators
 authors: FJ
 ---
 <!--- This is the source file for this topics. Can be edited. -->
 
-This page gives hints on how to to specify bands and occupation numbers, 
+This page gives hints on how to specify bands and occupation numbers, 
 for metals or insulators with the ABINIT package.
 
 ## Introduction
 
-  
+
 Metallic as well as insulating systems can be treated, depending on the value
 of [[occopt]]. The default value of [[occopt]] corresponds to an insulator (or
 finite molecule): the number of bands (or states for a molecule) is deduced
@@ -47,8 +47,7 @@ might be useful to perform a Δ-SCF calculation for excited states.
 
 ## Tutorials
 
-* [[tutorial:base1|The tutorial 1]] deals with the H2 molecule: get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy 
-* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA 
+* [[tutorial:base1|The tutorial 1]] deals with the H2 molecule: get the total energy, the electronic energies, the charge density, the bond length, the atomisation energy
+* [[tutorial:base2|The tutorial 2]] deals again with the H2 molecule: convergence studies, LDA versus GGA
 * [[tutorial:base3|The tutorial 3]] deals with crystalline silicon (an insulator): the definition of a k-point grid, the smearing of the cut-off energy, the computation of a band structure, and again, convergence studies ...
 * [[tutorial:base4|The tutorial 4]] deals with crystalline aluminum (a metal), and its surface: occupation numbers, smearing the Fermi-Dirac distribution, the surface energy, and again, convergence studies ...
-

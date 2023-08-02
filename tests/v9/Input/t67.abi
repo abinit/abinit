@@ -1,0 +1,27 @@
+# Calculation of phonon frequencies at gamma.
+ ifcflag 1
+ ngqpt 2 2 2
+ dipdip 0
+ nph1l 1
+ qph1l
+    0.0    0.0    0.0    1.0
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = anaddb
+#%% [shell]
+#%% pre_commands =
+#%%   iw_cp si_with_quad_block_not_at_the_end_DDB t67.ddb.in
+#%% [files]
+#%% files_to_test =
+#%%   t67.abo, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
+#%% [paral_info]
+#%% max_nprocs = 2
+#%% [extra_info]
+#%% authors = M. Giantomassi
+#%% keywords = LONGWAVE
+#%% description =
+#%%   Test whether one can read a DDB with the dynamical quadrupole section that is not the last block.
+#%%   The order of the blocks indeed depend on the list of files passed to mrgddb and the internal implementation
+#%%   should not assume any particular order
+#%%<END TEST_INFO>

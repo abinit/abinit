@@ -6,7 +6,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2021 ABINIT group (AM)
+!! Copyright (C) 1999-2022 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -17,13 +17,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,flush_unit,herald,init10
-!!      isfile,multibinit_main,multibinit_main2,timein,wrtout,xmpi_init
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -49,11 +42,9 @@ program multibinit
   use m_effective_potential_file
   use m_abihist
 
-  use m_specialmsg, only : specialmsg_getcount, herald
+  use m_specialmsg, only : specialmsg_getcount
   use m_io_tools,   only : flush_unit, open_file
   use m_time,       only : asctime, timein
-  use m_parser,     only : instrng
-  use m_dtset,      only : chkvars
   use m_dtfil,      only : isfile
 
   !use m_generate_training_set, only : generate_training_set
@@ -61,7 +52,7 @@ program multibinit
   use m_init10,              only : init10
   use m_multibinit_unittest, only: mb_test_main
   use m_multibinit_driver
-  use m_multibinit_main2, only: multibinit_main2
+  use m_multibinit_main2, only: multibinit_main2, herald_multibinit
 
   implicit none
 
@@ -73,7 +64,7 @@ program multibinit
   real(dp) :: tsec(2)
   character(len=24) :: codename,start_datetime
   character(len=fnlen) :: filnam(18),tmpfilename
-  character(len=500) :: message 
+  character(len=500) :: message
   type(args_t) :: args
   integer :: ii
   integer :: master, my_rank, comm, nproc, ierr
@@ -100,20 +91,6 @@ program multibinit
   ! Parse command line arguments.
   args = args_parser(); if (args%exit /= 0) goto 100
 
- ! nargs = command_argument_count()
- ! do iarg=1,nargs
- !    call get_command_argument(number=iarg, value=arg)
- !    if (arg == "-v" .or. arg == "--version") then
- !       write(std_out,"(a)") trim(abinit_version); goto 100
- !       goto 100
- !    else if (arg == "--unittest") then
- !       unittest=.True.
- !       call mb_test_main()
- !       goto 100
- !    else if(arg== "-F03") then
- !       use_f03=.True.
- !    endif
- ! end do
 
  ! Initialize memory profiling if activated at configure time.
  ! if a full report is desired, set the argument of abimem_init to "2" instead of "0" via the command line.
@@ -127,7 +104,7 @@ program multibinit
 
   if (iam_master) then
      codename='MULTIBINIT'//repeat(' ',14)
-     call herald(codename,abinit_version,std_out)
+     call herald_multibinit(codename,abinit_version,std_out, args%multibinit_F03_mode/=1)
   end if
 
   start_datetime = asctime()
@@ -136,7 +113,12 @@ program multibinit
   call wrtout(std_out,message,'COLL')
 
   !Initialise the code : write heading, and read names of files.
-  call init10(filnam,comm)
+  call init10(args%input_path, filnam,comm)
+
+  ! set filnam(2), and (3) from input path
+  if (len_trim(args%input_path)/=0) then
+     call invars_multibinit_filenames_from_input_file(args%input_path, filnam(2), filnam(3))
+  end if
 
   !******************************************************************
 
@@ -157,7 +139,7 @@ program multibinit
      end if
      !  Call open_file(unit=ab_out,file=tmpfilename,form='formatted',status='new')
      rewind (unit=ab_out)
-     call herald(codename,abinit_version,ab_out)
+     call herald_multibinit(codename,abinit_version,ab_out, args%multibinit_F03_mode/=1)
      !  Print the number of cpus in output
      write(message,'(a,i5,a)') '-  nproc =',nproc
      call wrtout(ab_out,message,'COLL')
@@ -170,14 +152,15 @@ program multibinit
   call wrtout(ab_out,message,'COLL')
   call wrtout(std_out,message,'COLL')
 
+
   !***************************************************************************************
   !***************************************************************************************
   if(args%multibinit_F03_mode==1) then
      ! Use the F03 mode, which has only spin and a simple harmonic lattice now
      ! After everything is migrated, it will becomes default and multibinit_main will be deprecated.
-     call multibinit_main2(filnam)
+     call multibinit_main2(args%input_path,filnam, args%dry_run)
   else
-     call multibinit_main(filnam, args%dry_run)
+     call multibinit_main(args%input_path, filnam, args%dry_run)
   end if
   ! Final message
   !****************************************************************************************

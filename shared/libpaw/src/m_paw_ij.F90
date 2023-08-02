@@ -9,7 +9,7 @@
 !!  for a given atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MT, FJ)
+!! Copyright (C) 2013-2022 ABINIT group (MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -317,13 +317,6 @@ CONTAINS
 !!   In output all the basic dimensions are defined and the arrays are allocated
 !!   according to the input variables.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
-!!      m_dfptnl_pert,m_nonlinear,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_ij_init(Paw_ij,cplex,nspinor,nsppol,nspden,pawspnorb,natom,ntypat,typat,Pawtab,&
@@ -563,13 +556,6 @@ end subroutine paw_ij_init
 !! SIDE EFFECTS
 !!  paw_ij(:)<type(paw_ij_type)>=paw arrays given on (i,j) channels
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
-!!      m_dfptnl_pert,m_nonlinear,m_paral_pert,m_paw_ij,m_paw_tools
-!!      m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_ij_free(Paw_ij)
@@ -672,13 +658,6 @@ end subroutine paw_ij_free
 !! SIDE EFFECTS
 !!  Paw_ij(:)<type(paw_ij_type)>=PAW arrays given on (i,j) channels.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
-!!      m_dfptnl_pert,m_nonlinear,m_paw_ij,m_paw_tools,m_respfn_driver
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_ij_nullify(Paw_ij)
@@ -744,11 +723,6 @@ end subroutine paw_ij_nullify
 !!
 !! NOTES
 !!  paw_ij_cpy must have been allocated in the calling function.
-!!
-!! PARENTS
-!!      m_paw_ij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -978,11 +952,6 @@ end subroutine paw_ij_copy
 !! (Only writing)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pawdij,m_sigma_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1349,11 +1318,6 @@ end subroutine paw_ij_print
 !!
 !! OUTPUT
 !!  paw_ij_gathered(:)<type(paw_ij_type)>= output paw_oij datastructure
-!!
-!! PARENTS
-!!      m_io_kss,m_paw_ij,m_paw_tools
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2016,11 +1980,6 @@ end subroutine paw_ij_gather
 !! SIDE EFFECTS
 !!  paw_ij(:)<type(paw_ij_type)>= input (and eventually output) paw_ij datastructures
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_ij_redistribute(paw_ij,mpi_comm_in,mpi_comm_out,&
@@ -2346,12 +2305,6 @@ end subroutine paw_ij_redistribute
 !! SIDE EFFECTS
 !!  Paw_ij<type(paw_ij_type)>=paw_ij structure
 !!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine paw_ij_reset_flags(Paw_ij,all,dijhartree,self_consistent)
@@ -2441,11 +2394,6 @@ end subroutine paw_ij_reset_flags
 !!
 !! OUTPUT
 !!  paw_ij= output datastructure filled with buffers receive in a receive operation
-!!
-!! PARENTS
-!!      m_paw_ij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2687,11 +2635,6 @@ end subroutine paw_ij_isendreceive_getbuffer
 !!  buf_int_size= size of buffer of integers
 !!  buf_dp= buffer of double precision numbers to be sent
 !!  buf_dp_size= size of buffer of double precision numbers
-!!
-!! PARENTS
-!!      m_paw_ij
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

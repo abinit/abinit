@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -110,7 +110,7 @@ for arg in ("enable","with"):
         (opt,re.sub("_","-",opt),opt)
     else:
       m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
-        + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
+        + "    AS_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
           (arg,opt_name,opt_desc,opt_dflt))
 
       if ( opt_dflt is not None ):

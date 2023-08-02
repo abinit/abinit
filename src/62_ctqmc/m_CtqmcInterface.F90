@@ -11,18 +11,12 @@
 !!  friendly interface for the user
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -44,7 +38,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +49,7 @@ TYPE, PUBLIC :: CtqmcInterface
   TYPE(Ctqmc)         :: Hybrid
   INTEGER _PRIVATE :: opt_fk       = 0
   INTEGER _PRIVATE :: opt_order    = 0
+  INTEGER _PRIVATE :: opt_histo    = 0
   INTEGER _PRIVATE :: opt_movie    = 0
   INTEGER _PRIVATE :: opt_analysis = 0
   INTEGER _PRIVATE :: opt_check    = 0
@@ -81,7 +76,7 @@ CONTAINS
 !!  Initialize with permanent parameters
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,12 +99,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -156,6 +145,7 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   END IF
   this%opt_fk       = 0
   this%opt_order    = 0
+  this%opt_histo    = 0
   this%opt_movie    = 0
   this%opt_analysis = 0
   this%opt_check    = 0
@@ -172,7 +162,7 @@ END SUBROUTINE CtqmcInterface_init
 !!  Set and save options for many runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -198,20 +188,16 @@ END SUBROUTINE CtqmcInterface_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_movie,opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
+SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_histo,opt_movie,&
+& opt_analysis,opt_check, opt_noise, opt_spectra, opt_gMove) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_Fk
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_order
+  INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_histo
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_movie
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_analysis
   INTEGER , OPTIONAL  , INTENT(IN   ) :: opt_check
@@ -223,6 +209,8 @@ SUBROUTINE CtqmcInterface_setOpts(this,opt_Fk,opt_order,opt_movie,opt_analysis,o
     this%opt_Fk = opt_fk
   IF ( PRESENT(opt_order) ) &
     this%opt_order = opt_order
+  IF ( PRESENT(opt_histo) ) &
+    this%opt_histo = opt_histo
   IF ( PRESENT(opt_analysis) ) &
     this%opt_analysis = opt_analysis
   IF ( PRESENT(opt_check) ) &
@@ -247,7 +235,7 @@ END SUBROUTINE CtqmcInterface_setOpts
 !!  run a ctqmc simu and get results
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -269,12 +257,6 @@ END SUBROUTINE CtqmcInterface_setOpts
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -310,6 +292,7 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
     CALL Ctqmc_setU(this%Hybrid, matU)
 
   CALL Ctqmc_run(this%Hybrid,opt_order=this%opt_order, &
+                           opt_histo=this%opt_histo, &
                            opt_movie=this%opt_movie, &
                            opt_analysis=this%opt_analysis, &
                            opt_check=this%opt_check, &
@@ -360,7 +343,7 @@ END SUBROUTINE CtqmcInterface_run
 !!  change sweeps on the fly
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -374,12 +357,6 @@ END SUBROUTINE CtqmcInterface_run
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -401,7 +378,7 @@ END SUBROUTINE CtqmcInterface_setSweeps
 !!  Destroy simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -414,12 +391,6 @@ END SUBROUTINE CtqmcInterface_setSweeps
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2011-2021 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2011-2022 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Documentation],[9.5.1],
+AC_INIT([ABINIT-Documentation],[9.11.2],
   [https://bugs.launchpad.net/abinit/],[abinit-doc])
 AC_REVISION([Autotools support for the ABINIT Documentation])
 AC_CONFIG_AUX_DIR([config/gnu])
@@ -58,7 +58,7 @@ AX_PROG_MKDIR_P
 
 # Option to test the absence of LaTeX
 AC_ARG_ENABLE(portability-tests,
-  AC_HELP_STRING([--enable-portability-tests],
+  AS_HELP_STRING([--enable-portability-tests],
     [Maintainer-only option to force build parameters (default: disabled)]))
 test "${enable_portability_tests}" = "" && enable_portability_tests="no"
 

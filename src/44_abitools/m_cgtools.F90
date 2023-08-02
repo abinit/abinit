@@ -7,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2021 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2022 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,8 +43,9 @@ module m_cgtools
 
  use m_fstrings,      only : toupper, itoa, sjoin
  use m_time,          only : timab, cwtime, cwtime_report
- use m_numeric_tools, only : hermit
+ use m_numeric_tools, only : hermit, rhophi
  use m_abi_linalg,    only : abi_zgemm_2r, abi_xgemm
+ use m_pawcprj,       only : pawcprj_type,pawcprj_axpby,pawcprj_zaxpby
 
  implicit none
 
@@ -110,10 +111,15 @@ module m_cgtools
                                     ! in the case of real WFs (istwfk/=1)
  public :: cg_zprecon_block         ! precondition $<G|(H-e_{n,k})|C_{n,k}>$ for a block of band
  public :: fxphas_seq               ! Fix phase of all bands. Keep normalization but maximize real part
+ public :: fxphas_and_cmp           ! Fix phase and compare two set of wavefunctions
  public :: overlap_g                ! Compute the scalar product between WF at two different k-points
  public :: subdiago                 ! Diagonalizes the Hamiltonian in the eigenfunction subspace
+ public :: subdiago_low_memory      ! Diagonalizes the Hamiltonian in the eigenfunction subspace
+                                    ! G components are updated block by block to save memory.
  public :: pw_orthon                ! Normalize nvec complex vectors each of length nelem and then
                                     ! orthogonalize by modified Gram-Schmidt.
+ public :: pw_orthon_cprj           ! Normalize nvec complex vectors each of length nelem and then
+                                    ! orthogonalize by modified Gram-Schmidt. Also update cprj coeffs.
  public :: cg_hprotate_and_get_diag
  public :: cg_hrotate_and_get_diag
  public :: cg_get_eigens            ! Compute <i|H|i> / <i|S|i> for ndat states.
@@ -144,10 +150,6 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  ocplx(n)=Output complex array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_tocplx(n, cg, ocplx)
@@ -165,7 +167,7 @@ subroutine cg_tocplx(n, cg, ocplx)
 
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(ii,idx)
+!$OMP PARALLEL DO PRIVATE(idx)
  do ii=1,n
    idx = 2*ii-1
    ocplx(ii) = DCMPLX(cg(idx),cg(idx+1))
@@ -190,10 +192,6 @@ end subroutine cg_tocplx
 !! OUTPUT
 !!  ocg(2*n)=Output array with real and imaginary part.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_fromcplx(n, icplx, ocg)
@@ -211,7 +209,7 @@ subroutine cg_fromcplx(n, icplx, ocg)
 
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(ii,idx)
+!$OMP PARALLEL DO PRIVATE(idx)
  do ii=1,n
    idx = 2*ii-1
    ocg(idx  ) = DBLE (icplx(ii))
@@ -231,8 +229,6 @@ end subroutine cg_fromcplx
 !!
 !! INPUTS
 !!  nband=Number of vectors in icg1
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -257,7 +253,7 @@ pure subroutine cg_kfilter(npw_k, my_nspinor, nband_k, kinpw, cg)
    do iband=1,nband_k
      iwavef=(iband-1)*npw_k*my_nspinor
      do ipw=1+igs,npw_k+igs
-       if(kinpw(ipw-igs)>huge(zero)*1.d-11)then
+       if (kinpw(ipw-igs)>huge(zero)*1.d-11)then
          cg(1,ipw+iwavef)=zero
          cg(2,ipw+iwavef)=zero
        end if
@@ -284,8 +280,6 @@ end subroutine cg_kfilter
 !!
 !! SIDE EFFECT
 !!  arr(2,ldx,ldy,ldz*ndat)= all entries in the augmented region are set to zero
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -338,10 +332,6 @@ end subroutine cg_setaug_zero
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_to_reim(npw, ndat, cg, factor, reim)
@@ -379,10 +369,6 @@ end subroutine cg_to_reim
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -427,11 +413,6 @@ end subroutine cg_from_reim
 !! OUTPUT
 !!  y = In output, y contains a copy of the values of x.
 !!
-!! PARENTS
-!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_mkrho,m_dfpt_vtowfk,m_iowf
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_zcopy(n, x, y)
@@ -465,11 +446,6 @@ end subroutine cg_zcopy
 !!
 !! OUTPUT
 !!  x = Updated vector.
-!!
-!! PARENTS
-!!      m_cgtools,m_cgwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -509,8 +485,6 @@ end subroutine cg_zscal
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function cg_dznrm2(n, x) result(res)
@@ -544,8 +518,6 @@ end function cg_dznrm2
 !!
 !! OUTPUT
 !!  res(2)=Real and Imaginary part of the scalar product.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -603,8 +575,6 @@ end function cg_zdotc
 !! OUTPUT
 !!  res=Real part of the scalar product.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function cg_real_zdotc(n,x,y) result(res)
@@ -643,8 +613,6 @@ end function cg_real_zdotc
 !!
 !! OUTPUT
 !!  res(2)=Real and Imaginary part of the scalar product.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -702,11 +670,6 @@ end function cg_zdotu
 !! SIDE EFFECTS
 !!  y = Array. In output, y contains the updated vector.
 !!
-!! PARENTS
-!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_rf2_init
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_zaxpy(n, alpha, x, y)
@@ -750,13 +713,9 @@ end subroutine cg_zaxpy
 !! OUTPUT
 !! y Contains the updated vector y.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine cg_zaxpby(n, a, x ,b, y)
+subroutine cg_zaxpby(n, a, x, b, y)
 
 !Arguments ------------------------------------
 !scalars
@@ -799,11 +758,6 @@ end subroutine cg_zaxpby
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      lapackprof,m_cgtools
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -863,11 +817,6 @@ end subroutine cg_zgemv
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      lapackprof,m_cgtools,m_sigmaph
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -944,13 +893,9 @@ end subroutine cg_zgemm
 !!   9 => use time-reversal symmetry for k=(1/2,1/2,1/2)
 !!
 !!  Useful relations:
-!!   u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
+!!   u_k(G) = u_{k+G0}(G-G0); u_{-k}(-G) = u_k(G)^*
 !!  and therefore:
 !!   u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1005,11 +950,6 @@ end function set_istwfk
 !!
 !! OUTPUT
 !!  dotr= <vect|vect>
-!!
-!! PARENTS
-!!      m_cgwf,m_dfpt_cgwf,m_dfpt_vtowfk,m_dft_energy,m_epjdos,m_rf2_init
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1082,14 +1022,6 @@ end subroutine sqnorm_g
 !!  $doti=\Im ( <vect1|vect2> )$ , output only if option=2 and eventually option=3.
 !!  $dotr=\Re ( <vect1|vect2> )$
 !!
-!! PARENTS
-!!      m_cgcprj,m_cgwf,m_chebfi,m_d2frnl,m_dfpt_cgwf,m_dfpt_lwwf,m_dfpt_nstwf
-!!      m_dfpt_scfcv,m_dfpt_vtowfk,m_dfptnl_pert,m_dft_energy,m_efmas,m_eig2d
-!!      m_extraprho,m_fock_getghc,m_gkk,m_nonlop,m_nonlop_test,m_pead_nl_loop
-!!      m_phpi,m_rf2,m_rf2_init
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm)
@@ -1102,12 +1034,14 @@ subroutine dotprod_g(dotr, doti, istwf_k, npw, option, vect1, vect2, me_g0, comm
  real(dp),intent(in) :: vect1(2,npw),vect2(2,npw)
 
 !Local variables-------------------------------
-!scalars
  integer :: ierr
-!arrays
  real(dp) :: dotarr(2)
 
 ! *************************************************************************
+
+ ! Init results indipendently of option.
+ dotr = zero
+ doti = zero
 
  if (istwf_k==1) then
    ! General k-point
@@ -1173,11 +1107,6 @@ end subroutine dotprod_g
 !! OUTPUT
 !!  ai=imaginary part of the matrix element
 !!  ar=real part of the matrix element
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1330,11 +1259,6 @@ end subroutine matrixelmt_g
 !! OUTPUT
 !!  dotr= value of the dot product
 !!
-!! PARENTS
-!!      m_epjdos
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine dotprod_v(cplex,dotr,nfft,nspden,opt_storage,pot1,pot2,comm)
@@ -1431,13 +1355,6 @@ end subroutine dotprod_v
 !!   cplex=2:
 !!     V is stored as : V^11, V^22, V^12, i.V^21 (complex)
 !!     N is stored as : n, m_x, m_y, mz          (complex)
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_lw,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv
-!!      m_dfptnl_pert,m_dft_energy,m_odamix,m_prcref,m_respfn_driver,m_rhotov
-!!      m_rhotoxc,m_setvtr
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1677,11 +1594,6 @@ end subroutine dotprod_vn
 !! OUTPUT
 !!  norm2= value of the square of the norm
 !!
-!! PARENTS
-!!      m_dfpt_rhotov,m_dfpt_vtorho,m_rhotov,m_vtorho
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine sqnorm_v(cplex,nfft,norm2,nspden,opt_storage,pot,mpi_comm_sphgrid)
@@ -1763,12 +1675,6 @@ end subroutine sqnorm_v
 !! OUTPUT
 !!  meansp(nspden)=mean value for each nspden component
 !!
-!! PARENTS
-!!      m_electronpositron,m_forces,m_newvtr,m_paw_nhat,m_prcref,m_psolver
-!!      m_rhotov,m_rhotoxc
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine mean_fftr(arraysp,meansp,nfft,nfftot,nspden,mpi_comm_sphgrid)
@@ -1825,11 +1731,6 @@ end subroutine mean_fftr
 !! OUTPUT
 !!  spin = 3-vector of spin components for this state
 !!  cgcmat = outer spin product of spinorial wf with itself
-!!
-!! PARENTS
-!!      m_cut3d,m_epjdos
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1898,10 +1799,6 @@ end subroutine cg_getspin
 !! into account, for symmetric wavefunctions coming from k=(0 0 0) or other
 !! special k points.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarrbox)
@@ -1927,7 +1824,7 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
 !In the case of special k-points, invariant under time-reversal,
 !but not Gamma, initialize the inverse coordinates
 !Remember indeed that
-!u_k(G) = u_{k+G0}(G-G0); u_{-k}(G) = u_k(G)^*
+!u_k(G) = u_{k+G0}(G-G0); u_{-k}(-G) = u_k(G)^*
 !and therefore:
 !u_{G0/2}(G) = u_{G0/2}(-G-G0)^*.
  if (istwf_k>=2) then
@@ -2057,11 +1954,6 @@ end subroutine cg_gsph2box
 !! OUTPUT
 !!  oarrsph(2,npw_k*ndat)=Data defined on the G-sphere.
 !!
-!! PARENTS
-!!      m_dfti,m_fft,m_fftw3
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rscal)
@@ -2162,11 +2054,6 @@ end subroutine cg_box2gsph
 !!  rho(ldx,ldy,ldz) = contains the input density at input,
 !!                  modified in input with the contribution gived by ur.
 !!
-!! PARENTS
-!!      m_dfti,m_fft,m_fftw3
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_addtorho(nx,ny,nz,ldx,ldy,ldz,ndat,weight_r,weight_i,ur,rho)
@@ -2239,11 +2126,6 @@ end subroutine cg_addtorho
 !!  ur(2,ldx,ldy,ldz*ndat)=
 !!    Input = wavefunctions in real space.
 !!    Output= vloc |ur>
-!!
-!! PARENTS
-!!      m_dfti,m_fftw3
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2355,11 +2237,6 @@ end subroutine cg_vlocpsi
 !!
 !! OUTPUT
 !!  [umat]=Cholesky upper triangle matrix.
-!!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2521,11 +2398,6 @@ end subroutine cgnc_cholesky
 !! OUTPUT
 !!  [umat]=Cholesky upper triangle matrix.
 !!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cgpaw_cholesky(npwsp, nband, cg, gsc, istwfk, me_g0, comm_pw, umat)
@@ -2649,11 +2521,6 @@ end subroutine cgpaw_cholesky
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cgnc_normalize(npwsp, nband, cg, istwfk, me_g0, comm_pw)
@@ -2737,11 +2604,6 @@ end subroutine cgnc_normalize
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cgnc_gsortho(npwsp, nband1, icg1, nband2, iocg2, istwfk, normalize, me_g0, comm_pw)
@@ -2824,8 +2686,6 @@ end subroutine cgnc_gsortho
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine cgnc_gramschmidt(npwsp, nband, cg, istwfk, me_g0, comm_pw)
@@ -2881,11 +2741,6 @@ end subroutine cgnc_gramschmidt
 !!  gsc(2*npwsp*nband)
 !!    input: Input set of vectors S|C>
 !!    output: New S|C> compute with the new |C>
-!!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2977,11 +2832,6 @@ end subroutine cgpaw_normalize
 !!    input: set of |C> and S|C> wher |C> is the set of states to orthogonalize
 !!    output: Orthonormalized set.
 !!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cgpaw_gsortho(npwsp, nband1, icg1, igsc1, nband2, iocg2, iogsc2, istwfk, normalize, me_g0, comm_pw)
@@ -3049,7 +2899,7 @@ end subroutine cgpaw_gsortho
 
 !!****f* m_cgtools/cgpaw_gramschmidt
 !! NAME
-!!  cgpaw_grortho
+!!  cgpaw_gramschmidt
 !!
 !! FUNCTION
 !!  Gram-Schmidt orthonormalization of the vectors stored in cg
@@ -3065,8 +2915,6 @@ end subroutine cgpaw_gsortho
 !!  cg(2*npwsp*nband), gsc(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -3151,17 +2999,13 @@ end subroutine cgpaw_gramschmidt
 !!  1) MPIWF Might have to be recoded for efficient paralellism
 !!
 !!  2) The new version employs BLAS2 routine so that the OMP parallelism is delegated to BLAS library.
+!!     May use BLAS3 if multiple wavefunctions are optimized at the same time.
 !!
 !!  3) Note for PAW: ref.= PRB 73, 235101 (2006) [[cite:Audouze2006]], equations (71) and (72):
 !!     in normal use, projbd applies P_c projector
 !!     if cg and scg are inverted, projbd applies P_c+ projector
 !!
 !!  4) cg_zgemv wraps ZGEMM whose implementation is more efficient, especially in the threaded case.
-!!
-!! PARENTS
-!!      lapackprof,m_cgwf,m_dfpt_cgwf,m_dfpt_nstwf,m_getgh1c
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3279,10 +3123,10 @@ end subroutine projbd
 !! FUNCTION
 !! Multiply random number values in cg by envelope function to lower initial kinetic energy.
 !! Envelope  $\left( 1-\left( G/G_{\max }\right) ^2\right) ^{power}$ for |G|<= Gmax.
-!! Near G=0, little scaling, and goes to zero flatly near Gmax.Loop over perturbations
+!! Near G=0, little scaling, and goes to zero flatly near Gmax.
 !!
 !! INPUTS
-!! cg(2,npw*nband)=initial random number wavefunctions
+!! cg(2,mcg)=initial random number wavefunctions
 !! ecut=kinetic energy cutoff in Ha
 !! gmet(3,3)=reciprocal space metric (bohr^-2)
 !! icgmod=shift to be given to the location of data in cg
@@ -3296,15 +3140,10 @@ end subroutine projbd
 !! OUTPUT
 !!  cg(2,mcg)=revised values (not orthonormalized)
 !!
-!! PARENTS
-!!      m_inwffil
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
-subroutine cg_envlop(cg,ecut,gmet,icgmod,kg,kpoint,mcg,nband,npw,nspinor)
+subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspinor)
 
 !Arguments ------------------------------------
 !scalars
@@ -3386,11 +3225,6 @@ end subroutine cg_envlop
 !!
 !! OUTPUT
 !!  cg(2*npw,nband)=nband normalized eigenvectors
-!!
-!! PARENTS
-!!      m_cgtools
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3479,11 +3313,6 @@ end subroutine cg_normev
 !! OUTPUT
 !!  pcon(npw)=preconditioning matrix
 !!  vect(2,npw*nspinor)=<G|(H-eval)|C_{n,k}>*(polynomial ratio)
-!!
-!! PARENTS
-!!      m_cgwf,m_dfpt_cgwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3614,11 +3443,6 @@ end subroutine cg_precon
 !!  pcon(npw,blocksize)=preconditionning matrix
 !!            input  if optpcon=0,2 and iterationnumber/=1
 !!            output if optpcon=0,2 and iterationnumber==1
-!!
-!! PARENTS
-!!      m_lobpcg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -3906,11 +3730,6 @@ end subroutine cg_precon_block
 !!            input  if optpcon=0,2 and iterationnumber/=1
 !!            output if optpcon=0,2 and iterationnumber==1
 !!
-!! PARENTS
-!!      m_lobpcg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
@@ -4069,11 +3888,6 @@ end subroutine cg_zprecon_block
 !!  cg(2,mcg)=same array with altered phase.
 !!  gsc(2,mgsc)= same array with altered phase.
 !!
-!! PARENTS
-!!      m_dynmat,m_rayleigh_ritz
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, useoverlap)
@@ -4222,10 +4036,8 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
    ABI_FREE(sabb)
    ABI_FREE(sbbb)
 
-!  ====================================================================
-
-!  Storages that take into account the time-reversal symmetry : the freedom is only a sign freedom
  else  ! if istwfk/=1
+   !  Storages that take into account the time-reversal symmetry: the freedom is only a sign freedom
 
    ABI_MALLOC(creb,(nband_k))
    creb(:)=zero
@@ -4270,6 +4082,111 @@ subroutine fxphas_seq(cg, gsc, icg, igsc, istwfk, mcg, mgsc, nband_k, npw_k, use
 end subroutine fxphas_seq
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_cgtools/fxphas_and_cmp
+!! NAME
+!! fxphas_and_com
+!!
+!! FUNCTION
+!! Fix phase and compare two set of wavefunctions
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+logical function fxphas_and_cmp(npw_k, nspinor, nband_k, istwfk, cg1, cg2, eig_k, msg, atol_rho, atol_dphi) result(ok)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: npw_k, nspinor, nband_k, istwfk
+ real(dp),intent(inout) :: cg1(2, npw_k*nspinor, nband_k), cg2(2, npw_k*nspinor, nband_k)
+ real(dp),intent(in) :: eig_k(nband_k)
+ character(len=*),intent(out) :: msg
+ real(dp),optional,intent(in) :: atol_rho, atol_dphi
+
+!Local variables-------------------------------
+ integer, parameter :: useoverlap0 = 0, mgsc = 0
+ integer :: ipw, ipwsp, isp, mcg, band
+ real(dp) :: phi1, rho1, phi2, rho2, max_rho_adiff, atol_rho__, phi_diff_ref, max_dphi_adiff, atol_dphi__, gsc(0,0)
+ character(len=500) :: btype
+
+! ***********************************************************************
+
+ atol_rho__ = tol6; if (present(atol_rho)) atol_rho__ = atol_rho
+ atol_dphi__ = tol3; if (present(atol_dphi)) atol_dphi__ = atol_dphi
+ max_rho_adiff = zero; max_dphi_adiff = zero; phi_diff_ref = huge(one)
+
+ mcg = npw_k * nspinor * nband_k
+ call fxphas_seq(cg1, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
+ call fxphas_seq(cg2, gsc, 1, 1, istwfk, mcg, mgsc, nband_k, npw_k * nspinor, useoverlap0)
+
+ do band=1,nband_k
+   call band_type(band, btype)
+   if (btype == "degenerate") cycle
+   write(234, *)"band: ", band, "istwfk: ", istwfk, trim(btype)
+   write(235, *)"band: ", band, "istwfk:", istwfk, trim(btype)
+   write(234, *)"cg1:"; write(235, *)"cg2:"
+   !write(234, *)"cg1 rho:"; write(235, *)"cg2 rho phi:"
+   do isp=1,nspinor
+     do ipw=1,npw_k
+       ipwsp = ipw + (isp - 1) * npw_k
+       if (npw_k > 15 .and. ipw > 15 .and. ipw < npw_k - 15) cycle
+       !write(234, *)ipwsp, cg1(1, ipwsp, band); write(234, *)ipwsp, cg1(2, ipwsp, band)
+       !write(235, *)ipwsp, cg2(1, ipwsp, band); write(235, *)ipwsp, cg2(2, ipwsp, band)
+       call rhophi(cg1(:, ipwsp, band), phi1, rho1)
+       call rhophi(cg2(:, ipwsp, band), phi2, rho2)
+       write(234, *)ipwsp, rho1!; write(234, *)ipwsp, phi1
+       write(235, *)ipwsp, rho2!; write(235, *)ipwsp, phi2
+     end do
+   end do
+ end do
+
+ do band=1,nband_k
+   do ipw=1,npw_k * nspinor
+     call rhophi(cg1(:, ipw, band), phi1, rho1)
+     call rhophi(cg2(:, ipw, band), phi2, rho2)
+     max_rho_adiff = max(max_rho_adiff, abs(rho1 - rho2))
+     if (rho1 > atol_rho__ ** 2) then
+       if (phi_diff_ref /= huge(one)) phi_diff_ref = phi1 - phi2
+       max_dphi_adiff = max(max_dphi_adiff, abs(phi_diff_ref - (phi1 - phi2)))
+     end if
+   end do
+ end do
+
+ write(msg, "(2(a,es12.4))")"max_rho_adiff: ", max_rho_adiff, ", max_dphi_adiff: ", max_dphi_adiff
+ ok = (max_rho_adiff < atol_rho__ .and. max_dphi_adiff < atol_dphi__)
+
+contains
+subroutine band_type(band, btype)
+  integer,intent(in) :: band
+  character(len=*),intent(out) :: btype
+  real(dp) :: e0
+
+  e0 = eig_k(band)
+
+  if (band == 1) then
+    btype = "last_state"
+    if (nband_k > 1) then
+      btype = "non-degenerate"
+      if (abs(e0 - eig_k(band + 1)) < tol6) btype = "degenerate"
+    end if
+
+  else if (band == nband_k) then
+    btype = "last_state"
+    if (band - 1 > 0) then
+      if (abs(e0 - eig_k(band - 1)) < tol6) btype = "degenerate"
+    end if
+
+  else
+    btype = "non-degenerate"
+    if (abs(e0 - eig_k(band - 1)) < tol6 .or. abs(e0 - eig_k(band + 1)) < tol6) btype = "degenerate"
+  end if
+
+end subroutine band_type
+
+end function fxphas_and_cmp
+!!***
+
 !!****f* m_cgtools/overlap_g
 !! NAME
 !! overlap_g
@@ -4298,11 +4215,6 @@ end subroutine fxphas_seq
 !! vect2 are (1:2,0:mpw) and the element (1:2,0) MUST be set to zero.
 !!
 !! The current implementation if not compatible with TR-symmetry (i.e. istwfk/=1) !
-!!
-!! PARENTS
-!!      m_berrytk,m_dfpt_fef
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -4373,12 +4285,6 @@ end subroutine overlap_g
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace. Hermitianized in output.
 !!  cg(2,mcg)=wavefunctions
 !!  gsc(2,mgsc)=<g|S|c> matrix elements (S=overlap)
-!!
-!! PARENTS
-!!      m_rayleigh_ritz,m_vtowfk
-!!
-!! CHILDREN
-!!      cgpaw_cholesky,cgpaw_gramschmidt,ortho_reim,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -4587,6 +4493,212 @@ subroutine subdiago(cg, eig_k, evec, gsc, icg, igsc, istwf_k, mcg, mgsc, nband_k
 end subroutine subdiago
 !!***
 
+!!****f* ABINIT/subdiago_low_memory
+!! NAME
+!! subdiago_low_memory
+!!
+!! FUNCTION
+!! This routine diagonalizes the Hamiltonian in the eigenfunction subspace
+!! Separate the computation in blocks of plane waves to save memory
+!!
+!! INPUTS
+!!  icg=shift to be applied on the location of data in the array cg
+!!  istwf_k=input parameter that describes the storage of wfs
+!!  mcg=second dimension of the cg array
+!!  nband_k=number of bands at this k point for that spin polarization
+!!  npw_k=number of plane waves at this k point
+!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
+!!  subham(nband_k*(nband_k+1))=Hamiltonian expressed in the WFs subspace
+!!
+!! OUTPUT
+!!  eig_k(nband_k)=array for holding eigenvalues (hartree)
+!!  evec(2*nband_k,nband_k)=array for holding eigenvectors
+!!
+!! SIDE EFFECTS
+!!  cg(2,mcg)=wavefunctions
+!!
+!! SOURCE
+
+subroutine subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
+&                   mcg,nband_k,npw_k,nspinor,paral_kgb,&
+&                   subham)
+
+ use m_linalg_interfaces
+ use m_abi_linalg
+
+!Arguments ------------------------------------
+ integer,intent(in) :: icg,istwf_k,mcg,nband_k,npw_k
+ integer,intent(in) :: nspinor,paral_kgb
+ real(dp),intent(inout) :: subham(nband_k*(nband_k+1))
+ real(dp),intent(out) :: eig_k(nband_k),evec(2*nband_k,nband_k)
+ real(dp),intent(inout),target :: cg(2,mcg)
+
+!Local variables-------------------------------
+ integer :: ig,igfirst,block_size,iblock,nblock,block_size_tmp,wfsize
+ integer :: iband,ii,ierr,vectsize,use_slk
+ character(len=500) :: message
+ ! real(dp) :: tsec(2)
+ real(dp),allocatable :: evec_tmp(:,:),subham_tmp(:)
+ real(dp),allocatable :: work(:,:)
+ real(dp),allocatable :: blockvectora(:,:),blockvectorb(:,:),blockvectorc(:,:)
+ real(dp),pointer :: cg_block(:,:)
+
+! *********************************************************************
+
+ if (paral_kgb<0) then
+   ABI_BUG('paral_kgb should be positive ')
+ end if
+
+ ! 1 if Scalapack version is used.
+ use_slk = paral_kgb
+
+!Impose Hermiticity on diagonal elements of subham (and subovl, if needed)
+! MG FIXME: In these two calls we are aliasing the args
+ call hermit(subham,subham,ierr,nband_k)
+
+!Diagonalize the Hamitonian matrix
+ if(istwf_k==2) then
+   ABI_MALLOC(evec_tmp,(nband_k,nband_k))
+   ABI_MALLOC(subham_tmp,(nband_k*(nband_k+1)/2))
+   subham_tmp=subham(1:nband_k*(nband_k+1):2)
+   evec_tmp=zero
+   call abi_xhpev('V','U',nband_k,subham_tmp,eig_k,evec_tmp,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+   evec(:,:)=zero;evec(1:2*nband_k:2,:) =evec_tmp
+   ABI_FREE(evec_tmp)
+   ABI_FREE(subham_tmp)
+ else
+   call abi_xhpev('V','U',nband_k,subham,eig_k,evec,nband_k,istwf_k=istwf_k,use_slk=use_slk)
+ end if
+
+!Normalize each eigenvector and set phase:
+!The problem with minus/plus signs might be present also if .not. use_subovl
+!if(use_subovl == 0) then
+ call cg_normev(evec,nband_k,nband_k)
+!end if
+
+ if(istwf_k==2)then
+   do iband=1,nband_k
+     do ii=1,nband_k
+       if(abs(evec(2*ii,iband))>1.0d-10)then
+         write(message,'(3a,2i0,2es16.6,a,a)')ch10,&
+&         ' subdiago: For istwf_k=2, observed the following element of evec :',ch10,&
+&         iband,ii,evec(2*ii-1,iband),evec(2*ii,iband),ch10,'  with a non-negligible imaginary part.'
+         ABI_BUG(message)
+       end if
+     end do
+   end do
+ end if
+
+!=====================================================
+!Carry out rotation of bands C(G,n) according to evecs
+! ZGEMM if istwfk==1, DGEMM if istwfk==2
+!=====================================================
+ wfsize=npw_k*nspinor
+
+ block_size=100
+
+ if (wfsize<block_size) block_size=wfsize
+
+ nblock=wfsize/block_size
+ if (mod(wfsize,block_size)/=0) nblock=nblock+1
+
+ if (istwf_k>1) then ! evec is real
+
+   vectsize=2*block_size
+
+   ABI_MALLOC_OR_DIE(blockvectora,(vectsize,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorb,(nband_k,nband_k), ierr)
+   ABI_MALLOC_OR_DIE(blockvectorc,(vectsize,nband_k), ierr)
+
+   do iband=1,nband_k
+     call abi_xcopy(nband_k,evec(2*iband-1,1),2*nband_k,blockvectorb(iband,1),nband_k)
+   end do
+
+   do iblock=1,nblock
+
+     igfirst=(iblock-1)*block_size
+     block_size_tmp=block_size
+     if (igfirst+block_size>wfsize) then
+       block_size_tmp=wfsize-igfirst
+     end if
+
+     do iband=1,nband_k
+       call abi_xcopy(block_size_tmp,cg(1,1+cgindex_subd(iblock,iband)),2,blockvectora(1,iband),1)
+       call abi_xcopy(block_size_tmp,cg(2,1+cgindex_subd(iblock,iband)),2,blockvectora(block_size+1,iband),1)
+       if (block_size_tmp<block_size) then
+         blockvectora(block_size_tmp+1:block_size,iband) = zero
+         blockvectora(block_size+block_size_tmp+1:2*block_size,iband) = zero
+       end if
+     end do
+
+     call abi_xgemm('N','N',vectsize,nband_k,nband_k,&
+&     cone,blockvectora,vectsize,blockvectorb,nband_k,czero,blockvectorc,vectsize)
+
+     do iband=1,nband_k
+       call abi_xcopy(block_size_tmp,blockvectorc(1,iband),1,cg(1,1+cgindex_subd(iblock,iband)),2)
+       call abi_xcopy(block_size_tmp,blockvectorc(block_size+1,iband),1,cg(2,1+cgindex_subd(iblock,iband)),2)
+     end do
+
+   end do
+
+   ABI_FREE(blockvectora)
+   ABI_FREE(blockvectorb)
+   ABI_FREE(blockvectorc)
+
+ else ! evec is complex
+
+   ABI_MALLOC_OR_DIE(work,(2,block_size*nband_k), ierr)
+   if (nblock==1) then
+     cg_block => cg(:,icg+1:icg+nband_k*wfsize)
+   else
+     ABI_MALLOC_OR_DIE(cg_block,(2,block_size*nband_k), ierr)
+   end if
+
+   do iblock=1,nblock
+     igfirst=(iblock-1)*block_size
+     block_size_tmp=block_size
+     if (igfirst+block_size>wfsize) then
+       block_size_tmp=wfsize-igfirst
+     end if
+     if (nblock/=1) then
+       do iband=1,nband_k
+         do ig=1,block_size_tmp
+           cg_block(:,ig+(iband-1)*block_size) = cg(:,ig+cgindex_subd(iblock,iband))
+         end do
+         if (block_size_tmp<block_size) then
+           do ig=block_size_tmp+1,block_size
+             cg_block(:,ig+(iband-1)*block_size) = zero
+           end do
+         end if
+       end do
+     end if
+     call abi_xgemm('N','N',block_size,nband_k,nband_k,cone,cg_block,block_size,evec,nband_k,czero,work,&
+       &     block_size,x_cplx=2)
+     do iband=1,nband_k
+       do ig=1,block_size_tmp
+         cg(:,ig+cgindex_subd(iblock,iband)) = work(:,ig+(iband-1)*block_size)
+       end do
+     end do
+   end do
+
+   ABI_FREE(work)
+   if (nblock/=1) then
+     ABI_FREE(cg_block)
+   end if
+
+ end if
+
+ contains
+
+   function cgindex_subd(iblock,iband)
+
+   integer :: iband,iblock,cgindex_subd
+   cgindex_subd=(iblock-1)*block_size+(iband-1)*wfsize+icg
+ end function cgindex_subd
+
+end subroutine subdiago_low_memory
+!!***
+
 !!****f* m_cgtools/pw_orthon
 !! NAME
 !! pw_orthon
@@ -4630,11 +4742,6 @@ end subroutine subdiago
 !! Note that each vector has an arbitrary phase which is not fixed in this routine.
 !!
 !! WARNING: not yet suited for nspinor=2 with istwfk/=1
-!!
-!! PARENTS
-!!      lapackprof,m_inwffil,m_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5124,6 +5231,203 @@ subroutine pw_orthon(icg, igsc, istwf_k, mcg, mgsc, nelem, nvec, ortalgo, ovl_ve
 end subroutine pw_orthon
 !!***
 
+!!****f* m_cgtools/pw_orthon_paw
+!! NAME
+!! pw_orthon_paw
+!!
+!! FUNCTION
+!! Normalize nvec complex vectors each of length nelem and then orthogonalize by modified Gram-Schmidt.
+!! The overlap matrix <c_m|S|c_n> (S can be identity) has to be provided as input, and is overwritten.
+!!
+!! INPUTS
+!!  icg=shift to be given to the location of the data in cg(=vecnm)
+!!  mcg=maximum size of second dimension of cg(=vecnm)
+!!  nelem=number of complex elements in each vector
+!!  nspinor=number of spinorial components of the wavefunctions (on current proc)
+!!  nvec=number of vectors to be orthonormalized
+!!  ortalgo= option for the choice of the algorithm
+!!         -1: no orthogonalization (direct return)
+!!          0: do orthogonalization
+!!  comm=MPI communicator
+!!
+!! SIDE EFFECTS
+!!  cprj(optional)=<p_i|c_n> coefficients, updated to keep them consistent with the WF at output
+!!  ovl_mat=overlap matrix <c_m|S|c_n> for m<=n
+!!  vecnm= input: vectors to be orthonormalized; array of nvec column
+!!                vectors,each of length nelem,shifted by icg
+!!                This array is complex or else real(dp) of twice length
+!!         output: orthonormalized set of vectors
+!!
+!! NOTES
+!! Note that each vector has an arbitrary phase which is not fixed in this routine.
+!!
+!! SOURCE
+
+subroutine pw_orthon_cprj(icg,mcg,nelem,nspinor,nvec,ortalgo,ovl_mat,vecnm,cprj)
+
+ use m_abi_linalg
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: icg,mcg,nelem,nspinor,nvec,ortalgo
+!arrays
+ real(dp),intent(inout) :: ovl_mat(nvec*(nvec+1)),vecnm(2,mcg)
+ type(pawcprj_type),intent(inout),optional,target :: cprj(:,:)
+
+!Local variables-------------------------------
+!scalars
+ logical :: do_cprj
+ integer :: ii,ii1,ii2,ivec,ivec2,ivec3,iv1l,iv2l,iv3l,iv1r,iv2r,iv3r,ncprj
+ real(dp) :: doti,dotr,summ,xnorm
+!arrays
+ real(dp) :: ovl_row_tmp(2*nvec),ovl_col_tmp(2*nvec)
+ real(dp) :: re,im
+
+! *************************************************************************
+
+!Nothing to do if ortalgo=-1
+ if(ortalgo==-1) return
+
+ do_cprj=.false.
+ if (present(cprj)) then
+   do_cprj=.true.
+   ncprj = size(cprj,2)
+   if (ncprj/=nspinor*nvec) then
+     ABI_ERROR('bad size for cprj')
+   end if
+ end if
+
+ ! The overlap matrix is : ovl(i,j) = <psi_i|S|psi_j> = (<psi_j|S|psi_i>)^*
+ ! The row index stands for the "left"  band index
+ ! The column index stands for the "right" band index
+ ! Only the upper triangular part of the (complex) overlap matrix is stored, so only elements with i<=j.
+ ! They are stored in the following order: ovl(1,1),ovl(1,2),ovl(2,2),ovl(1,3),ovl(2,3),...
+ ! so:
+ ! -- shift for the ith row    : 2.(i.(i-1)/2) = i.(i-1)
+ ! -- shift for the ith column : 2.(i-1)+1 = 2.i-1
+ ! => index of real part of elem in the jth column and ith row (=ovl(i,j)) : 2.i-1+j.(j-1) (for i<=j)
+ ! => index of imaginary part = index of real part + 1
+ ! After orthogonalizing the first n vectors, we have:
+ ! for i<=n, i<=j : ovl(i,j) = delta_ij
+
+ do ivec=1,nvec
+
+   ! First we normalize the current vector
+   iv1r = ivec*(ivec-1) ! ith row
+   iv1l = 2*ivec-1      ! ith column
+   ! ovl(i1,i1) = <psi_i1|S|psi_i1>
+   summ = ovl_mat(iv1r+iv1l)
+   xnorm = sqrt(abs(summ)) ;  summ=1.0_dp/xnorm
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(icg,ivec,nelem,summ,vecnm)
+   do ii=1+nelem*(ivec-1)+icg,nelem*ivec+icg
+     vecnm(1,ii)=vecnm(1,ii)*summ
+     vecnm(2,ii)=vecnm(2,ii)*summ
+   end do
+!  Apply the normalization to cprj coeffs
+   if (do_cprj) call pawcprj_axpby(zero,summ,cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec))
+
+   ! As the norm of |psi_i1> changed, we update the overlap matrix accordingly.
+   ! From previous iterations, we already have:
+   ! ovl(i2,i1) = <psi_i2|S|psi_i1> = 0 for i2<i1
+   ! so we need to change only:
+   ! ovl(i1,i2) = <psi_i1|S|psi_i2> for i1<=i2
+   do ivec2=ivec,nvec
+     iv2r=ivec2*(ivec2-1)
+     if (ivec<ivec2) then
+       ovl_mat(iv2r+iv1l  ) = ovl_mat(iv2r+iv1l  )*summ
+       ovl_mat(iv2r+iv1l+1) = ovl_mat(iv2r+iv1l+1)*summ
+     else if (ivec==ivec2) then
+       ovl_mat(iv2r+iv1l  ) = ovl_mat(iv2r+iv1l  )*summ*summ
+       ovl_mat(iv2r+iv1l+1) = ovl_mat(iv2r+iv1l+1)*summ*summ
+       re = ovl_mat(iv2r+iv1l  )
+       im = ovl_mat(iv2r+iv1l+1)
+       if (abs(re-1)>tol10.or.abs(im)>tol10) then
+         write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (re)',re
+         write(std_out,'(a,es21.10e3)') '(pw_ortho) ovl (im)',im
+         ABI_WARNING('In pw_orthon_cprj : the result should be equal to one!')
+       end if
+     end if
+   end do
+
+!  Remove projection in all higher states.
+   if (ivec<nvec) then
+
+     do ivec2=ivec+1,nvec
+
+       iv2r = ivec2*(ivec2-1)
+       iv2l = 2*ivec2-1
+       ! (dotr,doti) = <psi_i1|S|psi_i2>
+       dotr = ovl_mat(iv2r+iv1l  )
+       doti = ovl_mat(iv2r+iv1l+1)
+
+!      Then subtract the appropriate amount of the lower state
+       ii1=nelem*(ivec-1)+icg;ii2=nelem*(ivec2-1)+icg
+       ! |psi'_i2> = |psi_i2> - <psi_i1|S|psi_i2> |psi_i1>
+!$OMP PARALLEL DO PRIVATE(ii) SHARED(doti,dotr,ii1,ii2,nelem,vecnm)
+       do ii=1,nelem
+         vecnm(1,ii2+ii)=vecnm(1,ii2+ii)-dotr*vecnm(1,ii1+ii)+doti*vecnm(2,ii1+ii)
+         vecnm(2,ii2+ii)=vecnm(2,ii2+ii)-doti*vecnm(1,ii1+ii)-dotr*vecnm(2,ii1+ii)
+       end do
+       if (do_cprj) call pawcprj_zaxpby((/-dotr,-doti/),(/one,zero/),cprj(:,nspinor*(ivec-1)+1:nspinor*ivec),&
+&                                                                    cprj(:,nspinor*(ivec2-1)+1:nspinor*ivec2))
+       ! As |psi_i2> changed, we update the overlap matrix accordingly.
+       ! We have: <psi'_i3|S|psi'_i2> = <psi'_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i3|S|psi_i1>
+       ! Remember that i2>i1.
+       ! For i3<=i2, we compute the new column i2.
+       ! For i3<i1:
+       ! (1) <psi'_i3|S|psi'_i2> = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i3|S|psi_i1>
+       !                         = <psi_i3|S|psi_i2>
+       ! as for i3<i1 we have <psi_i3|S|psi_i1> = 0
+       ! For i1<=i3<i2:
+       ! (2) <psi'_i3|S|psi'_i2> = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i3|S|psi_i1>
+       !                         = <psi_i3|S|psi_i2> - <psi_i1|S|psi_i2> (<psi_i1|S|psi_i3>)^*
+       ! For i3=i2:
+       ! (3) <psi'_i3|S|psi'_i2> =  <psi'_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi'_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1>
+       !                           - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1> + <psi_i1|S|psi_i2> <psi_1|S|psi_1> <psi_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> <psi_i2|S|psi_i1>
+       !                         =   <psi_i2|S|psi_i2> - <psi_i1|S|psi_i2> (<psi_i1|S|psi_i2>)^*
+       ! so the case i3=i2 (3) is equivalent to the case i1<=i3<i2 (2) with i3=i2.
+       ! Here we compute (2) and (3) in a temporary array:
+       do ivec3=ivec,ivec2
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_col_tmp(iv3l  ) = ovl_mat(iv2r+iv3l  ) - dotr*ovl_mat(iv3r+iv1l) - doti*ovl_mat(iv3r+iv1l+1)
+         ovl_col_tmp(iv3l+1) = ovl_mat(iv2r+iv3l+1) - doti*ovl_mat(iv3r+iv1l) + dotr*ovl_mat(iv3r+iv1l+1)
+       end do
+       ! For i2<i3, we compute the new row i2.
+       ! (4) <psi'_i2|S|psi_i3> = <psi_i2|S|psi_i3> - <psi_i2|S|psi_i1> <psi_i1|S|psi_i3>
+       !                        = <psi_i2|S|psi_i3> - (<psi_i1|S|psi_i2>)^* <psi_i1|S|psi_i3>
+       ! Here we compute (4) in a temporary array:
+       do ivec3=ivec2+1,nvec
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_row_tmp(iv3l  ) = ovl_mat(iv3r+iv2l  ) - dotr*ovl_mat(iv3r+iv1l) - doti*ovl_mat(iv3r+iv1l+1)
+         ovl_row_tmp(iv3l+1) = ovl_mat(iv3r+iv2l+1) + doti*ovl_mat(iv3r+iv1l) - dotr*ovl_mat(iv3r+iv1l+1)
+       end do
+       ! We update the column i2 (starting from ivec and not 1, thanks to (1))
+       do ivec3=ivec,ivec2
+         iv3l=2*ivec3-1
+         ovl_mat(iv2r+iv3l  ) = ovl_col_tmp(iv3l  )
+         ovl_mat(iv2r+iv3l+1) = ovl_col_tmp(iv3l+1)
+       end do
+       ! We update the row i2
+       do ivec3=ivec2+1,nvec
+         iv3r=ivec3*(ivec3-1)
+         iv3l=2*ivec3-1
+         ovl_mat(iv3r+iv2l  ) = ovl_row_tmp(iv3l  )
+         ovl_mat(iv3r+iv2l+1) = ovl_row_tmp(iv3l+1)
+       end do
+     end do
+
+   end if  ! Test on "ivec"
+
+!end loop over vectors (or bands) with index ivec :
+ end do
+
+end subroutine pw_orthon_cprj
+!!***
+
 !!****f* m_cgtools/cg_hprotate_and_get_diag
 !! NAME
 !!   cg_hprotate_and_get_diag
@@ -5136,10 +5440,6 @@ end subroutine pw_orthon
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5198,10 +5498,6 @@ end subroutine cg_hprotate_and_get_diag
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5269,10 +5565,6 @@ end subroutine cg_hrotate_and_get_diag
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_get_eigens(usepaw, istwf_k, npwsp, ndat, cg, ghc, gsc, eig, me_g0, comm)
@@ -5317,10 +5609,6 @@ end subroutine cg_get_eigens
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
@@ -5336,13 +5624,13 @@ subroutine cg_get_residvecs(usepaw, npwsp, ndat, eig, cg, ghc, gsc, residvecs)
 
  if (usepaw == 1) then
    ! (H - e) |psi>
-!$OMP PARALLEL DO
+   !$OMP PARALLEL DO IF (ndat > 1)
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * gsc(:,idat)
    end do
  else
    ! (H - eS) |psi>
-!$OMP PARALLEL DO
+   !$OMP PARALLEL DO IF (ndat > 1)
    do idat=1,ndat
      residvecs(:,idat) = ghc(:,idat) - eig(idat) * cg(:,idat)
    end do
@@ -5362,10 +5650,6 @@ end subroutine cg_get_residvecs
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
@@ -5378,7 +5662,7 @@ subroutine cg_norm2g(istwf_k, npwsp, ndat, cg, norms, me_g0, comm)
  integer :: idat, ierr
 ! *************************************************************************
 
-!$OMP PARALLEL DO
+!$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call sqnorm_g(norms(idat), istwf_k, npwsp, cg(:,idat), me_g0, xmpi_comm_self)
  end do
@@ -5398,10 +5682,6 @@ end subroutine cg_norm2g
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_zdotg_zip(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, comm)
@@ -5415,7 +5695,7 @@ subroutine cg_zdotg_zip(istwf_k, npwsp, ndat, option, cg1, cg2, dots, me_g0, com
  real(dp) :: dotr, doti, re_dots(ndat)
 ! *************************************************************************
 
-!$OMP PARALLEL DO PRIVATE(dotr, doti)
+!$OMP PARALLEL DO IF (ndat > 1) PRIVATE(dotr, doti)
  do idat=1,ndat
    call dotprod_g(dotr, doti, istwf_k, npwsp, option, cg1(:,idat), cg2(:,idat), me_g0, xmpi_comm_self)
    if (istwf_k == 2) then
@@ -5452,10 +5732,6 @@ end subroutine cg_zdotg_zip
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -5501,10 +5777,6 @@ end subroutine cg_precon_many
 !! SIDE EFFECTS
 !!  y = Array. In output, y contains the updated vector.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
@@ -5521,7 +5793,7 @@ subroutine cg_zaxpy_many_areal(npwsp, ndat, alphas, x, y)
  integer :: idat
 ! *************************************************************************
 
-!$OMP PARALLEL DO
+!$OMP PARALLEL DO IF (ndat > 1)
  do idat=1,ndat
    call daxpy(2*npwsp, alphas(idat), x(1,idat), 1, y(1,idat), 1)
  end do
@@ -5547,10 +5819,6 @@ end subroutine cg_zaxpy_many_areal
 !!  cg(2*npwsp*nband)
 !!    input: Input set of vectors.
 !!    output: Orthonormalized set.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

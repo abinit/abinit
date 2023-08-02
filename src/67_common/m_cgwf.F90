@@ -6,14 +6,10 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2022 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -139,13 +135,6 @@ contains
 !!  2) Not sure that that the generalized eigenproblem (when gs_hamk%usepaw=1)
 !!     is compatible with wfoptalg=2 or 3 (use of shifted square Hamiltonian) - to be verified
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
-!!
 !! SOURCE
 
 subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
@@ -178,7 +167,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
  real(dp),intent(out) :: resid(nband)
 
 !Local variables-------------------------------
- integer,parameter :: level=113,tim_getghc=1,tim_projbd=1
+ integer,parameter :: level=113,tim_getghc=1,tim_projbd=1,type_calc=0
  integer,save :: nskip=0
  integer :: choice,counter,cpopt,ddkflag,dimenlc1,dimenlr1,dimenl2,iat,iatom,itypat
  integer :: iband,ibandmin,ibandmax,me_g0
@@ -418,13 +407,13 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        sij_opt=1
        if (finite_field .and. gs_hamk%usepaw == 1) then
          call getghc(0,cwavef,cprj_band_srt,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
          call pawcprj_put(gs_hamk%atindx,cprj_band_srt,cprj_k,natom,iband,0,ikpt,&
 &         1,isppol,mband,1,natom,1,mband,dimlmn,nspinor,nsppol,0,&
 &         mpicomm=spaceComm_distrb,proc_distrb=mpi_enreg%proc_distrb)
        else
          call getghc(cpopt,cwavef,cprj_dum,ghc,scwavef,gs_hamk,gvnlxc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        end if
 
        call cg_zcopy(npw*nspinor,ghc,ghc_all(1,1+icg_shift-icg))
@@ -510,7 +499,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
        call fock_set_ieigen(gs_hamk%fockcommon,iband)
        sij_opt=0
        call getghc(cpopt,cwavef,cprj_dum,ghc,gsc_dummy,gs_hamk,gvnlxc,&
-&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
      end if
 
 
@@ -525,7 +514,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          work(:,:)=ghc(:,:)-zshift(iband)*cwavef(:,:)
        end if
        call getghc(cpopt,work,cprj_dum,ghc,swork,gs_hamk,gvnlx_dummy,&
-&       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+         &       eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
        if (gen_eigenpb) then
          ghc(:,:)=ghc(:,:)-zshift(iband)*swork(:,:)
        else
@@ -771,6 +760,10 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            gamma=zero
            dotgp=dotgg
            call cg_zcopy(npw*nspinor,direc,conjgr)
+           if (prtvol==-level)then
+             write(message,'(a,es21.10e3)')' cgwf: dotgg = ',dotgg
+             call wrtout(std_out,message,'PERS')
+           end if
 
          else
            gamma=dotgg/dotgp
@@ -841,7 +834,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
          sij_opt=0;if (gen_eigenpb) sij_opt=1
 
          call getghc(cpopt,direc,cprj_dum,gh_direc,gs_direc,gs_hamk,gvnlx_direc,&
-&         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,0)
+           &         eval,mpi_enreg,1,prtvol,sij_opt,tim_getghc,type_calc)
 
          if(wfopta10==2 .or. wfopta10==3)then
            ! Minimisation of the residual, so compute <G|(H-zshift)^2|D>
@@ -855,7 +848,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
            end if
 
            call getghc(cpopt,work,cprj_dum,gh_direc,swork,gs_hamk,gvnlx_dummy,&
-&           eval,mpi_enreg,1,prtvol,0,tim_getghc,0)
+             &           eval,mpi_enreg,1,prtvol,0,tim_getghc,type_calc)
 
            if (gen_eigenpb) then
              gh_direc(:,:)=gh_direc(:,:)-zshift(iband)*swork(:,:)
@@ -1362,7 +1355,6 @@ end subroutine cgwf
 !! sinth = sin(thetam)
 !! thetam = optimal angle theta in line_minimization
 !!
-!!
 !! SIDE EFFECTS
 !! Input/Output
 !! dphase_aux1 = change in Zak phase accumulated during the loop over iline
@@ -1374,13 +1366,6 @@ end subroutine cgwf
 !! Hamiltonian does not change with theta (we are neglecting the dependence
 !! of the Hartree and exchange-correlation terms on theta; the original
 !! abinit routine does the same)
-!!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -1690,13 +1675,6 @@ end subroutine linemin
 !! e0 = energy for the given value of theta
 !! e1 = derivative of the energy with respect to theta
 !!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
-!!
 !! SOURCE
 
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
@@ -1818,13 +1796,6 @@ end subroutine etheta
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
 !!  subvnlx(nband_k*(nband_k+1)*use_subvnlx)=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
-!!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -2046,13 +2017,6 @@ end subroutine mksubham
 !!  dtefield <type(efield_type)> = variables related to Berry phase calculations (see initberry.f)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 

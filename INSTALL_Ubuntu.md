@@ -134,6 +134,12 @@ sudo apt install liblapack-dev libblas-dev
 sudo apt install libhdf5-dev libnetcdf-dev libnetcdff-dev libpnetcdf-dev libxc-dev
 ```
 
+Note that if you prefer to compile hdf5 and netcdf4 from source, you will neeed
+the zlib library that can be installed with:
+
+    sudo apt-get install -y libz-dev
+
+
 ### Compiling ABINIT
 
 For normal users it is advised to download the latest stable version from our website

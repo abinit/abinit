@@ -13,7 +13,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (hexu)
+!! Copyright (C) 2001-2022 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,8 +72,10 @@ contains
   !-----------------------------------------------------------------------
   subroutine dense_mat_t_finalize(self)
     class(dense_mat_t), intent(inout) :: self
-    if (allocated(self%mat))  ABI_FREE(self%mat)
-    if (allocated(self%mshape)) ABI_FREE(self%mat)
+    ABI_SFREE(self%mat)
+    if (allocated(self%mshape)) then
+      ABI_FREE(self%mat)
+    end if
     self%ncol=0
     self%nrow=0
     self%ndim=0

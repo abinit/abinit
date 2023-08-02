@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,80 +14,76 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t96/t96.in
-- output file    -> t96.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t96/t96.abi
+- output file    -> t96.abo
 - root for input  files -> t96i
 - root for output files -> t96o
-
 
  DATASET    1 : space group R-3 c (#167); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
      intxc =       1    ionmov =       0      iscf =       7    lmnmax =       3
-     lnmax =       3     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     lnmax =       3     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =      10  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      12    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          30        mffmem =           1         mkmem =           1
-       mpw =          39          nfft =        3375          nkpt =           1
+       mpw =          39          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       1.940 Mbytes of memory.
+P This job should need less than                       2.278 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group R-3 c (#167); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
      intxc =       1    ionmov =       0      iscf =       7    lmnmax =       3
-     lnmax =       3     mgfft =      15  mpssoang =       2    mqgrid =    3001
+     lnmax =       3     mgfft =      16  mpssoang =       2    mqgrid =    3001
      natom =      10  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      12    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          30        mffmem =           1         mkmem =           1
-       mpw =          39          nfft =        3375          nkpt =           1
+       mpw =          39          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       1.940 Mbytes of memory.
+P This job should need less than                       2.278 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
+_ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : the unit cell is not primitive
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
      intxc =       1    ionmov =       0      iscf =       7    lmnmax =       3
-     lnmax =       3     mgfft =      40  mpssoang =       2    mqgrid =    3001
+     lnmax =       3     mgfft =      48  mpssoang =       2    mqgrid =    3001
      natom =      30  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      36    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          75        mffmem =           1         mkmem =           1
-       mpw =         208          nfft =        9000          nkpt =           1
+       mpw =         208          nfft =       10800          nkpt =           1
 ================================================================================
-P This job should need less than                       4.208 Mbytes of memory.
+P This job should need less than                       5.044 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.071 Mbytes.
+_ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.084 Mbytes.
 ================================================================================
-
 
  DATASET    4 : the unit cell is not primitive
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
      intxc =       1    ionmov =       0      iscf =       7    lmnmax =       3
-     lnmax =       3     mgfft =      40  mpssoang =       2    mqgrid =    3001
+     lnmax =       3     mgfft =      48  mpssoang =       2    mqgrid =    3001
      natom =      30  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      36    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =          75        mffmem =           1         mkmem =           1
-       mpw =         208          nfft =        9000          nkpt =           1
+       mpw =         208          nfft =       10800          nkpt =           1
 ================================================================================
-P This job should need less than                       4.208 Mbytes of memory.
+P This job should need less than                       5.044 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.071 Mbytes.
+_ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.084 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -110,6 +106,7 @@ _ WF disk file :      0.240 Mbytes ; DEN or POT disk file :      0.071 Mbytes.
           chkprim2          1
           chkprim3          0
           chkprim4          0
+      chksymtnons           3
              ecut1     2.00000000E+00 Hartree
              ecut2     2.00000000E+00 Hartree
              ecut3     3.00000000E+00 Hartree
@@ -134,10 +131,10 @@ P           mkmem           1
             nband3         75
             nband4         75
            ndtset           4
-            ngfft1         15      15      15
-            ngfft2         15      15      15
-            ngfft3         15      15      40
-            ngfft4         15      15      40
+            ngfft1         16      16      16
+            ngfft2         16      16      16
+            ngfft3         15      15      48
+            ngfft4         15      15      48
              nkpt           1
              nsym1         12
              nsym2         12
@@ -580,10 +577,10 @@ P           mkmem           1
 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.2
++Overall time at end (sec) : cpu=          1.1  wall=          1.2

@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <Heff_definition>
-  <coefficient number="1" value="  -0.4523766787E-01" text="(Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1">
+  <coefficient number="1" value="  -0.4618059062E-01" text="(Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1">
     <term weight=" 1.000000">
       <displacement_diff atom_a="0" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
@@ -674,7 +674,7 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="2" value="  -0.7134576524E-02" text="(Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1">
+  <coefficient number="2" value="  -0.8065962844E-02" text="(Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1">
     <term weight=" 1.000000">
       <displacement_diff atom_a="0" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
@@ -1156,69 +1156,13 @@
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="3" value="  -0.1327705004E+00" text="(Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1">
+  <coefficient number="3" value="  -0.1533152608E+00" text="(Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y[1 0 0])^1">
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -1228,13 +1172,13 @@
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
@@ -1242,13 +1186,13 @@
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
@@ -1256,13 +1200,13 @@
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
@@ -1274,270 +1218,6 @@
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-  </coefficient>
-  <coefficient number="4" value="   0.1007897829E+00" text="(Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1">
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
@@ -1546,79 +1226,33 @@
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
     </term>
     <term weight="-1.000000">
       <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
       <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
@@ -1626,198 +1260,20 @@
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
       <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
       <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
@@ -1826,533 +1282,23 @@
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
+    </term>
+    <term weight="-1.000000">
       <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-  </coefficient>
-  <coefficient number="5" value="  -0.7440101370E-01" text="(Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1">
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 -1 0</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -2360,41 +1306,27 @@
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
       <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
@@ -2402,1543 +1334,1514 @@
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="0" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-  </coefficient>
-  <coefficient number="6" value="   0.8523008293E-01" text="(Ru_y-O1_y)^2(O3_z-O1_z)^1">
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
     </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="2" direction="z" power="2">
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
+        <cell_b>1 0 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="x" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="1" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="7" value="  -0.3327707504E-01" text="(O1_x-O2_x)^1(O2_y-O1_y)^1(O2_y-O3_y[0 -1 1])^1">
+  <coefficient number="4" value="   0.9102390609E-01" text="(Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1">
     <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
+        <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
+        <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
+        <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
+        <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
+      <displacement_diff atom_a="1" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
+        <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
+        <cell_b>1 0 0</cell_b>
       </displacement_diff>
     </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
+        <cell_b>1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="2" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="1" atom_b="4" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="3" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="1" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="8" value="   0.2240189844E-01" text="(O1_x-O2_x)^1(O2_y-O3_y)^2">
+  <coefficient number="5" value="   0.1429292207E+00" text="(O1_x-Ru_x)^1(O1_y-Ru_y[-1 0 0])^1(O1_x-O2_x[-1 1 0])^1">
     <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>-1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
       <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>-1 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
     </term>
-    <term weight=" 1.000000">
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
       <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
     </term>
     <term weight=" 1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
       <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
     </term>
     <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
       <displacement_diff atom_a="2" atom_b="3" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>-1 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 -1 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
       <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="2" atom_b="3" direction="x" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>-1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
         <cell_a>0 0 0</cell_a>
         <cell_b>1 -1 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 -1 0</cell_b>
       </displacement_diff>
-    </term>
-    <term weight=" 1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>0 1 0</cell_b>
+        <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>1 -1 0</cell_b>
-      </displacement_diff>
-    </term>
-    <term weight="-1.000000">
-      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 0 -1</cell_b>
-      </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
+      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
     </term>
     <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="2" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="4" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="4" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 -1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="2" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
       <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 1 -1</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
-        <cell_a>0 0 0</cell_a>
-        <cell_b>0 -1 0</cell_b>
-      </displacement_diff>
     </term>
-    <term weight=" 1.000000">
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
       <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
         <cell_b>0 0 0</cell_b>
       </displacement_diff>
-      <displacement_diff atom_a="3" atom_b="2" direction="y" power="2">
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
         <cell_a>0 0 0</cell_a>
-        <cell_b>1 0 0</cell_b>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="3" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
       </displacement_diff>
     </term>
   </coefficient>
-  <coefficient number="9" value="  -0.2885885544E+04" text="(eta_1)^3">
+  <coefficient number="6" value="   0.7959292797E-01" text="(O1_y-Ru_y)^1(O1_x-Sr_x)^1(O1_z-Sr_z[0 1 1])^1">
     <term weight=" 1.000000">
-      <strain power=" 3" voigt=" 1"/>
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <strain power=" 3" voigt=" 2"/>
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <strain power=" 3" voigt=" 3"/>
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
     </term>
-  </coefficient>
-  <coefficient number="10" value="  -0.3246958458E+03" text="(eta_1)^1(eta_5)^2">
-    <term weight=" 1.000000">
-      <strain power=" 1" voigt=" 1"/>
-      <strain power=" 2" voigt=" 5"/>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <strain power=" 1" voigt=" 2"/>
-      <strain power=" 2" voigt=" 4"/>
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <strain power=" 1" voigt=" 2"/>
-      <strain power=" 2" voigt=" 6"/>
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <strain power=" 1" voigt=" 1"/>
-      <strain power=" 2" voigt=" 6"/>
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <strain power=" 1" voigt=" 3"/>
-      <strain power=" 2" voigt=" 4"/>
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
     </term>
     <term weight=" 1.000000">
-      <strain power=" 1" voigt=" 3"/>
-      <strain power=" 2" voigt=" 5"/>
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 -1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="3" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="3" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="2" atom_b="1" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>-1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="2" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 1</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 1 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight=" 1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 -1</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+    </term>
+    <term weight="-1.000000">
+      <displacement_diff atom_a="4" atom_b="1" direction="y" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="z" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>1 0 0</cell_b>
+      </displacement_diff>
+      <displacement_diff atom_a="4" atom_b="0" direction="x" power="1">
+        <cell_a>0 0 0</cell_a>
+        <cell_b>0 1 0</cell_b>
+      </displacement_diff>
     </term>
   </coefficient>
 </Heff_definition>

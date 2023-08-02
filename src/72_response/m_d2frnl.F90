@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -143,18 +139,6 @@ contains
 !!                          pawfgrtab(:)%gylmgr2 are deallocated here
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!    (gradients of rhoij for each atom with respect to atomic positions are computed here)
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      appdig,check_degeneracies,ddkfiles,dotprod_g,gs_ham%free,gs_ham%load_k
-!!      gs_ham%load_spin,init_hamiltonian,metric,mkffnl,mkkin,mkkpg,nonlop
-!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawaccrhoij
-!!      pawcprj_alloc,pawcprj_free,pawdij2e1kb,pawdijfr,pawfgrtab_free
-!!      pawfgrtab_init,pawgrnl,pawrhoij_free,pawrhoij_gather,pawrhoij_nullify
-!!      pawrhoij_symrhoij,pawtab_get_lsize,strconv,timab,wfk_open_read,wrtout
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -802,6 +786,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                  gh2c=zero; gs2c=zero
                  call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
                  1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
+!DEBUG
+!                gh2c=zero; gs2c=zero
+!ENDDEBUG
                  do ispinor=1,dtset%nspinor
                    ii = 1+(ispinor-1)*npw_k
                    do icplx=1,2
@@ -810,6 +797,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                    end do
                  end do
                  gh2c = gh2c - eig_k*gs2c
+!DEBUG
+!                gh2c=zero; gs2c=zero
+!ENDDEBUG
                end if
                ideg = efmasdeg(ikpt)%ideg(iband)
                ABI_MALLOC( ch2c_tmp, (size(efmasval(ideg,ikpt)%ch2c, dim=3)) )

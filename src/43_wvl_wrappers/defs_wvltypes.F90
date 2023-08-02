@@ -12,7 +12,7 @@
 !! * wvl_data : container for all required wavelets data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2021 ABINIT group (DC)
+!! Copyright (C) 2001-2022 ABINIT group (DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -232,7 +232,7 @@ CONTAINS
 !!  Nullify all wvl pointers
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (T. Rangel)
+!!  Copyright (C) 2013-2022 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -246,15 +246,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_driver
-!!
-!! CHILDREN
-!!      nullify_atoms_data,nullify_dft_local_fields,nullify_diis_objects
-!!      nullify_gaussian_basis,nullify_gpu_pointers
-!!      nullify_local_zone_descriptors,nullify_locreg_descriptors
-!!      nullify_orbitals_data,nullify_paw_objects,nullify_rholoc_objects
 !!
 !! SOURCE
 

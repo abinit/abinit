@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -104,12 +100,6 @@ contains
 !! The lines of code needed to output the defaults are preserved
 !! (see last section of the routine, but are presently disabled)
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      create_nc_file,outvar_a_h,outvar_i_n,outvar_o_z,wrtout
-!!
 !! SOURCE
 
 subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
@@ -187,6 +177,9 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !###########################################################
 !### 02. Open NetCDF file for export variables
 
+!Wrap the netcdf OUT.nc into conditional for flexible output writing
+ if ( dtsets(1)%ncout == 1 ) then
+
 #ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
  ! otherwise v6[34] crashes with errmess:
@@ -195,24 +188,30 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  ! one should use groups for this kind of operations!!
 
  ncid = 0
- if (ndtset_alloc  < 10) then
-   if (iout==std_out)then
-     write(iout,*) ch10,' These variables are accessible in NetCDF format (',trim(filnam4)//'_OUT.nc',')',ch10
-   end if
-   call create_nc_file(trim(filnam4)//"_OUT.nc",ncid)
-
-   if (dtsets(1)%prtvol==-2) then
-     if (ncid>0)then
-       ncid=-ncid
-     else
-       ncid=-1
+   if (ndtset_alloc  < 10) then
+     if (iout==std_out)then
+       write(iout,*) ch10,' These variables are accessible in NetCDF format (',trim(filnam4)//'_OUT.nc',')',ch10
      end if
+     call create_nc_file(trim(filnam4)//"_OUT.nc",ncid)
+
+     if (dtsets(1)%prtvol==-2) then
+       if (ncid>0)then
+        ncid=-ncid
+       else
+        ncid=-1
+       end if
+     end if
+   else
+     ABI_COMMENT("output of OUT.nc has been disabled. Too many datasets")
    end if
- else
-   ABI_COMMENT("output of OUT.nc has been disabled. Too many datasets")
- end if
 #endif
  !ncid = 0
+ 
+  else if ( dtsets(1)%ncout == 0 ) then
+   ABI_COMMENT("ncout set to 0. No OUT.nc will be printed.")
+  else
+   ABI_COMMENT("ncout value unregonized. OUT.nc will proceed will default settings.")
+ end if !ncout condition
 
 !###########################################################
 !##1 03. Set up dimensions : determine whether these are different for different datasets.
@@ -389,7 +388,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  call wrtout(iout,message,'COLL')
 
 #ifdef HAVE_NETCDF
- if (ncid /= 0) then
+ if (ncid /= 0 .and. dtsets(1)%ncout == 1) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then
      message='Netcdf Error while closing the OUT.nc file: '//trim(nf90_strerror(ncerr))

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t47/t47.in
-- output file    -> t47.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t47/t47.abi
+- output file    -> t47.abo
 - root for input  files -> t47i
 - root for output files -> t47o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.604 Mbytes of memory.
+P This job should need less than                       1.721 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.104 Mbytes of memory.
+P This job should need less than                       1.221 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.104 Mbytes of memory.
+P This job should need less than                       1.221 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.104 Mbytes of memory.
+P This job should need less than                       1.221 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.104 Mbytes of memory.
+P This job should need less than                       1.221 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -119,11 +113,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.104 Mbytes of memory.
+P This job should need less than                       1.221 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -136,11 +129,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =         184          nfft =        4096          nkpt =           2
 ================================================================================
-P This job should need less than                       1.104 Mbytes of memory.
+P This job should need less than                       1.221 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    8 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -153,11 +145,10 @@ _ WF disk file :      0.030 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =          85          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       1.060 Mbytes of memory.
+P This job should need less than                       1.181 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -170,7 +161,7 @@ _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =          85          nfft =        4096          nkpt =           1
 ================================================================================
-P This job should need less than                       1.060 Mbytes of memory.
+P This job should need less than                       1.181 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.008 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -446,8 +437,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.03365
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1304,7 +1295,6 @@ tolerances: {tolwfr: 1.00E-14, }
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
   2.66E-15  3.75E-15  6.00E-15  4.39E-15  1.73E-08
  -4.2235E-01  1.5342E-02  1.5342E-02  1.5342E-02  1.0907E-01
-  prteigrs : nnsclo,ikpt=    8    1 max resid (incl. the buffer)=  1.72593E-08
 
 
 --- !ResultsGS
@@ -1805,10 +1795,10 @@ P           mkmem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  77 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
+.Delivered  92 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.8  wall=          2.1

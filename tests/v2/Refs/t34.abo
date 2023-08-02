@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t34/t34.in
-- output file    -> t34.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t34/t34.abi
+- output file    -> t34.abo
 - root for input  files -> t34i
 - root for output files -> t34o
-
 
  DATASET    1 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =         280          nfft =        9600          nkpt =           1
 ================================================================================
-P This job should need less than                       3.031 Mbytes of memory.
+P This job should need less than                       3.311 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.011 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pm m 2 (# 25); Bravais oP (primitive ortho.)
 ================================================================================
@@ -70,6 +68,8 @@ _ WF disk file :      0.019 Mbytes ; DEN or POT disk file :      0.075 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.2000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00800000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix1     5.00000000E-01
            diemix2     3.50000000E-01
@@ -97,9 +97,11 @@ P          mk1mem           1
               occ      2.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol1          1       1
+           prtpot1          0
+           prtpot2          1
+          rfatpol1          1       2
           rfatpol2          2       2
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
            rfphon1          0
            rfphon2          1
@@ -151,8 +153,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -323,7 +325,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t34o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -340,7 +341,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t34o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -521,7 +521,7 @@ tolerances: {tolvrs: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.861688E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -529,6 +529,8 @@ tolerances: {tolvrs: 1.00E-15, }
  -outvars: echo values of variables after computation  --------
             acell      1.2000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00800000E+00
+              asr           0
+           chneut           0
            diemac      1.00000000E+00
            diemix1     5.00000000E-01
            diemix2     3.50000000E-01
@@ -562,9 +564,11 @@ P          mk1mem           1
               occ      2.000000  0.000000
         optdriver1          0
         optdriver2          1
-          rfatpol1          1       1
+           prtpot1          0
+           prtpot2          1
+          rfatpol1          1       2
           rfatpol2          2       2
-            rfdir1          0       0       0
+            rfdir1          1       1       1
             rfdir2          1       0       0
            rfphon1          0
            rfphon2          1
@@ -586,6 +590,11 @@ P          mk1mem           1
             znucl        1.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -675,5 +684,5 @@ P          mk1mem           1
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and  12 COMMENTs to log file.
+.Delivered   2 WARNINGs and   9 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.5  wall=          0.5

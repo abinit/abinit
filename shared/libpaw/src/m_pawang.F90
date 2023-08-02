@@ -9,7 +9,7 @@
 !!  regions and related data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2021 ABINIT group (MT, FJ, BA)
+!! Copyright (C) 2013-2022 ABINIT group (MT, FJ, BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -192,11 +192,6 @@ CONTAINS
 !! OUTPUT
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_nonlinear,m_paw_init
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngrad2_ylm,&
@@ -325,11 +320,6 @@ end subroutine pawang_init
 !! SIDE EFFECTS
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_driver,m_nonlinear,m_paw_init
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawang_free(Pawang)
@@ -408,11 +398,6 @@ end subroutine pawang_free
 !!        <down, S_lm1| L.S |S_lm2, up>  =-Conjg[<up, S_lm1| L.S |S_lm2, down>]
 !!        Also, only ilm1<=ilm2 terms are stored, because:
 !!         <sigma, S_lm1| L.S |S_lm2, sigma_prime>=-<sigma_prime, S_lm1| L.S |S_lm2, sigma>
-!!
-!! PARENTS
-!!      m_pawang
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -600,11 +585,6 @@ subroutine pawang_lsylm(pawang)
 !!       pawang%angwgth    - (angl_size) array, the weight factor of the
 !!                           point (ax, ay, az)
 !!
-!! PARENTS
-!!      m_pawang
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine initang(pawang)
@@ -689,11 +669,6 @@ end subroutine initang
 !!  angwgth(angl_size):
 !!     For each point of the angular mesh, gives the weight of the corresponding point on an unitary sphere.
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine make_angular_mesh(ntheta, nphi, angl_size, vers_cart, angwgth)
@@ -767,11 +742,6 @@ end subroutine make_angular_mesh
 !!  x(n)=array of support points
 !!  weights(n)=array of integration weights
 !!
-!! PARENTS
-!!      m_pawang
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine gauleg(xmin,xmax,x,weights,n)
@@ -835,10 +805,6 @@ end subroutine make_angular_mesh
 !! OUTPUT
 !!   factorial= n! (real)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 elemental function rfactorial(nn)
@@ -878,10 +844,6 @@ end function rfactorial
 !!
 !! OUTPUT
 !!   perms= n!/(n-k)!
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

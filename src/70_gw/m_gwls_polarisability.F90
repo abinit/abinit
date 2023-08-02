@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -49,9 +45,10 @@ real(dp),public :: matrix_function_omega(2)
 
 
 ! Some timing variables
-integer,  public :: counter_fft, counter_sqmr, counter_rprod, counter_proj, counter_H
+integer,  public :: counter_fft = 0, counter_sqmr = 0, counter_rprod = 0 , counter_proj = 0, counter_H = 0
 
-real(dp), public :: time1, time2, time_fft, time_sqmr, time_rprod,time_proj,time_H
+real(dp), public :: time1 = zero, time2 = zero, time_fft = zero 
+real(dp), public :: time_sqmr = zero, time_rprod = zero, time_proj = zero, time_H = zero
 
 real(dp), allocatable, public :: Sternheimer_solutions_zero(:,:,:,:)
 integer, public :: index_solution=0
@@ -78,12 +75,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k
 !!
 !! SOURCE
 
@@ -131,7 +122,7 @@ real(dp) ::  list_QMR_frequencies(2,2)
 
 
 integer,  save ::  icounter = 0
-real(dp), save ::  total_time1, total_time2, total_time
+real(dp), save ::  total_time1 = zero, total_time2 = zero, total_time = zero
 
 
 integer :: num_op_v, i_op_v, case_op_v
@@ -660,12 +651,6 @@ end subroutine Pk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_polarisability
-!!
-!! CHILDREN
-!!      epsilon_k
-!!
 !! SOURCE
 
 subroutine epsilon_k(psi_out,psi_in,omega)
@@ -697,13 +682,6 @@ end subroutine epsilon_k
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy,m_gwls_ComputePoles
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
-!!      epsilon_k
-!!
 !! SOURCE
 
 subroutine set_dielectric_function_frequency(omega)
@@ -730,11 +708,6 @@ end subroutine set_dielectric_function_frequency
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      epsilon_k
 !!
 !! SOURCE
 

@@ -1,8 +1,8 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2021 ABINIT group . 
+.Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h02 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t11/t11.in
-- output file    -> t11.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t11/t11.abi
+- output file    -> t11.abo
 - root for input  files -> t11i
 - root for output files -> t11o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          13        mffmem =           1         mkmem =           8
        mpw =          84          nfft =        1728          nkpt =           8
 ================================================================================
-P This job should need less than                       1.931 Mbytes of memory.
+P This job should need less than                       1.980 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.135 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,7 +49,7 @@ _ WF disk file :      0.135 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          13        mffmem =           1         mkmem =          29
        mpw =          84          nfft =        1728          nkpt =          29
 ================================================================================
-P This job should need less than                       2.125 Mbytes of memory.
+P This job should need less than                       2.174 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.485 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -326,8 +324,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01105
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -517,31 +515,6 @@ tolerances: {tolwfr: 1.00E-14, }
   1.1789E+00
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  3.27371E-09
-  prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  8.57157E-10
-  prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  2.61112E-08
-  prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  1.84905E-14
-  prteigrs : nnsclo,ikpt=   30    6 max resid (incl. the buffer)=  7.43568E-13
-  prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  5.37203E-10
-  prteigrs : nnsclo,ikpt=   30    8 max resid (incl. the buffer)=  3.03632E-06
-  prteigrs : nnsclo,ikpt=   30   10 max resid (incl. the buffer)=  2.44703E-08
-  prteigrs : nnsclo,ikpt=   30   11 max resid (incl. the buffer)=  5.06241E-09
-  prteigrs : nnsclo,ikpt=   30   12 max resid (incl. the buffer)=  1.78224E-12
-  prteigrs : nnsclo,ikpt=   30   14 max resid (incl. the buffer)=  8.81806E-11
-  prteigrs : nnsclo,ikpt=   30   15 max resid (incl. the buffer)=  4.10473E-10
-  prteigrs : nnsclo,ikpt=   30   16 max resid (incl. the buffer)=  8.96435E-06
-  prteigrs : nnsclo,ikpt=   30   17 max resid (incl. the buffer)=  1.17515E-06
-  prteigrs : nnsclo,ikpt=   30   18 max resid (incl. the buffer)=  3.02885E-08
-  prteigrs : nnsclo,ikpt=   30   19 max resid (incl. the buffer)=  8.51198E-07
-  prteigrs : nnsclo,ikpt=   30   20 max resid (incl. the buffer)=  2.16394E-07
-  prteigrs : nnsclo,ikpt=   30   22 max resid (incl. the buffer)=  2.15762E-10
-  prteigrs : nnsclo,ikpt=   30   23 max resid (incl. the buffer)=  1.06469E-07
-  prteigrs : nnsclo,ikpt=   30   24 max resid (incl. the buffer)=  2.06049E-08
-  prteigrs : nnsclo,ikpt=   30   25 max resid (incl. the buffer)=  4.56025E-06
-  prteigrs : nnsclo,ikpt=   30   26 max resid (incl. the buffer)=  3.07727E-07
-  prteigrs : nnsclo,ikpt=   30   27 max resid (incl. the buffer)=  1.13925E-07
-  prteigrs : nnsclo,ikpt=   30   28 max resid (incl. the buffer)=  2.58837E-05
-  prteigrs : nnsclo,ikpt=   30   29 max resid (incl. the buffer)=  5.19197E-14
 
 
 --- !ResultsGS
@@ -944,10 +917,10 @@ P           mkmem2         29
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.5  wall=          1.5
+.Delivered   2 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.4  wall=          1.5

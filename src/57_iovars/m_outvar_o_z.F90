@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -103,12 +99,6 @@ contains
 !!  Note that acell, occ, rprim, xred and vel might have been modified by the
 !!  computation, so that their values if choice=1 or choice=2 will differ.
 !!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      appdig
-!!
 !! SOURCE
 
  subroutine outvar_o_z(choice,dtsets,iout,&
@@ -134,7 +124,7 @@ contains
  integer :: multi_kptopt
  integer :: natom
  integer :: nimage,nnos,nsym
- integer :: ntypalch,ntypat,size1,size2,tnkpt,timopt_default,tmpimg0
+ integer :: ntypalch,ntypat,size1,size2,test_write,tnkpt,timopt_default,tmpimg0
  logical :: compute_static_images
  character(len=1) :: firstchar_gpu
 !arrays
@@ -227,6 +217,9 @@ contains
 
  intarr(1,:)=dtsets(:)%optcell
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optcell','INT',0)
+
+ intarr(1,:)=dtsets(:)%optdcmagpawu
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdcmagpawu','INT',0)
 
  intarr(1,:)=dtsets(:)%optdriver
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'optdriver','INT',0)
@@ -533,9 +526,6 @@ contains
  intarr(1,:)=dtsets(:)%prtebands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtebands','INT',0)
 
- intarr(1,:)=dtsets(:)%prtefg
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefg','INT',0)
-
  intarr(1,:)=dtsets(:)%prtefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtefmas','INT',0)
 
@@ -547,9 +537,6 @@ contains
 
  intarr(1,:)=dtsets(:)%prteliash
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prteliash','INT',0)
-
- intarr(1,:)=dtsets(:)%prtfc
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfc','INT',0)
 
  intarr(1,:)=dtsets(:)%prtfull1wf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtfull1wf','INT',0)
@@ -580,6 +567,9 @@ contains
 
  intarr(1,:)=dtsets(:)%prtnest
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnest','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtocc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtocc','INT',0)
 
  intarr(1,:)=dtsets(:)%prtphbands
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtphbands','INT',0)
@@ -651,12 +641,16 @@ contains
  intarr(1,:)=dtsets(:)%prt1dm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt1dm','INT',0)
 
+ !ptcharge
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
      dprarr(ii,idtset) = dtsets(idtset)%ptcharge(ii)
    end do ! end loop over ntypat
  end do ! end loop over datasets
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'ptcharge','DPR',0)
+
+ intarr(1,:)=dtsets(:)%prt_lorbmag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt_lorbmag','INT',0)
 
  intarr(1,:)=dtsets(:)%ptgroupma
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ptgroupma','INT',0)
@@ -721,6 +715,10 @@ contains
    end do ! end loop over ntypat
  end do ! end loop over datasets
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'quadmom','DPR',0)
+
+ intarr(1,:)=dtsets(:)%quadquad
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'quadquad','INT',0)
+
 
 !###########################################################
 !### 03. Print all the input variables (R)
@@ -790,12 +788,18 @@ contains
  intarr(1,:)=dtsets(:)%restartxf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'restartxf','INT',0)
 
- intarr(1,:)=dtsets(:)%rfasr
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
+!intarr(1,:)=dtsets(:)%rfasr
+!call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
 
- intarr(1,:)=dtsets(:)%rfatpol(1)
- intarr(2,:)=dtsets(:)%rfatpol(2)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'rfatpol','INT',0)
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%rfatpol(1)/=1 .or. dtsets(idtset)%rfatpol(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%rfatpol(1)
+   intarr(2,:)=dtsets(:)%rfatpol(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'rfatpol','INT',0)
+ endif
 
  intarr(1,:)=dtsets(:)%rfddk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfddk','INT',0)
@@ -819,6 +823,9 @@ contains
 
  intarr(1,:)=dtsets(:)%rfstrs
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfstrs','INT',0)
+
+ intarr(1,:)=dtsets(:)%rfstrs_ref
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfstrs_ref','INT',0)
 
  intarr(1,:)=dtsets(:)%rfuser
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfuser','INT',0)
@@ -1082,6 +1089,9 @@ contains
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,-3,marr,narr,narrm,ncid,ndtset_alloc,'tnons','DPR',multivals%nsym)
 
+ dprarr(1,:)=dtsets(:)%tolcum
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolcum','DPR',0)
+
  dprarr(1,:)=dtsets(:)%toldfe
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'toldfe','ENE',0)
 
@@ -1181,6 +1191,9 @@ contains
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
 
+ intarr(1,:)=dtsets(:)%useextfpmd
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useextfpmd','INT',0)
+
  intarr(1,:)=dtsets(:)%use_yaml
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
 
@@ -1237,6 +1250,9 @@ contains
 
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
+
+ intarr(1,:)=dtsets(:)%use_oldchi
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_oldchi','INT',0)
 
 
 !###########################################################
@@ -1345,6 +1361,8 @@ contains
 !###########################################################
 !### 03. Print all the input variables (W)
 !##
+ intarr(1,:)=dtsets(:)%wfinit
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfinit','INT',0)
 
  dprarr(1,:)=dtsets(:)%wfmix
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'wfmix','DPR',0)
@@ -1576,12 +1594,6 @@ contains
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_outvar_o_z
-!!
-!! CHILDREN
-!!      appdig
 !!
 !! SOURCE
 

@@ -6,14 +6,10 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2021 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -70,11 +66,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -137,11 +128,6 @@ end subroutine setup_timing_log
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gwls_sternheimer
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine close_timing_log()
@@ -166,11 +152,6 @@ end subroutine close_timing_log
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -203,12 +184,6 @@ end subroutine write_text_block_in_Timing_log
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy,m_gwls_DielectricArray
-!!      m_gwls_GenerateEpsilon
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -246,11 +221,6 @@ end subroutine write_timing_log
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_GWlanczos
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

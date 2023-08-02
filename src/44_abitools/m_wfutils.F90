@@ -6,7 +6,7 @@
 !!  parameters and function for wave functions copy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2021 ABINIT group (CS,GZ,FB)
+!!  Copyright (C) 2001-2022 ABINIT group (CS,GZ,FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -62,11 +62,6 @@ contains
 !!  icg=shift to be applied on the location of data in the array cg
 !!  igsc=shift to be applied on the location of data in the array gsc
 !!  blocksize=size of blocks
-!!
-!! PARENTS
-!!      lobpcgwf
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!
@@ -171,12 +166,6 @@ end function wfindex
 !!
 !! TODO
 !!  Split the two cases so that we can avoid the array descriptors.
-!!
-!! PARENTS
-!!   lobpcgwf
-!!
-!! CHILDREN
-!!   dcopy, zcopy
 !!
 !! SOURCE
 !!

@@ -7,14 +7,10 @@
 !! the irreducible representations associated to electronic eigenstates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2021 ABINIT group (MG)
+!!  Copyright (C) 2008-2022 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -31,7 +27,7 @@ MODULE m_esymm
  use m_errors
 
  use m_io_tools,       only : file_exists
- use m_symtk,          only : matr3inv, chkgrp, symrelrot, littlegroup_q
+ use m_symtk,          only : matr3inv, sg_multable, symrelrot, littlegroup_q
  use m_symfind,        only : symbrav
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : print_arr, set2unit, get_trace
@@ -245,12 +241,6 @@ CONTAINS  !=====================================================================
 !!   The present implementation does NOT work at zone border if the little group of
 !!   kpt_in is non-symmorphic namely thers is at lest a symmetry operation with non-zero tnons.
 !!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF_TOL,ene_k,tolsym)
@@ -431,9 +421,9 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
  ABI_MALLOC(dum_symafm,(esymm%nsym_gk))
  dum_symafm=1
 
- call chkgrp(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
-
- ABI_CHECK(grp_ierr==0,"chkgrp failed")
+!Check group closure
+ call sg_multable(esymm%nsym_gk,dum_symafm,sgk,grp_ierr)
+ ABI_CHECK(grp_ierr==0,"sg_multable failed")
  ABI_FREE(dum_symafm)
 
  ABI_MALLOC(tmp_nelements,(esymm%nsym_gk))
@@ -475,7 +465,7 @@ subroutine esymm_init(esymm,kpt_in,Cryst,only_trace,nspinor,first_ib,nbnds,EDIFF
 
    spgroup=0
    chkprim=1 ! Cell must be primitive.
-   !call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   !call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
    !call symspgr(bravais,Cryst%nsym,spgroup,Cryst%symrel,Cryst%tnons,tolsym)
 
    !call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tolsym)
@@ -834,12 +824,6 @@ end subroutine esymm_init
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_print(esymm,unit,mode_paral,prtvol)
@@ -948,12 +932,6 @@ end subroutine esymm_print
 !! FUNCTION
 !!  Deallocate the memory allocated in the esymm_t datatype (scalar version)
 !!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_free_0D(esymm)
@@ -1001,11 +979,6 @@ end subroutine esymm_free_0D
 !! FUNCTION
 !!  Deallocate the memory allocated in the esymm_t datatype (2D version)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
-!!
 !! SOURCE
 
 subroutine esymm_free_2D(esymm)
@@ -1038,12 +1011,6 @@ end subroutine esymm_free_2D
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -1297,8 +1264,6 @@ end subroutine esymm_finalize
 !!  trace(%nsym_gk)=The trace of the representation to be compared with the internal database (if present).
 !!  tolerr=Absolute error on the character.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function which_irrep(esymm,trace,tolerr)
@@ -1340,12 +1305,6 @@ end function which_irrep
 !!
 !! INPUTS
 !!  esymm<esymm_t>
-!!
-!! PARENTS
-!!      m_cohsex,m_sigc,m_sigx
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 
@@ -1440,8 +1399,6 @@ end subroutine esymm_symmetrize_mels
 !! INPUTS
 !!  esymm<esymm_t>
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 function esymm_failed(esymm)
@@ -1467,12 +1424,6 @@ end function esymm_failed
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_esymm
-!!
-!! CHILDREN
-!!      xgeev,xginv,zpotrf,ztrsm
 !!
 !! SOURCE
 

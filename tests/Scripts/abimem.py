@@ -244,13 +244,14 @@ def get_epilog():
         return """\
 Usage example:
 
+    abimem.py summarize [FILES]  => Print basic info to terminal
     abimem.py leaks [FILES]       => Find possible memory leaks in FILE(s)
     abimem.py small [FILES]       => Find small memory allocations in FILE(s)
     abimem.py large [FILES]       => Find large memory allocations in FILE(s)
     abimem.py intense [FILES]     => Find periods of intense memory allocation in FILE(s)
     abimem.py peaks [FILES]       => Find peaks in memory allocation in FILE(s)
     abimem.py plot [FILES]        => Plot memory allocations in FILE(s) with matplotlib
-    abiopen.py FILE               => Open file in ipython shell.
+    abimem.py ipython [FILE]      => Open file in ipython shell.
 
     FILES could be either a list of files or a single directory containing abimem_ran.mocc files.
 
@@ -283,10 +284,10 @@ def main():
 
     # loglevel is bound to the string value obtained from the command line argument.
     # Convert to upper case to allow the user to specify --loglevel=DEBUG or --loglevel=debug
-    numeric_level = getattr(logging, options.loglevel.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError('Invalid log level: %s' % options.loglevel)
-    logging.basicConfig(level=numeric_level)
+    #numeric_level = getattr(logging, options.loglevel.upper(), None)
+    #if not isinstance(numeric_level, int):
+    #    raise ValueError('Invalid log level: %s' % options.loglevel)
+    #logging.basicConfig(level=numeric_level)
 
     if options.seaborn:
         # Use seaborn settings.

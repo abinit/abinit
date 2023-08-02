@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2021 ABINIT group (DCA,XG,GMR)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA,XG,GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -64,11 +60,6 @@ contains
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
