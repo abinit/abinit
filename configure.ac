@@ -400,6 +400,13 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
   fi
   # Perform pattern replacement in OpenMP offload flags with requested GPU arch
   FCFLAGS_OPENMP_OFFLOAD=`echo "${FCFLAGS_OPENMP_OFFLOAD}" | sed "s/__GPU_ARCH__/$GPU_ARCH/"`
+
+  #FIXME With LLVM 16 embedded with ROCm 5.6.0, issues occurs if OpenMP offload is enabled everywhere
+  #Therefore, we enable it only if subfolders where it's needed.
+  if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
+    amd_openmp_flags="$FCFLAGS_OPENMP_OFFLOAD"
+    FCFLAGS_OPENMP_OFFLOAD=""
+  fi
 else
   FCFLAGS_OPENMP_OFFLOAD=""
 fi
@@ -489,22 +496,11 @@ ABI_OPTIM_INIT([${abi_optim_flavor}])
   fcflags_opt_20_datashare="-O0"
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
-  if test "${abi_fc_vendor}" == "llvm"; then
-    AC_MSG_NOTICE([disabling optimizations for shared/common/src/39_libpaw/ with LLVM/Flang.])
-    fcflags_opt_39_libpaw="-O0"
-    AC_MSG_NOTICE([disabling optimizations for src/95_drive/ with LLVM/Flang.])
-    fcflags_opt_95_drive="-O0"
-  fi
 
 # FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
-# Checked with version 15.0.2 (May 2022).
+# Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
 if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
-  fcflags_opt_default="-O2"
-  if test "${abi_openmp_enable}" = "yes"; then
-    fcflags_opt_default="-O2 -fopenmp"
-  fi
   if test "${abi_openmp_offload_enable}" = "yes"; then
-    amd_openmp_flags="-D__HIP_PLATFORM_AMD__ -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=${abi_gpu_device} --offload-arch=${abi_gpu_device}  "
     fcflags_opt_28_numeric_noabirule="${amd_openmp_flags}"
     fcflags_opt_45_xgTools="${amd_openmp_flags}"
     fcflags_opt_46_ghc_omp="${amd_openmp_flags}"
