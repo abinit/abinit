@@ -428,7 +428,7 @@ end subroutine chkgrp
 !scalars
  integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
  integer :: sym1,sym2,sym3
- integer :: isym
+ !integer :: isym
  real(dp) :: tnons_tol_
  logical :: found_inv,iseq
  character(len=500) :: msg
@@ -503,7 +503,7 @@ end subroutine chkgrp
  end do
 
  ! 3)
- !In order to avoid potential cubic scaling with number of atoms, in exotic cases, with large prefactor, 
+ !In order to avoid potential cubic scaling with number of atoms, in exotic cases, with large prefactor,
  !set up lookup table for the point symmetry part of the symmetry operations.
  !Still cubic, but with a reduced prefactor. To fully eliminate cubic scaling, should
  !set up lookup table for the tnons_ as well.
@@ -519,13 +519,13 @@ end subroutine chkgrp
  list_symrel(1,1)=1
  nlist_symrel(1)=1
  !If more than one symmetry operation, then loop on the other ones, find whether the ptsymm has already been found,
- !or create one new item in the list 
+ !or create one new item in the list
  if(nsym/=1)then
    do sym1=2,nsym
      found=0
      do ptsymm2=1,nptsymm
        if(all(symrel(:,:,list_symrel(1,ptsymm2)) == symrel(:,:,sym1)))then
-         ptsymm(sym1)=ptsymm2 ; found=1 
+         ptsymm(sym1)=ptsymm2 ; found=1
          nlist_symrel(ptsymm2)=nlist_symrel(ptsymm2)+1
          list_symrel(nlist_symrel(ptsymm2),ptsymm2)=sym1
          cycle
@@ -547,7 +547,7 @@ end subroutine chkgrp
  !Check that each point symmetry is associated to the same number of translations
  if(nptsymm/=1)then
    do ptsymm1=1,nptsymm
-     if(nlist_symrel(ptsymm1)/=nlist_symrel(1))then 
+     if(nlist_symrel(ptsymm1)/=nlist_symrel(1))then
        write(msg, '(9a)' )&
 &        'The number of translations (and possibly symafm) associated to the same symrel',ch10,&
 &        'is not the same for all point symmetries',ch10,&
@@ -576,7 +576,7 @@ end subroutine chkgrp
    sym1=list_symrel(1,ptsymm1)
    do ptsymm2=1,nptsymm
      sym2=list_symrel(1,ptsymm2)
-     ! Compute the product of the two symmetries. 
+     ! Compute the product of the two symmetries.
      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
      ! Check that product array is one of the original point symmetries.
      iseq= .false.
@@ -633,7 +633,7 @@ end subroutine chkgrp
 
        !The equal number of translations for each point symmetry has been checked earlier.
        !If the full table is not requested, it is now sufficient to check that
-       !the product of all symmetry operations sym1 with a pure translation (ptsymm=1), or with one of the instances        
+       !the product of all symmetry operations sym1 with a pure translation (ptsymm=1), or with one of the instances
        !for each point symmetries is indeed present in the table.
        !This is done to save CPU time when the number of symmetry operations is bigger than 384.
 
