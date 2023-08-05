@@ -182,7 +182,7 @@ module m_gwr
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
 !#ifdef __HAVE_GREENX
- use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
+ use minimax_grids,   only : gx_minimax_grid !, gx_get_error_message
 !#endif
 
  implicit none
@@ -790,6 +790,9 @@ module m_gwr
    procedure :: run_g0w0 => gwr_run_g0w0
    ! Compute QP corrections with one-shot G0W0.
 
+   procedure :: run_chi0 => gwr_run_chi0
+   ! Compute CHI0 only.
+
    procedure :: run_energy_scf => gwr_run_energy_scf
    ! Compute QP corrections with energy-only self-consistent GW
 
@@ -1165,10 +1168,11 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%ntau = dtset%gwr_ntau
 
 !#ifdef __HAVE_GREENX
+ call wrtout(std_out, sjoin("Computing minimax grid with regterm:", ftoa(dtset%userra)))
  call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
                       gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
                       gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
-                      gwr%ft_max_error, gwr%cosft_duality_error, ierr)
+                      gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=dtset%userra)
 
  ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
  !if (ierr /= 0) then
@@ -6265,6 +6269,42 @@ subroutine gwr_run_g0w0(gwr, free_ugb)
  call gwr%build_sigmac()
 
 end subroutine gwr_run_g0w0
+!!***
+
+!!****f* m_gwr/gwr_run_chi0
+!! NAME
+!!  gwr_run_chi0
+!!
+!! FUNCTION
+!!  Driver to compute CHI0 along the imaginary axis.
+!!
+!! INPUTS
+!!  [free_ugb]: True if array with empty KS states should freed as soon as possibile. Default: True
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gwr_run_chi0(gwr, free_ugb)
+
+!Arguments ------------------------------------
+ class(gwr_t),intent(inout) :: gwr
+ logical,optional,intent(in) :: free_ugb
+
+!Local variables-------------------------------
+ logical :: free_ugb__
+
+! *************************************************************************
+
+ ! Use ugb wavefunctions and the Lehmann representation to compute head/wings and Sigma_x matrix elements.
+ call gwr%build_chi0_head_and_wings()
+
+ ! Now compute G(itau) from ugb and start the GWR algorithm.
+ free_ugb__ = .True.; if (present(free_ugb)) free_ugb__ = free_ugb
+ call gwr%build_green(free_ugb=free_ugb__)
+ call gwr%build_tchi()
+
+end subroutine gwr_run_chi0
 !!***
 
 !----------------------------------------------------------------------

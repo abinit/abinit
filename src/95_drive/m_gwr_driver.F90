@@ -266,7 +266,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    write(ab_out,"(a,i0)")"    nsppol: ",dtset%nsppol
    write(ab_out,"(a,i0)")"    nspinor: ",dtset%nspinor
    write(ab_out,"(a,i0)")"    mband: ",dtset%mband
-   write(ab_out,"(2a)")"      gwr_task: ",trim(dtset%gwr_task)
+   write(ab_out,"(3a)")  "    gwr_task: '",trim(dtset%gwr_task),"'"
 
    work_size = dtset%nkpt * dtset%nsppol
    ! Non-scalable memory in Mb i.e. memory that is not distributed with MPI.
@@ -880,6 +880,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      call gwr%rpa_energy()
    case ("GAMMA_GW")
      call gwr%gamma_gw(nfftf, ngfftf, vpsp)
+   case ("CHI0")
+     call gwr%run_chi0()
    case ("G0W0")
      call gwr%run_g0w0()
    case ("G0V")
