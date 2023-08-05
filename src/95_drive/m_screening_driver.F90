@@ -90,9 +90,9 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
-#ifdef __HAVE_GREENX
+!#ifdef __HAVE_GREENX
  use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
-#endif
+!#endif
 
  implicit none
 
@@ -1004,41 +1004,38 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(z)
    ABI_FREE(zw)
 
-#ifdef __HAVE_GREENX
-if (.False.) then
-!if (dtset%gwr_ntau /= 0) then
-   call wrtout(std_out, sjoin("Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
-   gaps = ebands_get_gaps(ks_ebands, gap_err)
-   ABI_CHECK(gap_err == 0, "gap_err")
-   ! ================================
-   ! Setup tau/omega mesh and weights
-   ! ================================
-   ! Compute min/max transition energy taking into account nsppol if any.
-   te_min = minval(gaps%cb_min - gaps%vb_max)
-   te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
-   if (te_min <= tol6) then
-     te_min = tol6
-     ABI_WARNING("System is metallic or with a very small fundamental gap!")
-   end if
+   if (dtset%userie == 4242) then
+       call wrtout(std_out, sjoin("userie == 4242 --> Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
+       gaps = ebands_get_gaps(ks_ebands, gap_err)
+       ABI_CHECK(gap_err == 0, "gap_err")
+       ! ================================
+       ! Setup tau/omega mesh and weights
+       ! ================================
+       ! Compute min/max transition energy taking into account nsppol if any.
+       te_min = minval(gaps%cb_min - gaps%vb_max)
+       te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
+       if (te_min <= tol6) then
+         te_min = tol6
+         ABI_ERROR("System is metallic or with a very small fundamental gap!")
+       end if
 
-   call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
-                        tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
-                        iw_mesh, iw_wgs,   &
-                        t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
-                        ft_max_error, cosft_duality_error, ierr)
-   ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
-   !if (ierr /= 0) then
-   !  call gx_get_error_message(msg)
-   !  ABI_ERROR(msg)
-   !end if
+       call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
+                            tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
+                            iw_mesh, iw_wgs,   &
+                            t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
+                            ft_max_error, cosft_duality_error, ierr)
+       ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+       !if (ierr /= 0) then
+       !  call gx_get_error_message(msg)
+       !  ABI_ERROR(msg)
+       !end if
 
-   call gaps%free()
-   do iomega=1,Ep%nomegaei
-     Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
-     write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
-   end do
-end if
-#endif
+       call gaps%free()
+       do iomega=1,Ep%nomegaei
+         Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
+         !write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
+       end do
+    end if
 
  else if (Ep%contour_deformation .and. Dtset%cd_customnimfrqs /= 0) then
    Ep%omega(Ep%nomegaer+1)=CMPLX(zero,Dtset%cd_imfrqs(1))

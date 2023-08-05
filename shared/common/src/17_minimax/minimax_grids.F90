@@ -57,7 +57,7 @@ contains
   subroutine gx_minimax_grid(num_points, e_min, e_max, &
        tau_points, tau_weights, omega_points, omega_weights, &
        cosft_wt, cosft_tw, sinft_wt, &
-       max_errors, cosft_duality_error, ierr, bare_cos_sin_weights)
+       max_errors, cosft_duality_error, ierr, bare_cos_sin_weights, regterm)
 
     integer, intent(in)                               :: num_points
     real(kind=dp), intent(in)                         :: e_min, e_max
@@ -70,6 +70,7 @@ contains
     real(kind=dp), intent(out)                        :: max_errors(3), cosft_duality_error
     logical, intent(in), optional                     :: bare_cos_sin_weights
     integer, intent(out)                              :: ierr
+    real(kind=dp),optional,intent(in)                          :: regterm
 
     ! Internal variables
     logical                                           :: my_bare_cos_sin_weights
@@ -77,7 +78,7 @@ contains
     integer, parameter                                :: cos_w_to_cos_t = 2
     integer, parameter                                :: sin_t_to_sin_w = 3
     integer                                           :: i_point, j_point
-    real(kind=dp)                                     :: e_range, scaling
+    real(kind=dp)                                     :: e_range, scaling, regterm__
     real(kind=dp), dimension(:), allocatable          :: x_tw
     real(kind=dp), dimension(:, :), allocatable       :: mat
     real(kind=dp), dimension(:, :), allocatable       :: tmp_cosft_wt, tmp_cosft_tw
@@ -86,6 +87,8 @@ contains
     if (present(bare_cos_sin_weights)) then
        my_bare_cos_sin_weights = bare_cos_sin_weights
     endif
+
+    regterm__ = 0.0_dp; if (present(regterm)) regterm__ = regterm
 
     ! Begin work
     e_range = e_max/e_min
@@ -133,17 +136,17 @@ contains
 
     ! get the weights for the cosine transform W^c(it) -> W^c(iw)
     call get_transformation_weights(num_points, tau_points, omega_points, cosft_wt, e_min, e_max, &
-         max_errors(1), cos_t_to_cos_w, ierr)
+         max_errors(1), cos_t_to_cos_w, regterm__, ierr)
     if (ierr /= 0) return
 
     ! get the weights for the cosine transform W^c(iw) -> W^c(it)
     call get_transformation_weights(num_points, tau_points, omega_points, cosft_tw, e_min, e_max, &
-         max_errors(2), cos_w_to_cos_t, ierr)
+         max_errors(2), cos_w_to_cos_t, regterm__, ierr)
     if (ierr /= 0) return
 
     ! get the weights for the sine transform Sigma^sin(it) -> Sigma^sin(iw) (PRB 94, 165109 (2016), Eq. 71)
     call get_transformation_weights(num_points, tau_points, omega_points, sinft_wt, e_min, e_max, &
-         max_errors(3), sin_t_to_sin_w, ierr)
+         max_errors(3), sin_t_to_sin_w, regterm__, ierr)
     if (ierr /= 0) return
 
     ! Compute the actual weights used for the inhomogeneous cosine/ FT and check whether
@@ -236,13 +239,13 @@ contains
   !! @param[inout] weights: corresponding tranformation weights
   !! @param[in] e_min: Minimum transition energy.
   !! @param[in] e_max: Maximum transition energy.
-  !! @param[inout] max_errors: Max error for the three kind of transforms
+  !! @param[inout] max_error: Max error for the transform
   !! @param[in] transformation type : 1 the cosine transform cos(it) -> cos(iw)
   !!                                : 2 the cosine transform cos(iw) -> cos(it)
   !!                                : 3 the sine transform   sin(it) -> sin(iw)
   !! @param[in] ierr: exit status
   subroutine get_transformation_weights(num_points, tau_points, omega_points, weights, e_min, e_max, &
-       max_error, transformation_type, ierr)
+       max_error, transformation_type, regterm, ierr)
 
     integer, intent(in)                                :: num_points
     real(kind=dp), allocatable, dimension(:), &
@@ -255,6 +258,7 @@ contains
     real(kind=dp), intent(inout)                       :: max_error
     integer, intent(in)                                :: transformation_type
     integer, intent(out)                               :: ierr
+    real(kind=dp),intent(in)                           :: regterm
 
     ! Internal variables
     integer                                            :: i_node, i_point, j_point, k_point, &
@@ -323,9 +327,15 @@ contains
        ! integration weights = (V Sigma^-1 U^T)*psi
 
        ! 1) V * Sigma^-1
+       !regterm = 0.01_dp
        do j_point = 1, num_points
           do k_point = 1, num_points
-             mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)/vec_S(j_point)
+             if (regterm > tiny(regterm)) then
+                 mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point)*vec_S(j_point) / &
+                                              (vec_S(j_point)**2+regterm**2)
+             else
+                mat_VT_s(k_point, j_point) = mat_VT(j_point, k_point) / vec_S(j_point)
+             end if
           end do ! k_point
        end do ! j_point
 
@@ -447,7 +457,7 @@ contains
   !! @param[in] x_mu : Transition energy (nodes in the interval [e_min,e_max])
   !! @param[in] psi: corresponding auxiliary function (see transformation type definition)
   !! @param[in] current_point:  current grid point ether omega(i_point) or tau_(i_point)
-  !! @param[out] max_errors: Max error for the three kind of transforms
+  !! @param[out] max_error: Max error for the transform.
   !! @param[in] transformation type : 1 fit function for the cosine transform cos(it) -> cos(iw), psi(omeaga,x)
   !!                                : 2 fit function for the cosine transform cos(iw) -> cos(it), psi(tau,x)
   !!                                : 3 fit function for the sine transform   sin(it) -> sin(iw), psi(omega,x)

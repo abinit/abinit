@@ -3309,7 +3309,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        write(msg, '(a,f8.2,4a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,& 
+       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
 &      '  the default value of spinmagntarget, and explicit definition of occ.',ch10,&
        'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
@@ -3361,7 +3361,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  symrel and tnons
-!  Check the point group closure 
+!  Check the point group closure
    call sg_multable(dt%nsym,dt%symafm,dt%symrel,ierrgrp, tnons=dt%tnons, tnons_tol=tol5)
    if (ierrgrp==1) ierr=ierr+1
 
@@ -4030,7 +4030,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    if (optdriver == RUNL_GWR) then
-     msg = "G0W0, HDIAGO, HDIAGO_FULL, RPA_ENERGY, EGEW, EGW0, G0EW, G0V, CC4S, CC4S_FULL, GAMMA_GW"
+     msg = "G0W0, HDIAGO, HDIAGO_FULL, RPA_ENERGY, EGEW, EGW0, G0EW, G0V, CC4S, CC4S_FULL, GAMMA_GW, CHI0"
      if (.not. string_in(dt%gwr_task, msg)) then
        ABI_ERROR_NOSTOP(sjoin("Invalid gwr_task:`", dt%gwr_task, "`, must be among:", msg), ierr)
      end if
