@@ -853,7 +853,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
- real(dp) :: prev_efficiency, prev_speedup
+ real(dp) :: prev_efficiency, prev_speedup, regterm
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
@@ -1168,23 +1168,17 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%ntau = dtset%gwr_ntau
 
 !#ifdef __HAVE_GREENX
+ regterm = dtset%userra
  call wrtout(std_out, sjoin("Computing minimax grid with regterm:", ftoa(dtset%userra)))
  call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
                       gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
                       gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
-                      gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=dtset%userra)
+                      gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
 
  ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
- !if (ierr /= 0) then
- !  call gx_get_error_message(msg)
- !  ABI_ERROR(msg)
- !end if
 
  ! FIXME: Here we need to rescale the weights because greenx convention is not what we expect!
  !gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
-!#else
-! ABI_ERROR("GWR code requires Green-X library!")
-!#endif
 
  if (gwr%comm%me == 0) then
    write(std_out, "(3a)")ch10, " Computing F(delta) = \int_0^{\infty} dw / (w^2 + delta^2) = pi/2/delta ", ch10
@@ -1552,8 +1546,8 @@ end block
  ! Create netcdf file to store results
  ! ====================================
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
- if (dtset%gwr_task == "RPA_ENERGY") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_RPAGWR.nc")
- if (dtset%gwr_task == "GAMMA_GW") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GAMMAGWR.nc")
+ !if (dtset%gwr_task == "RPA_ENERGY") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_RPAGWR.nc")
+ !if (dtset%gwr_task == "GAMMA_GW") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GAMMAGWR.nc")
 
  if (my_rank == master) then
    call gwr%print(units)
@@ -1579,7 +1573,9 @@ end block
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "wr_step", "ecuteps", "ecut", "ecutsigx", "gwr_boxcutmin" &
+     "wr_step", "ecuteps", "ecut", "ecutsigx", "gwr_boxcutmin", &
+     "min_transition_energy_eV", "max_transition_energy_eV", "eratio", &
+     "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", "cosft_duality_error", "regterm" &
    ])
    NCF_CHECK(ncerr)
 
@@ -1587,7 +1583,12 @@ end block
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("gwr_task", "char", "character_string_length"), &
      nctkarr_t("tau_mesh", "dp", "ntau"), &
+     nctkarr_t("tau_wgs", "dp", "ntau"), &
      nctkarr_t("iw_mesh", "dp", "ntau"), &
+     nctkarr_t("iw_wgs", "dp", "ntau"), &
+     nctkarr_t("cosft_wt", "dp", "ntau, ntau"), &
+     nctkarr_t("cosft_tw", "dp", "ntau, ntau"), &
+     nctkarr_t("sinft_wt", "dp", "ntau, ntau"), &
      !nctkarr_t("ngqpt", "int", "three"), &
      nctkarr_t("bstart_ks", "int", "nkcalc, nsppol"), &
      nctkarr_t("bstop_ks", "int", "nkcalc, nsppol"), &
@@ -1606,13 +1607,23 @@ end block
    NCF_CHECK(ncerr)
 
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "wr_step", "ecuteps", "ecut", "ecutsigx", "gwr_boxcutmin"], &
-     [gwr%wr_step, dtset%ecuteps, dtset%ecut, dtset%ecutsigx, dtset%gwr_boxcutmin])
+     "wr_step", "ecuteps", "ecut", "ecutsigx", "gwr_boxcutmin", &
+     "min_transition_energy_eV", "max_transition_energy_eV", "eratio", &
+     "ft_max_err_t2w_cos", "ft_max_err_w2t_cos", "ft_max_err_t2w_sin", "cosft_duality_error", "regterm"], &
+     [gwr%wr_step, dtset%ecuteps, dtset%ecut, dtset%ecutsigx, dtset%gwr_boxcutmin, &
+      gwr%te_min, gwr%te_max, gwr%te_max / gwr%te_min, &
+      gwr%ft_max_error(1), gwr%ft_max_error(2), gwr%ft_max_error(3), gwr%cosft_duality_error, regterm &
+     ])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nf90_put_var(ncid, vid("gwr_task"), trim(dtset%gwr_task)))
    NCF_CHECK(nf90_put_var(ncid, vid("tau_mesh"), gwr%tau_mesh))
+   NCF_CHECK(nf90_put_var(ncid, vid("tau_wgs"), gwr%tau_wgs))
    NCF_CHECK(nf90_put_var(ncid, vid("iw_mesh"), gwr%iw_mesh))
+   NCF_CHECK(nf90_put_var(ncid, vid("iw_wgs"), gwr%iw_wgs))
+   NCF_CHECK(nf90_put_var(ncid, vid("cosft_wt"), gwr%cosft_wt))
+   NCF_CHECK(nf90_put_var(ncid, vid("cosft_tw"), gwr%cosft_tw))
+   NCF_CHECK(nf90_put_var(ncid, vid("sinft_wt"), gwr%sinft_wt))
    NCF_CHECK(nf90_put_var(ncid, vid("bstart_ks"), gwr%bstart_ks))
    NCF_CHECK(nf90_put_var(ncid, vid("bstop_ks"), gwr%bstop_ks))
    NCF_CHECK(nf90_put_var(ncid, vid("kcalc"), gwr%kcalc))
