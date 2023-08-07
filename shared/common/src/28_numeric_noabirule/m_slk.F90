@@ -2887,36 +2887,9 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 ! *************************************************************************
 
   ! 0. Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols,nev,gpu=use_gpu)
+  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols,nev,gpu=use_gpu,blacs_ctx=sc_desc(CTXT_))
 
-  ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
-  !    and invert triangular matrix U
-  call elpa_func_cholesky(elpa_hdl,b)
-  call elpa_func_invert_triangular(elpa_hdl,b)
-  ! 2. Calculate U**-T * A * U**-1
-  ! 2a. tmp1 = U**-T * A
-  call elpa_func_hermitian_multiply(elpa_hdl,'U','L',na,b,a,na_rows,na_cols,tmp1,na_rows,na_cols)
-  ! 2b. tmp2 = tmp1**T
-  call pztranc(na,na,CONE,tmp1,1,1,sc_desc,CZERO,tmp2,1,1,sc_desc)
-  ! 2c. A =  U**-T * tmp2 ( = U**-T * Aorig * U**-1 )
-  call elpa_func_hermitian_multiply(elpa_hdl,'U','U',na,b,tmp2,na_rows,na_cols,a,na_rows,na_cols)
-  ! A is only set in the upper half, solve_evp_real needs a full matrix
-  ! Set lower half from upper half
-  call pztranc(na,na,CONE,a,1,1,sc_desc,CZERO,tmp1,1,1,sc_desc)
-  do i=1,na_cols
-     ! Get global column corresponding to i and number of local rows up to
-     ! and including the diagonal, these are unchanged in A
-     n_col = indxl2g(i,     nblk, my_pcol, 0, np_cols)
-     n_row = numroc (n_col, nblk, my_prow, 0, np_rows)
-     a(n_row+1:na_rows,i) = tmp1(n_row+1:na_rows,i)
-  enddo
-  ! 3. Calculate eigenvalues/eigenvectors of U**-T * A * U**-1
-  !    Eigenvectors go to tmp1
-  call elpa_func_solve_evp_1stage(elpa_hdl,a,tmp1,ev,nev)
-  ! 4. Backtransform eigenvectors: Z = U**-1 * tmp1
-  ! hermitian_multiply needs the transpose of U**-1, thus tmp2 = (U**-1)**T
-  call pztranc(na,na,CONE,b,1,1,sc_desc,CZERO,tmp2,1,1,sc_desc)
-  call elpa_func_hermitian_multiply(elpa_hdl,'L','N',nev,tmp2,tmp1,na_rows,na_cols,z,na_rows,na_cols)
+  call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,z,ev,nev)
 
   call elpa_func_deallocate(elpa_hdl)
 
@@ -2948,36 +2921,9 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 ! *************************************************************************
 
   ! 0. Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols,nev,gpu=use_gpu)
+  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol,na,nblk,na_rows,na_cols,nev,gpu=use_gpu,blacs_ctx=sc_desc(CTXT_))
 
-  ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
-  !    and invert triangular matrix U
-  call elpa_func_cholesky(elpa_hdl,b)
-  call elpa_func_invert_triangular(elpa_hdl,b)
-  ! 2. Calculate U**-T * A * U**-1
-  ! 2a. tmp1 = U**-T * A
-  call elpa_func_hermitian_multiply(elpa_hdl,'U','L',na,b,a,na_rows,na_cols,tmp1,na_rows,na_cols)
-  ! 2b. tmp2 = tmp1**T
-  call pdtran(na,na,1.d0,tmp1,1,1,sc_desc,0.d0,tmp2,1,1,sc_desc)
-  ! 2c. A =  U**-T * tmp2 ( = U**-T * Aorig * U**-1 )
-  call elpa_func_hermitian_multiply(elpa_hdl,'U','U',na,b,tmp2,na_rows,na_cols,a,na_rows,na_cols)
-  ! A is only set in the upper half, solve_evp_real needs a full matrix
-  ! Set lower half from upper half
-  call pdtran(na,na,1.d0,a,1,1,sc_desc,0.d0,tmp1,1,1,sc_desc)
-  do i=1,na_cols
-     ! Get global column corresponding to i and number of local rows up to
-     ! and including the diagonal, these are unchanged in A
-     n_col = indxl2g(i,     nblk, my_pcol, 0, np_cols)
-     n_row = numroc (n_col, nblk, my_prow, 0, np_rows)
-     a(n_row+1:na_rows,i) = tmp1(n_row+1:na_rows,i)
-  enddo
-  ! 3. Calculate eigenvalues/eigenvectors of U**-T * A * U**-1
-  !    Eigenvectors go to tmp1
-  call elpa_func_solve_evp_1stage(elpa_hdl,a,tmp1,ev,nev)
-  ! 4. Backtransform eigenvectors: Z = U**-1 * tmp1
-  !    hermitian_multiply needs the transpose of U**-1, thus tmp2 = (U**-1)**T
-  call pdtran(na,na,1.d0,b,1,1,sc_desc,0.d0,tmp2,1,1,sc_desc)
-  call elpa_func_hermitian_multiply(elpa_hdl,'L','N',nev,tmp2,tmp1,na_rows,na_cols,z,na_rows,na_cols)
+  call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,tmp1,ev,nev)
 
   call elpa_func_deallocate(elpa_hdl)
 
