@@ -141,8 +141,7 @@ hipsolverFillMode_t select_hipsolver_fill_mode(const char *c)
 
 extern "C" void gpu_linalg_init_()
 {
-  //HIP_API_CHECK( hipblasCreate(&hipblas_handle) );
-  hipblasCreate(&hipblas_handle);
+  HIP_API_CHECK( hipblasCreate(&hipblas_handle) );
   HIP_API_CHECK( hipsolverDnCreate(&hipsolverDn_handle) );
   HIP_API_CHECK( hipStreamCreate(&stream_compute) );
   HIP_API_CHECK( hipsolverDnSetStream(hipsolverDn_handle,stream_compute) );
