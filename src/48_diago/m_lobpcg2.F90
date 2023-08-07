@@ -900,10 +900,10 @@ module m_lobpcg2
     !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
     !---end
 
-    ABI_NVTX_START_RANGE(NVTX_RR_HEGV)
     call timab(tim_hegv,1,tsec)
     tsec(2) = abi_wtime()
     if ( var == VAR_X ) then
+      ABI_NVTX_START_RANGE(NVTX_RR_HEEV)
     ! Solve Hermitian eigen problem
       select case (eigenSolver)
       case (EIGENEVD)
@@ -926,6 +926,7 @@ module m_lobpcg2
         ABI_ERROR("Error for Eigen Solver HEEV")
       end select
     else
+      ABI_NVTX_START_RANGE(NVTX_RR_HEGV)
       ! Solve Hermitian general eigen problem only for first blockdim eigenvalues
       select case (eigenSolver)
       case (EIGENVX)
