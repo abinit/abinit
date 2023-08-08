@@ -226,8 +226,9 @@ contains
 &  v1zeeman)
  end if
 
+ ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
+ vmagpen1=zero
  if (abs(magpen) > tol6) then
-   ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
    call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,nspden, &
 & rhomag,vmagpen1)
  end if
