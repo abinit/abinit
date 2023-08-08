@@ -298,6 +298,7 @@ contains
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      corstr(1:6)=corstr(1:6)+taustr(1:6)
+     ABI_FREE(vxctotg)
    end if
    call timab(551,2,tsec)
  end if
