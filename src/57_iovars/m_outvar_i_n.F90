@@ -740,6 +740,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%magconon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'magconon','INT',0)
 
+ intarr(1,:)=dtsets(:)%mag1mom
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'mag1mom','INT',0)
+
  dprarr(1,:)=dtsets(:)%magpen
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'magpen','ENE',0)
 
