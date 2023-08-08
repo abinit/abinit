@@ -900,7 +900,7 @@ subroutine pawtab_free_0D(Pawtab)
    LIBPAW_DEALLOCATE(Pawtab%tcoretauspl)
  end if
  if (allocated(Pawtab%tnablaphi))  then
-   LIBPAW_DEALLOCATE(Pawtab%tphi)
+   LIBPAW_DEALLOCATE(Pawtab%tnablaphi)
  end if
  if (allocated(Pawtab%tphi))  then
    LIBPAW_DEALLOCATE(Pawtab%tphi)
