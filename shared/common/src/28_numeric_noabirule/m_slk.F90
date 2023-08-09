@@ -596,7 +596,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 #ifdef HAVE_LINALG_ELPA
  ! FIXME, to be investigated : - ELPA seem to prefer a block size that is a power of 2, hence 32
  !                             - Should we use specific setting based on using ELPA GPU kernel or not ?
- integer, parameter :: DEFAULT_SIZE_BLOCS = 32
+ integer, parameter :: DEFAULT_SIZE_BLOCS = 16
 #else
  ! As recommended by Intel MKL, a more sensible default than the previous value of 40
  integer, parameter :: DEFAULT_SIZE_BLOCS = 24
