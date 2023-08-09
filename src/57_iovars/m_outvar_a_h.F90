@@ -1180,6 +1180,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:) = dtsets(:)%gwr_max_hwtene
  call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_max_hwtene', 'ENE', 0)
 
+ dprarr(1,:) = dtsets(:)%gwr_regterm
+ call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_regterm', 'DPR', 0)
+
  narr = size(dtsets(0)%gwr_np_kgts)
  do idtset=0,ndtset_alloc
    intarr(1:narr,idtset) = dtsets(idtset)%gwr_np_kgts

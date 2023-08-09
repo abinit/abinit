@@ -494,6 +494,9 @@ module m_gwr
    ! (nqibz)
    ! Descriptor for tchi. NB: The g-vectors are sorted by |q+g|^2/2
 
+   integer,allocatable :: chinpw_qibz(:)
+   ! Number of PWs in tchi for each q-point in the IBZ (available on all procs)
+
    !type(desc_t),allocatable :: sigma_desc_kibz(:)
    ! (nkibz)
    ! Descriptor for self-energy
@@ -853,7 +856,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3)
  integer :: ip_g, ip_k, ip_t, ip_s, np_g, np_k, np_t, np_s
  real(dp) :: cpu, wall, gflops, wmax, vc_ecut, delta, abs_rerr, exact_int, eval_int
- real(dp) :: prev_efficiency, prev_speedup, regterm
+ real(dp) :: prev_efficiency, prev_speedup, regterm, prev_dual_error
  logical :: isirr_k, changed, q_is_gamma, reorder
  character(len=5000) :: msg
  type(krank_t) :: qrank, krank_ibz
@@ -1168,14 +1171,46 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  gwr%ntau = dtset%gwr_ntau
 
 !#ifdef __HAVE_GREENX
- regterm = dtset%userra
- call wrtout(std_out, sjoin("Computing minimax grid with regterm:", ftoa(dtset%userra)))
- call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
-                      gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
-                      gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
-                      gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
+ regterm = dtset%gwr_regterm
+ if (regterm > -tol16) then
+     call wrtout(std_out, sjoin("Computing minimax grid with user-provided regterm:", ftoa(regterm)))
+     call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
+                          gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
+                          gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
+                          gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
+     ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+ else
+     regterm = zero
+     call wrtout(std_out, sjoin("Computing minimax grid with user-provided regterm:", ftoa(regterm)))
+     call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
+                          gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
+                          gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
+                          gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
+     ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
 
- ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+    ! If duality error is big, use regterm = 1e-6
+    if (gwr%cosft_duality_error > half) then
+       ABI_SFREE(gwr%tau_mesh)
+       ABI_SFREE(gwr%tau_wgs)
+       ABI_SFREE(gwr%iw_mesh)
+       ABI_SFREE(gwr%iw_wgs)
+       ABI_SFREE(gwr%cosft_wt)
+       ABI_SFREE(gwr%cosft_tw)
+       ABI_SFREE(gwr%sinft_wt)
+       regterm = tol6
+       call wrtout(std_out, sjoin("LARGE duality error -> recomputing minimax grid with regterm:", ftoa(regterm)))
+       prev_dual_error = gwr%cosft_duality_error
+       call gx_minimax_grid(gwr%ntau, gwr%te_min, gwr%te_max, &  ! in
+                            gwr%tau_mesh, gwr%tau_wgs, gwr%iw_mesh, gwr%iw_wgs, & ! out args allocated by the routine.
+                            gwr%cosft_wt, gwr%cosft_tw, gwr%sinft_wt, &
+                            gwr%ft_max_error, gwr%cosft_duality_error, ierr, regterm=regterm)
+       ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+
+       if (gwr%cosft_duality_error > prev_dual_error) then
+         ABI_WARNING("Using regterm didn't decrease the duality error")
+       end if
+    end if
+ end if
 
  ! FIXME: Here we need to rescale the weights because greenx convention is not what we expect!
  !gwr%iw_wgs(:) = gwr%iw_wgs(:) / four
@@ -1517,6 +1552,7 @@ end block
  end do
 
  ABI_MALLOC(gwr%tchi_desc_qibz, (gwr%nqibz))
+ ABI_ICALLOC(gwr%chinpw_qibz, (gwr%nqibz))
 
  do my_iqi=1,gwr%my_nqibz
    iq_ibz = gwr%my_qibz_inds(my_iqi); qq_ibz = gwr%qibz(:, iq_ibz)
@@ -1526,10 +1562,14 @@ end block
 
    ! Compute sqrt(vc(q,G))
    associate (desc_q => gwr%tchi_desc_qibz(iq_ibz))
+   if (gwr%itreat_iqibz(iq_ibz)) gwr%chinpw_qibz(iq_ibz) = desc_q%npw
    q_is_gamma = (normv(qq_ibz, gwr%cryst%gmet, "G") < GW_TOLQ0)
    call desc_q%get_vc_sqrt(qq_ibz, q_is_gamma, gwr, gwr%gtau_comm%value)
    end associate
  end do
+
+ ! Collect npwq on all procs
+ call xmpi_sum(gwr%chinpw_qibz, gwr%comm%value, ierr)
 
  ! Init 1D PBLAS grid to block-distribute matrices along columns.
  call gwr%g_slkproc%init(gwr%g_comm%value, grid_dims=[1, gwr%g_comm%nproc])
@@ -1546,8 +1586,6 @@ end block
  ! Create netcdf file to store results
  ! ====================================
  gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GWR.nc")
- !if (dtset%gwr_task == "RPA_ENERGY") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_RPAGWR.nc")
- !if (dtset%gwr_task == "GAMMA_GW") gwr%gwrnc_path = strcat(dtfil%filnam_ds(4), "_GAMMAGWR.nc")
 
  if (my_rank == master) then
    call gwr%print(units)
@@ -1561,9 +1599,9 @@ end block
    smat_bsize2 = merge(1, gwr%b2gw - gwr%b1gw + 1, gwr%sig_diago)
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("nsppol", gwr%nsppol), nctkdim_t("ntau", gwr%ntau), nctkdim_t("nwr", gwr%nwr), &
+     nctkdim_t("chi_mpw", gwr%tchi_mpw), nctkdim_t("nqibz", gwr%nqibz), nctkdim_t("nqbz", gwr%nqbz), &
      nctkdim_t("nkcalc", gwr%nkcalc), nctkdim_t("max_nbcalc", gwr%max_nbcalc), &
      nctkdim_t("smat_bsize1", smat_bsize1), nctkdim_t("smat_bsize2", smat_bsize2) &
-     !nctkdim_t("nqibz", gwr%nqibz), nctkdim_t("nqbz", gwr%nqbz)
      ], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -1904,6 +1942,7 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%kcalc2ibz)
  ABI_SFREE(gwr%sigx_mat)
  ABI_SFREE(gwr%sigc_iw_mat)
+ ABI_SFREE(gwr%chinpw_qibz)
 
  call gwr%ks_gaps%free()
  call ebands_free(gwr%qp_ebands)
@@ -3906,10 +3945,11 @@ subroutine gwr_print(gwr, units, header)
  call ydoc%add_int("green_mpw", gwr%green_mpw)
  call ydoc%add_int("tchi_mpw", gwr%tchi_mpw)
  call ydoc%add_int1d("g_ngfft", gwr%g_ngfft(1:6))
+ call ydoc%add_real("gwr_boxcutmin", gwr%dtset%gwr_boxcutmin)
  call ydoc%add_int1d("P gwr_np_kgts", gwr%dtset%gwr_np_kgts)
  call ydoc%add_int1d("P np_kibz", gwr%np_kibz)
  call ydoc%add_int1d("P np_qibz", gwr%np_qibz)
- ! Print Max error due to inhomogeneous FT.
+ ! Print Max error due to the inhomogeneous FT.
  call ydoc%add_real("min_transition_energy_eV", gwr%te_min)
  call ydoc%add_real("max_transition_energy_eV", gwr%te_max)
  call ydoc%add_real("eratio", gwr%te_max / gwr%te_min)
@@ -5068,7 +5108,7 @@ subroutine gwr_build_sigmac(gwr)
  integer,parameter :: master = 0
  integer :: my_is, my_it, spin, ikcalc_ibz, ik_ibz, sc_nfft, my_ir, my_nr, iw, idat, max_ndat, ndat, ii, jj, irow
  integer :: iq_ibz, iq_bz, itau, ierr, ibc, bmin, bmax, band, band1
- integer :: band2, band2_start, band2_stop, nbc, ib1, ib2
+ integer :: band2, band2_start, band2_stop, nbc, ib1, ib2, pade_npts
  integer :: my_ikf, ipm, ik_bz, ikcalc, uc_ir, ir, ncid, col_bsize, nrsp, sc_nfftsp
  integer :: isym_k, trev_k, g0_k(3), tsign_k !, b1gw, b2gw, ! npwsp, my_iqi, sc_ir, ig, my_iqf,
  integer(kind=XMPI_ADDRESS_KIND) :: buf_count
@@ -5638,7 +5678,12 @@ end if
      v_meanf = vxc_val + vu
 
      band2 = merge(1, band, gwr%sig_diago)
-     call spade%init(gwr%ntau, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin), branch_cut=">")
+     pade_npts = gwr%ntau
+     if (gwr%dtset%userie > 0 .and. pade_npts > gwr%dtset%userie) then
+        pade_npts = min(gwr%ntau, gwr%dtset%userie)
+        call wrtout(std_out, sjoin("Limiting the number of points for pade to:", itoa(pade_npts)))
+     end if
+     call spade%init(pade_npts, imag_zmesh, gwr%sigc_iw_mat(:, band, band2, ikcalc, spin), branch_cut=">")
 
      ! Solve the QP equation with Newton-Rapson starting from e0
      zz = cmplx(e0, zero)
@@ -6058,7 +6103,7 @@ subroutine gwr_rpa_energy(gwr)
 !scalars
  integer,parameter :: master = 0
  integer :: my_is, my_iqi, my_it, itau, spin, iq_ibz, ii, ierr, ig, ncut, icut, mat_size
- integer :: il_g1, il_g2, ig1, ig2, npw_q, ig0
+ integer :: il_g1, il_g2, ig1, ig2, npw_q, ig0, ncid, ncerr
  logical :: q_is_gamma, print_time
  real(dp) :: weight, qq_ibz(3), estep, aa, bb, rmsq, ecut_soft, damp, tsec(2)
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_q, wall_q, gflops_q, cpu_cut, wall_cut, gflops_cut
@@ -6229,7 +6274,27 @@ subroutine gwr_rpa_energy(gwr)
      rmsq = linfit(ncut, ecut_chi(:) ** (-three/two), ec_rpa, aa, bb)
      write(ab_out, "(2a16,*(es16.8))") "oo", "0", bb * Ha_eV, bb
    end if
- end if
+
+   ! ======================
+   ! Add results to GWR.nc
+   ! ======================
+   NCF_CHECK(nctk_open_modify(ncid, gwr%gwrnc_path, xmpi_comm_self))
+   ncerr = nctk_def_dims(ncid, [nctkdim_t("ncut", ncut)], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("ecut_chi", "dp", "ncut"), &
+     nctkarr_t("ec_rpa_ecut", "dp", "ncut"), &
+     nctkarr_t("ec_mp2_ecut", "dp", "ncut") &
+   ])
+   NCF_CHECK(ncerr)
+
+   ! Write data.
+   NCF_CHECK(nctk_set_datamode(ncid))
+   NCF_CHECK(nf90_put_var(ncid, vid("ecut_chi"), ecut_chi))
+   NCF_CHECK(nf90_put_var(ncid, vid("ec_rpa_ecut"), ec_rpa))
+   NCF_CHECK(nf90_put_var(ncid, vid("ec_mp2_ecut"), ec_mp2))
+ end if ! master
 
  ABI_FREE(ec_rpa)
  ABI_FREE(ec_mp2)
@@ -6237,6 +6302,12 @@ subroutine gwr_rpa_energy(gwr)
 
  call cwtime_report(" gwr_rpa_energy:", cpu_all, wall_all, gflops_all)
  call timab(1928, 2, tsec)
+
+contains
+integer function vid(vname)
+  character(len=*),intent(in) :: vname
+  vid = nctk_idname(ncid, vname)
+end function vid
 
 end subroutine gwr_rpa_energy
 !!***
@@ -6552,6 +6623,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
      nctkarr_t("iw_mesh", "dp", "ntau"), &
      nctkarr_t("iw_wgs", "dp", "ntau"), &
      nctkarr_t("gvecs", "int", "three, mpw, nqibz"), &
+     nctkarr_t("chinpw_qibz", "int", "nqibz"), &
      nctkarr_t("mats", "dp", "two, mpw, mpw, ntau, nqibz, nsppol") &
    ])
    NCF_CHECK(ncerr)
@@ -6566,6 +6638,7 @@ subroutine gwr_ncwrite_tchi_wc(gwr, what, filepath)
    NCF_CHECK(nf90_put_var(ncid, vid("tau_wgs"), gwr%tau_wgs))
    NCF_CHECK(nf90_put_var(ncid, vid("iw_mesh"), gwr%iw_mesh))
    NCF_CHECK(nf90_put_var(ncid, vid("iw_wgs"), gwr%iw_wgs))
+   NCF_CHECK(nf90_put_var(ncid, vid("chinpw_qibz"), gwr%chinpw_qibz))
    NCF_CHECK(nf90_close(ncid))
  end if
 
