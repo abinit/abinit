@@ -3857,6 +3857,7 @@ pawtab%lamb_shielding=paw_setuploc%lamb_shielding
  call pawrad_free(tproj_mesh)
  call pawrad_free(core_mesh)
  call pawrad_free(vloc_mesh)
+ call pawrad_free(coretau_mesh)
 
  if (allocated(vlocr)) then
    LIBPAW_DEALLOCATE(vlocr)
