@@ -39,29 +39,30 @@ Variable(
 """,
 ),
 
-Variable(
-    abivarname="dipdip_range@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['LatticeModel_expert'],
-    dimensions=[3],
-    defaultval=0,
-    mnemonics="Dipole-Dipole range",
-    added_in_version="before_v9",
-    text=r"""
-Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
-
-* dipdip_range if superior to ncell and superior to short-range interaction
-* ncell if dipdip_range inferior to ncell
-* short-range if dipdip_range inferior to short-range interaction
-
-For example:
-
-    * if dipdip_range = 2 2 2 and the short range interaction if 3 3 3, the dipdip interaction will be set on 3 3 3
-
-    * if ncell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
-""",
-),
+## Deprecated.
+#Variable(
+#    abivarname="dipdip_range@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['LatticeModel_expert'],
+#    dimensions=[3],
+#    defaultval=0,
+#    mnemonics="Dipole-Dipole range",
+#    added_in_version="before_v9",
+#    text=r"""
+#Depending of the cases, the range of the dipole-dipole interaction will be parameted by:
+#
+#* dipdip_range if superior to ncell and superior to short-range interaction
+#* ncell if dipdip_range inferior to ncell
+#* short-range if dipdip_range inferior to short-range interaction
+#
+#For example:
+#
+#    * if dipdip_range = 2 2 2 and the short range interaction if 3 3 3, the dipdip interaction will be set on 3 3 3
+#
+#    * if ncell = 15 15 15 and the dipdip_range is 6 6 6, the dipdip interaction will be set on 15 15 15
+#""",
+#),
 
 
 Variable(
@@ -300,10 +301,6 @@ with number of steps [[multibinit:lwf_temperature_nstep]] will be done.
 The corresponding _lwf_hist.nc  file has the corresponding temperature in the filename.
 """,
 ),
-
-
-
-
 
 
 Variable(
