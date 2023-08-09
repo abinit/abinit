@@ -58,8 +58,14 @@ MODULE m_dyson_solver
  type, public :: sigma_pade_t
 
     integer :: npts
+    ! Number of points
+
     character(len=1) :: branch_cut
+
     complex(dp),pointer :: zmesh(:) => null(), sigc_cvals(:) => null()
+    ! pointer to input mesh and values.
+
+    !real(d) :: wmax = -one
 
  contains
 
@@ -762,13 +768,25 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
  complex(dp),target,intent(in) :: zmesh(npts), sigc_cvals(npts)
  character(len=*),intent(in) :: branch_cut
 
+!Local variables-------------------------------
+!scalars
+ integer :: ii
+
 ! *************************************************************************
 
  self%npts = npts
- self%branch_cut = branch_cut
 
- self%zmesh => zmesh
- self%sigc_cvals => sigc_cvals
+ ! Select first points according to wmax.
+ !if (wmax > zero) then
+ !  do ii=1,npts
+ !    if (real(zmesh(ii)) > wmax) exit
+ !  end do
+ !  self%npts = ii-1
+ !end if
+
+ self%branch_cut = branch_cut
+ self%zmesh => zmesh(1:self%npts)
+ self%sigc_cvals => sigc_cvals(1:self%npts)
 
 end subroutine sigma_pade_init
 !!***

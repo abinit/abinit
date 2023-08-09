@@ -604,6 +604,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_max_hwtene', tread, 'ENE')
  if (tread == 1) dtset%gwr_max_hwtene = dprarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_regterm', tread, 'DPR')
+ if (tread == 1) dtset%gwr_regterm = dprarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gwr_task", tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
 
@@ -2877,7 +2880,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tl_radius',tread,'DPR')
  if(tread==1) dtset%tl_radius=dprarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%write_files = key_value
 ! Print variables
@@ -2916,15 +2919,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    !dtset%prtwant    = 1   ! TO BE CHECKED FOR CONSISTENCY
    dtset%prtwf      = 1
    dtset%prtxml     = 1
- else if(dtset%write_files=='none') then 
+ else if(dtset%write_files=='none') then
    dtset%ncout      = 0
    dtset%prtddb     = 0
    dtset%prtden     = 0
    dtset%prtdos     = 0
    dtset%prtebands  = 0
    dtset%prteig     = 0
-   dtset%prtelf     = 0 
-   dtset%prtevk     = 0   
+   dtset%prtelf     = 0
+   dtset%prtevk     = 0
    dtset%prtfsurf   = 0
    dtset%prtgden    = 0
    dtset%prtgeo     = 0
@@ -2953,7 +2956,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtddb = 1
    else
       dtset%prtddb = 0
-   end if       
+   end if
    if (INDEX(dtset%write_files,'den_1') .gt. 0) then
       dtset%prtden = 1
    else if (INDEX(dtset%write_files,'den_2') .gt. 0) then
@@ -2985,20 +2988,20 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtdos = 5
    else
       dtset%prtdos = 0
-   end if   
+   end if
    if ( (INDEX(dtset%write_files,'dosm_1') .gt. 0) .AND. (dtset%prtdos .eq. 3 ) )then
       dtset%prtdosm = 1
       dtset%prtdos  = 3
    else
       dtset%prtdosm = 0
-   end if         
+   end if
    if (INDEX(dtset%write_files,'ebands_1') .gt. 0) then
       dtset%prtebands = 1
    else if (INDEX(dtset%write_files,'ebands_2') .gt. 0) then
       dtset%prtebands = 2
    else
       dtset%prtebands = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'eig') .gt. 0) then
       dtset%prteig = 1
    else
@@ -3016,27 +3019,27 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtfsurf = 1
    else
       dtset%prtfsurf = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'gden') .gt. 0) then
       dtset%prtgden = 1
    else
       dtset%prtgden = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'geo') .gt. 0) then
       dtset%prtgeo = 1
    else
       dtset%prtgeo = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'gkk') .gt. 0) then
       dtset%prtgkk = 1
    else
       dtset%prtgkk = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'gsr') .gt. 0) then
       dtset%prtgsr = 1
    else
       dtset%prtgsr = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'hist') .gt. 0) then
       dtset%prthist = 1
    else
@@ -3046,22 +3049,22 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtkbff = 1
    else
       dtset%prtkbff = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'kden') .gt. 0) then
       dtset%prtkden = 1
    else
       dtset%prtkden = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'lden') .gt. 0) then
       dtset%prtlden = 1
    else
       dtset%prtlden = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'ncout') .gt. 0) then
       dtset%ncout = 1
    else
       dtset%ncout = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'pot') .gt. 0) then
       dtset%prtpot = 1
    else
@@ -3090,27 +3093,27 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtvclmb = 2
    else
       dtset%prtvha = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vha') .gt. 0) then
       dtset%prtvha = 1
    else
       dtset%prtvha = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vhxc') .gt. 0) then
       dtset%prtvhxc = 1
    else
       dtset%prtvhxc = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vpsp') .gt. 0) then
       dtset%prtvpsp = 1
    else
       dtset%prtvpsp = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vxc') .gt. 0) then
       dtset%prtvxc = 1
    else
       dtset%prtvxc = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'want_1') .gt. 0) then
       dtset%prtwant = 1
    else if (INDEX(dtset%write_files,'want_2') .gt. 0) then
@@ -3119,12 +3122,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtwant = 3
    else
       dtset%prtwant = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'wf_1') .gt. 0) then
       dtset%prtwf = 1
       if (INDEX(dtset%write_files,'wf_full_1') .gt. 0) then
          dtset%prtwf_full = 1
-      end if   
+      end if
    else if (INDEX(dtset%write_files,'wf_2') .gt. 0) then
       dtset%prtwf = 2
    else if (INDEX(dtset%write_files,'wf_3') .gt. 0) then
@@ -3138,7 +3141,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
       dtset%prtxml = 1
    else
       dtset%prtxml = 0
-   end if   
+   end if
  end if
 
  ! Wannier90 interface related variables

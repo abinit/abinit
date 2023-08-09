@@ -23779,6 +23779,26 @@ Energy window in Hartree for the empty states used in the computation of the hea
 """,
 ),
 
+
+Variable(
+    abivarname="gwr_regterm",
+    varset="gw",
+    vartype="real",
+    topics=['GWR_expert'],
+    dimensions=[1],
+    defaultval=-1.0,
+    mnemonics="GWR REGularization TERM",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.8.0",
+    text=r"""
+TODO: To be described.
+Negative value means automatic regularization.
+Zero to deactivate it.
+Positive to use specific value.
+""",
+),
+
+
 Variable(
     abivarname="optdcmagpawu",
     varset="paw",

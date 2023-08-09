@@ -288,6 +288,7 @@ type, public :: dataset_type
  integer :: gwr_rpa_ncut = 5
  real(dp) :: gwr_boxcutmin = one
  real(dp) :: gwr_max_hwtene = -one
+ real(dp) :: gwr_regterm = -one
  character(len=fnlen) :: gwr_task = "None"
 !H
  integer :: hmcsst
@@ -1660,6 +1661,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwr_rpa_ncut         = dtin%gwr_rpa_ncut
  dtout%gwr_boxcutmin        = dtin%gwr_boxcutmin
  dtout%gwr_max_hwtene       = dtin%gwr_max_hwtene
+ dtout%gwr_regterm          = dtin%gwr_regterm
  dtout%gwr_task             = dtin%gwr_task
  dtout%gwr_tolqpe           = dtin%gwr_tolqpe
  dtout%gwr_nstep            = dtin%gwr_nstep
@@ -3369,7 +3371,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
- list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_np_kgts gwr_nstep gwr_ntau'
+ list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_regterm gwr_np_kgts gwr_nstep gwr_ntau'
  list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
