@@ -1368,10 +1368,30 @@ contains
        end do
        call mpigatherv(mygf,myorder, my_ncoeff, allgf, allorder, ntot, comm, nproc)
        BLOCK
+         real(dp) :: allgf_copy(size(allgf))
          real(dp):: work((ntot+1)/2)
          integer:: worder((ntot+1)/2)
          integer :: i
+         logical :: ideg(ntot)
+         ideg=.False.
+
+         allgf_copy(:)=allgf(:)
+         call MergeSort(allgf_copy, work, allorder, worder)
+         do i=2, ntot
+           if(abs(allgf(allorder(i))-allgf(allorder(i-1)))< 1e-16) then
+              !print *, allgf(allorder(i-1)), allgf(allorder(i))
+              ideg(allorder(i))=.True.
+              isbanned(allorder(i))=.True.
+           end if
+         end do
+         do i=2, ntot
+           if(ideg(allorder(i))) then
+              !print *, "new:", allgf(allorder(i-1)), allgf(allorder(i))
+              allgf(allorder(i))=9D99
+           endif
+         end do
          call MergeSort(allgf, work, allorder, worder)
+
          ! at least n_remaining terms should be kept. It reduces to a percentage everytime, but should be larger than 40*ncoeff_to_select.
          ! if ncoeff_to_select*10>ncoeff_tot, use ncoeff_tot
          print *, "n_remaining:----------------------", n_remaining
@@ -1379,14 +1399,21 @@ contains
          ! FIXME: Crashes here when fixcoeff.
          ! check size of coeff. and order are correctly set.
          ! allorder is gathered from myorder.
-         print *, "sizeof allorder:", size(allorder)
-         print *, "size of isbanned:", size(isbanned)
-         print *, "max allorder:", maxval(allorder)
-         print *, "ncoeff_tot:", ncoeff_tot
-         print *, "n_remaining:", n_remaining
+         !print *, "sizeof allorder:", size(allorder)
+         !print *, "size of isbanned:", size(isbanned)
+         !print *, "max allorder:", maxval(allorder)
+         !print *, "ncoeff_tot:", ncoeff_tot
+         !print *, "n_remaining:", n_remaining
          do i=n_remaining+1, ncoeff_tot
            isbanned(allorder(i))=.True.
          end do
+
+         !do i=2, ncoeff_tot
+         !  if(abs(allgf(allorder(i))-allgf(allorder(i-1)))< 1e-16) then
+         !          print *, "allgf(allorder(i))", allgf(allorder(i))
+         !     isbanned(allorder(i))=.True.
+         !  end if
+         !end do
 
          if(my_rank==0) then
            do i=1, min(30,size(allorder))
@@ -1396,6 +1423,7 @@ contains
        end BLOCK
 
        BLOCK ! add selected terms
+               
          integer :: i
          integer :: ind_select
          integer :: nselected_this_cycle
@@ -1404,12 +1432,22 @@ contains
          i=0
          do while(nselected_this_cycle<ncoeff_this_cycle)
            i=i+1
+           !do while( isbanned(allorder(i))  .or. isselected(allorder(i)))  
+           !  i=i+1
+           !enddo
            index_min = allorder(i)
            !    Check if there is still coefficient
+           !if(i>size(allorder))then
+           !  exit
+           !end if
+
            if(index_min==0) then
              exit
+           !else
            !else if(is_duplicate_coeff(index_min)) then
            !  cycle
+           else if ( isbanned(allorder(i))  .or. isselected(allorder(i))) then
+             cycle
            else
              ind_select=ncoeff_selected+1
              list_coeffs(ind_select) = index_min
