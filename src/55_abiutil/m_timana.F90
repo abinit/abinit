@@ -1994,8 +1994,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
         ' Detailed analysis of some time consuming routines ',&
         '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
         '                                 (sec)                (msec)              (microsec)'
-       nlist=8
-       list(:nlist)=(/802,803,9,75,76,77,210,11/)
+       nlist=10
+       list(:nlist)=(/802,803,9,75,76,77,210,11,1661,1764/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then
