@@ -912,73 +912,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
 !LONG WAVE integer input variables
 !FIXME
-! if(dtset%optdriver==RUNL_LONGWAVE) then
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
+ if(tread==1) dtset%prepalw=intarr(1)
+
+ if(dtset%optdriver==RUNL_LONGWAVE) then
    tread_key=0
-
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf1atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_atpol(1:2)=intarr(1:2)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert1_dir',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf1dir',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_dir(1:3)=intarr(1:3)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert1_elfd',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf1elfd',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_elfd=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert1_phon',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf1phon',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_phon=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf2atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_atpol(1:2)=intarr(1:2)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert2_dir',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2dir',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_dir(1:3)=intarr(1:3)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_elfd',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2elfd',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_elfd=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_phon',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2phon',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_phon=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_strs',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2strs',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_strs=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf3atpol',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert3_dir',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf3dir',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_dir(1:3)=intarr(1:3)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert3_elfd',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf3elfd',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_elfd=intarr(1)
-   if (tread_alt==1) tread_key=1
-
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert3_phon',tread,'INT')
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf3phon',tread_alt,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_phon=intarr(1)
-   if (tread_alt==1) tread_key=1
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_flexo',tread,'INT')
    if(tread==1) dtset%lw_flexo=intarr(1)
@@ -989,12 +927,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_natopt',tread,'INT')
    if(tread==1) dtset%lw_natopt=intarr(1)
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
-   if(tread==1) dtset%prepalw=intarr(1)
-
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ffnl_lw',tread,'INT')
    if(tread==1) dtset%ffnl_lw=intarr(1)
-! end if
+ end if
 
  ! Recursion input variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tfkinfunc',tread,'INT')
