@@ -268,10 +268,15 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    write(ab_out,"(a,i0)")"    mband: ",dtset%mband
    write(ab_out,"(3a)")  "    gwr_task: '",trim(dtset%gwr_task),"'"
 
-   work_size = dtset%nkpt * dtset%nsppol
+   if (string_in(dtset%gwr_task, "HDIAGO, HDIAGO_FULL, CC4S, CC4S_FULL")) then
+      work_size = dtset%nkpt * dtset%nsppol * dtset%mpw
+      max_wfsmem_mb = (two * dp * dtset%mpw * dtset%mband * dtset%nkpt * dtset%nsppol * dtset%nspinor * b2Mb) * 1.1_dp
+   else
+      work_size = dtset%gwr_ntau * dtset%nkpt * dtset%nsppol * dtset%mpw
+      max_wfsmem_mb = (two * dp * dtset%mpw * dtset%mband * dtset%nkpt * dtset%nsppol * dtset%nspinor * b2Mb) * 1.1_dp
+   end if
    ! Non-scalable memory in Mb i.e. memory that is not distributed with MPI.
    nonscal_mem = zero
-   max_wfsmem_mb = (two * dp * dtset%mpw * dtset%mband * dtset%nkpt * dtset%nsppol * dtset%nspinor * b2Mb) * 1.1_dp
 
    ! List of configurations.
    ! Assuming an OpenMP implementation with perfect speedup!
@@ -283,7 +288,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      eff = (one * work_size) / (ii * nks_per_proc)
      ! Add the non-scalable part and increase by 10% to account for other datastructures.
      mempercpu_mb = (max_wfsmem_mb + nonscal_mem) * 1.1_dp
-
      do omp_ncpus=1,1 !xomp_get_max_threads()
        write(ab_out,"(a,i0)")"    - tot_ncpus: ",ii * omp_ncpus
        write(ab_out,"(a,i0)")"      mpi_ncpus: ",ii
