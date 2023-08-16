@@ -47,6 +47,7 @@ module m_odamix
  use m_spacepar,   only : hartre
  use m_rhotoxc,    only : rhotoxc
  use m_fft,        only : fourdp
+ use m_xc_tb09,    only : xc_tb09_update_c
 
  implicit none
 
@@ -348,6 +349,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call xcdata_init(xcdata,dtset=dtset)
 
+!If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+ if (dtset%xc_tb09_c>99._dp) then
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,my_natom,dtset%natom, &
+&    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&    paw_an,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&    computation_type='all')
+ end if
+
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
@@ -589,6 +599,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
              &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
+
+!If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+ if (dtset%xc_tb09_c>99._dp) then
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,my_natom,dtset%natom, &
+&    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&    paw_an,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&    computation_type='all')
+ end if
 
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
