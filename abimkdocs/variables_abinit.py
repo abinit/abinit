@@ -21389,7 +21389,33 @@ or other quantities that are density-dependent is performed before this replacem
 
 It has been observed that the SCF cycle of the Tran-Blaha mGGA can be quite
 hard to make converge, for systems for which there is some vacuum. In this
-case, setting [[xc_denpos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
+case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6 , and increasing if necessary [[xc_denpos]]
+has been seen to allow good convergence. Of course, this will affect the numerical results somehow,
+and one should play a bit with this value to avoid incorrect calculations.
+""",
+),
+
+Variable(
+    abivarname="xc_taupos",
+    varset="dev",
+    vartype="real",
+    topics=['xc_expert'],
+    dimensions="scalar",
+    defaultval=[[xc_denpos]],
+    mnemonics="eXchange-Correlation - TAU kinetic energy DENsity POSitivity value",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.10.4",
+    text=r"""
+For the evaluation of the meta-GGA exchange-correlation functionals,
+the kinetic energy density (usually named tau) cannot be negative, or even too small.
+[[xc_taupos]] is the smallest value that the kinetic energy density can assume
+at the time of the evaluation of a XC functional, in ABINIT.
+When then computed kinetic energy density drops below [[xc_taupos]] before
+attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].  
+
+It has been observed that the SCF cycle using meta-GGA functionals can be quite
+hard to make converge, for systems for which there is some vacuum. In this
+case, setting [[xc_taupos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
 convergence. Of course, this will affect the numerical results somehow, and
 one should play a bit with this value to avoid incorrect calculations.
 """,

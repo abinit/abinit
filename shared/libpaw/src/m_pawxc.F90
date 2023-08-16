@@ -503,7 +503,7 @@ end subroutine pawxc_xcmult_wrapper
 !! pawxc_mkdenpos_wrapper
 !!
 !! FUNCTION
-!! Make a ground-state density positive everywhere :
+!! Make a density positive everywhere :
 !! when the density (or spin-density) is smaller than xc_denpos,
 !! set it to the value of xc_denpos
 !!
@@ -577,6 +577,7 @@ subroutine pawxc_mkdenpos_local()
  if(nspden==1)then
 !  Non spin-polarized
 !$OMP PARALLEL DO PRIVATE(ifft,rhotmp) REDUCTION(MIN:worst) REDUCTION(+:numneg) SHARED(nfft,rhonow)
+!$OMP&SHARED(nfft,rhonow)
    do ifft=1,nfft
      rhotmp=rhonow(ifft,1)
      if(rhotmp<xc_denpos)then
@@ -833,6 +834,7 @@ end function pawxc_is_tb09
 !!  ----- Optional arguments -----
 !!  [coretau(nrad*usekden)]= core kinetic energy density (optional)
 !!  [taur(nrad,lm_size,nspden*usekden)]= kinetic energy density on radial mesh (optional)
+!!  [xc_taupos]= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!
 !! OUTPUT
 !!  == if option=0, 2, 3, or 4 ==
@@ -907,13 +909,14 @@ end function pawxc_is_tb09
 !! SOURCE
 subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3xc,non_magnetic_xc,&
 &                nrad,nspden,option,pawang,pawrad,rhor,usecore,usexcnhat,vxc,xclevel,xc_denpos,&
-&                coretau,taur,vxctau,grho1_over_rho1) ! optional arguments
+&                coretau,taur,vxctau,xc_taupos,grho1_over_rho1) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,lm_size,nkxc,nk3xc,nrad,nspden,option,usecore,usexcnhat,xclevel
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: hyb_mixing,xc_denpos
+ real(dp),intent(in),optional :: xc_taupos
  real(dp),intent(out) :: enxc,enxcdc
  real(dp),intent(out),optional :: grho1_over_rho1
  type(pawang_type),intent(in) :: pawang
@@ -937,7 +940,7 @@ subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nha
  integer :: nvxcgrho,nvxclrho,nvxctau,order
  integer :: usecoretau,usegradient,usekden,uselaplacian
  logical :: need_vxctau,with_taur
- real(dp) :: enxcr,factor,rhotot,sumg,vxcrho
+ real(dp) :: enxcr,factor,my_xc_taupos,rhotot,sumg,vxcrho
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: dgxc(:),dlxc(:),d2lxc(:),dnexcdn(:,:),drho(:),d2rho(:),drhocore(:)
@@ -1028,6 +1031,7 @@ subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nha
  if (nk3xc>0) k3xc(:,:,:)=zero
  order=1;if (nkxc_updn>0) order=2;if (nk3xc>0) order=3 ! to which der. of the energy the computation must be done
  if (present(grho1_over_rho1)) grho1_over_rho1=zero
+ my_xc_taupos=xc_denpos;if(present(xc_taupos)) my_xc_taupos=xc_taupos
 
  if (xclevel==0.or.ixc==0) then
    msg='Note that no xc is applied (ixc=0).'
@@ -1307,6 +1311,9 @@ subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nha
 
 !    Make the density positive everywhere (but do not care about gradients)
      call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,rho_updn,xc_denpos)
+     if (usekden==1) then
+       call pawxc_mkdenpos_wrapper(iwarn,nrad,nspden_updn,0,tau_updn,my_xc_taupos)
+     end if
 
 !    Call to main XC driver
      call pawxc_drivexc_wrapper(hyb_mixing,ixc,order,nrad,nspden_updn,&

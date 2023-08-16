@@ -299,7 +299,8 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                 & dtset%nucdipmom,nzlmopt,option,tdks%paw_an,tdks%paw_an,   &
                 & tdks%paw_ij,tdks%pawang,dtset%pawprtvol,tdks%pawrad,      &
                 & tdks%pawrhoij,dtset%pawspnorb,tdks%pawtab,dtset%pawxcdev, &
-                & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,tdks%ucvol, &
+                & dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,            &
+                & dtset%xc_taupos,tdks%ucvol,                               &
                 & psps%znuclpsp,comm_atom=mpi_enreg%comm_atom,              &
                 & mpi_atmtab=mpi_enreg%my_atmtab,vpotzero=vpotzero)
    !Correct the average potential with the calculated constant vpotzero

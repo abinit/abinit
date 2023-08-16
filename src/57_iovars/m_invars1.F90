@@ -2703,6 +2703,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  X
    dtsets(idtset)%xclevel  = 0
    dtsets(idtset)%xc_denpos = tol14
+   dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp
    dtsets(idtset)%xredsph_extra(:,:)=zero
 !  Y

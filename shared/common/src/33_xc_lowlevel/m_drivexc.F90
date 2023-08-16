@@ -640,7 +640,7 @@ end subroutine xcmult
 !! mkdenpos
 !!
 !! FUNCTION
-!! Make a ground-state density positive everywhere:
+!! Make a density positive everywhere:
 !! when the density (or spin-density) is smaller than xc_denpos,
 !! set it to the value of xc_denpos
 !!
@@ -705,6 +705,7 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
 !  Non spin-polarized
 !$OMP PARALLEL DO PRIVATE(ifft,rhotmp) REDUCTION(MIN:worst) REDUCTION(+:numneg) SHARED(nfft,rhonow)
+!$OMP&SHARED(nfft,rhonow)
    do ifft=1,nfft
      rhotmp=rhonow(ifft,1)
      if(rhotmp<xc_denpos)then
