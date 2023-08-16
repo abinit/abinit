@@ -212,6 +212,7 @@ type, public :: dataset_type
  integer :: getden = 0
  integer :: getefmas = 0
  integer :: getgam_eig2nkq = 0
+ integer :: getkden = 0
  integer :: getocc = 0
  integer :: getpawden = 0
  integer :: getqps = 0
@@ -317,6 +318,7 @@ type, public :: dataset_type
  integer :: irdden = 0
  integer :: irdefmas = 0
  integer :: irdhaydock = 0
+ integer :: irdkden = 0
  integer :: irdpawden = 0
  integer :: irdqps = 0
  integer :: irdscr = 0
@@ -1575,6 +1577,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getefmas           = dtin%getefmas
  dtout%getgam_eig2nkq     = dtin%getgam_eig2nkq
  dtout%gethaydock         = dtin%gethaydock
+ dtout%getkden            = dtin%getkden
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
  dtout%getddb_filepath        = dtin%getddb_filepath
@@ -1688,6 +1691,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irdden             = dtin%irdden
  dtout%irdefmas           = dtin%irdefmas
  dtout%irdhaydock         = dtin%irdhaydock
+ dtout%irdkden            = dtin%irdkden
  dtout%irdpawden          = dtin%irdpawden
  dtout%irdqps             = dtin%irdqps
  dtout%irdscr             = dtin%irdscr
@@ -3333,7 +3337,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
- list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
+ list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
@@ -3362,7 +3366,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irddvdb irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
