@@ -386,7 +386,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
 &   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)
@@ -625,7 +625,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom, &
 &   dtset%nspden,ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang, &
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&   dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)

@@ -3874,6 +3874,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  xc_denpos
    call chkdpr(0,0,cond_string,cond_values,ierr,'xc_denpos',dt%xc_denpos,1,tiny(one),iout)
 
+!  xc_taupos
+   call chkdpr(0,0,cond_string,cond_values,ierr,'xc_taupos',dt%xc_taupos,1,tiny(one),iout)
+
 !  xc_tb09_c
    call chkdpr(0,0,cond_string,cond_values,ierr,'xc_tb09_c',dt%xc_tb09_c,1,0.0_dp,iout)
    if (dt%xc_tb09_c>99._dp.and.dt%iscf==22) then

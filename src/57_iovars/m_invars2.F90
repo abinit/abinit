@@ -2875,6 +2875,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xc_denpos',tread,'DPR')
  if(tread==1) dtset%xc_denpos=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xc_taupos',tread,'DPR')
+ if(tread==1) then
+   dtset%xc_taupos=dprarr(1)
+ else
+   dtset%xc_taupos=dtset%xc_denpos
+ end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'xc_tb09_c',tread,'DPR')
  if(tread==1) dtset%xc_tb09_c=dprarr(1)
 

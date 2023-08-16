@@ -696,6 +696,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      end if
 !    Make the density positive everywhere (but do not care about gradients)
      call mkdenpos(iwarn,nfft,nspden_updn,1,rhonow(:,1:nspden_updn,1),xcdata%xc_denpos)
+     if (usekden==1) then
+       call mkdenpos(iwarn,nfft,nspden_updn,1,taunow(:,1:nspden_updn,1),xcdata%xc_taupos)
+     end if
 
 !    write(std_out,*) 'rhonow',rhonow
 

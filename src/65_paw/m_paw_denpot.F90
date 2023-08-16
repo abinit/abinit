@@ -108,7 +108,8 @@ CONTAINS  !=====================================================================
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!  ucvol=unit cell volume (bohr^3)
 !!  xclevel= XC functional level
-!!  xc_denpos= lowest allowe density (usually for the computation of the XC functionals)
+!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  xc_taupos= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
 !!
 !! OUTPUT
@@ -144,7 +145,8 @@ CONTAINS  !=====================================================================
 
 subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 & my_natom,natom,nspden,ntypat,nucdipmom,nzlmopt,option,paw_an,paw_an0,&
-& paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spnorbscl,xclevel,xc_denpos,ucvol,znucl,&
+& paw_ij,pawang,pawprtvol,pawrad,pawrhoij,pawspnorb,pawtab,pawxcdev,spnorbscl,&
+& xclevel,xc_denpos,xc_taupos,ucvol,znucl,&
 & electronpositron,mpi_atmtab,comm_atom,vpotzero,hyb_mixing,hyb_mixing_sr) ! optional arguments
 
 !Arguments ---------------------------------------------
@@ -152,7 +154,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  integer,intent(in) :: ipert,ixc,my_natom,natom,nspden,ntypat,nzlmopt,option,pawprtvol
  integer,intent(in) :: pawspnorb,pawxcdev,xclevel
  integer,optional,intent(in) :: comm_atom
- real(dp), intent(in) :: spnorbscl,xc_denpos,ucvol
+ real(dp), intent(in) :: spnorbscl,xc_denpos,xc_taupos,ucvol
  real(dp),intent(in),optional :: hyb_mixing,hyb_mixing_sr
  real(dp),intent(out) :: compch_sph,epaw,epawdc
  type(electronpositron_type),pointer,optional :: electronpositron
@@ -508,7 +510,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
          call pawxc(pawtab(itypat)%coredens,eexc,eexcdc,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),rho1,usecore,0,vxc_tmp,xclevel,xc_denpos,&
-&         coretau=pawtab(itypat)%coretau,taur=tau1,vxctau=vxctau_tmp)
+&         coretau=pawtab(itypat)%coretau,taur=tau1,vxctau=vxctau_tmp,xc_taupos=xc_taupos)
        else
          call pawxc_dfpt(pawtab(itypat)%coredens,cplex,cplex,eexc,ixc,paw_an0(iatom)%kxc1,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,option,&
@@ -571,7 +573,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 &         eexc,eexcdc,hyb_mixing_,ixc,kxc_tmp,k3xc_tmp,lm_size,&
 &         paw_an(iatom)%lmselect,nhat1,nkxc1,nk3xc1,non_magnetic_xc,mesh_size,nspden,option,&
 &         pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,vxc_tmp,xclevel,xc_denpos,&
-&         coretau=pawtab(itypat)%tcoretau,taur=ttau1,vxctau=vxctau_tmp)
+&         coretau=pawtab(itypat)%tcoretau,taur=ttau1,vxctau=vxctau_tmp,xc_taupos=xc_taupos)
        else
          call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
 &         cplex,cplex,eexc,ixc,paw_an0(iatom)%kxct1,lm_size,&
