@@ -1127,71 +1127,78 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (has_to_init) then
    if (dtset%iscf>0 .or. (dtset%iscf==0 .and. dtset%usewvl==1 )) then ! .and. dtset%usepaw==1)) then
 
-     if(dtfil%ireadden/=0.and.dtset%positron<=0)then
-       ! Read density
-       rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
-       if (dtset%usewvl==0) then
-         call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
-         mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
-         results_gs%etotal = hdr_den%etot; call hdr_den%free()
-       else
-         fform=52 ; accessfil=0
-         if (dtset%iomode == IO_MODE_MPI ) accessfil=4
-         if (dtset%iomode == IO_MODE_ETSF) accessfil=3
-         call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
-           mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
-       end if
+     if((dtfil%ireadden/=0.or.dtfil%ireadkden/=0).and.dtset%positron<=0)then
 
-       if (rdwrpaw/=0) then
-         call hdr%update(bantot,etot,fermie,fermih,residm,&
-           rprimd,occ,pawrhoij,xred,args_gs%amu,&
-           comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+       ! Read density       
+       if (dtfil%ireadden/=0) then
+         rdwrpaw=psps%usepaw; if(dtfil%ireadwf/=0) rdwrpaw=0
+         if (dtset%usewvl==0) then
+           call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
+           mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
+           results_gs%etotal = hdr_den%etot
+           call hdr_den%free()
+         else
+           fform=52 ; accessfil=0
+           if (dtset%iomode == IO_MODE_MPI ) accessfil=4
+           if (dtset%iomode == IO_MODE_ETSF) accessfil=3
+           call ioarr(accessfil,rhor,dtset,results_gs%etotal,fform,dtfil%fildensin,hdr,&
+             mpi_enreg,ngfftf,cplex1,nfftf,pawrhoij,1,rdwrpaw,wvl%den)
+         end if
+         if (rdwrpaw/=0) then
+           call hdr%update(bantot,etot,fermie,fermih,residm,&
+             rprimd,occ,pawrhoij,xred,args_gs%amu,&
+             comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+         end if
+!        Compute up+down rho(G) by fft
+         call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
-
+   
        ! Read kinetic energy density
-       if(dtfil%ireadkden/=0 .and. dtset%usekden==1 )then
+       if(dtfil%ireadkden/=0 .and.dtset%usekden==1 )then
+         rdwrpaw=0
          call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
          mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr, allow_interp=.True.)
          call hdr_den%free()
-       end if
-
-!      Compute up+down rho(G) by fft
-       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
-       if(dtset%usekden==1)then
+!        Compute up+down tau(G) by fft
          call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
 
      else if(dtfil%ireadwf/=0)then
-       izero=0
+
+       izero=0 ; tim_mkrho=1
 !      Obtain the charge density from wfs that were read previously
 !      Be careful: in PAW, rho does not include the compensation
 !      density (to be added in scfcv.F90) !
-!      tim_mkrho=1 ; mpi_enreg%paralbd=0
-       tim_mkrho=1
-       if (psps%usepaw==1) then
-         ABI_MALLOC(rhowfg,(2,dtset%nfft))
-         ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-!        write(std_out,*) "mkrhogstate"
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         extfpmd=extfpmd)
-         call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
-         if(dtset%usekden==1)then
+       if (dtfil%ireadden==0) then
+         if (psps%usepaw==1) then
+           ABI_MALLOC(rhowfg,(2,dtset%nfft))
+           ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&           extfpmd=extfpmd)
+           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+           ABI_FREE(rhowfg)
+           ABI_FREE(rhowfr)
+         else
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&           extfpmd=extfpmd)
+         end if
+       end if
+!      Obtain the kinetic energy density from wfs that were read previously
+       if (dtfil%ireadkden==0.and.dtset%usekden==1) then
+         if (psps%usepaw==1) then
+           ABI_MALLOC(rhowfg,(2,dtset%nfft))
+           ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
            call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
-         end if
-         ABI_FREE(rhowfg)
-         ABI_FREE(rhowfr)
-       else
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         extfpmd=extfpmd)
-         if(dtset%usekden==1)then
+           ABI_FREE(rhowfg)
+           ABI_FREE(rhowfr)
+         else
            call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &           mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
          end if
-
        end if
 
      else if(dtfil%ireadwf==0.and.dtset%positron/=1)then
@@ -1240,8 +1247,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    else if ((dtset%iscf==-1.or.dtset%iscf==-2.or.dtset%iscf==-3).and.dtset%positron<=0) then
 
-!    Read rho(r) from a disk file
-     rdwrpaw=psps%usepaw
+!    Read density from a disk file (this is mandatory for non-self-consistent calculations)
 !    Note : results_gs%etotal is read here,
 !    and might serve in the tddft routine, but it is contrary to the intended use of results_gs ...
 !    Warning : should check the use of results_gs%e_fermie
@@ -1249,21 +1255,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    One might make them separate variables.
 
     ! Read density and get Fermi level from hdr_den
+     rdwrpaw=psps%usepaw
      call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
      mpi_enreg, rhor, hdr_den, pawrhoij, comm, check_hdr=hdr)
      results_gs%etotal = hdr_den%etot;
-     results_gs%energies%e_fermie = hdr_den%fermie; results_gs%energies%e_fermih = hdr_den%fermih ! CP modified, added fermih
+     results_gs%energies%e_fermie = hdr_den%fermie
+     results_gs%energies%e_fermih = hdr_den%fermih
+!    Compute up+down rho(G) by fft
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      call hdr_den%free()
 
-     if(dtfil%ireadkden/=0 .and. dtset%usekden==1)then
+     ! Read kinetic energy density
+     if(dtset%usekden==1)then
+       rdwrpaw=0
        call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
        mpi_enreg, taur, hdr_den, pawrhoij, comm, check_hdr=hdr)
        call hdr_den%free()
-     end if
-
-!    Compute up+down rho(G) by fft
-     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
-     if(dtset%usekden==1)then
+!      Compute up+down tau(G) by fft
        call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
 

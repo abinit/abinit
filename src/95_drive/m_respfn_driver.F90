@@ -222,7 +222,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
- integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
+ integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
@@ -270,9 +270,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: grxc(:,:),kxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phfrq(:),phnons(:,:,:),piezofrnl(:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:)
- real(dp),allocatable :: symrel_cart(:,:,:)
+ real(dp),allocatable :: symrel_cart(:,:,:),taug(:,:),taur(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
- real(dp),allocatable :: vxc(:,:),work(:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
+ real(dp),allocatable :: vxc(:,:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
  real(dp),allocatable :: eigen0_pert(:),eigenq_pert(:),occ_rbz_pert(:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
@@ -699,64 +699,94 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  ABI_MALLOC(rhog,(2,nfftf))
  ABI_MALLOC(rhor,(nfftf,dtset%nspden))
+ ABI_MALLOC(taug,(2,nfftf*dtset%usekden))
+ ABI_MALLOC(taur,(nfftf,dtset%nspden*dtset%usekden))
 
 !Read ground-state charge density from diskfile in case getden /= 0
 !or compute it from wfs that were read previously : rhor as well as rhog
 
- if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
-   ! Read rho1(r) from a disk file and broadcast data.
-   ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
+!Read rho(r) from a disk file and broadcast data.
+!This part is not compatible with MPI-FFT (note single_proc=.True. below)
+ if (dtset%getden /= 0 .or. dtset%irdden /= 0 .or. &
+&    dtset%getkden /= 0 .or. dtset%irdkden /= 0) then
 
-   rdwr=1;rdwrpaw=psps%usepaw;if(ireadwf0/=0) rdwrpaw=0
-   if (rdwrpaw/=0) then
-     ABI_MALLOC(pawrhoij_read,(natom))
-     call pawrhoij_nullify(pawrhoij_read)
-     call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-&              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
-     call pawrhoij_alloc(pawrhoij_read,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
-&                        dtset%nsppol,dtset%typat,pawtab=pawtab)
-   else
+   ! Read charge density
+   if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
+     rdwrpaw=psps%usepaw;if(ireadwf0/=0) rdwrpaw=0
+     if (rdwrpaw/=0) then
+       ABI_MALLOC(pawrhoij_read,(natom))
+       call pawrhoij_nullify(pawrhoij_read)
+       call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
+&                nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+       call pawrhoij_alloc(pawrhoij_read,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
+&                          dtset%nsppol,dtset%typat,pawtab=pawtab)
+     else
+       ABI_MALLOC(pawrhoij_read,(0))
+     end if
+    ! Note MT july 2013: Should we read rhoij from the density file ?
+     call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
+&         mpi_enreg, rhor, hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
+     etotal = hdr_den%etot
+     call hdr_den%free()
+     if (rdwrpaw/=0) then
+       call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
+       call pawrhoij_free(pawrhoij_read)
+     end if
+     ABI_FREE(pawrhoij_read)
+     ! Compute up+down rho(G) by fft
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
+   end if
+
+   ! Read kinetic energy density
+   if (dtset%getkden /= 0 .or. dtset%irdkden /= 0) then
+     rdwrpaw=0
      ABI_MALLOC(pawrhoij_read,(0))
+     call read_rhor(dtfil%filkdensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, &
+&         mpi_enreg, taur, hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
+     call hdr_den%free()
+     ABI_FREE(pawrhoij_read)
+     ! Compute up+down tau(G) by fft
+     call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
    end if
-
-!    MT july 2013: Should we read rhoij from the density file ?
-   call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
-   hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_den%free()
-
-   if (rdwrpaw/=0) then
-     call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
-     call pawrhoij_free(pawrhoij_read)
-   end if
-   ABI_FREE(pawrhoij_read)
-
-!  Compute up+down rho(G) by fft
-   ABI_MALLOC(work,(nfftf))
-   work(:)=rhor(:,1)
-   call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
-   ABI_FREE(work)
 
  else
-   izero=0
-!  Obtain the charge density from read wfs
-!  Be careful: in PAW, compensation density has to be added !
-   tim_mkrho=4
+
+   izero=0 ; tim_mkrho=4
    paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
    paw_dmft%use_dmft=0 ! respfn with dmft not implemented
-   if (psps%usepaw==1) then
-     ABI_MALLOC(rhowfg,(2,dtset%nfft))
-     ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-
-     call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
-     ABI_FREE(rhowfg)
-     ABI_FREE(rhowfr)
-   else
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+!  Obtain the charge density from read wfs
+!  Be careful: in PAW, compensation density has to be added !
+   if (dtset%getden == 0 .and. dtset%irdden == 0) then
+      if (psps%usepaw==1) then
+        ABI_MALLOC(rhowfg,(2,dtset%nfft))
+        ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
+        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&        mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+        call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+        ABI_FREE(rhowfg)
+        ABI_FREE(rhowfr)
+      else
+        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&        mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+      end if
    end if
- end if ! getden
+!  Obtain the kinetic energy density from read wfs
+   if (dtset%getkden == 0 .and. dtset%irdkden == 0) then
+     if (psps%usepaw==1) then
+       ABI_MALLOC(rhowfg,(2,dtset%nfft))
+       ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&       mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+       call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
+       ABI_FREE(rhowfg)
+       ABI_FREE(rhowfr)
+     else
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&       mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+     end if
+
+   end if
+ end if ! getden/getkden/irdden/irdkden
 
 !In PAW, compensation density has eventually to be added
  nhatgrdim=0;nhatdim=0
@@ -1802,6 +1832,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_FREE(rfpert)
  ABI_FREE(rhog)
  ABI_FREE(rhor)
+ ABI_FREE(taug)
+ ABI_FREE(taur)
  ABI_FREE(symq)
  ABI_FREE(symrec)
  ABI_FREE(symrel_cart)
