@@ -5625,7 +5625,6 @@ ground-state calculation, if [[iscf]]<0 (non-SCF calculation), to indicate
 that the starting **kinetic energy density** is to be taken from the output of a previous
 dataset. It can be used to chain the calculations, since it describes from which
 dataset the OUTPUT density is to be taken, as INPUT density of the present dataset.
-Alternative to [[getden_filepath]] and [[irdkden]].
 
   * If [[getkden]] == 0, no such use of previously computed output density file is done.
 
@@ -8190,7 +8189,7 @@ Only relevant when [[usekden]]=1 (meta GGA exchange-correlation functionals).
 If 1, will start the ground-state calculation from the **kinetic energy density** file
 of a previous run.
 When [[iscf]] < 0, the reading of a KDEN file is always enforced.
-Alternative to [[getden_filepath]] and [[getkden]].
+Alternative to [[getkden]].
 
 A non-zero value of [[irdkden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
@@ -21454,7 +21453,7 @@ Variable(
     vartype="real",
     topics=['xc_expert'],
     dimensions="scalar",
-    defaultval=[[xc_denpos]],
+    defaultval="[[xc_denpos]]",
     mnemonics="eXchange-Correlation - TAU kinetic energy DENsity POSitivity value",
     characteristics=['[[DEVELOP]]'],
     added_in_version="9.10.4",

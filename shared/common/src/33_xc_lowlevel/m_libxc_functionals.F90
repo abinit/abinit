@@ -2160,8 +2160,8 @@ end subroutine libxc_functionals_getvxc
      do ii=1,2
        if (abs(xc_funcs(ii)%xc_tb09_c-99.99_dp)>tol12) cc=xc_funcs(ii)%xc_tb09_c
      end do
-     !write(msg,'(2a,f9.6)' ) ch10,&
-&    !'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
+!     write(msg,'(2a,f9.6)' ) ch10,&
+!&    'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
      !call wrtout(std_out,msg,'COLL')
 !  C is computed
    else
@@ -2179,8 +2179,8 @@ end subroutine libxc_functionals_getvxc
      end do
      cc= -0.012_dp + 1.023_dp*sqrt(sum(gnon)/npts)
      ABI_FREE(gnon)
-     !write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
-     !call wrtout(std_out,msg,'COLL')
+!     write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
+!     call wrtout(std_out,msg,'COLL')
    end if
 
 !  Set c in XC data structure
