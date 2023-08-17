@@ -149,7 +149,8 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,n
 !arrays
  integer,pointer :: my_atmtab(:)
  logical,allocatable :: lmselect(:),lmselect_tmp(:)
- real(dp) :: gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),qphon(3),rmet(3,3)
+!real(dp) :: tsec(2)
  real(dp),allocatable :: dylmdr(:,:,:),ff(:)
  real(dp),allocatable :: rhotot(:),grhotot(:,:),rhonow(:,:,:)
  real(dp),allocatable :: rhoxc(:,:),drhoxc(:),dcorexc(:)

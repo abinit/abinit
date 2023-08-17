@@ -5615,7 +5615,7 @@ Variable(
     vartype="integer",
     topics=['multidtset_useful'],
     dimensions="scalar",
-    defaultval=[[getden]],
+    defaultval="[[getden]]",
     mnemonics="GET the Kinetic energy DENsity from...",
     added_in_version="9.10.4",
     text=r"""
@@ -8182,7 +8182,7 @@ Variable(
     vartype="integer",
     topics=['multidtset_useful'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': [[irdden]]}),
+    defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': '[[irdden]]'}),
     mnemonics="Integer that governs the ReaDing of Kinetic energy density KDEN file",
     added_in_version="9.10.4",
     text=r"""

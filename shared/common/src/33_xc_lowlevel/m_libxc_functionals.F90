@@ -2130,7 +2130,6 @@ end subroutine libxc_functionals_getvxc
  integer  :: ii,ipts
  logical :: fixed_c_tb09,is_mgga_tb09
  real(dp) :: cc
- character(len=500) :: msg
 !arrays
  type(libxc_functional_type),pointer :: xc_funcs(:)
  real(dp),allocatable :: gnon(:)
