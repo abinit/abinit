@@ -654,8 +654,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
      stringfile='_KDEN'
    end if
    stringvar='kden'
-   call mkfilename(filnam,filkdensin,dtset%getkden,idtset,dtset%irdkden,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                   getpath=dtset%getden_filepath)
+   call mkfilename(filnam,filkdensin,dtset%getkden,idtset,dtset%irdkden,jdtset_,ndtset,stringfile,stringvar,will_read)
    if(will_read==0)filkdensin=trim(filnam_ds(3))//'_KDEN'
    ireadkden=will_read
    if ((dtset%optdriver==RUNL_GSTATE.or.dtset%optdriver==RUNL_GWLS).and.dtset%iscf<0) ireadkden=1
@@ -676,8 +675,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    stringfile='_PAWDEN'
  end if
  stringvar='pawden'
- call mkfilename(filnam,filpawdensin,dtset%getpawden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                 getpath=dtset%getden_filepath)
+ call mkfilename(filnam,filpawdensin,dtset%getpawden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar,will_read)
  if(will_read==0)filpawdensin=trim(filnam_ds(3))//'_PAWDEN'
 
  ! According to get1den, build _DEN file name, referred as fildens1in
