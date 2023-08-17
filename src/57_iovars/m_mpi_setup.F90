@@ -1085,7 +1085,7 @@ end subroutine mpi_setup
  logical :: dtset_found,file_found,first_bpp,iam_master
  logical :: with_image,with_pert,with_kpt,with_spinor,with_fft,with_band,with_bandpp,with_thread
  real(dp):: acc_c,acc_k,acc_kgb,acc_kgb_0,acc_s,ecut_eff,eff,ucvol,weight0
- character(len=9) :: suffix
+ character(len=10) :: suffix
  character(len=20) :: strg
  character(len=500) :: msg,msgttl
  character(len=fnlen) :: filden

@@ -1416,15 +1416,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getden_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getden_filepath = key_value
 
- if (dtset%usekden==1) then
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getkden',tread,'INT')
-   if(tread==1) then
-     dtset%getkden=intarr(1)
-   else
-     dtset%getkden=dtset%getden
-   end if
- end if
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpawden',tread,'INT')
  if(tread==1) dtset%getpawden=intarr(1)
 
@@ -1782,15 +1773,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddvdb',tread,'INT')
  if(tread==1) dtset%irddvdb = intarr(1)
-
- if (dtset%usekden==1) then
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdkden',tread,'INT')
-   if(tread==1) then
-     dtset%irdkden=intarr(1)
-   else
-     dtset%irdkden=dtset%irdden
-   end if
- end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdpawden',tread,'INT')
  if(tread==1) dtset%irdpawden=intarr(1)
@@ -2786,6 +2768,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%usekden=merge(1,0,xc_need_kden)
  end if
  if (dtset%usekden == 1 .and. dtset%nimage == 1) dtset%prtkden = 1
+
+! Some variables need usekden before beeing red
+if (dtset%usekden==1) then
+   dtset%getkden=dtset%getden
+   dtset%irdkden=dtset%irdden
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getkden',tread,'INT')
+   if(tread==1) dtset%getkden=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdkden',tread,'INT')
+   if(tread==1) dtset%irdkden=intarr(1)
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prtkden',tread,'INT')
  if(tread==1) dtset%prtkden=intarr(1)

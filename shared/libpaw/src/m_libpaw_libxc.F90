@@ -2116,7 +2116,6 @@ end subroutine libpaw_libxc_getvxc
  integer  :: ii,ipts
  logical :: fixed_c_tb09,is_mgga_tb09
  real(dp) :: cc
- character(len=500) :: msg
 !arrays
  type(libpaw_libxc_type),pointer :: xc_funcs(:)
  real(dp),allocatable :: gnon(:)
