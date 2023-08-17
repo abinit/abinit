@@ -1188,10 +1188,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          else
 #if defined HAVE_BIGDFT
            call wvl_initro(atindx1,wvl%descr%atoms%astruct%geocode,wvl%descr%h,&
-&               mpi_enreg%me_wvl,dtset%natom,nattyp,nffwvl%descr%Glr%d%n2,&
-&               wvl%descr%Glr%d%n2i,wvl%descr%Glr%d%n3,pawrad,pawtab,&
-&               psps%gth_params%psppar,rhor,rprimd,dtset%spinat,wvl%den,&
-&               dtset%xc_denpos,xred,dtset%ziontypat)
+&               mpi_enreg%me_wvl,dtset%natom,nattyp,nfftf,dtset%nspden,psps%ntypat,&
+&               wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,wvl%descr%Glr%d%n2,wvl%descr%Glr%d%n2i,&
+&               wvl%descr%Glr%d%n3,pawrad,pawtab,psps%gth_params%psppar,rhor,rprimd,&
+&               dtset%spinat,wvl%den,dtset%xc_denpos,xred,dtset%ziontypat)
            call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
 #endif
          end if ! usepaw
