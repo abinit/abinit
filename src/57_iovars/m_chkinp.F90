@@ -98,7 +98,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
  logical :: twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
- logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_need_kden
+ logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_tb09,xc_need_kden
  real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
@@ -168,6 +168,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      xc_is_lda=((dt%ixc>=1.and.dt%ixc<=10).or.dt%ixc==50)
      xc_is_gga=((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
      xc_is_mgga=(dt%ixc>=31.and.dt%ixc<=35)
+     xc_is_tb09=.false.
      xc_is_hybrid=(dt%ixc==40.or.dt%ixc==41.or.dt%ixc==42)
      xc_need_kden=(dt%ixc==31.or.dt%ixc==34.or.dt%ixc==35)
    else
@@ -175,6 +176,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      xc_is_lda=libxc_functionals_islda(xc_functionals=xcfunc)
      xc_is_gga=libxc_functionals_isgga(xc_functionals=xcfunc)
      xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
+     xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
      xc_is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xcfunc)
      xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
      call libxc_functionals_end(xc_functionals=xcfunc)
@@ -2587,12 +2589,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optstress',dt%optstress,1,(/1/),iout)
    end if
 !  TB09 XC functional cannot provide forces/stresses
-   if(dt%optforces/=0 .or. dt%optstress/=0)then
+   if((dt%optforces/=0.or.dt%optstress/=0).and.xc_is_tb09)then
      write(msg, '(9a)' ) &
 &      'When the selected XC functional is Tran-Blaha 2009 functional (modified Becke-Johnson),',ch10,&
 &        'which is a potential-only functional, calculations cannot be self-consistent',ch10,&
 &        'with respect to the total energy.',ch10, &
-&        'For that reason, neither forces nor stressescan be computed.',ch10,&
+&        'For that reason, neither forces nor stresses can be computed.',ch10,&
 &        'You should set optforces and optstress to 0!'
      ABI_WARNING(msg)
   end if
