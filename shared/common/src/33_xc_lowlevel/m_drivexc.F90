@@ -705,7 +705,6 @@ subroutine mkdenpos(iwarn,nfft,nspden,option,rhonow,xc_denpos)
 
 !  Non spin-polarized
 !$OMP PARALLEL DO PRIVATE(ifft,rhotmp) REDUCTION(MIN:worst) REDUCTION(+:numneg) SHARED(nfft,rhonow)
-!$OMP&SHARED(nfft,rhonow)
    do ifft=1,nfft
      rhotmp=rhonow(ifft,1)
      if(rhotmp<xc_denpos)then
