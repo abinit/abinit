@@ -55,6 +55,7 @@ enunit      1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = graphene_gnu_11.2_macports
 #%% test_chain = t23.abi, t24.abi
 #%% [files]
 #%% files_to_test = 
