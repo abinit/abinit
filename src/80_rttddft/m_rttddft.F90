@@ -258,12 +258,12 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
            & grewtn,tdks%grvdw,tdks%gsqcut,istep,kxc,tdks%pawfgr%mgfft,             &
            & moved_atm_inside,moved_rhor,mpi_enreg,tdks%nattyp,tdks%pawfgr%nfft,    &
            & tdks%pawfgr%ngfft,tdks%ngrvdw,tdks%nhat,tdks%nhatgr,tdks%nhatgrdim,    &
-           & nkxc,psps%ntypat,n1xccc,n3xccc,optene,tdks%pawrad,tdks%pawtab,         &
-           & tdks%ph1df,psps,tdks%rhog,tdks%rhor,tdks%rmet,tdks%rprimd,strsxc,      &
-           & tdks%ucvol,tdks%usexcnhat,tdks%vhartr,tdks%vpsp,tdks%vtrial,tdks%vxc,  &
-           & vxcavg,tdks%wvl,tdks%xccc3d,tdks%xred,taur=tdks%taur,                  &
-           & vxc_hybcomp=tdks%vxc_hybcomp,vxctau=tdks%vxctau,add_tfw=tfw_activated, &
-           & xcctau3d=tdks%xcctau3d,calc_ewald=calc_ewald)
+           & nkxc,psps%ntypat,n1xccc,n3xccc,optene,tdks%pawang,tdks%pawrad,         &
+           & tdks%pawrhoij,tdks%pawtab,tdks%ph1df,psps,tdks%rhog,tdks%rhor,         &
+           & tdks%rmet,tdks%rprimd,strsxc,tdks%ucvol,tdks%usexcnhat,tdks%vhartr,    &
+           & tdks%vpsp,tdks%vtrial,tdks%vxc,vxcavg,tdks%wvl,tdks%xccc3d,tdks%xred,  &
+           & taur=tdks%taur,vxc_hybcomp=tdks%vxc_hybcomp,vxctau=tdks%vxctau,        &
+           & add_tfw=tfw_activated,xcctau3d=tdks%xcctau3d,calc_ewald=calc_ewald)
  ABI_FREE(grchempottn)
  ABI_FREE(grewtn)
  ABI_FREE(kxc)
