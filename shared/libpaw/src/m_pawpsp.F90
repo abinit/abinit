@@ -734,7 +734,7 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 !arrays
  real(dp),pointer :: ncore(:),tcoretau(:),tncore(:),tnvale(:),tproj(:,:),vlocr(:)
  type(pawrad_type),intent(inout) :: pawrad
- type(pawrad_type),intent(out)::core_mesh,tproj_mesh,vale_mesh,vloc_mesh
+ type(pawrad_type),intent(out) :: core_mesh,tproj_mesh,vale_mesh,vloc_mesh
  type(pawrad_type),pointer :: radmesh(:)
  type(pawtab_type),intent(inout) :: pawtab
  integer,intent(out)::nmesh
@@ -3889,10 +3889,12 @@ pawtab%lamb_shielding=paw_setuploc%lamb_shielding
  if (paw_setuploc%pseudo_valence_density%tread) then
    call pawrad_free(vale_mesh)
  end if
+ if (paw_setuploc%ae_core_kinetic_energy_density%tread.and.pawtab%has_coretau>=1) then
+   call pawrad_free(coretau_mesh)
+ end if
  if (allocated(tnvale)) then
    LIBPAW_DEALLOCATE(tnvale)
  end if
-
 
 end subroutine pawpsp_17in
 !!***
