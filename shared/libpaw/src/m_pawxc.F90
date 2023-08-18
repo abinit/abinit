@@ -1748,6 +1748,7 @@ subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nha
      LIBPAW_DEALLOCATE(gxc)
      LIBPAW_DEALLOCATE(dylmdr)
      if (uselaplacian==1) then
+       LIBPAW_DEALLOCATE(lxc)
        LIBPAW_DEALLOCATE(ylmlapl)
      end if
    end if

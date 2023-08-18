@@ -1184,7 +1184,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          if (dtset%usepaw==0) then
            !Wavelet density corresponds exactly to the wavefunctions,
            !since wavefunctions are taken from diagonalisation of LCAO.
-           call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
+           call wvl_mkrho(dtset,irrzon,mpi_enreg,phnons,rhor,wvl%wfs,wvl%den)
          else
 #if defined HAVE_BIGDFT
            call wvl_initro(atindx1,wvl%descr%atoms%astruct%geocode,wvl%descr%h,&
@@ -1192,7 +1192,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &               wvl%descr%Glr%d%n1,wvl%descr%Glr%d%n1i,wvl%descr%Glr%d%n2,wvl%descr%Glr%d%n2i,&
 &               wvl%descr%Glr%d%n3,pawrad,pawtab,psps%gth_params%psppar,rhor,rprimd,&
 &               dtset%spinat,wvl%den,dtset%xc_denpos,xred,dtset%ziontypat)
-           call wvl_mkrho(dtset, irrzon, mpi_enreg, phnons, rhor, wvl%wfs, wvl%den)
+           call wvl_mkrho(dtset,irrzon,mpi_enreg,phnons,rhor,wvl%wfs,wvl%den)
 #endif
          end if ! usepaw
        end if ! usewvl
@@ -1640,7 +1640,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    nullify(cg,eigen)
  endif
 
- if (dtset%usewvl == 0 .or. dtset%nsym <= 1) then
+ if (dtset%usewvl == 0) then
 !  In wavelet case, irrzon and phnons are deallocated by wavelet object.
    ABI_FREE(irrzon)
    ABI_FREE(phnons)
