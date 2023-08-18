@@ -36,7 +36,6 @@ MODULE m_xc_tb09
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type,pawrad_deducer0,nderiv_gen,simp_gen
  use m_pawtab,       only : pawtab_type
- use m_paw_an,       only : paw_an_type
  use m_pawrhoij,     only : pawrhoij_type
  use m_paw_denpot,   only : pawdensities
  use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
@@ -73,7 +72,6 @@ CONTAINS  !=====================================================================
 !!  intxc = 1 if the XC functional has to be interpolated on a more refined mesh
 !!  ixc= choice of exchange-correlation scheme
 !!  mpi_enreg= information about MPI parallelization
-!!  my_natom= number of atoms treated by current processor
 !!  natom= total number of atoms in cell
 !!  nfft= (effective) number of FFT grid points (for this processor)
 !!  ngfft(18)= contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
@@ -84,7 +82,6 @@ CONTAINS  !=====================================================================
 !!  nspden= number of spin-density components
 !!  ntypat= number of types of atoms in unit cell.
 !!  n3xccc= dimension of the xccc3d array (0 or nfft or cplx*nfft).
-!!  paw_an(natom) <type(paw_an_type)>= paw arrays given on angular mesh
 !!  pawang <type(pawang_type)> =paw angular mesh and related data
 !!  pawrad(ntypat) <type(pawrad_type)> =paw radial mesh and related data
 !!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies and related data (for the current atom)
@@ -110,14 +107,14 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,nhatdim, &
-&                           nhatgr,nhatgrdim,nspden,ntypat,n3xccc,paw_an,pawang,pawrad, &
+subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,natom,nfft,ngfft,nhat,nhatdim, &
+&                           nhatgr,nhatgrdim,nspden,ntypat,n3xccc,pawang,pawrad, &
 &                           pawrhoij,pawtab,pawxcdev,rhor,rprimd,usepaw,xccc3d,xc_denpos, &
 &                           computation_type,mpi_atmtab,comm_atom,xc_funcs) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: intxc,ixc,n3xccc,nfft,my_natom,natom,nhatdim,nhatgrdim
+ integer,intent(in) :: intxc,ixc,n3xccc,nfft,natom,nhatdim,nhatgrdim
  integer,intent(in) :: nspden,ntypat,pawxcdev,usepaw
  integer,intent(in),optional :: comm_atom
  real(dp),intent(in),optional :: xc_denpos
@@ -131,16 +128,15 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,n
  real(dp),intent(in) :: rhor(nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),xccc3d(n3xccc)
  type(libxc_functional_type),intent(inout),optional :: xc_funcs(2)
- type(paw_an_type),intent(in) :: paw_an(my_natom*usepaw)
  type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
- type(pawrhoij_type),intent(in) :: pawrhoij(my_natom*usepaw)
+ type(pawrhoij_type),intent(in) :: pawrhoij(:)
  type(pawtab_type),intent(in),target :: pawtab(ntypat*usepaw)
 
 !Local variables-------------------------------
 !scalars
  integer :: cplex,iatom,iatom_tot,ierr,ii,ilm,iloop,ir,itypat,ixc_from_lib,ipts
- integer :: ishift,iwarn,lm_size,lm_size_eff,mesh_size,my_comm_atom,ngrad,nfftot
- integer :: npts,nspden1,nzlmopt,option,opt_compch,opt_dens,pawprtvol,usecore
+ integer :: ishift,iwarn,lm_size,lm_size_eff,mesh_size,my_comm_atom,my_natom,ngrad
+ integer :: nfftot,npts,nspden1,nzlmopt,option,opt_compch,opt_dens,pawprtvol,usecore
  integer :: usenhat,usexcnhat
  real(dp) :: compch_dum,factor,grho_over_rho,grho2,rho,sumg,ucvol,xc_c_tb09
  logical :: my_atmtab_allocated,paral_atom,test_tb09,use_exact_nhat_gradient
@@ -206,6 +202,10 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,n
    end if
    if(.not.allocated(pawang%ylmrgr)) then
      msg='pawang%ylmrgr must be allocated!'
+     ABI_BUG(msg)
+   end if
+   if (size(pawrhoij)/=mpi_enreg%my_natom) then
+     msg='Invalid pawrhoij size!'
      ABI_BUG(msg)
    end if
  end if
@@ -292,6 +292,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,n
  if (usepaw==1.and.compute_paw) then
 
 !  Set up parallelism over atoms
+   my_natom=mpi_enreg%my_natom
    paral_atom=(present(comm_atom).and.(my_natom/=natom))
    nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
    my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
@@ -316,7 +317,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,n
 
      itypat=pawrhoij(iatom)%itypat
      mesh_size=pawtab(itypat)%mesh_size
-     lm_size=paw_an(iatom)%lm_size
+     lm_size=pawtab(itypat)%lcut_size**2
      lm_size_eff=min(lm_size,pawang%ylm_size)
      ABI_MALLOC(ff,(mesh_size))
 
@@ -326,7 +327,7 @@ subroutine xc_tb09_update_c(intxc,ixc,mpi_enreg,my_natom,natom,nfft,ngfft,nhat,n
      ABI_MALLOC(nhat1,(mesh_size,lm_size,usexcnhat))
      ABI_MALLOC(lmselect,(lm_size))
      ABI_MALLOC(lmselect_tmp,(lm_size))
-     lmselect_tmp(:)=.true. ; if (nzlmopt==1) lmselect_tmp(:)=paw_an(iatom)%lmselect(:)
+     lmselect_tmp(:)=.true.
      cplex=1 ; nspden1=1 ; opt_compch=0 ; opt_dens=1-usexcnhat ; pawprtvol=0
      call pawdensities(compch_dum,cplex,iatom_tot,lmselect_tmp,lmselect,&
 &     lm_size,nhat1,nspden1,nzlmopt,opt_compch,opt_dens,-1,0,pawang,pawprtvol,&

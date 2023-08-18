@@ -351,9 +351,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
  if (dtset%xc_tb09_c>99._dp) then
-   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,my_natom,dtset%natom, &
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
 &    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
-&    paw_an,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
 &    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
 &    computation_type='all')
  end if
@@ -602,9 +602,9 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
 !If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
  if (dtset%xc_tb09_c>99._dp) then
-   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,my_natom,dtset%natom, &
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
 &    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
-&    paw_an,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
 &    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
 &    computation_type='all')
  end if
