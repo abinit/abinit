@@ -19307,7 +19307,7 @@ Variable(
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
 it gives a convergence tolerance for the largest squared "residual" (defined
-below) for any given band. The squared residual is: < nk| (H-E)^2 |nk>,    E = < nk|H|nk >
+below) for any given band. The squared residual is: 
 
 $$
 \langle \nk| (H - \enk)^2 |\nk \rangle, \,\text{with}\; \enk = \langle \nk|H|\nk \rangle
