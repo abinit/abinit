@@ -2390,7 +2390,7 @@ For the time being,
   Otherwise, use [[densfor_pred]] = 2
 
 
-!!! note "concerning the correction of forces (use of [[densfor_pred]] = 1, 2, 3, 4 or 6)"
+!!! note "About the correction to forces (use of [[densfor_pred]] = 1, 2, 3, 4 or 6)"
 
     The force on the atom located at R is corrected by the addition of the following
     term: $F_{residual}=\int dr V_{residual} \frac{d \rho_{atomic}}{dR}$,
@@ -2398,21 +2398,23 @@ For the time being,
 
     - When such an atomic density ($\rho_{atomic}$) is found in the pseudopotential or
     PAW file, it is used. If not, a gaussian density (defined by [[densty]] parameter) is used.
+
     - When SCF mixing is done on the density ([[iscf]] >= 10), the potential
-    residual ($V_residual$) is obtained from the density residual with the first
+    residual ($V_{residual}$) is obtained from the density residual with the first
     order formula $V_{residual}=\frac{dV}{d \rho} \rho_{residual}$
-    and uses the exchange-correlation kernel
-    $ \frac{dV_{xc}}{d\rho}=K_{xc}$ whose computation is time-consuming for GGA
-    functionals. By default (positive values of [[densfor_pred]]), the local-
-    density part of the GGA exchange-correlation kernel is used (even for GGA, for
-    which it seems to give a reasonable accuracy). Using the full GGA exchange
-    correlation kernel (so, including derivatives with respect to the gradient of
-    the density) is always possible by giving a negative value to
-    [[densfor_pred]]. In case of hybrid functionals, a similar correction term is
+    and uses the exchange-correlation kernel $K_{xc}=\frac{dV_{xc}}{d\rho}$ whose computation
+    is time-consuming for GGA (or meta-GGA) functionals.
+    
+    - By default (positive values of [[densfor_pred]]), even for GGA and meta-GGA,
+    the local-density part of the exchange-correlation kernel is used, which gives a reasonable accuracy.
+    Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of
+    the density) is always possible by giving a negative value to [[densfor_pred]].
+
+    - In case of hybrid functionals, a similar correction term is
     added, although in the density mixing scheme, the related GGA kernel is used
     instead of the hybrid functional kernel.
 
-!!! note "concerning the use of [[densfor_pred]] = 5 or 6 (density prediction)"
+!!! note "About the use of [[densfor_pred]] = 5 or 6 (density prediction)"
 
     The algorithm is described in [[cite:Alfe1999]].
     It uses an atomic (spherical) density. When such an atomic density
@@ -13277,8 +13279,10 @@ the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 
   * [[occopt]] = 3 to 8 :
 Metallic occupation of levels, using different occupation schemes (see below).
+See the review of the different possibilities in [[cite:Santos2023]], that
+delivers a nice pedagogical explanation of these.
 The corresponding thermal broadening, or cold smearing, is defined by the
-input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
+input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha, 
 divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
@@ -13289,8 +13293,9 @@ can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
 Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
-$\tilde{\delta}(x)=0.25 (\cosh(x/2.0))^{-2}$. For usual calculations, at zero temperature, do not use [[occopt]]=3,
-but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
+$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$. 
+For usual calculations, at zero temperature, do not use [[occopt]]=3,
+but [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
 
     * [[occopt]] = 4:
@@ -13302,7 +13307,7 @@ Must be used with caution, see the note below.
 
     * [[occopt]] = 5:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.8165 (monotonic
-function in the tail)
+function in the tail).
 Same smeared delta function as [[occopt]] = 4, with different a.
 Must be used with caution, see the note below.
 
@@ -13323,7 +13328,7 @@ Uniform smearing (the delta function is replaced by a constant function of
 value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
-    * [[occopt]] = 9:
+  * [[occopt]] = 9:
 Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that [[occopt]] = 9 cannot be used with fixed magnetization calculation.
 
 !!! note
@@ -13337,6 +13342,7 @@ Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]
     of this problem, a small variation of input parameters might lead to a jump of
     total energy, because there might be two or even three possible values of the
     Fermi energy, and the bisection algorithm finds one or the other.
+    See a more detailed explanation in [[cite:Santos2023]].
 """,
 ),
 
@@ -19377,7 +19383,7 @@ Variable(
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
 it gives a convergence tolerance for the largest squared "residual" (defined
-below) for any given band. The squared residual is: < nk| (H-E)^2 |nk>,    E = < nk|H|nk >
+below) for any given band. The squared residual is: 
 
 $$
 \langle \nk| (H - \enk)^2 |\nk \rangle, \,\text{with}\; \enk = \langle \nk|H|\nk \rangle

@@ -1,5 +1,5 @@
 
-.Version 9.11.2 of ABINIT 
+.Version 9.10.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h10 )
+.Starting date : Thu 20 Jul 2023.
+- ( at 12h32 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t19/t19.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/TestBot_MPI1/v9_t19/t19.abi
 - output file    -> t19.abo
 - root for input  files -> t19i
 - root for output files -> t19o
@@ -74,6 +74,7 @@ P           mkmem           1
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000
+        optstress           0
           prtkden           1
             rprim      1.0000000000E+00 -6.8780443909E-07 -1.5175935869E-37
                       -5.0000059566E-01  8.6602505988E-01 -1.5175935869E-37
@@ -143,8 +144,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.03028
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/PseudosHGH_pwteter/49in.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for In,  from PRB58, 3641 (1998)
 - 49.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -169,8 +170,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    3.321137
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -216,12 +217,6 @@ Result for kinetic energy density :
    Integrated=    1.9928E+01
 --------------------------------------------------------------------------------
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.16484609E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.18429714E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.27137610E-02  sigma(2 1)=  1.68451079E-04
-
-
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   potential residual=  5.726E+01 exceeds tolvrs=  1.000E-10
@@ -241,11 +236,8 @@ convergence: {deltae: -3.246E+01, res2:  5.726E+01, residm:  3.769E-03, diffor: 
 etotal    :  -3.24556676E+01
 entropy   :   0.00000000E+00
 fermie    :   3.50109850E-02
-cartesian_stress_tensor: # hartree/bohr^3
-- [  1.16484609E-02,   1.68451079E-04,   0.00000000E+00, ]
-- [  1.68451079E-04,   1.18429714E-02,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   1.27137610E-02, ]
-pressure_GPa:  -3.5506E+02
+cartesian_stress_tensor: null
+pressure_GPa: null
 xred      :
 - [  3.3283E-01,   6.6617E-01,  -1.8297E-04, In]
 - [  3.3283E-01,   6.6617E-01,   4.9982E-01, In]
@@ -358,16 +350,6 @@ band_energy         : -6.65112222968304E+00
 ...
 
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.16484609E-02  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.18429714E-02  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.27137610E-02  sigma(2 1)=  1.68451079E-04
-
--Cartesian components of stress tensor (GPa)         [Pressure= -3.5506E+02 GPa]
-- sigma(1 1)=  3.42709494E+02  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  3.48432191E+02  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  3.74051699E+02  sigma(2 1)=  4.95600102E+00
-
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -406,12 +388,13 @@ P           mkmem           1
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  2.000000  2.000000
+        optstress           0
           prtkden           1
             rprim      1.0000000000E+00 -6.8780443909E-07 -1.5175935869E-37
                       -5.0000059566E-01  8.6602505988E-01 -1.5175935869E-37
                        6.1232339957E-17  1.0605752387E-16  1.0000000000E+00
-           strten      1.1648460885E-02  1.1842971437E-02  1.2713760975E-02
-                       0.0000000000E+00  0.0000000000E+00  1.6845107910E-04
+           strten      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
            symrel      1  0  0   0  1  0   0  0  1       1  0  0   0  1  0   0  0  1
                        0  1  0   1  0  0   0  0  1       0  1  0   1  0  0   0  0  1
                       -1  0  0   0 -1  0   0  0  1      -1  0  0   0 -1  0   0  0  1
@@ -544,10 +527,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.8
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.8
+.Delivered   4 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.3  wall=          1.3
