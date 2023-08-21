@@ -27,22 +27,9 @@ inp_files = [
     "t12.abi",  # optic
     "t13.abi",  # GGA-PBE NC BCC Iron ferromagnetic
     "t14.abi",  # GGA-PBE PAW BCC Iron ferromagnetic
-    "t15.abi",  # check slight misalignment of rprim, with large tolsym
-    "t16.abi",  # check slightly incorrect xred, with large tolsym
-    # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
-    "t17.abi",
-    # check slightly incorrect rprim and xred, yielding correction to tnons, tolerated.
-    "t18.abi",
+
     "t19.abi",  # disable all checks thanks to expert_user
-    "t20.abi",  # test treatment of inaccurate POSCAR file
-    "t21.abi",  # test treatment of inaccurate POSCAR file
     "t22.abi",  # test different cellcharge for different images, algo pSIC
-    "t23.abi",  # test treatment of inaccurate POSCAR file
-    "t24.abi",  # test treatment of inaccurate POSCAR file
-    "t25.abi",  # test treatment of inaccurate POSCAR file
-    "t26.abi",  # test treatment of inaccurate POSCAR file
-    "t27.abi",  # test treatment of inaccurate POSCAR file
-    "t28.abi",  # test treatment of inaccurate POSCAR file
     "t29.abi",  # RMM-DIIS eigsolver for NC.
     "t30.abi",  # RMM-DIIS eigsolver for PAW.
     # GW/BSE
@@ -118,11 +105,6 @@ inp_files = [
     "t92.abi",  # check extended fpmd routines with low number of bands
     "t93.abi",  # energy, forces for PAW non-collinear, with usexcnhat=0
     "t94.abi",  # energy, stress for PAW non-collinear, with usexcnhat=0
-    "t95.abi",  # test treatment of inaccurate POSCAR file
-    "t96.abi",  # test treatment of inaccurate POSCAR file
-    "t97.abi",  # test treatment of inaccurate POSCAR file
-    "t98.abi",  # test treatment of inaccurate POSCAR file
-    "t99.abi",  # test treatment of inaccurate POSCAR file
 
     # Optics with spin-orbit coupling
     "t100.abi", # Optical conductivity with spin-orbit coupling - ABINIT step
@@ -150,10 +132,12 @@ inp_files = [
 
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
+
     # UPF2 format for norm-conserving pseudopotentials
     "t130.abi",  # UPF2
     "t131.abi",  # UPF2 with SOC
     "t132.abi",  # Forces using Beigi 2D cut-off
+
     # more DFPT
     "t140.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
     "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
@@ -163,4 +147,31 @@ inp_files = [
     "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
     "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
     "t148.abi",  # test flexoelectric tensor calculation with ffnl_lw=1
+
+    # write_files behaviour
+    "t150.abi",  # test the behaviour of supravariable write_files
+
+    # DDB file conversion
+    "t160.abi",  # convert DDB from text to netcdf
+    "t161.abi",  # convert DDB from netcdf to text
+
+    # Symmetry recognition and possible corrections, including inaccurate POSCAR files
+    "t180.abi",  # test treatment of inaccurate POSCAR file
+    "t181.abi",  # test treatment of inaccurate POSCAR file
+    "t183.abi",  # test treatment of inaccurate POSCAR file
+    "t184.abi",  # test treatment of inaccurate POSCAR file
+    "t185.abi",  # test treatment of inaccurate POSCAR file
+    "t186.abi",  # test treatment of inaccurate POSCAR file
+    "t187.abi",  # test treatment of inaccurate POSCAR file
+    "t188.abi",  # test treatment of inaccurate POSCAR file
+    "t189.abi",  # test post treatment of an increase of symmetry due to geometry optimization
+    "t190.abi",  # check slight misalignment of rprim, with large tolsym
+    "t191.abi",  # check slightly incorrect xred, with large tolsym
+    "t192.abi",  # check slightly incorrect rprim and xred, yielding correction to tnons, although still not tolerated.
+    "t193.abi",  # check slightly incorrect rprim and xred, yielding correction to tnons, tolerated.
+    "t195.abi",  # test treatment of inaccurate POSCAR file
+    "t196.abi",  # test treatment of inaccurate POSCAR file
+    "t197.abi",  # test treatment of inaccurate POSCAR file
+    "t198.abi",  # test treatment of inaccurate POSCAR file
+    "t199.abi",  # test treatment of inaccurate POSCAR file
 ]

@@ -610,8 +610,16 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  ! RESPFN integer input variables (needed here to get the value of response)
  ! Warning: rfddk,rfelfd,rfmagn,rfphon,rfstrs,rfsrs_ref,rfuser,rf2_dkdk and rf2_dkde are also read in invars1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
- if(tread==1) dtset%rfasr=intarr(1)
+
+!call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfasr',tread,'INT')
+!if(tread==1) dtset%rfasr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
+ if(tread==1) dtset%asr=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
+ if(tread==1) dtset%chneut=intarr(1)
+
 
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rfatpol',tread,'INT')
  if(tread==1) dtset%rfatpol(1:2)=intarr(1:2)
@@ -1476,14 +1484,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%enunit=intarr(1)
 
  ! eph variables
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'asr',tread,'INT')
- if(tread==1) dtset%asr=intarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dipdip',tread_dipdip,'INT')
  if(tread_dipdip==1) dtset%dipdip=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chneut',tread,'INT')
- if(tread==1) dtset%chneut=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symdynmat',tread,'INT')
  if(tread==1) dtset%symdynmat=intarr(1)
@@ -2926,6 +2928,269 @@ if (dtset%usekden==1) then
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tl_radius',tread,'DPR')
  if(tread==1) dtset%tl_radius=dprarr(1)
+ 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%write_files = key_value
+! Print variables
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%write_files = key_value
+ if(dtset%write_files=='default') then
+  !!!EMPTY ON PURPOSE
+ else if(dtset%write_files=='all') then
+   dtset%ncout      = 1 !Already the default but good to keep track
+   dtset%prtddb     = 1
+   dtset%prtden     = 1
+   !dtset%prtdos     = 1
+   dtset%prtebands  = 1 !DEFAULT in all set to xgr
+   dtset%prteig     = 1
+   dtset%prtelf     = 1 ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtevk     = 1  ! TO BE CHECKED FOR CONSISTENCY
+   !dtset%prtfsurf   = 1  ! TO BE CHECKED FOR CONSISTENCY
+   !dtset%prtgden    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtgeo     = 1
+   dtset%prtgkk     = 1
+   dtset%prtgsr     = 1
+   dtset%prthist    = 1
+   dtset%prtkbff    = 1
+   !dtset%prtkden    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtlden    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtpot     = 1
+   !dtset%prtpsps    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   !dtset%prtstm     = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtsuscep  = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtvclmb   = 2  ! NC default
+   dtset%prtvha     = 1
+   dtset%prtvhxc    = 1
+   dtset%prtvhxc    = 1
+   dtset%prtvpsp    = 1  ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtvxc     = 1
+   !dtset%prtwant    = 1   ! TO BE CHECKED FOR CONSISTENCY
+   dtset%prtwf      = 1
+   dtset%prtxml     = 1
+ else if(dtset%write_files=='none') then 
+   dtset%ncout      = 0
+   dtset%prtddb     = 0
+   dtset%prtden     = 0
+   dtset%prtdos     = 0
+   dtset%prtebands  = 0
+   dtset%prteig     = 0
+   dtset%prtelf     = 0 
+   dtset%prtevk     = 0   
+   dtset%prtfsurf   = 0
+   dtset%prtgden    = 0
+   dtset%prtgeo     = 0
+   dtset%prtgkk     = 0
+   dtset%prtgsr     = 0
+   dtset%prthist    = 0
+   dtset%prtkbff    = 0
+   dtset%prtkden    = 0
+   dtset%prtlden    = 0
+   dtset%prtpot     = 0
+   dtset%prtpsps    = 0
+   dtset%prtstm     = 0
+   dtset%prtsuscep  = 0
+   dtset%prtvclmb   = 0
+   dtset%prtvha     = 0
+   dtset%prtvhxc    = 0
+   dtset%prtvhxc    = 0
+   dtset%prtvpsp    = 0
+   dtset%prtvxc     = 0
+   dtset%prtwant    = 0
+   dtset%prtwf      = 0
+   dtset%prtxml     = 0
+ !!!PLEASE ADD IN ALPHABETICAL ORDER THE FUTURE OPTIONS BELOW!!!
+ else if (dtset%write_files.ne.'none' .or. dtset%write_files.ne.'all' .or. dtset%write_files.ne.'default' ) then
+   if (INDEX(dtset%write_files,'ddb') .gt. 0) then
+      dtset%prtddb = 1
+   else
+      dtset%prtddb = 0
+   end if       
+   if (INDEX(dtset%write_files,'den_1') .gt. 0) then
+      dtset%prtden = 1
+   else if (INDEX(dtset%write_files,'den_2') .gt. 0) then
+      dtset%prtden = 2
+   else if (INDEX(dtset%write_files,'den_3') .gt. 0) then
+      dtset%prtden = 3
+   else if (INDEX(dtset%write_files,'den_4') .gt. 0) then
+      dtset%prtden = 4
+   else if (INDEX(dtset%write_files,'den_5') .gt. 0) then
+      dtset%prtden = 5
+   else if (INDEX(dtset%write_files,'den_6') .gt. 0) then
+      dtset%prtden = 6
+   else if (INDEX(dtset%write_files,'den_7') .gt. 0) then
+      dtset%prtden = 7
+   else
+      dtset%prtden = 0
+   end if
+   if ( (INDEX(dtset%write_files,'dos_1') .gt. 0) .AND. (dtset%occopt .ge. 3 .AND. dtset%occopt .le. 7 ) )then
+      dtset%prtdos = 1
+   else if ( (INDEX(dtset%write_files,'dos_1') .gt. 0) .AND. (dtset%iscf .eq. -3 ) )then
+      dtset%prtdos = 1
+   else if ( INDEX(dtset%write_files,'dos_2') .gt. 0 )then
+      dtset%prtdos = 2
+   else if ( INDEX(dtset%write_files,'dos_3') .gt. 0 )then
+      dtset%prtdos = 3
+   else if ( INDEX(dtset%write_files,'dos_4') .gt. 0 )then
+      dtset%prtdos = 4
+   else if ( (INDEX(dtset%write_files,'dos_5') .gt. 0 ) .AND. (dtset%nspinor .eq. 2 ) )then
+      dtset%prtdos = 5
+   else
+      dtset%prtdos = 0
+   end if   
+   if ( (INDEX(dtset%write_files,'dosm_1') .gt. 0) .AND. (dtset%prtdos .eq. 3 ) )then
+      dtset%prtdosm = 1
+      dtset%prtdos  = 3
+   else
+      dtset%prtdosm = 0
+   end if         
+   if (INDEX(dtset%write_files,'ebands_1') .gt. 0) then
+      dtset%prtebands = 1
+   else if (INDEX(dtset%write_files,'ebands_2') .gt. 0) then
+      dtset%prtebands = 2
+   else
+      dtset%prtebands = 0
+   end if   
+   if (INDEX(dtset%write_files,'eig') .gt. 0) then
+      dtset%prteig = 1
+   else
+      dtset%prteig = 0
+   end if
+   if (INDEX(dtset%write_files,'elf') .gt. 0) then
+      dtset%prtelf = 1
+   else
+      dtset%prtelf = 0
+   end if
+   if (INDEX(dtset%write_files,'evk') .gt. 0) then
+      dtset%prtevk = 1
+   end if
+   if (INDEX(dtset%write_files,'fsurf') .gt. 0) then
+      dtset%prtfsurf = 1
+   else
+      dtset%prtfsurf = 0
+   end if   
+   if (INDEX(dtset%write_files,'gden') .gt. 0) then
+      dtset%prtgden = 1
+   else
+      dtset%prtgden = 0
+   end if   
+   if (INDEX(dtset%write_files,'geo') .gt. 0) then
+      dtset%prtgeo = 1
+   else
+      dtset%prtgeo = 0
+   end if   
+   if (INDEX(dtset%write_files,'gkk') .gt. 0) then
+      dtset%prtgkk = 1
+   else
+      dtset%prtgkk = 0
+   end if   
+   if (INDEX(dtset%write_files,'gsr') .gt. 0) then
+      dtset%prtgsr = 1
+   else
+      dtset%prtgsr = 0
+   end if   
+   if (INDEX(dtset%write_files,'hist') .gt. 0) then
+      dtset%prthist = 1
+   else
+      dtset%prthist = 0
+   end if
+   if ( (INDEX(dtset%write_files,'kbff') .gt. 0) .AND. (dtset%iomode .eq. 3) )then
+      dtset%prtkbff = 1
+   else
+      dtset%prtkbff = 0
+   end if   
+   if (INDEX(dtset%write_files,'kden') .gt. 0) then
+      dtset%prtkden = 1
+   else
+      dtset%prtkden = 0
+   end if   
+   if (INDEX(dtset%write_files,'lden') .gt. 0) then
+      dtset%prtlden = 1
+   else
+      dtset%prtlden = 0
+   end if   
+   if (INDEX(dtset%write_files,'ncout') .gt. 0) then
+      dtset%ncout = 1
+   else
+      dtset%ncout = 0
+   end if   
+   if (INDEX(dtset%write_files,'pot') .gt. 0) then
+      dtset%prtpot = 1
+   else
+      dtset%prtpot = 0
+   end if
+   if (INDEX(dtset%write_files,'psps_1') .gt. 0) then
+      dtset%prtpsps = 1
+   else if (INDEX(dtset%write_files,'psps_-1') .gt. 0) then
+      dtset%prtpsps = -1
+   else
+      dtset%prtpsps = 0
+   end if
+   if (INDEX(dtset%write_files,'stm') .gt. 0) then
+      dtset%prtstm = 1
+   else
+      dtset%prtstm = 0
+   end if
+   if (INDEX(dtset%write_files,'suscep') .gt. 0) then
+      dtset%prtsuscep = 1
+   else
+      dtset%prtsuscep = 0
+   end if
+   if (INDEX(dtset%write_files,'vclmb_1') .gt. 0) then
+      dtset%prtvclmb = 1
+   else if (INDEX(dtset%write_files,'vclmb_2') .gt. 0) then
+      dtset%prtvclmb = 2
+   else
+      dtset%prtvha = 0
+   end if 
+   if (INDEX(dtset%write_files,'vha') .gt. 0) then
+      dtset%prtvha = 1
+   else
+      dtset%prtvha = 0
+   end if 
+   if (INDEX(dtset%write_files,'vhxc') .gt. 0) then
+      dtset%prtvhxc = 1
+   else
+      dtset%prtvhxc = 0
+   end if 
+   if (INDEX(dtset%write_files,'vpsp') .gt. 0) then
+      dtset%prtvpsp = 1
+   else
+      dtset%prtvpsp = 0
+   end if 
+   if (INDEX(dtset%write_files,'vxc') .gt. 0) then
+      dtset%prtvxc = 1
+   else
+      dtset%prtvxc = 0
+   end if 
+   if (INDEX(dtset%write_files,'want_1') .gt. 0) then
+      dtset%prtwant = 1
+   else if (INDEX(dtset%write_files,'want_2') .gt. 0) then
+      dtset%prtwant = 2
+   else if (INDEX(dtset%write_files,'want_3') .gt. 0) then
+      dtset%prtwant = 3
+   else
+      dtset%prtwant = 0
+   end if 
+   if (INDEX(dtset%write_files,'wf_1') .gt. 0) then
+      dtset%prtwf = 1
+      if (INDEX(dtset%write_files,'wf_full_1') .gt. 0) then
+         dtset%prtwf_full = 1
+      end if   
+   else if (INDEX(dtset%write_files,'wf_2') .gt. 0) then
+      dtset%prtwf = 2
+   else if (INDEX(dtset%write_files,'wf_3') .gt. 0) then
+      dtset%prtwf = 3
+   else if (INDEX(dtset%write_files,'wf_-1') .gt. 0) then
+      dtset%prtwf = -1
+   else
+      dtset%prtwf = 0
+   end if
+   if (INDEX(dtset%write_files,'xml') .gt. 0) then
+      dtset%prtxml = 1
+   else
+      dtset%prtxml = 0
+   end if   
+ end if
 
  ! Wannier90 interface related variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'w90iniprj',tread,'INT')

@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v7_t99/t99.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t99/t99.abi
 - output file    -> t99.abo
 - root for input  files -> t99i
 - root for output files -> t99o
-
 
  DATASET    1 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       1.045 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.013 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P3 m 1 (#156); Bravais hP (primitive hexag.)
 ================================================================================
@@ -179,8 +177,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.00903
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/B-q3
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/B-q3
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/B-q3
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/B-q3
 - Goedecker pseudopotential for B
 -  5.00000   3.00000     70301                znucl, zion, pspdat
    10   11    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -210,8 +208,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/7n.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for N,  from PRB58, 3641 (1998)
 -  7.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1194,7 +1192,7 @@ tolerances: {tolvrs: 1.00E-16, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.0419077053         0.0000000000
+   1    1   1    1        -0.0413719064         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2         0.0413719064        -0.0000000000
@@ -1202,7 +1200,7 @@ tolerances: {tolvrs: 1.00E-16, }
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1        -0.0419077053         0.0000000000
+   2    1   2    1        -0.0413719064         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2         0.0413719064        -0.0000000000
@@ -1210,7 +1208,7 @@ tolerances: {tolvrs: 1.00E-16, }
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1         0.2200801699         0.0000000000
+   3    1   3    1         0.2202285640        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
    3    1   3    2        -0.2202285640         0.0000000000
@@ -1218,23 +1216,23 @@ tolerances: {tolvrs: 1.00E-16, }
    1    2   1    1         0.0413719064         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2        -0.0346601219         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   1    2        -0.0413719064        -0.0000000000
+   1    2   2    2         0.0000000000        -0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1         0.0413719064         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2        -0.0346601219         0.0000000000
-   2    2   3    2        -0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000        -0.0000000000
+   2    2   2    2        -0.0413719064        -0.0000000000
+   2    2   3    2        -0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.2202285640        -0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.2201707233         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2        -0.0000000000        -0.0000000000
+   3    2   3    2         0.2202285640         0.0000000000
   
   Rigid-atom elastic tensor , in cartesian coordinates,
      j1       j2             matrix element
@@ -1331,11 +1329,11 @@ tolerances: {tolvrs: 1.00E-16, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.904207E-03 -1.904207E-03 -6.752058E-05  3.768470E-04  3.768470E-04
-   4.449170E-03
+  -1.928645E-03 -1.928645E-03  0.000000E+00  0.000000E+00  0.000000E+00
+   4.449758E-03
  Phonon frequencies in cm-1    :
-- -4.179251E+02 -4.179251E+02 -1.481905E+01  8.270836E+01  8.270836E+01
--  9.764799E+02
+- -4.232887E+02 -4.232887E+02  0.000000E+00  0.000000E+00  0.000000E+00
+-  9.766091E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1523,10 +1521,10 @@ P          mk1mem2          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          3.8
++Overall time at end (sec) : cpu=          2.6  wall=          2.6

@@ -1,6 +1,6 @@
 
-.Version 9.9.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,17 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Mar 2023.
-- ( at 16h09 )
+.Starting date : Sun 16 Jul 2023.
+- ( at 07h18 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/TestBot_MPI1/tutorial_tnuc_4/tnuc_4.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/tutorial_tnuc_4/tnuc_4.abi
 - output file    -> tnuc_4.abo
 - root for input  files -> tnuc_4i
 - root for output files -> tnuc_4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -42,7 +41,6 @@ P This job should need less than                     283.749 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.352 Mbytes ; DEN or POT disk file :      7.631 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -164,9 +162,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -388,9 +386,9 @@ meta: {optdriver: 1, rfddk: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_serial/jzwanzig_doc/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -758,60 +756,15 @@ P          mk1mem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         67.7        1.13      0.019
-- Total wall clock time (s,m,h):         68.0        1.13      0.019
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           67.7, wall_time =           68.0
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- fourwf%(pot)                     26.130  38.6        26.217  38.6           4020      -1.00        1.00       1.00
-- xc:pot/=fourdp                   12.660  18.7        12.690  18.7             65      -1.00        1.00       1.00
-- fourdp                           11.534  17.0        11.577  17.0           1117      -1.00        1.00       1.00
-- pawdenpot                         6.232   9.2         6.249   9.2             26      -1.00        1.00       1.00
-- vtowfk(contrib)                   2.122   3.1         2.123   3.1             25      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)              2.032   3.0         2.029   3.0             -1      -1.00        1.00       1.00
-- dfpt_vtorho (1)                   1.928   2.8         1.933   2.8             18      -1.00        1.00       1.00
-- pspini                            1.320   1.9         1.324   1.9              2      -1.00        1.00       1.00
-- nonlop(apply)                     0.943   1.4         0.945   1.4            831      -1.00        1.00       1.00
-- pawmkrho                          0.768   1.1         0.768   1.1             25      -1.00        1.00       1.00
-- dfpt_nstpaw                       0.559   0.8         0.563   0.8              3      -1.00        0.99       0.99
-- fourwf%(den)                      0.423   0.6         0.427   0.6            104      -1.00        0.99       0.99
-- projbd                            0.361   0.5         0.370   0.5           1010      -1.00        0.98       0.98
-- others (126)                     -2.190  -3.2        -2.213  -3.3             -1      -1.00        0.99       0.99
--<END_TIMER>
--
-- subtotal                         64.823  95.7        65.002  95.6                                  1.00       1.00
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          67.7, wall_time =          68.0
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- fourwf%(pot)                     26.130  38.6        26.217  38.6           4020      -1.00        1.00       1.00
-- xc:pot/=fourdp                   12.660  18.7        12.690  18.7             65      -1.00        1.00       1.00
-- fourdp                           11.534  17.0        11.577  17.0           1117      -1.00        1.00       1.00
-- pawdenpot                         6.232   9.2         6.249   9.2             26      -1.00        1.00       1.00
-- vtowfk(contrib)                   2.122   3.1         2.123   3.1             25      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)              2.032   3.0         2.029   3.0             -1      -1.00        1.00       1.00
-- dfpt_vtorho (1)                   1.928   2.8         1.933   2.8             18      -1.00        1.00       1.00
-- pspini                            1.320   1.9         1.324   1.9              2      -1.00        1.00       1.00
-- nonlop(apply)                     0.943   1.4         0.945   1.4            831      -1.00        1.00       1.00
-- pawmkrho                          0.768   1.1         0.768   1.1             25      -1.00        1.00       1.00
-- dfpt_nstpaw                       0.559   0.8         0.563   0.8              3      -1.00        0.99       0.99
-- fourwf%(den)                      0.423   0.6         0.427   0.6            104      -1.00        0.99       0.99
-- projbd                            0.361   0.5         0.370   0.5           1010      -1.00        0.98       0.98
-- others (126)                     -2.190  -3.2        -2.213  -3.3             -1      -1.00        0.99       0.99
--<END_TIMER>
+- Timing analysis has been suppressed with timopt=0
 
-- subtotal                         64.823  95.7        65.002  95.6                                  1.00       1.00
+
 
 ================================================================================
 
@@ -828,7 +781,12 @@ P          mk1mem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Projector augmented-wave approach to density-functional perturbation theory.
+- [1] Orbital magnetism and chemical shielding in the projector augmented-wave formalism.
+- J.W. Zwanziger, M. Torrent, and X. Gonze Phys. Rev. B 107, 165157 (2023).
+- Comment: to be cited in case the computation of orbital magnetism is used, i.e. orbmag>0.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2023
+-
+- [2] Projector augmented-wave approach to density-functional perturbation theory.
 - C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 73, 235101 (2006).
 - Comparison between projector augmented-wave and ultrasoft pseudopotential formalisms
 - at the density-functional perturbation theory level.
@@ -838,18 +796,18 @@ P          mk1mem           1
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#audouze2006,
 - and https://docs.abinit.org/theory/bibliography/#audouze2008
 -
-- [2] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [3] Libxc: A library of exchange and correlation functionals for density functional theory.
+- [4] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
 - Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [4] The Abinit project: Impact, environment and recent developments.
+- [5] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -866,7 +824,7 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [5] ABINIT: Overview, and focus on selected capabilities
+- [6] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -883,7 +841,7 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [6] Recent developments in the ABINIT software package.
+- [7] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -901,10 +859,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         67.8  wall=         68.0
+- Proc.   0 individual time (sec): cpu=         78.5  wall=         78.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  53 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         67.8  wall=         68.0
+.Delivered  51 WARNINGs and  11 COMMENTs to log file.
++Overall time at end (sec) : cpu=         78.5  wall=         78.9
