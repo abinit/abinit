@@ -211,7 +211,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,bantot,bdeigrf,coredens_method,cplex,cplex_rhoij
+ integer :: analyt,ask_accurate,asr,bantot,bdeigrf,chneut,coredens_method,cplex,cplex_rhoij
  !integer :: nkpt_eff, band_index, ikpt, isppol, nkpt_max, nband_k,
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
  integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
@@ -223,7 +223,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
  integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
- integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
@@ -307,7 +307,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  iscf=dtset%iscf
 
 !Respfn input variables
- rfasr=dtset%rfasr   ; rfdir(1:3)=dtset%rfdir(1:3)
+ asr=dtset%asr   ; chneut=dtset%chneut ; rfdir(1:3)=dtset%rfdir(1:3)
  rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd ; rfmagn=dtset%rfmagn
  rfphon=dtset%rfphon ; rfstrs=dtset%rfstrs
  rfuser=dtset%rfuser ; rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
@@ -346,6 +346,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
 !Define the set of admitted perturbations
+! Note that we have a global parameter (mpert=natom+MPERT_MAX)
+! with MPERT_MAX=8, but we use a smaller value here.
  mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
@@ -1141,11 +1143,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &     ' and rfstrs=',rfstrs,'.',ch10,&
 &     'Action: change qpt, or rfelfd, or rfstrs in the input file.'
      ABI_ERROR(message)
-   else if(rfasr==2)then
-     write(message,'(2a)')ch10,' rfasr=2 not allowed with q/=0 => rfasr was reset to 0.'
-     ABI_WARNING(message)
-     rfasr=0
    end if
+   if(chneut/=0)then
+     write(message,'(2a)')ch10,' chneut/=0 not allowed with q/=0 => chneut reset to 0 locally.'
+     ABI_WARNING(message)
+     chneut=0
+   end if
+   if(asr/=0)then
+     write(message,'(2a)')ch10,' asr/=0 not allowed with q/=0 => asr reset to 0 locally.'
+     ABI_WARNING(message)
+     asr=0
+   end if
+
  end if
 
 !Determine the symmetrical perturbations
@@ -1155,7 +1164,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout([std_out, ab_out] ,message)
  ii=1
- do ipert=1,natom+6
+ do ipert=1,natom+6  ! GA: Why natom+6 instead of natom+MPERT_MAX ?
    do idir=1,3
      if(rfpert(ipert)==1.and.rfdir(idir)==1)then
        if( pertsy(idir,ipert)==1 )then
@@ -1508,11 +1517,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_MALLOC(carflg,(3,mpert,3,mpert))
    ABI_MALLOC(d2matr,(2,3,mpert,3,mpert))
    outd2=1
-   call dfpt_gatherdy(becfrnl,dtset%berryopt,blkflg,carflg,&
-&   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
+   call dfpt_gatherdy(asr,becfrnl,dtset%berryopt,blkflg,carflg,&
+&   chneut,dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
-&   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
+&   rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
 
 !  Output of the dynamical matrix (master only)
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,&
@@ -1530,17 +1539,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   nblok=1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Initialize ddb object
-   call ddb%init(dtset, nblok=1, mpert=mpert, msize=(3*mpert*3*mpert))
+   call ddb%init(dtset, nblok=1, mpert=mpert, with_d2E=.true.)
 
 ! Set the values for the 2nd order derivatives
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
-   call ddb%set_d2matr(d2matr, blkflg, iblok=1)
+   call ddb%set_d2matr(1, d2matr, blkflg)
 
-! Output dynamical matrix in text format.
-   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
-
-! Output dynamical matrix in netcdf format.
-   call ddb%write_nc(ddb_hdr, strcat(dtfil%fnameabo_ddb, ".nc"))
+! Output dynamical matrix
+   call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
 ! Deallocate ddb object
    call ddb_hdr%free()
@@ -3073,7 +3079,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
  if(outd2==2 .and. rfpert(natom+2)==1 .and.rfphon==1)then
    write(iout,*)' '
    write(iout,*)' Effective charges, in cartesian coordinates,'
-   write(iout,*)'  if specified in the inputs, asr has been imposed'
+   write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
    write(iout,*)'    j1       j2             matrix element'
    write(iout,*)' dir pert dir pert     real part    imaginary part'
    ipert1=natom+2
@@ -3103,7 +3109,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
    end if
    write(iout,*)' Effective charges, in cartesian coordinates,'
    write(iout,*)' (from electric field response) '
-   write(iout,*)'  if specified in the inputs, asr has been imposed'
+   write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
    write(iout,*)'    j1       j2             matrix element'
    write(iout,*)' dir pert dir pert     real part    imaginary part'
    ipert2=natom+2
@@ -3134,7 +3140,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
    end if
    write(iout,*)' Effective charges, in cartesian coordinates,'
    write(iout,*)' (from phonon response) '
-   write(iout,*)'  if specified in the inputs, asr has been imposed'
+   write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
    write(iout,*)'    j1       j2             matrix element'
    write(iout,*)' dir pert dir pert     real part    imaginary part'
    nline=1
@@ -3187,7 +3193,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        write(iout,*)' '
        write(iout,*)' Effective charges, in cartesian coordinates, for band',iband
        write(iout,*)' (from phonon response) '
-       write(iout,*)'  if specified in the inputs, asr has been imposed'
+       write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
        write(iout,*)'    j1       j2             matrix element'
        write(iout,*)' dir pert dir pert     real part    imaginary part'
        nline=1
@@ -3341,10 +3347,14 @@ end subroutine dfpt_dyout
 !! but the correct non-cartesian coordinates ( => d2cart)
 !!
 !! INPUTS
+!! asr= (0=> no acoustic sum rule [asr] imposed), (1 or 2=> asr is imposed) only for dynamical matrix at Gamma
 !! becfrnl(3,natom,3*pawbec)=NL frozen contribution to Born Effective Charges (PAW only)
 !! berryopt=option for berry phase treatment
 !! blkflg(3,mpert,3,mpert)= ( 1 if the element of the dynamical
 !!  matrix has been calculated ; 0 otherwise )
+!! chneut= (0=> no charge neutrality sum rule imposed), (1=> charge neutrality is imposed,
+!!  with equal repartition of the charge neutrality correction for the effective charges),
+!! (2=> charge neutrality is imposed, with weighted repartition of the charge neutrality correction for the effective charges),
 !! dyew(2,3,natom,3,natom)=Ewald part of the dyn.matrix
 !! dyfrwf(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)=frozen wf part of the dyn.matrix (except xc1)
 !! dyfrx1(2,3,natom,3,natom)=xc core correction (1) part of the frozen-wf
@@ -3373,9 +3383,6 @@ end subroutine dfpt_dyout
 !!  if outd2=2, stationary part.
 !! pawbec= flag for the computation of frozen part of Born Effective Charges (PAW only)
 !! prtbbb=if 1, print the band-by-band decomposition, otherwise, prtbbb=0
-!! rfasr= (0=> no acoustic sum rule [asr] imposed), (1=> asr is imposed,
-!!  with equal repartition of the charge neutrality correction for the effective charges),
-!! (2=> asr is imposed, with weighted repartition of the charge neutrality correction for the effective charges),
 !! rfpert(mpert)=define the perturbations
 !! rprimd(3,3)=dimensional primitive translations (bohr)
 !! typat(natom)=integer label of each type of atom (1,2,...)
@@ -3397,16 +3404,16 @@ end subroutine dfpt_dyout
 !!
 !! SOURCE
 
-subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
+subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,dyfrx1,&
 & dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
-& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion)
+& rfpert,rprimd,typat,ucvol,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: berryopt,dyfr_cplex,dyfr_nondiag,mband,mpert,natom,ntypat,outd2
- integer,intent(in) :: pawbec,pawpiezo,prtbbb,rfasr,usevdw
+ integer,intent(in) :: asr,berryopt,chneut,dyfr_cplex,dyfr_nondiag,mband,mpert,natom,ntypat,outd2
+ integer,intent(in) :: pawbec,pawpiezo,prtbbb,usevdw
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: rfpert(mpert),typat(natom)
@@ -3428,7 +3435,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 
 !Local variables -------------------------
 !scalars
- integer :: chneut,iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
+ integer :: iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
  integer :: jj,nblok,selectz
  character(len=500) :: message
 !arrays
@@ -3689,19 +3696,18 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
  end if
 
 !  Imposition of the ASR on the analytical part of the DynMat
-!  Assume that if rfasr/=0, the whole cartesian matrix is correct
- if(rfasr/=0)then
+!  Assume that if asr/=0, the whole cartesian matrix is correct
+ if(asr/=0)then
 
    ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
-   call asria_calc(rfasr,d2work,d2cart,mpert,natom)
+   call asria_calc(asr,d2work,d2cart,mpert,natom)
 !  The following line imposes ASR:
-   call asria_corr(rfasr,d2work,d2cart,mpert,natom)
+   call asria_corr(asr,d2work,d2cart,mpert,natom)
 
    ABI_FREE(d2work)
 
-!  Imposition of the ASR on the effective charges.
+!  Imposition of the charge neutrality on the effective charges.
    if(rfpert(natom+2)==1)then
-     chneut=rfasr
      selectz=0
      call chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
    end if
@@ -3934,8 +3940,8 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 
 ! *************************************************************************
 
- if(nspden==4)then
-   ABI_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for insulators and norm-conserving psp!')
+ if(nspden==4 .and. usepaw==1)then
+   ABI_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for norm-conserving psp! (no paw support yet with nspden=4)')
  end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)

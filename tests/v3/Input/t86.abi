@@ -22,6 +22,12 @@ qpt3     1 0 0
 rfphon3  1
 tolvrs3  1.0d-12
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
+
 getwfk 1
 getden 1
 kptopt 3

@@ -244,16 +244,28 @@ where each of the vectors is normalized, and form the desired angles with the ot
 
 Variable(
     abivarname="asr",
-    varset="eph",
+    varset="dfpt",
     vartype="integer",
-    topics=['DFPT_useful'],
+    topics=['DFPT_useful','Phonons_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="Acoustic Sum Rule",
     added_in_version="before_v9",
     text=r"""
-Govern the imposition of the Acoustic Sum Rule (ASR) in phonon calculations.
-Same meaning as the corresponding anaddb variable.
+Set the treatment of the Acoustic Sum Rule (ASR) in phonon calculations in the ABINIT code.
+Same values as the corresponding ANADDB variable [[asr@anaddb]]. Please switch to this description. 
+
+Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
+Running different DFPT calculations from scratch just to change [[asr]] is indeed a waste of time as
+you can compute the DDB only once and then use anaddb.
+
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+[[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
+[[optdriver]]=10 (longwave calculations).
+For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
+of the dynamical matrix, and the subsequent echo of the phonon frequencies at Gamma, TO and LO parts.
+
+See also the variables [[chneut]] and [[chneut@anaddb]], that govern the imposition of the charge neutrality sum rule.
 """,
 ),
 
@@ -1711,17 +1723,29 @@ and corresponding translated atomic positions.
 
 Variable(
     abivarname="chneut",
-    varset="eph",
+    varset="dfpt",
     vartype="integer",
-    topics=['Phonons_useful'],
+    topics=['Phonons_basic'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="CHarge NEUTrality treatment",
     added_in_version="before_v9",
     text=r"""
-Set the treatment of the Charge Neutrality requirement for the effective charges.
-Same meaning as the corresponding anaddb variable.
-Note the different default value in abinit and anaddb
+Set the treatment of the Charge Neutrality requirement for the effective charges in the ABINIT code.
+Same values as the corresponding ANADDB variable [[chneut@anaddb]]. Please switch to this description. 
+Note however the different default value in abinit (1) and anaddb (0).
+
+Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
+Running different DFPT calculations from scratch just to change [[chneut]] is indeed a waste of time as
+you can compute the DDB only once and then use anaddb.
+
+Anyhow, this input variable is used in different contexts in ABINIT, in addition of being used in ANADDB :
+[[optdriver]]=1 (phonon calculations), [[optdriver]]=7 (electron-phonon calculations) and
+[[optdriver]]=10 (longwave calculations).
+For [[optdriver]]=1, it does not modify the self-consistent calculations, neither the DDB generation, but only the echo in the main output file
+of the Born effective charge, and the subsequent echo of the phonon frequencies at Gamma, LO part only.
+
+See also the variables [[asr]] and [[asr@anaddb]], that govern the imposition of the acoustic sum rule.
 """,
 ),
 
@@ -4725,6 +4749,25 @@ grid compatible with all the symmetries of the space group must be enforced or n
 The behaviour of ABINIT before v5.5 corresponds to the default value 11.
 """,
 ),
+
+Variable(
+    abivarname="field_red",
+    varset="ffield",
+    vartype="real",
+    topics=[],
+    dimensions=[3],
+    defaultval=MultipleValue(number=3, value=0.0),
+    mnemonics="FIELD in REDuced coordinates",
+    requires="[[berryopt]] in [4, 6, 14, 16, 17]",
+    added_in_version="v9.11.2",
+    text=r"""
+Stores the field direction in reduced coordinates, deduced from [[dfield]], [[efield]],
+[[red_efieldbar]], [[red_dfield]], [[red_efield]], and/or [[jfielddir]],
+depending on the value of [[berryopt]], for the purpose of computing
+the symmetries of the system placed in such field.
+""",
+),
+
 
 Variable(
     abivarname="fockdownsampling",
@@ -10912,6 +10955,22 @@ during structural optimization or molecular dynamics (see [[natcon]], [[iatcon]]
 ),
 
 Variable(
+    abivarname="ncout",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Print netCDF output files",
+    added_in_version="9.11.0",
+    text=r"""
+If set to 1, ABINIT will produce a netCDF output file up to 10 datasets calculations.
+If set to 0, said files will not be printed.
+""",
+),
+
+
+Variable(
     abivarname="nctime",
     varset="dev",
     vartype="integer",
@@ -13272,8 +13331,10 @@ the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 
   * [[occopt]] = 3 to 8 :
 Metallic occupation of levels, using different occupation schemes (see below).
+See the review of the different possibilities in [[cite:Santos2023]], that
+delivers a nice pedagogical explanation of these.
 The corresponding thermal broadening, or cold smearing, is defined by the
-input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
+input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha, 
 divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
@@ -13284,8 +13345,9 @@ can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
 Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
-$\tilde{\delta}(x)=0.25 (\cosh(x/2.0))^{-2}$. For usual calculations, at zero temperature, do not use [[occopt]]=3,
-but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
+$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$. 
+For usual calculations, at zero temperature, do not use [[occopt]]=3,
+but [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
 
     * [[occopt]] = 4:
@@ -13297,7 +13359,7 @@ Must be used with caution, see the note below.
 
     * [[occopt]] = 5:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.8165 (monotonic
-function in the tail)
+function in the tail).
 Same smeared delta function as [[occopt]] = 4, with different a.
 Must be used with caution, see the note below.
 
@@ -13318,7 +13380,7 @@ Uniform smearing (the delta function is replaced by a constant function of
 value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
-    * [[occopt]] = 9:
+  * [[occopt]] = 9:
 Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that [[occopt]] = 9 cannot be used with fixed magnetization calculation.
 
 !!! note
@@ -13332,6 +13394,7 @@ Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]
     of this problem, a small variation of input parameters might lead to a jump of
     total energy, because there might be two or even three possible values of the
     Fermi energy, and the bisection algorithm finds one or the other.
+    See a more detailed explanation in [[cite:Santos2023]].
 """,
 ),
 
@@ -15374,6 +15437,21 @@ It is only meaningful when [[gw1rdm]]>0. The files that are printed use the usua
 ),
 
 Variable(
+    abivarname="prtddb",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="PRinT the Derivative Data Base file",
+    added_in_version="9.11.0",
+    text=r"""
+If set to 1, ABINIT will produce a DDB file. 
+""",
+),
+
+
+Variable(
     abivarname="prtden",
     varset="files",
     vartype="integer",
@@ -15699,6 +15777,21 @@ Please note that ELF is **not** yet implemented in the case of PAW
 ),
 
 Variable(
+    abivarname="prtevk",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT EVK",
+    added_in_version="9.11.0",
+    text=r"""
+   If set to 1, ABINIT will produce a netCDF EVK file.
+""",
+),
+
+
+Variable(
     abivarname="prtfull1wf",
     varset="dfpt",
     vartype="integer",
@@ -15822,6 +15915,23 @@ The GSR file contains the most important GS results (band structure, forces,
 stresses, electronic density). The GSR file can be read by AbiPy and used for further post-processing.
 """,
 ),
+
+Variable(
+    abivarname="prthist",
+    varset="files",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="PRinT the HISTory file",
+    added_in_version="9.11.0",
+    text=r"""
+If set to 1, ABINIT will produce a HIST file. The HIST file contains the history
+of structural relaxations or molecular dynamics calculations. This file can be
+used to restart the calculation or to analyze the results at the end of calculation.
+""",
+),
+
 
 Variable(
     abivarname="prtkden",
@@ -17415,36 +17525,6 @@ electric field, homogeneous magnetic field calculations).
 If equal to 1, the 2nd order wavefunctions, as defined by [[rf2_dkdk]] or [[rf2_dkde]], are computed for the
 corresponding direction. If 0, this direction is not considered.
 See [[rf2_dkdk]] for more details.
-""",
-),
-
-Variable(
-    abivarname="rfasr",
-    varset="dfpt",
-    vartype="integer",
-    topics=['Phonons_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="Response Function: Acoustic Sum Rule",
-    added_in_version="before_v9",
-    text=r"""
-Control the evaluation of the acoustic sum rule in effective charges and
-dynamical matrix at Gamma within a response function calculation (not active
-at the level of producing the DDB, but at the level of the phonon
-eigenfrequencies output).
-
-  * 0 --> no acoustic sum rule imposed
-  * 1 --> acoustic sum rule imposed for dynamical matrix at Gamma, and charge neutrality
-    imposed with extra charge evenly distributed among atoms
-  * 2 --> acoustic sum rule imposed for dynamical matrix at Gamma, and charge neutrality
-    imposed with extra charge given proportionally to those atoms with the largest effective charge.
-
-The treatment of the acoustic sum rule and charge neutrality sum rule is finer
-at the level of the ANADDB utility, with the two independent input variables
-[[anaddb:asr]] and [[anaddb:chneut]].
-Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
-Running different DFPT calculations from scrarch just to change [[rfasr]] is indeed a waste of time as
-you can compute the DDB only once and then use anaddb.
 """,
 ),
 
@@ -19355,7 +19435,7 @@ Variable(
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
 it gives a convergence tolerance for the largest squared "residual" (defined
-below) for any given band. The squared residual is: < nk| (H-E)^2 |nk>,    E = < nk|H|nk >
+below) for any given band. The squared residual is: 
 
 $$
 \langle \nk| (H - \enk)^2 |\nk \rangle, \,\text{with}\; \enk = \langle \nk|H|\nk \rangle
@@ -21229,6 +21309,74 @@ The different possibilities are:
   Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,
 ),
+
+Variable(
+    abivarname="write_files",
+    varset="files",
+    vartype="string",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval="default",
+    mnemonics="write files",
+    added_in_version="9.11.0",
+    text=r"""
+Supra-variable controlling the underlying printing options of the prt-type variables.
+It can be used as a simple string flagging the desired outputs as follows:
+
+ * "default"   --> An empty string will produce only the log and abo files
+ * "none"      --> It will deactivate all printing options currently available. Only the log and abo file will be produced following a calculation.  
+ * "ddb"       --> Activates the printing of the DDB file. Refer to [[prtddb]] for further documentation.
+ * "den_1"     --> Activates the printing of the density file under option 1 of the [[prtden]] variable.
+ * "den_2"     --> Activates the printing of the density file under option 2 of the [[prtden]] variable.
+ * "den_3"     --> Activates the printing of the density file under option 3 of the [[prtden]] variable.
+ * "den_4"     --> Activates the printing of the density file under option 4 of the [[prtden]] variable.
+ * "den_5"     --> Activates the printing of the density file under option 5 of the [[prtden]] variable.
+ * "den_6"     --> Activates the printing of the density file under option 6 of the [[prtden]] variable.
+ * "den_7"     --> Activates the printing of the density file under option 7 of the [[prtden]] variable.
+ * "dos_1"     --> Activates the printing of the density of states file under option 1 of the [[prtdos]] variable.
+ * "dos_2"     --> Activates the printing of the density of states file under option 2 of the [[prtdos]] variable.
+ * "dos_3"     --> Activates the printing of the density of states file under option 3 of the [[prtdos]] variable.
+ * "dos_4"     --> Activates the printing of the density of states file under option 4 of the [[prtdos]] variable.
+ * "dos_5"     --> Activates the printing of the density of states file under option 5 of the [[prtdos]] variable.
+ * "dosm_1"    --> Activates the printing of the density of states file with M decomposition. Refer to [[prtdosm]] variable for further documentation.
+ * "ebands_1"  --> Activates the printing of the electronic bands using option 1 as in [[prtebands]].
+ * "ebands_2"  --> Activates the printing of the electronic bands using option 2 as in [[prtebands]].
+ * "eig"       --> Activates the printing of the eigenvalues file. Refer to [[prteig]] for further documentation.
+ * "elf"       --> Activates the printing of the electron localization function. Refer to [[prtelf]] for further documentation.
+ * "evk"       --> Activates the printing of the netCDF EVK file. Refer to [[prtevk]] for further documentation.
+ * "fsurf"     --> Activates the printing of the Fermi surface file. Refer to [[prtfsurf]] for further documentation.
+ * "gden"      --> Activates the printing of the gradient of the electronic density file. Refer to [[prtgden]] for further documentation.
+ * "geo"       --> Activates the printing of the geometry analysis. Refer to [[prtgeo]] for further documentation.
+ * "gkk"       --> Activates the printing of the GKK matrix file. Refer to [[prtgkk]] for further documentation.
+ * "gsr"       --> Activates the printing of the GSR file. Refer to [[prtgsr]] for further documention.
+ * "hist"      --> Activates the printing of the HIST file. Refer to [[prthist]] for further documentation.
+ * "kbff"      --> Activates the printing of the Kleynman-Bylander form factors. Refer to [[prtkbff]] for further documentation.
+ * "kden"      --> Activates the printing of the kinetic energy density file. Refer to [[prtkden]] for further documentation.
+ * "lden"      --> Activates the printing of the Laplacian of the eletronic density. Refer to [[prtlden]] for further documentation.
+ * "ncout"     --> Activates the printing of the OUT file in netCDF format. Refer to [[ncout]] for further documentation.
+ * "pot"       --> Activates the printing of the total potential. Refer to [[prtpot]] for further documentation.
+ * "psps_1"    --> Activates the printing of the pseudopotential tables in netCDF format. Refer to [[prtpsps]] for further documentation.
+ * "psps_-1"   --> Activates the printing of the pseudopotential tables in netCDF format with code exit after printing. Refer to [[prtpsps]] for further documentation.
+ * "stm"       --> Activates the printing of the STM density. Refer to [[prtstm]] for further documentation.
+ * "suscep"    --> Activates the printing of the susceptibility file. Refer to [[prtsuscep]] for further documentation.
+ * "vclmb_1"   --> Activates the printing of the Coulomb potential. Refer to [[prtvclmb]] for further documentation.
+ * "vclmb_2"   --> Activates the printing of the Coulomb potential. Refer to [[prtvclmb]] for further documentation.
+ * "vha"       --> Activates the printing of the Hartree potential. Refer to [[prtvha]] for further documentation.
+ * "vhxc"      --> Activates the printing of the sum of the Hartree and XC potentials. Refer to [[prtvhxc]] for further documentation.
+ * "vpsp"      --> Activates the printing of the local pseudopotential. Refer to [[prtvpsp]] for further documentation.
+ * "vxc"       --> Activates the printing of the XC potential. Refer to [[prtvxc]] for further documentation.
+ * "want_1"    --> Activates the printing of the Wannierization in different settings. Refer to [[prtwant]] for further documentation.
+ * "want_2"    --> Activates the printing of the Wannierization in different settings. Refer to [[prtwant]] for further documentation.
+ * "want_2"    --> Activates the printing of the Wannierization in different settings. Refer to [[prtwant]] for further documentation.
+ * "wf_1"      --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "wf_full_1" --> Activates the printing of the wavefunction file on the full mesh. Refer to [[prtwf_full]] for further documentation.
+ * "wf_2"      --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "wf_3"      --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "wf_-1"     --> Activates the printing of the wavefunction file. Refer to [[prtwf]] for further documentation.
+ * "xml"       --> Activates the printing of the xml file. Refer to [[prtxml]] for further documentation.
+""",
+),
+
 
 Variable(
     abivarname="wtatcon",

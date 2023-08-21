@@ -484,6 +484,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2023'
  priority(45)=20
 
+
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 
@@ -559,6 +560,9 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
 !  If optdriver==1 and usepaw==1, cite Audouze2006 and Audouze2008
    if(dtsets(idtset)%usepaw==1.and.dtsets(idtset)%optdriver==1)cite(23)=1
+
+!  If orbmag/=0, cite Zwanziger2023
+   if(dtsets(idtset)%orbmag>0)cite(45)=1
 
 !  If ixc<0, cite Marques2012
    if(dtsets(idtset)%ixc<0 .or. dtsets(idtset)%gwcalctyp>=100)cite(24)=1

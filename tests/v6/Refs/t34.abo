@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h20 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v6_t34/t34.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t34/t34.abi
 - output file    -> t34.abo
 - root for input  files -> t34i
 - root for output files -> t34o
-
 
  DATASET   11 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -55,7 +53,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   22 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -89,7 +85,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   31 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -107,7 +102,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   32 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
@@ -123,7 +117,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   41 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -141,7 +134,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   42 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 42.
@@ -157,7 +149,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   51 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -175,7 +166,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   52 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 52.
@@ -191,7 +181,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   61 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -209,7 +198,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   62 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 62.
@@ -225,7 +213,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   71 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -243,7 +230,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   72 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 72.
@@ -259,7 +245,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   81 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -277,7 +262,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   82 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 82.
@@ -293,7 +277,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   91 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -311,7 +294,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   92 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 92.
@@ -327,7 +309,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  101 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -345,7 +326,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  102 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  102.
@@ -361,7 +341,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  111 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -379,7 +358,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  112 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  112.
@@ -395,7 +373,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  121 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -413,7 +390,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  122 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  122.
@@ -429,7 +405,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  131 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -447,7 +422,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  132 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  132.
@@ -463,7 +437,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  141 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -481,7 +454,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  142 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  142.
@@ -497,7 +469,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  151 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -515,7 +486,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  152 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  152.
@@ -531,7 +501,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  161 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -549,7 +518,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  162 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  162.
@@ -565,7 +533,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  171 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -583,7 +550,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  172 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  172.
@@ -599,7 +565,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  181 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -617,7 +582,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  182 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  182.
@@ -633,7 +597,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  191 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -651,7 +614,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  192 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  192.
@@ -667,7 +629,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  201 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -685,7 +646,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  202 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  202.
@@ -701,7 +661,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  211 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -719,7 +678,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  212 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  212.
@@ -735,7 +693,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  221 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -753,7 +710,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  222 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  222.
@@ -769,7 +725,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  231 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -787,7 +742,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  232 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  232.
@@ -803,7 +757,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  241 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -821,7 +774,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  242 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  242.
@@ -837,7 +789,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  251 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -855,7 +806,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  252 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  252.
@@ -871,7 +821,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  261 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -889,7 +838,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  262 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  262.
@@ -905,7 +853,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  271 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -923,7 +870,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  272 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  272.
@@ -939,7 +885,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  281 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -957,7 +902,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  282 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  282.
@@ -973,7 +917,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  291 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -991,7 +934,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  292 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  292.
@@ -1007,7 +949,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  301 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1025,7 +966,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  302 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  302.
@@ -1041,7 +981,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  311 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1059,7 +998,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  312 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  312.
@@ -1075,7 +1013,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  321 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1093,7 +1030,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  322 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  322.
@@ -1109,7 +1045,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  331 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1127,7 +1062,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  332 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  332.
@@ -1143,7 +1077,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  341 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1161,7 +1094,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  342 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  342.
@@ -1177,7 +1109,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  351 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1195,7 +1126,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  352 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  352.
@@ -1211,7 +1141,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  361 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1229,7 +1158,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  362 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  362.
@@ -1245,7 +1173,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  371 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1263,7 +1190,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  372 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  372.
@@ -1279,7 +1205,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  381 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1297,7 +1222,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  382 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  382.
@@ -1313,7 +1237,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  391 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1331,7 +1254,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  392 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  392.
@@ -1347,7 +1269,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  401 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1365,7 +1286,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  402 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  402.
@@ -1381,7 +1301,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  411 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1399,7 +1318,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  412 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  412.
@@ -1415,7 +1333,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  421 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1433,7 +1350,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  422 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  422.
@@ -1449,7 +1365,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  431 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1467,7 +1382,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  432 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  432.
@@ -1483,7 +1397,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  441 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1501,7 +1414,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  442 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  442.
@@ -1517,7 +1429,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  451 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1535,7 +1446,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  452 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  452.
@@ -1551,7 +1461,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  461 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1569,7 +1478,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  462 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  462.
@@ -1585,7 +1493,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  471 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1603,7 +1510,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  472 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  472.
@@ -1619,7 +1525,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  481 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1637,7 +1542,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  482 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  482.
@@ -1653,7 +1557,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  491 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1671,7 +1574,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  492 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  492.
@@ -1687,7 +1589,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  501 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1705,7 +1606,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  502 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  502.
@@ -1721,7 +1621,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  511 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1739,7 +1638,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  512 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  512.
@@ -1755,7 +1653,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  521 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1773,7 +1670,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  522 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  522.
@@ -1789,7 +1685,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  531 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1807,7 +1702,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  532 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  532.
@@ -1823,7 +1717,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  541 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1841,7 +1734,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  542 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  542.
@@ -1857,7 +1749,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  551 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1875,7 +1766,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  552 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  552.
@@ -1891,7 +1781,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  561 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1909,7 +1798,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  562 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  562.
@@ -1925,7 +1813,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  571 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1943,7 +1830,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  572 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  572.
@@ -1959,7 +1845,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  581 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -1977,7 +1862,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  582 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  582.
@@ -1993,7 +1877,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  591 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2011,7 +1894,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  592 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  592.
@@ -2027,7 +1909,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  601 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2045,7 +1926,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  602 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  602.
@@ -2061,7 +1941,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  611 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2079,7 +1958,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  612 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  612.
@@ -2095,7 +1973,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  621 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2113,7 +1990,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  622 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  622.
@@ -2129,7 +2005,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  631 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2147,7 +2022,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  632 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  632.
@@ -2163,7 +2037,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  641 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2181,7 +2054,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  642 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  642.
@@ -2197,7 +2069,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  651 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2215,7 +2086,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  652 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  652.
@@ -2231,7 +2101,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  661 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2249,7 +2118,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  662 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  662.
@@ -2265,7 +2133,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  671 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2283,7 +2150,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  672 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  672.
@@ -2299,7 +2165,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  681 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2317,7 +2182,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  682 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  682.
@@ -2333,7 +2197,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  691 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2351,7 +2214,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  692 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  692.
@@ -2367,7 +2229,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  701 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2385,7 +2246,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  702 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  702.
@@ -2401,7 +2261,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  711 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2419,7 +2278,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  712 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  712.
@@ -2435,7 +2293,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  721 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2453,7 +2310,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  722 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  722.
@@ -2469,7 +2325,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  731 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2487,7 +2342,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  732 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  732.
@@ -2503,7 +2357,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  741 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2521,7 +2374,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  742 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  742.
@@ -2537,7 +2389,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  751 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2555,7 +2406,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  752 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  752.
@@ -2571,7 +2421,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  761 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2589,7 +2438,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  762 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  762.
@@ -2605,7 +2453,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  771 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2623,7 +2470,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  772 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  772.
@@ -2639,7 +2485,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  781 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2657,7 +2502,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  782 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  782.
@@ -2673,7 +2517,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  791 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2691,7 +2534,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  792 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  792.
@@ -2707,7 +2549,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  801 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2725,7 +2566,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  802 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  802.
@@ -2741,7 +2581,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  811 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2759,7 +2598,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  812 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  812.
@@ -2775,7 +2613,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  821 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2793,7 +2630,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  822 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  822.
@@ -2809,7 +2645,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  831 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2827,7 +2662,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  832 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  832.
@@ -2843,7 +2677,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  841 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2861,7 +2694,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  842 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  842.
@@ -2877,7 +2709,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  851 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2895,7 +2726,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  852 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  852.
@@ -2911,7 +2741,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  861 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2929,7 +2758,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  862 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  862.
@@ -2945,7 +2773,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  871 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2963,7 +2790,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  872 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  872.
@@ -2979,7 +2805,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  881 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -2997,7 +2822,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  882 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  882.
@@ -3013,7 +2837,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  891 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3031,7 +2854,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  892 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  892.
@@ -3047,7 +2869,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  901 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3065,7 +2886,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  902 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  902.
@@ -3081,7 +2901,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  911 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3099,7 +2918,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  912 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  912.
@@ -3115,7 +2933,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  921 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3133,7 +2950,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  922 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  922.
@@ -3149,7 +2965,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  931 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3167,7 +2982,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  932 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  932.
@@ -3183,7 +2997,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  941 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3201,7 +3014,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  942 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  942.
@@ -3217,7 +3029,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  951 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3235,7 +3046,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  952 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  952.
@@ -3251,7 +3061,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  961 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3269,7 +3078,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  962 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  962.
@@ -3285,7 +3093,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  971 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3303,7 +3110,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  972 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  972.
@@ -3319,7 +3125,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  981 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3337,7 +3142,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  982 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  982.
@@ -3353,7 +3157,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET  991 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3371,7 +3174,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET  992 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  992.
@@ -3387,7 +3189,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET 1001 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3405,7 +3206,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET 1002 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 1002.
@@ -3421,7 +3221,6 @@ P This job should need less than                       1.217 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET 1011 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -3439,7 +3238,6 @@ P This job should need less than                       1.584 Mbytes of memory.
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET 1012 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 1012.
@@ -3456,7 +3254,6 @@ P This job should need less than                       1.217 Mbytes of memory.
 _ WF disk file :      0.038 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET 1021 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 1021.
@@ -3472,7 +3269,6 @@ P This job should need less than                       1.584 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.006 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET 1022 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -13391,8 +13187,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.16336
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -48934,10 +48730,10 @@ P           mkmem1022       3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.0  wall=         30.2
+- Proc.   0 individual time (sec): cpu=         22.6  wall=         27.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 608 WARNINGs and 413 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.0  wall=         30.2
++Overall time at end (sec) : cpu=         22.6  wall=         27.1

@@ -1,3 +1,43 @@
+## v9.12
+
+Version 9.12, released on September 10, 2023.
+List of changes with respect to version 9.10.
+<!-- Release notes updated on XXX YY , 2023. -->
+
+Many thanks to the contributors to the ABINIT project between
+May 2023 and September 2023 (with some late contributions until YYY 2023).
+These release notes
+are relative to modifications/improvements of ABINIT v9.12 with respect to v9.10.
+<!-- TO BE CHANGED Merge requests up to and including MR919. Also, MR923 to MR925 are taken into account. -->
+
+TO BE CHANGED 
+
+The list of contributors includes:
+J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
+L. Mac Enulty, D.D. O'Regan, S. Rostami,
+M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
+
+It is worthwhile to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### **A.** Important remarks and warnings.
+
+**A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced 
+by [[asr]] and [[chneut]]. The latter variables have been used already for some time for a more detailed imposition of the acoustic sum rule
+and the charge neutrality sum rule in the electron-phonon part of ABINIT, and even for a longer time
+in the ANADDB utility. Actually, rfasr was used to initialize asr and chneut internally. This change was long overdue. 
+The default values for [[asr]] and [[chneut]], namely 1, are however not the same as the previous default value of rfasr, namely 0.
+Thus a large fraction of the reference files of the test have been upgraded to the new default, but in a sizeable number
+the old default value has been specified explicitly.
+
+By X. Gonze (commit XXX).
+
+* * *
+
+
 ## v9.10
 
 Version 9.10, released on June 24, 2023.
@@ -1062,7 +1102,7 @@ By J. Zwanziger (MR749)
 By G. Petretto
 
 **D.5** Several bug fixes related to the treatment of inaccurate atomic positions (and large tolsym).
-Several test have been created ([[test:v9_17]] to [[test:v9_20]]).
+Several test have been created test:v9_17 to test:v9_20 (NOTE : all these tests are now v9_180 to v9_199).
 
 **D.6** AiiDA+ABINIT developments
 
@@ -1158,7 +1198,7 @@ Other specific publications are mentioned in the [Suggested acknowledgment page]
     [[ixcrot]], [[chneut]], [[ntime]], [[prtkden]], [[symsigma]] and [[tolsym]]. In particular the new default value
     of [[tolsym]], 1e-5, is more in line with the tolerances of other codes, so that for users of such
     codes, one barrier to the use of ABINIT is removed. By the same token, some bug in the recognition of symmetries
-    has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_15]] and [[test:v9_16]].
+    has been fixed, when [[tolsym]] is close to the default, see the new tests [[test:v9_190]] and [[test:v9_191]].
     The new input variable [[chksymtnons]] has been introduced, to govern the possible automatic alignment
     of the [[tnons]] with the FFT grid (actually needed for GW calculations).
     By X. Gonze (MR 689 and others)
@@ -1806,7 +1846,7 @@ By R. Outerov and B. Amadon (MR622).
 **D.32** On-going work on refactoring the Coulomb interaction part of ABINIT.
 
 New input variables [[fock_icutcoul]], and [[gw_icutcoul]], that should superceed [[icutcoul]].
-New test added for the mini-Brillouin Zone integration, [[gw_icutcoul]]=14, 15, 16, see [[test:v9_21]].
+New test added for the mini-Brillouin Zone integration, [[gw_icutcoul]]=14, 15, 16, see [[test:v9_181]].
 
 By B. Guster, M. Giantomassi, F. Bruneval and X. Gonze (MR 627, 633, 673, 679, 686).
 

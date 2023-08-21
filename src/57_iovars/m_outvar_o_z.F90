@@ -788,8 +788,8 @@ contains
  intarr(1,:)=dtsets(:)%restartxf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'restartxf','INT',0)
 
- intarr(1,:)=dtsets(:)%rfasr
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
+!intarr(1,:)=dtsets(:)%rfasr
+!call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
 
  test_write=0
  do idtset=1,ndtset_alloc

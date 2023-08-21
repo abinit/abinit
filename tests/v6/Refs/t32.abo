@@ -22,7 +22,6 @@
 - root for input  files -> t32i
 - root for output files -> t32o
 
-
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,7 +37,6 @@ P This job should need less than                      14.942 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -56,7 +54,6 @@ P This job should need less than                      14.942 Mbytes of memory.
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,7 +69,6 @@ P This job should need less than                      24.750 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
