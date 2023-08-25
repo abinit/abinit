@@ -350,7 +350,6 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    lmn2_size=paw_ij(iatom)%lmn2_size
    lm_size=paw_an(iatom)%lm_size
    mesh_size=pawtab(itypat)%mesh_size
-
    usecore=1;usetcore =pawtab(itypat)%usetcore
    if (ipert/=0) usecore=0  ! This is true for phonons and Efield pert.
    if (ipert/=0) usetcore=0 ! This is true for phonons and Efield pert.
@@ -1639,9 +1638,9 @@ subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
                  phiphj=pawtab%nablaphi(ir,iln)*pawtab%nablaphi(ir,jln)
                  tphitphj=pawtab%tnablaphi(ir,iln)*pawtab%tnablaphi(ir,jln)
                  tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)=tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
-    &             +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)
+&                 +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)
                  ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden)=ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
-    &             +ro_rg(1:cplex)*tphitphj*one_over_rad2_(ir)
+&                 +ro_rg(1:cplex)*tphitphj*one_over_rad2_(ir)
                end do
              end if
            end if

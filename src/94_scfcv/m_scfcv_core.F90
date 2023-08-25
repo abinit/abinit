@@ -961,8 +961,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  if (dtset%iscf>=10.and.dtset%usewvl==0.and.forces_needed>0 .and. &
 & abs(dtset%densfor_pred)>=1.and.abs(dtset%densfor_pred)<=6.and.abs(dtset%densfor_pred)/=5) then
    if (dtset%xclevel==1.or.dtset%densfor_pred>=0) nkxc=2*min(dtset%nspden,2)-1
-   if (dtset%xclevel==2.and.dtset%nspden==1.and.dtset%densfor_pred<0) nkxc=7
-   if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19
+   if (dtset%xclevel==2.and.dtset%nspden==1.and.dtset%densfor_pred<0) nkxc=7    ! This is not full kxc for mGGA
+   if (dtset%xclevel==2.and.dtset%nspden==2.and.dtset%densfor_pred<0) nkxc=19   ! This is not full kxc for mGGA
  end if
  if (nkxc>0) then
    call check_kxc(dtset%ixc,dtset%optdriver)
