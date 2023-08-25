@@ -521,7 +521,8 @@ subroutine size_dvxc(ixc,order,nspden,&
      else if (ixc<0) then
        if (libxc_has_kxc.or.ixc==-406.or.ixc==-427.or.ixc==-428.or.ixc==-456) then
          ndvxc=2*min(nspden,2)+1 ; if (order==-2) ndvxc=2
-         if (need_gradient) ndvxc=15
+         if (need_gradient) ndvxc=15  ! This is for GGA, but also for mGGA
+                                      ! (we dont consider derivatives wrt Tau or Laplacian)
        end if
      end if
    end if
@@ -885,6 +886,7 @@ end subroutine mkdenpos
 !!     dvxc(:,13)=d2Ec/d(abs(grad(rho))) drho_up / abs(grad(rho))
 !!     dvxc(:,14)=d2Ec/d(abs(grad(rho))) drho_dn / abs(grad(rho))
 !!     dvxc(:,15)=1/abs(grad(rho)) * d/d(abs(grad(rho)) (dEc/d(abs(grad(rho))) /abs(grad(rho)))
+!!    Note about mGGA: 2nd derivatives involving Tau or Laplacian are not output
 !!  [d2vxc(npts,nd2vxc)]=second derivative of the XC potential=3rd order derivative of XC energy
 !!   === Only if abs(order)>1 ===
 !!   === At present only available for LDA ===
@@ -1063,10 +1065,12 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &    'doesnt match the requirements of the XC functional!'
    ABI_BUG(message)
  end if
- if (abs(order)>1.and.ixc<0.and.(need_laplacian==1.or.need_kden==1)) then
-   message='Derivatives of XC potential are not available in mGGA!'
-   ABI_BUG(message)
- end if
+ !Deactivate this test because, in case of mGGA,  we can output derivatives involving
+ ! the density and its gradient. Derivatives involving tau or Laplacian will not be output.
+ !if (abs(order)>1.and.ixc<0.and.(need_laplacian==1.or.need_kden==1)) then
+ !  message='Derivatives of XC potential are not available in mGGA!'
+ !  ABI_BUG(message)
+ !end if
 
 !Check other optional arguments
  if (my_exexch/=0.and.usegradient==0) then
@@ -1536,39 +1540,80 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !  ===== meta-GGA =====
    if (need_laplacian==1.or.need_kden==1) then
      if (need_laplacian==1.and.need_kden==1) then
-       if (present(xc_funcs)) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&           grho2=grho2_updn,vxcgr=vxcgrho,&
-&           lrho=lrho_updn,vxclrho=vxclrho,&
-&           tau=tau_updn,vxctau=vxctau,&
-&           xc_functionals=xc_funcs)
+       if (abs(order)<=1) then
+         if (present(xc_funcs)) then
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,&
+&             lrho=lrho_updn,vxclrho=vxclrho,&
+&             tau=tau_updn,vxctau=vxctau,&
+&             xc_functionals=xc_funcs)
+         else
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,&
+&             lrho=lrho_updn,vxclrho=vxclrho,&
+&             tau=tau_updn,vxctau=vxctau)
+         end if
        else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&           grho2=grho2_updn,vxcgr=vxcgrho,&
-&           lrho=lrho_updn,vxclrho=vxclrho,&
-&           tau=tau_updn,vxctau=vxctau)
+         if (present(xc_funcs)) then
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,&
+&             lrho=lrho_updn,vxclrho=vxclrho,&
+&             tau=tau_updn,vxctau=vxctau,&
+&             xc_functionals=xc_funcs)
+         else
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,&
+&             lrho=lrho_updn,vxclrho=vxclrho,&
+&             tau=tau_updn,vxctau=vxctau)
+         end if
        end if
      else if (need_laplacian==1) then
-       if (present(xc_funcs)) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&           grho2=grho2_updn,vxcgr=vxcgrho,&
-&           lrho=lrho_updn,vxclrho=vxclrho,&
-&           xc_functionals=xc_funcs)
+       if (abs(order)<=1) then
+         if (present(xc_funcs)) then
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,&
+&             lrho=lrho_updn,vxclrho=vxclrho,&
+&             xc_functionals=xc_funcs)
+         else
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,&
+&             lrho=lrho_updn,vxclrho=vxclrho)
+         end if
        else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&           grho2=grho2_updn,vxcgr=vxcgrho,&
-&           lrho=lrho_updn,vxclrho=vxclrho)
+         if (present(xc_funcs)) then
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,&
+&             lrho=lrho_updn,vxclrho=vxclrho,&
+&             xc_functionals=xc_funcs)
+         else
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,&
+&             lrho=lrho_updn,vxclrho=vxclrho)
+         end if
        end if
      else if (need_kden==1) then
-       if (present(xc_funcs)) then
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&           grho2=grho2_updn,vxcgr=vxcgrho,&
-&           tau=tau_updn,vxctau=vxctau,&
-&           xc_functionals=xc_funcs)
+       if (abs(order)<=1) then
+         if (present(xc_funcs)) then
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,&
+&             tau=tau_updn,vxctau=vxctau,&
+&             xc_functionals=xc_funcs)
+         else
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,&
+&             tau=tau_updn,vxctau=vxctau)
+         end if
        else
-         call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
-&           grho2=grho2_updn,vxcgr=vxcgrho,&
-&           tau=tau_updn,vxctau=vxctau)
+         if (present(xc_funcs)) then
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,&
+&             tau=tau_updn,vxctau=vxctau,&
+&             xc_functionals=xc_funcs)
+         else
+           call libxc_functionals_getvxc(ndvxc,nd2vxc,npts,nspden,order,rho_updn,exc,vxcrho,&
+&             grho2=grho2_updn,vxcgr=vxcgrho,dvxc=dvxc,&
+&             tau=tau_updn,vxctau=vxctau)
+         end if
        end if
      end if
      !Some meta-GGAs can only be used with a LDA correlation (see doc)
@@ -1578,6 +1623,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
        if (present(vxcgrho)) vxcgrho(:,:)=zero
        if (present(vxclrho)) vxclrho(:,:)=zero
        if (present(vxctau)) vxctau(:,:)=zero
+       if (present(dvxc)) dvxc(:,:)=zero
      end if
 
 !  ===== GGA =====
