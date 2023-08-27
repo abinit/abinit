@@ -831,7 +831,7 @@ end function pawxc_get_uselaplacian
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
 !!    if nspden==4: kxc(:,4:6)= (m_x, m_y, m_z) (magnetization)
-!!   ===== if GGA
+!!   ===== if GGA or mGGA
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
 !!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
@@ -862,7 +862,8 @@ end function pawxc_get_uselaplacian
 !!       kxc(:,19)=gradz(rho_dn)
 !!    if nspden==4:
 !!       kxc(:,20:22)= (m_x, m_y, m_z) (magnetization)
-!!  Dimension of K3xc:
+!!    Note about mGGA: 2nd derivatives involving Tau or Laplacian are not output
+!!  Content of K3xc array:
 !!   ===== if LDA (xclevel=1) :
 !!    if nspden==1: return  k3xc(:,1)=d3Exc/drho3
 !!    if nspden>=2, return  k3xc(:,1)=d3Exc/drho_up drho_up drho_up
@@ -5715,7 +5716,7 @@ subroutine pawxc_drivexc_abinit()
 ! *************************************************************************
 
  test_args=(present(dvxc).and.present(d2vxc))
- if (usegradient==1) test_args=(test_args.and.present(dvxc).and.present(d2vxc))
+ if (usegradient==1) test_args=(test_args.and.present(grho2).and.present(vxcgrho))
  if (uselaplacian==1) test_args=(test_args.and.present(lrho).and.present(vxclrho))
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))
  if (.not.test_args) then

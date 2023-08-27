@@ -66,6 +66,7 @@ module libxc_functionals
  public :: libxc_functionals_getid              ! Return identifer of a XC functional, from its name
  public :: libxc_functionals_family_from_id     ! Retrieve family of a XC functional, from its id
  public :: libxc_functionals_ixc                ! The value of ixc used to initialize the XC functional(s)
+ public :: libxc_functionals_islda              ! Return TRUE if the set of XC functional(s) is LDA
  public :: libxc_functionals_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libxc_functionals_ismgga             ! Return TRUE if the set of XC functional(s) set is meta-GGA
  public :: libxc_functionals_istb09             ! Return TRUE if the XC functional is Tran-Blaha 2009.
@@ -900,6 +901,44 @@ end function libxc_functionals_ixc
 
 !----------------------------------------------------------------------
 
+!!****f* libxc_functionals/libxc_functionals_islda
+!! NAME
+!!  libxc_functionals_islda
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used (set of) functional(s)
+!!  is a LDA or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+ function libxc_functionals_islda(xc_functionals)
+
+!Arguments ------------------------------------
+ logical :: libxc_functionals_islda
+ type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ libxc_functionals_islda = .false.
+ if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
+
+ if (present(xc_functionals)) then
+   libxc_functionals_islda=(any(xc_functionals%family==XC_FAMILY_LDA) .or. &
+&                           any(xc_functionals%family==XC_FAMILY_HYB_LDA))
+ else
+   libxc_functionals_islda=(any(xc_global%family==XC_FAMILY_LDA) .or. &
+&                           any(xc_global%family==XC_FAMILY_HYB_LDA))
+ end if
+
+end function libxc_functionals_islda
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* libxc_functionals/libxc_functionals_isgga
 !! NAME
 !!  libxc_functionals_isgga
@@ -1703,12 +1742,16 @@ end function libxc_functionals_gga_from_hybrid
 !arrays
  real(dp),target :: rhotmp(nspden),sigma(3),vxctmp(nspden),vsigma(3)
  real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6)
+ real(dp),target :: v2rholapl(3),v2sigmalapl(6),v2lapl2(3)
+ real(dp),target :: v2rhotau(3),v2sigmatau(6),v2lapltau(3),v2tau2(3)
  real(dp),target :: v3rho3(4),v3rho2sigma(9),v3rhosigma2(12),v3sigma3(10)
  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
  type(libxc_functional_type),pointer :: xc_funcs(:)
 #if defined HAVE_LIBXC && defined HAVE_FC_ISO_C_BINDING
  type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2),vlrho_c(2),vtau_c(2)
  type(C_PTR) :: v2rho2_c(2),v2rhosigma_c(2),v2sigma2_c(2)
+ type(C_PTR) :: v2rholapl_c(2),v2sigmalapl_c(2),v2lapl2_c(2)
+ type(C_PTR) :: v2rhotau_c(2),v2sigmatau_c(2),v2lapltau_c(2),v2tau2_c(2)
  type(C_PTR) :: v3rho3_c(2),v3rho2sigma_c(2),v3rhosigma2_c(2),v3sigma3_c(2)
 #endif
 
@@ -1778,10 +1821,28 @@ end function libxc_functionals_gga_from_hybrid
      v2rho2_c(ii)=c_loc(v2rho2)
      v2sigma2_c(ii)=c_loc(v2sigma2)
      v2rhosigma_c(ii)=c_loc(v2rhosigma)
+     if (is_mgga) then
+       v2rholapl_c(ii)=c_loc(v2rholapl)
+       v2sigmalapl_c(ii)=c_loc(v2sigmalapl)
+       v2lapl2_c(ii)=c_loc(v2lapl2)
+       v2rhotau_c(ii)=c_loc(v2rhotau)
+       v2sigmatau_c(ii)=c_loc(v2sigmatau)
+       v2lapltau_c(ii)=c_loc(v2lapltau)
+       v2tau2_c(ii)=c_loc(v2tau2)
+     end if
    else
      v2rho2_c(ii)=C_NULL_PTR
      v2sigma2_c(ii)=C_NULL_PTR
      v2rhosigma_c(ii)=C_NULL_PTR
+     if (is_mgga) then
+       v2rholapl_c(ii)=C_NULL_PTR
+       v2sigmalapl_c(ii)=C_NULL_PTR
+       v2lapl2_c(ii)=C_NULL_PTR
+       v2rhotau_c(ii)=C_NULL_PTR
+       v2sigmatau_c(ii)=C_NULL_PTR
+       v2lapltau_c(ii)=C_NULL_PTR
+       v2tau2_c(ii)=C_NULL_PTR
+     end if
    end if
    if ((xc_funcs(ii)%has_kxc).and.(abs(order)>2)) then
      v3rho3_c(ii)=c_loc(v3rho3)
@@ -1880,10 +1941,12 @@ end function libxc_functionals_gga_from_hybrid
      else if (xc_funcs(ii)%family==XC_FAMILY_MGGA.or. &
 &             xc_funcs(ii)%family==XC_FAMILY_HYB_MGGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero ; vlrho=zero ; vtau=zero
+       v2rho2=zero ; v2sigma2=zero ; v2rhosigma=zero
+       ! At present, we don't use 2nd derivatives involving Tau or Laplacian
        call xc_get_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
 &                  exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
-&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
-&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
+&                  v2rho2_c(ii),v2rhosigma_c(ii),v2rholapl_c(ii),v2rhotau_c(ii),v2sigma2_c(ii), &
+&                  v2sigmalapl_c(ii),v2sigmatau_c(ii),v2lapl2_c(ii),v2lapltau_c(ii),v2tau2_c(ii))
      end if
 #endif
 
@@ -1915,9 +1978,11 @@ end function libxc_functionals_gga_from_hybrid
              d2vxc(ipts,4)=d2vxc(ipts,4)+v3rho3(4)
            endif
          endif
-!      ----- GGA -----
+!      ----- GGA or mGGA -----
        else if (xc_funcs(ii)%family==XC_FAMILY_GGA.or. &
-&               xc_funcs(ii)%family==XC_FAMILY_HYB_GGA) then
+&               xc_funcs(ii)%family==XC_FAMILY_HYB_GGA.or. &
+&               xc_funcs(ii)%family==XC_FAMILY_MGGA.or. &
+&               xc_funcs(ii)%family==XC_FAMILY_HYB_MGGA) then
          if (xc_funcs(ii)%kind==XC_EXCHANGE) then
            if (nspden==1) then
              dvxc(ipts,1)=v2rho2(1)*two

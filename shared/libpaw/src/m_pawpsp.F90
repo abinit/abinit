@@ -4437,7 +4437,7 @@ subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 !Local variables-------------------------------
  integer :: il
 #if defined LIBPAW_HAVE_LIBXC
- integer :: ii
+ integer :: ii,id
 #endif
  character(len=100) :: xclibxc
  character(len=500) :: msg
@@ -4558,13 +4558,24 @@ subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 &        xclibxc(1:6)=='MGGA_X'.or.xclibxc(1:6)=='MGGA_C'.or. &
 &        xclibxc(1:6)=='mgga_x'.or.xclibxc(1:6)=='mgga_c') then
 #if defined LIBPAW_HAVE_LIBXC
-       ii=index(xclibxc,'+')
+       pspxc=0
+       ii=index(xclibxc,'+') ; if (ii<=0) ii=0
        if (ii>0) then
-         pspxc=-(libxc_functionals_getid(xclibxc(1:ii-1))*1000 &
-&               +libxc_functionals_getid(xclibxc(ii+1:)))
-       else
-         pspxc=-libxc_functionals_getid(xclibxc)
+         id=libxc_functionals_getid(xclibxc(1:ii-1))
+         if (id<=0) then
+           write(msg, '(3a)' ) 'The ',xclibxc(1:ii-1), &
+&             ' functional (read from PAW-XML file) was not found in the libXC library!'
+           LIBPAW_ERROR(msg)
+         end if
+         pspxc=pspxc-id*1000
        end if
+       id=libxc_functionals_getid(xclibxc(ii+1:))
+       if (id<=0) then
+         write(msg, '(3a)' ) 'The ',xclibxc(ii+1:), &
+&             ' functional (read from PAW-XML file) was not found in the libXC library!'
+         LIBPAW_ERROR(msg)
+       end if
+       pspxc=pspxc-id
 #else
        msg='Cannot use LibXC functional because ABINIT is not compiled with LibXC !'
        LIBPAW_ERROR(msg)
