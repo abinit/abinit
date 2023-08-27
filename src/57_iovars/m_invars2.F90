@@ -234,12 +234,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 !scalars
  integer,parameter :: master = 0
  integer :: bantot,berryopt,dmatsize,ndim,getocc,narr,nprocs
- integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_current
+ integer :: iat,iatom,iband,ii,iimage,ikpt,intimage,ionmov,isppol,ixc_here
  integer :: densfor_pred,ipsp,iscf,isiz,itypat,jj,kptopt,lpawu,marr,natom,natomcor,nband1,nberry
  integer :: niatcon,nimage,nkpt,nkpthf,npspalch,nqpt,nsp,nspinor,nsppol,nsym,ntypalch,ntypat,ntyppure
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
  integer :: tread_brange, tread_erange, tread_kfilter
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
+ logical :: xc_is_mgga,xc_need_kden,xc_has_kxc
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
  real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
@@ -253,7 +254,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer,allocatable :: iatcon(:),natcon(:), intarr(:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: dmatpawu_tmp(:), dprarr(:)
- type(libxc_functional_type) :: xcfunc_tmp(2)
+ type(libxc_functional_type) :: xcfunc(2)
 
 ! *************************************************************************
 
@@ -1361,9 +1362,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! Read other parameters
  ! ALL CHECKING SHOULD BE DONE IN m_chkinp.F90
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
- if(tread==1) dtset%auxc_scal=dprarr(1)
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'builtintest',tread,'INT')
  if(tread==1) dtset%builtintest=intarr(1)
 
@@ -1816,7 +1814,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      tread=1
    end if
  end if
- ixc_current=dtset%ixc
+ ixc_here=dtset%ixc
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixcrot',tread,'INT')
  if(tread==1) dtset%ixcrot=intarr(1)
@@ -1827,40 +1825,57 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ixc_sigma',tread,'INT')
  if(tread==1)then
    dtset%ixc_sigma=intarr(1)
-   if( dtset%optdriver==RUNL_SIGMA .and. mod(dtset%gwcalctyp,10)==5)ixc_current=dtset%ixc_sigma
+   if (dtset%optdriver==RUNL_SIGMA.and.mod(dtset%gwcalctyp,10)==5) ixc_here=dtset%ixc_sigma
  end if
 
- ! Initialize xclevel and usefock
- call get_xclevel(ixc_current,dtset%xclevel,dtset%usefock)
-
+ ! Initialize here data related to exchange-correlation functional
+ if (ixc_here<0) then
+   call libxc_functionals_init(ixc_here,dtset%nspden,xc_functionals=xcfunc,xc_tb09_c=dtset%xc_tb09_c)
+ end if
+ call get_xclevel(ixc_here,dtset%xclevel,dtset%usefock)
+ xc_has_kxc=has_kxc(ixc_here,xc_funcs=xcfunc)
+ ! Meta-GGA
+ if (ixc_here<0) then
+   xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
+   xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
+ else
+   xc_is_mgga=(ixc_here>=31.and.ixc_here<=35)
+   xc_need_kden=(ixc_here==31.or.ixc_here==34.or.ixc_here==35)
+ end if
+ ! Hybrids 
+ if (dtset%usefock==1) then
+   if(ixc_here==40.or.ixc_here==41.or.ixc_here==42) then
+     dtset%hyb_mixing_sr=zero
+     dtset%hyb_range_dft=zero ; dtset%hyb_range_fock=zero
+     if(ixc_here==40)dtset%hyb_mixing=one
+     if(ixc_here==41)dtset%hyb_mixing=quarter
+     if(ixc_here==42)dtset%hyb_mixing=third
+   else if(ixc_here==-427)then
+     ! Special case of HSE03
+     dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
+     dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
+   else if (ixc_here<0) then
+     call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
+       hyb_range=dtset%hyb_range_dft,xc_functionals=xcfunc)
+     dtset%hyb_range_fock=dtset%hyb_range_dft
+   end if
+ end if
+ ! Hybrids: auxilliary functional 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
+ if(tread==1) dtset%auxc_scal=dprarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
  if(tread==1) dtset%auxc_ixc=intarr(1)
  ! If the default value had been given, possibly switch on
  ! the auxc_ixc corresponding to ixc, if the latter is an hybrid
- if(dtset%auxc_ixc==0)then
-   call get_auxc_ixc(dtset%auxc_ixc,ixc_current)
+ if (dtset%auxc_ixc==0) then
+   call get_auxc_ixc(dtset%auxc_ixc,ixc_here)
+ end if
+ if (ixc_here<0) then
+   call libxc_functionals_end(xc_functionals=xcfunc)
  end if
 
  ! Now take care of the parameters for hybrid functionals
  if(dtset%usefock==1)then
-
-   if(ixc_current ==40 .or. ixc_current ==41 .or. ixc_current ==42)then
-     dtset%hyb_mixing_sr=zero
-     dtset%hyb_range_dft=zero ; dtset%hyb_range_fock=zero
-     if(ixc_current==40)dtset%hyb_mixing=one
-     if(ixc_current==41)dtset%hyb_mixing=quarter
-     if(ixc_current==42)dtset%hyb_mixing=third
-   else if(ixc_current==-427)then
-     ! Special case of HSE03
-     dtset%hyb_mixing=zero  ; dtset%hyb_mixing_sr=quarter
-     dtset%hyb_range_dft=0.15_dp*two**third  ; dtset%hyb_range_fock=0.15_dp*sqrt(half)
-   else if (ixc_current<0) then
-     call libxc_functionals_init(ixc_current,dtset%nspden,xc_functionals=xcfunc_tmp)
-     call libxc_functionals_get_hybridparams(hyb_mixing=dtset%hyb_mixing,hyb_mixing_sr=dtset%hyb_mixing_sr,&
-       hyb_range=dtset%hyb_range_dft,xc_functionals=xcfunc_tmp)
-     call libxc_functionals_end(xc_functionals=xcfunc_tmp)
-     dtset%hyb_range_fock=dtset%hyb_range_dft
-   end if
 
    ! Warning: the user-defined parameters for hybrids are by convention stored as negative numbers
    ! This trick will allow to echo them, and only them.
@@ -1933,8 +1948,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 &         dtset%densfor_pred/=0.and.abs(dtset%densfor_pred)/=5) then
    !In case of density mixing (iscf>=10) and correction of forces (densfor_pred/=0 and 5)
    !  we need Kxc. If it is not available, we switch to potential mixing (iscf<10)
-   if (dtset%ixc<0) call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_functionals=xcfunc_tmp)
-   if (.not.has_kxc(dtset%ixc,xcfunc_tmp)) then
+   if (.not.xc_has_kxc) then
      call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optforces',tread,'INT')
      if (dtset%optforces/=0.or.intarr(1)/=0) then
        dtset%iscf=dtset%iscf-10
@@ -1942,7 +1956,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        ABI_COMMENT(msg)
      end if
    end if
-   if (dtset%ixc<0) call libxc_functionals_end(xc_functionals=xcfunc_tmp)
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vdw_df_acutmin',tread,'DPR')
@@ -2118,7 +2131,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%optforces=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optstress',tread,'INT')
- if(tread==1) dtset%optstress=intarr(1)
+ if(tread==1) then
+   dtset%optstress=intarr(1)
+ else if (xc_is_mgga) then
+   dtset%optstress=0  ! This is temporary, hopefully
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optnlxccc',tread,'INT')
  if(tread==1) dtset%optnlxccc=intarr(1)
@@ -2355,7 +2372,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%pawusecp=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'pawxcdev',tread,'INT')
- if(tread==1) dtset%pawxcdev=intarr(1)
+ if(tread==1) then
+   dtset%pawxcdev=intarr(1)
+ else if (usepaw==1.and.xc_is_mgga) then
+   dtset%pawxcdev=0
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spnorbscl',tread,'DPR')
  if(tread==1) dtset%spnorbscl=dprarr(1)
@@ -2727,7 +2748,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) then
    dtset%usekden=intarr(1)
  else
-   dtset%usekden=merge(1,0,libxc_functionals_ismgga().or.dtset%ixc==31.or.dtset%ixc==34.or.dtset%ixc==35)
+   dtset%usekden=merge(1,0,xc_need_kden)
  end if
  if (dtset%usekden == 1 .and. dtset%nimage == 1) dtset%prtkden = 1
 
