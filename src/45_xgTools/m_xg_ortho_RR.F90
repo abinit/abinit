@@ -242,7 +242,7 @@ module m_xg_ortho_RR
     else if ( EIGPACK(eigenSolver) ) then
       call xg_init(vec,Xspace,subdim,subdim,gpu_option=gpu_option)
     else
-      call xg_setBlock(subA,vec%self,1,subdim,blockdim)
+      call xg_setBlock(subA,vec%self,subdim,blockdim)
     endif
 
      ! Compute subA and subB by part
@@ -254,32 +254,32 @@ module m_xg_ortho_RR
     call timab(tim_RR_gemm_1,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_RR_GEMM_1)
 
-    call xg_setBlock(subA,subsub,1,blockdim,blockdim)
+    call xg_setBlock(subA,subsub,blockdim,blockdim)
     call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub)
 
     if ( solve_ax_bx_ .or. var /= VAR_X ) then
-      call xg_setBlock(subB,subsub,1,blockdim,blockdim)
+      call xg_setBlock(subB,subsub,blockdim,blockdim)
       call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub)
     endif
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
       ! subA
-      call xg_setBlock(subA,subsub,blockdim+1,2*blockdim,blockdim)
+      call xg_setBlock(subA,subsub,2*blockdim,blockdim,fcol=blockdim+1)
       call xgBlock_gemm(XW%trans,AW%normal,1.0d0,XW,AW,0.d0,subsub)
 
       ! subB
-      call xg_setBlock(subB,subsub,blockdim+1,2*blockdim,blockdim)
+      call xg_setBlock(subB,subsub,2*blockdim,blockdim,fcol=blockdim+1)
       call xgBlock_gemm(XW%trans,BW%normal,1.0d0,XW,BW,0.d0,subsub)
 
     end if
 
     if ( var == VAR_XWP ) then
       ! subA
-      call xg_setBlock(subA,subsub,2*blockdim+1,3*blockdim,blockdim)
+      call xg_setBlock(subA,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
       call xgBlock_gemm(XWP%trans,AP%normal,1.0d0,XWP,AP,0.d0,subsub)
 
       ! subB
-      call xg_setBlock(subB,subsub,2*blockdim+1,3*blockdim,blockdim)
+      call xg_setBlock(subB,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
       call xgBlock_gemm(XWP%trans,BP%normal,1.0d0,XWP,BP,0.d0,subsub)
 
     end if
@@ -376,7 +376,7 @@ module m_xg_ortho_RR
       !/* Compute first part of X here */
       ! Use subB as buffer
       !lobpcg%XWP (:,X+1:X+blockdim) = matmul(lobpcg%XWP (:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_setBlock(vec%self,Cwp,1,blockdim,blockdim)
+      call xgBlock_setBlock(vec%self,Cwp,blockdim,blockdim)
       call xgBlock_gemm(X%normal,Cwp%normal,1.0d0,X,Cwp,0.d0,subB%self)
       call xgBlock_copy(subB%self,X)
 
@@ -393,7 +393,7 @@ module m_xg_ortho_RR
         if(gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(vec%self) !FIXME Avoid that transfer
         call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
         if(gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_to_gpu(vec%self) !FIXME Avoid that transfer
-        call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
+        call xgBlock_setBlock(vec%self,Cwp,subdim-blockdim,blockdim)
 
         !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
         call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self)
