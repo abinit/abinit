@@ -265,7 +265,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 #endif
  integer :: accessfil,ask_accurate,bantot,choice,comm_psp,fform
  integer :: gnt_option,gscase,iatom,idir,ierr,ii,indx,jj,kk,ios,iorder_cprj,itypat
- integer :: ixfh,mband_cprj,mcg,mcprj,me,mgfftf,mpert,mu,my_natom,my_nspinor
+ integer :: ixfh,mband_cprj,mcg,mcprj,me,mgfftf,mpert,msize,mu,my_natom,my_nspinor
  integer :: nband_k,nbandtot,nblok,ncprj,ncpgr,nfftf,nfftot,npwmin
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
