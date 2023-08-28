@@ -542,7 +542,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! densfor_pred<0 not valid for mGGA
      ! Yet it is but contribution from Laplacian and/or kin. ene. density are not taken into account
      !if(dt%densfor_pred<0.and.xc_is_mgga.and.dt%iscf>=10)then
-     !  msg='densfor_pred<0 (full correction for forces) is not allowed for density mixing and meta-GGA XC!'       
+     !  msg='densfor_pred<0 (full correction for forces) is not allowed for density mixing and meta-GGA XC!'
      !  ABI_ERROR_NOSTOP(msg, ierr)
      !end if
    end if
@@ -3333,7 +3333,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(optdriver==RUNL_RESPFN)then
-       write(msg, '(a,f8.2,4a)' )&
+       write(msg, '(a,f8.2,8a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
        'A spin-polarized response function calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
@@ -3342,10 +3342,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%prtdos==1)then
-       write(msg, '(a,f8.2,4a)' )&
+       write(msg, '(a,f8.2,8a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,& 
+       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
 &      '  the default value of spinmagntarget, and explicit definition of occ.',ch10,&
        'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
