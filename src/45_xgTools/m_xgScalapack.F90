@@ -317,8 +317,8 @@ module m_xgScalapack
         call xgBlock_copy_from_gpu(eigenvalues)
       end if
 
-      call xgBlock_reverseMap(matrixA,matrix,nbli_global,nbco_global)
-      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,nbco_global,1)
+      call xgBlock_reverseMap(matrixA,matrix,rows=nbli_global,cols=nbco_global)
+      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,rows=nbco_global,cols=1)
       cptr = c_loc(eigenvalues_tmp)
       call c_f_pointer(cptr,vector,(/ nbco_global /))
 
@@ -420,9 +420,9 @@ module m_xgScalapack
         call xgBlock_copy_from_gpu(eigenvalues)
       end if
 
-      call xgBlock_reverseMap(matrixA,matrix1,nbli_global,nbco_global)
-      call xgBlock_reverseMap(matrixB,matrix2,nbli_global,nbco_global)
-      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,nbco_global,1)
+      call xgBlock_reverseMap(matrixA,matrix1,rows=nbli_global,cols=nbco_global)
+      call xgBlock_reverseMap(matrixB,matrix2,rows=nbli_global,cols=nbco_global)
+      call xgBlock_reverseMap(eigenvalues,eigenvalues_tmp,rows=nbco_global,cols=1)
       cptr = c_loc(eigenvalues_tmp)
       call c_f_pointer(cptr,vector,(/ nbco_global /))
 
@@ -469,15 +469,16 @@ module m_xgScalapack
     integer            , intent(  out) :: req
     double precision, pointer :: tab(:,:)
     double precision :: tsec(2)
-    integer :: cols, rows
+    !integer :: cols, rows
     integer :: ierr
     integer :: sendto, receivefrom
     integer :: lap
 
     call timab(M__tim_scatter,1,tsec)
 
-    call xgBlock_getSize(matrix,rows,cols)
-    call xgBlock_reverseMap(matrix,tab,rows,cols)
+    !call xgBlock_getSize(matrix,rows,cols)
+    !call xgBlock_reverseMap(matrix,tab,rows,cols)
+    call xgBlock_reverseMap(matrix,tab)
 
     ! If we did the he(e|g)v and we are the first group
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null .and. xgScalapack%rank(M__WORLD)<xgScalapack%size(M__SLK) ) then

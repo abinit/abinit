@@ -643,7 +643,8 @@ module m_xgTransposer
      rdispls(icpu) = rdispls(icpu-1)+recvcounts(icpu-1)
    end do
 
-   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
+   call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,recvbuf,&
+     & rows=xgTransposer%perPair,cols=cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
    ! just for debug
@@ -852,7 +853,7 @@ module m_xgTransposer
      end do
 
      call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf, &
-&      xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
+&      rows=xgTransposer%perPair,cols=cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
      if(xgTransposer%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
        !$OMP TARGET UPDATE FROM(sendbuf)
@@ -914,8 +915,9 @@ module m_xgTransposer
      !call xmpi_barrier(xgTransposer%mpiData(MPI_LINALG)%comm)
      do icpu = 0, ncpu_cols-1
        !write(*,*) me, "->", icpu, "from col ",icpu*ncolsColsRows+1, " number of rows:", nrowsLinalgMe
-       call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,icpu*ncolsColsRows+1,nrowsLinalgMe,ncolsColsRows)
-       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(icpu+1)%ptr,xgTransposer%perPair,ncolsColsRows*nrowsLinalgMe)
+       call xgBlock_setBlock(xgTransposer%xgBlock_linalg,xgBlock_toTransposed,nrowsLinalgMe,ncolsColsRows,fcol=icpu*ncolsColsRows+1)
+       call xgBlock_reverseMap(xgBlock_toTransposed,sendptrbuf(icpu+1)%ptr,&
+         rows=xgTransposer%perPair,cols=ncolsColsRows*nrowsLinalgMe)
        call timab(tim_gatherv,1,tsec)
        call xmpi_gatherv(sendptrbuf(icpu+1)%ptr,2*ncolsColsRows*nrowsLinalgMe,recvbuf,recvcounts,rdispls,icpu,comm,ierr)
        call timab(tim_gatherv,2,tsec)
@@ -1007,7 +1009,7 @@ module m_xgTransposer
     ncolsColsRows = xgTransposer%ncolsColsRows
     nPair = nrowsColsRows*ncolsColsRows
 
-    call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,xgTransposer%perPair,nPair)
+    call xgBlock_reverseMap(xgTransposer%xgBlock_colsrows,bufferOrdered,rows=xgTransposer%perPair,cols=nPair)
 
     nspinor = xgTransposer%nspinor
     nrowsLinalg => xgTransposer%nrowsLinalg

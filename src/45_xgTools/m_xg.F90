@@ -460,7 +460,7 @@ contains
     xg%gpu_option = l_gpu_option
     if ( present(comm) ) xg%spacedim_comm = comm
 
-    call xg_setBlock(xg,xg%self,1,rows,cols)
+    call xg_setBlock(xg,xg%self,rows,cols)
     call xgBlock_zero(xg%self)
 
   end subroutine xg_init
@@ -695,25 +695,32 @@ contains
     use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, pointer, intent(inout) :: array(:,:)
-    integer   , intent(in   ) :: rows
-    integer   , intent(in   ) :: cols
+    integer,optional,intent(in) :: rows
+    integer,optional,intent(in) :: cols
     type(c_ptr) :: cptr
+
+    integer :: rows_,cols_
+
+    rows_ = xgBlock%ldim
+    cols_ = xgBlock%cols
+    if (present(rows)) rows_=rows
+    if (present(cols)) cols_=cols
 
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
-      if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
+      if ( xgBlock%cols*xgBlock%Ldim < cols_*rows_ ) then
         write(std_out,*) xgBlock%cols,xgBlock%Ldim,cols,rows
         write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
         ABI_ERROR("Bad reverseMapping")
       end if
       cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
-      call c_f_pointer(cptr,array,(/ rows, cols /))
+      call c_f_pointer(cptr,array,(/ rows_, cols_ /))
     case ( SPACE_C )
-      if ( xgBlock%cols*xgBlock%Ldim < cols*rows ) then
+      if ( xgBlock%cols*xgBlock%Ldim < cols_*rows_ ) then
         ABI_ERROR("Bad complex reverseMapping")
       end if
       cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
-      call c_f_pointer(cptr,array,(/ 2*rows, cols /))
+      call c_f_pointer(cptr,array,(/ 2*rows_, cols_ /))
     end select
 
   end subroutine xgBlock_reverseMap
@@ -880,16 +887,20 @@ contains
   !! NAME
   !! xg_setBlock
 
-  subroutine xg_setBlock(xg, Xgblock, fcol, rows, cols)
+  subroutine xg_setBlock(xg, Xgblock, rows, cols, fcol)
     use, intrinsic :: iso_c_binding
     type(xg_t), intent(inout) :: xg
     type(xgBlock_t), intent(inout) :: xgBlock
-    integer, intent(in) :: fcol
     integer, intent(in) :: rows
     integer, intent(in) :: cols
+    integer, optional, intent(in) :: fcol
     type(c_ptr) :: cptr
+    integer :: fcol_
 
-    if ( (fcol+cols-1 ) > xg%cols ) then
+    fcol_=1
+    if (present(fcol)) fcol_=fcol
+
+    if ( (fcol_+cols-1 ) > xg%cols ) then
       ABI_ERROR("Too many columns")
     endif
     if ( rows > xg%rows ) then
@@ -907,10 +918,10 @@ contains
 
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      cptr = getClocR(xg%rows,xg%cols,xg%vecR(:,fcol:fcol+cols-1))
+      cptr = getClocR(xg%rows,xg%cols,xg%vecR(:,fcol_:fcol_+cols-1))
       call c_f_pointer(cptr,xgBlock%vecR,(/ xgBlock%LDim,cols /))
     case(SPACE_C)
-      cptr = getClocC(xg%rows,xg%cols,xg%vecC(:,fcol:fcol+cols-1))
+      cptr = getClocC(xg%rows,xg%cols,xg%vecC(:,fcol_:fcol_+cols-1))
       call c_f_pointer(cptr,xgBlock%vecC,(/ xgBlock%LDim,cols /))
     end select
 
@@ -922,16 +933,20 @@ contains
   !! NAME
   !! xgBlock_setBlock
 
-  subroutine xgBlock_setBlock(xgBlockA,xgBlockB, fcol, rows, cols)
+  subroutine xgBlock_setBlock(xgBlockA,xgBlockB, rows, cols, fcol)
     use, intrinsic :: iso_c_binding
-    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(in   ) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
-    integer, intent(in) :: fcol
     integer, intent(in) :: rows
     integer, intent(in) :: cols
+    integer,optional,intent(in) :: fcol
     type(c_ptr) :: cptr
+    integer :: fcol_
 
-    if ( (fcol+cols-1 ) > xgblockA%cols ) then
+    fcol_=1
+    if (present(fcol)) fcol_=fcol
+
+    if ( (fcol_+cols-1 ) > xgblockA%cols ) then
       ABI_ERROR("Too many columns")
     endif
     if ( rows > xgblockA%rows ) then
@@ -949,10 +964,10 @@ contains
 
     select case(xgBlockA%space)
     case (SPACE_R,SPACE_CR)
-      cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(:,fcol:fcol+cols-1))
+      cptr = getClocR(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecR(:,fcol_:fcol_+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecR,(/ xgBlockB%LDim,cols /))
     case(SPACE_C)
-      cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(:,fcol:fcol+cols-1))
+      cptr = getClocC(xgBlockA%LDim,xgBlockA%cols,xgBlockA%vecC(:,fcol_:fcol_+cols-1))
       call c_f_pointer(cptr,xgBlockB%vecC,(/ xgBlockB%LDim,cols /))
     end select
 
@@ -4248,13 +4263,13 @@ contains
       if (modulo(ncols,nspinor)/=0) then
         ABI_ERROR('nspinor should divide the number of cols')
       end if
-      call xgBlock_setBlock(xgBlock,xgBlock_spinor,1,nrows,ncols)
+      call xgBlock_setBlock(xgBlock,xgBlock_spinor,nrows,ncols)
       if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows*nspinor,ncols/nspinor/))
     else if (option==ROWS2COLS) then
       if (modulo(nrows,nspinor)/=0) then
         ABI_ERROR('nspinor should divide the number of rows')
       end if
-      call xgBlock_setBlock(xgBlock,xgBlock_spinor,1,nrows,ncols)
+      call xgBlock_setBlock(xgBlock,xgBlock_spinor,nrows,ncols)
       if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows/nspinor,ncols*nspinor/))
     else
       ABI_ERROR('bad option value')

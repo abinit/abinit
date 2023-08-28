@@ -267,25 +267,25 @@ module m_lobpcg2
     ! pointer point to null()
 
     call xg_init(lobpcg%XWP,space,spacedim,3*blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
-    call xg_setBlock(lobpcg%XWP,lobpcg%X,1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%XWP,lobpcg%W,blockdim+1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%XWP,lobpcg%P,2*blockdim+1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%XWP,lobpcg%XW,1,spacedim,2*blockdim)
-    call xg_setBlock(lobpcg%XWP,lobpcg%WP,blockdim+1,spacedim,2*blockdim)
+    call xg_setBlock(lobpcg%XWP,lobpcg%X,spacedim,blockdim)
+    call xg_setBlock(lobpcg%XWP,lobpcg%W,spacedim,blockdim,fcol=blockdim+1)
+    call xg_setBlock(lobpcg%XWP,lobpcg%P,spacedim,blockdim,fcol=2*blockdim+1)
+    call xg_setBlock(lobpcg%XWP,lobpcg%XW,spacedim,2*blockdim)
+    call xg_setBlock(lobpcg%XWP,lobpcg%WP,spacedim,2*blockdim,fcol=blockdim+1)
 
     call xg_init(lobpcg%AXWP,space,spacedim,3*blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
-    call xg_setBlock(lobpcg%AXWP,lobpcg%AX,1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%AXWP,lobpcg%AW,blockdim+1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%AXWP,lobpcg%AP,2*blockdim+1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%AXWP,lobpcg%AXW,1,spacedim,2*blockdim)
-    call xg_setBlock(lobpcg%AXWP,lobpcg%AWP,blockdim+1,spacedim,2*blockdim)
+    call xg_setBlock(lobpcg%AXWP,lobpcg%AX,spacedim,blockdim)
+    call xg_setBlock(lobpcg%AXWP,lobpcg%AW,spacedim,blockdim,fcol=blockdim+1)
+    call xg_setBlock(lobpcg%AXWP,lobpcg%AP,spacedim,blockdim,fcol=2*blockdim+1)
+    call xg_setBlock(lobpcg%AXWP,lobpcg%AXW,spacedim,2*blockdim)
+    call xg_setBlock(lobpcg%AXWP,lobpcg%AWP,spacedim,2*blockdim,fcol=blockdim+1)
 
     call xg_init(lobpcg%BXWP,space,spacedim,3*blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
-    call xg_setBlock(lobpcg%BXWP,lobpcg%BX,1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%BXWP,lobpcg%BW,blockdim+1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%BXWP,lobpcg%BP,2*blockdim+1,spacedim,blockdim)
-    call xg_setBlock(lobpcg%BXWP,lobpcg%BXW,1,spacedim,2*blockdim)
-    call xg_setBlock(lobpcg%BXWP,lobpcg%BWP,blockdim+1,spacedim,2*blockdim)
+    call xg_setBlock(lobpcg%BXWP,lobpcg%BX,spacedim,blockdim)
+    call xg_setBlock(lobpcg%BXWP,lobpcg%BW,spacedim,blockdim,fcol=blockdim+1)
+    call xg_setBlock(lobpcg%BXWP,lobpcg%BP,spacedim,blockdim,fcol=2*blockdim+1)
+    call xg_setBlock(lobpcg%BXWP,lobpcg%BXW,spacedim,2*blockdim)
+    call xg_setBlock(lobpcg%BXWP,lobpcg%BWP,spacedim,2*blockdim,fcol=blockdim+1)
 
     if ( lobpcg%nblock /= 1 ) then
       call xg_init(lobpcg%AllBX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
@@ -443,8 +443,8 @@ module m_lobpcg2
     end if
 
     call xg_init(eigenvalues3N,SPACE_R,blockdim3,1, gpu_option=lobpcg%gpu_option)
-    call xg_setBlock(eigenvalues3N,eigenvaluesN,1,blockdim,1)
-    call xg_setBlock(eigenvalues3N,eigenvalues2N,1,blockdim2,1)
+    call xg_setBlock(eigenvalues3N,eigenvaluesN,blockdim,1)
+    call xg_setBlock(eigenvalues3N,eigenvalues2N,blockdim2,1)
 
     call xgBlock_reshape(eigen,(/ blockdim, nblock /))
     call xgBlock_reshape(residu,(/ blockdim, nblock /))
@@ -469,12 +469,12 @@ module m_lobpcg2
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBW,lobpcg%xgTransposerX,&
         lobpcg%BW,lobpcg%BWColsRows,STATE_LINALG)
     else
-      call xgBlock_setBlock(lobpcg%X, lobpcg%XColsRows, 1, spacedim, blockdim)
-      call xgBlock_setBlock(lobpcg%AX, lobpcg%AXColsRows, 1, spacedim, blockdim)
-      call xgBlock_setBlock(lobpcg%BX, lobpcg%BXColsRows, 1, spacedim, blockdim)
-      call xgBlock_setBlock(lobpcg%W, lobpcg%WColsRows, 1, spacedim, blockdim)
-      call xgBlock_setBlock(lobpcg%AW, lobpcg%AWColsRows, 1, spacedim, blockdim)
-      call xgBlock_setBlock(lobpcg%BW, lobpcg%BWColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%X, lobpcg%XColsRows, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%AX, lobpcg%AXColsRows, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%BX, lobpcg%BXColsRows, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%W, lobpcg%WColsRows, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%AW, lobpcg%AWColsRows, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%BW, lobpcg%BWColsRows, spacedim, blockdim)
     end if
 
     !! Start big loop over blocks
@@ -483,8 +483,8 @@ module m_lobpcg2
       nrestart = 0
 
       call lobpcg_getX0(lobpcg,iblock)
-      call xgBlock_setBlock(residu,residuBlock,iblock,blockdim,1)
-      call xgBlock_setBlock(occ,occBlock,iblock,blockdim,1)
+      call xgBlock_setBlock(residu,residuBlock,blockdim,1,fcol=iblock)
+      call xgBlock_setBlock(occ,   occBlock,   blockdim,1,fcol=iblock)
 
       if ( iblock > 1 ) then
         call lobpcg_setPreviousX0_BX0(lobpcg,iblock)
@@ -672,7 +672,7 @@ module m_lobpcg2
       end if
 
       ! Save eigenvalues
-      call xgBlock_setBlock(eigen,eigenBlock,iblock,blockdim,1)
+      call xgBlock_setBlock(eigen,eigenBlock,blockdim,1,fcol=iblock)
       call xgBlock_copy(eigenvaluesN,eigenBlock)
 
       ! Save new X in X0
@@ -703,9 +703,9 @@ module m_lobpcg2
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllBX0,lobpcg%xgTransposerAllX0,&
           lobpcg%AllBX0%self,lobpcg%AllBX0ColsRows,STATE_LINALG)
       else
-        call xgBlock_setBlock(lobpcg%AllX0      , lobpcg%AllX0ColsRows , 1, spacedim, lobpcg%neigenpairs)
-        call xgBlock_setBlock(lobpcg%AllAX0%self, lobpcg%AllAX0ColsRows, 1, spacedim, lobpcg%neigenpairs)
-        call xgBlock_setBlock(lobpcg%AllBX0%self, lobpcg%AllBX0ColsRows, 1, spacedim, lobpcg%neigenpairs)
+        call xgBlock_setBlock(lobpcg%AllX0      , lobpcg%AllX0ColsRows , spacedim, lobpcg%neigenpairs)
+        call xgBlock_setBlock(lobpcg%AllAX0%self, lobpcg%AllAX0ColsRows, spacedim, lobpcg%neigenpairs)
+        call xgBlock_setBlock(lobpcg%AllBX0%self, lobpcg%AllBX0ColsRows, spacedim, lobpcg%neigenpairs)
       end if
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_COLSROWS)
@@ -758,7 +758,7 @@ module m_lobpcg2
     spacedim = lobpcg%spacedim
 
     !lobpcg%XWP(:,X+1:X+blockdim) = lobpcg%X0(:,(iblock-1)*blockdim+1:iblock*blockdim)
-    call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,(iblock-1)*blockdim+1,spacedim,blockdim)
+    call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,spacedim,blockdim,fcol=(iblock-1)*blockdim+1)
     call xgBlock_copy(lobpcg%X0,lobpcg%X)
 
   end subroutine lobpcg_getX0
@@ -768,8 +768,8 @@ module m_lobpcg2
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     integer        , intent(in   ) :: iblock
-    call xg_setBlock(lobpcg%AllBX0,lobpcg%BX0,1,lobpcg%spacedim,(iblock-1)*lobpcg%blockdim)
-    call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,1,lobpcg%spacedim,(iblock-1)*lobpcg%blockdim)
+    call xg_setBlock(lobpcg%AllBX0,lobpcg%BX0,lobpcg%spacedim,(iblock-1)*lobpcg%blockdim)
+    call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,lobpcg%spacedim,(iblock-1)*lobpcg%blockdim)
   end subroutine lobpcg_setPreviousX0_BX0
 
 
@@ -835,7 +835,7 @@ module m_lobpcg2
     spacedim = lobpcg%spacedim
 
     !X0(:,(iblock-1)*blockdim+1:iblock*blockdim) = lobpcg%XWP(:,lobpcg%X+1:lobpcg%X+blockdim)
-    call xgBlock_setBlock(lobpcg%AllX0,Xtmp,(iblock-1)*blockdim+1,spacedim,blockdim)
+    call xgBlock_setBlock(lobpcg%AllX0,Xtmp,spacedim,blockdim,fcol=(iblock-1)*blockdim+1)
     call xgBlock_copy(lobpcg%X,Xtmp)
   end subroutine lobpcg_setX0
 
@@ -850,11 +850,11 @@ module m_lobpcg2
     firstcol = (jblock-1)*lobpcg%blockdim+1  ! Start of each block
 
     ! BX
-    call xg_setBlock(lobpcg%AllBX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
+    call xg_setBlock(lobpcg%AllBX0,CXtmp,lobpcg%spacedim,lobpcg%blockdim,fcol=firstcol)
     call xgBlock_copy(lobpcg%BX,CXtmp)
 
     ! AX
-    call xg_setBlock(lobpcg%AllAX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
+    call xg_setBlock(lobpcg%AllAX0,CXtmp,lobpcg%spacedim,lobpcg%blockdim,fcol=firstcol)
     call xgBlock_copy(lobpcg%AX,CXtmp)
   end subroutine lobpcg_transferAX_BX
 

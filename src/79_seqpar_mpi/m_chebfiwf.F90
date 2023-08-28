@@ -507,9 +507,9 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
  spacedim = spacedim/l_icplx
 
- call xgBlock_reverseMap(X,cg,l_icplx,spacedim*blockdim)
- call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
- call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
+ call xgBlock_reverseMap(X,cg,rows=l_icplx,cols=spacedim*blockdim)
+ call xgBlock_reverseMap(AX,ghc,rows=l_icplx,cols=spacedim*blockdim)
+ call xgBlock_reverseMap(BX,gsc,rows=l_icplx,cols=spacedim*blockdim)
 
  !Scale back cg
  if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
@@ -668,9 +668,9 @@ subroutine getBm1X(X,Bm1X,transposer)
 
  spacedim = spacedim/l_icplx
 
- call xgBlock_reverseMap(X,ghc_filter,l_icplx,spacedim*blockdim)
+ call xgBlock_reverseMap(X,ghc_filter,rows=l_icplx,cols=spacedim*blockdim)
 
- call xgBlock_reverseMap(Bm1X,gsm1hc_filter,l_icplx,spacedim*blockdim)
+ call xgBlock_reverseMap(Bm1X,gsm1hc_filter,rows=l_icplx,cols=spacedim*blockdim)
 
  if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
 

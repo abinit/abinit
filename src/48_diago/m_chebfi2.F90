@@ -283,15 +283,15 @@ subroutine chebfi_allocateAll(chebfi)
  if (chebfi%paral_kgb == 0) then
    chebfi%total_spacedim = spacedim
    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,gpu_option=chebfi%gpu_option) !regular arrays
-   call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1, spacedim, neigenpairs)
-   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1, spacedim, neigenpairs)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_next,spacedim, neigenpairs)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_prev,spacedim, neigenpairs, fcol=neigenpairs+1)
  else
    total_spacedim = spacedim
    call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
    chebfi%total_spacedim = total_spacedim
    call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,gpu_option=chebfi%gpu_option) !transposed arrays
-   call xg_setBlock(chebfi%X_NP, chebfi%X_next,               1, total_spacedim, chebfi%bandpp)
-   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, chebfi%bandpp+1, total_spacedim, chebfi%bandpp)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_next, total_spacedim, chebfi%bandpp)
+   call xg_setBlock(chebfi%X_NP, chebfi%X_prev, total_spacedim, chebfi%bandpp, fcol=chebfi%bandpp+1)
  end if
  call timab(tim_X_NP_init,2,tsec)
 
@@ -576,9 +576,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    !call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS)
    ABI_NVTX_END_RANGE()
  else
-   call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, 1, spacedim, neigenpairs)   !use xXColsRows instead of X notion
-   call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, 1, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
-   call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, 1, spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)   !use xXColsRows instead of X notion
+   call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
+   call xgBlock_setBlock(chebfi%BX%self, chebfi%xBXColsRows, spacedim, neigenpairs)
  end if
 
  call timab(tim_getAX_BX,1,tsec)
@@ -624,7 +624,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
 
  if (chebfi%paral_kgb == 0) then
-   call xgBlock_reverseMap(DivResults%self,eig,1,neigenpairs)
+   call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=neigenpairs)
    do iband=1, neigenpairs !TODO TODO
   ! !nline necessary to converge to tolerance
   ! !nline_tolwfr = cheb_oracle1(dble(eig(iband*2-1,1)), lambda_minus, lambda_plus, tolerance / resids_filter(iband), nline)
@@ -634,7 +634,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
      nline_bands(iband) = nline ! fiddle with this to use locking
    end do
  else
-   call xgBlock_reverseMap(DivResults%self,eig,1,chebfi%bandpp)
+   call xgBlock_reverseMap(DivResults%self,eig,rows=1,cols=chebfi%bandpp)
    do iband=1, chebfi%bandpp !TODO TODO
      nline_bands(iband) = nline ! fiddle with this to use locking
    end do
@@ -695,14 +695,14 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_LINALG)
 
    if (xmpi_comm_size(chebfi%spacecom) == 1) then !only one MPI proc reset buffers to right addresses (because of X-Xcolwise swaps)
-     call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
-     call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
-     call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
+     call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
+     call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
+     call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
    end if
  else
-   call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
-   call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, spacedim, neigenpairs)
+   call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
  end if
  ABI_NVTX_END_RANGE()
 
@@ -928,10 +928,10 @@ subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
 
   ! *********************************************************************
 
-  call xgBlock_setBlock(chebfi%X_prev,     chebfi%X_swap,     1, spacedim, neigenpairs) !X_swap = X_prev
-  call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X_prev,     1, spacedim, neigenpairs) !X_prev = xXColsRows
-  call xgBlock_setBlock(chebfi%X_next,     chebfi%xXColsRows, 1, spacedim, neigenpairs) !xXColsRows = X_next
-  call xgBlock_setBlock(chebfi%X_swap,     chebfi%X_next,     1, spacedim, neigenpairs) !X_next = X_swap
+  call xgBlock_setBlock(chebfi%X_prev,     chebfi%X_swap,     spacedim, neigenpairs) !X_swap = X_prev
+  call xgBlock_setBlock(chebfi%xXColsRows, chebfi%X_prev,     spacedim, neigenpairs) !X_prev = xXColsRows
+  call xgBlock_setBlock(chebfi%X_next,     chebfi%xXColsRows, spacedim, neigenpairs) !xXColsRows = X_next
+  call xgBlock_setBlock(chebfi%X_swap,     chebfi%X_next,     spacedim, neigenpairs) !X_next = X_swap
 
 end subroutine chebfi_swapInnerBuffers
 !!***
@@ -995,14 +995,14 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
 
     if(abs(ampfactor) < 1e-3) ampfactor = 1e-3 !just in case, avoid amplifying too much
 
-    call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
-    call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
+    call xgBlock_setBlock(chebfi%xXColsRows, X_part, chebfi%total_spacedim, 1, fcol=iband)
+    call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, chebfi%total_spacedim, 1, fcol=iband)
 
     call xgBlock_scale(X_part, 1/ampfactor, 1)
     call xgBlock_scale(AX_part, 1/ampfactor, 1)
 
     if(chebfi%paw) then
-      call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
+      call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, chebfi%total_spacedim, 1, fcol=iband)
       call xgBlock_scale(BX_part, 1/ampfactor, 1)
     end if
   end do
