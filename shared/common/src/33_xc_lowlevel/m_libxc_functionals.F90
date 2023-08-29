@@ -69,7 +69,8 @@ module libxc_functionals
  public :: libxc_functionals_islda              ! Return TRUE if the set of XC functional(s) is LDA
  public :: libxc_functionals_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libxc_functionals_ismgga             ! Return TRUE if the set of XC functional(s) set is meta-GGA
- public :: libxc_functionals_istb09             ! Return TRUE if the XC functional is Tran-Blaha 2009.
+ public :: libxc_functionals_is_tb09            ! Return TRUE if the XC functional is Tran-Blaha 2009.
+ public :: libxc_functionals_set_c_tb09         ! Set c parameter for Tran-Blaha 2009 functional
  public :: libxc_functionals_needs_laplacian    ! Return TRUE if the set of XC functional(s) uses LAPLACIAN
  public :: libxc_functionals_needs_temperature  ! Return TRUE if the set of XC functional(s) uses the elec. temperature
  public :: libxc_functionals_set_temperature    ! Set electronic temperature in a set of XC functional(s)
@@ -567,7 +568,7 @@ contains
        ABI_BUG(msg)
      end if
      xc_func%xc_tb09_c=xc_tb09_c
-    end if
+   end if
 
 !  Get functional kind
    xc_func%kind=int(xc_get_info_kind(xc_func%conf))
@@ -1015,9 +1016,9 @@ end function libxc_functionals_ismgga
 
 !----------------------------------------------------------------------
 
-!!****f* libxc_functionals/libxc_functionals_istb09
+!!****f* libxc_functionals/libxc_functionals_is_tb09
 !! NAME
-!!  libxc_functionals_istb09
+!!  libxc_functionals_is_tb09
 !!
 !! FUNCTION
 !!  Test function to identify whether the presently used functional
@@ -1029,7 +1030,7 @@ end function libxc_functionals_ismgga
 !!
 !! SOURCE
 
-logical function libxc_functionals_istb09(xc_functionals) result(ans)
+logical function libxc_functionals_is_tb09(xc_functionals) result(ans)
 
 !Arguments ------------------------------------
  type(libxc_functional_type),intent(in),optional :: xc_functionals(2)
@@ -1037,7 +1038,6 @@ logical function libxc_functionals_istb09(xc_functionals) result(ans)
 ! *************************************************************************
 
  ans  = .false.
- if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
 
  if (present(xc_functionals)) then
    ans = any(xc_functionals%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
@@ -1045,7 +1045,50 @@ logical function libxc_functionals_istb09(xc_functionals) result(ans)
    ans = any(xc_global%id == libxc_functionals_getid('XC_MGGA_X_TB09'))
  end if
 
-end function libxc_functionals_istb09
+end function libxc_functionals_is_tb09
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libxc_functionals/libxc_functionals_set_c_tb09
+!! NAME
+!!  libxc_functionals_set_c_tb09
+!!
+!! FUNCTION
+!!  Set c parameter for the Tran-Blaha 2009 functional
+!!
+!! INPUTS
+!! xc_c_tb09= value of the c parameter to set for the TB09 functional
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+subroutine libxc_functionals_set_c_tb09(xc_tb09_c,xc_functionals)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: xc_tb09_c
+ type(libxc_functional_type),intent(inout),optional :: xc_functionals(2)
+!Local variables -------------------------------
+ integer :: ii
+
+! *************************************************************************
+
+ if (present(xc_functionals)) then
+   do ii=1,2
+     if (xc_functionals(ii)%id == libxc_functionals_getid('XC_MGGA_X_TB09')) then
+       xc_functionals(ii)%xc_tb09_c = xc_tb09_c
+     end if
+   end do
+ else
+   do ii=1,2
+     if (xc_global(ii)%id == libxc_functionals_getid('XC_MGGA_X_TB09')) then
+       xc_global(ii)%xc_tb09_c = xc_tb09_c
+     end if
+   end do
+ end if
+
+end subroutine libxc_functionals_set_c_tb09
 !!***
 
 !----------------------------------------------------------------------
@@ -2087,7 +2130,6 @@ end subroutine libxc_functionals_getvxc
  integer  :: ii,ipts
  logical :: fixed_c_tb09,is_mgga_tb09
  real(dp) :: cc
- character(len=500) :: msg
 !arrays
  type(libxc_functional_type),pointer :: xc_funcs(:)
  real(dp),allocatable :: gnon(:)
@@ -2118,9 +2160,9 @@ end subroutine libxc_functionals_getvxc
      do ii=1,2
        if (abs(xc_funcs(ii)%xc_tb09_c-99.99_dp)>tol12) cc=xc_funcs(ii)%xc_tb09_c
      end do
-     write(msg,'(2a,f9.6)' ) ch10,&
-&    'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
-     call wrtout(std_out,msg,'COLL')
+!     write(msg,'(2a,f9.6)' ) ch10,&
+!&    'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
+     !call wrtout(std_out,msg,'COLL')
 !  C is computed
    else
      ABI_MALLOC(gnon,(npts))
@@ -2137,8 +2179,8 @@ end subroutine libxc_functionals_getvxc
      end do
      cc= -0.012_dp + 1.023_dp*sqrt(sum(gnon)/npts)
      ABI_FREE(gnon)
-     write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
-     call wrtout(std_out,msg,'COLL')
+!     write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
+!     call wrtout(std_out,msg,'COLL')
    end if
 
 !  Set c in XC data structure

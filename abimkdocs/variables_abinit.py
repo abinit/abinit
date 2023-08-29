@@ -5653,6 +5653,37 @@ go backward to find the needed file. Going back beyond the first dataset is equi
 ),
 
 Variable(
+    abivarname="getkden",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval="[[getden]]",
+    mnemonics="GET the Kinetic energy DENsity from...",
+    added_in_version="9.10.4",
+    text=r"""
+Only relevant when [[usekden]]=1 (meta GGA exchange-correlation functionals).
+Eventually used when [[ndtset]] > 0 (multi-dataset mode) and, in the case of a
+ground-state calculation, if [[iscf]]<0 (non-SCF calculation), to indicate
+that the starting **kinetic energy density** is to be taken from the output of a previous
+dataset. It can be used to chain the calculations, since it describes from which
+dataset the OUTPUT density is to be taken, as INPUT density of the present dataset.
+
+  * If [[getkden]] == 0, no such use of previously computed output density file is done.
+
+  * If [[getkden]] is positive, its value gives the index of the dataset from which
+the output density is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getkden]] is -1, the output density of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getkden]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+""",
+),
+
+Variable(
     abivarname="getocc",
     varset="files",
     vartype="integer",
@@ -8175,7 +8206,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': 0}),
-    mnemonics="Integer that governs the ReaDing of DEN file",
+    mnemonics="Integer that governs the ReaDing of density DEN file",
     added_in_version="before_v9",
     text=r"""
 If 1, will start the ground-state calculation from the density file of a previous run.
@@ -8183,6 +8214,27 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 Alternative to [[getden_filepath]] and [[getden]].
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
+For further information about the *files file*, consult the [[help:abinit#files-file]].
+""",
+),
+
+Variable(
+    abivarname="irdkden",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': '[[irdden]]'}),
+    mnemonics="Integer that governs the ReaDing of Kinetic energy density KDEN file",
+    added_in_version="9.10.4",
+    text=r"""
+Only relevant when [[usekden]]=1 (meta GGA exchange-correlation functionals).
+If 1, will start the ground-state calculation from the **kinetic energy density** file
+of a previous run.
+When [[iscf]] < 0, the reading of a KDEN file is always enforced.
+Alternative to [[getkden]].
+
+A non-zero value of [[irdkden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
 """,
 ),
@@ -21537,7 +21589,33 @@ or other quantities that are density-dependent is performed before this replacem
 
 It has been observed that the SCF cycle of the Tran-Blaha mGGA can be quite
 hard to make converge, for systems for which there is some vacuum. In this
-case, setting [[xc_denpos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
+case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6 , and increasing if necessary [[xc_denpos]]
+has been seen to allow good convergence. Of course, this will affect the numerical results somehow,
+and one should play a bit with this value to avoid incorrect calculations.
+""",
+),
+
+Variable(
+    abivarname="xc_taupos",
+    varset="dev",
+    vartype="real",
+    topics=['xc_expert'],
+    dimensions="scalar",
+    defaultval="[[xc_denpos]]",
+    mnemonics="eXchange-Correlation - TAU kinetic energy DENsity POSitivity value",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.10.4",
+    text=r"""
+For the evaluation of the meta-GGA exchange-correlation functionals,
+the kinetic energy density (usually named tau) cannot be negative, or even too small.
+[[xc_taupos]] is the smallest value that the kinetic energy density can assume
+at the time of the evaluation of a XC functional, in ABINIT.
+When then computed kinetic energy density drops below [[xc_taupos]] before
+attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].  
+
+It has been observed that the SCF cycle using meta-GGA functionals can be quite
+hard to make converge, for systems for which there is some vacuum. In this
+case, setting [[xc_taupos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
 convergence. Of course, this will affect the numerical results somehow, and
 one should play a bit with this value to avoid incorrect calculations.
 """,
