@@ -1,5 +1,5 @@
 
-.Version 9.10.2 of ABINIT 
+.Version 9.10.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 20 Jul 2023.
-- ( at 12h11 )
+.Starting date : Thu 17 Aug 2023.
+- ( at 20h55 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/TestBot_MPI1/libxc_t09/t09.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/torrent_mgga-tb09/tests/TestBot_MPI1/libxc_t09/t09.abi
 - output file    -> t09.abo
 - root for input  files -> t09i
 - root for output files -> t09o
@@ -99,6 +99,8 @@ P           mkmem          10
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
+        optforces1          2
+        optforces2          0
         optstress1          1
         optstress2          0
           prtkden1          0
@@ -200,8 +202,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.08431
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/torrent_mgga-tb09/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/torrent_mgga-tb09/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -363,8 +365,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.08431
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/torrent_mgga-tb09/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/torrent_mgga-tb09/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -401,7 +403,7 @@ tolerances: {tolwfr: 1.00E-10, }
  ETOT 10  -8.3923339738754    -1.135E-10 2.109E-09 8.636E-16
  ETOT 11  -8.3923339738884    -1.295E-11 2.325E-10 6.239E-18
  ETOT 12  -8.3923339738894    -1.062E-12 3.423E-10 3.397E-21
- ETOT 13  -8.3923339738894    -2.842E-14 9.936E-11 3.628E-22
+ ETOT 13  -8.3923339738894    -2.842E-14 9.936E-11 3.627E-22
 
  At SCF step   13   max residual=  9.94E-11 < tolwfr=  1.00E-10 =>converged.
 
@@ -424,7 +426,7 @@ lattice_vectors:
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567851E+01
-convergence: {deltae: -2.842E-14, res2:  3.628E-22, residm:  9.936E-11, diffor: null, }
+convergence: {deltae: -2.842E-14, res2:  3.627E-22, residm:  9.936E-11, diffor:  0.000E+00, }
 etotal    :  -8.39233397E+00
 entropy   :   0.00000000E+00
 fermie    :   4.48624331E-01
@@ -433,10 +435,8 @@ pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
-cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -459,16 +459,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89175035150835     0.89175035150835     0.89175035150835
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
-    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740655773021  6.740655773021  6.740655773021 bohr
               =  3.567001406033  3.567001406033  3.567001406033 angstroms
  prteigrs : about to open file t09o_DS2_EIG
@@ -506,8 +496,8 @@ band_energy         :  1.14452470725308E+00
            etotal2    -8.3923339739E+00
             fcart1     4.9932924070E-30 -4.9932924070E-30  1.4979877221E-29
                       -4.9932924070E-30  4.9932924070E-30 -1.4979877221E-29
-            fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            getwfk1          0
            getwfk2         -1
@@ -537,6 +527,8 @@ P           mkmem          10
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
+        optforces1          2
+        optforces2          0
         optstress1          1
         optstress2          0
           prtkden1          0
@@ -698,10 +690,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          2.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.4
+.Delivered   6 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.8  wall=          2.9
