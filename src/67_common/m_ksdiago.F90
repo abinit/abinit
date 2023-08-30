@@ -961,7 +961,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (dtset%ixc < 0) then
-   if (libxc_functionals_ismgga() .and. .not. libxc_functionals_istb09()) then
+   if (libxc_functionals_ismgga() .and. .not. libxc_functionals_is_tb09()) then
      ABI_ERROR("meta-gga functionals are not compatible with direct diagonalization!")
    end if
  end if

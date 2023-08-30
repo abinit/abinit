@@ -1124,10 +1124,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    else if (pspcod==7)then
      ! PAW "pseudopotentials"
      call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,ABS(dtset%hyb_mixing),dtset%ixc,&
-       lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
-       pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
-       dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
-       dtset%xc_denpos,zion,psps%znuclpsp(ipsp))
+&      lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
+&      pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
+&      dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
+&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),xc_taupos=dtset%xc_taupos)
 
    else if (pspcod==8)then
 
@@ -1171,10 +1171,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    else if (pspcod==17)then
      ! PAW XML pseudopotentials
      call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,ABS(dtset%hyb_mixing),dtset%ixc,lmax,&
-      psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
-      dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
-      dtset%usexcnhat_orig,vlspl,xcccrc,&
-      dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp))
+&     psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
+&     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
+&     dtset%usexcnhat_orig,vlspl,xcccrc,&
+&     dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp),&
+&     xc_taupos=dtset%xc_taupos)
      call paw_setup_free(paw_setuploc)
    end if
 
