@@ -2390,7 +2390,7 @@ For the time being,
   Otherwise, use [[densfor_pred]] = 2
 
 
-!!! note "concerning the correction of forces (use of [[densfor_pred]] = 1, 2, 3, 4 or 6)"
+!!! note "About the correction to forces (use of [[densfor_pred]] = 1, 2, 3, 4 or 6)"
 
     The force on the atom located at R is corrected by the addition of the following
     term: $F_{residual}=\int dr V_{residual} \frac{d \rho_{atomic}}{dR}$,
@@ -2398,21 +2398,23 @@ For the time being,
 
     - When such an atomic density ($\rho_{atomic}$) is found in the pseudopotential or
     PAW file, it is used. If not, a gaussian density (defined by [[densty]] parameter) is used.
+
     - When SCF mixing is done on the density ([[iscf]] >= 10), the potential
-    residual ($V_residual$) is obtained from the density residual with the first
+    residual ($V_{residual}$) is obtained from the density residual with the first
     order formula $V_{residual}=\frac{dV}{d \rho} \rho_{residual}$
-    and uses the exchange-correlation kernel
-    $ \frac{dV_{xc}}{d\rho}=K_{xc}$ whose computation is time-consuming for GGA
-    functionals. By default (positive values of [[densfor_pred]]), the local-
-    density part of the GGA exchange-correlation kernel is used (even for GGA, for
-    which it seems to give a reasonable accuracy). Using the full GGA exchange
-    correlation kernel (so, including derivatives with respect to the gradient of
-    the density) is always possible by giving a negative value to
-    [[densfor_pred]]. In case of hybrid functionals, a similar correction term is
+    and uses the exchange-correlation kernel $K_{xc}=\frac{dV_{xc}}{d\rho}$ whose computation
+    is time-consuming for GGA (or meta-GGA) functionals.
+    
+    - By default (positive values of [[densfor_pred]]), even for GGA and meta-GGA,
+    the local-density part of the exchange-correlation kernel is used, which gives a reasonable accuracy.
+    Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of
+    the density) is always possible by giving a negative value to [[densfor_pred]].
+
+    - In case of hybrid functionals, a similar correction term is
     added, although in the density mixing scheme, the related GGA kernel is used
     instead of the hybrid functional kernel.
 
-!!! note "concerning the use of [[densfor_pred]] = 5 or 6 (density prediction)"
+!!! note "About the use of [[densfor_pred]] = 5 or 6 (density prediction)"
 
     The algorithm is described in [[cite:Alfe1999]].
     It uses an atomic (spherical) density. When such an atomic density
@@ -5669,6 +5671,37 @@ go backward to find the needed file. Going back beyond the first dataset is equi
 ),
 
 Variable(
+    abivarname="getkden",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval="[[getden]]",
+    mnemonics="GET the Kinetic energy DENsity from...",
+    added_in_version="9.10.4",
+    text=r"""
+Only relevant when [[usekden]]=1 (meta GGA exchange-correlation functionals).
+Eventually used when [[ndtset]] > 0 (multi-dataset mode) and, in the case of a
+ground-state calculation, if [[iscf]]<0 (non-SCF calculation), to indicate
+that the starting **kinetic energy density** is to be taken from the output of a previous
+dataset. It can be used to chain the calculations, since it describes from which
+dataset the OUTPUT density is to be taken, as INPUT density of the present dataset.
+
+  * If [[getkden]] == 0, no such use of previously computed output density file is done.
+
+  * If [[getkden]] is positive, its value gives the index of the dataset from which
+the output density is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getkden]] is -1, the output density of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getkden]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+""",
+),
+
+Variable(
     abivarname="getocc",
     varset="files",
     vartype="integer",
@@ -8191,7 +8224,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': 0}),
-    mnemonics="Integer that governs the ReaDing of DEN file",
+    mnemonics="Integer that governs the ReaDing of density DEN file",
     added_in_version="before_v9",
     text=r"""
 If 1, will start the ground-state calculation from the density file of a previous run.
@@ -8199,6 +8232,27 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 Alternative to [[getden_filepath]] and [[getden]].
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
+For further information about the *files file*, consult the [[help:abinit#files-file]].
+""",
+),
+
+Variable(
+    abivarname="irdkden",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': '[[irdden]]'}),
+    mnemonics="Integer that governs the ReaDing of Kinetic energy density KDEN file",
+    added_in_version="9.10.4",
+    text=r"""
+Only relevant when [[usekden]]=1 (meta GGA exchange-correlation functionals).
+If 1, will start the ground-state calculation from the **kinetic energy density** file
+of a previous run.
+When [[iscf]] < 0, the reading of a KDEN file is always enforced.
+Alternative to [[getkden]].
+
+A non-zero value of [[irdkden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
 """,
 ),
@@ -13295,8 +13349,10 @@ the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 
   * [[occopt]] = 3 to 8 :
 Metallic occupation of levels, using different occupation schemes (see below).
+See the review of the different possibilities in [[cite:Santos2023]], that
+delivers a nice pedagogical explanation of these.
 The corresponding thermal broadening, or cold smearing, is defined by the
-input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
+input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha, 
 divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
@@ -13307,8 +13363,9 @@ can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
 Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
-$\tilde{\delta}(x)=0.25 (\cosh(x/2.0))^{-2}$. For usual calculations, at zero temperature, do not use [[occopt]]=3,
-but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
+$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$. 
+For usual calculations, at zero temperature, do not use [[occopt]]=3,
+but [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
 
     * [[occopt]] = 4:
@@ -13320,7 +13377,7 @@ Must be used with caution, see the note below.
 
     * [[occopt]] = 5:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.8165 (monotonic
-function in the tail)
+function in the tail).
 Same smeared delta function as [[occopt]] = 4, with different a.
 Must be used with caution, see the note below.
 
@@ -13341,7 +13398,7 @@ Uniform smearing (the delta function is replaced by a constant function of
 value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
-    * [[occopt]] = 9:
+  * [[occopt]] = 9:
 Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that [[occopt]] = 9 cannot be used with fixed magnetization calculation.
 
 !!! note
@@ -13355,6 +13412,7 @@ Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]
     of this problem, a small variation of input parameters might lead to a jump of
     total energy, because there might be two or even three possible values of the
     Fermi energy, and the bisection algorithm finds one or the other.
+    See a more detailed explanation in [[cite:Santos2023]].
 """,
 ),
 
@@ -19395,7 +19453,7 @@ Variable(
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
 it gives a convergence tolerance for the largest squared "residual" (defined
-below) for any given band. The squared residual is: < nk| (H-E)^2 |nk>,    E = < nk|H|nk >
+below) for any given band. The squared residual is: 
 
 $$
 \langle \nk| (H - \enk)^2 |\nk \rangle, \,\text{with}\; \enk = \langle \nk|H|\nk \rangle
@@ -21572,7 +21630,33 @@ or other quantities that are density-dependent is performed before this replacem
 
 It has been observed that the SCF cycle of the Tran-Blaha mGGA can be quite
 hard to make converge, for systems for which there is some vacuum. In this
-case, setting [[xc_denpos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
+case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6 , and increasing if necessary [[xc_denpos]]
+has been seen to allow good convergence. Of course, this will affect the numerical results somehow,
+and one should play a bit with this value to avoid incorrect calculations.
+""",
+),
+
+Variable(
+    abivarname="xc_taupos",
+    varset="dev",
+    vartype="real",
+    topics=['xc_expert'],
+    dimensions="scalar",
+    defaultval="[[xc_denpos]]",
+    mnemonics="eXchange-Correlation - TAU kinetic energy DENsity POSitivity value",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.10.4",
+    text=r"""
+For the evaluation of the meta-GGA exchange-correlation functionals,
+the kinetic energy density (usually named tau) cannot be negative, or even too small.
+[[xc_taupos]] is the smallest value that the kinetic energy density can assume
+at the time of the evaluation of a XC functional, in ABINIT.
+When then computed kinetic energy density drops below [[xc_taupos]] before
+attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].  
+
+It has been observed that the SCF cycle using meta-GGA functionals can be quite
+hard to make converge, for systems for which there is some vacuum. In this
+case, setting [[xc_taupos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
 convergence. Of course, this will affect the numerical results somehow, and
 one should play a bit with this value to avoid incorrect calculations.
 """,

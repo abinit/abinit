@@ -1575,7 +1575,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
              call simp_gen(vxcij1(kln),ff,pawrad)
            end do
            !if Meta GGA add 1/2*[<nabla_phi_i|vxctau1|nabla_phi_j>
-           !                    -<nabla_tphi_i|vxcttau|nabla_tphi_j>]
+           !                    -<nabla_tphi_i|vxcttau1|nabla_tphi_j>]
            if (usekden==1) then
              do jln=1,basis_size
                j0ln=jln*(jln-1)/2

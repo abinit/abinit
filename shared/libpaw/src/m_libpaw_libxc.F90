@@ -54,8 +54,11 @@ module m_libpaw_libxc_funcs
  public :: libpaw_libxc_getid              ! Return identifer of a XC functional, from its name
  public :: libpaw_libxc_family_from_id     ! Retrieve family of a XC functional, from its id
  public :: libpaw_libxc_ixc                ! The value of ixc used to initialize the XC functional(s)
+ public :: libpaw_libxc_islda              ! Return TRUE if the set of XC functional(s) is LDA
  public :: libpaw_libxc_isgga              ! Return TRUE if the set of XC functional(s) is GGA or meta-GGA
  public :: libpaw_libxc_ismgga             ! Return TRUE if the set of XC functional(s) is meta-GGA
+ public :: libpaw_libxc_is_tb09            ! Return TRUE if the XC functional is Tran-Blaha 2009.
+ public :: libpaw_libxc_set_c_tb09         ! Set c parameter for Tran-Blaha 2009 functional
  public :: libpaw_libxc_needs_laplacian    ! Return TRUE if the set of XC functional uses LAPLACIAN
  public :: libpaw_libxc_needs_temperature  ! Return TRUE if the set of XC functional(s) uses the elec. temperature
  public :: libpaw_libxc_set_temperature    ! Set electronic temperature in a set of XC functional(s)
@@ -889,6 +892,44 @@ end function libpaw_libxc_ixc
 
 !----------------------------------------------------------------------
 
+!!****f* m_libpaw_libxc_funcs/libpaw_libxc_islda
+!! NAME
+!!  libpaw_libxc_islda
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used (set of) functional(s)
+!!  is a LDA or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libpaw_libxc_type)>, optional argument
+!!                     XC functionals to initialize
+!!
+!! SOURCE
+
+ function libpaw_libxc_islda(xc_functionals)
+
+!Arguments ------------------------------------
+ logical :: libpaw_libxc_islda
+ type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ libpaw_libxc_islda = .false.
+ if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
+
+ if (present(xc_functionals)) then
+   libpaw_libxc_islda=(any(xc_functionals%family==LIBPAW_XC_FAMILY_LDA) .or. &
+&                      any(xc_functionals%family==LIBPAW_XC_FAMILY_HYB_LDA))
+ else
+   libpaw_libxc_islda=(any(paw_xc_global%family==LIBPAW_XC_FAMILY_LDA) .or. &
+&                      any(paw_xc_global%family==LIBPAW_XC_FAMILY_HYB_LDA))
+ end if
+
+end function libpaw_libxc_islda
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_libpaw_libxc_funcs/libpaw_libxc_isgga
 !! NAME
 !!  libpaw_libxc_isgga
@@ -961,6 +1002,84 @@ function libpaw_libxc_ismgga(xc_functionals)
  end if
 
 end function libpaw_libxc_ismgga
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libpaw_libxc_funcs/libpaw_libxc_is_tb09
+!! NAME
+!!  libpaw_libxc_is_tb09
+!!
+!! FUNCTION
+!!  Test function to identify whether the presently used functional
+!!  is Tran-Blaha 2009 or not
+!!
+!! INPUTS
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+logical function libpaw_libxc_is_tb09(xc_functionals) result(ans)
+
+!Arguments ------------------------------------
+ type(libpaw_libxc_type),intent(in),optional :: xc_functionals(2)
+
+! *************************************************************************
+
+ ans  = .false.
+ if (.not.libpaw_xc_constants_initialized) call libpaw_libxc_constants_load()
+
+ if (present(xc_functionals)) then
+   ans = any(xc_functionals%id == libpaw_libxc_getid('XC_MGGA_X_TB09'))
+ else
+   ans = any(paw_xc_global%id == libpaw_libxc_getid('XC_MGGA_X_TB09'))
+ end if
+
+end function libpaw_libxc_is_tb09
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* libpaw_libxc_funcs/libpaw_libxcset_c_tb09
+!! NAME
+!!  libpaw_libxc_set_c_tb09
+!!
+!! FUNCTION
+!!  Set c parameter for the Tran-Blaha 2009 functional
+!!
+!! INPUTS
+!! xc_c_tb09= value of the c parameter to set for the TB09 functional
+!! [xc_functionals(2)]=<type(libxc_functional_type)>, optional argument
+!!                     Handle for XC functionals
+!!
+!! SOURCE
+
+subroutine libpaw_libxc_set_c_tb09(xc_tb09_c,xc_functionals)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: xc_tb09_c
+ type(libpaw_libxc_type),intent(inout),optional :: xc_functionals(2)
+!Local variables -------------------------------
+ integer :: ii
+
+! *************************************************************************
+
+ if (present(xc_functionals)) then
+   do ii=1,2
+     if (xc_functionals(ii)%id == libpaw_libxc_getid('XC_MGGA_X_TB09')) then
+       xc_functionals(ii)%xc_tb09_c = xc_tb09_c
+     end if
+   end do
+ else
+   do ii=1,2
+     if (paw_xc_global(ii)%id == libpaw_libxc_getid('XC_MGGA_X_TB09')) then
+       paw_xc_global(ii)%xc_tb09_c = xc_tb09_c
+     end if
+   end do
+ end if
+
+end subroutine libpaw_libxc_set_c_tb09
 !!***
 
 !----------------------------------------------------------------------
@@ -1653,13 +1772,17 @@ end function libpaw_libxc_gga_from_hybrid
 !arrays
  real(dp),target :: rhotmp(nspden),sigma(3),exctmp,vxctmp(nspden),vsigma(3)
  real(dp),target :: v2rho2(3),v2rhosigma(6),v2sigma2(6)
+ real(dp),target :: v2rholapl(3),v2sigmalapl(6),v2lapl2(3)
+ real(dp),target :: v2rhotau(3),v2sigmatau(6),v2lapltau(3),v2tau2(3)
  real(dp),target :: v3rho3(4),v3rho2sigma(9),v3rhosigma2(12),v3sigma3(10)
  real(dp),target :: lrhotmp(nspden),tautmp(nspden),vlrho(nspden),vtau(nspden)
  type(libpaw_libxc_type),pointer :: xc_funcs(:)
 #if defined LIBPAW_HAVE_LIBXC && defined LIBPAW_ISO_C_BINDING
  type(C_PTR) :: exc_c(2),vxc_c(2),vsigma_c(2),vlrho_c(2),vtau_c(2)
  type(C_PTR) :: v2rho2_c(2),v2rhosigma_c(2),v2sigma2_c(2)
- type(C_PTR) :: v3rho3_c(2),v3rho2sigma_c(2),v3rhosigma2_c(2),v3sigma3_c(2)
+ type(C_PTR) :: v2rholapl_c(2),v2sigmalapl_c(2),v2lapl2_c(2)
+ type(C_PTR) :: v2rhotau_c(2),v2sigmatau_c(2),v2lapltau_c(2),v2tau2_c(2)
+type(C_PTR) :: v3rho3_c(2),v3rho2sigma_c(2),v3rhosigma2_c(2),v3sigma3_c(2)
 #endif
 
 ! *************************************************************************
@@ -1728,10 +1851,28 @@ end function libpaw_libxc_gga_from_hybrid
      v2rho2_c(ii)=c_loc(v2rho2)
      v2sigma2_c(ii)=c_loc(v2sigma2)
      v2rhosigma_c(ii)=c_loc(v2rhosigma)
+     if (is_mgga) then
+       v2rholapl_c(ii)=c_loc(v2rholapl)
+       v2sigmalapl_c(ii)=c_loc(v2sigmalapl)
+       v2lapl2_c(ii)=c_loc(v2lapl2)
+       v2rhotau_c(ii)=c_loc(v2rhotau)
+       v2sigmatau_c(ii)=c_loc(v2sigmatau)
+       v2lapltau_c(ii)=c_loc(v2lapltau)
+       v2tau2_c(ii)=c_loc(v2tau2)
+     end if
    else
      v2rho2_c(ii)=C_NULL_PTR
      v2sigma2_c(ii)=C_NULL_PTR
      v2rhosigma_c(ii)=C_NULL_PTR
+     if (is_mgga) then
+       v2rholapl_c(ii)=C_NULL_PTR
+       v2sigmalapl_c(ii)=C_NULL_PTR
+       v2lapl2_c(ii)=C_NULL_PTR
+       v2rhotau_c(ii)=C_NULL_PTR
+       v2sigmatau_c(ii)=C_NULL_PTR
+       v2lapltau_c(ii)=C_NULL_PTR
+       v2tau2_c(ii)=C_NULL_PTR
+     end if
    end if
    if ((xc_funcs(ii)%has_kxc).and.(abs(order)>2)) then
      v3rho3_c(ii)=c_loc(v3rho3)
@@ -1830,10 +1971,12 @@ end function libpaw_libxc_gga_from_hybrid
      else if (xc_funcs(ii)%family==LIBPAW_XC_FAMILY_MGGA.or. &
 &             xc_funcs(ii)%family==LIBPAW_XC_FAMILY_HYB_GGA) then
        exctmp=zero ; vxctmp=zero ; vsigma=zero ; vlrho=zero ; vtau=zero
+       v2rho2=zero ; v2sigma2=zero ; v2rhosigma=zero
+       ! At present, we don't use 2nd derivatives involving Tau or Laplacian
        call libpaw_xc_get_mgga(xc_funcs(ii)%conf,1,rho_c,sigma_c,lrho_c,tau_c, &
 &                  exc_c(ii),vxc_c(ii),vsigma_c(ii),vlrho_c(ii),vtau_c(ii), &
-&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR, &
-&                  C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR,C_NULL_PTR)
+&                  v2rho2_c(ii),v2rhosigma_c(ii),v2rholapl_c(ii),v2rhotau_c(ii),v2sigma2_c(ii), &
+&                  v2sigmalapl_c(ii),v2sigmatau_c(ii),v2lapl2_c(ii),v2lapltau_c(ii),v2tau2_c(ii))
      end if
 #endif
 
@@ -1865,9 +2008,11 @@ end function libpaw_libxc_gga_from_hybrid
              d2vxc(ipts,4)=d2vxc(ipts,4)+v3rho3(4)
            endif
          endif
-!      ----- GGA -----
+!      ----- GGA or mGGA -----
        else if (xc_funcs(ii)%family==LIBPAW_XC_FAMILY_GGA.or. &
-&               xc_funcs(ii)%family==LIBPAW_XC_FAMILY_HYB_GGA) then
+&               xc_funcs(ii)%family==LIBPAW_XC_FAMILY_HYB_GGA.or. &
+&               xc_funcs(ii)%family==LIBPAW_XC_FAMILY_MGGA.or. &
+&               xc_funcs(ii)%family==LIBPAW_XC_FAMILY_HYB_MGGA) then
          if (xc_funcs(ii)%kind==LIBPAW_XC_EXCHANGE) then
            if (nspden==1) then
              dvxc(ipts,1)=v2rho2(1)*two
@@ -1971,7 +2116,6 @@ end subroutine libpaw_libxc_getvxc
  integer  :: ii,ipts
  logical :: fixed_c_tb09,is_mgga_tb09
  real(dp) :: cc
- character(len=500) :: msg
 !arrays
  type(libpaw_libxc_type),pointer :: xc_funcs(:)
  real(dp),allocatable :: gnon(:)
@@ -2002,9 +2146,9 @@ end subroutine libpaw_libxc_getvxc
      do ii=1,2
        if (abs(xc_funcs(ii)%xc_tb09_c-99.99_dp)>tol12) cc=xc_funcs(ii)%xc_tb09_c
      end do
-     write(msg,'(2a,f9.6)' ) ch10,&
-&    'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
-     call wrtout(std_out,msg,'COLL')
+     !write(msg,'(2a,f9.6)' ) ch10,&
+&    !'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
+     !call wrtout(std_out,msg,'COLL')
 !  C is computed
    else
      LIBPAW_ALLOCATE(gnon,(npts))
@@ -2021,8 +2165,8 @@ end subroutine libpaw_libxc_getvxc
      end do
      cc= -0.012_dp + 1.023_dp*sqrt(sum(gnon)/npts)
      LIBPAW_DEALLOCATE(gnon)
-     write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
-     call wrtout(std_out,msg,'COLL')
+     !write(msg,'(2a,f9.6)' ) ch10,'In the mGGA functional TB09, c = ',cc
+     !call wrtout(std_out,msg,'COLL')
    end if
 
 !  Set c in XC data structure
@@ -2370,6 +2514,7 @@ module m_libpaw_libxc
 & libxc_functionals_ixc               => libpaw_libxc_ixc, &
 & libxc_functionals_isgga             => libpaw_libxc_isgga, &
 & libxc_functionals_ismgga            => libpaw_libxc_ismgga, &
+& libxc_functionals_is_tb09           => libpaw_libxc_is_tb09, &
 & libxc_functionals_needs_laplacian   => libpaw_libxc_needs_laplacian, &
 & libxc_functionals_needs_temperature => libpaw_libxc_needs_temperature, &
 & libxc_functionals_set_temperature   => libpaw_libxc_set_temperature, &
