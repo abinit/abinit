@@ -152,6 +152,11 @@ P           mkmem           1
            ntypat           1
               occ      2.000000  0.666667  0.666667  0.666667
            occopt           0
+        optforces1          2
+        optforces2          2
+        optforces3          0
+        optforces4          2
+        optforces5          0
         optstress1          1
         optstress2          0
         optstress3          0
@@ -602,7 +607,7 @@ lattice_vectors:
 lattice_lengths: [   8.48528,    8.48528,    8.48528, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   4.3200000E+02
-convergence: {deltae: -1.768E-06, res2:  5.881E-08, residm:  1.009E-14, diffor: null, }
+convergence: {deltae: -1.768E-06, res2:  5.881E-08, residm:  1.009E-14, diffor:  0.000E+00, }
 etotal    :  -4.09545898E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.02482993E-03
@@ -610,9 +615,8 @@ cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
-cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -631,14 +635,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 12.000000000000 12.000000000000 bohr
               =  6.350126503080  6.350126503080  6.350126503080 angstroms
  prteigrs : about to open file t13o_DS3_EIG
@@ -896,7 +892,7 @@ lattice_vectors:
 lattice_lengths: [   8.48528,    8.48528,    8.48528, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   4.3200000E+02
-convergence: {deltae:  1.822E-07, res2:  9.944E-10, residm:  6.559E-16, diffor: null, }
+convergence: {deltae:  1.822E-07, res2:  9.944E-10, residm:  6.559E-16, diffor:  0.000E+00, }
 etotal    :  -4.07715087E+00
 entropy   :   0.00000000E+00
 fermie    :   1.70563918E-02
@@ -904,9 +900,8 @@ cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
-cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -925,14 +920,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000 12.000000000000 12.000000000000 bohr
               =  6.350126503080  6.350126503080  6.350126503080 angstroms
  prteigrs : about to open file t13o_DS5_EIG
@@ -973,9 +960,9 @@ band_energy         : -6.21353953269182E-01
            etotal5    -4.0771508712E+00
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart3    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart3     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
             fcart4    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart5    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart5     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            getwfk1          0
            getwfk2          1
@@ -1005,6 +992,11 @@ P           mkmem           1
            ntypat           1
               occ      2.000000  0.666667  0.666667  0.666667
            occopt           0
+        optforces1          2
+        optforces2          2
+        optforces3          0
+        optforces4          2
+        optforces5          0
         optstress1          1
         optstress2          0
         optstress3          0

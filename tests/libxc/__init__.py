@@ -34,6 +34,8 @@ inp_files = [
 "t20.abi",
 "t21.abi",
 "t22.abi",
+"t23.abi",
+"t24.abi",
 "t41.abi",
 "t42.abi", 
 "t43.abi", 
