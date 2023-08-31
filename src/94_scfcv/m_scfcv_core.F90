@@ -1387,11 +1387,12 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
        dummy_nhatgr = .True.
      end if
 
+!    Compute trial potential
      call setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &     istep,kxc,mgfftf,moved_atm_inside,moved_rhor,mpi_enreg,&
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,psps%ntypat,&
-&     n1xccc,n3xccc,optene,pawrad,pawtab,ph1df,psps,rhog,rhor,rmet,rprimd,&
-&     strsxc,ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
+&     n1xccc,n3xccc,optene,pawang,pawrad,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
+&     rmet,rprimd,strsxc,ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 &     xccc3d,xred,electronpositron=electronpositron,&
 &     taur=taur,vxc_hybcomp=vxc_hybcomp,vxctau=vxctau,add_tfw=tfw_activated,xcctau3d=xcctau3d)
 
@@ -1443,7 +1444,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      option=0;if (dtset%iscf>0.and.dtset%iscf<10.and.nstep>0) option=1
      call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,ipert,dtset%ixc,my_natom,dtset%natom,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,&
-&     pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&     pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,&
+&     dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &     hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,&
 &     electronpositron=electronpositron,vpotzero=vpotzero)
@@ -1664,6 +1666,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 !  ######################################################################
 !  In case of density mixing or wavelet handling, compute the total energy
 !  ----------------------------------------------------------------------
+
    call timab(1452,1,tsec)
    if (dtset%iscf>=10 .or. wvlbigdft) then
      optene = 1  ! use double counting scheme (default)
@@ -1734,6 +1737,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      if (quit==1) exit
    end if
 
+
 !  ######################################################################
 !  Mix the total density (if required)
 !  ----------------------------------------------------------------------
@@ -1775,6 +1779,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     n1xccc,pawrhoij,pawtab,ph1df,psps,rhog,rhor,&
 &     rprimd,susmat,psps%usepaw,vtrial,wvl%descr,wvl%den,xred,&
 &     mix_mgga=mix_mgga,taug=taug,taur=taur,tauresid=nvtauresid)
+
    end if   ! iscf>=10
 
    call timab(1455,2,tsec)
@@ -1847,10 +1852,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      end if
 
 !    Compute new potential from the trial density
-
      optene=2*optres;if(psps%usepaw==1) optene=2
-     call rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,istep,kxc,mpi_enreg,nfftf,ngfftf, &
-&     nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,optene,optres,optxc,&
+     call rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,istep,&
+&     kxc,mpi_enreg,nfftf,ngfftf,nhat,nhatgr,nhatgrdim,nkxc,nvresid,n3xccc,&
+&     optene,optres,optxc,pawang,pawrad,pawrhoij,pawtab,&
 &     rhog,rhor,rprimd,strscondft,strsxc,ucvol_local,psps%usepaw,usexcnhat,&
 &     vhartr,vnew_mean,vpsp,vres_mean,res2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
 &     electronpositron=electronpositron,taur=taur,vxctau=vxctau,vtauresid=nvtauresid,&
@@ -1879,7 +1884,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,&
 &       paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&       pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &       hyb_mixing=hyb_mixing,hyb_mixing_sr=hyb_mixing_sr,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,&
 &       electronpositron=electronpositron)
 

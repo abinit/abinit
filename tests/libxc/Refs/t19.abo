@@ -92,6 +92,9 @@ _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.208 Mbytes.
            getden1          0
            getden2          0
            getden3         -1
+          getkden1          0
+          getkden2          0
+          getkden3         -1
            getwfk1          0
            getwfk2         -1
            getwfk3          0
@@ -145,6 +148,9 @@ P           mkmem3          1
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
+        optforces1          2
+        optforces2          0
+        optforces3          0
         optstress1          1
         optstress2          0
         optstress3          0
@@ -454,7 +460,7 @@ lattice_vectors:
 lattice_lengths: [   7.02320,    7.02320,    7.02320, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.4495680E+02
-convergence: {deltae:  1.353E-06, res2:  1.000E-09, residm:  1.881E-13, diffor: null, }
+convergence: {deltae:  1.353E-06, res2:  1.000E-09, residm:  1.881E-13, diffor:  0.000E+00, }
 etotal    :  -1.78104198E+01
 entropy   :   0.00000000E+00
 fermie    :  -1.98817936E-01
@@ -462,9 +468,8 @@ cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ar]
-cartesian_forces: # hartree/bohr
-- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -483,14 +488,6 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
-
- cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
-
- cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
- frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  9.932300000000  9.932300000000  9.932300000000 bohr
               =  5.255946788878  5.255946788878  5.255946788878 angstroms
  prteigrs : about to open file t19o_DS2_EIG
@@ -626,11 +623,14 @@ force_length_stats: {min: null, max: null, mean: null, }
            etotal1    -2.1162165507E+01
            etotal2    -1.7810419824E+01
             fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
-            fcart2    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            getden1          0
            getden2          0
            getden3         -1
+          getkden1          0
+          getkden2          0
+          getkden3         -1
            getwfk1          0
            getwfk2         -1
            getwfk3          0
@@ -684,6 +684,9 @@ P           mkmem3          1
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000
+        optforces1          2
+        optforces2          0
+        optforces3          0
         optstress1          1
         optstress2          0
         optstress3          0

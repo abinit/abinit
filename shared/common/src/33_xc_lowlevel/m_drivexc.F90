@@ -640,7 +640,7 @@ end subroutine xcmult
 !! mkdenpos
 !!
 !! FUNCTION
-!! Make a ground-state density positive everywhere:
+!! Make a density positive everywhere:
 !! when the density (or spin-density) is smaller than xc_denpos,
 !! set it to the value of xc_denpos
 !!
