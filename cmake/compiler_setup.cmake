@@ -120,6 +120,13 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "NVHPC") # NVFORTRAN
   add_compile_options(
     "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-traceback>")
 
+  # Replace "-fast" with "-O2" flag in C++ flags as it will cause issues with nvcc/Kokkos
+  if(CMAKE_BUILD_TYPE MATCHES "Release|MinSizeRel|RelWithDebInfo")
+    string(REGEX REPLACE "-fast" "-O2" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+    string(REGEX REPLACE "-fast" "-O2" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+    string(REGEX REPLACE "-fast" "-O2" CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL}")
+  endif()
+
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "PGI")
 
   # TODO
