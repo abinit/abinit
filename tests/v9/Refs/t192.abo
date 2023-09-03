@@ -17,10 +17,10 @@
 .Starting date : Thu 17 Aug 2023.
 - ( at 21h16 )
   
-- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/torrent_mgga-tb09/tests/TestBot_MPI1/v9_t17/t17.abi
-- output file    -> t17.abo
-- root for input  files -> t17i
-- root for output files -> t17o
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/torrent_mgga-tb09/tests/TestBot_MPI1/v9_t192/t192.abi
+- output file    -> t192.abo
+- root for input  files -> t192i
+- root for output files -> t192o
 
 
  Symmetries : the unit cell is not primitive
@@ -314,7 +314,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  length scales=  6.873756006790  6.873756006790 22.206443012000 bohr
               =  3.637435016202  3.637435016202 11.751143525803 angstroms
  prteigrs : about to open file t192o_EIG
- Fermi (or HOMO) energy (hartree) =  -0.05301   Average Vxc (hartree)=  -0.30957 
+ Fermi (or HOMO) energy (hartree) =  -0.05301   Average Vxc (hartree)=  -0.30957
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 16, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.74048   -0.72076   -0.71968   -0.69442   -0.36361   -0.28642   -0.28632   -0.16513

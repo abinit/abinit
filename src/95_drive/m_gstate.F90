@@ -1582,7 +1582,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
 
    if (dtset%prtddb==1) then
-    ! Write the DDB
+     ! Write the DDB
      call ddb%write(ddb_hdr, dtfil%fnameabo_ddb, with_psps=0)
    end if
 
