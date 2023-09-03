@@ -770,7 +770,7 @@ subroutine sigma_pade_init(self, npts, zmesh, sigc_cvals, branch_cut)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii
+! integer :: ii
 
 ! *************************************************************************
 
