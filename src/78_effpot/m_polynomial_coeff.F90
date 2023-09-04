@@ -1882,6 +1882,55 @@ subroutine polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,
    end do
  end do
 
+
+
+
+! filter the list_symcoeff_tmp2 to remove the terms which the equivalent cannot be found. 
+! This can happen when the cell is too small and the equivalent is out of the cell
+
+block 
+integer :: list_symcoeff_tmp3(6,ncoeff,nsym)
+integer :: counter_good, counter_bad, ncoeff_orig
+integer :: coeffmap(ncoeff)
+ncoeff_orig=ncoeff
+counter_bad=0
+counter_good=0
+coeffmap(:)=0
+! copy the list_symcoeff_tmp2 to list_symcoeff_tmp3
+list_symcoeff_tmp3 = list_symcoeff_tmp2
+
+ do icoeff = 1,ncoeff
+   if(any(list_symcoeff_tmp2(6,icoeff,:)==0)) then
+    counter_bad=counter_bad+1
+  else
+    counter_good=counter_good+1
+    coeffmap(icoeff)=counter_good
+  endif
+ end do
+
+ ABI_SFREE(list_symcoeff_tmp2)
+ ncoeff=ncoeff-counter_bad
+ ABI_MALLOC(list_symcoeff_tmp2,(6,ncoeff,nsym))
+ counter_good=0
+ do icoeff = 1,ncoeff_orig
+   if(.not. (any(list_symcoeff_tmp3(6,icoeff,:)==0))) then
+  counter_good=counter_good+1
+  list_symcoeff_tmp2(:,counter_good,:)=list_symcoeff_tmp3(:,icoeff,:)
+  do isym = 1,nsym
+    if(coeffmap(list_symcoeff_tmp2(6,counter_good,isym)) /= 0) then
+      list_symcoeff_tmp2(6,counter_good,isym)=coeffmap(list_symcoeff_tmp2(6,counter_good,isym))
+    else
+      ABI_BUG("coeffmap is not correct.")
+    endif
+ end do
+endif
+ end do
+ 
+
+
+end block
+
+
 !2.5/do checks
  do icoeff = 1,ncoeff
    do isym = 1,nsym
