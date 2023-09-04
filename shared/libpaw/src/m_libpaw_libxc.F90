@@ -2147,7 +2147,7 @@ end subroutine libpaw_libxc_getvxc
        if (abs(xc_funcs(ii)%xc_tb09_c-99.99_dp)>tol12) cc=xc_funcs(ii)%xc_tb09_c
      end do
      !write(msg,'(2a,f9.6)' ) ch10,&
-&    !'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
+     !& 'In the mGGA functional TB09, c is fixed by the user and is equal to ',cc
      !call wrtout(std_out,msg,'COLL')
 !  C is computed
    else
