@@ -649,7 +649,6 @@ contains
    function is_duplicate_coeff(coeff, lcoeffs, ncoeff_to_compare) result(found)
      type(polynomial_coeff_type), intent(in):: coeff, lcoeffs(:)
      integer, intent(in) :: ncoeff_to_compare
-     integer:: ii
      logical :: found
      found =.False.
      do ii=1, ncoeff_to_compare
@@ -2363,6 +2362,12 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
 !!                        fixed part of the model (more often harmonic part)
 !! sqomega(ntime) =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
+!! weight(ntime) = weight of each configuration
+!! fit_on(3) = Flag to know if we fit the energy,  forces and stresses
+!! fit_factors(3) = Factors to apply to the energy, forces and stresses
+!! nbound = Number of bound coefficients
+!! min_bound_coeff = Minimum value for the bound coefficients
+!! ignore_bound = Flag to ignore the bound coefficients
 !!
 !! OUTPUT
 !! coefficients(ncoeff_fit) = Values of the coefficients
@@ -2379,7 +2384,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energy_coeffs,energy_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
 &                                     strten_coeffs,strten_diff,sqomega,fit_on,fit_factors, nbound, &
-&                                     min_bound_coeff, ignore_bound)
+&                                     min_bound_coeff, ignore_bound, weight)
 
  implicit none
 
@@ -2400,6 +2405,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  real(dp), intent(in) :: min_bound_coeff
  logical,intent(in)  :: fit_on(3)
  logical,intent(in)  :: ignore_bound
+ real(dp), intent(in) :: weight(ntime)
 
 !Local variables-------------------------------
 !scalar
@@ -2462,12 +2468,12 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
        jcoeff_tmp = list_coeffs(jcoeff)
        enu = energy_coeffs(jcoeff_tmp,itime)
        if(fit_on(3))then
-         etmpA =  emu*enu/(sqomega(itime)**(1.0/2.0))
-         A(icoeff,jcoeff) = A(icoeff,jcoeff) + efact*etmpA
+         etmpA =  emu*enu/(sqomega(itime)**(1.0/2.0)) 
+         A(icoeff,jcoeff) = A(icoeff,jcoeff) + efact*etmpA* weights(itime)
        endif
      end do
      if(fit_on(3))then
-        etmpB = etmpB + energy_diff(itime)*emu/(sqomega(itime)**(1.0/2.0)) !/ (sqomega(itime)**3)
+        etmpB = etmpB + energy_diff(itime)*emu/(sqomega(itime)**(1.0/2.0)) * weights(itime)!/ (sqomega(itime)**3)
      else
         etmpB = zero ! REMOVE THIS LINE TO TAKE INTO ACOUNT THE ENERGY
      endif
@@ -2478,11 +2484,11 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
          do jcoeff=1,ncoeff_fit
            jcoeff_tmp = list_coeffs(jcoeff)
            fnu = fcart_coeffs(mu,ia,jcoeff_tmp,itime)
-           ftmpA =  fmu*fnu
-           if(fit_on(1))A(icoeff,jcoeff) = A(icoeff,jcoeff) + ffact*ftmpA
+           ftmpA =  fmu*fnu 
+           if(fit_on(1))A(icoeff,jcoeff) = A(icoeff,jcoeff) + ffact*ftmpA* weights(itime)
          end do
          if(fit_on(1))then
-           ftmpB = ftmpB + fcart_diff(mu,ia,itime)*fmu
+           ftmpB = ftmpB + fcart_diff(mu,ia,itime)*fmu* weights(itime)
          else
            ftmpB = zero
          endif
@@ -2495,10 +2501,10 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
          jcoeff_tmp = list_coeffs(jcoeff)
          snu = strten_coeffs(mu,itime,jcoeff_tmp)
          stmpA =  sqomega(itime)*smu*snu
-         if(fit_on(2))A(icoeff,jcoeff) = A(icoeff,jcoeff) + sfact*stmpA
+         if(fit_on(2))A(icoeff,jcoeff) = A(icoeff,jcoeff) + sfact*stmpA *weights(itime)
        end do
         if(fit_on(2))then
-          stmpB = stmpB + sqomega(itime)*strten_diff(mu,itime)*smu
+          stmpB = stmpB + sqomega(itime)*strten_diff(mu,itime)*smu * weights(itime)
         else
           stmpB = zero
         endif
@@ -2581,6 +2587,62 @@ end if
 end subroutine fit_polynomial_coeff_solve
 !!***
 
+
+//!****f* m_fit_polynomial_coeff/get_weight_from_forces
+//!
+//! NAME
+//! get_weight_from_forces
+//!
+//! FUNCTION
+//! Compute the weight for the forces
+//!
+//! INPUTS
+//! DFT_forces(3,natom,ntime) = DFT forces
+//! temperature: a scalar, the temperature in K, which is a factor to tune how much the forces 
+//!              are taken into account in the fit
+//! ntime: a scalar, the number of time steps
+//! natom: a scalar, the number of atoms
+//!
+//! OUTPUT
+//! weight(ntime) = the weight for each time step
+//!
+//! SOURCE
+subroutine get_weight_from_forces(DFT_forces, temperature, ntime, natom, weight)
+  real(dp), intent(in) :: DFT_forces(3,natom,ntime)
+  real(dp), intent(in) :: temperature
+  integer, intent(in) :: ntime, natom
+  real(dp), intent(out) :: weight(ntime)
+  integer :: itime, iatom
+  ! Boltzmann constant in Ha/K 
+  real(dp), parameter :: kb = 3.166815d-6
+  real(dp) :: average_forces(ntime)
+
+  if (temperature <= 0.0_dp) then
+    weights=1.0_dp
+  else
+     ! compute the average norm of force for each atom
+     average_forces = 0.0_dp
+      do itime=1,ntime
+        do iatom=1,natom
+          average_forces(itime) = average_forces(itime) + norm2(DFT_forces(:,iatom,itime))
+        end do
+        average_forces(itime) = average_forces(itime)/natom
+      end do
+
+      ! compute the weight
+      weight = 0.0_dp
+      do itime=1,ntime
+        weight(itime) = exp(-average_forces(itime)/(kb*temperature))
+      end do
+
+      ! normalize the weight
+      weight = weight/sum(weight)* ntime
+
+  end if
+end subroutine  get_weight_from_forces
+//!***
+
+  
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeGF
 !!
 !! NAME
@@ -2608,6 +2670,7 @@ end subroutine fit_polynomial_coeff_solve
 !! ncoeff_fit = Number of coefficients fitted
 !! ncoeff_max = Maximum number of coeff in the list
 !! ntime = Number of time in the history
+!! weight(ntime) = weight for each time step
 !! strten_coeffs(ncoeff,3,natom,ntime)= value of the stresses for each coefficient
 !!                                      (1/ucvol factor is taking into acount) (Ha/Bohr^3)
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
@@ -2622,7 +2685,7 @@ end subroutine fit_polynomial_coeff_solve
 subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff,&
 &                                         fcart_coeffs,fcart_diff,gf_value,list_coeffs,&
 &                                         natom,ncoeff_fit,ncoeff_max,ntime,strten_coeffs,&
-&                                         strten_diff,sqomega)
+&                                         strten_diff,sqomega, weight)
 
  implicit none
 
@@ -2638,6 +2701,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(in) :: coefficients(ncoeff_fit)
+ real(dp), intent(in) :: weight(ntime)
  real(dp),intent(out) :: gf_value(4)
 !Local variables-------------------------------
 !scalar
@@ -2665,10 +2729,10 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
    emu = zero
    do icoeff=1,ncoeff_fit
      icoeff_tmp = list_coeffs(icoeff)
-     emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime)
+     emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime) 
    end do
 !   uncomment the next line to be consistent with the definition of the goal function
-   etmp = etmp + (energy_diff(itime)-emu)**2/(sqomega(itime)**(1.0/2.0))
+   etmp = etmp + (energy_diff(itime)-emu)**2* weight(itime)/(sqomega(itime)**(1.0/2.0))
 !   uncomment the next get a measure in Ha instead of Ha^2
 !   etmp = etmp + abs(energy_diff(itime)-emu)
 !  Fill forces
@@ -2679,7 +2743,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
          icoeff_tmp = list_coeffs(icoeff)
          fmu =  fmu + coefficients(icoeff)*fcart_coeffs(mu,ia,icoeff_tmp,itime)
        end do
-       ftmp = ftmp + (fcart_diff(mu,ia,itime)-fmu)**2
+       ftmp = ftmp + (fcart_diff(mu,ia,itime)-fmu)**2* weight(itime)
      end do !End loop dir
    end do !End loop natom
    do mu=1,6
@@ -2688,7 +2752,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
        icoeff_tmp = list_coeffs(icoeff)
        smu = smu + coefficients(icoeff)*strten_coeffs(mu,itime,icoeff_tmp)
      end do
-     stmp = stmp + sqomega(itime)*(strten_diff(mu,itime)-smu)**2
+     stmp = stmp + sqomega(itime)* weight(itime) *(strten_diff(mu,itime)-smu)**2
    end do !End loop stress dir
  end do ! End loop time
 
@@ -3011,6 +3075,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! compute_anharmonic = TRUE if the anharmonic part of the effective potential
 !!                           has to be taking into acount
 !! print_file = if True, a ASCII file with the difference in energy will be print
+!! weights(ntime) = weight for each time step
 !!
 !! OUTPUT
 !! mse  =  Mean square error of the energy   (Hatree)
@@ -3020,7 +3085,8 @@ end subroutine fit_polynomial_coeff_getFS
 !! SOURCE
 
 subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,comm,&
-&                                          compute_anharmonic,print_file,filename,scup_dtset,prt_ph)
+&                                          compute_anharmonic,print_file,filename,scup_dtset,&
+&                                          prt_ph, weights)
 
  implicit none
 
@@ -3036,6 +3102,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !Strings/Characters
  character(len=fnlen),optional,intent(in) :: filename
  type(scup_dtset_type),optional,intent(inout) :: scup_dtset
+ real(dp),intent(in) :: weights(ntime)
 !Local variables-------------------------------
 !scalar
 integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
@@ -3175,14 +3242,14 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
     endif
    endif!(need_prt_ph)
 
-   mse  = mse  + ((hist%etot(ii) - energy))**2/(sqomega(ii)**(1.0/2.0)) !+abs(hist$etot(ii) - energy)
+   mse  = mse  + weights(ii) * ((hist%etot(ii) - energy))**2/(sqomega(ii)**(1.0/2.0)) !+abs(hist$etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
      do mu=1,3   ! Loop over cartesian directions
-       msef = msef + (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2
+       msef = msef + weights(ii) * (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2
      end do
    end do
    do mu=1,6 ! Loop over stresses
-     mses = mses + sqomega(ii)*(hist%strten(mu,ii) - strten(mu))**2
+     mses = mses + weights(ii) * sqomega(ii)*(hist%strten(mu,ii) - strten(mu))**2
    end do
  end do ! End loop itime
    if(need_prt_ph)then
