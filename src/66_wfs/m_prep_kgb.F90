@@ -26,6 +26,7 @@ module m_prep_kgb
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_abi_linalg
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab

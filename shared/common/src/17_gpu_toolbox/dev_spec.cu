@@ -401,7 +401,7 @@ extern "C" void copy_from_gpu_(void *cpu_ptr, void **gpu_ptr, const size_t* size
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, const size_t* size)
+extern "C" void copy_gpu_to_gpu_cpp_(void **dest_gpu_ptr, void **src_gpu_ptr, const size_t* size)
 {
   if (cudaMemcpy(*dest_gpu_ptr, *src_gpu_ptr, *size, cudaMemcpyDeviceToDevice) != cudaSuccess)
   {
@@ -424,18 +424,13 @@ extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, const 
 /*  None                                                                      */
 /*============================================================================*/
 
-extern "C" void gpu_memset_(void **gpu_ptr, const int32_t* value, const size_t* size_in_bytes)
+extern "C" void gpu_memset_cpp_(void **gpu_ptr, const int32_t* value, const size_t* size_in_bytes)
 {
   if(cudaMemset(*gpu_ptr, *value, *size_in_bytes)!=cudaSuccess){
     fprintf(stderr, "ERROR: gpu_memset at address %p failed : %s\n",*gpu_ptr,cudaGetErrorString(cudaGetLastError()));
     fflush(stderr);
     abi_cabort();
   }
-}
-
-extern "C" void gpu_memset_omp_(void *gpu_ptr, const int32_t* value, const size_t* size_in_bytes)
-{
-  CUDA_API_CHECK(cudaMemset(gpu_ptr, *value, *size_in_bytes));
 }
 
 /*============================================================================*/
