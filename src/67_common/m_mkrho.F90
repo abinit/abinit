@@ -476,7 +476,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
              end do ! end iband=1,nband_k
 
-             if (dtset%use_gpu_cuda == 1) then
+             if (dtset%use_gpu_cuda == ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
                call gpu_fourwf(1,&     ! cplex
                  &     rhoaug,&        ! denpot
@@ -502,9 +502,33 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  &     tim_fourwf,&          ! tim_fourwf
                  &     weight_t,&            ! weight_r
                  &     weight_t)             ! weight_i
-#else
-               call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support.")
-               call abi_abort('COLL')
+#endif
+             else if (dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA
+               call gpu_fourwf_managed(1,&     ! cplex
+                 &     rhoaug,&        ! denpot
+                 &     cwavef(:,:,1),& ! fofgin
+                 &     dummy,&         ! fofgout
+                 &     wfraug,&        ! fofr
+                 &     gbound,&        ! gboundin
+                 &     gbound,&        ! gboundout
+                 &     istwf_k,&       ! istwf_k
+                 &     kg_k,&          ! kg_kin
+                 &     kg_k,&          ! kg_kout
+                 &     dtset%mgfft,&   ! mgfft
+                 &     mpi_enreg,&     ! mpi_enreg
+                 &     nband_k,&       ! ndat
+                 &     dtset%ngfft,&   ! ngfft
+                 &     npw_k,&         ! npwin
+                 &     1,&             ! npwout
+                 &     n4,&            ! n4
+                 &     n5,&            ! n5
+                 &     n6,&            ! n6
+                 &     1,&             ! option
+                 &     mpi_enreg%paral_kgb,& ! paral_kgb
+                 &     tim_fourwf,&          ! tim_fourwf
+                 &     weight_t,&            ! weight_r
+                 &     weight_t)             ! weight_i
 #endif
              else if (dtset%use_gpu_cuda == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD

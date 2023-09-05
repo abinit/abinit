@@ -1,8 +1,8 @@
 //{\src2tex{textfont=tt}}
-//****f* ABINIT/gpu_fourwf
+//****f* ABINIT/gpu_fourwf_managed
 //
 // NAME
-// gpu_fourwf
+// gpu_fourwf_managed
 //
 // FUNCTION
 // Carry out composite Fourier transforms between real and reciprocal (G) space.
@@ -114,23 +114,24 @@ static cufftHandle plan_fft;
 //GPU ffts buffers
 static double *work_gpu;
 static double *fofr_gpu;
-static double *denpot_gpu;
 static double *weightr_gpu;
 static double *weighti_gpu;
-static double *fofgin_gpu;
-static double *fofgout_gpu;
-static int *kg_kin_gpu;
-static int *kg_kout_gpu;
 
 
 //Transfers buffers in pinned memory for async memcopy between cpu & gpu
-static double *buff_denpot;
 static double *buff_weightr;
 static double *buff_weighti;
 //static double *buff_kgkout;
 
+extern "C" void gpu_check_pointer_(void *ptr, const char* message="")
+{
+  cudaPointerAttributes pointer_attributes;
+  cudaPointerGetAttributes (&pointer_attributes, ptr);
+  printf("[GPU DEBUG %s] : ptr=%p pointer attribute type=%s\n", message, ptr, cudaMemoryTypeToString(pointer_attributes.type));
+  fflush(stdout);
+}
 
-extern "C" void gpu_fourwf_(int *cplex,
+extern "C" void gpu_fourwf_managed_(int *cplex,
                             double *denpot,
                             double *fofgin,
                             double *fofgout,
@@ -213,9 +214,17 @@ extern "C" void gpu_fourwf_(int *cplex,
     alloc_gpu_fourwf_(ngfft,ndat,npwin,npwout);
   }//end if "fft size changed"
 
+  int deviceId;
+  CHECK_CUDA_ERROR( cudaGetDevice(&deviceId) );
+  if(*option!=3) {
+    //printf("[debug prefetch] &fofgin=%p fofgin=%f npwin=%d ndat=%d, deviceId=%d\n",fofgin, *fofgin,  *npwin, *ndat, deviceId);
+    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgin, 2*(*npwin)*(*ndat)*sizeof(double), deviceId) );
+  }
+
+  if(*option==2 || *option==3)
+    CHECK_CUDA_ERROR( cudaMemPrefetchAsync ( fofgout, 2*(*npwout)*(*ndat)*sizeof(double), deviceId) );
+
   //memcpy cpu => buffer
-  if(*option == 1 || *option == 2)
-    memcpy(buff_denpot,denpot,nfft_tot*sizeof(double));
   if(*option==1){
     memcpy(buff_weightr,weight_r,(*ndat)*sizeof(double));
     memcpy(buff_weighti,weight_i,(*ndat)*sizeof(double));
@@ -225,13 +234,6 @@ extern "C" void gpu_fourwf_(int *cplex,
   }
 
   if(*option!=3){
-    CHECK_CUDA_ERROR( cudaMemcpy(kg_kin_gpu,kg_kin,3*(*npwin)*sizeof(int),cudaMemcpyHostToDevice) );
-    CHECK_CUDA_ERROR( cudaMemcpy(fofgin_gpu,fofgin,2*(*npwin)*(*ndat)*sizeof(double),cudaMemcpyHostToDevice) );
-
-    //We launch async transfert of denpot
-    if(*option == 1 || *option == 2){
-      CHECK_CUDA_ERROR( cudaMemcpyAsync(denpot_gpu,buff_denpot,nfft_tot*sizeof(double),cudaMemcpyHostToDevice,stream_cpy) );
-    }
     //We launch async transfert of denpot
     if(*option == 1){
       CHECK_CUDA_ERROR( cudaMemcpyAsync(weightr_gpu,buff_weightr,(*ndat)*sizeof(double),cudaMemcpyHostToDevice,stream_cpy) );
@@ -239,7 +241,7 @@ extern "C" void gpu_fourwf_(int *cplex,
     }
 
     //call preprocessing routine on gpu
-    gpu_sphere_in_(fofgin_gpu,work_gpu,kg_kin_gpu,npwin,&n1,&n2,&n3,ndat,istwf_k,&stream_compute);
+    gpu_sphere_in_(fofgin,work_gpu,kg_kin,npwin,&n1,&n2,&n3,ndat,istwf_k,&stream_compute);
 
     //call backward fourrier transform on gpu work_gpu => fofr_gpu
     CHECK_CUDA_ERROR( FFTEXECC2C(plan_fft,(cucmplx *)work_gpu,(cucmplx *)fofr_gpu,CUFFT_INVERSE) );
@@ -257,17 +259,17 @@ extern "C" void gpu_fourwf_(int *cplex,
     CHECK_CUDA_ERROR( cudaStreamSynchronize(stream_cpy) );
 
     //call density accumulation routine on gpu
-    gpu_density_accumulation_(fofr_gpu,denpot_gpu,weightr_gpu,weighti_gpu,&nfft_tot,ndat,&stream_compute);
-
-    //We get denpot back on cpu
-    CHECK_CUDA_ERROR( cudaMemcpy(denpot,denpot_gpu,nfft_tot*sizeof(double),cudaMemcpyDeviceToHost) );
+    gpu_density_accumulation_(fofr_gpu,denpot,weightr_gpu,weighti_gpu,&nfft_tot,ndat,&stream_compute);
   }
 
   if(*option==2){
     //We finished denpot transfert
     cudaStreamSynchronize(stream_cpy);
     //call gpu routine to  Apply local potential
-    gpu_apply_local_potential_((double2*)fofr_gpu,denpot_gpu,&nfft_tot,ndat,&stream_compute);
+    gpu_apply_local_potential_((double2*)fofr_gpu,denpot,&nfft_tot,ndat,&stream_compute);
+
+    // when using managed memory, do a device sync before re-using data on host
+    CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
   }
 
   if(*option==2 || *option==3){
@@ -276,18 +278,19 @@ extern "C" void gpu_fourwf_(int *cplex,
     CHECK_CUDA_ERROR( FFTEXECC2C(plan_fft,(cucmplx *)fofr_gpu,(cucmplx *)work_gpu,CUFFT_FORWARD) );
 
     //call post processing  routine on gpu
-    CHECK_CUDA_ERROR( cudaMemcpy(kg_kout_gpu,kg_kout,3*(*npwout)*sizeof(int),cudaMemcpyHostToDevice) );
-    gpu_sphere_out_(fofgout_gpu,work_gpu,kg_kout_gpu,npwout,&n1,&n2,&n3,ndat,&stream_compute);
+    gpu_sphere_out_(fofgout,work_gpu,kg_kout,npwout,&n1,&n2,&n3,ndat,&stream_compute);
 
-    //We get fofgout back on cpu
-    CHECK_CUDA_ERROR( cudaMemcpy(fofgout,fofgout_gpu,2*(*npwout)*(*ndat)*sizeof(double),cudaMemcpyDeviceToHost) );
   }
 
-}//end subroutine gpu_fourwf
+  // when using managed memory, do a device sync before re-using data on host
+  CHECK_CUDA_ERROR( cudaDeviceSynchronize() );
+
+}//end subroutine gpu_fourwf_managed
+
 
 
 //Memory allocation routine
-extern "C" void alloc_gpu_fourwf_(int *ngfft, int *ndat, int *npwin, int *npwout)
+extern "C" void alloc_gpu_fourwf_managed_(int *ngfft, int *ndat, int *npwin, int *npwout)
 {
 
   gpu_initialized = 1;
@@ -329,16 +332,10 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft, int *ndat, int *npwin, int *npwout
 
   CHECK_CUDA_ERROR( cudaMalloc(&work_gpu, 2*ndat_loc*fft_size*sizeof(double)) );
   CHECK_CUDA_ERROR( cudaMalloc(&fofr_gpu, 2*ndat_loc*fft_size*sizeof(double)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&denpot_gpu,fft_size*sizeof(double)) );
   CHECK_CUDA_ERROR( cudaMalloc(&weightr_gpu, ndat_loc*sizeof(double)) );
   CHECK_CUDA_ERROR( cudaMalloc(&weighti_gpu, ndat_loc*sizeof(double)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&kg_kin_gpu,3*npw*sizeof(int)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&fofgin_gpu,2*npw*ndat_loc*sizeof(double)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&kg_kout_gpu,3*npw*sizeof(int)) );
-  CHECK_CUDA_ERROR( cudaMalloc(&fofgout_gpu,2*npw*ndat_loc*sizeof(double)) );
 
   // Allocation des buffers cpu "pinned"
-  CHECK_CUDA_ERROR( cudaMallocHost(&buff_denpot,fft_size*sizeof(double))) ;
   CHECK_CUDA_ERROR( cudaMallocHost(&buff_weightr, ndat_loc*sizeof(double)) );
   CHECK_CUDA_ERROR( cudaMallocHost(&buff_weighti, ndat_loc*sizeof(double)) );
 
@@ -347,21 +344,15 @@ extern "C" void alloc_gpu_fourwf_(int *ngfft, int *ndat, int *npwin, int *npwout
 }//End of alloc_gpu_fourwf_
 
 
-extern "C" void free_gpu_fourwf_(){
+extern "C" void free_gpu_fourwf_managed_(){
 
   // destroy old fftw plan
   CHECK_CUDA_ERROR( cufftDestroy(plan_fft) );
 
   CHECK_CUDA_ERROR( cudaFree(work_gpu) );
   CHECK_CUDA_ERROR( cudaFree(fofr_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(denpot_gpu) );
   CHECK_CUDA_ERROR( cudaFree(weightr_gpu) );
   CHECK_CUDA_ERROR( cudaFree(weighti_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(kg_kin_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(fofgin_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(kg_kout_gpu) );
-  CHECK_CUDA_ERROR( cudaFree(fofgout_gpu) );
-  CHECK_CUDA_ERROR( cudaFreeHost(buff_denpot) );
   CHECK_CUDA_ERROR( cudaFreeHost(buff_weightr) );
   CHECK_CUDA_ERROR( cudaFreeHost(buff_weighti) );
 
