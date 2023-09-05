@@ -133,7 +133,11 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    ! Initialize gpu data needed in fourwf
    ! ndat=bandpp when paral_kgb=1
    ! no matter paral_kgb=0 or 1, we gathet all bands into a single call gpu_fourwf
-   call alloc_gpu_fourwf(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
+   if(use_gpu_cuda == ABI_GPU_LEGACY) then
+     call alloc_gpu_fourwf(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
+   else if (use_gpu_cuda == ABI_GPU_KOKKOS) then
+     call alloc_gpu_fourwf_managed(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
+   end if
 
  end if
 !=== Nonlocal Hamiltonian ===
@@ -235,7 +239,11 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 
  if (use_gpu_cuda == ABI_GPU_KOKKOS .or. use_gpu_cuda == ABI_GPU_LEGACY) then
    if (option==0.or.option==2) then
-     call free_gpu_fourwf()
+     if (use_gpu_cuda == ABI_GPU_LEGACY) then
+       call free_gpu_fourwf()
+     else if(use_gpu_cuda == ABI_GPU_KOKKOS) then
+       call free_gpu_fourwf_managed()
+     end if
    end if
 
    if (option==1.or.option==2) then

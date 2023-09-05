@@ -1344,9 +1344,18 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      end do
 !    Accumulate time because it is not done in gpu_fourwf
      call timab(240+tim_fourwf,1,tsec)
-     if(use_gpu_cuda_==ABI_GPU_LEGACY .or. use_gpu_cuda_==ABI_GPU_KOKKOS) then
+     if(use_gpu_cuda_==ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
        call gpu_fourwf(1,rhoaug,&
+&       cwavef_alltoall1,&
+&       dummy,wfraug,gbound_,gbound_,&
+&       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,&
+&       ngfft,ndatarecv,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&       tim_fourwf,weight_t,weight_t)
+#endif
+     else if(use_gpu_cuda_==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA
+       call gpu_fourwf_managed(1,rhoaug,&
 &       cwavef_alltoall1,&
 &       dummy,wfraug,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather,kg_k_gather,mgfft,mpi_enreg,bandpp,&
@@ -1459,9 +1468,18 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
        weight2_t(iibandpp) = occ_k(ind_occ2)*wtk/ucvol
      end do
      call timab(240+tim_fourwf,1,tsec)
-     if (use_gpu_cuda_==ABI_GPU_LEGACY .or. use_gpu_cuda_==ABI_GPU_KOKKOS) then
+     if (use_gpu_cuda_==ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
        call gpu_fourwf(1,rhoaug,&
+&       ewavef_alltoall_sym,&
+&       dummy,wfraug,gbound_,gbound_,&
+&       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,&
+&       ngfft,ndatarecv_tot,1,n4,n5,n6,option_fourwf,mpi_enreg%paral_kgb,&
+&       tim_fourwf,weight1_t,weight2_t)
+#endif
+     else if(use_gpu_cuda_==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA
+       call gpu_fourwf_managed(1,rhoaug,&
 &       ewavef_alltoall_sym,&
 &       dummy,wfraug,gbound_,gbound_,&
 &       istwf_k_,kg_k_gather_sym,kg_k_gather_sym,mgfft,mpi_enreg,bandpp_sym,&
