@@ -596,9 +596,9 @@ contains
   ! These will store the non-local factors for vectin, svectout and vectout respectively
   byte_count=sizeof(projections_ptr)
   !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,s_projections,vnl_projections)
-  if(cpopt < 2) call gpu_memset_omp(c_loc(projections_ptr),     zero, byte_count)
-  call gpu_memset_omp(c_loc(s_projections),   zero, byte_count)
-  call gpu_memset_omp(c_loc(vnl_projections), zero, byte_count)
+  if(cpopt < 2) call gpu_memset(c_loc(projections_ptr),     0, byte_count)
+  call gpu_memset(c_loc(s_projections),   0, byte_count)
+  call gpu_memset(c_loc(vnl_projections), 0, byte_count)
   !$OMP END TARGET DATA
 
   if (signs==1.and.ngrads>0) then
@@ -606,7 +606,7 @@ contains
     !$OMP TARGET ENTER DATA MAP(alloc:dprojections)
     byte_count=sizeof(dprojections)
     !$OMP TARGET DATA USE_DEVICE_PTR(dprojections)
-    call gpu_memset_omp(c_loc(dprojections), zero, byte_count)
+    call gpu_memset(c_loc(dprojections), 0, byte_count)
     !$OMP END TARGET DATA
     if(choice==1.or.choice==3.or.choice==23) then
       ABI_MALLOC(enlk,(ndat))

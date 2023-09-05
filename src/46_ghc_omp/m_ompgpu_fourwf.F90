@@ -28,6 +28,7 @@ module m_ompgpu_fourwf
 
  use defs_basis
  use m_abicore
+ use m_abi_linalg
  use m_errors
  use m_xomp
 
@@ -165,7 +166,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    byte_count=sizeof(work_gpu)
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu)
-   call gpu_memset_omp(c_loc(work_gpu), zero, byte_count)
+   call gpu_memset(c_loc(work_gpu), 0, byte_count)
    !$OMP END TARGET DATA
 
    ! During GPU calculation we do some pre-calculation on symetries
