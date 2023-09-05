@@ -15,6 +15,7 @@ add_library(46_manage_cuda STATIC
   gpu_compute_nl_projections.cu
   gpu_density_accumulation.cu
   gpu_fourwf.cu
+  gpu_fourwf_managed.cu
   gpu_gemm_nonlop.cu
   gpu_gemm_nonlop.h
   gpu_mkkpg.cu

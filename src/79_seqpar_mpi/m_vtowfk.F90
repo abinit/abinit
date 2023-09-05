@@ -808,9 +808,36 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            if (abs(occ_k(iband)) < tol8) weight_t(iblocksize) = zero
          end do
 
-         if (dtset%use_gpu_cuda == ABI_GPU_LEGACY .or. dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
+         if (dtset%use_gpu_cuda == ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
            call gpu_fourwf(1,&        ! cplex
+             &     rhoaug(:,:,:,1),&  ! denpot
+             &     cwavef(:,:),&      ! fofgin
+             &     dummy,&            ! fofgout
+             &     wfraug,&           ! fofr
+             &     gs_hamk%gbound_k,& ! gboundin
+             &     gs_hamk%gbound_k,& ! gboundout
+             &     istwf_k,&          ! istwf_k
+             &     kg_k,&             ! kg_kin
+             &     kg_k,&             ! kg_kout
+             &     gs_hamk%mgfft,&    ! mgfft
+             &     mpi_enreg,&        ! mpi_enreg
+             &     blocksize,&        ! ndat = number of band in current block of bands
+             &     gs_hamk%ngfft,&    ! ngfft
+             &     npw_k,&            ! npwin
+             &     1,&                ! npwout
+             &     gs_hamk%n4,&       ! n4
+             &     gs_hamk%n5,&       ! n5
+             &     gs_hamk%n6,&       ! n6
+             &     1,&                ! option
+             &     mpi_enreg%paral_kgb,& ! paral_kgb
+             &     tim_fourwf,&          ! tim_fourwf
+             &     weight_t,&            ! weight_r
+             &     weight_t)             ! weight_i
+#endif
+         else if (dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA
+           call gpu_fourwf_managed(1,&        ! cplex
              &     rhoaug(:,:,:,1),&  ! denpot
              &     cwavef(:,:),&      ! fofgin
              &     dummy,&            ! fofgout
