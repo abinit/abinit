@@ -365,24 +365,16 @@ contains
           ABI_FREE_MANAGED(xg%vecR)
         end if
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
-        !xg%vecR(:,:) = zero
         size_bytes = rows*cols*dp
-        !FIXME Remove GPU_DISABLED branch
-        if (l_use_gpu==ABI_GPU_KOKKOS) then
-          call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
-        end if
+        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
         xg%trans = 't'
       case (SPACE_C)
         if ( associated(xg%vecC) ) then
           ABI_FREE_MANAGED(xg%vecC)
         end if
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
-        !xg%vecC(:,:) = zero
         size_bytes = rows*cols*dpc
-        !FIXME Remove GPU_DISABLED branch
-        if (l_use_gpu==ABI_GPU_KOKKOS) then
-          call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
-        end if
+        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
         xg%trans = 'c'
       case default
         ABI_ERROR("Invalid space")
@@ -405,7 +397,7 @@ contains
         !FIXME To be wrapped
         size_bytes = sizeof(xg%vecR)
         !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecR)
-        call gpu_memset_omp(c_loc(xg%vecR), zero, size_bytes)
+        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
         !$OMP END TARGET DATA
       case (SPACE_C)
         if ( allocated(xg%vecC) ) then
@@ -419,7 +411,7 @@ contains
         !FIXME To be wrapped
         size_bytes = sizeof(xg%vecC)
         !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecC)
-        call gpu_memset_omp(c_loc(xg%vecC), zero, size_bytes)
+        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
         !$OMP END TARGET DATA
       case default
         ABI_ERROR("Invalid space")
@@ -3720,12 +3712,12 @@ contains
       case (SPACE_R,SPACE_CR)
         byte_count = xgBlock%ldim * xgBlock%cols * dp
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
-        call gpu_memset_omp(c_loc(xgBlock%vecR), 0, byte_count)
+        call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
         !$OMP END TARGET DATA
       case (SPACE_C)
         byte_count = xgBlock%ldim * xgBlock%cols * dpc
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
-        call gpu_memset_omp(c_loc(xgBlock%vecC), 0, byte_count)
+        call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
       end select
 #endif
