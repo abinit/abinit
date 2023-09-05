@@ -347,7 +347,7 @@ module m_abi_linalg
       type(c_ptr),                    intent(inout)  :: gpu_ptr
     end subroutine dealloc_on_gpu
 
-    subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_")
+    subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_cpp_")
       use, intrinsic :: iso_c_binding
       implicit none
       type(c_ptr)                                   :: dest_gpu_ptr
@@ -355,10 +355,10 @@ module m_abi_linalg
       integer(kind=c_size_t),        intent(in)    :: size_in_bytes
     end subroutine copy_gpu_to_gpu
 
-    subroutine gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_")
+    subroutine gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_cpp_")
       use, intrinsic :: iso_c_binding
       implicit none
-      type(c_ptr),                    intent(inout) :: gpu_ptr
+      type(c_ptr),                    intent(in) :: gpu_ptr
       integer(kind=c_int32_t),        intent(in)    :: val
       integer(kind=c_size_t),         intent(in)    :: size_in_bytes
     end subroutine gpu_memset
@@ -392,9 +392,7 @@ module m_abi_linalg
  public :: alloc_on_gpu
  public :: copy_from_gpu
  public :: copy_on_gpu
- public :: copy_gpu_to_gpu
  public :: dealloc_on_gpu
- public :: gpu_memset
  public :: gpu_allocated_impl
  public :: gpu_managed_ptr_status
  public :: gpu_linalg_init
@@ -408,6 +406,8 @@ module m_abi_linalg
  public :: gpu_xsygvd_bufferSize
 #endif
 
+ public :: copy_gpu_to_gpu
+ public :: gpu_memset
  public :: gpu_allocated
 
  public :: gpu_xorthonormalize
