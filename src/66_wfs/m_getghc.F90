@@ -841,7 +841,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
+#ifdef FC_NVHPC
+   !FIXME This Kokkos kernel seem to cause issue under NVHPC so it is disabled
+   if (.false.) then
+#else
    if (gs_ham%use_gpu_impl == ABI_GPU_KOKKOS) then
+#endif
+
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
      call assemble_energy_contribution_kokkos(c_loc(ghc), &
        & c_loc(gsc), c_loc(kinpw_k2), c_loc(cwavef), c_loc(gvnlxc_), &
@@ -850,7 +856,13 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ! will probably be moved elsewhere once all the scf loop runs on device
      call gpu_device_synchronize()
 #endif
+
    else
+
+#ifdef FC_NVHPC
+     !Related to FIXME above
+     if (gs_ham%use_gpu_impl == ABI_GPU_KOKKOS) call gpu_device_synchronize()
+#endif
      !  Assemble modified kinetic, local and nonlocal contributions
      !  to <G|H|C(n,k)>. Take also into account build-in debugging.
      if(prtvol/=-level)then
