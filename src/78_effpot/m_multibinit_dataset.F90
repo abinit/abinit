@@ -210,6 +210,7 @@ module m_multibinit_dataset
   real(dp) :: tolmxf
   real(dp) :: acell(3)
   real(dp) :: fit_factors(3)
+  real(dp) :: fit_weight_T
   real(dp) :: opt_factors(3)
   real(dp) :: bound_factors(3)
   real(dp) :: bound_penalty
@@ -420,6 +421,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_ncoeff=0
  multibinit_dtset%fit_ncoeff_per_iatom=0
  multibinit_dtset%fit_ncoeff_per_cycle=1
+ multibinit_dtset%fit_weight_T=-0.1_dp
+
  multibinit_dtset%fit_iatom=0
  multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
@@ -2583,7 +2586,7 @@ multibinit_dtset%lwf_temperature_start=0.0
 ! end do
 
 if(any(multibinit_dtset%dipdip_range /=-375)) then
-  ABI_ERROR("The use of the keyword dipdip_range has been deprecated. Please remove it from the input file!") 
+  ABI_ERROR("The use of the keyword dipdip_range has been deprecated. Please remove it from the input file!")
 end if
 multibinit_dtset%dipdip_range(:)=[0,0,0]
 
@@ -2901,6 +2904,12 @@ multibinit_dtset%dipdip_range(:)=[0,0,0]
 &   'Action: correct fit_tolGF in your input file.'
    ABI_ERROR(message)
  end if
+
+ multibinit_dtset%fit_weight_T=-0.1_dp
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_weight_T',tread,'DPR')
+ if(tread==1) multibinit_dtset%fit_weight_T=dprarr(1)
+
+
 !G
 
 !H
@@ -3640,6 +3649,10 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    if(multibinit_dtset%fit_tolMSDFS > 0)then
      write(nunit,'(1x,a17,es16.8)')'   fit_tolMSDFS',multibinit_dtset%fit_tolMSDFS
    end if
+   if(multibinit_dtset%fit_weight_T > 0.0_dp)then
+     write(nunit,'(1x,a17,es16.8)')'   fit_weight_T',multibinit_dtset%fit_weight_T
+   end if
+
    write(nunit,'(1x,a17,es16.8)')'      fit_cutoff',multibinit_dtset%fit_cutoff
    write(nunit,'(1x,a17,es16.8)')'      fit_droprate',multibinit_dtset%fit_drop_rate
    write(nunit,'(1x,a17,es16.8)')'      fit_min_bound_coeff',multibinit_dtset%fit_min_bound_coeff

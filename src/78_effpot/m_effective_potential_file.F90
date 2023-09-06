@@ -2209,16 +2209,12 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
   ABI_MALLOC(blkval,(2,3,mpert,3,mpert,nblok))
-  print *, "size blkval:", size(blkval), "after allocation"
-  print *, "sizeof blkval:", sizeof(blkval), "after allocation"
   blkval = 0
   if(size(ddb%val) /= 2*3*mpert*3*mpert*nblok ) then
     ABI_BUG("Size of ddb%val is not consistent.")
   endif
   blkval = reshape(ddb%val,(/2,3,mpert,3,mpert,nblok/))
 
-  print *, "size ddbval:", size(ddb%val)
-  print *, "size blkval:", size(blkval), "after reshape"
 
 !**********************************************************************
 ! Transfert crystal values
@@ -2797,8 +2793,6 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   end if
 !-------------------------------------------------------------------------------------
 ! DEALLOCATION OF ARRAYS
-  print *, "size blkval:", size(blkval), "deallocation"
-  print *, "sizeof blkval:", sizeof(blkval), "deallocation"
   ABI_FREE(blkval)
   ABI_FREE(zeff)
   ABI_FREE(qdrp_cart)

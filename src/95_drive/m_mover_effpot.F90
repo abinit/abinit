@@ -619,7 +619,7 @@ ABI_FREE(xcart)
 &         1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
 &         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on, &
-&         max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1)
+&         max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1, fit_weight_T=inp%fit_weight_T)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -669,7 +669,8 @@ ABI_FREE(xcart)
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
 &           -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.true.,positive=.false.,&
-&            fit_on=inp%fit_on,sel_on=inp%sel_on, max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1)
+&            fit_on=inp%fit_on,sel_on=inp%sel_on, max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, &
+&            ncoeff_per_cycle=1, fit_weight_T=inp%fit_weight_T)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -802,7 +803,7 @@ ABI_FREE(xcart)
 !        Reset the simulation
            call effective_potential_setCoeffs(coeffs_all,effective_potential,ncoeff+ncoeff_bound)
            call fit_polynomial_coeff_getPositive(effective_potential,hist,coeff_values,&
-&           isPositive,listcoeff_bound,ncoeff+ii,ncoeff,nmodels,comm,verbose=.false.)
+&           isPositive,listcoeff_bound,ncoeff+ii,ncoeff,nmodels,comm,verbose=.false., fit_weight_T=inp%fit_weight_T)
            if(all(isPositive == 0)) then
              write(message, '(5a,I0,a)')ch10,'--',ch10,' No possible model ',&
 &             'with ', ii,' additional terms found'
@@ -859,7 +860,8 @@ ABI_FREE(xcart)
 &                 ncoeff+ii)
                  call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),1,0,&
                    &                 -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,positive=.false., &
-                   &                  max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1)
+                   &                  max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1, &
+                  &                  fit_weight_T=inp%fit_weight_T)
                  call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
                  dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
                  acell(:) = one
@@ -942,7 +944,7 @@ ABI_FREE(xcart)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
          &       -1,inp%fit_nimposecoeff,inp%fit_imposecoeff,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on,&
-         &       max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1)
+         &       max_nbody=inp%fit_max_nbody, drop_rate=0.0_dp, ncoeff_per_cycle=1, fit_weight_T=inp%fit_weight_T)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')

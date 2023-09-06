@@ -129,7 +129,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   only_odd_power,only_even_power,prt_anh,&
 &                                   fit_iatom,prt_files,fit_on,sel_on,fit_factors,prt_GF_csv,&
 &                                   dispterms,coeff_file_rw,read_effective_potential, max_nbody, &
-&                                   min_bound_coeff, drop_rate, ncoeff_per_cycle)
+&                                   min_bound_coeff, drop_rate, ncoeff_per_cycle, fit_weight_T)
 
  implicit none
 
@@ -153,6 +153,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),optional,intent(in) :: fit_factors(3)
  real(dp), optional, intent(in) :: min_bound_coeff
  real(dp), optional, intent(in) :: drop_rate
+ real(dp), intent(in) :: fit_weight_T
 !Local variables-------------------------------
 !scalar
  integer :: nbound, nfix
@@ -187,6 +188,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),allocatable :: fcart_coeffs(:,:,:,:),gf_values(:,:),gf_mpi(:,:)
  real(dp),allocatable :: fcart_coeffs_tmp(:,:,:,:),strten_coeffs_tmp(:,:,:)
  real(dp),allocatable :: strten_coeffs(:,:,:)
+ real(dp), allocatable :: weights(:)
  type(polynomial_coeff_type),allocatable :: my_coeffs(:),coeffs_iatom(:)
  type(polynomial_coeff_type),allocatable :: coeffs_out(:)
  type(polynomial_coeff_type),target,allocatable :: coeffs_tmp(:)
@@ -229,6 +231,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  call get_ncoeff_preselected()
  call get_ncoeff_to_select_and_ncoeff_to_fit()
  call initialize_fitting_parameters_for_coefficients()
+ call get_weight_from_hist(hist, fit_weight_T, ntime, eff_pot%supercell%natom, weights, comm )
  call initialize_gf()
  select case(option)
  case(1)
@@ -373,6 +376,7 @@ contains
     ABI_SFREE(fixcoeff_corr)
     ABI_SFREE(fix_and_impose)
     ABI_SFREE(list_coeffs_copy)
+    ABI_FREE(weights)
   end subroutine deallocate_arrays
 
   subroutine copy_eff_pot_to_eff_pot_fixed()
@@ -1113,11 +1117,41 @@ contains
 
     !Compute GF, coeff_values,strten_coeffs and fcart_coeffs are set to zero
     !it means that only the harmonic part wiil be computed
-    coeff_values = zero
+    if(fit_weight_T>0.0_dp) then
+        coeff_values = zero
+        call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,fit_data%energy_diff,fcart_coeffs,&
+          &                                    fit_data%fcart_diff,gf_values(:,1),int((/1/)),natom_sc,&
+          &                                    0,my_ncoeff,ntime,strten_coeffs,fit_data%strten_diff,&
+          &                                    fit_data%training_set%sqomega, weights=weights)
+
+        !Print the standard deviation before the fit
+        write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
+          !&                   ' Mean Standard Deviation values at the begining of the fit process (meV**2/atm):',&
+          !&               ch10,'   Energy          : ',&
+          !&               gf_values(4,1)*factor*(Ha_EV*1000)**2  ,ch10,&
+          &                    ' Weighted Goal function values at the begining of the fit process (eV^2/A^2):',ch10,&
+          &                    '   Energy          : ',&
+          &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
+          &                    '   Forces+Stresses : ',&
+          &               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
+          &                    '   Forces          : ',&
+          &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
+          &                    '   Stresses        : ',&
+          &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
+        if(need_verbose)then
+          call wrtout(ab_out,message,'COLL')
+          call wrtout(std_out,message,'COLL')
+        end if
+    end if
+
+    block
+      real(dp) :: weights1(ntime)
+      weights1=one
+      coeff_values = zero
     call fit_polynomial_coeff_computeGF(coeff_values,energy_coeffs,fit_data%energy_diff,fcart_coeffs,&
       &                                    fit_data%fcart_diff,gf_values(:,1),int((/1/)),natom_sc,&
       &                                    0,my_ncoeff,ntime,strten_coeffs,fit_data%strten_diff,&
-      &                                    fit_data%training_set%sqomega)
+      &                                    fit_data%training_set%sqomega, weights=weights1)
 
     !Print the standard deviation before the fit
     write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' ) ch10,&
@@ -1137,6 +1171,9 @@ contains
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
     end if
+    end block
+
+
     ABI_MALLOC(gf_values_iter,(4,ncoeff_to_select+1))
     gf_values_iter(:,:) = zero
     !Store initial gf_values as first value in gf_values_iter
@@ -1260,7 +1297,7 @@ contains
          &                                      strten_coeffs_tmp,fit_data%strten_diff,&
          &                                      fit_data%training_set%sqomega,fit_on,int_fit_factors, &
          &                                      nbound=nbound, min_bound_coeff=min_bound_coeff1,  &
-         &                                      ignore_bound=.True.)
+         &                                      ignore_bound=.True., weights=weights)
 
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
@@ -1272,7 +1309,7 @@ contains
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
 &                                            gf_values(:,icoeff),list_coeffs_tmp(1:icycle),natom_sc,&
 &                                            icycle,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
-&                                            fit_data%strten_diff,fit_data%training_set%sqomega)
+&                                            fit_data%strten_diff,fit_data%training_set%sqomega, weights=weights)
            write (j_char, '(i7)') my_coeffindexes(icoeff)
            write(message, '(4x,a,3x,4ES18.10)') adjustl(j_char), &
 !&                                   gf_values(4,icoeff)*factor*(1000*Ha_ev)**2 ,&
@@ -1630,13 +1667,13 @@ contains
           &%energy_diff,info, list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp&
           &,ncoeff_to_fit, ntime,strten_coeffs_tmp,fit_data%strten_diff, fit_data&
           &%training_set%sqomega,fit_on,int_fit_factors, nbound=nbound, &
-          & min_bound_coeff=min_bound_coeff1, ignore_bound=.False. )
+          & min_bound_coeff=min_bound_coeff1, ignore_bound=.False., weights=weights )
         if(info==0)then
           call fit_polynomial_coeff_computeGF(coeff_values(1:icycle_tmp),energy_coeffs_tmp,&
             &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
             &                                            gf_values(:,1),list_coeffs_tmp(1:icycle_tmp),natom_sc,&
             &                                            icycle_tmp,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
-            &                                            fit_data%strten_diff,fit_data%training_set%sqomega)
+            &                                            fit_data%strten_diff,fit_data%training_set%sqomega, weights=weights)
 
         else!In this case the matrix is singular
           gf_values(:,icoeff) = zero
@@ -1733,7 +1770,7 @@ contains
        &                                  list_coeffs_tmp(1:ncoeff_to_fit),natom_sc,&
        &                                  ncoeff_to_fit,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
        &                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on,int_fit_factors, &
-       &                                  nbound=nbound, min_bound_coeff=min_bound_coeff1, ignore_bound=.False.)
+       &                                  nbound=nbound, min_bound_coeff=min_bound_coeff1, ignore_bound=.False., weights=weights)
 
      if(need_verbose) then
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
@@ -1751,31 +1788,63 @@ contains
          call wrtout(std_out,message,'COLL')
        end if
      end do
+     if(fit_weight_T>0.0_dp) then
+         call fit_polynomial_coeff_computeGF(coeff_values(1:ncoeff_to_fit),energy_coeffs_tmp,&
+           &                                      fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
+           &                                      gf_values(:,1),list_coeffs_tmp(1:ncoeff_to_fit),natom_sc,&
+           &                                      ncoeff_to_fit,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
+           &                                      fit_data%strten_diff,fit_data%training_set%sqomega, weights=weights)
 
-     call fit_polynomial_coeff_computeGF(coeff_values(1:ncoeff_to_fit),energy_coeffs_tmp,&
-       &                                      fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
-       &                                      gf_values(:,1),list_coeffs_tmp(1:ncoeff_to_fit),natom_sc,&
-       &                                      ncoeff_to_fit,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
-       &                                      fit_data%strten_diff,fit_data%training_set%sqomega)
+         if(need_verbose) then
+           !  Print the standard deviation after the fit
+           write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+             !&                    ' Mean Standard Deviation values at the end of the fit process (meV^2/atm): ',ch10,&
+             !&                    '   Energy          : ',&
+             !&               gf_values(4,1)*(Ha_EV*1000)**2 *factor ,ch10,&
+             &                    'Weighted goal function values at the end of the fit process (eV^2/A^2):',ch10,&
+             &                    '   Energy          : ',&
+             &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
+             &                    '   Forces+Stresses : ',&
+             &               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
+             &                    '   Forces          : ',&
+             &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
+             &                    '   Stresses        : ',&
+             &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
+           call wrtout(ab_out,message,'COLL')
+           call wrtout(std_out,message,'COLL')
+         end if
+     endif
+     
+     block
+       real(dp) :: weights1(ntime)
+       weights1(:) = one
+       call fit_polynomial_coeff_computeGF(coeff_values(1:ncoeff_to_fit),energy_coeffs_tmp,&
+           &                                      fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
+           &                                      gf_values(:,1),list_coeffs_tmp(1:ncoeff_to_fit),natom_sc,&
+           &                                      ncoeff_to_fit,ncoeff_to_fit,ntime,strten_coeffs_tmp,&
+           &                                      fit_data%strten_diff,fit_data%training_set%sqomega, weights=weights1)
 
-     if(need_verbose) then
-       !  Print the standard deviation after the fit
-       write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
-         !&                    ' Mean Standard Deviation values at the end of the fit process (meV^2/atm): ',ch10,&
-         !&                    '   Energy          : ',&
-         !&               gf_values(4,1)*(Ha_EV*1000)**2 *factor ,ch10,&
-         &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
-         &                    '   Energy          : ',&
-         &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
-         &                    '   Forces+Stresses : ',&
-         &               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
-         &                    '   Forces          : ',&
-         &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
-         &                    '   Stresses        : ',&
-         &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
-       call wrtout(ab_out,message,'COLL')
-       call wrtout(std_out,message,'COLL')
-     end if
+         if(need_verbose) then
+           !  Print the standard deviation after the fit
+           write(message,'(4a,ES24.16,2a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
+             !&                    ' Mean Standard Deviation values at the end of the fit process (meV^2/atm): ',ch10,&
+             !&                    '   Energy          : ',&
+             !&               gf_values(4,1)*(Ha_EV*1000)**2 *factor ,ch10,&
+             &                    ' Goal function values at the end of the fit process (eV^2/A^2):',ch10,&
+             &                    '   Energy          : ',&
+             &               gf_values(4,1)*(HaBohr_eVAng)**2,ch10,&
+             &                    '   Forces+Stresses : ',&
+             &               gf_values(1,1)*(HaBohr_eVAng)**2,ch10,&
+             &                    '   Forces          : ',&
+             &               gf_values(2,1)*(HaBohr_eVAng)**2,ch10,&
+             &                    '   Stresses        : ',&
+             &               gf_values(3,1)*(HaBohr_eVAng)**2,ch10
+           call wrtout(ab_out,message,'COLL')
+           call wrtout(std_out,message,'COLL')
+         end if
+
+      end block
+
 
      !Allocate output coeffs -> selected plus fixed ones
      ncoeff_out = ncoeff_to_fit+eff_pot_fixed%anharmonics_terms%ncoeff
@@ -1823,7 +1892,7 @@ contains
      ! Calculate MSD values for final model
      if(need_prt_files)call fit_polynomial_coeff_computeMSD(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
        &                                       natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-       &                                       compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
+       &                                       compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename, weights=weights)
 
 
      INQUIRE(FILE='TRS_fit_diff_anharmonic_terms_energy.dat',OPENED=file_opened&
@@ -1907,7 +1976,7 @@ end subroutine fit_polynomial_coeff_fit
 !! SOURCE
 
 subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive,list_coeff,ncoeff,&
-&                                           nfixcoeff,nmodel,comm,verbose)
+&                                           nfixcoeff,nmodel,comm,verbose, fit_weight_T)
 
  implicit none
 
@@ -1921,6 +1990,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
  logical,optional,intent(in) :: verbose
+ real(dp) :: fit_weight_T
 !Local variables-------------------------------
 !scalar
  integer :: ierr,ii,info,imodel,my_nmodel,nmodel_alone
@@ -1928,6 +1998,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  integer :: nproc,ntime
  logical :: iam_master,need_verbose
 !arrays
+real(dp), allocatable :: weights(:)
  integer :: sc_size(3)
  integer,allocatable  :: list_coeffs(:),my_modelindexes(:),my_modellist(:)
  real(dp),allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:), strten_coeffs(:,:,:)
@@ -2008,6 +2079,9 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !Compute Sheppard and al Factors  \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]].
  call fit_data_compute(fit_data,eff_pot,hist,comm,verbose=need_verbose)
 
+ABI_MALLOC(weights,(ntime))
+ call get_weight_from_hist(hist, fit_weight_T, ntime, eff_pot%supercell%natom, weights, comm )
+
 !Get the decomposition for each coefficients of the forces,stresses and energy for
 !each atoms and each step  (see equations 11 & 12 of
 ! PRB95,094115(2017)) [[cite:Escorihuela-Sayalero2017]] + allocation
@@ -2056,7 +2130,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
      &,fit_data%fcart_diff, energy_coeffs,fit_data%energy_diff,info,&
      & list_coeff(imodel,1:ncoeff),natom_sc,ncoeff, ncoeff_tot,ntime&
      &,strten_coeffs,fit_data%strten_diff, fit_data%training_set%sqomega,fit_on&
-     &,fit_factors, nbound=0, min_bound_coeff=-10.0_dp, ignore_bound=.True.)
+     &,fit_factors, nbound=0, min_bound_coeff=-10.0_dp, ignore_bound=.True., weights=weights)
 
    if(info==0)then
 
@@ -2084,6 +2158,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  ABI_FREE(my_modelindexes)
  ABI_FREE(my_modellist)
  ABI_FREE(strten_coeffs)
+ ABI_FREE(weights)
 
 end subroutine fit_polynomial_coeff_getPositive
 !!***
@@ -2299,7 +2374,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
 !   call effective_potential_setCoeffs(coeffs_test,eff_pot,ncoeff_model)
    call fit_polynomial_coeff_fit(eff_pot,(/0/),(/0/),hist,0,(/0,0/),1,0,&
      &             -1,0,(/0/),1,comm,verbose=.true.,positive=.false., max_nbody=max_nbody, &
-     & drop_rate=0.0_dp, ncoeff_per_cycle=1)
+     & drop_rate=0.0_dp, ncoeff_per_cycle=1, fit_weight_T=-0.1_dp)
 
    coeffs_in => eff_pot%anharmonics_terms%coefficients
 
@@ -2362,7 +2437,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
 !!                        fixed part of the model (more often harmonic part)
 !! sqomega(ntime) =  Sheppard and al Factors \Omega^{2} see J.Chem Phys 136, 074103 (2012) [[cite:Sheppard2012]]
-!! weight(ntime) = weight of each configuration
+!! weights(ntime) = weight of each configuration
 !! fit_on(3) = Flag to know if we fit the energy,  forces and stresses
 !! fit_factors(3) = Factors to apply to the energy, forces and stresses
 !! nbound = Number of bound coefficients
@@ -2384,7 +2459,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energy_coeffs,energy_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
 &                                     strten_coeffs,strten_diff,sqomega,fit_on,fit_factors, nbound, &
-&                                     min_bound_coeff, ignore_bound, weight)
+&                                     min_bound_coeff, ignore_bound, weights)
 
  implicit none
 
@@ -2405,7 +2480,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  real(dp), intent(in) :: min_bound_coeff
  logical,intent(in)  :: fit_on(3)
  logical,intent(in)  :: ignore_bound
- real(dp), intent(in) :: weight(ntime)
+ real(dp), intent(in) :: weights(ntime)
 
 !Local variables-------------------------------
 !scalar
@@ -2588,59 +2663,89 @@ end subroutine fit_polynomial_coeff_solve
 !!***
 
 
-//!****f* m_fit_polynomial_coeff/get_weight_from_forces
-//!
-//! NAME
-//! get_weight_from_forces
-//!
-//! FUNCTION
-//! Compute the weight for the forces
-//!
-//! INPUTS
-//! DFT_forces(3,natom,ntime) = DFT forces
-//! temperature: a scalar, the temperature in K, which is a factor to tune how much the forces 
-//!              are taken into account in the fit
-//! ntime: a scalar, the number of time steps
-//! natom: a scalar, the number of atoms
-//!
-//! OUTPUT
-//! weight(ntime) = the weight for each time step
-//!
-//! SOURCE
-subroutine get_weight_from_forces(DFT_forces, temperature, ntime, natom, weight)
-  real(dp), intent(in) :: DFT_forces(3,natom,ntime)
+!!****f* m_fit_polynomial_coeff/get_weight_from_hist
+!!
+!! NAME
+!! get_weight_from_hist
+!!
+!! FUNCTION
+!! Compute the weight for the hist
+!!
+!! INPUTS
+!! hist<type(abihist)> = The history of the MD (or snapshot of DFT
+!! temperature: a scalar, the temperature in K, which is a factor to tune how much the forces 
+!!              are taken into account in the fit
+!! ntime: a scalar, the number of time steps
+!! natom: a scalar, the number of atoms
+!!
+!! OUTPUT
+!! weight(ntime) = the weight for each time step
+!!
+!! SOURCE
+subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
+  type(abihist), intent(in) :: hist
+  !real(dp), intent(in) :: DFT_forces(3,natom,ntime)
   real(dp), intent(in) :: temperature
   integer, intent(in) :: ntime, natom
-  real(dp), intent(out) :: weight(ntime)
+  integer, intent(in) :: comm
+  real(dp), allocatable, intent(out) :: weights(:)
   integer :: itime, iatom
   ! Boltzmann constant in Ha/K 
   real(dp), parameter :: kb = 3.166815d-6
   real(dp) :: average_forces(ntime)
+  character(len=ntime*100) :: msg
+  integer ::  master, my_rank
+  logical :: iam_master
 
-  if (temperature <= 0.0_dp) then
-    weights=1.0_dp
-  else
+  master = 0
+  my_rank = xmpi_comm_rank(comm)
+  iam_master = (my_rank == master)
+
+
+
+  ABI_MALLOC(weights,(ntime))
+  weights=1.0_dp
+
+  ! compute average forces for each time step
+  average_forces = 0.0_dp
+  do itime=1,ntime
+     do iatom=1,natom
+       average_forces(itime) = average_forces(itime) + norm2(hist%fcart(:,iatom,itime))
+     end do
+     average_forces(itime) = average_forces(itime)/natom
+  end do
+
+  if (temperature > 0.0_dp) then
      ! compute the average norm of force for each atom
-     average_forces = 0.0_dp
-      do itime=1,ntime
-        do iatom=1,natom
-          average_forces(itime) = average_forces(itime) + norm2(DFT_forces(:,iatom,itime))
-        end do
-        average_forces(itime) = average_forces(itime)/natom
-      end do
-
       ! compute the weight
-      weight = 0.0_dp
+      weights = 0.0_dp
       do itime=1,ntime
-        weight(itime) = exp(-average_forces(itime)/(kb*temperature))
+        weights(itime) = exp(-average_forces(itime)/(kb*temperature))
       end do
-
       ! normalize the weight
-      weight = weight/sum(weight)* ntime
-
+      weights = weights/sum(weights)* ntime
   end if
-end subroutine  get_weight_from_forces
-//!***
+  ! For each time, print the average forces, the energy, the weight, 
+  ! the maximum of axial stress, and maximum of shear stress
+  ! first write the header of the table
+  ! write a separator
+
+if(iam_master)then
+  write(msg, '(a)') '-----------------------------------------------------------------------------------'
+  write(msg, '(a)') 'Time  Average_forces  Etot-min(Etot)       Weight      Max(axial_stress) Max(shear_stress)'
+  call wrtout(std_out,msg,'COLL')
+  ! then write the data
+  do itime=1,ntime
+      write(msg, '(i5, 3e15.6, 2e15.6)') itime, average_forces(itime), &
+        & hist%etot(itime)-minval(hist%etot(:)), weights(itime), &
+        & maxval(abs(hist%strten(1:3,itime))), maxval(abs(hist%strten(4:6,itime)))
+     call wrtout(std_out,msg,'COLL')
+  end do
+  write(msg, '(a)') '-----------------------------------------------------------------------------------'
+endif
+
+end subroutine  get_weight_from_hist
+!!***
 
   
 !!****f* m_fit_polynomial_coeff/fit_polynomial_coeff_computeGF
@@ -2670,7 +2775,7 @@ end subroutine  get_weight_from_forces
 !! ncoeff_fit = Number of coefficients fitted
 !! ncoeff_max = Maximum number of coeff in the list
 !! ntime = Number of time in the history
-!! weight(ntime) = weight for each time step
+!! weights(ntime) = weight for each time step
 !! strten_coeffs(ncoeff,3,natom,ntime)= value of the stresses for each coefficient
 !!                                      (1/ucvol factor is taking into acount) (Ha/Bohr^3)
 !! strten_diff(6,natom) = Difference of stress tensor between DFT calculation and
@@ -2685,7 +2790,7 @@ end subroutine  get_weight_from_forces
 subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff,&
 &                                         fcart_coeffs,fcart_diff,gf_value,list_coeffs,&
 &                                         natom,ncoeff_fit,ncoeff_max,ntime,strten_coeffs,&
-&                                         strten_diff,sqomega, weight)
+&                                         strten_diff,sqomega, weights)
 
  implicit none
 
@@ -2701,7 +2806,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(in) :: coefficients(ncoeff_fit)
- real(dp), intent(in) :: weight(ntime)
+ real(dp), intent(in) :: weights(ntime)
  real(dp),intent(out) :: gf_value(4)
 !Local variables-------------------------------
 !scalar
@@ -2732,7 +2837,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
      emu = emu + coefficients(icoeff)*energy_coeffs(icoeff_tmp,itime) 
    end do
 !   uncomment the next line to be consistent with the definition of the goal function
-   etmp = etmp + (energy_diff(itime)-emu)**2* weight(itime)/(sqomega(itime)**(1.0/2.0))
+   etmp = etmp + (energy_diff(itime)-emu)**2* weights(itime)/(sqomega(itime)**(1.0/2.0))
 !   uncomment the next get a measure in Ha instead of Ha^2
 !   etmp = etmp + abs(energy_diff(itime)-emu)
 !  Fill forces
@@ -2743,7 +2848,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
          icoeff_tmp = list_coeffs(icoeff)
          fmu =  fmu + coefficients(icoeff)*fcart_coeffs(mu,ia,icoeff_tmp,itime)
        end do
-       ftmp = ftmp + (fcart_diff(mu,ia,itime)-fmu)**2* weight(itime)
+       ftmp = ftmp + (fcart_diff(mu,ia,itime)-fmu)**2* weights(itime)
      end do !End loop dir
    end do !End loop natom
    do mu=1,6
@@ -2752,7 +2857,7 @@ subroutine fit_polynomial_coeff_computeGF(coefficients,energy_coeffs,energy_diff
        icoeff_tmp = list_coeffs(icoeff)
        smu = smu + coefficients(icoeff)*strten_coeffs(mu,itime,icoeff_tmp)
      end do
-     stmp = stmp + sqomega(itime)* weight(itime) *(strten_diff(mu,itime)-smu)**2
+     stmp = stmp + sqomega(itime)* weights(itime) *(strten_diff(mu,itime)-smu)**2
    end do !End loop stress dir
  end do ! End loop time
 
@@ -3102,7 +3207,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !Strings/Characters
  character(len=fnlen),optional,intent(in) :: filename
  type(scup_dtset_type),optional,intent(inout) :: scup_dtset
- real(dp),intent(in) :: weights(ntime)
+ real(dp),optional, intent(in) :: weights(ntime)
 !Local variables-------------------------------
 !scalar
 integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
@@ -3120,6 +3225,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
  type(abihist) :: hist_out
  character(len=200) :: filename_hist
 
+ real(dp) :: weights_tmp(ntime)
 ! *************************************************************************
  !MS Hide SCALE-UP variables
  ABI_UNUSED(itime)
@@ -3177,6 +3283,12 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
    write(msg,'(3a)')' You asked for printing of the MSD-values',ch10,&
 &        ' without specifying a filename'
    ABI_ERROR(msg)
+ end if
+
+ if(present(weights))then
+   weights_tmp = weights
+ else
+   weights_tmp = one
  end if
 
  file_anh=trim(name_file)//'_anharmonic_terms_energy.dat'
@@ -3242,14 +3354,14 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
     endif
    endif!(need_prt_ph)
 
-   mse  = mse  + weights(ii) * ((hist%etot(ii) - energy))**2/(sqomega(ii)**(1.0/2.0)) !+abs(hist$etot(ii) - energy)
+   mse  = mse  + weights_tmp(ii) * ((hist%etot(ii) - energy))**2/(sqomega(ii)**(1.0/2.0)) !+abs(hist$etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
      do mu=1,3   ! Loop over cartesian directions
-       msef = msef + weights(ii) * (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2
+       msef = msef + weights_tmp(ii) * (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2
      end do
    end do
    do mu=1,6 ! Loop over stresses
-     mses = mses + weights(ii) * sqomega(ii)*(hist%strten(mu,ii) - strten(mu))**2
+     mses = mses + weights_tmp(ii) * sqomega(ii)*(hist%strten(mu,ii) - strten(mu))**2
    end do
  end do ! End loop itime
    if(need_prt_ph)then
@@ -3362,8 +3474,9 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 &                            filename,eff_pot%anharmonics_terms)
 
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,&
-&                                      sqomega,comm,&
-&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,scup_dtset=scup_dtset,prt_ph=need_prt_ph)
+&                                     sqomega,comm,&
+&                                     compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,&
+&                                     scup_dtset=scup_dtset,prt_ph=need_prt_ph)
 
 
 !  Print the standard deviation after the fit
