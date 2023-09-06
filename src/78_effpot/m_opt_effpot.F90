@@ -251,12 +251,16 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   !  call the fit process routine
   !  This routine solves the linear system proposed
   !  by C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
+  block
+  real(dp) :: weights(ntime)
+  weights=1.0_dp
   call fit_polynomial_coeff_solve(coeff_values(1:opt_ncoeff),fcart_coeffs,fit_data%fcart_diff,&
     &                                  energy_coeffs,fit_data%energy_diff,info,&
     &                                  coeff_inds,natom_sc,opt_ncoeff,opt_ncoeff,ntime,&
     &                                  strten_coeffs,fit_data%strten_diff,&
     &                                  fit_data%training_set%sqomega,opt_on,opt_factors, nbound=0, &
-    &                                  min_bound_coeff=-1000.0_dp, ignore_bound=.False.)
+    &                                  min_bound_coeff=-1000.0_dp, ignore_bound=.False., weights=weights)
+  end block
   if (info /= 0 .and. all(coeff_values < tol16))then
     write(frmt,*) opt_ncoeff
     write(message, '(2a,'//ADJUSTR(frmt)//'I4,8a)' ) ch10,&
@@ -472,9 +476,13 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
   !Before adding bound coefficients calculate MSD of initial model
   !MS FOR THE MOMENT PRINT NO FILE
+  block 
+  real(dp) :: weights(ntime)
+  weights=1.0_dp
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse_ini,msef_ini,mses_ini,&
     &                                  natom_sc,ntime,fit_data%training_set%sqomega,comm,&
     &                                  compute_anharmonic=.TRUE.,print_file=.FALSE.)
+  end block
 
 
   !  Print the standard devition of initial model
@@ -656,9 +664,13 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
         if(iterm>nterm)then
           ! MS 2006 Decomment for old style optimization
+          block 
+          real(dp) :: weights(ntime)
+          weights=1.0_dp
           call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
-            &                                           natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-            &                                           compute_anharmonic=.TRUE.,print_file=.FALSE.)
+                    &                                           natom_sc,ntime,fit_data%training_set%sqomega,comm,&
+                    &                                           compute_anharmonic=.TRUE.,print_file=.FALSE., weights=weights)
+          end block
           i = 0
           write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
           call wrtout(std_out,message,'COLL')
@@ -668,9 +680,13 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             i = i + 1
             eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &!coeff_ini / 2**i
               &                  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient / 2**1
+          block 
+           real(dp) :: weights(ntime)
+           weights=1.0_dp
             call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
               &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-              &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
+              &                                              compute_anharmonic=.TRUE.,print_file=.FALSE., weights=weights)
+            end block
 
             write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
             call wrtout(std_out,message,'COLL')

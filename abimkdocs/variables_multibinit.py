@@ -816,6 +816,32 @@ Indices of the banned coefficients during the fit process of the model
 ),
 
 Variable(
+    abivarname="fit_weight_T@multibinit",
+    varset="multibinit",
+    vartype="float",
+    topics=['FitProcess_expert'],
+    dimensions='scalar',
+    defaultval=-0.1,
+    mnemonics="FIT WEIGHT characteristic Temperature",
+    added_in_version="before_v9",
+    text=r"""
+A temperature-like parameter to tune the weights of the structures in the training set. 
+If the value is negative or 0, this weight scheme is not used and all structures in the training set are seen as equally important. 
+
+If it is positive:
+For each structure in the traning set, the average of the norm of the forces on the atoms are evaluated, and 
+the weight is evaluated as exp(-average(norm(force))/(kb T)). And then it is normalized so that the average of the weights is 1.
+With this weight scheme, the structure with large forces are seen as less important than the structre with small forces. 
+For small fit_weight_T, the weight are more biased to the structures with low forces.
+This can be useful when the structure near local minima and saddle points (in which the forces are close to 0) need to the emphasized. 
+Note that if the fig_weight_T is too small, the algoritm becomes inefficient as a large part of the training set has very low weight and are wasted. 
+""",
+),
+
+
+
+
+Variable(
     abivarname="ts_option@multibinit",
     varset="multibinit",
     vartype="integer",

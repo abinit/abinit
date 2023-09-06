@@ -317,6 +317,8 @@ subroutine polynomial_coeff_init(coefficient,nterm,polynomial_coeff,terms,name, 
    if(abs(weights(ii)) > tol16)then
      iterm1 = iterm1 + 1
      call polynomial_term_copy(terms(ii), polynomial_coeff%terms(iterm1))
+     if(sum(polynomial_coeff%terms(iterm1)%power_strain)>1) then
+     endif
    end if
  end do
 end subroutine polynomial_coeff_init
@@ -3377,6 +3379,7 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
          index_coeff(ii) = index_coeff(ii) - ncoeff + ncoeff_sym
        end if
      end do
+
 
      if(power_disp >= power_disp_min) then
        !      count the number of body

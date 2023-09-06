@@ -3293,6 +3293,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_nbancoeff fit_ncoeff fit_ncoeff_per_iatom fit_ncoeff_per_cycle'
  list_vars=trim(list_vars)//' fit_nfixcoeff fit_nimposecoeff fit_rangePower fit_SPCoupling fit_SPC_maxS'
  list_vars=trim(list_vars)//' fit_tolGF fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS fit_max_nbody'
+ list_vars=trim(list_vars)//' fit_weight_T'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling fock_icutcoul'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
  list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
