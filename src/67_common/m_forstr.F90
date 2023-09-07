@@ -678,6 +678,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !*************************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_FORSTRNPS)
  call timab(920,1,tsec) ; call timab(921,-1,tsec)
 
 !Init mpicomm and me
@@ -1264,6 +1265,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    fockcommon%use_ACE=use_ACE_old
  end if
  call timab(928,2,tsec) ; call timab(920,-2,tsec)
+ ABI_NVTX_END_RANGE()
 
 end subroutine forstrnps
 !!***
