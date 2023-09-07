@@ -192,7 +192,7 @@ nav:
     - DFT beyond basics:
         - properties at the nucleus: tutorial/nuc.md
         - DFT+U : tutorial/dftu.md
-        - cRPA U(J): tutorial/ucalc_crpa.md 
+        - cRPA U(J): tutorial/ucalc_crpa.md
         - Linear Response U(J): tutorial/lruj.md
         - PAW2: tutorial/paw2.md
         - PAW3: tutorial/paw3.md
@@ -349,7 +349,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.11.4
+    version: ABINIT_VERSION
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github
