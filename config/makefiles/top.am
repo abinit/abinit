@@ -28,7 +28,7 @@ EXTRA_DIST += \
 	doc/topics/documents/howto_chebfi.pdf \
 	doc/topics/documents/hybrids-2017.pdf \
 	doc/topics/documents/noncol.pdf \
-	mkdocs.yml \
+	mkdocs.yml.in \
 	mksite.py \
 	requirements.txt \
 	scripts \

@@ -128,6 +128,7 @@ tests/TestBot_MPI*/*
 /config/wrappers/wrap-mpifc
 
 # Documentation
+mkdocs.yml
 mkdocs_plugins/dist
 /site/
 /doc/developers/statistics.json
