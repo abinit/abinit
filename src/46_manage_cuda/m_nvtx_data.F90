@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 63
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 64
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -94,7 +94,8 @@ module m_nvtx_data
   integer, parameter :: NVTX_LOBPCG2_B_ORTHO = 60
   integer, parameter :: NVTX_LOBPCG2_GET_AX_BX = 61
   integer, parameter :: NVTX_RR_HEEV = 62
-  integer, parameter :: NVTX_FORSTR_NONLOP = 63
+  integer, parameter :: NVTX_FORSTRNPS = 63
+  integer, parameter :: NVTX_FORSTR_NONLOP = 64
 
 contains
 
@@ -172,6 +173,7 @@ contains
          & "LOBPCG2_B_ORTHO", &
          & "GET_AX_BX", &
          & "RR_HEEV", &
+         & "FORSTRNPS", &
          & "FORSTR_NONLOP" &
          ]
 
@@ -237,7 +239,8 @@ contains
     nvtx_ids(60)= NVTX_LOBPCG2_B_ORTHO
     nvtx_ids(61)= NVTX_LOBPCG2_GET_AX_BX
     nvtx_ids(62)= NVTX_RR_HEEV
-    nvtx_ids(63)= NVTX_FORSTR_NONLOP
+    nvtx_ids(63)= NVTX_FORSTRNPS
+    nvtx_ids(64)= NVTX_FORSTR_NONLOP
 
   end subroutine nvtx_init
 
