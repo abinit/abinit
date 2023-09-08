@@ -880,7 +880,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
       lambda_nonlop(1)=lambdablock(mpi_enreg%me_band+1)
    end if
    call nonlop(choice,cpopt,cwaveprj,enlout,hamk,idir,lambda_nonlop,mpi_enreg,1,nnlout,paw_opt,&
-&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2)
+&   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2,vectproj=vectproj)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    !call gpu_device_synchronize()
    !call gpu_data_prefetch_async_f(C_LOC(cwavef_alltoall2), cwavef_alltoall2_size, CPU_DEVICE_ID)
