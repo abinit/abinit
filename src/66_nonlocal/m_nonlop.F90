@@ -716,7 +716,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
          sij_, svectout, &
          hamk%useylm, vectin, vectout, &
-         hamk%use_gpu_impl)
+         vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
 #else
    ABI_ERROR("abinit was not compiled with GPU support")
 #endif
@@ -730,7 +730,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
          nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
          phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,hamk%use_gpu_impl)
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
 
    end if
 
