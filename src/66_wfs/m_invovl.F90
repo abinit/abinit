@@ -794,7 +794,6 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     blas_transpose = 't'
   end if
 
-  ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
   ABI_MALLOC(proj,       (cplx,invovl%nprojs,nspinor*ndat))
   ABI_MALLOC(sm1proj,    (cplx,invovl%nprojs,nspinor*ndat))
   ABI_MALLOC(PtPsm1proj, (cplx,invovl%nprojs,nspinor*ndat))
@@ -839,7 +838,11 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
-  call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
+  ! cwaveprj may be dummy or unused if gemm nonlop is turned on
+  if((.not. gemm_nonlop_use_gemm) .or. cwaveprj(1,1)%ncpgr/=0) then
+    ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
+    call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
+  end if
   ABI_NVTX_END_RANGE()
 
   ! get the cprj
@@ -935,25 +938,30 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
 
   ABI_NVTX_START_RANGE(NVTX_INVOVL_POST2)
-  ! copy PtPSm1proj to cwaveprj(:,:)
-  do idat=1, ndat*nspinor
-    shift = 0
-    do iatom = 1, ham%natom
-      nlmn = cwaveprj(iatom, idat)%nlmn
-      cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = PtPsm1proj(1:cplx, shift+1:shift+nlmn, idat)
-      shift = shift + nlmn
-    end do
-  end do
-  !cwaveprj_in is empty if GEMM nonlop is being used, so populate it here
-  if(gemm_nonlop_use_gemm) then
+  if(cwaveprj(1,1)%ncpgr/=0) then
+    ! copy PtPSm1proj to cwaveprj(:,:)
     do idat=1, ndat*nspinor
       shift = 0
       do iatom = 1, ham%natom
-        nlmn = cwaveprj_in(iatom, idat)%nlmn
-        cwaveprj_in(iatom, idat)%cp(1:cplx, 1:nlmn) = proj(1:cplx, shift+1:shift+nlmn, idat)
+        nlmn = cwaveprj(iatom, idat)%nlmn
+        cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = PtPsm1proj(1:cplx, shift+1:shift+nlmn, idat)
         shift = shift + nlmn
       end do
     end do
+    !cwaveprj_in is empty if GEMM nonlop is being used, so populate it here
+    if(gemm_nonlop_use_gemm) then
+      do idat=1, ndat*nspinor
+        shift = 0
+        do iatom = 1, ham%natom
+          nlmn = cwaveprj_in(iatom, idat)%nlmn
+          cwaveprj_in(iatom, idat)%cp(1:cplx, 1:nlmn) = proj(1:cplx, shift+1:shift+nlmn, idat)
+          shift = shift + nlmn
+        end do
+      end do
+    end if
+    call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
+    call pawcprj_free(cwaveprj_in)
+    ABI_FREE(cwaveprj_in)
   end if
 
   if (ham%use_gpu_impl == ABI_GPU_LEGACY .or. ham%use_gpu_impl==ABI_GPU_KOKKOS) then
@@ -965,9 +973,6 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     sm1cwavef = cwavef + sm1cwavef
   end if
 
-  call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
-  call pawcprj_free(cwaveprj_in)
-  ABI_FREE(cwaveprj_in)
   ABI_NVTX_END_RANGE()
 
   ABI_FREE(proj)

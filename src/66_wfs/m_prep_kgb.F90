@@ -751,7 +751,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      end if
    end if
  end if
- if(cpopt>=0) then
+ if(cpopt>=0.and. .not. present(vectproj)) then
    if (size(cwaveprj)/=hamk%natom*my_nspinor*mpi_enreg%bandpp) then
      ABI_BUG('Incorrect size for cwaveprj!')
    end if
