@@ -2718,13 +2718,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    ABI_BUG(message)
  end if
 
- if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
-   ! temporarily change the number of threads (currently when GPU is enabled we use
-   ! OMP_NUM_THREADS=1 except in specific locations; wfconv is one of them)
-   write(std_out,*) "Using ", dtset%use_gpu_openmp_threads, " OpenMP threads to perform wfconv"
-   call xomp_set_num_threads(dtset%use_gpu_openmp_threads)
- end if
-
  ngfft_now(1:3)=ngfft1(1:3)
  ngfft_now(8:18)=ngfft1(8:18)
 !This line is the reason why ngfft_now has to be introduced
@@ -3232,11 +3225,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&
 &   mpi_enreg2%me_g0,mpi_enreg2%comm_bandspinorfft)
    ABI_FREE(dum)
- end if
-
- if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
-   ! restore OMP_NUM_THREADS=1
-   call xomp_set_num_threads(1)
  end if
 
 end subroutine wfconv
