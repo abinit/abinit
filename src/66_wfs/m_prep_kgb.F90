@@ -847,15 +847,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  else
    ! Here, we cheat, and use DCOPY to bypass some compiler's overzealous bound-checking
    ! (ndatarecv*my_nspinor*bandpp might be greater than the declared size of cwavef)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
     if (l_use_gpu_cuda == ABI_GPU_KOKKOS) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
        call copy_gpu_to_gpu(C_LOC(cwavef_alltoall2), C_LOC(cwavef), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
+#endif
     else
        call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
     end if
-#else
-    call DCOPY(2*ndatarecv*my_nspinor*bandpp,cwavef,1,cwavef_alltoall2,1)
-#endif
  end if
 
  if(hamk%istwf_k==2) then
@@ -971,15 +969,13 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    end if
  else
    ! TODO check other usages, maybe
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
     if (l_use_gpu_cuda == ABI_GPU_KOKKOS) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
        call copy_gpu_to_gpu(C_LOC(gsc), C_LOC(gsc_alltoall2), INT(2, c_size_t) * ndatarecv * my_nspinor * bandpp * dp)
+#endif
     else
        call DCOPY(2*ndatarecv*my_nspinor*bandpp, gsc_alltoall2, 1, gsc, 1)
     end if
-#else
-    call DCOPY(2*ndatarecv*my_nspinor*bandpp, gsc_alltoall2, 1, gsc, 1)
-#endif
  end if
  if (hamk%istwf_k==2) mpi_enreg%me_g0=old_me_g0
 
