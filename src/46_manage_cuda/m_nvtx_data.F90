@@ -28,7 +28,7 @@ module m_nvtx_data
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 64
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 65
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -50,7 +50,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2_CORE = 16 ! core
   integer, parameter :: NVTX_CHEBFI2_NONLOP = 17
   integer, parameter :: NVTX_CTOCPRJ = 18
-  integer, parameter :: NVTX_SCF_FOURWF = 19
+  integer, parameter :: NVTX_VTOWFK_FOURWF = 19
   integer, parameter :: NVTX_MKRHO = 20
   integer, parameter :: NVTX_INVOVL = 21
   integer, parameter :: NVTX_INVOVL_PREP = 22
@@ -96,6 +96,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_RR_HEEV = 62
   integer, parameter :: NVTX_FORSTRNPS = 63
   integer, parameter :: NVTX_FORSTR_NONLOP = 64
+  integer, parameter :: NVTX_VTOWFK_NONLOP = 65
 
 contains
 
@@ -129,7 +130,7 @@ contains
          & "CHEBFI2_CORE", &
          & "CHEBFI2_NONLOP", &
          & "CTOCPRJ", &
-         & "SCF_FOURWF", &
+         & "VTOWFK_FOURWF", &
          & "MKRHO", &
          & "INVOVL", &
          & "INVOVL_PREP", &
@@ -174,7 +175,8 @@ contains
          & "GET_AX_BX", &
          & "RR_HEEV", &
          & "FORSTRNPS", &
-         & "FORSTR_NONLOP" &
+         & "FORSTR_NONLOP", &
+         & "VTOWFK_NONLOP" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -195,7 +197,7 @@ contains
     nvtx_ids(16)= NVTX_CHEBFI2_CORE
     nvtx_ids(17)= NVTX_CHEBFI2_NONLOP
     nvtx_ids(18)= NVTX_CTOCPRJ
-    nvtx_ids(19)= NVTX_SCF_FOURWF
+    nvtx_ids(19)= NVTX_VTOWFK_FOURWF
     nvtx_ids(20)= NVTX_MKRHO
     nvtx_ids(21)= NVTX_INVOVL
     nvtx_ids(22)= NVTX_INVOVL_PREP
@@ -241,6 +243,7 @@ contains
     nvtx_ids(62)= NVTX_RR_HEEV
     nvtx_ids(63)= NVTX_FORSTRNPS
     nvtx_ids(64)= NVTX_FORSTR_NONLOP
+    nvtx_ids(65)= NVTX_VTOWFK_NONLOP
 
   end subroutine nvtx_init
 
