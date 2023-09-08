@@ -39,6 +39,7 @@ MODULE m_invovl
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_bandfft_kpt, only : bandfft_kpt_get_ikpt
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
+ use m_gemm_nonlop, only : gemm_nonlop_use_gemm
  use m_nonlop,      only : nonlop
  use m_prep_kgb,    only : prep_nonlop
 
@@ -850,25 +851,29 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
       &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,&
       &                   already_transposed=.true.,&
-      &                   use_gpu_cuda=ham%use_gpu_impl)
+      &                   use_gpu_cuda=ham%use_gpu_impl,&
+      &                   vectproj=proj)
   else
     call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,&
-      &              nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
+      &              nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,vectproj=proj)
   end if
   ABI_NVTX_END_RANGE()
 
   call timab(timer_apply_inv_ovl_opernla, 2, tsec)
   call timab(timer_apply_inv_ovl_inv_s, 1, tsec)
 
-  ! copy cwaveprj_in to proj(:,:)
-  do idat=1, ndat*nspinor
-    shift = 0
-    do iatom = 1, ham%natom
-      nlmn = cwaveprj_in(iatom, idat)%nlmn
-      proj(1:cplx, shift+1:shift+nlmn, idat) = cwaveprj_in(iatom, idat)%cp(1:cplx, 1:nlmn)
-      shift = shift + nlmn
+  ! If using GEMM nonlop, proj array is used directly instead of writing in cwaveprj_in content, so skip this copy
+  if(.not. gemm_nonlop_use_gemm) then
+    ! copy cwaveprj_in to proj(:,:)
+    do idat=1, ndat*nspinor
+      shift = 0
+      do iatom = 1, ham%natom
+        nlmn = cwaveprj_in(iatom, idat)%nlmn
+        proj(1:cplx, shift+1:shift+nlmn, idat) = cwaveprj_in(iatom, idat)%cp(1:cplx, 1:nlmn)
+        shift = shift + nlmn
+      end do
     end do
-  end do
+  end if
 
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
@@ -897,15 +902,18 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   ABI_NVTX_END_RANGE()
 
-  ! copy sm1proj to cwaveprj(:,:)
-  do idat=1, ndat*nspinor
-    shift = 0
-    do iatom = 1, ham%natom
-      nlmn = cwaveprj(iatom, idat)%nlmn
-      cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = sm1proj(1:cplx, shift+1:shift+nlmn, idat)
-      shift = shift + nlmn
+  ! If using GEMM nonlop, sm1proj array is used directly instead of reading cwaveprj content, so skip this copy
+  if(.not. gemm_nonlop_use_gemm) then
+    ! copy sm1proj to cwaveprj(:,:)
+    do idat=1, ndat*nspinor
+      shift = 0
+      do iatom = 1, ham%natom
+        nlmn = cwaveprj(iatom, idat)%nlmn
+        cwaveprj(iatom, idat)%cp(1:cplx, 1:nlmn) = sm1proj(1:cplx, shift+1:shift+nlmn, idat)
+        shift = shift + nlmn
+      end do
     end do
-  end do
+  end if
   call timab(timer_apply_inv_ovl_inv_s, 2, tsec)
   call timab(timer_apply_inv_ovl_opernlb, 1, tsec)
 
@@ -917,10 +925,10 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   if (mpi_enreg%paral_kgb==1) then
     call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
       &                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.,&
-      &                   use_gpu_cuda=ham%use_gpu_impl)
+      &                   use_gpu_cuda=ham%use_gpu_impl,vectproj=sm1proj)
   else
     call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
-      &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc)
+      &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,vectproj=sm1proj)
   end if
   ABI_NVTX_END_RANGE()
 
@@ -936,6 +944,17 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
       shift = shift + nlmn
     end do
   end do
+  !cwaveprj_in is empty if GEMM nonlop is being used, so populate it here
+  if(gemm_nonlop_use_gemm) then
+    do idat=1, ndat*nspinor
+      shift = 0
+      do iatom = 1, ham%natom
+        nlmn = cwaveprj_in(iatom, idat)%nlmn
+        cwaveprj_in(iatom, idat)%cp(1:cplx, 1:nlmn) = proj(1:cplx, shift+1:shift+nlmn, idat)
+        shift = shift + nlmn
+      end do
+    end do
+  end if
 
   if (ham%use_gpu_impl == ABI_GPU_LEGACY .or. ham%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)

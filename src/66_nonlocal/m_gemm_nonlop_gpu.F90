@@ -374,7 +374,7 @@ module m_gemm_nonlop_gpu
 &                        nnlout,npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,&
 &                        sij,svectout,&
 &                        useylm,vectin,vectout,&
-&                        use_gpu_cuda)
+&                        vectproj,use_gpu_cuda)
 
   !Arguments ------------------------------------
   !scalars
@@ -396,6 +396,7 @@ module m_gemm_nonlop_gpu
   real(dp), target, intent(inout)  ::  vectin (2,npwin*nspinor*ndat)
   real(dp), target, intent(out)    :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
   real(dp), target, intent(inout)  ::  vectout(2,npwout*nspinor*ndat) !vz_i
+  real(dp), target, intent(inout), optional :: vectproj(:,:,:)
 
   ! locals
   integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend
@@ -407,10 +408,13 @@ module m_gemm_nonlop_gpu
   integer :: npw_max
   integer :: nattyp_max
 
+  logical :: local_vectproj
+
   real(dp), allocatable, target :: sij_typ(:)
 
   !type(c_ptr)                      :: projections_gpu,        s_projections_gpu,        vnl_projections_gpu
-  real(dp),    allocatable, target :: projections_cpu(:,:,:), s_projections_cpu(:,:,:), vnl_projections_cpu(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projections_cpu(:,:,:)
+  real(dp),    allocatable, target :: s_projections_cpu(:,:,:), vnl_projections_cpu(:,:,:)
 
   ! used inside opernlc_ylm_allwf_kokkos_cpp when iphase > 1
   type(c_ptr)                      :: vnl_projections2_gpu
@@ -536,24 +540,38 @@ module m_gemm_nonlop_gpu
     end if
   end if
 
-  ABI_MALLOC(    projections_cpu,(cplex,     nprojs,nspinor*ndat))
+  ! If vectproj is provided, use it for further calculations, use allocated array otherwise
+  local_vectproj=.false.
+  if(PRESENT(vectproj)) then
+    if(size(vectproj)>1) local_vectproj=.true.
+  end if
+  if (local_vectproj) then
+    projections_cpu => vectproj
+  else
+    ABI_MALLOC(    projections_cpu,(cplex,     nprojs,nspinor*ndat))
+    projections_cpu = zero
+  end if
   ABI_MALLOC(  s_projections_cpu,(cplex,     nprojs,nspinor*ndat)) ! TODO - TO BE REMOVED ONCE CUDA-IZATION IS OK
   ABI_MALLOC(vnl_projections_cpu,(cplex_fac, nprojs,nspinor*ndat)) ! TODO - TO BE REMOVED ONCE CUDA-IZATION IS OK
-  projections_cpu = zero
   s_projections_cpu = zero
   vnl_projections_cpu = zero
 
   if(cpopt >= 2) then
 
-    ! retrieve from cprjin
-    do idat=1, ndat*nspinor
-      shift = 0
-      do iatom = 1, natom
-        nlmn = cprjin(iatom, idat)%nlmn
-        projections_cpu(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
-        shift = shift + nlmn
+    if(.not. local_vectproj) then
+      !This use-case is extremely painful for GEMM GPU nonlop performance.
+      !vectproj paramter should always be provided to avoid it
+
+      ! retrieve from cprjin
+      do idat=1, ndat*nspinor
+        shift = 0
+        do iatom = 1, natom
+          nlmn = cprjin(iatom, idat)%nlmn
+          projections_cpu(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
+          shift = shift + nlmn
+        end do
       end do
-    end do
+    end if
 
     ! copy from HOST projections_cpu to GPU projections_gpu
     call copy_on_gpu(projections_cpu, gemm_nonlop_gpu_data%projections_gpu,&
@@ -628,15 +646,20 @@ module m_gemm_nonlop_gpu
       call copy_from_gpu(projections_cpu, gemm_nonlop_gpu_data%projections_gpu,&
           INT(cplex, c_size_t) * nprojs * nspinor*ndat * dp)
 
-      ! store in cprjin
-      do idat=1, ndat*nspinor
-        shift = 0
-        do iatom = 1, natom
-          nlmn = cprjin(iatom, idat)%nlmn
-          cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections_cpu(1:cplex, shift+1:shift+nlmn, idat)
-          shift = shift + nlmn
+      if(.not. local_vectproj) then
+        !This use-case is extremely painful for GEMM GPU nonlop performance.
+        !vectproj paramter should always be provided to avoid it
+
+        ! store in cprjin
+        do idat=1, ndat*nspinor
+          shift = 0
+          do iatom = 1, natom
+            nlmn = cprjin(iatom, idat)%nlmn
+            cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections_cpu(1:cplex, shift+1:shift+nlmn, idat)
+            shift = shift + nlmn
+          end do
         end do
-      end do
+      end if
 
     end if ! cpopt >= 0
 
@@ -885,7 +908,7 @@ module m_gemm_nonlop_gpu
   ABI_FREE_CUDA( lambda_gpu )
 
   ! if projections_cpu was allocated, then free it here
-  ABI_FREE(    projections_cpu)
+  if(.not. local_vectproj) ABI_FREE(projections_cpu)
   ABI_FREE(  s_projections_cpu) ! TO BE REMOVED
   ABI_FREE(vnl_projections_cpu) ! TO BE REMOVED
 

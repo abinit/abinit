@@ -489,7 +489,7 @@ contains
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 use_gpu_cuda)
+&                 vectproj,use_gpu_cuda)
 
   !Arguments ------------------------------------
   !scalars
@@ -515,6 +515,7 @@ contains
   real(dp),intent(inout) :: enlout(nnlout*ndat)
   real(dp),intent(out) :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
   real(dp),intent(inout) :: vectout(2,npwout*nspinor*ndat) !vz_i
+  real(dp),intent(inout),optional,target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ! locals
@@ -523,12 +524,14 @@ contains
   integer :: enlout_shift, force_shift, nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  logical :: local_vectproj
   real(dp) :: esum
   real(dp) :: work(6)
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: enlk(:),sij_typ(:)
-  real(dp), allocatable :: projections(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:)
+  real(dp),  ABI_CONTIGUOUS pointer :: projections(:,:,:)
+  real(dp), allocatable :: s_projections(:,:,:), vnl_projections(:,:,:)
   real(dp), allocatable :: dprojections(:,:,:), temp_realvec(:)
 
 ! *************************************************************************
@@ -573,11 +576,20 @@ contains
   ABI_CHECK(ngrads>=6.or.choice/=3 ,"Bad allocation in gemm_nonlop (3)!")
   ABI_CHECK(ngrads>=9.or.choice/=23,"Bad allocation in gemm_nonlop (23)!")
 
+  ! If vectproj is provided, use it for further calculations, use allocated array otherwise
+  local_vectproj=.false.
+  if(PRESENT(vectproj)) then
+    if(size(vectproj)>1) local_vectproj=.true.
+  end if
+  if (local_vectproj) then
+    projections => vectproj
+  end if
+
   ! These will store the non-local factors for vectin, svectout and vectout respectively
-  ABI_MALLOC(projections,(cplex, nprojs,nspinor*ndat))
+  if(.not. local_vectproj) ABI_MALLOC(projections,(cplex, nprojs,nspinor*ndat))
   ABI_MALLOC(s_projections,(cplex, nprojs,nspinor*ndat))
   ABI_MALLOC(vnl_projections,(cplex_fac, nprojs,nspinor*ndat))
-  projections = zero
+  if(.not. local_vectproj) projections = zero
   s_projections = zero
   vnl_projections = zero
   if (signs==1.and.ngrads>0) then
@@ -611,15 +623,20 @@ contains
 
 
   if(cpopt >= 2) then
-    ! retrieve from cprjin
-    do idat=1, ndat*nspinor
-      shift = 0
-      do iatom = 1, natom
-        nlmn = cprjin(iatom, idat)%nlmn
-        projections(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
-        shift = shift + nlmn
+    if(.not. local_vectproj) then
+      !This use-case is extremely painful for GEMM nonlop performance.
+      !vectproj paramter should always be provided to avoid it
+
+      ! retrieve from cprjin
+      do idat=1, ndat*nspinor
+        shift = 0
+        do iatom = 1, natom
+          nlmn = cprjin(iatom, idat)%nlmn
+          projections(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
+          shift = shift + nlmn
+        end do
       end do
-    end do
+    end if
     if(cpopt==4.and.allocated(dprojections)) then
       ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (1)")
       do idat=1, ndat*nspinor
@@ -689,15 +706,20 @@ contains
     end if
 
     if(cpopt >= 0) then
-      ! store in cprjin
-      do idat=1, ndat*nspinor
-        shift = 0
-        do iatom = 1, natom
-          nlmn = cprjin(iatom, idat)%nlmn
-          cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections(1:cplex, shift+1:shift+nlmn, idat)
-          shift = shift + nlmn
+      if(.not. local_vectproj) then
+        !This use-case is extremely painful for GEMM nonlop performance.
+        !vectproj paramter should always be provided to avoid it
+
+        ! store in cprjin
+        do idat=1, ndat*nspinor
+          shift = 0
+          do iatom = 1, natom
+            nlmn = cprjin(iatom, idat)%nlmn
+            cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections(1:cplex, shift+1:shift+nlmn, idat)
+            shift = shift + nlmn
+          end do
         end do
-      end do
+      end if
       if(cpopt==3) then
         ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (2)")
         shift = 0
@@ -915,7 +937,7 @@ contains
  end if
 
 ! Release memory
-  ABI_FREE(projections)
+  if(.not. local_vectproj) ABI_FREE(projections)
   ABI_FREE(s_projections)
   ABI_FREE(vnl_projections)
   if (allocated(dprojections)) then
