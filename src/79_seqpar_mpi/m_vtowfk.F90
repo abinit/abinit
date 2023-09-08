@@ -721,7 +721,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
- ABI_NVTX_START_RANGE(NVTX_SCF_FOURWF)
  ABI_MALLOC(enlout,(nnlout*blocksize))
 
  ! Allocation of memory space for one block of waveforms containing blocksize waveforms
@@ -793,6 +792,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
    if (iscf>0) then
 
+     ABI_NVTX_START_RANGE(NVTX_VTOWFK_FOURWF)
      ! In case of fixed occupation numbers, accumulates the partial density
      if (fixed_occ .and. mpi_enreg%paral_kgb/=1) then
 
@@ -1036,11 +1036,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ABI_FREE(cwavefb)
        end if
      end if
+     ABI_NVTX_END_RANGE()
    end if ! End of SCF calculation
 
 !    Call to nonlocal operator:
 !    - Compute nonlocal forces from most recent wfs
 !    - PAW: compute projections of WF onto NL projectors (cprj)
+   ABI_NVTX_START_RANGE(NVTX_VTOWFK_NONLOP)
    if (has_cprj_in_memory) then
      if (optforces>0) then
 !      Treat all wavefunctions in case of PAW
@@ -1106,10 +1108,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end if
        end if ! PAW or forces
      end if ! iscf>0 or iscf=-3
-  end if
+   end if
+   ABI_NVTX_END_RANGE()
  end do !  End of loop on blocks
  !call cwtime_report(" Block loop", cpu, wall, gflops)
- ABI_NVTX_END_RANGE()
 
  if(dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
