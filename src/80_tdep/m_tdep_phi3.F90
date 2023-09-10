@@ -295,9 +295,9 @@ subroutine tdep_write_phi3(distance,Invar,Phi3_ref,Shell3at,Sym)
         write(Invar%stdout,'(a,i4,a,i4)') '  For jatom  =',jatom ,' ,with type=',mod(jatom -1,Invar%natom_unitcell)+1
         write(Invar%stdout,'(a,i4,a,i4)') '  For katom  =',katom ,' ,with type=',mod(katom -1,Invar%natom_unitcell)+1
         do jj=1,3
-          if (jj==1) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta x}='
-          if (jj==2) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta y}='
-          if (jj==3) write(Invar%stdout,'(a)') '  \Phi3^{\alpha\beta z}='
+          if (jj==1) write(Invar%stdout,'(a)') '  Phi3^{alpha beta x}='
+          if (jj==2) write(Invar%stdout,'(a)') '  Phi3^{alpha beta y}='
+          if (jj==3) write(Invar%stdout,'(a)') '  Phi3^{alpha beta z}='
           do ii=1,3
             if (abs(Phi3_333(ii,1,jj)).lt.5.d-7) then
               tmp1=0.d0
