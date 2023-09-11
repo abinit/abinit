@@ -6152,7 +6152,7 @@ subroutine dvdb_test_ftinterp(dvdb_filepath, rspace_cell, symv1, dvdb_ngqpt, dvd
    write(std_out, "(/, 2a)")" Downsampling Q-mesh using coarse_ngqpt:", trim(ltoa(coarse_ngqpt))
 
 !Flang compiler complains with empty constructors (this bug should be corrected in future versions)
-#if defined FC_LLVM || defined FC_ARM
+#if defined FC_LLVM || defined FC_ARM || defined FC_NVHPC
    vd_max = vdiff_t(zero,zero,zero,zero,zero,zero)
 #else
    vd_max = vdiff_t()
