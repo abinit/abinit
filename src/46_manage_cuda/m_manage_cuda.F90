@@ -22,8 +22,6 @@
 
 module m_manage_cuda
 
- use m_alloc_hamilt_gpu
-
 #ifdef HAVE_FC_ISO_C_BINDING
  use, intrinsic :: iso_c_binding
 #endif
