@@ -841,15 +841,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  =   1 ,with type=   1
-  Phi3^{ alpha beta x}=
+  Phi3^{alpha^{ alpha beta x}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
-  Phi3^{ alpha beta y}=
+  Phi3^{alpha^{ alpha beta y}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
-  Phi3^{ alpha beta z}=
+  Phi3^{alpha^{ alpha beta z}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
@@ -990,10 +990,10 @@
  Thermodynamic quantities and convergence parameters of THE MODEL,
       as a function of the step number (energies in eV/atom and forces in Ha/bohr) :
  <U_TDEP> = U_0 + U_1 + U_2 + U_3 + U_4
-       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3 ui uj uk - 1/24 sum_ijkl Phi4 ui uj uk ul >
+       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3^{alpha ui uj uk - 1/24 sum_ijkl Phi4 ui uj uk ul >
         and U_1 = <      sum_i    Phi1 ui >
         and U_2 = < 1/2  sum_ij   Phi2 ui uj >
-        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >
+        and U_3 = < 1/6  sum_ijk  Phi3^{alpha ui uj uk >
         and U_4 = < 1/24 sum_ijkl Phi4 ui uj uk ul >
   Delta_U =   < U_MD - U_TDEP > 
   Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 
