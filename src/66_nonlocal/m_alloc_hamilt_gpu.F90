@@ -308,13 +308,20 @@ subroutine alloc_nonlop_gpu_data(dtset,&
   ! other
   integer,                   intent(in) :: use_gpu_cuda
 
+  !Local variables-------------------------------
+  !scalars
+#if defined HAVE_GPU_CUDA
   integer :: cplex
   integer :: nprojs
   integer :: itypat
 
   real(dp) :: allocated_size_bytes
   character(len=500)    :: message
+#endif
 
+! *************************************************************************
+
+#if defined HAVE_GPU_CUDA
   allocated_size_bytes = 0.
 
   cplex=2; !if (istwf_k>1) cplex=1
@@ -350,6 +357,14 @@ subroutine alloc_nonlop_gpu_data(dtset,&
 
   end if
 
+#else
+
+  if (.false.) then
+    write(std_out,*) psps%indlmn(1,1,1),dtset%natom,npwin,npwout,atindx1(1),nattyp(1),use_gpu_cuda
+  end if
+
+#endif
+
 end subroutine alloc_nonlop_gpu_data
 !!***
 
@@ -369,6 +384,7 @@ end subroutine alloc_nonlop_gpu_data
 
 subroutine dealloc_nonlop_gpu_data()
 
+#if defined HAVE_GPU_CUDA
   if (gemm_nonlop_gpu_data % allocated) then
     ABI_FREE_CUDA(gemm_nonlop_gpu_data%    projections_gpu)
     ABI_FREE_CUDA(gemm_nonlop_gpu_data%  s_projections_gpu)
@@ -380,6 +396,7 @@ subroutine dealloc_nonlop_gpu_data()
 
     gemm_nonlop_gpu_data % allocated = .false.
   end if
+#endif
 
 end subroutine dealloc_nonlop_gpu_data
 !!***

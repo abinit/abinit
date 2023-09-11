@@ -98,7 +98,7 @@ module m_respfn_driver
  use m_d2frnl,     only : d2frnl
 
 #if defined HAVE_GPU_CUDA
- use m_manage_cuda
+ use m_alloc_hamilt_gpu
 #endif
 
  implicit none

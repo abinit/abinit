@@ -108,7 +108,7 @@ module m_gstate
  use m_fft,              only : fft_init_counters,fft_output_counters
 
 #if defined HAVE_GPU_CUDA
- use m_manage_cuda
+ use m_alloc_hamilt_gpu
 #endif
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
