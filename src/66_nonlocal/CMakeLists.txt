@@ -3,6 +3,7 @@
 #
 
 set(66_nonlocal_SRC
+  m_alloc_hamilt_gpu.F90
   m_cgprj.F90
   m_contract.F90
   m_fock.F90
