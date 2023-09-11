@@ -35,6 +35,7 @@ module m_vtowfk
  use m_cgtools
  use m_dtset
  use m_dtfil
+ use m_xomp
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab, cwtime, cwtime_report, sec2str
@@ -447,6 +448,11 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ABI_ERROR(msg)
        end if
 
+       if (dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
+         ! Kokkos GPU branch is not OpenMP thread-safe, setting OpenMP num threads to 1
+         call xomp_set_num_threads(1)
+       end if
+
 !    =========================================================================
 !    ============ MINIMIZATION OF BANDS: LOBPCG ==============================
 !    =========================================================================
@@ -527,7 +533,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                        mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
        end if
 
+       if (dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
+         ! Kokkos GPU branch is not OpenMp thread-safe, restoring OpenMP threads num
+         call xomp_set_num_threads(dtset%use_gpu_openmp_threads)
+       end if
+
      end if
+
    end if
 
 !  =========================================================================
