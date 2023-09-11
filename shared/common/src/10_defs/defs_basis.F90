@@ -359,7 +359,7 @@ module defs_basis
  ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
  integer,parameter,public :: ABI_GPU_LEGACY   = 1
  ! GPU implementation relying on OpenMP v5 "TARGET" construct
- integer,parameter,public :: ABI_GPU_OPENMP   = 666
+ integer,parameter,public :: ABI_GPU_OPENMP   = 2
  ! GPU implementation relying on Kokkos framework
  integer,parameter,public :: ABI_GPU_KOKKOS   = 3
 
