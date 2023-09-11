@@ -156,6 +156,7 @@ function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,ebands) result(Ec_GM_k)
 !scalars
  integer :: ibdm!,unitt
  real(dp) :: ec_integrated,spin_fact,fact
+ character(len=500) :: msg
 !arrays
 !************************************************************************
 
@@ -164,8 +165,9 @@ function calc_Ec_GM_k(ib1,ib2,ik_ibz,Sr,weights,sigcme_k,ebands) result(Ec_GM_k)
  fact=spin_fact*(one/(two_pi*two))
 
  if (ib1/=1) then
-   ABI_WARNING("Unable to compute the Galitskii-Migdal correlation energy because the first band was &
-   &not included in bdgw interval. Restart the calculation starting bdgw from 1.")
+   msg="Unable to compute the Galitskii-Migdal correlation energy because the first band was " // &
+     & "not included in bdgw interval. Restart the calculation starting bdgw from 1."
+   ABI_WARNING(msg)
  else
    ! WARNING: Sigma_c(iv) produced from a previous integration at the screening stage, is numerically not much stable and introduces bumps.
    ! Unfortunately, the Green's function times Sigma_c(iv) does not decay fast enough with iv to overcome the bumps. These bumps are
