@@ -3892,7 +3892,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkdpr(0,0,cond_string,cond_values,ierr,'xc_tb09_c',dt%xc_tb09_c,1,0.0_dp,iout)
    !if (dt%xc_tb09_c>99._dp.and.dt%iscf==22) then
    !  write(msg, '(a,i4,a,i4,a,a,a,a,a,a)' )&
-&  !    'TB09 XC functional with variable c is not compatible with ODA mixing (iscf=22)!'
+   !&   'TB09 XC functional with variable c is not compatible with ODA mixing (iscf=22)!'
    !  ABI_ERROR_NOSTOP(msg,ierr)
    !end if
 
