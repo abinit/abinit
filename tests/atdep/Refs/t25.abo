@@ -2002,15 +2002,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  =   1 ,with type=   1
-  Phi3^{alpha^{alpha beta x}=
+  Phi3^{alpha beta x}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.175392
    0.000000  0.175392  0.000000
-  Phi3^{alpha^{alpha beta y}=
+  Phi3^{alpha beta y}=
    0.000000  0.000000  0.175392
    0.000000  0.000000  0.000000
    0.175392  0.000000  0.000000
-  Phi3^{alpha^{alpha beta z}=
+  Phi3^{alpha beta z}=
    0.000000  0.175392  0.000000
    0.175392  0.000000  0.000000
    0.000000  0.000000  0.000000
@@ -2022,15 +2022,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  =   2 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
   -0.014265 -0.033987 -0.033987
   -0.033987 -0.033987 -0.043848
   -0.033987 -0.043848 -0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
   -0.033987 -0.033987 -0.043848
   -0.033987 -0.014265 -0.033987
   -0.043848 -0.033987 -0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
   -0.033987 -0.043848 -0.033987
   -0.043848 -0.033987 -0.033987
   -0.033987 -0.033987 -0.014265
@@ -2041,15 +2041,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   2 ,with type=   2
   For katom  =   1 ,with type=   1
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
   -0.014265 -0.033987 -0.033987
   -0.033987 -0.033987 -0.043848
   -0.033987 -0.043848 -0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
   -0.033987 -0.033987 -0.043848
   -0.033987 -0.014265 -0.033987
   -0.043848 -0.033987 -0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
   -0.033987 -0.043848 -0.033987
   -0.043848 -0.033987 -0.033987
   -0.033987 -0.033987 -0.014265
@@ -2060,15 +2060,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  =  76 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
    0.014265  0.033987 -0.033987
    0.033987  0.033987 -0.043848
   -0.033987 -0.043848  0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
    0.033987  0.033987 -0.043848
    0.033987  0.014265 -0.033987
   -0.043848 -0.033987  0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
   -0.033987 -0.043848  0.033987
   -0.043848 -0.033987  0.033987
    0.033987  0.033987 -0.014265
@@ -2079,15 +2079,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =  76 ,with type=   2
   For katom  =   1 ,with type=   1
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
    0.014265  0.033987 -0.033987
    0.033987  0.033987 -0.043848
   -0.033987 -0.043848  0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
    0.033987  0.033987 -0.043848
    0.033987  0.014265 -0.033987
   -0.043848 -0.033987  0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
   -0.033987 -0.043848  0.033987
   -0.043848 -0.033987  0.033987
    0.033987  0.033987 -0.014265
@@ -2098,15 +2098,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  = 118 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
    0.014265 -0.033987  0.033987
   -0.033987  0.033987 -0.043848
    0.033987 -0.043848  0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
   -0.033987  0.033987 -0.043848
    0.033987 -0.014265  0.033987
   -0.043848  0.033987 -0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
    0.033987 -0.043848  0.033987
   -0.043848  0.033987 -0.033987
    0.033987 -0.033987  0.014265
@@ -2117,15 +2117,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  = 118 ,with type=   2
   For katom  =   1 ,with type=   1
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
    0.014265 -0.033987  0.033987
   -0.033987  0.033987 -0.043848
    0.033987 -0.043848  0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
   -0.033987  0.033987 -0.043848
    0.033987 -0.014265  0.033987
   -0.043848  0.033987 -0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
    0.033987 -0.043848  0.033987
   -0.043848  0.033987 -0.033987
    0.033987 -0.033987  0.014265
@@ -2136,15 +2136,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  = 202 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
   -0.014265  0.033987  0.033987
    0.033987 -0.033987 -0.043848
    0.033987 -0.043848 -0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
    0.033987 -0.033987 -0.043848
   -0.033987  0.014265  0.033987
   -0.043848  0.033987  0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
    0.033987 -0.043848 -0.033987
   -0.043848  0.033987  0.033987
   -0.033987  0.033987  0.014265
@@ -2155,15 +2155,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  = 202 ,with type=   2
   For katom  =   1 ,with type=   1
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
   -0.014265  0.033987  0.033987
    0.033987 -0.033987 -0.043848
    0.033987 -0.043848 -0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
    0.033987 -0.033987 -0.043848
   -0.033987  0.014265  0.033987
   -0.043848  0.033987  0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
    0.033987 -0.043848 -0.033987
   -0.043848  0.033987  0.033987
   -0.033987  0.033987  0.014265
@@ -2174,15 +2174,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   2 ,with type=   2
   For katom  =   2 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
    0.014265  0.033987  0.033987
    0.033987  0.033987  0.043848
    0.033987  0.043848  0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
    0.033987  0.033987  0.043848
    0.033987  0.014265  0.033987
    0.043848  0.033987  0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
    0.033987  0.043848  0.033987
    0.043848  0.033987  0.033987
    0.033987  0.033987  0.014265
@@ -2193,15 +2193,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =  76 ,with type=   2
   For katom  =  76 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
   -0.014265 -0.033987  0.033987
   -0.033987 -0.033987  0.043848
    0.033987  0.043848 -0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
   -0.033987 -0.033987  0.043848
   -0.033987 -0.014265  0.033987
    0.043848  0.033987 -0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
    0.033987  0.043848 -0.033987
    0.043848  0.033987 -0.033987
   -0.033987 -0.033987  0.014265
@@ -2212,15 +2212,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  = 118 ,with type=   2
   For katom  = 118 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
   -0.014265  0.033987 -0.033987
    0.033987 -0.033987  0.043848
   -0.033987  0.043848 -0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
    0.033987 -0.033987  0.043848
   -0.033987  0.014265 -0.033987
    0.043848 -0.033987  0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
   -0.033987  0.043848 -0.033987
    0.043848 -0.033987  0.033987
   -0.033987  0.033987 -0.014265
@@ -2231,15 +2231,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  = 202 ,with type=   2
   For katom  = 202 ,with type=   2
-  Phi3^{alpha^{ alpha beta x}=
+  Phi3^{alpha beta x}=
    0.014265 -0.033987 -0.033987
   -0.033987  0.033987  0.043848
   -0.033987  0.043848  0.033987
-  Phi3^{alpha^{ alpha beta y}=
+  Phi3^{alpha beta y}=
   -0.033987  0.033987  0.043848
    0.033987 -0.014265 -0.033987
    0.043848 -0.033987 -0.033987
-  Phi3^{alpha^{ alpha beta z}=
+  Phi3^{alpha beta z}=
   -0.033987  0.043848  0.033987
    0.043848 -0.033987 -0.033987
    0.033987 -0.033987 -0.014265
@@ -2330,10 +2330,10 @@
  Thermodynamic quantities and convergence parameters of THE MODEL,
       as a function of the step number (energies in eV/atom and forces in Ha/bohr) :
  <U_TDEP> = U_0 + U_1 + U_2 + U_3
-       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3^{alpha ui uj uk >
+       with U_0 = < U_MD - sum_i Phi1 ui - 1/2 sum_ij Phi2 ui uj - 1/6 sum_ijk Phi3 ui uj uk >
         and U_1 = <      sum_i    Phi1 ui >
         and U_2 = < 1/2  sum_ij   Phi2 ui uj >
-        and U_3 = < 1/6  sum_ijk  Phi3^{alpha ui uj uk >
+        and U_3 = < 1/6  sum_ijk  Phi3 ui uj uk >
   Delta_U =   < U_MD - U_TDEP > 
   Delta_U2= (< (U_MD - U_TDEP)^2 >)**0.5 
   Delta_F2= (< (F_MD - F_TDEP)^2 >)**0.5 
