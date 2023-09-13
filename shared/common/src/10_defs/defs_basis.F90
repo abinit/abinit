@@ -561,7 +561,7 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_DDK_DIAGO
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
- case ("optics_fullbz")
+ case ("optics_fullbz", "wfk_optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
