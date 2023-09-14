@@ -1623,7 +1623,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  real(dp) :: vec3(3), sym_vec(3), mat33(3,3), f_kq(3), work33(3,3)
  real(dp) :: fsum_eh(3,2,ebands%nsppol), max_adiff_spin(ebands%nsppol)
  real(dp) :: onsager(3,3,3,ebands%nsppol)
- real(dp),pointer :: sig_p(:,:,:,:), mob_p(:,:,:,:)
+ real(dp),pointer :: sig_p(:,:,:,:), mob_p(:,:,:,:), sbk_p(:,:,:,:)
  real(dp),target,allocatable :: ibte_sigma(:,:,:,:,:), ibte_mob(:,:,:,:,:), ibte_rho(:,:,:)
  real(dp),allocatable :: grp_srate(:,:,:,:), fkn_in(:,:,:,:), fkn_out(:,:,:,:), fkn_serta(:,:,:,:), taukn_serta(:,:,:,:)
  character(len=2) :: components(3)
@@ -1794,8 +1794,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  ABI_CALLOC(fkn_serta, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(taukn_serta, (3, nkibz, bmin:bmax, nsppol))
  ABI_MALLOC(ibte_sigma, (3, 3, 2, nsppol, ntemp))
+ ABI_MALLOC(ibte_seebeck, (3, 3, 2, nsppol, ntemp))
  ABI_MALLOC(ibte_mob, (3, 3, 2, nsppol, ntemp))
  ABI_MALLOC(converged, (ntemp))
+ ABI_MALLOC(sig_gen, (3, 3, 2, nsppol))
 
  abs_tol = dtset%ibte_abs_tol
 
@@ -1827,6 +1829,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    mu_e = ibte%eph_mu_e(itemp)
    sig_p => ibte_sigma(:,:,:,:,itemp)
    mob_p => ibte_mob(:,:,:,:,itemp)
+   sbk_p => ibte_seebeck(:,:,:,:,itemp)
 
    ! Precompute tau_serta and fkn_serta for this T: f^'_nk v_\nk * \tau^0
    do spin=1,nsppol
@@ -1984,13 +1987,13 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
          !pay attention when implementing if sigma=zero, bug ! impossible to get S.
          ! use matr3inv to inverse the matrix sigma but verify also that the det is not equal to zero !
          ! maybe type the command use "..." to be able to use the functions, check in the code
-         call inv33(sig_p,sig_p)
-         sig_p= sig_p*sig_gen/kT
-           do spin=1,nsppol
-             mat33 = sum(sig_p(:,:,:,spin), dim=3)
-             write(msg, "(i5,1x,es9.1,*(1x, es16.6))") &
-               iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
-           end do
+         do spin=1,nsppol
+           call inv33(sum(sig_p(:,:,:,spin),dim=3), inv_sig_p)
+           mat33 = matmul (inv_sig_p, sum(sig_gen(:,:,:,spin),dim=3)) / kT
+           write(msg, "(i5,1x,es9.1,*(1x, es16.6))") &
+               iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3)
+           sbk_p (:,:,1,spin) = mat33
+         end do
          call wrtout(std_out, msg)
        end if 
   
@@ -2051,6 +2054,10 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
          end do ! itemp
        end do ! spin
        call wrtout(unts, ch10)
+
+
+       ! HERE look into adding seebeck output for semiconductors as well, check what happens with e and h components in tensors
+       ! routine
      end do ! ii
 
    else
@@ -2078,8 +2085,24 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        end do ! spin
        call wrtout(unts, ch10)
 
-       ! HERE add output of Seebeck and kappa_el coefficients
      end do ! ii
+
+     ! HERE add output of Seebeck and kappa_el coefficients
+     ! TODO: add off diagonal Seebeck and sigma coefficients
+     msg = " Seebeck [Volts / Kelvin] using IBTE"
+     call wrtout(unts, msg)
+     do spin=1,ibte%nsppol
+       if (ibte%nsppol == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+       write(msg, "(5a16)") 'Temperature (K)', 'xx', 'yy', 'zz', "Converged"
+       call wrtout(unts, msg)
+       do itemp=1,ibte%ntemp
+         mat33 = sum(ibte_seebeck(:,:,:,spin,itemp), dim=3)
+         write(msg,"(f16.2,3e16.6,a16)") &
+           ibte%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3), yesno(converged(itemp))
+         call wrtout(unts, msg)
+       end do ! itemp
+     end do ! spin
+     call wrtout(unts, ch10)
    end if
 
    !pre = "_IBTE"
@@ -2101,6 +2124,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
      nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
      nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
+     nctkarr_t('ibte_seebeck', "dp", "three, three, two, nsppol, ntemp"), &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
@@ -2109,6 +2133,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_sigma"), ibte_sigma))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_mob"), ibte_mob))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_rho"), ibte_rho))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_seebeck"), ibte_seebeck))
    NCF_CHECK(nf90_close(ncid))
 #endif
 
@@ -2120,9 +2145,11 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  ABI_FREE(fkn_in)
  ABI_FREE(fkn_out)
  ABI_FREE(ibte_sigma)
+ ABI_FREE(ibte_seebeck)
  ABI_FREE(ibte_mob)
  ABI_FREE(ibte_rho)
  ABI_FREE(converged)
+ ABI_FREE(sig_gen)
 
  do spin=1,nsppol
    do ikcalc=1,nkcalc
@@ -2237,13 +2264,14 @@ subroutine ibte_calc_tensors(self, cryst, itemp, kT, mu_e, fk, onsager, sigma_eh
 
  !call xmpi_sum(sigma_eh, comm, ierr)
  !call xmpi_sum(onsager, comm, ierr)
+
+ fsum_eh = fsum_eh / cryst%ucvol
+
  ! Get units conversion factor including spin degeneracy.
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
  fact = 100**3 / e_Cb
-
  sigma_eh = fact0 * sigma_eh  ! siemens cm^-1
- fsum_eh = fsum_eh / cryst%ucvol
 
  ! Scale by the carrier concentration.
  do spin=1,nsppol
