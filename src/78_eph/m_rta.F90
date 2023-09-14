@@ -1605,6 +1605,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
+ integer :: iet, max_et
  integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr
  integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum, btype, nsp
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
@@ -1626,7 +1627,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  real(dp),target,allocatable :: ibte_sigma(:,:,:,:,:), ibte_mob(:,:,:,:,:), ibte_rho(:,:,:)
  real(dp),allocatable :: grp_srate(:,:,:,:), fkn_in(:,:,:,:), fkn_out(:,:,:,:), fkn_serta(:,:,:,:), taukn_serta(:,:,:,:)
  character(len=2) :: components(3)
-
+ real(dp), allocatable :: sig_gen(:,:,:,:), mob_gen(:,:,:,:)
  type :: scatk_t
 
    integer :: rank = xmpi_undefined_rank
@@ -1882,97 +1883,140 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    !if (cnt > 1 ) fkn_in = fkn_out
    fkn_out = zero
 
-   ! Begin iterative solver.
-   iter_loop: do iter=1,dtset%ibte_niter
+ max_et=2 !max_et =1 pour F^E et max_et=2 pour F^E et F^T 
 
-     ! Loop over the nk index in F_nk.
-     do spin=1,nsppol
-        do ikcalc=1,nkcalc
-          sr_p => sr(ikcalc, spin)
-          if (sr_p%rank /= my_rank) cycle ! MPI parallelism
-          ik_ibz = ibte%kcalc2ebands(1, ikcalc)
-          do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
+! start here with loop over E and T perturbations: once F^Eps is done, init F^T and converge it as well
+   electherm_loop: do iet = 1, max_et
 
-            ! Summing over the q-points in the effective IBZ(k) and the m band index.
-            ! Results stored in vec3. Integration weights are already included.
-            vec3 = zero
-            do band_sum=ibte%bmin, ibte%bmax
-              do iq_sum=1, sr_p%nq_ibzk_eff
-                ikq_ibz = sr_p%kq_symtab(1, iq_sum); isym_kq = sr_p%kq_symtab(2, iq_sum)
-                trev_kq = sr_p%kq_symtab(6, iq_sum) !; g0_kq = sr_p%kq_symtab(3:5, iq_sum)
-                ! Build F_{m,k+q} in the effective IBZ(k) from fkn_in using symmetries (need k+q --> IBZ map)
-                ! Use transpose(R) because we are using the tables for the wavefunctions
-                ! In this case listkk has been called with symrec and use_symrec=False
-                ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
-                ! vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
-                mat33 = transpose(cryst%symrel_cart(:,:,isym_kq))
-                f_kq = matmul(mat33, fkn_in(:, ikq_ibz, band_sum, spin))
-                if (trev_kq == 1) f_kq = -f_kq
-                vec3 = vec3 + sr_p%vals(iq_sum, band_sum, band_k, itemp) * f_kq(:)
-              end do ! iq_sum
-            end do ! band_k
-
-            ! Symmetrize intermediate results using the operations of the litte group of k.
-            sym_vec = zero
-            do isym_lgk=1,sr_p%lgk_nsym
-              isym = sr_p%lgk_sym2glob(1, isym_lgk)
-              itime = sr_p%lgk_sym2glob(2, isym_lgk)
-              mat33 = transpose(cryst%symrel_cart(:,:,isym))
-              !if(itime == 1) mat33 = -mat33 ! FIXME: here there's a different convention for TR used in m_lgroup
-              if (itime == 2) mat33 = -mat33
-              sym_vec = sym_vec + matmul(mat33, vec3)
+     if (iet == 2) then
+     ! initialize F^T from F^E
+       do spin=1,nsppol
+          do ikcalc=1,nkcalc
+            ik_ibz = ibte%kcalc2ebands(1, ikcalc)
+            do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
+               e_nk = ebands%eig(band_k, ik_ibz, spin)
+               fkn_in(:, ik_ibz, band_k, spin)  = fkn_in(:, ik_ibz, band_k, spin) * (e_nk-mu_e)/kT
             end do
-            sym_vec = taukn_serta(:, ik_ibz, band_k, spin) * sym_vec / sr_p%lgk_nsym
-            fkn_out(:, ik_ibz, band_k, spin) = fkn_serta(:, ik_ibz, band_k, spin) + sym_vec
-
-          end do ! band_k
-        end do ! ikcalc
-     end do ! spin
-
-     call xmpi_sum(fkn_out, comm, ierr)
-     do spin=1,nsppol
-       max_adiff_spin(spin) = maxval(abs(fkn_out(:,:,:,spin) - fkn_in(:,:,:,spin)))
-     end do
-     max_adiff = maxval(max_adiff_spin)
-
-     ! Compute transport tensors from fkn_out
-     call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sig_p, mob_p, fsum_eh, comm)
-
-     ! Print mobility for semiconductors or conductivity for metals.
-     if (ibte%assume_gap) then
-       do spin=1,nsppol
-         mat33 = sum(mob_p(:,:,:,spin), dim=3)
-         write(msg, "(i5,1x,es9.1,*(1x, f16.2))") &
-           iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
-       end do
-     else
-       do spin=1,nsppol
-         mat33 = sum(sig_p(:,:,:,spin), dim=3)
-         write(msg, "(i5,1x,es9.1,*(1x, es16.6))") &
-           iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
-       end do
-     end if
-     call wrtout(std_out, msg)
-
-     ! Check for convergence by testing max_k |F_k^i - F_k^{i-1}|.
-     converged(itemp) = max_adiff < abs_tol
-     if (converged(itemp)) then
-       call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
-                   "iterations within ibte_abs_tol:", ftoa(abs_tol)), pre_newlines=1)
-       exit iter_loop
-     else
-       ! Linear mixing of fkn_in and fkn_out.
-       fkn_in = (one - dtset%ibte_alpha_mix) * fkn_in + dtset%ibte_alpha_mix * fkn_out
-       fkn_out = zero
+          end do
+        end do
+       ABI_CHECK(converged(itemp), "Warning: E field BTE not converged, I will not try to converge the T gradient")
+       if (.not. converged(itemp)) exit electherm_loop
      end if
 
-   end do iter_loop
+     ! Begin iterative solver.
+     iter_loop: do iter=1,dtset%ibte_niter
+  
+       ! Loop over the nk index in F_nk.
+       do spin=1,nsppol
+          do ikcalc=1,nkcalc
+            sr_p => sr(ikcalc, spin)
+            if (sr_p%rank /= my_rank) cycle ! MPI parallelism
+            ik_ibz = ibte%kcalc2ebands(1, ikcalc)
+            do band_k=ibte%bstart_ks(ikcalc, spin), ibte%bstop_ks(ikcalc, spin)
+  
+              ! Summing over the q-points in the effective IBZ(k) and the m band index.
+              ! Results stored in vec3. Integration weights are already included.
+              vec3 = zero
+              do band_sum=ibte%bmin, ibte%bmax
+                do iq_sum=1, sr_p%nq_ibzk_eff
+                  ikq_ibz = sr_p%kq_symtab(1, iq_sum); isym_kq = sr_p%kq_symtab(2, iq_sum)
+                  trev_kq = sr_p%kq_symtab(6, iq_sum) !; g0_kq = sr_p%kq_symtab(3:5, iq_sum)
+                  ! Build F_{m,k+q} in the effective IBZ(k) from fkn_in using symmetries (need k+q --> IBZ map)
+                  ! Use transpose(R) because we are using the tables for the wavefunctions
+                  ! In this case listkk has been called with symrec and use_symrec=False
+                  ! so q_bz = S^T q_ibz where S is the isym_kq symmetry
+                  ! vkq = matmul(transpose(cryst%symrel_cart(:,:,isym_kq)), vkq)
+                  mat33 = transpose(cryst%symrel_cart(:,:,isym_kq))
+                  f_kq = matmul(mat33, fkn_in(:, ikq_ibz, band_sum, spin))
+                  if (trev_kq == 1) f_kq = -f_kq
+                  vec3 = vec3 + sr_p%vals(iq_sum, band_sum, band_k, itemp) * f_kq(:)
+                end do ! iq_sum
+              end do ! band_k
+  
+              ! Symmetrize intermediate results using the operations of the litte group of k.
+              sym_vec = zero
+              do isym_lgk=1,sr_p%lgk_nsym
+                isym = sr_p%lgk_sym2glob(1, isym_lgk)
+                itime = sr_p%lgk_sym2glob(2, isym_lgk)
+                mat33 = transpose(cryst%symrel_cart(:,:,isym))
+                !if(itime == 1) mat33 = -mat33 ! FIXME: here there's a different convention for TR used in m_lgroup
+                if (itime == 2) mat33 = -mat33
+                sym_vec = sym_vec + matmul(mat33, vec3)
+              end do
+              sym_vec = taukn_serta(:, ik_ibz, band_k, spin) * sym_vec / sr_p%lgk_nsym
+              ! if iet 2 multiply by e-mu / T
+              fkn_out(:, ik_ibz, band_k, spin) = fkn_serta(:, ik_ibz, band_k, spin) + sym_vec
+  
+            end do ! band_k
+          end do ! ikcalc
+       end do ! spin
+  
+       call xmpi_sum(fkn_out, comm, ierr)
+       do spin=1,nsppol
+         max_adiff_spin(spin) = maxval(abs(fkn_out(:,:,:,spin) - fkn_in(:,:,:,spin)))
+       end do
+       max_adiff = maxval(max_adiff_spin)
+  
 
-   if (.not. converged(itemp)) then
-     msg = sjoin("Not converged after:", itoa(dtset%ibte_niter), "max iterations")
-     call wrtout(ab_out, msg, pre_newlines=1, newlines=1)
-     ABI_WARNING(msg)
-   end if
+       ! Compute transport tensors from fkn_out (= F_eps or F_T)
+       call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sig_gen, mob_gen, fsum_eh, comm)
+         
+       ! Print mobility for semiconductors or conductivity for metals.
+       if (iet==1) then! for F_eps and charge transport
+         sig_p = sig_gen
+         mob_p = mob_gen
+         if (ibte%assume_gap) then
+           do spin=1,nsppol
+             mat33 = sum(mob_p(:,:,:,spin), dim=3)
+             write(msg, "(i5,1x,es9.1,*(1x, f16.2))") &
+               iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
+           end do
+         else
+           do spin=1,nsppol
+             mat33 = sum(sig_p(:,:,:,spin), dim=3)
+             write(msg, "(i5,1x,es9.1,*(1x, es16.6))") &
+               iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
+           end do
+         end if
+         call wrtout(std_out, msg)
+       else if (iet == 2) then! for Seebeck, sig_p is now = sigma * Seebeck
+         ! output sig_p^-1 * sig_gen
+         !pay attention when implementing if sigma=zero, bug ! impossible to get S.
+         ! use matr3inv to inverse the matrix sigma but verify also that the det is not equal to zero !
+         ! maybe type the command use "..." to be able to use the functions, check in the code
+         call inv33(sig_p,sig_p)
+         sig_p= sig_p*sig_gen/kT
+           do spin=1,nsppol
+             mat33 = sum(sig_p(:,:,:,spin), dim=3)
+             write(msg, "(i5,1x,es9.1,*(1x, es16.6))") &
+               iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
+           end do
+         call wrtout(std_out, msg)
+       end if 
+  
+       ! Check for convergence by testing max_k |F_k^i - F_k^{i-1}|.
+       converged(itemp) = max_adiff < abs_tol
+       if (converged(itemp)) then
+         call wrtout(std_out, sjoin(" IBTE solver converged after:", itoa(iter), &
+                     "iterations within ibte_abs_tol:", ftoa(abs_tol)), pre_newlines=1)
+            ! if (iet == 1) fkn_efield = fkn_out
+         exit iter_loop
+       else
+         ! Linear mixing of fkn_in and fkn_out.
+         fkn_in = (one - dtset%ibte_alpha_mix) * fkn_in + dtset%ibte_alpha_mix * fkn_out
+         fkn_out = zero
+       end if
+  
+     end do iter_loop
+
+     if (.not. converged(itemp)) then
+       msg = sjoin("Not converged after:", itoa(dtset%ibte_niter), "max iterations")
+       call wrtout(ab_out, msg, pre_newlines=1, newlines=1)
+       ABI_WARNING(msg)
+     end if
+
+   end do electherm_loop
+! end E/T loop
  end do ! itemp
 
  ABI_MALLOC(ibte_rho, (3, 3, ntemp))
@@ -2033,6 +2077,8 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
          end do ! itemp
        end do ! spin
        call wrtout(unts, ch10)
+
+       ! HERE add output of Seebeck and kappa_el coefficients
      end do ! ii
    end if
 
