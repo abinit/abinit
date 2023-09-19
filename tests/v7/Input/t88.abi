@@ -109,6 +109,7 @@ znucl  13
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.1_elpa
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi
 #%% [files]
 #%% files_to_test = 
