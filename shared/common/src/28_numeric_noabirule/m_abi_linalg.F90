@@ -890,13 +890,11 @@ CONTAINS  !===========================================================
 #endif
 
 #ifdef HAVE_GPU_CUDA
- if (use_gpu_cuda/=0) then
+ if (use_gpu_cuda/=ABI_GPU_DISABLED) then
    call abi_gpu_work_finalize()
    call gpu_linalg_shutdown()
  end if
  abi_linalg_gpu_mode = ABI_GPU_DISABLED
-#else
- if (use_gpu_cuda/=0) ABI_BUG("GPU linalg shutdown was requested but ABINIT wasn't built with GPU support!")
 #endif
 
 !Memory freeing
