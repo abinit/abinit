@@ -56,11 +56,11 @@ contains
   type(Lattice_type),intent(in) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
 
-  integer :: berryopt,jellslab,noncoll,use_inversion,chkprim,counter,nzchempot
+  integer :: nspden,use_inversion,chkprim,counter
   integer :: ptgroupma,isym,ii,jj,iatom_unitcell
   integer :: bravais(11)
   integer, allocatable :: symrel(:,:,:),symafm(:)
-  double precision :: genafm(3), efield(3)
+  double precision :: genafm(3)
   double precision :: temp1(3,1), temp2(3,1)
   double precision, allocatable :: spinat(:,:)
   double precision, allocatable :: tnons(:,:)
@@ -91,18 +91,14 @@ contains
   end do
 
 ! Calculation of the (non-symmorphic) translations
-  berryopt=0
-  efield(:)=0.d0
-  jellslab=0
-  noncoll=0
-  nzchempot=0
+  nspden=1
   ABI_MALLOC(spinat,(3,Invar%natom_unitcell)); spinat(:,:)=0.d0
   use_inversion=1
   ABI_MALLOC(symrel    ,(3,3,Sym%msym)) ; symrel    (:,:,:)=0
   ABI_MALLOC(tnons       ,(3,Sym%msym)) ; tnons       (:,:)=0.d0
   ABI_MALLOC(symafm        ,(Sym%msym)) ; symafm        (:)=1
-  call symfind(berryopt,efield,Lattice%gprimd,jellslab,Sym%msym,Invar%natom_unitcell,noncoll,Sym%nptsym,Sym%nsym,&
-&      nzchempot,0,Sym%ptsymrel,spinat,symafm,symrel,tnons,tol8,Invar%typat_unitcell,use_inversion,Sym%xred_zero)
+  call symfind(Lattice%gprimd,Sym%msym,Invar%natom_unitcell,Sym%nptsym,nspden,Sym%nsym,&
+&      0,Sym%ptsymrel,spinat,symafm,symrel,tnons,tol8,Invar%typat_unitcell,use_inversion,Sym%xred_zero)
   ABI_FREE(spinat)
   ABI_MALLOC(Sym%symrel,(3,3,Sym%nsym)) ; Sym%symrel(:,:,:)=0
   ABI_MALLOC(Sym%tnons   ,(3,Sym%nsym)) ; Sym%tnons   (:,:)=0.d0
@@ -213,7 +209,7 @@ contains
 
   integer :: isym,jatom,mu
   integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
-  integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
+  integer :: vecti(3),vectj(3),vectsym(4,Sym%nsym)
   integer, allocatable :: indsym2(:,:,:,:)
   double precision :: temp3(3,1)
   double precision :: tmpi(3,Invar%natom),tmpj(3,Invar%natom),tmp_store(3,Invar%natom_unitcell)
