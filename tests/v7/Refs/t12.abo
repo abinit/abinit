@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h31 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h04 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t12/t12.in
-- output file    -> t12.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t12/t12.abi
+- output file    -> t12.abo
 - root for input  files -> t12i
 - root for output files -> t12o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          24        mffmem =           1         mkmem =          10
        mpw =         293          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       6.680 Mbytes of memory.
+P This job should need less than                       7.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.075 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      1.075 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          24        mffmem =           1         mkmem =          10
        mpw =         293          nfft =        8000          nkpt =          10
 ================================================================================
-P This job should need less than                       6.680 Mbytes of memory.
+P This job should need less than                       7.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.075 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,7 +65,7 @@ _ WF disk file :      1.075 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 -    mband =          24        mffmem =           1         mkmem =         256
        mpw =         293          nfft =        8000          nkpt =         256
 ================================================================================
-P This job should need less than                      61.062 Mbytes of memory.
+P This job should need less than                      61.524 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :     27.471 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
@@ -563,8 +560,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.18935
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/78_Pt_r.oncvpsp.psp8
 - Au    NOPTPSP  r_core=  2.21  2.52  2.40  3.02
 - 78.00000  18.00000    140202                znucl, zion, pspdat
     8    2    3    4       500   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -768,7 +765,7 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.18935
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t12o_DS2_WFK
+-inwffil : will read wavefunctions from disk file t12o_DS2_WFK.nc
 _setup2: Arith. and geom. avg. npw (full set) are     282.281     282.247
 
 ================================================================================
@@ -1364,7 +1361,13 @@ P           mkmem3        256
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] The Abinit project: Impact, environment and recent developments.
+- [1] Specification of an extensible and portable file format for electronic structure and crystallographic data
+- X. Gonze, C.-O. Almbladh, A. Cucca, D. Caliste, C. Freysoldt, M. Marques, V. Olevano, Y. Pouillon, M.J. Verstraete,
+- Comput. Material Science 43, 1056 (2008).
+- Comment: to be cited in case the ETSF_IO file format is used, i.e. iomode=3.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2008
+-
+- [2] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -1381,12 +1384,12 @@ P           mkmem3        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Optimized norm-conserving Vanderbilt pseudopotentials.
+- [3] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [3] ABINIT: Overview, and focus on selected capabilities
+- [4] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -1403,7 +1406,7 @@ P           mkmem3        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [4] Recent developments in the ABINIT software package.
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1421,25 +1424,10 @@ P           mkmem3        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- And optionally:
--
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
-- D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
-- S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
-- M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
-- M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment: the third generic paper describing the ABINIT project.
-- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
-- The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- Proc.   0 individual time (sec): cpu=         22.6  wall=         22.7
+- Proc.   0 individual time (sec): cpu=         21.9  wall=         22.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.6  wall=         22.7
+.Delivered   6 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         21.9  wall=         22.6

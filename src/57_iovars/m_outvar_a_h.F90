@@ -1104,6 +1104,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%gethaydock
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gethaydock','INT',0)
 
+ if (any(dtsets(:)%usekden==1)) then
+   intarr(1,:)=dtsets(:)%getkden
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getkden','INT',0)
+ end if
+
  intarr(1,:)=dtsets(:)%getocc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getocc','INT',0)
 

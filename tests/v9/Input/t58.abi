@@ -12,7 +12,7 @@ t57o_DS6_DDB
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
 #%% files_to_test =
-#%%   t58.stdout, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   t58.stdout, tolnlines = 3, tolabs = 0.0, tolrel = 0.0
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]

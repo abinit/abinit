@@ -107,7 +107,7 @@ Note the use of [[bandpp]] 10 to accelerate the convergence.
 
 !!! important
     If your system were larger and required more CPU time, all the usual variables for parallelism
-    [[npkpt]], [[npband]], [[npfft]], [[npspinor]] could be used wisely.
+    [[np_spkpt]], [[npband]], [[npfft]], [[npspinor]] could be used wisely.
 
 Then run the calculation in sequential, first for the initial
 configuration (`timages_01.abi`), and then for the final one (`timages_02.abi`). You

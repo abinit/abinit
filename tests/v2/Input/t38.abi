@@ -57,7 +57,9 @@
     typat5   2 1
     xred5   3*0.50d0 3*0.0d0
 
-
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
 
 #Common data
  kptopt  3

@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h27 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t62-t63-t64-t65/t62.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t62-t63-t64-t65/t62.abi
 - output file    -> t62.abo
 - root for input  files -> t62i
 - root for output files -> t62o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       4.755 Mbytes of memory.
 _ WF disk file :      0.881 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       3.778 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.881 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -74,7 +71,6 @@ P This job should need less than                      25.259 Mbytes of memory.
 _ WF disk file :      7.033 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4 (RF).
@@ -91,7 +87,6 @@ P This job should need less than                      25.698 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      7.033 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -110,7 +105,6 @@ P This job should need less than                      25.698 Mbytes of memory.
 _ WF disk file :      7.033 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6 (RF).
@@ -127,7 +121,6 @@ P This job should need less than                      25.698 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      7.033 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -1561,8 +1554,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.05308
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1943,23 +1936,23 @@ tolerances: {tolvrs: 1.00E-06, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.0000000663         0.0000000000
+   1    1   1    1         0.0000000000         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   3    1         0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1        -0.0000000663         0.0000000000
+   2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1        -0.0000000663         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
+   3    1   3    1         0.0000000000         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -7.567123E-07 -7.567117E-07 -7.567099E-07
+   0.000000E+00  0.000000E+00  0.000000E+00
  Phonon frequencies in cm-1    :
-- -1.660792E-01 -1.660790E-01 -1.660786E-01
+-  0.000000E+00  0.000000E+00  0.000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1993,8 +1986,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.95178
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2292,8 +2285,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.95313
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2454,8 +2447,8 @@ meta: {optdriver: 8, wfk_task: 8, }
 - Reading GS states from WFK file: t62o_DS2_WFK
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/29cu.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Cu,  from PRB58, 3641 (1998)
 - 29.00000   1.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3967,10 +3960,10 @@ P          mk1mem7          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         32.0  wall=         32.6
+- Proc.   0 individual time (sec): cpu=         23.2  wall=         23.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.0  wall=         32.6
+.Delivered  14 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=         23.2  wall=         23.4

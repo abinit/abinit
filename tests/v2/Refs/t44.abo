@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t44/t44.in
-- output file    -> t44.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t44/t44.abi
+- output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
-
 
  DATASET    1 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           8        mffmem =           1         mkmem =          10
        mpw =          66          nfft =        1728          nkpt =          10
 ================================================================================
-P This job should need less than                       1.750 Mbytes of memory.
+P This job should need less than                       1.800 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.083 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -51,7 +49,7 @@ _ WF disk file :      0.083 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          10
        mpw =          77          nfft =        1728          nkpt =          10
 ================================================================================
-P This job should need less than                       1.767 Mbytes of memory.
+P This job should need less than                       1.816 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.096 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -187,8 +185,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.10694
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -558,8 +556,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.308   => boxcut(ratio)=   2.00661
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/33as.SGS_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.SGS_mod
 -   pspot from prpsa - Bachelet or Stumpf table ( !! OLD, for testing purposes only )
 - 33.00000   5.00000    900101                znucl, zion, pspdat
     5    3    2    2       269   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1344,10 +1342,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.9
+.Delivered   9 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.2  wall=          2.5

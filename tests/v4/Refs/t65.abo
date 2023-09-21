@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t65/t65.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t65/t65.abi
 - output file    -> t65.abo
 - root for input  files -> t65i
 - root for output files -> t65o
-
 
  DATASET    1 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -55,7 +54,6 @@ P newvtr chain                          1.682 Mbytes.
 _ WF disk file :      0.079 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (RF).
@@ -82,7 +80,6 @@ P Main chain + nonlop.f + opernl.f      2.273 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.248 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -124,6 +121,8 @@ _ WF disk file :      0.248 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0300000000E+01  1.0300000000E+01  1.0300000000E+01 Bohr
               amu      2.69815390E+01  3.09737620E+01
+              asr           0
+           chneut           0
            diemac1     6.00000000E+00
            diemac2     6.00000000E+00
            diemac3     1.00000000E+00
@@ -340,8 +339,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/13al.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Al,  from PRB58, 3641 (1998)
 - 13.00000   3.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -363,8 +362,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    0.692782
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/15p.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for P,  from PRB58, 3641 (1998)
 - 15.00000   5.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2293,7 +2292,7 @@ tolerances: {tolwfr: 1.00E-12, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2383,6 +2382,8 @@ tolerances: {tolwfr: 1.00E-12, }
  -outvars: echo values of variables after computation  --------
             acell      1.0300000000E+01  1.0300000000E+01  1.0300000000E+01 Bohr
               amu      2.69815390E+01  3.09737620E+01
+              asr           0
+           chneut           0
            diemac1     6.00000000E+00
            diemac2     6.00000000E+00
            diemac3     1.00000000E+00
@@ -2656,10 +2657,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          5.4  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.4  wall=          5.8
+.Delivered  10 WARNINGs and  21 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.9  wall=          4.0

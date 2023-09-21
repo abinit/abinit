@@ -54,5 +54,5 @@ xred # Reduced coordinate of atoms
 #%% keywords = 
 #%% description = 
 #%%   Diamond. Test the mGGA functional from Tran and Blaha (correction to Becke-Johnson).
-#%%   To make the test more poratble, we generate GGA-PBE wave functions as starting point.
+#%%   To make the test more portable, we generate GGA-PBE wave functions as starting point.
 #%%<END TEST_INFO>

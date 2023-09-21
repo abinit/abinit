@@ -49,7 +49,7 @@ as of v9.2, although the documentation is not yet fully upgraded.
 * (Legacy implementation) [[tutorial:eph_legacy|The legacy tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 Also there is a tutorial for [[tutorial:eph_tdep_legacy|the temperature dependence of the electronic structure]]:.
 
-* (New implementation) Four tutorials for the new procedure are available at [[tutorial:eph_intro|an overview of the EPH code]], 
+* (New implementation)  Three tutorials for the new procedure are available at [[tutorial:eph_intro|an overview of the EPH code]], 
 [[tutorial:eph4zpr|Zero-point renormalization of the band gap and temperature-dependent band gaps]], 
-[[tutorial:eph4mob|Phonon-limited mobility]] and
+[[tutorial:eph4mob|Phonon-limited mobility]] and a fourth one is in preparation.
 :.
