@@ -150,7 +150,7 @@ contains
     write(Invar%stdout,*) 'Shell number:',ishell 
     write(Invar%stdout,'(a,i5,a)') '  For atom',iatref,':'
     call tdep_calc_nbcoeff(distance,iatref,Invar,ishell,1,1,1,MPIdata,ncoeff,norder,Shell1at%nshell,order,proj,Sym)
-!FB    ncoeff=0
+    ncoeff=0
     if (ncoeff.eq.0) then 
       Shell1at%neighbours(1,ishell)%n_interactions=0
       if(allocated(Shell1at%neighbours(1,ishell)%atomj_in_shell)) then
