@@ -94,7 +94,7 @@ end subroutine tdep_make_inbox
   double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3),temp2(3,3)
   double precision :: rprimd(3,3),rprimdt(3,3),rprimd_md(3,3),rprim_tmp(3,3),rprimdm1(3,3)
   double precision :: rprim(3,3),temp(3,3),rprimm1(3,3),rprimt(3,3),rprimdtm1(3,3)
-  double precision :: xi,hh
+  double precision :: xi,hh,AA,BB,CC,DD
   double precision, allocatable :: WORK(:)
   type(Input_type) :: Invar
   type(Lattice_type),intent(out) :: Lattice
@@ -158,7 +158,7 @@ end subroutine tdep_make_inbox
 ! 1/ line only              --> line=1 (see rprim using acell in ABINIT) :
 !                               Mono, Tri
 ! 2/ column only            --> line=2 (see rprim using scalecart in ABINIT) :
-!                               Bct, Face-centered-Ortho, Base-centered-Ortho, C-centered-Ortho
+!                               Bct, Face-centered-Ortho, Body-centered-Ortho, C-centered-Ortho
 ! 3/ neither line or column --> line=3 (rprim has to be directly dimensioned in ABINIT) :
 !                               C-centered-Mono
 !=============================================================================================
@@ -181,6 +181,18 @@ end subroutine tdep_make_inbox
     rprim(1,1)=1.0d0 ; rprim(1,2)=0.0d0 ; rprim(1,3)=0.0d0
     rprim(2,1)=0.0d0 ; rprim(2,2)=1.0d0 ; rprim(2,3)=0.0d0
     rprim(3,1)=0.0d0 ; rprim(3,2)=0.0d0 ; rprim(3,3)=1.0d0
+  else if (Invar%bravais(1).eq.3.and.Invar%bravais(2).eq.-3) then !face centered orthorhombic
+    brav=1
+    line=2
+    rprim(1,1)=0.0d0 ; rprim(1,2)=0.5d0 ; rprim(1,3)=0.5d0
+    rprim(2,1)=0.5d0 ; rprim(2,2)=0.0d0 ; rprim(2,3)=0.5d0
+    rprim(3,1)=0.5d0 ; rprim(3,2)=0.5d0 ; rprim(3,3)=0.0d0
+  else if (Invar%bravais(1).eq.3.and.Invar%bravais(2).eq.-1) then !body centered orthorhombic
+    brav=1
+    line=2
+    rprim(1,1)=-0.5d0 ; rprim(1,2)= 0.5d0 ; rprim(1,3)= 0.5d0
+    rprim(2,1)= 0.5d0 ; rprim(2,2)=-0.5d0 ; rprim(2,3)= 0.5d0
+    rprim(3,1)= 0.5d0 ; rprim(3,2)= 0.5d0 ; rprim(3,3)=-0.5d0
   else if (Invar%bravais(1).eq.3.and.Invar%bravais(2).eq.3) then !orthorombic C-face centered
     brav=1
     line=2
@@ -209,20 +221,24 @@ end subroutine tdep_make_inbox
     rprim(1,1)=xi    ; rprim(1,2)=-xi/dsqrt(3d0)    ; rprim(1,3)= hh
     rprim(2,1)= 0.d0 ; rprim(2,2)=2d0*xi/dsqrt(3d0) ; rprim(2,3)= hh
     rprim(3,1)=-xi   ; rprim(3,2)=-xi/dsqrt(3d0)    ; rprim(3,3)= hh
-
+!    AA=dcos(Invar%angle_alpha*pi/180.d0/2d0)
+!    BB=dsin(Invar%angle_alpha*pi/180.d0/2d0)
+!    CC=dcos(Invar%angle_alpha*pi/180.d0)
+!    DD=dsqrt(1-CC**2/AA**2)
+!    rprim(1,1)= AA   ; rprim(1,2)= AA  ; rprim(1,3)= CC/AA
+!    rprim(2,1)=-BB   ; rprim(2,2)= BB  ; rprim(2,3)= 0.d0
+!    rprim(3,1)= 0.d0 ; rprim(3,2)= 0.d0; rprim(3,3)= DD
+!    rprim(1,1)= AA    ; rprim(1,2)= -BB ; rprim(1,3)= 0.d0
+!    rprim(2,1)= AA    ; rprim(2,2)=  BB ; rprim(2,3)= 0.d0
+!    rprim(3,1)= CC/AA ; rprim(3,2)= 0.d0; rprim(3,3)= DD
 ! For hexagonal: bravais(1)=6
   else if (Invar%bravais(1).eq.6.and.Invar%bravais(2).eq.0) then !hexagonal
     brav=4
     line=0
-    rprim(1,1)= 1.0d0 ; rprim(1,2)= 0.0d0 ; rprim(1,3)= 0.0d0
+! The following definition of the hcp is fixed in m_dynmat (chkrp9)
+    rprim(1,1)= 1.0d0 ; rprim(1,2)= 0.0d0            ; rprim(1,3)= 0.0d0
     rprim(2,1)=-0.5d0 ; rprim(2,2)= dsqrt(3.d0)/2.d0 ; rprim(2,3)= 0.0d0
-    rprim(3,1)= 0.0d0 ; rprim(3,2)= 0.0d0 ; rprim(3,3)= 1.0d0
-!FB    rprim(1,1)= 1.0d0 ; rprim(1,2)=-0.5d0 ; rprim(1,3)= 0.0d0
-!FB    rprim(2,1)= 0.0d0 ; rprim(2,2)= dsqrt(3.d0)/2.d0 ; rprim(2,3)= 0.0d0
-!FB    rprim(3,1)= 0.0d0 ; rprim(3,2)= 0.0d0 ; rprim(3,3)= 1.0d0
-!FB    rprim(1,1)= dsqrt(3.d0)/2.d0 ; rprim(1,2)= 0.5d0 ; rprim(1,3)= 0.0d0
-!FB    rprim(2,1)=-dsqrt(3.d0)/2.d0 ; rprim(2,2)= 0.5d0 ; rprim(2,3)= 0.0d0
-!FB    rprim(3,1)= 0.0d0            ; rprim(3,2)= 0.0d0 ; rprim(3,3)= 1.0d0
+    rprim(3,1)= 0.0d0 ; rprim(3,2)= 0.0d0            ; rprim(3,3)= 1.0d0
 ! For cubic: bravais(1)=7
   else if (Invar%bravais(1).eq.7.and.Invar%bravais(2).eq.0) then !simple cubic
     brav=1
@@ -277,7 +293,42 @@ end subroutine tdep_make_inbox
     acell_unitcell(ii)=temp2(ii,ii)
   end do
 
-! Check the precision and the order of the lattice parameters
+! Check the off-diagonal elements
+  rprimd_md(:,:)=0.d0
+  rprim_tmp(:,:)=rprim(:,:)
+  do ii=1,3
+    do jj=1,3
+      do kk=1,3
+        if (line==2) then
+          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(jj)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
+        else if (line==0.or.line==1) then
+          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(ii)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
+        else
+          ABI_ERROR(' THE CALCULATION OF RPRIMD IS NOT IMPLEMENTED')
+        end if
+      end do
+    end do
+    write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'The rprimd_md (computed)=',(rprimd_md(ii,jj),jj=1,3)
+  end do
+  if((abs(rprimd_md(1,2)-Invar%rprimd_md(1,2)).gt.tol5).or.(abs(rprimd_md(1,3)-Invar%rprimd_md(1,3)).gt.tol5).or.&
+&    (abs(rprimd_md(2,1)-Invar%rprimd_md(2,1)).gt.tol5).or.(abs(rprimd_md(3,1)-Invar%rprimd_md(3,1)).gt.tol5).or.&
+&    (abs(rprimd_md(2,3)-Invar%rprimd_md(2,3)).gt.tol5).or.(abs(rprimd_md(3,2)-Invar%rprimd_md(3,2)).gt.tol5).or.&
+&    (abs(rprimd_md(1,1)-Invar%rprimd_md(1,1)).gt.tol5).or.(abs(rprimd_md(2,2)-Invar%rprimd_md(2,2)).gt.tol5).or.&
+&    (abs(rprimd_md(3,3)-Invar%rprimd_md(3,3)).gt.tol5)) then
+    do ii=1,3
+      write(Invar%stdlog,'(a,x,3(f16.10,x))') 'The rprimd (from the input file or NetCDF file) is=',(Invar%rprimd_md(ii,jj),jj=1,3)
+    end do  
+    do ii=1,3
+      write(Invar%stdlog,'(a,x,3(f16.10,x))') 'However, using multiplicity (from the input file)=',(Invar%multiplicity(ii,jj),jj=1,3)
+    end do  
+    do ii=1,3
+      write(Invar%stdlog,'(a,x,3(f16.10,x))') 'rprim (from the aTDEP code)=',(rprim(ii,jj),jj=1,3)
+    end do  
+    write(Invar%stdlog,'(a,x,3(f16.10,x))') 'and acell (from the calculation)=',(acell_unitcell(ii),ii=1,3)
+    ABI_ERROR(' RPRIMD IS NOT RELATED TO RPRIM AND MULTIPLICITY. MODIFY YOUR RPRIMD.')
+  end if
+
+! Check the diagonal elements 
   if ((Invar%bravais(1).eq.2).and.(Invar%bravais(2).eq.0)) then !monoclinic
 !FB    if ((acell_unitcell(1).gt.acell_unitcell(3)).or.&
 !FB&       (acell_unitcell(2).gt.acell_unitcell(3)).or.&
@@ -307,7 +358,6 @@ end subroutine tdep_make_inbox
     acell_unitcell(3)=acell_unitcell(1)
   end if
   write(Invar%stdout,'(a,1x,3(f16.10,1x))') ' acell_unitcell=',acell_unitcell(:)
-! TODO: Check also the off-diagonal elements
 
 ! Redefine rprimd_md (in order to have a precision higher than 1.d-8)
   rprimd_md(:,:)=0.d0
@@ -315,7 +365,13 @@ end subroutine tdep_make_inbox
   do ii=1,3
     do jj=1,3
       do kk=1,3
-        rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(ii)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
+        if (line==2) then
+          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(jj)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
+        else if (line==0.or.line==1) then
+          rprimd_md(ii,jj)=rprimd_md(ii,jj)+acell_unitcell(ii)*Invar%multiplicity(ii,kk)*rprim_tmp(kk,jj)
+        else
+          ABI_ERROR(' THE CALCULATION OF RPRIMD IS NOT IMPLEMENTED')
+        end if
       end do
     end do
     write(Invar%stdout,'(a,1x,3(f16.10,1x))') ' rprimd_md=',(rprimd_md(ii,jj),jj=1,3)
@@ -331,7 +387,7 @@ end subroutine tdep_make_inbox
     rprimd(2,1)=rprim(2,1)*acell_unitcell(2) ; rprimd(2,2)=rprim(2,2)*acell_unitcell(2) ; rprimd(2,3)=rprim(2,3)*acell_unitcell(2)
     rprimd(3,1)=rprim(3,1)*acell_unitcell(3) ; rprimd(3,2)=rprim(3,2)*acell_unitcell(3) ; rprimd(3,3)=rprim(3,3)*acell_unitcell(3)
   else
-    write(Invar%stdout,'(a)') ' STOP : CALCULATION OF RPRIMD NOT IMPLEMENTED'
+    ABI_ERROR(' THE CALCULATION OF RPRIMD IS NOT IMPLEMENTED')
   end if
 
 ! Starting from rprimd, compute gmet, rmet, gprimd  
