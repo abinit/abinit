@@ -1,5 +1,5 @@
 
-.Version 9.8.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Dec 2022.
-- ( at 21h06 )
+.Starting date : Sun 16 Jul 2023.
+- ( at 07h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_1/teph_tdep_legacy_1.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/tutorespfn_teph_tdep_legacy_1/teph_tdep_legacy_1.abi
 - output file    -> teph_tdep_legacy_1.abo
 - root for input  files -> teph_tdep_legacy_1i
 - root for output files -> teph_tdep_legacy_1o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       7.626 Mbytes of memory.
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       5.224 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -204,8 +201,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     37.000   => boxcut(ratio)=   2.01471
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/C.psp8
 - C     ONCVPSP-3.3.0  r_core=   1.20440   1.26326
 -  6.00000   4.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -902,23 +899,23 @@ tolerances: {tolwfr: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.6104777624         0.0000000000
-   1    1   2    1         0.0000147075         0.0000000000
-   1    1   3    1         0.0000040628         0.0000000000
+   1    1   1    1         0.6104681699        -0.0000000000
+   1    1   2    1        -0.0000036289         0.0000000000
+   1    1   3    1         0.0000007170        -0.0000000000
    1    1   1    2        -0.6104681699         0.0000000000
    1    1   2    2         0.0000036289        -0.0000000000
    1    1   3    2        -0.0000007170         0.0000000000
   
-   2    1   1    1         0.0000149715         0.0000000000
-   2    1   2    1         0.6104544335         0.0000000000
-   2    1   3    1         0.0000003081         0.0000000000
+   2    1   1    1         0.0000173275         0.0000000000
+   2    1   2    1         0.6104505447         0.0000000000
+   2    1   3    1        -0.0000154737        -0.0000000000
    2    1   1    2        -0.0000173275        -0.0000000000
    2    1   2    2        -0.6104505447        -0.0000000000
    2    1   3    2         0.0000154737         0.0000000000
   
-   3    1   1    1         0.0000034016         0.0000000000
-   3    1   2    1        -0.0000048148         0.0000000000
-   3    1   3    1         0.6104769362         0.0000000000
+   3    1   1    1         0.0000195291        -0.0000000000
+   3    1   2    1         0.0000041138        -0.0000000000
+   3    1   3    1         0.6104715911        -0.0000000000
    3    1   1    2        -0.0000195291         0.0000000000
    3    1   2    2        -0.0000041138         0.0000000000
    3    1   3    2        -0.6104715911         0.0000000000
@@ -926,40 +923,40 @@ tolerances: {tolwfr: 1.00E-08, }
    1    2   1    1        -0.6104653230        -0.0000000000
    1    2   2    1        -0.0000055095         0.0000000000
    1    2   3    1        -0.0000233890        -0.0000000000
-   1    2   1    2         0.6104550073         0.0000000000
-   1    2   2    2        -0.0000165370         0.0000000000
-   1    2   3    2         0.0000069525         0.0000000000
+   1    2   1    2         0.6104653230         0.0000000000
+   1    2   2    2         0.0000055095        -0.0000000000
+   1    2   3    2         0.0000233890         0.0000000000
   
    2    2   1    1        -0.0000057309         0.0000000000
    2    2   2    1        -0.6104488615         0.0000000000
    2    2   3    1        -0.0000120127        -0.0000000000
-   2    2   1    2        -0.0000171460         0.0000000000
-   2    2   2    2         0.6104739187         0.0000000000
-   2    2   3    2         0.0000043743         0.0000000000
+   2    2   1    2         0.0000057309        -0.0000000000
+   2    2   2    2         0.6104488615        -0.0000000000
+   2    2   3    2         0.0000120127         0.0000000000
   
    3    2   1    1        -0.0000004836        -0.0000000000
    3    2   2    1         0.0000211850        -0.0000000000
    3    2   3    1        -0.6104714286        -0.0000000000
-   3    2   1    2         0.0000041543         0.0000000000
-   3    2   2    2         0.0000023152         0.0000000000
-   3    2   3    2         0.6104737555         0.0000000000
+   3    2   1    2         0.0000004836         0.0000000000
+   3    2   2    2        -0.0000211850         0.0000000000
+   3    2   3    2         0.6104714286         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.575504E-05  1.049333E-05  3.094794E-05  7.467448E-03  7.467499E-03
-   7.467592E-03
+  -1.155423E-07 -1.001283E-07  0.000000E+00  7.467385E-03  7.467496E-03
+   7.467603E-03
  Phonon energies in meV     :
-- -4.287164E-01  2.855379E-01  8.421363E-01  2.031996E+02  2.032010E+02
--  2.032035E+02
+- -3.144067E-03 -2.724630E-03  0.000000E+00  2.031979E+02  2.032009E+02
+-  2.032038E+02
  Phonon frequencies in cm-1    :
-- -3.457832E+00  2.303019E+00  6.792288E+00  1.638915E+03  1.638926E+03
--  1.638947E+03
+- -2.535861E-02 -2.197563E-02  0.000000E+00  1.638902E+03  1.638926E+03
+-  1.638949E+03
  Phonon frequencies in Thz     :
-- -1.036632E-01  6.904276E-02  2.036277E-01  4.913345E+01  4.913378E+01
--  4.913439E+01
+- -7.602320E-04 -6.588128E-04  0.000000E+00  4.913303E+01  4.913376E+01
+-  4.913447E+01
  Phonon energies in Kelvin  :
-- -4.975042E+00  3.313526E+00  9.772575E+00  2.358031E+03  2.358047E+03
--  2.358076E+03
+- -3.648534E-02 -3.161799E-02  0.000000E+00  2.358011E+03  2.358046E+03
+-  2.358080E+03
  Components of second-order derivatives of the electronic energy, EIGR2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -2.9896116905E+00    0.0000000000E+00
@@ -1009,14 +1006,14 @@ tolerances: {tolwfr: 1.00E-08, }
  Fan corrections to eigenvalues at T=0 (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.32652   -2.65230   -7.94689   -5.90710   -5.00903   -5.00903   -5.00903   -1.03284
-  -0.28328    0.30751    0.79633    0.35288
+  -0.00144   -0.01658   -0.01658   -0.01658   -0.01618   -0.01618   -0.01618   -0.00420
+  -0.00235    0.00131    0.00262    0.00041
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  Fan corrections to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -8.88512  -72.17275 -216.24592 -160.74031 -136.30272 -136.30272 -136.30272  -28.10509
-  -7.70845    8.36779   21.66914    9.60241
+  -0.03916   -0.45127   -0.45122   -0.45116   -0.44023   -0.44023   -0.44023   -0.11421
+  -0.06386    0.03552    0.07142    0.01125
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1024,14 +1021,14 @@ tolerances: {tolwfr: 1.00E-08, }
  DDW corrections to eigenvalues at T=0 (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.32611    2.65299    7.94758    5.90779    5.00857    5.00857    5.00857    1.03188
-   0.28182   -0.30752   -0.79575   -0.35344
+   0.00102    0.01727    0.01727    0.01727    0.01572    0.01572    0.01572    0.00324
+   0.00088   -0.00131   -0.00205   -0.00097
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  DDW corrections to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband= 12, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   8.87381   72.19141  216.26462  160.75907  136.29022  136.29022  136.29022   28.07900
-   7.66865   -8.36805  -21.65344   -9.61750
+   0.02785    0.46992    0.46992    0.46992    0.42772    0.42772    0.42772    0.08812
+   0.02407   -0.03577   -0.05572   -0.02634
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1153,6 +1150,11 @@ P          mk1mem           8
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -1260,10 +1262,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         23.3  wall=         23.5
+- Proc.   0 individual time (sec): cpu=         27.4  wall=         27.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.3  wall=         23.5
+.Delivered   1 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=         27.4  wall=         27.5

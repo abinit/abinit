@@ -71,7 +71,7 @@ contains
 ! The routine used is symlatt (from Abinit code)
   Sym%msym=1000 !msym needs to be very large due to non-primitive cell calculations
   ABI_MALLOC(Sym%ptsymrel,(3,3,Sym%msym)) ; Sym%ptsymrel(:,:,:)=0
-  call symlatt(Invar%bravais,Sym%msym,Sym%nptsym,Sym%ptsymrel,Lattice%rprimdt,tol8)
+  call symlatt(Invar%bravais,std_out,Sym%msym,Sym%nptsym,Sym%ptsymrel,Lattice%rprimdt,tol8)
   write(Invar%stdout,'(a,1x,11(i4,1x))')' bravais=',Invar%bravais(:)
   Sym%nsym=Sym%nptsym
 
@@ -213,8 +213,7 @@ contains
 
   integer :: isym,jatom,mu
   integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
-!  integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
-  integer :: vecti(3),vectj(3),vectsym(4,Sym%nsym)
+  integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
   integer, allocatable :: indsym2(:,:,:,:)
   double precision :: temp3(3,1)
   double precision :: tmpi(3,Invar%natom),tmpj(3,Invar%natom),tmp_store(3,Invar%natom_unitcell)

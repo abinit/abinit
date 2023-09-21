@@ -167,5 +167,5 @@ plowan_compute3 1 # Activate the computation of Wannier functions
 #%% keywords = GW, cRPA, DMFT
 #%% authors =  B. Amadon
 #%% description = For SrVO3, compute cRPA screened interaction U in the d-dp(b) model
-#%% topics = CRPA
+#%% topics = CalcUJ
 #%%<END TEST_INFO>

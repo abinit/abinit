@@ -17,7 +17,7 @@ rmm_diis1   1
 npband1     4
 bandpp1     6
 npfft1      1
-npkpt1      1
+np_spkpt1      1
 tolwfr1     1.0d-18
 
 ###########################################

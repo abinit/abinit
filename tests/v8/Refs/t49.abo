@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h13 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
 
 ================================================================================
@@ -52,13 +52,20 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3082654  5.3082654  G(1)= -0.0941927  0.0941927  0.0941927
  R(2)=  5.3082654  0.0000000  5.3082654  G(2)=  0.0941927 -0.0941927  0.0941927
  R(3)=  5.3082654  5.3082654  0.0000000  G(3)=  0.0941927  0.0941927 -0.0941927
  Unit cell volume ucvol=  2.9914923E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 2 blocks has been read.
 
 ================================================================================
 
@@ -83,7 +90,7 @@
        3               3       -1.429236        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.992108E+00    2.282375E-17    2.293757E-17
@@ -526,6 +533,6 @@
 
 ================================================================================
 
-+Total cpu time      0.200  and wall time      0.217 sec
++Total cpu time      0.162  and wall time      0.179 sec
 
  anaddb : the run completed succesfully.
