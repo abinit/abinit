@@ -277,8 +277,6 @@ static const char *_hipGetErrorEnum(hipsolverStatus_t error) {
       return "HIPSOLVER_STATUS_HANDLE_IS_NULLPTR";
     case HIPSOLVER_STATUS_INVALID_ENUM:
       return "HIPSOLVER_STATUS_INVALID_ENUM";
-    case HIPSOLVER_STATUS_ZERO_PIVOT:
-      return "HIPSOLVER_STATUS_ZERO_PIVOT";
     case HIPSOLVER_STATUS_UNKNOWN:
       return "HIPSOLVER_STATUS_UNKNOWN";
     case HIPSOLVER_STATUS_NOT_SUPPORTED:
