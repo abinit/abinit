@@ -186,6 +186,7 @@ contains
     integer :: c
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%input_path=input_path
+#ifndef FC_CRAY
     self%filenames(:)=filenames(:)
     call xmpi_bcast(self%filenames, master, comm, ierr)
     !TODO: remove params as argument. It is here because the params are read
@@ -231,6 +232,7 @@ contains
 
 
     call self%energy_table%init()
+#endif
 
   end subroutine initialize
 
