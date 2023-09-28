@@ -131,7 +131,7 @@ module m_gpu_toolbox
     end subroutine gpu_memory_advise_f
 
     !!! FFT related routines
-    subroutine gpu_fft_plan_destroy() bind(c, name='gpu_fft_plan_many_cpp')
+    subroutine gpu_fft_plan_destroy() bind(c, name='gpu_fft_plan_destroy_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
     end subroutine gpu_fft_plan_destroy
