@@ -56,7 +56,7 @@ contains
   type(Lattice_type),intent(in) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
 
-  integer :: nspden,use_inversion,chkprim,counter
+  integer :: nspden,use_inversion,chkprim
   integer :: ptgroupma,isym,ii,jj,iatom_unitcell
   integer :: bravais(11)
   integer, allocatable :: symrel(:,:,:),symafm(:)
@@ -197,18 +197,17 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_SearchS_1at(Invar,Lattice,MPIdata,Sym,xred_ideal)
+ subroutine tdep_SearchS_1at(Invar,MPIdata,Sym,xred_ideal)
 
   implicit none
 
   type(Input_type), intent(in) :: Invar
-  type(Lattice_type), intent(in) :: Lattice
   type(Symetries_type), intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
   integer :: isym,jatom,mu
-  integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
+  integer :: iatom_unitcell,jatom_unitcell,iatom
   integer :: vecti(3),vectj(3),vectsym(4,Sym%nsym)
   integer, allocatable :: indsym2(:,:,:,:)
   double precision :: temp3(3,1)
