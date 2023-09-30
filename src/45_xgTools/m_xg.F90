@@ -3261,16 +3261,20 @@ contains
     integer         , intent(  out), optional :: min_elt
     integer         , intent(in   ), optional :: use_gpu_cuda
 
-    integer :: icol, ierr
+    integer :: icol, ierr, i
     double precision,external :: ddot
     integer      :: l_use_gpu_cuda
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     double precision :: tmp
-    integer :: i,cols,rows
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    integer :: cols,rows
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:),dot__vecR(:,:)
 #endif
+
+    ! Used in GPU and Cray compilations
+    ABI_UNUSED(tmp)
+    ABI_UNUSED(i)
 
     if ( dot%space /= SPACE_R ) then
       ABI_ERROR("error space")
@@ -3381,6 +3385,18 @@ contains
         end do
         !$omp end parallel do
       case(SPACE_C)
+#if defined(FC_CRAY)
+        !$omp parallel do private(i,tmp), &
+        !$omp& schedule(static)
+        do icol = 1, xgBlock%cols
+          tmp=0
+          do i = 1, xgBlock%rows
+            tmp = tmp + dconjg(xgBlock%vecC(i,icol))*xgBlock%vecC(i,icol)
+          end do
+          dot%vecR(icol,1)=tmp
+        end do
+        !$omp end parallel do
+#else
         !$omp parallel do shared(dot,xgBlock), &
         !$omp& schedule(static)
         do icol = 1, xgBlock%cols
@@ -3391,6 +3407,7 @@ contains
           dot%vecR(icol,1) = ddot(2*xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1)
         end do
         !$omp end parallel do
+#endif
       end select
       call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,ierr)
 
@@ -3628,7 +3645,7 @@ contains
 
       case(SPACE_C)
 !FIXME Somehow, zdotc call goes wrong with NVHPC here (NVHPC 22.11, MKL 22.3)
-#if defined(FC_NVHPC) && defined(HAVE_LINALG_MKL_THREADS)
+#if defined(FC_NVHPC) || defined(FC_CRAY)
         !$omp parallel do private(i,tmp) shared(dot,xgBlockA,xgBlockB), &
         !$omp& schedule(static)
         do icol = 1, xgBlockA%cols
