@@ -94,7 +94,7 @@ end subroutine tdep_make_inbox
   double precision :: acell_unitcell(3),multiplicity(3,3),multiplicitym1(3,3),temp2(3,3)
   double precision :: rprimd(3,3),rprimdt(3,3),rprimd_md(3,3),rprim_tmp(3,3),rprimdm1(3,3)
   double precision :: rprim(3,3),temp(3,3),rprimm1(3,3),rprimt(3,3),rprimdtm1(3,3)
-  double precision :: xi,hh,AA,BB,CC,DD
+  double precision :: xi,hh
   double precision, allocatable :: WORK(:)
   type(Input_type) :: Invar
   type(Lattice_type),intent(out) :: Lattice
@@ -221,6 +221,7 @@ end subroutine tdep_make_inbox
     rprim(1,1)=xi    ; rprim(1,2)=-xi/dsqrt(3d0)    ; rprim(1,3)= hh
     rprim(2,1)= 0.d0 ; rprim(2,2)=2d0*xi/dsqrt(3d0) ; rprim(2,3)= hh
     rprim(3,1)=-xi   ; rprim(3,2)=-xi/dsqrt(3d0)    ; rprim(3,3)= hh
+!  double precision :: AA,BB,CC,DD
 !    AA=dcos(Invar%angle_alpha*pi/180.d0/2d0)
 !    BB=dsin(Invar%angle_alpha*pi/180.d0/2d0)
 !    CC=dcos(Invar%angle_alpha*pi/180.d0)
@@ -316,10 +317,12 @@ end subroutine tdep_make_inbox
 &    (abs(rprimd_md(1,1)-Invar%rprimd_md(1,1)).gt.tol5).or.(abs(rprimd_md(2,2)-Invar%rprimd_md(2,2)).gt.tol5).or.&
 &    (abs(rprimd_md(3,3)-Invar%rprimd_md(3,3)).gt.tol5)) then
     do ii=1,3
-      write(Invar%stdlog,'(a,x,3(f16.10,x))') 'The rprimd (from the input file or NetCDF file) is=',(Invar%rprimd_md(ii,jj),jj=1,3)
+      write(Invar%stdlog,'(a,x,3(f16.10,x))') 'The rprimd (from the input file or NetCDF file) is=',&
+&                                             (Invar%rprimd_md(ii,jj),jj=1,3)
     end do  
     do ii=1,3
-      write(Invar%stdlog,'(a,x,3(f16.10,x))') 'However, using multiplicity (from the input file)=',(Invar%multiplicity(ii,jj),jj=1,3)
+      write(Invar%stdlog,'(a,x,3(f16.10,x))') 'However, using multiplicity (from the input file)=',&
+&                                             (Invar%multiplicity(ii,jj),jj=1,3)
     end do  
     do ii=1,3
       write(Invar%stdlog,'(a,x,3(f16.10,x))') 'rprim (from the aTDEP code)=',(rprim(ii,jj),jj=1,3)

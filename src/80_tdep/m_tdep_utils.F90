@@ -642,7 +642,7 @@ contains
   end do
 
 ! Find the symetry operation between 2 atoms
-  call tdep_SearchS_1at(Invar,Lattice,MPIdata,Sym,xred_ideal)
+  call tdep_SearchS_1at(Invar,MPIdata,Sym,xred_ideal)
   ABI_MALLOC(Invar%xred_ideal,(3,Invar%natom)) ; Invar%xred_ideal(:,:)=0.d0
   Invar%xred_ideal(:,:)=xred_ideal(:,:)
   ABI_FREE(xred_ideal)
