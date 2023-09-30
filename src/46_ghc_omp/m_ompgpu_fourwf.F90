@@ -183,14 +183,12 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    endif
 
 #ifdef HAVE_GPU_HIP
-#ifdef FC_LLVM
    !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
    ! For some reason, fofr won't be processed normally when passed as argument
    ! of FFT routine within TARGET DATA directives
    !$OMP TARGET MAP(to:fofr) MAP(from:fofr_amdref)
    fofr_amdref=c_loc(fofr)
    !$OMP END TARGET
-#endif
 #endif
 
 
