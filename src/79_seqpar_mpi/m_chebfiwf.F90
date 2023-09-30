@@ -271,7 +271,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! Stupid things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  real(dp) :: gsc_dummy(0,0)
- type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
+ type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  ! other
@@ -511,7 +511,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  type(xgTransposer_t), optional, intent(inout) :: transposer
  integer         :: blockdim
  integer         :: spacedim
- type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,0)
+ type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
 
 !Local variables-------------------------------
 !scalars
