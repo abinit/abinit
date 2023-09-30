@@ -29,6 +29,7 @@ module m_getghc_ompgpu
  use m_abicore
  use m_xmpi
  use m_xomp
+ use, intrinsic :: iso_c_binding
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
