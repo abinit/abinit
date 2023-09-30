@@ -34,7 +34,7 @@ target_link_libraries(44_abitools
   39_libpaw
   41_geometry)
 
-if(ABINIT_ENABLE_GPU_CUDA)
+if(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   target_link_libraries(44_abitools
     PUBLIC
     abinit::17_gpu_toolbox

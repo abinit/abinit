@@ -55,6 +55,18 @@ if(ABINIT_ENABLE_GPU_CUDA)
     )
 endif()
 
+if(ABINIT_ENABLE_GPU_HIP)
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    hip::amdhip64
+    hip::hipfft
+    roc::hipblas
+    roc::rocblas
+    roc::hipsolver
+    ${ROCTX}
+    )
+endif()
+
 if (ABINIT_YAKL_WANTED)
   target_link_libraries(17_gpu_toolbox
     PUBLIC

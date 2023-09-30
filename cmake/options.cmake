@@ -129,11 +129,43 @@ if(ABINIT_ENABLE_GPU_CUDA)
 
 endif()
 
-if (ABINIT_ENABLE_GPU_CUDA)
+option(ABINIT_ENABLE_GPU_HIP "Enable GPU build (using AMD HIP backend, default OFF)" OFF)
+if(ABINIT_ENABLE_GPU_HIP)
+
+  find_package(HIP)
+  find_package(hipfft)
+  find_package(rocblas)
+  find_package(hipblas)
+  find_package(hipsolver)
+
+  set(HAVE_GPU_HIP 1)
+
+  set(HAVE_GPU 1)
+  set(HAVE_GPU_SERIAL 1)
+
+  # ROCTX: ROC tracer library similar in use to NVTX for CUDA
+  find_library(ROCTX
+    NAMES libroctx64.so
+    HINTS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
+    REQUIRED)
+
+  # check roctx library is available
+  if (EXISTS ${ROCTX})
+    set(HAVE_GPU_MARKERS 1)
+  endif()
+  add_compile_definitions("__HIP_PLATFORM_AMD__")
+
+endif()
+
+if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   set(DO_BUILD_17_GPU_TOOLBOX TRUE)
-  set(DO_BUILD_46_MANAGE_CUDA TRUE)
 else()
   set(DO_BUILD_17_GPU_TOOLBOX FALSE)
+endif()
+
+if (ABINIT_ENABLE_GPU_CUDA)
+  set(DO_BUILD_46_MANAGE_CUDA TRUE)
+else()
   set(DO_BUILD_46_MANAGE_CUDA FALSE)
 endif()
 

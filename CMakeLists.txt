@@ -281,9 +281,16 @@ if(OpenMP_FOUND)
     set(HAVE_OMP_COLLAPSE 1)
   endif()
 
-  if (ABINIT_ENABLE_GPU_CUDA)
+  # Fix an inconsistency causing the absence of OpenMP flag at link step when using Cray compiler
+  if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Cray")
+    string(REPLACE " " ";" OpenMP_Fortran_FLAGS_LIST ${OpenMP_Fortran_FLAGS})
+    add_link_options(${OpenMP_Fortran_FLAGS_LIST})
+  endif()
+
+  if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
     # check for OpenMP GPU offload support (OpenMP v5 onwards)
     try_compile(HAVE_OPENMP_OFFLOAD_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_offload.F90
+      LINK_OPTIONS ${OpenMP_Fortran_FLAGS_LIST}
       LINK_LIBRARIES OpenMP::OpenMP_Fortran)
 
     if(HAVE_OPENMP_OFFLOAD_BOOL)
@@ -297,9 +304,14 @@ if(OpenMP_FOUND)
       #get_offload_flags(ARCH   sm_80   RESULT OFFLOAD_FLAGS)  for NVIDIA GPUs (NVHPC > v23.x and Flang > v16.0)
       #get_offload_flags(TARGET spir64  RESULT OFFLOAD_FLAGS)  for Intel GPUs  (IntelLLVM a.k.a IFX)
 
-      get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}      RESULT OPENMP_OFFLOAD_FLAGS)
+      if (ABINIT_ENABLE_GPU_CUDA)
+        get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}    RESULT OPENMP_OFFLOAD_FLAGS)
+      elseif(ABINIT_ENABLE_GPU_HIP)
+        get_offload_flags(ARCH   ${CMAKE_HIP_ARCHITECTURES}     RESULT OPENMP_OFFLOAD_FLAGS)
+      endif()
+
     endif()
-  endif(ABINIT_ENABLE_GPU_CUDA)
+  endif(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
 
 endif()
 
@@ -476,6 +488,10 @@ if(ABINIT_NETCDF_FORTRAN_FOUND)
   # kind of fix to make sure path PREFIX/include (where netcdf.mod is located)
   # is append in include dirs used in abinit::netcdf-fortran
   pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran prefix)
+  if("${ABINIT_NETCDF_FORTRAN_PREFIX}" STREQUAL "")
+    # Cray flavor of netcdf
+    pkg_get_variable(ABINIT_NETCDF_FORTRAN_PREFIX netcdf-fortran netcdf_prefix)
+  endif()
   get_target_property(ABINIT_NETCDF_FORTRAN_INC_TMP PkgConfig::ABINIT_NETCDF_FORTRAN INTERFACE_INCLUDE_DIRECTORIES)
   list(APPEND ABINIT_NETCDF_FORTRAN_INC_TMP "${ABINIT_NETCDF_FORTRAN_PREFIX}/include")
   set_target_properties(PkgConfig::ABINIT_NETCDF_FORTRAN PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ABINIT_NETCDF_FORTRAN_INC_TMP}")
@@ -893,6 +909,11 @@ if (ABINIT_ENABLE_GPU_CUDA)
   message("  CUDA toolkit found   : ${CUDAToolkit_FOUND}")
   message("  CUDA toolkit version : ${CUDAToolkit_VERSION}")
   message("  CUDA toolkit nvcc    : ${CUDAToolkit_NVCC_EXECUTABLE}")
+endif()
+message("    HIP enabled        : ${ABINIT_ENABLE_GPU_HIP}")
+if (ABINIT_ENABLE_GPU_HIP)
+  message("      HIP found   : ${HIP_FOUND}")
+  message("      HIP version : ${HIP_VERSION}")
 endif()
 if (HAVE_OPENMP_OFFLOAD)
   message("  OpenMP GPU offload flags : ${OPENMP_OFFLOAD_FLAGS}")
