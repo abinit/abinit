@@ -49,6 +49,7 @@ module m_chebfiwf
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_getghc,      only : multithreaded_getghc
+ use m_gemm_nonlop, only : gemm_nonlop_use_gemm
 
  use m_xg
  use m_xgTransposer
@@ -662,8 +663,13 @@ subroutine getBm1X(X,Bm1X,transposer)
 
  if(l_paw) then
    !cwaveprj_next is dummy
-   ABI_MALLOC(cwaveprj_next, (1,1))
-   call pawcprj_alloc(cwaveprj_next,0,(/1/))
+   if(gemm_nonlop_use_gemm) then
+     ABI_MALLOC(cwaveprj_next, (1,1))
+     call pawcprj_alloc(cwaveprj_next,0,(/1/))
+   else
+     ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
+     call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
+   end if
 
    ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
