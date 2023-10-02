@@ -32,14 +32,14 @@ module m_wfd
  use m_wfk
  use m_hdr
  use m_distribfft
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_cgtools
 
  use defs_datatypes,   only : pseudopotential_type, ebands_t
  use defs_abitypes,    only : mpi_type
  use m_gwdefs,         only : one_gw
  use m_time,           only : cwtime, cwtime_report, timab
- use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno
+ use m_fstrings,       only : toupper, firstchar, int2char10, sjoin, itoa, strcat, itoa, yesno, ltoa
  use m_io_tools,       only : get_unit, iomode_from_fname, iomode2str, open_file
  use m_numeric_tools,  only : imin_loc, list2blocks, bool2index
  use m_hide_blas,      only : xcopy, xdotc
@@ -52,7 +52,7 @@ module m_wfd
  use m_gsphere,        only : kg_map, make_istwfk_table
  use m_fftcore,        only : kpgsph, get_kg
  use m_mpinfo,         only : nullify_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg, initmpi_seq
- use m_bz_mesh,        only : kmesh_t, get_bz_item
+ use m_bz_mesh,        only : kmesh_t
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type, pawtab_get_lsize
  use m_pawfgrtab,      only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free, pawfgrtab_print
@@ -97,19 +97,19 @@ module m_wfd
 
  type,public :: kdata_t
 
-   logical :: use_fnl_dir0der0
+   logical :: use_fnl_dir0der0 = .False.
    ! Decide if we need to use fnl_dir0der0.
 
-   integer :: istwfk
+   integer :: istwfk = -1
    ! Storage mode for this k point.
 
-   integer :: npw
+   integer :: npw = -1
    ! Number of plane-waves for this k-point.
 
-   integer :: useylm
+   integer :: useylm = -1
    ! 1 if nonlocal part is applied using real spherical Harmonics. 0 for Legendre polynomial.
 
-   integer :: has_ylm
+   integer :: has_ylm = -1
    ! 0 if ylm is not used.
    ! 1 if ylm is allocated.
    ! 2 if ylm is already computed.
@@ -123,37 +123,41 @@ module m_wfd
    ! The boundary of the basis sphere of G vectors at a given k point.
    ! for use in improved zero padding of FFTs in 3 dimensions.
 
-   !% real(dp) :: kpoint(3)
-
    real(dp),allocatable :: ph3d(:,:,:)
    ! ph3d(2, npw, natom)
    ! 3-dim structure factors, for each atom and each plane wave.
-   ! Available only for PAW or use_fnl_dir0der0 == true.
+   ! Available only for PAW or use_fnl_dir0der0 is true.
 
    real(dp),allocatable :: phkxred(:,:)
    ! phkxred(2,natom))
    ! e^{ik.Ra} for each atom. Packed according to the atom type (atindx).
 
    real(dp),allocatable :: fnl_dir0der0(:,:,:,:)
-   ! fnl_dir0der0(npw,1,lmnmax,ntypat)
-   ! nonlocal form factors. Computed only if usepaw == 1 or use_fnl_dir0der0 == true.
+   ! fnl_dir0der0(npw, 1, lmnmax,ntypat)
+   ! nonlocal form factors. Computed only if usepaw == 1 or use_fnl_dir0der0 is true.
    ! fnl(k+G).ylm(k+G) if PAW
    ! f_ln(k+G)/|k+G|^l if NC
 
    real(dp),allocatable :: ylm(:,:)
-   ! ylm(npw,mpsang**2*useylm)
+   ! ylm(npw, mpsang**2*useylm)
    ! Real spherical harmonics for each k+G
 
- end type kdata_t
+ contains
 
- public :: kdata_init
- public :: kdata_free
- public :: kdata_copy
+   procedure :: init => kdata_init
+   ! Init object
+
+   procedure :: free => kdata_free_0D
+   ! Free memory
+
+ end type kdata_t
 
  interface kdata_free
    module procedure kdata_free_0D
    module procedure kdata_free_1D
  end interface kdata_free
+
+ public :: kdata_copy
 
  interface kdata_copy
    module procedure copy_kdata_0D
@@ -263,7 +267,7 @@ module m_wfd
 !!
 !! SOURCE
 
- type,public :: wfd_t
+ type, public :: wfd_t
 
   integer :: debug_level = 0    ! Internal flag defining the debug level.
   integer :: lmnmax
@@ -304,10 +308,9 @@ module m_wfd
    ! Cutoff for plane wave basis set.
 
   real(dp) :: ecutsm
-   ! ecutsm=smearing energy for plane wave kinetic energy (Ha)
+   ! smearing energy for plane wave kinetic energy (Ha)
    ! Cutoff for plane wave basis set.
 
-!arrays
   integer :: ngfft(18)
    ! Information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 
@@ -315,56 +318,49 @@ module m_wfd
    ! Governs the choice of the algorithm for nonlocal operator. See doc.
 
   integer,allocatable :: irottb(:,:)
-   ! irottb(nfftot,nsym)
+   ! (nfftot, nsym)
    ! Index of $R^{-1}(r-\tau)$ in the FFT box.
 
   integer,allocatable :: istwfk(:)
-   ! istwfk(nkibz)
+   ! (nkibz)
    ! Storage mode for this k-point.
 
   integer,allocatable :: nband(:,:)
-   ! nband(nkibz,nsppol)
+   ! (nkibz,nsppol)
    ! Number of bands at each k-point and spin.
 
   integer,allocatable :: indlmn(:,:,:)
-   ! indlmn(6,lmnmax,ntypat)
+   ! (6, lmnmax, ntypat)
    ! array giving l,m,n,lm,ln,spin for i=ln  (if useylm=0)
    !                                or i=lmn (if useylm=1)
 
   integer,allocatable :: nlmn_atm(:)
-   ! nlmn_atm(natom)
+   ! (natom)
    ! Number of (n,l,m) channels for each atom. Only for PAW
 
   integer,allocatable :: nlmn_sort(:)
-   ! nlmn_sort(natom)
+   ! (natom)
    ! Number of (n,l,m) channels for each atom (sorted by atom type). Only for PAW
 
   integer,allocatable :: nlmn_type(:)
-   ! nlmn_type(ntypat)
+   ! (ntypat)
    ! Number of (n,l,m) channels for each type of atom. Only for PAW.
 
   integer,allocatable :: npwarr(:)
-   ! npwarr(nkibz)
+   ! (nkibz)
    ! Number of plane waves for this k-point.
 
   integer, allocatable :: bks2wfd(:,:,:,:)
-   ! (3, %mband, %nkibz, %nsppol)
+   ! (3, mband, nkibz, nsppol)
    ! Maps global (band, ik_ibz, spin) to index in the wave store.
    ! Set to 0 if the (b, k, s) state is not in the store.
 
-  !integer(c_int8_t), private, allocatable :: bks_tab(:,:,:,:)
-   ! bks_tab(mband,nkibz,nsppol,0:nproc-1)
-   ! Global table used to keep trace of the distribution of the (b,k,s) states on each node inside Wfd%comm.
-   ! 1 if the node has this state. 0 otherwise.
-   ! A node owns a wavefunction if the corresponding ug is allocated AND computed.
-   ! If a node owns ur but not ug, or ug is just allocated then its entry in the table is zero.
-
   real(dp),allocatable :: kibz(:,:)
-   ! kibz(3,nkibz)
+   ! (3, nkibz)
    ! Reduced coordinates of the k-points in the IBZ.
 
   real(dp),allocatable :: ph1d(:,:)
-   ! ph1d(2,3*(2*mgfft+1)*natom)
+   ! (2,3*(2*mgfft+1)*natom)
    ! 1-dim structure factor phase information.
 
   logical,private, allocatable :: keep_ur(:,:,:)
@@ -372,16 +368,16 @@ module m_wfd
    ! keep(mband,nkibz,nsppol)
    ! Storage strategy: keep or not keep calculated u(r) in memory.
 
-  type(kdata_t),allocatable :: Kdata(:)
-   ! Kdata(nkibz)
+  type(kdata_t),allocatable :: kdata(:)
+   ! (nkibz)
    ! datatype storing k-dependent quantities.
 
   type(spin_store_t),allocatable :: s(:)
-   ! (%my_nsppol)
+   ! (my_nsppol)
    ! wfd%s(is)%k(ik)%b(ib)
 
   type(MPI_type) :: MPI_enreg
-   ! The MPI_type structured datatype gather different information about the MPI parallelisation :
+   ! The MPI_type structured datatype gather different information about the MPI parallelisation:
    ! number of processors, the index of my processor, the different groups of processors, etc ...
 
   !type(pseudopotential_type), pointer :: psps
@@ -390,7 +386,7 @@ module m_wfd
  contains
 
    procedure :: free => wfd_free
-   ! Destructor.
+   ! Free memory.
 
    procedure :: norm2 => wfd_norm2
    ! Compute <u(g)|u(g)> for the same k-point and spin.
@@ -558,11 +554,11 @@ subroutine kdata_init(Kdata, Cryst, Psps, kpoint, istwfk, ngfft, MPI_enreg, ecut
 
 !Arguments ------------------------------------
 !scalars
+ class(kdata_t),intent(inout) :: Kdata
  integer,intent(in) :: istwfk
  real(dp),optional,intent(in) :: ecut
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
- type(kdata_t),intent(inout) :: Kdata
  type(MPI_type),intent(in) :: MPI_enreg
 !arrays
  integer,optional,target,intent(in) :: kg_k(:,:)
@@ -690,12 +686,10 @@ end subroutine kdata_init
 subroutine kdata_free_0D(Kdata)
 
 !Arguments ------------------------------------
-!scalars
- type(kdata_t),intent(inout) :: Kdata
+ class(kdata_t),intent(inout) :: Kdata
 
 !************************************************************************
 
- !@kdata_t
  ABI_SFREE(Kdata%kg_k)
  ABI_SFREE(Kdata%gbound)
 
@@ -744,16 +738,15 @@ end subroutine kdata_free_1D
 !!  copy_kdata_0D
 !!
 !! FUNCTION
-!!  Deallocate memory
+!!  Copy object
 !!
 !! SOURCE
 
-subroutine copy_kdata_0D(Kdata_in,Kdata_out)
+subroutine copy_kdata_0D(Kdata_in, Kdata_out)
 
 !Arguments ------------------------------------
-!scalars
- type(kdata_t),intent(in) :: Kdata_in
- type(kdata_t),intent(inout) :: Kdata_out
+ class(kdata_t),intent(in) :: Kdata_in
+ class(kdata_t),intent(inout) :: Kdata_out
 
 !************************************************************************
 
@@ -803,7 +796,7 @@ subroutine copy_kdata_1D(Kdata_in, Kdata_out)
  end if
 
  do ik=LBOUND(Kdata_in,DIM=1),UBOUND(Kdata_in,DIM=1)
-   call copy_kdata_0d(Kdata_in(ik),Kdata_out(ik))
+   call copy_kdata_0d(Kdata_in(ik), Kdata_out(ik))
  end do
 
 end subroutine copy_kdata_1D
@@ -984,26 +977,26 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  end do
  call xmpi_sum(wfd%npwarr, wfd%comm, ierr)
 
- mpw = MAXVAL(Wfd%npwarr)
+ mpw = maxval(Wfd%npwarr)
 
  ABI_MALLOC(Wfd%nband, (nkibz,nsppol))
- Wfd%nband=nband; Wfd%mband = mband
- ABI_CHECK(MAXVAL(Wfd%nband)==mband,"wrong mband")
+ Wfd%nband = nband; Wfd%mband = mband
+ ABI_CHECK_IEQ(maxval(Wfd%nband), mband, "Wrong mband")
 
  ! Allocate u(g) and, if required, also u(r)
  ug_size = one*nspinor*mpw*COUNT(bks_mask)
  write(msg,'(a,f8.1,a)')' Memory needed for Fourier components u(G): ',two*gwpc*ug_size*b2Mb, ' [Mb] <<< MEM'
  call wrtout(std_out, msg)
 #ifdef HAVE_GW_DPC
- call wrtout(std_out, ' Storing wavefunctions in double precision array as `enable_gw_dpc="no"`')
- call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve the memory requirements for the WFs')
+ call wrtout(std_out, ' Storing wavefunctions in double precision as `enable_gw_dpc="no"`')
+ call wrtout(std_out, ' Recompile the code with `enable_gw_dpc="no"` to halve memory requirements for the WFs')
 #else
- call wrtout(std_out, ' Storing wavefunctions in single precision array as `enable_gw_dpc="no"`')
+ call wrtout(std_out, ' Storing wavefunctions in single precision as `enable_gw_dpc="no"`')
 #endif
 
  if (Wfd%usepaw==1) then
    cprj_size = one * nspinor*SUM(Wfd%nlmn_atm)*COUNT(bks_mask)
-   write(msg,'(a,f8.1,a)')' Memory needed for PAW projections Cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
+   write(msg,'(a,f8.1,a)')' Memory needed for PAW projections cprj: ',dp*cprj_size*b2Mb,' [Mb] <<< MEM'
    call wrtout(std_out, msg)
  end if
 
@@ -1074,7 +1067,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
    istwf_k = Wfd%istwfk(ik_ibz)
    npw_k   = Wfd%npwarr(ik_ibz)
    if (any(wfd%bks2wfd(1, :, ik_ibz, :) /= 0)) then
-     call kdata_init(Wfd%Kdata(ik_ibz), Cryst, Psps, kpoint, istwf_k, ngfft, Wfd%MPI_enreg, ecut=Wfd%ecut)
+     call Wfd%Kdata(ik_ibz)%init(Cryst, Psps, kpoint, istwf_k, ngfft, Wfd%MPI_enreg, ecut=Wfd%ecut)
    end if
  end do
 
@@ -1574,7 +1567,7 @@ subroutine wfd_copy_cg(wfd, band, ik_ibz, spin, cg)
  ABI_CHECK(wfd%get_wave_ptr(band, ik_ibz, spin, wave, msg) == 0, msg)
 
  if (.not. wave%has_ug == WFD_STORED) then
-   write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band,ik_ibz,spin," is not stored in memory!"
+   write(msg,'(a,3(i0,1x),a)')" ug for (band, ik_ibz, spin): ",band, ik_ibz, spin," is not stored in memory!"
    ABI_ERROR(msg)
  end if
 
@@ -1854,7 +1847,7 @@ subroutine wfd_ug2cprj(Wfd,band,ik_ibz,spin,choice,idir,natom,Cryst,cwaveprj,sor
 ! *********************************************************************
 
  ! Different form factors have to be calculated and stored in Kdata.
- ABI_CHECK(choice == 1, "choice/=1 not coded")
+ ABI_CHECK_IEQ(choice, 1, "choice/=1 not coded")
 
  dimffnl = 1
  npw_k   = Wfd%npwarr(ik_ibz)
@@ -2954,7 +2947,7 @@ subroutine wfdgw_distribute_bands(Wfd,ik_ibz,spin,my_nband,my_band_list,got,bmas
    else if (how_many > 1) then
      ! This band is duplicated. Assign it trying to obtain a good load distribution.
      rank_mask=.FALSE.; rank_mask(proc_ranks(1:how_many)+1)=.TRUE.
-     idle = imin_loc(get_more,mask=rank_mask)
+     idle = imin_loc(get_more, mask=rank_mask)
      get_more(idle) = get_more(idle) + 1
      if (Wfd%my_rank==idle-1) then
        my_nband=my_nband + 1
@@ -3683,7 +3676,7 @@ end subroutine wfd_get_cprj
 !!
 !! SOURCE
 
-subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
+subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -3697,18 +3690,17 @@ subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
  integer,parameter :: npw0=0
  integer :: npw_k, ik_ibz, istwf_k, is, ik, ib
  logical :: iscompatibleFFT
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer,allocatable :: kg_k(:,:)
 
 !************************************************************************
 
- !@wfd_t
- if ( ALL(Wfd%ngfft(1:3) == new_ngfft(1:3)) ) RETURN ! Nothing to do.
+ if (all(Wfd%ngfft(1:3) == new_ngfft(1:3)) ) RETURN ! Nothing to do.
 
  if (Wfd%prtvol > 0) then
-   write(msg,"(a,3(i0,1x),a,3(i0,1x),a)")"Changing FFT mesh: [",Wfd%ngfft(1:3),"] ==> [",new_ngfft(1:3),"]"
-   call wrtout(std_out, msg)
+   call wrtout(std_out,  &
+     sjoin(" Changing FFT mesh for wavefunctions: ",ltoa(Wfd%ngfft(1:3)), " ==> ", ltoa(new_ngfft(1:3))))
  end if
 
  ! Change FFT dimensions.
@@ -3729,7 +3721,7 @@ subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
  ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
- if (.not.iscompatibleFFT) then
+ if (.not. iscompatibleFFT) then
    ABI_WARNING("FFT mesh not compatible with symmetries. Wavefunction symmetrization should not be done in r-space!")
  end if
 
@@ -3752,8 +3744,8 @@ subroutine wfd_change_ngfft(Wfd,Cryst,Psps,new_ngfft)
      npw_k   = Wfd%Kdata(ik_ibz)%npw
      ABI_MALLOC(kg_k, (3,npw_k))
      kg_k = Wfd%Kdata(ik_ibz)%kg_k
-     call kdata_free(Wfd%Kdata(ik_ibz))
-     call kdata_init(Wfd%Kdata(ik_ibz),Cryst,Psps,Wfd%kibz(:,ik_ibz),istwf_k,new_ngfft,Wfd%MPI_enreg,kg_k=kg_k)
+     call Wfd%Kdata(ik_ibz)%free()
+     call Wfd%Kdata(ik_ibz)%init(Cryst,Psps,Wfd%kibz(:,ik_ibz),istwf_k,new_ngfft,Wfd%MPI_enreg,kg_k=kg_k)
      ABI_FREE(kg_k)
    end if
  end do
@@ -4001,7 +3993,7 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
  !           =e^{+2i\pi kibz.(R^{-1}t} u*({R^-1}(r-t),b,kibz) for time-reversal
  !
  ! Get ik_ibz, non-symmorphic phase, ph_mkt, and symmetries from ik_bz.
- call get_BZ_item(Kmesh,ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp,isirred)
+ call Kmesh%get_BZ_item(ik_bz,kbz,ik_ibz,isym_k,itim_k,ph_mkt,umklp,isirred)
  gwpc_ph_mkt = ph_mkt
 
  if (isirred) then
@@ -4224,14 +4216,14 @@ end subroutine wfd_sym_ug_kg
 !!
 !! SOURCE
 
-subroutine wfdgw_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
+subroutine wfdgw_write_wfk(Wfd,Hdr,ebands,wfk_fname,wfknocheck)
 
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: wfk_fname
  class(wfdgw_t),intent(in) :: Wfd
  type(Hdr_type),intent(in) :: Hdr
- type(ebands_t),intent(in) :: Bands
+ type(ebands_t),intent(in) :: ebands
  logical,intent(in),optional :: wfknocheck
 
 !Local variables ------------------------------
@@ -4365,7 +4357,7 @@ subroutine wfdgw_write_wfk(Wfd,Hdr,Bands,wfk_fname,wfknocheck)
          ! Write also kg_k, eig_k and occ_k
          call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,&
             kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k, &
-            eig_k=Bands%eig(:,ik_ibz,spin),occ_k=Bands%occ(:,ik_ibz,spin))                   ! occs extracted from Bands (i.e. QP_BSt)
+            eig_k=ebands%eig(:,ik_ibz,spin),occ_k=ebands%occ(:,ik_ibz,spin))                   ! occs extracted from Bands (i.e. QP_BSt)
                                                                                              ! kg_k obtained from Wfd so OK! It is
                                                                                              ! how Gs are ordered.
        else
@@ -4614,11 +4606,11 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
       istwfk_disk = hdr%istwfk(ik_ibz)
       change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
-      nband_wfd  = Wfd%nband(ik_ibz,spin)
+      nband_wfd  = Wfd%nband(ik_ibz, spin)
 
       if (nband_wfd > nband_disk) then
-        write(msg,'(a,2(i0,1x))')&
-         "nband_wfd to be read cannot be greater than nband_disk while: ",nband_wfd,nband_disk
+        write(msg,'(2(a, i0))')&
+         "nband_wfd to be read: ", nband_wfd,", cannot be greater than nband_disk: ",nband_disk
         ABI_ERROR(msg)
       end if
 
@@ -4636,6 +4628,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
       else
         ! Master reads full set of bands and broadcasts data, then each proc extract its own set of wavefunctions.
+        ! TODO: Should read in blocks to reduce memory footprint
         ABI_MALLOC_OR_DIE(allcg_k, (2, npw_disk*wfd%nspinor*(bmax-bmin+1)), ierr)
         if (my_rank == master) then
           call wfk%read_band_block([bmin, bmax], ik_ibz, spin, xmpio_single, kg_k=kg_k, cg_k=allcg_k, eig_k=eig_k)
@@ -4741,7 +4734,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       ABI_SFREE(out_cg)
 
       if (ik_ibz <= 10 .or. mod(ik_ibz, 200) == 0) then
-        write(msg,'(4(a,i0),a)') " Reading k-point [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
+        write(msg,'(4x,4(a,i0),a)') "Reading kpt [", ik_ibz, "/", wfd%nkibz, "] spin [", spin, "/", wfd%nsppol, "]"
         call cwtime_report(msg, cpu_ks, wall_ks, gflops_ks)
       end if
     end do !ik_ibz
@@ -4846,10 +4839,9 @@ subroutine wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pa
  call wfd%get_ur(band,ik_ibz,spin,ur_ae)
 
  kpoint = Wfd%kibz(:,ik_ibz)
+ ABI_MALLOC(ceikr, (Wfd%nfftot * wfd%nspinor))
 
- ABI_MALLOC(ceikr,(Wfd%nfftot))
-
- call calc_ceikr(kpoint,Wfd%nfftot,Wfd%ngfft,ceikr)
+ call calc_ceikr(kpoint, wfd%ngfft, Wfd%nfftot, wfd%nspinor, ceikr)
  ur_ae = ur_ae * ceikr
 
  ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
@@ -5467,21 +5459,21 @@ end subroutine wfdgw_get_nl_me
 !!
 !! SOURCE
 
-subroutine wfdgw_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
-                     optcalc) ! optional arguments
+subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
+                      optcalc) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftf
  integer,intent(in),optional :: optcalc
- type(ebands_t),intent(in) :: Bands
+ type(ebands_t),intent(in) :: ebands
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
  type(Pseudopotential_type),intent(in) :: Psps
  class(wfdgw_t),intent(inout) :: Wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
- real(dp),intent(out) :: rhor(nfftf,Wfd%nspden)
+ real(dp),intent(out) :: rhor(nfftf, Wfd%nspden)
 
 !Local variables ------------------------------
 !scalars
@@ -5503,7 +5495,7 @@ subroutine wfdgw_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
 !*************************************************************************
 
  ! Consistency check.
- ABI_CHECK(Wfd%nsppol == Bands%nsppol, "Mismatch in nsppol")
+ ABI_CHECK(Wfd%nsppol == ebands%nsppol, "Mismatch in nsppol")
 
  if (ANY(ngfftf(1:3) /= Wfd%ngfft(1:3))) call wfd%change_ngfft(Cryst,Psps,ngfftf)
 
@@ -5531,14 +5523,14 @@ subroutine wfdgw_mkrho(Wfd,Cryst,Psps,Kmesh,Bands,ngfftf,nfftf,rhor,&
  end if
 
  ! Build the iterator that will distribute the states in an automated way.
- Iter_bks = wfd%iterator_bks(bks_mask=ABS(Bands%occ)>=tol8)
+ Iter_bks = wfd%iterator_bks(bks_mask=ABS(ebands%occ)>=tol8)
 
  do alpha=1,nalpha
    do is=1,Wfd%nsppol
      do ik=1,Wfd%nkibz
        do ib_iter=1,iter_len(Iter_bks,ik,is)
          ib = iter_yield(Iter_bks,ib_iter,ik,is)
-         bks_weight = Bands%occ(ib,ik,is) * Kmesh%wt(ik) / Cryst%ucvol
+         bks_weight = ebands%occ(ib,ik,is) * Kmesh%wt(ik) / Cryst%ucvol
 
          call wfd%get_ur(ib,ik,is,wfr)
 

@@ -22,6 +22,11 @@
   toldfe2  1.0d-10
    nstep2  6
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 # data common to all sets
    ngkpt  1 1 1
   nshiftk 1

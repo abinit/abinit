@@ -43,9 +43,9 @@ use defs_abitypes,      only : MPI_type
 use m_io_tools,         only : get_unit
 use m_hamiltonian,      only : gs_hamiltonian_type, copy_hamiltonian
 use m_pawcprj,          only : pawcprj_type
-use m_vcoul,            only : vcoul_t, vcoul_init, vcoul_free
-use m_gsphere,          only : gsphere_t, gsph_init, gsph_free, print_gsphere
-use m_bz_mesh,          only : kmesh_t, kmesh_init, kmesh_free, kmesh_print, find_qmesh
+use m_vcoul,            only : vcoul_t
+use m_gsphere,          only : gsphere_t
+use m_bz_mesh,          only : kmesh_t, find_qmesh
 use m_fft,              only : fftpac, fourwf
 use m_getghc,           only : getghc
 use m_io_kss,           only : make_gvec_kss
@@ -1367,10 +1367,10 @@ call dtset%free()
 call gs_hamk%free()
 
 call cryst%free()
-call kmesh_free(Kmesh)
-call kmesh_free(Qmesh)
-call gsph_free(Gsphere)
-call vcoul_free(Vcp)
+call Kmesh%free()
+call Qmesh%free()
+call Gsphere%free()
+call Vcp%free()
 
 call bandfft_kpt_destroy_array(bandfft_kpt,mpi_enreg)
 call destroy_mpi_enreg(mpi_enreg)
@@ -1887,10 +1887,10 @@ call Cryst%print()
 if(dtset%optdriver==66) then
 
   !Set up of the k-points and tables in the whole BZ
-  call kmesh_init(Kmesh,Cryst,dtset%nkpt,dtset%kptns,dtset%kptopt,wrap_1zone=.false.)
-  call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out)
+  call Kmesh%init(Cryst,dtset%nkpt,dtset%kptns,dtset%kptopt,wrap_1zone=.false.)
+  call Kmesh%print("K-mesh for the wavefunctions",std_out)
   call find_qmesh(Qmesh,Cryst,Kmesh)
-  call kmesh_print(Qmesh,"Q-mesh for the screening function",std_out)
+  call Qmesh%print("Q-mesh for the screening function",std_out)
 
 
   !------------------------------
@@ -1908,12 +1908,12 @@ if(dtset%optdriver==66) then
   call make_gvec_kss(dtset%nkpt,dtset%kptns,ecut_eff,dtset%symmorphi,dtset%nsym,dtset%symrel,dtset%tnons,Cryst%gprimd,&
   &                      dtset%prtvol,npw_serial,gvec,ierr)
 
-  call gsph_init(Gsphere,Cryst,npw_serial,gvec=gvec)
+  call Gsphere%init(Cryst,npw_serial,gvec=gvec)
 
-  call print_gsphere(Gsphere)
+  call Gsphere%print()
 
-  call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
-  &               dtset%nkpt,dtset%kptns,dtset%ngfft,mpi_enreg%comm_world)
+  call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,dtset%rcut,dtset%gw_icutcoul,dtset%vcutgeo,dtset%ecutsigx,npw_serial,&
+                dtset%nkpt,dtset%kptns,mpi_enreg%comm_world)
 
   ! Since Vcp%vc_sqrt is sorted according to the KSS convention for G vectors
   ! BUT will be applied to GS wavefunctions (where G vectors are sorted otherwise)

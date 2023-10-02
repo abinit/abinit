@@ -155,7 +155,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
   fi
 
   # mkl_threads support functions
-  AC_MSG_CHECKING([for mkl_set/get_threads in the specified libraries])
+  AC_MSG_CHECKING([for mkl_[set/get]_threads in the specified libraries])
   AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
@@ -171,6 +171,36 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
       [Define to 1 if you have mkl_*threads extensions.])
   fi
 ]) # _SD_LINALG_CHECK_BLAS_MKL_EXTS
+
+
+                    # ------------------------------------ #
+
+
+# _SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS()
+# --------------------------------
+#
+# Check whether the specified openBLAS implementation provides BLAS extensions.
+#
+AC_DEFUN([_SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS], [
+
+  # openblas_threads support functions
+  AC_MSG_CHECKING([for openBLAS_[set/get]_threads/get_parallel in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: a
+      call openblas_set_num_threads
+      a = openblas_get_num_threads()
+      if (openblas_get_parallel()==0) stop "openBLAS doesnt support threads"
+    ]])], [sd_linalg_openblas_has_threads="yes"], [sd_linalg_openblas_has_threads="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_openblas_has_threads}])
+
+  if test "${sd_linalg_openblas_has_threads}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_OPENBLAS_THREADS], 1,
+      [Define to 1 if you have openblas_*threads extensions.])
+  fi
+]) # _SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS
 
 
                     # ------------------------------------ #

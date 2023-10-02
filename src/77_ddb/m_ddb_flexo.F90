@@ -29,6 +29,7 @@ module m_ddb_flexo
  use m_errors
 
  use m_fstrings,       only : itoa,sjoin
+ use m_ddb_hdr
  use m_ddb
  use m_crystal,        only : crystal_t
  use m_dynmat,       only : asria_corr,cart39
@@ -55,6 +56,7 @@ contains
 !!  d2asr(2,3,natom,3,natom)=ASR-correction
 !!  ddb<type(ddb_type)>=2nd order derivative database.
 !!  ddb<type(ddb_type)>=Long wave 3rd order derivative database.
+!!  ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  filnamddb = name of the ddb file
 !!  flexoflg=  1 -> Computes all contributions to FxE
@@ -72,12 +74,13 @@ contains
 !!
 !! SOURCE
 
-subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff)
+subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg,prtvol,zeff)
     
  implicit none
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: ddb_version
  integer , intent(in)  :: asr,flexoflg,prtvol
  class(ddb_type),intent(in) :: ddb,ddb_lw
  type(crystal_t),intent(in) :: crystal
@@ -129,7 +132,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
   
    write(msg, '(2a)' ) ch10," Extract the electronic flexoelectric coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL') 
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
   
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -137,7 +140,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
      call wrtout(std_out, sjoin("- Cannot find clamped ion FxE tensor in DDB file:", filnamddb))
      call wrtout(std_out, "  flexoflag=1 or 2 requires the DDB file to include the corresponding long wave 3rd derivatives")
    else
-     call dtciflexo(ddb_lw%val(:,:,iblok),ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
+     call dtciflexo(ddb_lw%val(:,:,iblok),ddb_version,ddb%mpert,ddb%natom,ciflexo,crystal%ucvol)
    end if
 
  end if
@@ -151,7 +154,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
    ! Extract the P^(1) tensor from the DDB
    if (.not.intstrn_only) then
      lwsym=0
-     iblok = ddb_lw%get_quadrupoles(lwsym,33,pol1)
+     iblok = ddb_lw%get_quadrupoles(ddb_version,lwsym,BLKTYP_d3E_lw,pol1)
    end if
 
    rfphon(:)=0
@@ -168,7 +171,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
   
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL') 
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -214,7 +217,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
    end if
 
    if (iblok/=0.and.jblok/=0) then
-     call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),crystal%gprimd,&
+     call dtmixflexo(asr,d2asr,ddb%val(:,:,kblok),ddb%val(:,:,jblok),ddb_lw%val(:,:,iblok),ddb_version,crystal%gprimd,&
    & intstrn,intstrn_only,mixflexo,ddb%mpert,ddb%natom,piezofr,pol1,psinvdm,crystal%rprimd,crystal%ucvol)
    end if
 
@@ -238,7 +241,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
 
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL')
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -257,7 +260,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
 
    write(msg, '(2a)' ) ch10," Extract the FxE force response coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL')
-   call ddb_lw%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (jblok == 0) then
      call wrtout(std_out, "  ")
@@ -287,7 +290,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,prtvol,zeff
    end if
 
    if (iblok/=0.and.jblok/=0) then
-     call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),&
+     call dtlattflexo(ddb%amu,ddb%val(:,:,lblok),ddb_lw%val(:,:,jblok),ddb_lw%val(:,:,iblok),ddb_version,&
    & intstrn,lattflexo,ddb%mpert,ddb%natom,crystal%ntypat,piezofr,prtvol,psinvdm,crystal%typat,crystal%ucvol,zeff)
    end if
  end if
@@ -336,6 +339,7 @@ end subroutine ddb_flexo
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !! ucvol= unit cell volume
 !!
 !! OUTPUT
@@ -343,11 +347,11 @@ end subroutine ddb_flexo
 !!
 !! SOURCE
 
-subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
+subroutine dtciflexo(blkval,ddb_version,mpert,natom,ciflexo,ucvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom
+ integer,intent(in) :: ddb_version,mpert,natom
  real(dp),intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3*mpert*3*mpert*3*mpert)
@@ -355,7 +359,8 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,istrs,ivarA,strsd,strsd1,strsd2,strst,qvecd
+ integer,parameter :: cvrsio8=20100401
+ integer :: elfd,istrs,ivarA,ri,strsd,strsd1,strsd2,strst,qvecd
  logical :: iwrite
  real(dp) :: fac
  character(len=500) :: msg
@@ -372,8 +377,17 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two/ucvol
+   ri=2
+ else
+   fac=one/ucvol
+   ri=1
+ end if
+
 !Extraction of the clamped-ion flexoelectric coeficients 
- fac=two/ucvol
  do qvecd=1,3
    do istrs=1,6
      strsd1=alpha(istrs)
@@ -381,7 +395,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
      strst=natom+3; if (istrs>3) strst=natom+4
      strsd=istrs; if (istrs>3) strsd=istrs-3
      do elfd=1,3
-       ciflexo(elfd,qvecd,strsd1,strsd2)=-fac*d3cart(2,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
+       ciflexo(elfd,qvecd,strsd1,strsd2)=fac*d3cart(ri,elfd,natom+2,strsd,strst,qvecd,natom+8)*confac
        if (istrs>3) ciflexo(elfd,qvecd,strsd2,strsd1)=ciflexo(elfd,qvecd,strsd1,strsd2)
      end do
    end do
@@ -433,6 +447,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !! blkval1d(2,3,mpert,3,mpert)= 1st derivative wrt atom displacements (at least)
 !! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt two atom displacements (at least)
 !! blkval(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for Phi^(1) tensor
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !! gprimd(3,3)= basis vectors in the reciprocal space
 !! intstrn_only= activates only the calculation of the internal strain tensor
 !! mpert =maximum number of ipert
@@ -449,12 +464,12 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !!
 !! SOURCE
 
-subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_only, &
+subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,ddb_version,gprimd,intstrn,intstrn_only, &
               & mixflexo,mpert,natom,piezofr,pol1,psinvdm,rprimd,ucvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: asr,mpert,natom
+ integer,intent(in) :: asr,ddb_version,mpert,natom
  real(dp),intent(in) :: ucvol
  logical,intent(in) :: intstrn_only
 !arrays
@@ -472,9 +487,11 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: cvrsio8=20100401
  integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,katd,qvecd,qvecd2
  logical :: iwrite
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
+ real(dp) :: fac
  character(len=500) :: msg
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,2,1,1/),beta(6)=(/1,2,3,3,3,2/)
@@ -495,13 +512,21 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !P^(1) lacks the 1/ucvol factor
  pol1=pol1/ucvol
 
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=-one
+ end if
+
 !Extraction of Phi^(1) tensor
  do qvecd=1,3
    do jat=1,natom
      do jatd=1,3
        do iat=1,natom
          do iatd=1,3
-           phi1(iatd,iat,jatd,jat,qvecd)=-two*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
+           phi1(iatd,iat,jatd,jat,qvecd)=fac*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
          end do
        end do
      end do
@@ -663,6 +688,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !! blkval2d(2,3,mpert,3,mpert)= 2nd derivatives wrt atom displacements and electric field (at least)
 !! blkvalA(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for FxE force response tensor
 !! blkvalB(2,3*mpert*3*mpert*3*mpert)= matrix of third-order energies for Phi^(1) tensor
+!! ddb_version = 8 digit integer giving date. To mantain compatibility with old DDB files.
 !! intstrn(3,3,3,natom)= relaxed-ion internal strain tensor
 !! mpert= maximum number of ipert
 !! natom= number of atoms in unit cell
@@ -677,12 +703,12 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 !!
 !! SOURCE
 
-subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,natom,&
+subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflexo,mpert,natom,&
                      & ntypat,piezofr,prtvol,psinvdm,typat,ucvol,zeff)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,ntypat,prtvol
+ integer,intent(in) :: ddb_version,mpert,natom,ntypat,prtvol
  real(dp),intent(in) :: ucvol
 
 !arrays
@@ -699,6 +725,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: cvrsio8=20100401
  integer :: elfd,iat,iatd,istrs,ivar,jat,jatd,jvar,kat,katd,strsd
  integer :: strsd1,strsd2,strst,qvecd,qvecd2
  logical :: iwrite
@@ -742,12 +769,20 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  d3cart(1,:,:,:,:,:,:) = reshape(blkvalB(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkvalB(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=-one
+ end if
+
  do qvecd=1,3
    do jat=1,natom
      do jatd=1,3
        do iat=1,natom
          do iatd=1,3
-           phi1(iatd,iat,jatd,jat,qvecd)=-two*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
+           phi1(iatd,iat,jatd,jat,qvecd)=fac*d3cart(2,iatd,iat,jatd,jat,qvecd,natom+8)
          end do
        end do
      end do
@@ -775,10 +810,17 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  end do
 
 !Calculate now the Lagrange elastic tensors 
-!First we need to extract the tensor with the q-gradient of the internal strain
-!(a.k.a flexoelectric force response tensor) 
+!First we need to extract the clamped-ion flexoelectric force response tensor
  d3cart(1,:,:,:,:,:,:) = reshape(blkvalA(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkvalA(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
+
+!Define the factors to apply if DDB file has been created with the old version of 
+!the longwave driver.
+ if (ddb_version <= cvrsio8) then
+   fac=-two
+ else
+   fac=one
+ end if
 
  do istrs=1,6
    strsd1=alpha(istrs)
@@ -788,7 +830,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
    do qvecd=1,3
      do iat=1,natom
        do iatd=1,3
-         flexofr(iatd,iat,qvecd,strsd1,strsd2)=-two*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
+         flexofr(iatd,iat,qvecd,strsd1,strsd2)=fac*d3cart(1,iatd,iat,strsd,strst,qvecd,natom+8)
          if (istrs>3) flexofr(iatd,iat,qvecd,strsd2,strsd1)=flexofr(iatd,iat,qvecd,strsd1,strsd2)
        end do
      end do

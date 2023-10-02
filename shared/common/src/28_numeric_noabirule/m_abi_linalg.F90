@@ -28,10 +28,10 @@ module m_abi_linalg
  use m_xmpi
  use m_xomp
  use m_slk
- use iso_c_binding
-#ifdef HAVE_LINALG_ELPA
- use m_elpa
-#endif
+ use, intrinsic :: iso_c_binding
+!#ifdef HAVE_LINALG_ELPA
+! use m_elpa
+!#endif
 #ifdef HAVE_LINALG_PLASMA
  use plasma, except_dp => dp, except_sp => sp
 #endif
@@ -362,7 +362,7 @@ CONTAINS  !===========================================================
    call MPI_CART_SUB(commcart, keepdim, slk_communicator,abi_info1)
    keepdim = (/.false., .true./)
    call MPI_CART_SUB(commcart, keepdim, slk_complement_communicator,abi_info1)
-   call init_scalapack(slk_processor,slk_communicator)
+   call slk_processor%init(slk_communicator)
    slk_minsize=maxval(slk_processor%grid%dims(1:2))
    need_work_space=(use_slk/=1) ! In this case we never use the work arrays
    ABI_LINALG_SCALAPACK_ISON = .true.
@@ -374,9 +374,9 @@ CONTAINS  !===========================================================
  ABI_UNUSED(np_slk)
 #endif
 
-#ifdef HAVE_LINALG_ELPA
- call elpa_func_init()
-#endif
+!#ifdef HAVE_LINALG_ELPA
+! call elpa_func_init()
+!#endif
 
 #ifdef HAVE_LINALG_PLASMA
 !Plasma Initialization
@@ -660,7 +660,7 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_LINALG_SCALAPACK
  if (ABI_LINALG_SCALAPACK_ISON) then
-   call end_scalapack(slk_processor)
+   call slk_processor%free()
    call xmpi_comm_free(slk_communicator)
    call xmpi_comm_free(slk_complement_communicator)
    slk_communicator=xmpi_comm_null
@@ -669,9 +669,9 @@ CONTAINS  !===========================================================
  end if
 #endif
 
-#ifdef HAVE_LINALG_ELPA
- call elpa_func_uninit()
-#endif
+!#ifdef HAVE_LINALG_ELPA
+! call elpa_func_uninit()
+!#endif
 
 #ifdef HAVE_LINALG_PLASMA
    call PLASMA_Finalize(info)

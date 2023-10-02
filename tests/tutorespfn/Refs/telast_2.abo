@@ -1,5 +1,5 @@
 
-.Version 9.8.1 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 21 Dec 2022.
-- ( at 21h06 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 22h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/TestBot_MPI1/tutorespfn_telast_2-telast_3/telast_2.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/tutorespfn_telast_2-telast_3/telast_2.abi
 - output file    -> telast_2.abo
 - root for input  files -> telast_2i
 - root for output files -> telast_2o
@@ -310,8 +310,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.00174
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.3.0  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -325,8 +325,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -4.229503   -0.925599
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken-9.8/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/P.psp8
 - P     ONCVPSP-3.3.0  r_core=   1.46089   1.55067   1.70594
 - 15.00000   5.00000    171102                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1819,9 +1819,9 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.1098837504         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   1    1         0.1098826675        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
+   1    1   3    1        -0.0000000000        -0.0000000000
    1    1   1    2         0.0011820327         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
@@ -1832,9 +1832,9 @@ tolerances: {tolvrs: 1.00E-10, }
    1    1   2    4        -0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.1098837504         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1098826675        -0.0000000000
+   2    1   3    1         0.0000000000        -0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2         0.0011820327         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
@@ -1845,9 +1845,9 @@ tolerances: {tolvrs: 1.00E-10, }
    2    1   2    4        -0.1046788618         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
   
-   3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.1305711393         0.0000000000
+   3    1   1    1        -0.0000000000        -0.0000000000
+   3    1   2    1         0.0000000000        -0.0000000000
+   3    1   3    1         0.1305684083         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2        -0.0237397489         0.0000000000
@@ -1861,7 +1861,7 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1         0.0011820327        -0.0000000000
    1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000        -0.0000000000
-   1    2   1    2         0.1098837504         0.0000000000
+   1    2   1    2         0.1098826675        -0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
    1    2   1    3        -0.1046788618         0.0000000000
@@ -1875,8 +1875,8 @@ tolerances: {tolvrs: 1.00E-10, }
    2    2   2    1         0.0011820327        -0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.1098837504         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   2    2         0.1098826675        -0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
    2    2   1    3        -0.0000000000        -0.0000000000
    2    2   2    3        -0.1046788618         0.0000000000
    2    2   3    3         0.0000000000         0.0000000000
@@ -1888,8 +1888,8 @@ tolerances: {tolvrs: 1.00E-10, }
    3    2   2    1         0.0000000000        -0.0000000000
    3    2   3    1        -0.0237397489        -0.0000000000
    3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.1305711393         0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1305684083         0.0000000000
    3    2   1    3        -0.0000000000        -0.0000000000
    3    2   2    3         0.0000000000         0.0000000000
    3    2   3    3        -0.0404165405         0.0000000000
@@ -1903,9 +1903,9 @@ tolerances: {tolvrs: 1.00E-10, }
    1    3   1    2        -0.1046788629        -0.0000000000
    1    3   2    2        -0.0000000000         0.0000000000
    1    3   3    2        -0.0000000000         0.0000000000
-   1    3   1    3         0.1109978394         0.0000000000
-   1    3   2    3         0.0000000000         0.0000000000
-   1    3   3    3         0.0000000000         0.0000000000
+   1    3   1    3         0.1112021273         0.0000000000
+   1    3   2    3        -0.0000000000         0.0000000000
+   1    3   3    3         0.0000000000        -0.0000000000
    1    3   1    4        -0.0001373998        -0.0000000000
    1    3   2    4         0.0000000000        -0.0000000000
    1    3   3    4         0.0000000000         0.0000000000
@@ -1917,7 +1917,7 @@ tolerances: {tolvrs: 1.00E-10, }
    2    3   2    2        -0.1046788629        -0.0000000000
    2    3   3    2         0.0000000000        -0.0000000000
    2    3   1    3        -0.0000000000         0.0000000000
-   2    3   2    3         0.1109978394         0.0000000000
+   2    3   2    3         0.1112021273         0.0000000000
    2    3   3    3        -0.0000000000         0.0000000000
    2    3   1    4         0.0000000000        -0.0000000000
    2    3   2    4        -0.0001373998        -0.0000000000
@@ -1929,9 +1929,9 @@ tolerances: {tolvrs: 1.00E-10, }
    3    3   1    2        -0.0000000000         0.0000000000
    3    3   2    2         0.0000000000        -0.0000000000
    3    3   3    2        -0.0404165405        -0.0000000000
-   3    3   1    3         0.0000000000         0.0000000000
+   3    3   1    3         0.0000000000        -0.0000000000
    3    3   2    3        -0.0000000000         0.0000000000
-   3    3   3    3         0.1326879784         0.0000000000
+   3    3   3    3         0.1327317942         0.0000000000
    3    3   1    4         0.0000000000         0.0000000000
    3    3   2    4         0.0000000000         0.0000000000
    3    3   3    4        -0.0259031427         0.0000000000
@@ -1945,9 +1945,9 @@ tolerances: {tolvrs: 1.00E-10, }
    1    4   1    3        -0.0001373998         0.0000000000
    1    4   2    3         0.0000000000         0.0000000000
    1    4   3    3         0.0000000000        -0.0000000000
-   1    4   1    4         0.1109978394         0.0000000000
-   1    4   2    4         0.0000000000         0.0000000000
-   1    4   3    4        -0.0000000000         0.0000000000
+   1    4   1    4         0.1112021273        -0.0000000000
+   1    4   2    4         0.0000000000        -0.0000000000
+   1    4   3    4        -0.0000000000        -0.0000000000
   
    2    4   1    1        -0.0000000000        -0.0000000000
    2    4   2    1        -0.1046788629        -0.0000000000
@@ -1958,8 +1958,8 @@ tolerances: {tolvrs: 1.00E-10, }
    2    4   1    3         0.0000000000         0.0000000000
    2    4   2    3        -0.0001373998         0.0000000000
    2    4   3    3         0.0000000000        -0.0000000000
-   2    4   1    4         0.0000000000         0.0000000000
-   2    4   2    4         0.1109978394         0.0000000000
+   2    4   1    4         0.0000000000        -0.0000000000
+   2    4   2    4         0.1112021273        -0.0000000000
    2    4   3    4         0.0000000000         0.0000000000
   
    3    4   1    1         0.0000000000        -0.0000000000
@@ -1971,13 +1971,13 @@ tolerances: {tolvrs: 1.00E-10, }
    3    4   1    3         0.0000000000        -0.0000000000
    3    4   2    3         0.0000000000        -0.0000000000
    3    4   3    3        -0.0259031427        -0.0000000000
-   3    4   1    4        -0.0000000000         0.0000000000
+   3    4   1    4        -0.0000000000        -0.0000000000
    3    4   2    4         0.0000000000         0.0000000000
-   3    4   3    4         0.1326879784         0.0000000000
+   3    4   3    4         0.1327317942        -0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2195,13 +2195,13 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -4.386606E-05 -4.386606E-05 -1.972139E-05  4.691126E-04  4.691126E-04
-   1.566262E-03  1.868970E-03  1.989560E-03  1.989560E-03  2.015869E-03
-   2.055125E-03  2.055125E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  4.711492E-04  4.711492E-04
+   1.566419E-03  1.869031E-03  1.989983E-03  1.989983E-03  2.015951E-03
+   2.055532E-03  2.055532E-03
  Phonon frequencies in cm-1    :
-- -9.627487E+00 -9.627487E+00 -4.328345E+00  1.029583E+02  1.029583E+02
--  3.437548E+02  4.101914E+02  4.366580E+02  4.366580E+02  4.424322E+02
--  4.510479E+02  4.510479E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.034053E+02  1.034053E+02
+-  3.437892E+02  4.102049E+02  4.367508E+02  4.367508E+02  4.424502E+02
+-  4.511371E+02  4.511371E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2515,10 +2515,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         58.0  wall=         58.3
+- Proc.   0 individual time (sec): cpu=         59.7  wall=         60.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         58.0  wall=         58.3
++Overall time at end (sec) : cpu=         59.7  wall=         60.0
