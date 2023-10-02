@@ -14,10 +14,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -106,6 +102,9 @@ module m_xcdata
   real(dp) :: xc_denpos
     ! density positivity value
 
+  real(dp) :: xc_taupos
+    ! kinetic energy density positivity value (mGGA)
+
  end type xcdata_type
 
 !----------------------------------------------------------------------
@@ -133,28 +132,23 @@ contains
 !!  [nelect = Number of electrons in the cell (for Fermi-Amaldi only)]
 !!  [tphysel = Physical temperature (for temperature-dependent functional)]
 !!  [vdw_xc = Choice of van-der-Waals density functional]
+!!  [xc_denpos = density positivity value]
+!!  [xc_taupos = kinetic energy density positivity value (mGGA)]
 !!
 !! OUTPUT
 !!  xcdata <type(xcdata_type)>= the data to calculate exchange-correlation are initialized
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_dft_energy,m_forstr,m_kxc,m_longwave,m_nonlinear,m_odamix,m_prcref
-!!      m_respfn_driver,m_rhotov,m_scfcv_core,m_setvtr,m_vhxc_me,m_xchybrid
-!!
-!! CHILDREN
-!!      get_xclevel
-!!
 !! SOURCE
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&
-&                      vdw_xc,xc_denpos)
+&                      vdw_xc,xc_denpos,xc_taupos)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in),optional :: auxc_ixc,intxc,ixc,nspden,vdw_xc
- real(dp),intent(in),optional :: hyb_mixing,nelect,tphysel,xc_denpos
+ real(dp),intent(in),optional :: hyb_mixing,nelect,tphysel,xc_denpos,xc_taupos
  type(dataset_type), intent(in),optional :: dtset
  type(xcdata_type), intent(out) :: xcdata
 !Local variables-------------------------------
@@ -173,14 +167,16 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
    xcdata%hyb_mixing=abs(dtset%hyb_mixing) ! Warning : the absolute value is needed, because of the singular way
                                            ! to define the default values for this input variable.
    xcdata%nelect=dtset%nelect
-   xcdata%tphysel=dtset%tphysel
+   xcdata%tphysel=merge(dtset%tphysel,dtset%tsmear,dtset%tphysel>tol8.and.dtset%occopt/=3.and.dtset%occopt/=9)
+
    xcdata%xc_denpos=dtset%xc_denpos
+   xcdata%xc_taupos=dtset%xc_taupos
 
  else
    if(.not.(present(auxc_ixc).and.present(intxc).and.present(ixc).and.&
 &           present(vdw_xc).and.present(hyb_mixing).and.&
 &           present(nelect).and.present(nspden).and.&
-&           present(tphysel).and.present(xc_denpos)))then
+&           present(tphysel).and.present(xc_denpos).and.present(xc_taupos)))then
      msg='If dtset is not provided, all the other optional arguments must be provided, which is not the case!'
      ABI_BUG(msg)
    endif
@@ -196,6 +192,7 @@ subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,
  if(present(nelect))    xcdata%nelect=nelect
  if(present(tphysel))   xcdata%tphysel=tphysel
  if(present(xc_denpos)) xcdata%xc_denpos=xc_denpos
+ if(present(xc_taupos)) xcdata%xc_taupos=xc_taupos
 
 !Compute xclevel
  call get_xclevel(xcdata%ixc,xcdata%xclevel,usefock=xcdata%usefock)
@@ -225,12 +222,6 @@ end subroutine xcdata_init
 !!  xclevel= 0 if no XC functional except possibly Fock; 1 if LDA; 2 if GGA ; 3 for TDDFT kernel tests
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_invars2,m_sigma_driver,m_xcdata
-!!
-!! CHILDREN
-!!      get_xclevel
 !!
 !! SOURCE
 
@@ -279,7 +270,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
            ABI_ERROR(message)
          end if
        end if
-     end if 
+     end if
    end do
  end if
 
@@ -308,12 +299,6 @@ end subroutine get_xclevel
 !!  auxc_ixc= 0 if no need of an auxiliary functional, otherwise, returns the ixc of an auxiliary functional.
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_invars2,m_vhxc_me
-!!
-!! CHILDREN
-!!      get_xclevel
 !!
 !! SOURCE
 

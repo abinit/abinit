@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -70,12 +66,6 @@ contains
 !!  elph_ds%k_phon%wtk = integration weights of the coarse FS k-grid
 !!  elph_ds%k_phon%velocwtk = velocity time integration weights of the coarse FS k-grid
 !!  elph_ds%k_phon%vvelocwtk = velocity^2 time integration weights of the coarse FS k-grid
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 
@@ -913,12 +903,6 @@ end subroutine d2c_weights
 !! OUTPUT
 !!  elph_ds%k_phon%wtq = integration weights of the coarse k-grid
 !!
-!! PARENTS
-!!      m_a2ftr,m_elphon
-!!
-!! CHILDREN
-!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
-!!
 !! SOURCE
 
 subroutine d2c_wtq(elph_ds)
@@ -1364,12 +1348,6 @@ end subroutine d2c_wtq
 !! TODO
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
-!! PARENTS
-!!      m_a2ftr,m_elphon
-!!
-!! CHILDREN
-!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
-!!
 !! SOURCE
 
 subroutine ep_el_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, enemin, enemax, nene, gprimd, &
@@ -1609,12 +1587,6 @@ end subroutine ep_el_weights
 !! TODO
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
-!!
 !! SOURCE
 
 subroutine ep_fs_weights(ep_b_min, ep_b_max, eigenGS, elphsmear, fermie, gprimd, &
@@ -1836,12 +1808,6 @@ end subroutine ep_fs_weights
 !!
 !! TODO
 !!   weights should be recalculated on-the-fly! The present implementation is not flexible!
-!!
-!! PARENTS
-!!      m_a2ftr,m_elphon
-!!
-!! CHILDREN
-!!      destroy_tetra,get_tetra_weight,init_tetra,matr3inv
 !!
 !! SOURCE
 

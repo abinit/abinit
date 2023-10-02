@@ -23,10 +23,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -50,7 +46,7 @@ module m_lgroup
  use m_numeric_tools, only : wrap2_pmhalf
  use m_geometry,      only : normv
  use m_kpts,          only : listkk
- use m_symtk,         only : chkgrp, littlegroup_q
+ use m_symtk,         only : sg_multable, littlegroup_q
 
  implicit none
 
@@ -167,10 +163,6 @@ contains  !=====================================================
 !!  comm= MPI communicator.
 !!  sord=Defines how to order the points in %ibz. ">" for increasing norm. "<" decreasing. Default: ">"
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz, comm, sord) result(new)
@@ -223,7 +215,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
  ! Check group closure.
  if (debug /= 0) then
-   call chkgrp(new%nsym_lg, symafm_lg, symrec_lg, ierr)
+   call sg_multable(new%nsym_lg, symafm_lg, symrec_lg, ierr)
    ABI_CHECK(ierr == 0, "Error in group closure")
  end if
 
@@ -339,10 +331,6 @@ end function lgroup_new
 !!  [qtol]=Optional tolerance for q-point comparison.
 !!         For each reduced direction the absolute difference between the coordinates must be less that qtol
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer pure function lgroup_findq_ibzk(self, qpt, qtol) result(iqpt)
@@ -386,10 +374,6 @@ end function lgroup_findq_ibzk
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function lgroup_find_ibzimage(self, qpt) result(iq_ibz)
@@ -432,10 +416,6 @@ end function lgroup_find_ibzimage
 !!
 !! OUTPUT
 !!  Only printing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -483,10 +463,6 @@ end subroutine lgroup_print
 !!
 !! FUNCTION
 !!  Free memory
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

@@ -5,7 +5,7 @@
 !! FUNCTION
 !! Ionmov predictors (15) FIRE algorithm
 !! The fast inertial relaxation engine (FIRE) method for relaxation.
-!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler, 
+!! The method is described in  Erik Bitzek, Pekka Koskinen, Franz G"ahler,
 !! Michael Moseler, and Peter Gumbsch, Phys. Rev. Lett. 97, 170201 [[cite:Bitzek2006]]
 !!
 !! COPYRIGHT
@@ -13,10 +13,6 @@
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -87,13 +83,6 @@ contains
 !! hist <type(abihist)> : History of positions,forces
 !!                               acell, rprimd, stresses
 !!
-!! PARENTS
-!!      m_precpred_1geo
-!!
-!! CHILDREN
-!!      fcart2gred,hist2var,metric,mkrdim,var2hist,xfpack_f2vout,xfpack_vin2x
-!!      xfpack_x2vin,xred2xcart
-!!
 !! SOURCE
 subroutine pred_fire(ab_mover, ab_xfh,forstr,hist,ionmov,itime,zDEBUG,iexit)
 
@@ -158,56 +147,35 @@ real(dp),allocatable,save :: vel_ioncell(:)
 !***************************************************************************
 
  if(iexit/=0)then
-   if (allocated(vin))           then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))          then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))           then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vel_ioncell))          then
-     ABI_FREE(vel_ioncell)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vel_ioncell)
    return
  end if
 
- !write(std_out,*) 'FIRE 01'
+write(std_out,*) 'FIRE 01'
 !##########################################################
 !### 01. Compute the dimension of vectors (ndim)
 
  ndim=3*ab_mover%natom
- if(ab_mover%optcell==1 .or.&
-& ab_mover%optcell==4 .or.&
-& ab_mover%optcell==5 .or.&
-& ab_mover%optcell==6) ndim=ndim+1
+ if(ab_mover%optcell==1) ndim=ndim+1
  if(ab_mover%optcell==2 .or.&
 & ab_mover%optcell==3) ndim=ndim+6
- if(ab_mover%optcell==7 .or.&
-& ab_mover%optcell==8 .or.&
-& ab_mover%optcell==9) ndim=ndim+3
+ if(ab_mover%optcell>=4) ndim=ndim+3
 
-!write(std_out,*) 'FIRE: ndim=', ndim
-! write(std_out,*) 'FIRE 02'
+write(std_out,*) 'FIRE: ndim=', ndim
+write(std_out,*) 'FIRE 02'
 !##########################################################
 !### 02. Allocate the vectors vin
 
 !Notice that vin, vout, etc could be allocated
 !From a previous dataset with a different ndim
  if(itime==1)then
-   if (allocated(vin))           then
-     ABI_FREE(vin)
-   end if
-   if (allocated(vout))          then
-     ABI_FREE(vout)
-   end if
-   if (allocated(vin_prev))           then
-     ABI_FREE(vin_prev)
-   end if
-   if (allocated(vel_ioncell))          then
-     ABI_FREE(vel_ioncell)
-   end if
+   ABI_SFREE(vin)
+   ABI_SFREE(vout)
+   ABI_SFREE(vin_prev)
+   ABI_SFREE(vel_ioncell)
 
    ABI_MALLOC(vin,(ndim))
    ABI_MALLOC(vout,(ndim))
@@ -216,7 +184,7 @@ real(dp),allocatable,save :: vel_ioncell(:)
    vel_ioncell(:)=0.0
  end if
 
- !write(std_out,*) 'FIRE 03'
+ write(std_out,*) 'FIRE 03'
 !##########################################################
 !### 03. Obtain the present values from the history
 
@@ -286,18 +254,18 @@ real(dp),allocatable,save :: vel_ioncell(:)
    end do
  end if
 
- !write(std_out,*) 'FIRE 04'
+ write(std_out,*) 'FIRE 04'
 !##########################################################
 !### 04. Fill the vectors vin and vout
 
 !Initialize input vectors : first vin, then vout
 ! transfer xred, acell, and rprim to vin
-call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
+call xfpack_x2vin(acell, ab_mover%natom, ndim,&
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0, vin, xred)
 !end if
 
-!transfer gred and strten to vout. 
+!transfer gred and strten to vout.
 !Note: gred is not f in reduced co.
 !but dE/dx
 
@@ -307,7 +275,7 @@ call xfpack_x2vin(acell, acell0, ab_mover%natom, ndim,&
 ! Now vout -> -dE/dx
 vout(:) = -1.0*vout(:)
 
- !write(std_out,*) 'FIRE 05'
+ write(std_out,*) 'FIRE 05'
 !##########################################################
 !### 05. iniialize FIRE
 if ( itime==1 ) then
@@ -318,7 +286,7 @@ if ( itime==1 ) then
    end if
 end if
 
- !write(std_out,*) 'FIRE 06'
+ write(std_out,*) 'FIRE 06'
 !##########################################################
 !### 06. update timestep
 ! Note that vin & vout are in reduced coordinates.
@@ -341,7 +309,7 @@ else
     dtratio = dtratio*dtdec
 endif
 
- !write(std_out,*) 'FIRE 07'
+ write(std_out,*) 'FIRE 07'
 !##########################################################
 !### 07. MD step. update vel_ioncell
 
@@ -354,7 +322,7 @@ vel_ioncell = vel_ioncell + dtratio*ab_mover%dtion* vout
 ! update x
 vin = vin + dtratio*ab_mover%dtion* vel_ioncell
 !write(std_out,*) 'FIRE vin: ', vin
-   
+
 !   write(std_out,*) 'FIRE vout: ', vout
 !   write(std_out,*) 'FIRE vf: ', vf
 !   write(std_out,*) 'FIRE etotal: ', etotal
@@ -382,7 +350,7 @@ if ( etotal - etotal_prev >0.0 ) then
     vin= vin*(1-mixold)+vin_prev*mixold
 end if
 
-! only set vin to vin_prev when energy decreased, so it's 
+! only set vin to vin_prev when energy decreased, so it's
 ! possible to go back.
 ! if (etotal - etotal_prev <0.0 ) then
  vin_prev(:)=vin(:)
@@ -400,7 +368,6 @@ end if
 & ab_mover%nsym, ab_mover%optcell, rprim, rprimd0,&
 & ab_mover%symrel, ucvol, ucvol0,&
 & vin, xred)
-
 
  if(ab_mover%optcell/=0)then
    call mkrdim(acell,rprim,rprimd)

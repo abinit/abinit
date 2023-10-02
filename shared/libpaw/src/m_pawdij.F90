@@ -155,13 +155,6 @@ CONTAINS
 !!    In order to compute first-order Dij, paw_an (resp. paw_ij) datastructures
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_respfn_driver
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,ntypat,&
@@ -1095,12 +1088,6 @@ end subroutine pawdij
 !!      dij(lmn2_size+1:2*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
@@ -1207,12 +1194,6 @@ end subroutine pawdijhartree
 !!
 !!  NOTES:
 !!   WARNING: What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1456,12 +1437,6 @@ end subroutine pawdijfock
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
@@ -1599,7 +1574,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
              call simp_gen(vxcij1(kln),ff,pawrad)
            end do
            !if Meta GGA add 1/2*[<nabla_phi_i|vxctau1|nabla_phi_j>
-           !                    -<nabla_tphi_i|vxcttau|nabla_tphi_j>]
+           !                    -<nabla_tphi_i|vxcttau1|nabla_tphi_j>]
            if (usekden==1) then
              do jln=1,basis_size
                j0ln=jln*(jln-1)/2
@@ -1866,12 +1841,6 @@ end subroutine pawdijxc
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijxcm(dijxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
@@ -2127,12 +2096,6 @@ end subroutine pawdijxcm
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_fock_getghc,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2423,12 +2386,6 @@ end subroutine pawdijhat
 !!   is \alpha^2 L_R\cdot m/|r-R|^3, where \alpha is the fine structure constant.
 !!
 !!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
@@ -2444,8 +2401,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
- complex(dpc) :: lms
+ integer :: idir,ij_size,il,ilmn,im,imesh,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
+ real(dp) :: rr
+ complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
  real(dp),allocatable :: ff(:),intgr3(:)
@@ -2480,8 +2438,10 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
  LIBPAW_ALLOCATE(ff,(mesh_size))
  do kln=1,ij_size
-   ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln) - &
-&    pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
+   do imesh = 2, mesh_size
+     rr = pawrad%rad(imesh)
+     ff(imesh)=(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
+   end do !imesh
    call pawrad_deducer0(ff,mesh_size,pawrad)
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
@@ -2504,8 +2464,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
    ! Matrix elements of interest are <S_l'm'|L_i|S_lm>
    ! these are zero if l' /= l and also if l' == l == 0
-   if ( il .NE. jl ) cycle
-   if ( il .EQ. 0  ) cycle
+   if ( il /= jl ) cycle
+   if ( il == 0  ) cycle
 
    do idir = 1, 3
 
@@ -2514,10 +2474,9 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
      call slxyzs(il,im,idir,jl,jm,lms)
 
-     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + &
-       & intgr3(kln)*dreal(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
-     dijnd(2*klmn,1) = dijnd(2*klmn,1) + &
-       & intgr3(kln)*dimag(lms)*nucdipmom(idir)*FineStructureConstant2*pawtab%dltij(klmn)
+     cmatrixelement = FineStructureConstant2*lms*nucdipmom(idir)*intgr3(kln)
+     dijnd(2*klmn-1,1) = dijnd(2*klmn-1,1) + real(cmatrixelement)
+     dijnd(2*klmn  ,1) = dijnd(2*klmn  ,1) + aimag(cmatrixelement)
 
    end do ! end loop over idir
 
@@ -2575,12 +2534,6 @@ end subroutine pawdijnd
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2684,7 +2637,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  end if
  ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
  call nderiv_gen(dv1dr,ff,pawrad)
- dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)/InvFineStruct**2)) &
+ dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
 & *dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
  call pawrad_deducer0(dv1dr,mesh_size,pawrad)
  do kln=1,ij_size
@@ -2776,12 +2729,6 @@ end subroutine pawdijso
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3039,12 +2986,6 @@ end subroutine pawdiju
 !!        Im(D_kl^A) = -Im(D_lk^A)  ( using (b) and (c) )
 !!        Im(D_kl^B) =  Im(D_lk^B)  ( using (a) and (c) )
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
@@ -3232,12 +3173,6 @@ end subroutine pawdiju_euijkl
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3546,12 +3481,6 @@ end subroutine pawdijexxc
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4185,12 +4114,6 @@ end subroutine pawdijfr
 !!      vpawu(2*i-1,:) contains the real part
 !!      vpawu(2*i,:) contains the imaginary part
 !!
-!! PARENTS
-!!      m_dftu_self,m_paw_hr,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
  subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
@@ -4209,7 +4132,7 @@ end subroutine pawdijfr
 !Option for interaction energy in case of non-collinear magnetism:
 !           1: E_int=-J/4.N.(N-2)                   (better)
 !           2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1)) (Nup and Ndn are ill-defined)
- integer,parameter :: option_interaction=1
+! integer,parameter :: option_interaction=3
 
  integer :: iplex,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden_eff
  real(dp) :: mnorm,mx,my,mz,n_sig,n_msig,n_tot,VUKStemp,n_sigs,n_msigs
@@ -4230,7 +4153,7 @@ end subroutine pawdijfr
    msg = "usepawu<0 not allowed!"
    LIBPAW_BUG(msg)
  end if
- if(option_interaction==3.and.pawtab%usepawu>=10) then
+ if(ndij==4.and.pawtab%option_interaction_pawu==3.and.pawtab%usepawu>=10) then
    msg = "Option_interaction==3 is not compatible with usepawu>=10 in pawpupot"
    LIBPAW_ERROR(msg)
  end if
@@ -4340,17 +4263,22 @@ end subroutine pawdijfr
        if(pawtab%usepawu==1.or.pawtab%usepawu==4) then ! not activated if usepawu=10 !!
 !        Here we compute vpawu=vpawu-v_dc
          vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-pawtab%upawu*(n_tot-half)
-         if (ndij/=4.or.option_interaction==2) then
+         if (ndij/=4.or.pawtab%option_interaction_pawu==2) then
            if(pawtab%usepawu/=4) then
              vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+pawtab%jpawu*(n_sig-half)
            else
              vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
            endif
-         else if (ndij==4.and.option_interaction==1) then
+         else if (ndij==4.and.(pawtab%usepawu==4.or.pawtab%option_interaction_pawu==1)) then
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
-         else if (ndij==4.and.option_interaction==3) then
+         else if (ndij==4.and.pawtab%option_interaction_pawu==3) then
 !          Here vdc^{alpha,beta}=\vect{m}.\vect{sigma}^{\beta,\alpha}
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
+           if (ispden==1) then
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*mz
+           else
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-half*pawtab%jpawu*mz
+           end if
          end if
 
 !        Around mean field
@@ -4404,12 +4332,12 @@ end subroutine pawdijfr
            end do
          end do
        end do
-       if((pawtab%usepawu==1.or.pawtab%usepawu==4).and.option_interaction==3) then ! not activated if usepawu=10 !!
-         vpawu(1,m11,m11,ispden)=vpawu(1,m11,m21,ispden)+half*pawtab%jpawu*mx
+       if(pawtab%usepawu==1.and.pawtab%option_interaction_pawu==3) then ! not activated if usepawu=10 !!
+         vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*mx
          if(ispden==3) then
-           vpawu(2,m11,m11,ispden)=vpawu(1,m11,m21,ispden)-half*pawtab%jpawu*my
+           vpawu(2,m11,m11,ispden)=vpawu(2,m11,m11,ispden)-half*pawtab%jpawu*my
          else
-           vpawu(2,m11,m11,ispden)=vpawu(1,m11,m21,ispden)+half*pawtab%jpawu*my
+           vpawu(2,m11,m11,ispden)=vpawu(2,m11,m11,ispden)+half*pawtab%jpawu*my
          end if
        end if
      end do
@@ -4473,12 +4401,6 @@ end subroutine pawdijfr
 !!
 !! OUTPUT
 !!  paw_ij%vpawx(pawtab%lexexch*2+1,pawtab%lexexch*2+1)=local exact-exchange potential
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4630,13 +4552,6 @@ end subroutine pawdijfr
 !!
 !! SIDE EFFECTS
 !!  paw_ij(natom)%dij???(cplex_dij*lmn2_size,nspden)=symmetrized dij quantities as output
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paw_denpot
-!!      m_pawdij,m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5377,12 +5292,6 @@ end subroutine symdij
 !! SIDE EFFECTS
 !!  paw_ij(natom)%dij???(cplex_dij*qphase*lmn2_size,nspden)=symmetrized dij quantities as output
 !!
-!! PARENTS
-!!      m_paw_denpot,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
@@ -5522,12 +5431,6 @@ end subroutine symdij_all
 !!
 !! OUTPUT
 !!  dij_out = coeff2d_type array containing the gathered Dij
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5683,12 +5586,6 @@ end subroutine pawdij_gather
 !!
 !! OUTPUT
 !! (Only writing)
-!!
-!! PARENTS
-!!      m_paw_tools,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 

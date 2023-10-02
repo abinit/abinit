@@ -31,11 +31,16 @@
   getwfq3  2
   prtvol3  10
   rfphon3  1
- rfatpol3  1 1
-   rfdir3  0 0 1
+ rfatpol   1 1
+   rfdir   0 0 1
   diemix3  0.65
   diemac3  1.0
   tolwfr3  1.0d-15
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #Common data
     npsp   2            # Two pseudopotentials to be read

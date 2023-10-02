@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,19 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t51/t51.in
-- output file    -> t51.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t51/t51.abi
+- output file    -> t51.abo
 - root for input  files -> t51i
 - root for output files -> t51o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
-
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -40,11 +39,10 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       5.648 Mbytes of memory.
+P This job should need less than                       5.658 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.049 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -63,7 +61,6 @@ P This job should need less than                       3.534 Mbytes of memory.
 _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -80,7 +77,6 @@ P This job should need less than                       3.547 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -99,7 +95,6 @@ P This job should need less than                       3.644 Mbytes of memory.
 _ WF disk file :      0.604 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5 (RF).
@@ -116,7 +111,6 @@ P This job should need less than                       6.470 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -502,6 +496,12 @@ P          mk1mem6        256
         optdriver6          1
         pawecutdg      9.00000000E+00 Hartree
          pawxcdev           0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          0
@@ -514,8 +514,6 @@ P          mk1mem6        256
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     2.50000000E-01  0.00000000E+00  0.00000000E+00
               qpt6    -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol           1       2
-            rfdir           1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -672,9 +670,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -692,9 +690,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA_PBE-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -950,7 +948,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -969,7 +966,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1033,7 +1029,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1097,7 +1092,6 @@ tolerances: {tolwfr: 1.00E-25, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1207,7 +1201,6 @@ meta: {optdriver: 1, rfelfd: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 -open ddk wf file :t51o_DS2_1WF7
 -open ddk wf file :t51o_DS2_1WF8
 -open ddk wf file :t51o_DS2_1WF9
@@ -1237,7 +1230,6 @@ meta: {optdriver: 1, rfelfd: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1259,11 +1251,11 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  6  -208.47654594503     -1.109E-05 8.673E-09 2.534E-02
  ETOT  7  -208.47654627644     -3.314E-07 2.047E-10 2.531E-03
  ETOT  8  -208.47654629108     -1.464E-08 1.163E-11 2.262E-04
- ETOT  9  -208.47654629174     -6.565E-10 4.730E-13 2.007E-05
+ ETOT  9  -208.47654629174     -6.566E-10 4.730E-13 2.007E-05
  ETOT 10  -208.47654629182     -8.038E-11 7.876E-14 1.740E-06
- ETOT 11  -208.47654629182     -4.775E-12 3.971E-15 1.528E-07
+ ETOT 11  -208.47654629182     -4.746E-12 3.971E-15 1.528E-07
  ETOT 12  -208.47654629183     -2.103E-12 6.809E-16 1.388E-08
- ETOT 13  -208.47654629183     -9.379E-13 4.701E-16 1.308E-09
+ ETOT 13  -208.47654629183     -9.663E-13 4.701E-16 1.308E-09
 
  At SCF step   13       vres2   =  1.31E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :t51o_DS2_1WF7
@@ -1294,6 +1286,31 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -0.014024        0.000000
+       1               2       -0.000000        0.000000
+       1               3       -0.000000        0.000000
+       2               1       -0.000000        0.000000
+       2               2       -0.014024        0.000000
+       2               3        0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2        0.000000        0.000000
+       3               3       -0.014024        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.083025E+00    3.863405E-13    8.762167E-16
+         1         2    3.856679E-13    2.083025E+00   -3.867537E-13
+         1         3    3.011822E-16   -3.863405E-13    2.083025E+00
+         2         1   -2.083025E+00   -3.863405E-13   -8.762167E-16
+         2         2   -3.856679E-13   -2.083025E+00    3.867537E-13
+         2         3   -3.011822E-16    3.863405E-13   -2.083025E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1385,30 +1402,30 @@ tolerances: {tolvrs: 1.00E-08, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4         2.0760125182         0.0000000000
+   1    1   1    4         2.0830246448         0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
-   3    1   1    4        -0.0000000000         0.0000000000
-   1    2   1    4        -2.0900367715         0.0000000000
+   3    1   1    4         0.0000000000         0.0000000000
+   1    2   1    4        -2.0830246448         0.0000000000
    2    2   1    4        -0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
   
    1    1   2    4         0.0000000000         0.0000000000
-   2    1   2    4         2.0760125182         0.0000000000
+   2    1   2    4         2.0830246448         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
    1    2   2    4        -0.0000000000         0.0000000000
-   2    2   2    4        -2.0900367715         0.0000000000
+   2    2   2    4        -2.0830246448         0.0000000000
    3    2   2    4         0.0000000000         0.0000000000
   
    1    1   3    4         0.0000000000         0.0000000000
    2    1   3    4        -0.0000000000         0.0000000000
-   3    1   3    4         2.0760125182         0.0000000000
+   3    1   3    4         2.0830246448         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
    2    2   3    4         0.0000000000         0.0000000000
-   3    2   3    4        -2.0900367715         0.0000000000
+   3    2   3    4        -2.0830246448         0.0000000000
   
   Warning: The rigid-atom proper piezoelectric tensor
   from  electric field response requires nsym=1
@@ -1461,7 +1478,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 -open ddk wf file :t51o_DS2_1WF7
 -open ddk wf file :t51o_DS2_1WF8
 -open ddk wf file :t51o_DS2_1WF9
@@ -1503,7 +1519,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1527,7 +1542,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  9   5.6392941969848     -1.083E-11 1.854E-14 1.554E-06
  ETOT 10   5.6392941969797     -5.043E-12 5.400E-15 1.272E-07
  ETOT 11   5.6392941969796     -1.172E-13 1.104E-16 1.180E-08
- ETOT 12   5.6392941969796      3.020E-14 6.800E-18 1.072E-09
+ ETOT 12   5.6392941969796      3.197E-14 6.800E-18 1.072E-09
 
  At SCF step   12       vres2   =  1.07E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :t51o_DS2_1WF7
@@ -1571,7 +1586,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1588,15 +1602,15 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  2   7.7005407972675     -2.147E+01 8.046E-03 1.424E+03
  ETOT  3   6.2187380049626     -1.482E+00 6.788E-04 2.774E+01
  ETOT  4   6.1977227388270     -2.102E-02 2.591E-05 2.543E+00
- ETOT  5   6.1973888731600     -3.339E-04 5.211E-07 2.992E-01
+ ETOT  5   6.1973888731601     -3.339E-04 5.211E-07 2.992E-01
  ETOT  6   6.1973824861258     -6.387E-06 8.825E-09 3.299E-02
  ETOT  7   6.1973822526937     -2.334E-07 2.758E-10 3.162E-03
- ETOT  8   6.1973822428062     -9.887E-09 1.581E-11 2.893E-04
- ETOT  9   6.1973822412308     -1.575E-09 2.862E-12 2.318E-05
+ ETOT  8   6.1973822428062     -9.888E-09 1.581E-11 2.893E-04
+ ETOT  9   6.1973822412309     -1.575E-09 2.862E-12 2.318E-05
  ETOT 10   6.1973822408446     -3.862E-10 2.982E-13 2.129E-06
- ETOT 11   6.1973822408165     -2.817E-11 1.415E-14 1.773E-07
- ETOT 12   6.1973822408106     -5.841E-12 3.151E-15 1.573E-08
- ETOT 13   6.1973822408118      1.194E-12 1.451E-16 1.441E-09
+ ETOT 11   6.1973822408165     -2.815E-11 1.415E-14 1.773E-07
+ ETOT 12   6.1973822408106     -5.855E-12 3.151E-15 1.573E-08
+ ETOT 13   6.1973822408118      1.222E-12 1.451E-16 1.441E-09
 
  At SCF step   13       vres2   =  1.44E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :t51o_DS2_1WF7
@@ -1729,23 +1743,23 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.1001899071         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   1    1         0.1009551383         0.0000000000
+   1    1   2    1        -0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1009551383        -0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.1001899071         0.0000000000
+   2    1   1    1        -0.0000000000        -0.0000000000
+   2    1   2    1         0.1009551383        -0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2        -0.1009551383         0.0000000000
    2    1   3    2         0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.1001899071         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   3    1         0.1009551383         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000        -0.0000000000
    3    1   3    2        -0.1009551383        -0.0000000000
@@ -1753,27 +1767,27 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   1    1        -0.1009551388         0.0000000000
    1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.1101051185         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   1    2         0.1009551388        -0.0000000000
+   1    2   2    2        -0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1         0.0000000000        -0.0000000000
    2    2   2    1        -0.1009551388        -0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
-   2    2   2    2         0.1101051185         0.0000000000
-   2    2   3    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.1009551388         0.0000000000
+   2    2   3    2        -0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.1009551388         0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.1101051185         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2        -0.0000000000        -0.0000000000
+   3    2   3    2         0.1009551388        -0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -1806,11 +1820,11 @@ tolerances: {tolvrs: 1.00E-08, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   2.113200E-04  2.113200E-04  2.113200E-04  1.672892E-03  1.672892E-03
-   1.672892E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.670864E-03  1.670864E-03
+   1.670864E-03
  Phonon frequencies in cm-1    :
--  4.637939E+01  4.637939E+01  4.637939E+01  3.671574E+02  3.671574E+02
--  3.671574E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.667122E+02  3.667122E+02
+-  3.667122E+02
 
 ================================================================================
 == DATASET  5 ==================================================================
@@ -1865,7 +1879,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1896,10 +1909,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1923,7 +1934,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT 11   6.6954871281511      3.004E-09 5.173E-13 7.446E-06
  ETOT 12   6.6954871275948     -5.563E-10 1.273E-14 6.632E-07
  ETOT 13   6.6954871278050      2.102E-10 4.139E-16 6.012E-08
- ETOT 14   6.6954871277811     -2.383E-11 2.211E-17 5.329E-09
+ ETOT 14   6.6954871277811     -2.382E-11 2.211E-17 5.329E-09
 
  At SCF step   14       vres2   =  5.33E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -1963,10 +1974,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1988,7 +1997,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  9   5.4777630532863      1.416E-09 3.882E-14 1.395E-06
  ETOT 10   5.4777630533165      3.019E-11 2.795E-16 1.243E-07
  ETOT 11   5.4777630532944     -2.208E-11 4.978E-17 1.128E-08
- ETOT 12   5.4777630532967      2.292E-12 6.137E-19 1.016E-09
+ ETOT 12   5.4777630532967      2.288E-12 6.137E-19 1.016E-09
 
  At SCF step   12       vres2   =  1.02E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2029,10 +2038,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2057,7 +2064,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT 12   6.9094654603154     -1.751E-09 4.688E-14 2.522E-06
  ETOT 13   6.9094654607036      3.882E-10 1.281E-15 2.259E-07
  ETOT 14   6.9094654607673      6.366E-11 8.417E-17 2.030E-08
- ETOT 15   6.9094654607575     -9.777E-12 5.904E-18 1.805E-09
+ ETOT 15   6.9094654607576     -9.749E-12 5.904E-18 1.805E-09
 
  At SCF step   15       vres2   =  1.81E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2097,10 +2104,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2122,8 +2127,8 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  9   5.9420799581184     -5.514E-09 8.802E-13 2.273E-05
  ETOT 10   5.9420799596715      1.553E-09 4.409E-14 2.065E-06
  ETOT 11   5.9420799595362     -1.353E-10 9.771E-16 1.842E-07
- ETOT 12   5.9420799595536      1.739E-11 6.022E-18 1.659E-08
- ETOT 13   5.9420799595538      1.279E-13 1.388E-18 1.495E-09
+ ETOT 12   5.9420799595536      1.737E-11 6.022E-18 1.659E-08
+ ETOT 13   5.9420799595538      1.421E-13 1.388E-18 1.495E-09
 
  At SCF step   13       vres2   =  1.49E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2317,7 +2322,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2347,10 +2351,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2372,7 +2374,7 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  9   5.5488896500481      6.835E-08 1.623E-11 1.489E-04
  ETOT 10   5.5488896553810      5.333E-09 4.438E-13 1.378E-05
  ETOT 11   5.5488896497489     -5.632E-09 3.729E-14 1.263E-06
- ETOT 12   5.5488896497477     -1.211E-12 1.368E-15 1.143E-07
+ ETOT 12   5.5488896497477     -1.204E-12 1.368E-15 1.143E-07
  ETOT 13   5.5488896497225     -2.514E-11 1.101E-16 1.009E-08
  ETOT 14   5.5488896497268      4.270E-12 2.103E-18 9.208E-10
 
@@ -2414,10 +2416,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2439,8 +2439,8 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  9   6.1827924731994      4.426E-07 4.518E-11 1.810E-04
  ETOT 10   6.1827925432758      7.008E-08 7.701E-13 1.779E-05
  ETOT 11   6.1827924971409     -4.613E-08 2.711E-13 1.531E-06
- ETOT 12   6.1827924971180     -2.283E-11 6.024E-16 1.369E-07
- ETOT 13   6.1827924970424     -7.562E-11 3.053E-17 1.232E-08
+ ETOT 12   6.1827924971180     -2.284E-11 6.024E-16 1.369E-07
+ ETOT 13   6.1827924970424     -7.561E-11 3.053E-17 1.232E-08
  ETOT 14   6.1827924968910     -1.515E-10 1.018E-17 1.154E-09
 
  At SCF step   14       vres2   =  1.15E-09 < tolvrs=  1.00E-08 =>converged.
@@ -2481,10 +2481,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2501,14 +2499,14 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  4   6.8631283910045     -2.095E-01 1.838E-04 5.387E+01
  ETOT  5   6.8579321966074     -5.196E-03 4.932E-06 7.393E+00
  ETOT  6   6.8575949172198     -3.373E-04 3.899E-07 8.510E-01
- ETOT  7   6.8575596967721     -3.522E-05 1.641E-08 8.515E-02
+ ETOT  7   6.8575596967722     -3.522E-05 1.641E-08 8.515E-02
  ETOT  8   6.8575580684641     -1.628E-06 1.393E-09 8.553E-03
  ETOT  9   6.8575581675330      9.907E-08 6.618E-11 8.254E-04
  ETOT 10   6.8575581558873     -1.165E-08 1.672E-12 7.368E-05
  ETOT 11   6.8575581495121     -6.375E-09 1.487E-13 6.729E-06
  ETOT 12   6.8575581488757     -6.364E-10 5.002E-15 6.117E-07
  ETOT 13   6.8575581492317      3.560E-10 1.436E-15 5.438E-08
- ETOT 14   6.8575581493322      1.006E-10 4.269E-17 4.807E-09
+ ETOT 14   6.8575581493322      1.005E-10 4.269E-17 4.807E-09
 
  At SCF step   14       vres2   =  4.81E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -2548,10 +2546,8 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t51o_DS1_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -2571,11 +2567,11 @@ tolerances: {tolvrs: 1.00E-08, }
  ETOT  7   7.4158327628270     -4.705E-05 1.615E-08 8.991E-02
  ETOT  8   7.4158317233999     -1.039E-06 8.171E-10 9.039E-03
  ETOT  9   7.4158321132969      3.899E-07 5.088E-11 8.697E-04
- ETOT 10   7.4158321010480     -1.225E-08 7.836E-13 7.761E-05
+ ETOT 10   7.4158321010481     -1.225E-08 7.836E-13 7.761E-05
  ETOT 11   7.4158320796816     -2.137E-08 1.292E-13 7.110E-06
  ETOT 12   7.4158320794039     -2.777E-10 1.585E-15 6.444E-07
  ETOT 13   7.4158320800017      5.979E-10 4.879E-16 5.748E-08
- ETOT 14   7.4158320800645      6.281E-11 2.379E-17 5.079E-09
+ ETOT 14   7.4158320800645      6.280E-11 2.379E-17 5.079E-09
 
  At SCF step   14       vres2   =  5.08E-09 < tolvrs=  1.00E-08 =>converged.
 ================================================================================
@@ -3092,6 +3088,12 @@ P          mk1mem6        256
         optdriver6          1
         pawecutdg      9.00000000E+00 Hartree
          pawxcdev           0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          1
+           prtpot5          1
+           prtpot6          1
             prtwf1          1
             prtwf2          1
             prtwf3          0
@@ -3104,8 +3106,6 @@ P          mk1mem6        256
               qpt4     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt5     2.50000000E-01  0.00000000E+00  0.00000000E+00
               qpt6    -2.50000000E-01  5.00000000E-01  2.50000000E-01
-          rfatpol           1       2
-            rfdir           1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -3323,10 +3323,10 @@ P          mk1mem6        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        288.0  wall=        289.2
+- Proc.   0 individual time (sec): cpu=        250.2  wall=        251.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  22 WARNINGs and 120 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        288.0  wall=        289.2
+.Delivered  27 WARNINGs and  40 COMMENTs to log file.
++Overall time at end (sec) : cpu=        250.2  wall=        251.2

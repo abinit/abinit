@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -123,12 +119,6 @@ contains
 !! Warning: this routine can be called with nkpt=0 (in which
 !! case it returns the true value of nkpt), which can lead
 !! to strange bugs in the debugging procedure, if one tries to print wtk or istwfk, in this case!
-!!
-!! PARENTS
-!!      m_invars1,m_invars2
-!!
-!! CHILDREN
-!!      getkgrid,intagm,metric,symfind,symlatt
 !!
 !! SOURCE
 
@@ -572,12 +562,6 @@ end subroutine inkpts
 !!  kptrlatt(3,3)=q-point lattice specification (if kptopt/=0)
 !!  wtqc=weigth of the eventual current q point
 !!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
-!!      getkgrid,intagm,metric,symfind,symlatt
-!!
 !! SOURCE
 
 subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spinat,string,typat,vacuum,xred,qptrlatt)
@@ -713,6 +697,11 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
      end if
    end if
 
+!DEBUG
+!write(std_out,'(a)')' m_inkpts%inqpt : before symlatt '
+!call flush(std_out)
+!ENDDEBUG
+
    ! Re-generate symmetry operations from the lattice and atomic coordinates
    ! This is a fundamental difference with respect to the k point generation.
    tolsym=tol8
@@ -720,11 +709,22 @@ subroutine inqpt(chksymbreak,iout,jdtset,lenstr,msym,natom,qptn,wtqc,rprimd,spin
    ABI_MALLOC(symafm_new,(msym))
    ABI_MALLOC(symrel_new,(3,3,msym))
    ABI_MALLOC(tnons_new,(3,msym))
-   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+   call symlatt(bravais,dev_null,msym,nptsym,ptsymrel,rprimd,tolsym)
    use_inversion=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-   call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym_new,0,0,&
+
+!DEBUG
+!write(std_out,'(a)')' m_inkpts%inqpt : before symfind '
+!call flush(std_out)
+!ENDDEBUG
+
+   call symfind(gprimd,msym,natom,nptsym,1,nsym_new,0,&
     ptsymrel,spinat,symafm_new,symrel_new,tnons_new,tolsym,typat,use_inversion,xred)
+
+!DEBUG
+!write(std_out,'(a)')' m_inkpts%inqpt : after symfind '
+!call flush(std_out)
+!ENDDEBUG
 
    ! Prepare to compute the q-point grid in the ZB or IZB
    iscf_fake=0 ! Do not need the weights

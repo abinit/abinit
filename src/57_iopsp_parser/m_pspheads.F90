@@ -3,17 +3,14 @@
 !! m_pspheads
 !!
 !! FUNCTION
-!!  Functions used to read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
+!!  Functions used to read the pseudopotential header of each psp file,
+!!  in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -28,26 +25,26 @@ MODULE m_pspheads
  use defs_basis
  use m_abicore
  use m_errors
+ use m_xmpi
+ use m_atomdata
  use m_hash_md5
  use m_psxml2ab
 #if defined HAVE_LIBPSML
  use m_psml
 #endif
 #if defined HAVE_BIGDFT
-  use BigDFT_API, only: atomic_info,psp_from_data
+ use BigDFT_API, only: atomic_info, psp_from_data
 #endif
- use m_atomdata
- use pseudo_pwscf ! pwscf module with all data explicit!
- use funct_pwscf  ! pwscf module for naming xc functionals
- use m_xmpi
 
  use defs_datatypes, only : pspheader_type
- use m_time,     only : timab
- use m_io_tools, only : open_file
- use m_fstrings, only : basename, lstrip, sjoin, startswith, atoi
- use m_read_upf_pwscf,  only : read_pseudo
- use m_pawpsp,   only : pawpsp_read_header_xml,pawpsp_read_pawheader
- use m_pawxmlps, only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
+ use m_time,         only : timab
+ use m_io_tools,     only : open_file
+ use m_numeric_tools,only : simpson
+ use m_fstrings,     only : basename, lstrip, sjoin, startswith, atoi, itoa, ftoa, toupper, next_token
+ use m_pawpsp,       only : pawpsp_read_header_xml,pawpsp_read_pawheader
+ use m_pawxmlps,     only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
+ use pseudo_types,   only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
+ use read_upf_new_module, only : read_upf_new
 
  implicit none
 
@@ -57,7 +54,10 @@ MODULE m_pspheads
  public :: inpspheads      ! Initialize pspheads(1:npsp).
  public :: pspheads_comm   ! Communicate pspheads to all processors
  public :: pawpsxml2ab
- public :: upfxc2abi       ! UPF XcC to Abinit pspxc
+
+ public :: upf2_jl2srso
+ public :: upfxc2abi       ! UPF XcC to Abinit pspxc (DEPRECATED. Only used for UPF1)
+ public :: upfdft_to_ixc   ! UPF2 dft to Abinit pspxc.
 
 contains
 !!***
@@ -76,12 +76,6 @@ contains
 !!  pspheads(npsp)=<type pspheader_type>=all the important information from the
 !!  pseudopotential file headers, as well as the psp file names
 !!  ecut_tmp(3,2,npsp)= possible ecut values as read in psp files
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -102,8 +96,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
  integer,parameter :: n1xccc_default=2501
  integer :: extension_switch
  integer :: idum,ii,ilmax,ipsp,lang,lmax,mmax,mpsang,n1xccc,nmesh
- integer :: pspcod,pspso,test_paw,usexml,unt,useupf !,pspxc
- real(dp) :: al,e990,e999,fchrg,qchrg,r1,rchrg,rr ! ,rp,rs
+ integer :: pspcod,pspso,test_paw,usexml,unt,useupf
+ real(dp) :: al,e990,e999,fchrg,qchrg,r1,rchrg,rr
  character(len=3) :: testxc
  character(len=500) :: msg,errmsg
  character(len=70) :: testxml
@@ -154,43 +148,42 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      usexml = 0
    end if
 
+   ! Check if pseudopotential file is a QE UPF2 file
+   ! "<UPF version="2.0.1">
+   useupf = 0
    if (testxml(1:4) == '<UPF') then
-     ! Make sure this is not UPF version >= 2
-     ! "<UPF version="2.0.1">
      ii = index(testxml, '"')
      if (ii /= 0) then
-       if (atoi(testxml(ii+1:ii+1)) >= 2) then
-         ABI_ERROR(sjoin("UPF >= 2 is not supported by Abinit. Use psp8 or psml format.", ch10, "Path:", filnam(ipsp)))
-       end if
+       useupf = atoi(testxml(ii+1:ii+1))
      else
-       ABI_ERROR(sjoin("Cannot find version attributed in UPF file:", filnam(ipsp)))
+       ABI_ERROR(sjoin("Cannot find version attribute in UPF2 file:", filnam(ipsp)))
      end if
    end if
 
    close(unit=unt, err=10, iomsg=errmsg)
 
-   ! Check if pseudopotential file is a Q-espresso UPF1 file
-   useupf = 0
-   if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
-     ABI_ERROR(msg)
-   end if
+   ! Check if pseudopotential file is a QE UPF1 file
+   if (useupf == 0) then
+     if (open_file(filnam(ipsp), msg, newunit=unt, form="formatted", status="old") /= 0) then
+       ABI_ERROR(msg)
+     end if
 
-   rewind(unit=unt, err=10, iomsg=errmsg)
-   read(unt,*,err=10,iomsg=errmsg) testxml ! just a string, no relation to xml.
-   if (testxml(1:9)=='<PP_INFO>') then
-     useupf = 1
-   else
-     useupf = 0
+     rewind(unit=unt, err=10, iomsg=errmsg)
+     read(unt,*,err=10,iomsg=errmsg) testxml ! just a string, no relation to xml.
+     if (testxml(1:9)=='<PP_INFO>') then
+       useupf = 1
+     else
+       useupf = 0
+     end if
+     close(unit=unt,err=10,iomsg=errmsg)
    end if
-   close(unit=unt,err=10,iomsg=errmsg)
 
    ! Read the header of the pseudopotential file
-   if (usexml /= 1 .and. useupf /= 1) then
+   if (usexml /= 1 .and. useupf == 0) then
      ! Open the psp file and read a normal abinit style header
      if (open_file(filnam(ipsp), msg, newunit=unt, form='formatted', status='old') /= 0) then
        ABI_ERROR(msg)
      end if
-
      rewind (unit=unt, err=10, iomsg=errmsg)
 
      ! Read the three first lines
@@ -234,32 +227,41 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
 
      write(msg,'(4a)')  &
        '- inpspheads : Reading pseudopotential header in XML form from ',ch10,&
-&      '-   ',trim(filnam(ipsp))
+       '-   ',trim(filnam(ipsp))
      call wrtout([std_out, ab_out], msg)
 
      call pawpsxml2ab(filnam(ipsp),ecut_tmp(:,:,ipsp), pspheads(ipsp),1)
      pspcod=17; pspheads(ipsp)%pspcod=pspcod
 
-   else if (useupf == 1) then
-     pspheads(ipsp)%pspcod = 11
-
+   else if (useupf > 0) then
      pspheads(ipsp)%xccc  = n1xccc_default ! will be set to 0 if no nlcc
-     ! call upfoctheader2abi (filnam(ipsp),  &
-     call upfheader2abi(filnam(ipsp), &
-       pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, &
-       nproj, nprojso)
+
+     if (useupf == 1) then
+       pspheads(ipsp)%pspcod = 11
+       call upf1_to_psphead(filnam(ipsp), pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, &
+         pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, nproj, nprojso)
+
+       ! FIXME: generalize for SO pseudos
+       pspheads(ipsp)%pspso = 0
+
+     else
+       ! UPF2 format
+       pspheads(ipsp)%pspcod = 12
+       call upf2_to_psphead(filnam(ipsp), pspheads(ipsp)%znuclpsp, pspheads(ipsp)%zionpsp, pspheads(ipsp)%pspxc, &
+         pspheads(ipsp)%lmax, pspheads(ipsp)%xccc, nproj, nprojso)
+
+       pspheads(ipsp)%pspso = merge(2, 0, any(nprojso > 0))
+     end if
 
      pspcod = pspheads(ipsp)%pspcod
      lmax   = pspheads(ipsp)%lmax
-     ! FIXME : generalize for SO pseudos
-     pspheads(ipsp)%pspso = 0
    end if
 
-   !write(std_out,*) pspheads(ipsp)%znuclpsp
-   !write(std_out,*) pspheads(ipsp)%zionpsp
-   !write(std_out,*) pspheads(ipsp)%pspcod
-   !write(std_out,*) pspheads(ipsp)%pspxc
-   !write(std_out,*) pspheads(ipsp)%lmax
+   !write(std_out,*) "pspheads(ipsp)%znuclpsp", pspheads(ipsp)%znuclpsp
+   !write(std_out,*) "pspheads(ipsp)%zionpsp",  pspheads(ipsp)%zionpsp
+   !write(std_out,*) "pspheads(ipsp)%pspcod",   pspheads(ipsp)%pspcod
+   !write(std_out,*) "pspheads(ipsp)%pspxc",    pspheads(ipsp)%pspxc
+   !write(std_out,*) "pspheads(ipsp)%lmax",     pspheads(ipsp)%lmax
 
    ! Initialize nproj, nprojso, pspso, as well as xccc, for each type of psp
    pspheads(ipsp)%GTHradii = zero
@@ -469,13 +471,13 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
        end if
      end do
 
-   else if (pspcod == 11.or.pspcod == 17) then
+   else if (any(pspcod == [11, 12, 17])) then
      ! already done above
 
    else
      write(msg, '(a,i0,4a)' )&
        'The pseudopotential code (pspcod) read from file is ',pspcod,ch10,&
-       'This value is not allowed (should be between 1 and 10). ',ch10,&
+       'This value is not allowed.',ch10,&
        'Action: use a correct pseudopotential file.'
      ABI_ERROR(msg)
    end if ! pspcod
@@ -485,10 +487,8 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
      pspheads(ipsp)%nproj(0:3)=nproj(0:3)
      pspheads(ipsp)%nprojso(1:3)=nprojso(1:3)
    end if
-   ! write(msg,'(a,10i6)') 'nproj = ', pspheads(ipsp)%nproj(:)
-   ! call wrtout(std_out,msg,'PERS')
-   ! write(msg,'(a,10i6)') 'nprojso = ', pspheads(ipsp)%nprojso(:)
-   ! call wrtout(std_out,msg,'PERS')
+   !write(std_out,'(a,*(i0,1x))') 'nproj = ', pspheads(ipsp)%nproj(:)
+   !write(std_out,'(a,*(i0,1x))') 'nprojso = ', pspheads(ipsp)%nprojso(:)
 
    close(unt)
 
@@ -497,8 +497,6 @@ subroutine inpspheads(filnam, npsp, pspheads, ecut_tmp)
  end do ! ipsp=1,npsp
 
  ! Note that mpsang is the max of 1+lmax, with minimal value 1 (even for local psps, at present)
- ! mpsang=max(maxval(pspheads(1:npsp)%lmax)+1,1) ! Likely troubles with HP compiler
- ! n1xccc=maxval(pspheads(1:npsp)%xccc)
  mpsang=1
  n1xccc=pspheads(1)%xccc
  do ii=1,npsp
@@ -546,12 +544,6 @@ end subroutine inpspheads
 !!  pspheads(npsp)=<type pspheader_type>=all the important information from the
 !!   pseudopotential file headers, as well as the psp file names. On one processor at input,
 !!   on all processors at output
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
 !!
 !! SOURCE
 
@@ -657,7 +649,7 @@ subroutine pspheads_comm(npsp,pspheads,test_paw)
  pspheads(1:npsp)%GTHradii(4) = list_dpr(1+6*npsp:7*npsp)
  ABI_FREE(list_dpr)
 
- ! Broadcast additional integers for PAW psps (testpaw was spread, previously)
+ ! Broadcast additional integers for PAW psps (testpaw was sent, previously)
  if (test_paw==1) then
    ABI_MALLOC(list_int,(6*npsp))
    list_int(1       :  npsp)=pspheads(1:npsp)%pawheader%basis_size
@@ -718,15 +710,9 @@ end subroutine pspheads_comm
 !! OUTPUT
 !! pspheads data structure is filled
 !!
-!! PARENTS
-!!      m_pspheads,m_pspini
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
-!!
 !! SOURCE
 
-subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
+subroutine pawpsxml2ab(filnam, ecut_tmp, pspheads, option)
 
 !Arguments ------------------------------------
 !scalars
@@ -737,12 +723,9 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
  real(dp),intent(inout) :: ecut_tmp(3,2)
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,il,lloc,lmax,pspcod,pspxc
  real(dp) :: r2well,zionpsp,znuclpsp
-! character(len=100) :: xclibxc
-! character(len=500) :: msg
-!arrays
+! character(len=100) :: xclibxc, msg
 
 ! *********************************************************************
 
@@ -784,17 +767,17 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 end subroutine pawpsxml2ab
 !!***
 
-!!****f* m_pspheads/upfheader2abi
+!!****f* m_pspheads/upf1_to_psphead
 !! NAME
-!! upfheader2abi
+!! upf1_to_psphead
 !!
 !! FUNCTION
 !!  This routine wraps a call to a PWSCF module, which reads in
-!!  a UPF (PWSCF / Espresso) format pseudopotential, then transfers
+!!  a UPF1 (PWSCF / Espresso) format pseudopotential, then transfers
 !!  data for the HEADER of abinit psps only!
 !!
 !! INPUTS
-!!  filpsp = name of file with UPF data
+!!  filpsp = name of file with UPF1 data
 !!
 !! OUTPUT
 !!  pspxc = index of xc functional for this pseudo
@@ -805,42 +788,40 @@ end subroutine pawpsxml2ab
 !!  nproj_l= number of projectors for each channel
 !!  nprojso_l= number of projectors for each channel for SO correction projectors
 !!
-!! PARENTS
-!!      m_pspheads
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
-!!
 !! SOURCE
 
-subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
+subroutine upf1_to_psphead(filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, nprojso_l)
+
+ use m_read_upf_pwscf,  only : read_pseudo
+ use pseudo_pwscf ! pwscf module with all data explicit!
 
 !Arguments -------------------------------
-  character(len=fnlen), intent(in) :: filpsp
-  integer, intent(inout) :: n1xccc
-  integer, intent(out) :: pspxc, lmax_
-  real(dp), intent(out) :: znucl, zion
-  !arrays
-  integer, intent(out) :: nproj_l(0:3)
-  integer, intent(out) :: nprojso_l(1:3)
+ character(len=fnlen), intent(in) :: filpsp
+ integer,intent(inout) :: n1xccc
+ integer,intent(out) :: pspxc, lmax_
+ real(dp),intent(out) :: znucl, zion
+!arrays
+ integer,intent(out) :: nproj_l(0:3)
+ integer,intent(out) :: nprojso_l(1:3)
 
 !Local variables -------------------------
-  integer :: iproj, ll, iunit
-  character(len=500) :: msg
-  type(atomdata_t) :: atom
+ integer :: iproj, ll, iunit
+ character(len=500) :: msg
+ type(atomdata_t) :: atom
 
 ! *********************************************************************
 
-!call pwscf routine for reading in UPF
  if (open_file(filpsp, msg, newunit=iunit, status='old',form='formatted') /= 0) then
    ABI_ERROR(msg)
  end if
 
-!read in psp data to static data in pseudo module, for ipsx == 1
+ ! read in psp data to static data in pseudo module, for ipsx == 1
  call read_pseudo(1,iunit)
  close (iunit)
 
-!copy over to abinit internal arrays and vars
+ ! copy over to abinit internal arrays and vars
+ ! FIXME: The API is broken. It does not recognize PBEsol
+ ! should use upfdft_to_ixc
  call upfxc2abi(dft(1), pspxc)
  lmax_ = lmax(1)
  call atomdata_from_symbol(atom,psd(1))
@@ -854,13 +835,239 @@ subroutine upfheader2abi (filpsp, znucl, zion, pspxc, lmax_, n1xccc, nproj_l, np
  end do
 
  nprojso_l = 0 !FIXME deal with so
-!do iproj = 1, nbeta(1)
-!nprojso_l(ll+1) = nprojso_l(ll+1) + 1
-!end do
+ !do iproj = 1, nbeta(1)
+ !nprojso_l(ll+1) = nprojso_l(ll+1) + 1
+ !end do
 
  if (.not. nlcc(1)) n1xccc = 0
 
-end subroutine upfheader2abi
+end subroutine upf1_to_psphead
+!!***
+
+!!****f* m_pspheads/upf2_to_psphead
+!! NAME
+!! upf2_to_psphead
+!!
+!! FUNCTION
+!!  This routine wraps a call to a PWSCF module, which reads in
+!!  a UPF2 (PWSCF / Espresso) format pseudopotential, then transfers
+!!  data for the HEADER of abinit psps only!
+!!
+!! INPUTS
+!!  filpsp = name of file with UPF1 data
+!!
+!! OUTPUT
+!!  pspxc = index of xc functional for this pseudo
+!!  lmax_ = maximal angular momentum
+!!  znucl = charge of species nucleus
+!!  zion = valence charge
+!!  n1xccc = default number of points. Set to 0 if no nlcc is present
+!!  nproj_l= number of projectors for each channel
+!!  nprojso_l= number of projectors for each channel for SO correction projectors
+!!
+!! SOURCE
+
+subroutine upf2_to_psphead(filpsp, znucl, zion, pspxc, lmax, n1xccc, nproj_l, nprojso_l)
+
+!Arguments -------------------------------
+ character(len=fnlen), intent(in) :: filpsp
+ integer,intent(inout) :: n1xccc
+ integer,intent(out) :: pspxc, lmax
+ real(dp),intent(out) :: znucl, zion
+!arrays
+ integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
+
+!Local variables -------------------------
+ integer :: ierr , iprj, ll, mmax, irad
+ real(dp) :: amesh, damesh
+ character(len=500) :: msg
+ logical :: linear_mesh
+ type(pseudo_upf) :: upf
+ type(atomdata_t) :: atom
+! arrays
+ real(dp),allocatable :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
+
+! *********************************************************************
+
+ ! See also https://github.com/QEF/qeschemas/blob/master/UPF/qe_pp-0.99.xsd
+ call read_upf_new(filpsp, upf, ierr)
+ ABI_CHECK(ierr == 0, sjoin("read_upf_new returned ierr:", itoa(ierr)))
+
+ call atomdata_from_symbol(atom, upf%psd)
+ znucl = atom%znucl
+ zion = upf%zp
+ lmax = upf%lmax
+ mmax = upf%mesh
+
+ ! Consistency check
+ ABI_CHECK(upf%typ == "NC", sjoin("Only NC pseudos in UPF2 format are supported while type is:", upf%typ))
+ ABI_CHECK(upfdft_to_ixc(upf%dft, pspxc, msg) == 0, msg)
+ if (.not. upf%nlcc) n1xccc = 0
+
+ ! Check that rad grid is linear starting at zero
+ linear_mesh = .True.
+ amesh = upf%r(2) - upf%r(1); damesh = zero
+ do irad=2,mmax-1
+   damesh = max(damesh, abs(upf%r(irad)+amesh-upf%r(irad+1)))
+ end do
+ linear_mesh = damesh < tol8
+
+ if (.not. linear_mesh .or. abs(upf%r(1)) > tol16) then
+   write(msg,'(3a)')&
+   'Assuming pseudized valence charge given on linear radial mesh starting at zero.',ch10,&
+   'Action: check your pseudopotential file.'
+   ABI_ERROR(msg)
+ end if
+
+ nproj_l = 0; nprojso_l = 0
+
+ if (.not. upf%has_so) then
+   ! Scalar case
+   do iprj=1,upf%nbeta
+     ll = upf%lll(iprj)
+     nproj_l(ll) = nproj_l(ll) + 1
+   end do
+
+ else
+   ! Pseudo in j = l + s representation.
+   call upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
+
+   ABI_FREE(vsr)
+   ABI_FREE(esr)
+   ABI_FREE(vso)
+   ABI_FREE(eso)
+ end if
+
+ call deallocate_pseudo_upf(upf)
+
+end subroutine upf2_to_psphead
+!!***
+
+!!****f* m_pspheads/upf2_jl2srso
+!! NAME
+!! upf2_jl2srso
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine upf2_jl2srso(upf, nproj_l, nprojso_l, vsr, esr, vso, eso)
+
+!Arguments -------------------------------
+ type(pseudo_upf),intent(in) :: upf
+!arrays
+ integer,intent(out) :: nproj_l(0:3), nprojso_l(1:3)
+ real(dp),allocatable,intent(out) :: vsr(:,:,:), esr(:,:), vso(:,:,:), eso(:,:)
+
+!Local variables -------------------------
+ integer :: iprj, ii, ll, l1, il, ik, lmax, mmax, mxprj
+ real(dp) :: jtot, eprmin !eps_srso,
+ !character(len=500) :: msg
+! arrays
+integer :: irc6(6),nproj6(6), done_ilk(6,2)
+ real(dp),allocatable :: vkb(:,:,:,:), evkb(:,:,:)
+
+! *********************************************************************
+
+ lmax = upf%lmax; mmax = upf%mesh
+ nproj_l = 0; nprojso_l = 0
+
+ ! Pseudo in j = l + s representation.
+ irc6 = zero; nproj6 = zero
+ do iprj=1,upf%nbeta
+   ll = upf%lll(iprj)
+   nproj6(ll+1) = nproj6(ll+1) + 1
+   !irc6(ll+1) = max(upf%kbeta(iprj), irc6(ll+1))
+   irc6(ll+1) = mmax
+ end do
+
+ ! Divide by two for l > 0 as this is sr_so_r expects.
+ nproj6(2:) = nproj6(2:) / 2
+ mxprj = maxval(nproj6)
+
+ ABI_MALLOC(vkb, (mmax,mxprj,4,2))
+ ABI_MALLOC(evkb, (mxprj,4,2))
+ ABI_MALLOC(vsr, (mmax,2*mxprj,4))
+ ABI_MALLOC(esr, (2*mxprj,4))
+ ABI_MALLOC(vso, (mmax,2*mxprj,4))
+ ABI_MALLOC(eso, (2*mxprj,4))
+
+ done_ilk = 0
+ do iprj=1,upf%nbeta
+   jtot = upf%jjj(iprj)
+   ll = upf%lll(iprj)
+   il = ll + 1
+   if (ll == 0) then
+     ik = 1
+   else
+     ! l+1/2 --> ik 1, l-1/2 --> ik 2
+     if (abs(jtot - (ll + half)) < tol6) then
+       ik = 1
+     else if (abs(jtot - (ll - half)) < tol6) then
+       ik = 2
+     else
+       ABI_ERROR(sjoin("Cannot detect ik index from jtot:", ftoa(jtot)))
+     end if
+   end if
+
+   done_ilk(il, ik) = done_ilk(il, ik) + 1
+   ii = done_ilk(il, ik)
+   evkb(ii,il,ik) = upf%dion(iprj,iprj) * half  ! convert from Rydberg to Ha
+   vkb(:,ii,il,ik) = upf%beta(:,iprj)
+ end do
+
+ call sr_so_r(lmax, irc6, nproj6, upf%r, mmax, mxprj, evkb, vkb, vsr, esr, vso, eso)
+
+ ! MG: This is done in oncvpsp 3.3 but not in oncvpsp4
+ ! drop sr, so orthonormal projectors with neglibible coefficients
+ ! modify cutoff if desired
+
+ eprmin=2.0d-5
+ write(std_out,'(/a,1p,e10.2,a)') 'Orthonormal projectors with coefficients <', &
+     eprmin,' Ha will be dropped'
+
+ do l1=1,lmax+1
+  if(abs(esr(3,l1))<eprmin) esr(3,l1)=0.0d0
+  if(abs(esr(4,l1))<eprmin) esr(4,l1)=0.0d0
+  if(abs(eso(3,l1))<eprmin) eso(3,l1)=0.0d0
+  if(abs(eso(4,l1))<eprmin) eso(4,l1)=0.0d0
+ end do
+
+#if 0
+ ! MG: This is done in oncvpsp 4 but not in oncvpsp 3.3
+ ! set smallest components to zero (following the approach used in oncvpsp)
+ eps_srso=1.0d-3
+ do l1=1,lmax+1
+   if (nproj6(l1) > 0) then
+     do iprj=2,2*nproj6(l1)
+       if (abs(esr(iprj,l1)) < eps_srso*abs(esr(1,l1))) esr(iprj,l1) = 0.0d0
+       if (l1 == 1) cycle
+       if (abs(eso(iprj,l1)) < eps_srso*abs(eso(1,l1))) eso(iprj,l1) = 0.0d0
+     end do
+   end if
+ end do
+#endif
+
+ ! set up projector number for sr_so calculations based on non-zero coefficients
+ ! note that energies and projectors have been sorted sr_so_r
+ ! so the relevant projectors are packed in the first positions.
+ do l1=1,lmax+1
+   ll = l1 - 1
+   do ii=1,2*nproj6(l1)
+    if (abs(esr(ii,l1)) > 0.0d0) nproj_l(ll) = nproj_l(ll) + 1
+    if (abs(eso(ii,l1)) > 0.0d0) nprojso_l(ll) = nprojso_l(ll) + 1
+   end do
+   !write(std_out, '(a,3(i0,1x))')' ll, nproj_l, nprojso_l',ll, nproj_l(ll), nprojso_l(ll)
+ end do
+
+ ABI_FREE(vkb)
+ ABI_FREE(evkb)
+
+end subroutine upf2_jl2srso
 !!***
 
 !!****f* m_pspheads/upfxc2abi
@@ -883,23 +1090,19 @@ end subroutine upfheader2abi
 !!   Could be included in separate module, eg read_upf_pwscf or funct_pwscf
 !!   Left without defs_basis or calls to abinit routines ON PURPOSE
 !!
-!! PARENTS
-!!      m_pspheads,m_upf2abinit
-!!
-!! CHILDREN
-!!      set_dft_from_indices,set_dft_from_name
-!!
 !! SOURCE
 
 subroutine upfxc2abi(dft, pspxc)
 
+ use funct_pwscf  ! pwscf module for naming xc functionals
+
 !Arguments -------------------------------
-  character(len=20), intent(in) :: dft
-  integer, intent(out) :: pspxc
+ character(len=*), intent(in) :: dft
+ integer, intent(out) :: pspxc
 
 !Local variables -------------------------
-  integer :: iexch,icorr,igcx,igcc
-  integer :: totalindex, offset
+ integer :: iexch,icorr,igcx,igcc
+ integer :: totalindex, offset
 
 ! *********************************************************************
 !extract from char*20 :: dft(:)
@@ -915,10 +1118,12 @@ subroutine upfxc2abi(dft, pspxc)
    igcx = get_igcx()
    igcc = get_igcc()
  end if
-!reset dft string to avoid stray spaces
+
+ !reset dft string to avoid stray spaces
  call set_dft_from_indices(iexch,icorr,igcx,igcc)
  write(std_out,'(a)') ' upf2abinit: XC string from pseudopotential is :'
  write(std_out,'(3a)') '>', dft, '<'
+ ABI_WARNING("upfxc2abi is not guaranteed to return the right ixc from QE XC string e.g. PBEsol. Please crosscheck!")
 
  offset = 100
  totalindex = offset*offset*offset*iexch + offset*offset*icorr + offset*igcx + igcc
@@ -964,6 +1169,442 @@ subroutine upfxc2abi(dft, pspxc)
 
 end subroutine upfxc2abi
 !!***
+
+!!****f* m_pspheads/updft_to_ixc
+!! NAME
+!! updft_to_ixc
+!!
+!! FUNCTION
+!!  Returns the abinit internal `ixc` from `dft` string with XC functional in QE format.
+!!
+!! SOURCE
+
+integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: dft
+ character(len=*),intent(out) :: msg
+ integer,intent(out) :: ixc
+
+!Local variables-------------------------------
+ integer :: start !, ii
+ character(len=500) :: x_name, c_name, gcx_name, gcc_name
+
+!*************************************************************************
+
+ ! This list taken from oncvpsp/src/upfout.f90
+ ! It should be OK as long as the UPF2 NC pseudos are generated with oncvpsp
+ ! but it does not cover all QE possibilities.
+ ierr = 0; msg = ""
+ select case (dft)
+ case ("PZ")
+   ixc = -001009
+ case ("PBE")
+   ixc = -101130 !; ixc = 11
+ case ("PW91")
+   ixc = -109134
+ case ("PBESOL")
+   ixc = -116133
+ case ("REVPBE")
+   ixc = -102130
+ case ("BP")
+   ixc = -106132
+ case ("BLYP")
+   ixc = -106131
+ case ("WC")
+   ixc = -118130
+ case ('SLA  PW   NOGX NOGC')  ! string produced by oncvpsp3
+   ixc = -1012
+ case default
+   ierr = 1
+ end select
+
+ ! Extract substrings with
+ !  1) exchange
+ !  2) correlation
+ !  3) gradient correction, exchange
+ !  4) gradient correction, correlation
+ if (ierr == 1) then
+   ierr = 0; start = 1
+   ABI_CHECK(next_token(dft, start, x_name) == 0 , "Error reading x_name")
+   ABI_CHECK(next_token(dft, start, c_name) == 0 , "Error reading c_name")
+   ABI_CHECK(next_token(dft, start, gcx_name) == 0 , "Error reading gcx_name")
+   ABI_CHECK(next_token(dft, start, gcc_name) == 0 , "Error reading gcc_name")
+   !print *, "dft: `", trim(dft), "`"
+   !print *, trim(x_name), ", " trim(c_name), ", ", trim(gcx_name), ", ", trim(gcc_name)
+
+   if (x_name == "SLA" .and. c_name == "PW") then
+     if (gcx_name == "NOGX" .and. gcc_name == "NOGV") ixc = -1012
+   else
+     ierr = 1
+   end if
+ end if
+
+ if (ierr == 1) then
+   write(msg, "(5a)") &
+     "Cannot find ABINIT ixc value corresponding to QE dft string: `", trim(dft), "`", ch10, &
+     "Please update mapping in m_pspheads/upfdft_to_ixc."
+ end if
+
+end function upfdft_to_ixc
+!!***
+
+! Copyright (c) 1989-2019 by D. R. Hamann, Mat-Sim Research LLC and Rutgers
+! University
+!
+!
+! This program is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+ subroutine sr_so_r(lmax,irc,nproj,rr,mmax,mxprj,evkb,vkb, &
+&                   vsr,esr,vso,eso)
+
+! reformulates non-local potentials based on j = l +/- 1/2 to scalar-
+! relativistic and L dot S projectors
+! uses relationship <L dot S> = (J^2 - L^2 - S^2)/2
+! so L dot S = +/- l/2 for j = l +/- 1/2
+
+!lmax  maximum angular momentum
+!irc  core radii indices
+!nproj  number of projectors for each l
+!rr  log radial grid
+!mmax  size of radial grid
+!mmax  dimension of log grid
+!mxprj  dimension of number of projectors
+!vkb  vkb projectors
+!evkb  coefficients of BKB projectors
+!vsr  normalized scalar projectors
+!esr  energy  coefficients of vscal
+!vso  normalized spin-orbig projectors
+!esol  energy  coefficients of vso
+
+ !implicit none
+ !integer, parameter :: dp=kind(1.0d0)
+
+!Input variables
+ integer,intent(in) :: lmax,mmax,mxprj
+ integer,intent(in) :: irc(6),nproj(6)
+ real(dp),intent(in) :: rr(mmax),vkb(mmax,mxprj,4,2),evkb(mxprj,4,2)
+
+!Output variables
+ real(dp),intent(out) :: vsr(mmax,2*mxprj,4),esr(2*mxprj,4)
+ real(dp),intent(out) :: vso(mmax,2*mxprj,4),eso(2*mxprj,4)
+
+!Local variables
+ integer :: ii,jj,kk,ik1,ik2,ip1,ip2,ipk,ll,l1,info,nn
+ real(dp) :: amesh
+ real(dp) :: apk,tt
+ real(dp) :: sovl(2*mxprj,2*mxprj),sovlev(2*mxprj),ascl(2*mxprj,2*mxprj),aso(2*mxprj,2*mxprj)
+ real(dp) :: asclst(2*mxprj,2*mxprj),wsclst(2*mxprj),asost(2*mxprj,2*mxprj),wsost(2*mxprj)
+ real(dp) :: asclt(2*mxprj,2*mxprj),asot(2*mxprj,2*mxprj)
+ real(dp) :: sphalf(2*mxprj,2*mxprj),smhalf(2*mxprj,2*mxprj)
+ real(dp) :: fscl(mxprj),fso(mxprj),work(10*mxprj)
+ real(dp), allocatable :: vkbt(:,:),vkbst(:,:)
+ logical :: sorted
+ character(len=500) :: msg
+
+ ABI_UNUSED(irc(1))
+
+ ! Check that rad grid is linear starting at zero
+ !linear_mesh = .True.
+ amesh = rr(2) - rr(1) !; damesh = zero
+ !do irad=2,mmax-1
+ !  damesh = max(damesh, abs(upf%r(irad)+amesh-upf%r(irad+1)))
+ !end do
+ !linear_mesh = damesh < tol8
+
+ !if (.not. linear_mesh .or. abs(upf%r(1)) > tol16) then
+ !  write(msg,'(3a)')&
+ !  'Assuming pseudized valence charge given on linear radial mesh starting at zero.',ch10,&
+ !  'Action: check your pseudopotential file.'
+ !  ABI_ERROR(msg)
+ !end if
+
+ !allocate(vkbt(mmax,2*mxprj),vkbst(mmax,2*mxprj))
+ ABI_MALLOC(vkbt, (mmax,2*mxprj))
+ ABI_MALLOC(vkbst, (mmax,2*mxprj))
+
+ do l1=1,lmax+1
+  ll=l1-1
+
+  if(ll==0) then
+   vsr(:,:,l1)=0.0d0
+   vso(:,:,l1)=0.0d0
+   esr(:,l1)=0.0d0
+   eso(:,l1)=0.0d0
+   if(nproj(l1)>=1) then
+    do ii=1,nproj(l1)
+     vsr(:,ii,l1)=vkb(:,ii,l1,1)
+     esr(ii,l1)=evkb(ii,l1,1)
+    end do
+   end if
+   cycle
+  end if
+
+  nn=2*nproj(l1)
+
+  fscl(1)=(ll+1)/dble(2*ll+1)
+  fscl(2)=ll/dble(2*ll+1)
+  fso(1)=2/dble(2*ll+1)
+  fso(2)=-2/dble(2*ll+1)
+
+! construct overlap matrix and diagonal energy matrices
+
+   sovl(:,:)=0.0d0
+   ascl(:,:)=0.0d0
+   aso(:,:)=0.0d0
+   vkbt(:,:)=0.0d0
+
+   do ik1=1,2
+    do ip1=1,nproj(l1)
+     ii=ip1+(ik1-1)*nproj(l1)
+
+     ascl(ii,ii)=fscl(ik1)*evkb(ip1,l1,ik1)
+     aso(ii,ii)=fso(ik1)*evkb(ip1,l1,ik1)
+
+     vkbt(:,ii)=vkb(:,ip1,l1,ik1)
+
+     do ik2=1,2
+      do ip2=1,nproj(l1)
+       jj=ip2+(ik2-1)*nproj(l1)
+
+       ! MG: This routine cannot be used as it assumes log mesh.
+       !call vpinteg(vkb(1,ip1,l1,ik1),vkb(1,ip2,l1,ik2),irc(l1),2*l1, &
+       !             sovl(ii,jj),rr)
+
+       ! So we replace it with simpson integration
+       sovl(ii,jj) = simpson(amesh, vkb(:,ip1,l1,ik1) * vkb(:,ip2,l1,ik2))
+      end do
+     end do
+    end do
+   end do
+
+   call dsyev( 'V', 'U', nn, sovl, 2*mxprj, sovlev, work, 10*mxprj, info )
+
+   if(info .ne. 0) then
+    write(msg,'(a,i4)') 'sr_so_r: S matrix eigenvalue ERROR, info=',info
+    ABI_ERROR(msg)
+   end if
+
+! construct S^(-1/2) AND s^(1/2)
+
+   do jj=1,nn
+    tt=sqrt(sovlev(jj))
+    do ii=1,nn
+     sphalf(ii,jj)=tt*sovl(ii,jj)
+     smhalf(ii,jj)=sovl(ii,jj)/tt
+    end do
+   end do
+
+! take linear combinations to form orthonormal basis functions
+
+   vkbst(:,:)=0.0d0
+
+   do jj=1,nn
+    do ii=1,nn
+     vkbst(:,jj)=vkbst(:,jj) + smhalf(ii,jj)*vkbt(:,ii)
+    end do
+   end do
+
+! construct A^(-1)* = S^(1/2)^T A^(-1) S^(1/2)
+
+     asclt(:,:)=0.0d0
+     asclst(:,:)=0.0d0
+     asot(:,:)=0.0d0
+     asost(:,:)=0.0d0
+
+     do ii=1,nn
+      do jj=1,nn
+       do kk=1,nn
+        asclt(ii,jj)=asclt(ii,jj)+ascl(ii,kk)*sphalf(kk,jj)
+        asot(ii,jj) =asot(ii,jj) + aso(ii,kk)*sphalf(kk,jj)
+       end do
+      end do
+     end do
+
+     do ii=1,nn
+      do jj=1,nn
+       do kk=1,nn
+        asclst(ii,jj)=asclst(ii,jj)+asclt(kk,jj)*sphalf(kk,ii)
+        asost(ii,jj) =asost(ii,jj) + asot(kk,jj)*sphalf(kk,ii)
+       end do
+      end do
+     end do
+
+! find eigenvalues and eigenvectors of the A* matrices
+
+!      SUBROUTINE DSYEV( JOBZ, UPLO, N, A, LDA, W, WORK, LWORK, INFO )
+
+     call dsyev( 'V', 'U', nn, asclst, 2*mxprj, wsclst, work, 10*mxprj, info )
+
+     if(info .ne. 0) then
+      write(msg,'(a,i4)') 'sr_so_r: A* matrix eigenvalue ERROR, info=',info
+      ABI_ERROR(msg)
+     end if
+
+     call dsyev( 'V', 'U', nn,  asost, 2*mxprj,  wsost, work, 10*mxprj, info )
+
+
+     if(info .ne. 0) then
+      write(msg,'(a,i4)') 'sr_so_r: A* matrix eigenvalue ERROR, info=',info
+      ABI_ERROR(msg)
+     end if
+
+! take linear combinations to form orthonormal projectors
+
+     vsr(:,:,l1)=0.0d0
+     vso(:,:,l1)=0.0d0
+     esr(:,l1)=0.0d0
+     eso(:,l1)=0.0d0
+
+     do ii=1,nn
+      esr(ii,l1)=wsclst(ii)
+      eso(ii,l1)=  wsost(ii)
+      do jj=1,nn
+       vsr(:,ii,l1)=vsr(:,ii,l1) + asclst(jj,ii)*vkbst(:,jj)
+       vso(:,ii,l1)= vso(:,ii,l1) +   asost(jj,ii)*vkbst(:,jj)
+      end do
+     end do
+
+! bubble-sort on coefficient magnitudes for scalar and then s-o
+! (Yes, I know bubble-sort is the least-efficient sorting algorithm.)
+
+     do ii=1,100
+      sorted=.true.
+      do jj=2,nn
+       if(abs(esr(jj-1,l1))<abs(esr(jj,l1))) then
+        tt=esr(jj,l1)
+        vkbt(:,1)=vsr(:,jj,l1)
+        esr(jj,l1)=esr(jj-1,l1)
+        vsr(:,jj,l1)=vsr(:,jj-1,l1)
+        esr(jj-1,l1)=tt
+        vsr(:,jj-1,l1)=vkbt(:,1)
+        sorted=.false.
+       end if
+      end do
+      if(sorted) exit
+     end do
+
+     do ii=1,100
+      sorted=.true.
+      do jj=2,nn
+       if(abs(eso(jj-1,l1))<abs(eso(jj,l1))) then
+        tt=eso(jj,l1)
+        vkbt(:,1)=vso(:,jj,l1)
+        eso(jj,l1)=eso(jj-1,l1)
+        vso(:,jj,l1)=vso(:,jj-1,l1)
+        eso(jj-1,l1)=tt
+        vso(:,jj-1,l1)=vkbt(:,1)
+        sorted=.false.
+       end if
+      end do
+      if(sorted) exit
+     end do
+
+     write(std_out,'(/a,i2)') &
+&         ' Orthonormal scalar projector coefficients, l = ',ll
+     write(std_out,'(1p,6e12.4)') (esr(jj,l1),jj=1,nn)
+     write(std_out,'(/a,i2)') &
+&         ' Orthonormal spin-orbit projector coefficients, l = ',ll
+     write(std_out,'(1p,6e12.4)') (eso(jj,l1),jj=1,nn)
+
+! Set sign of projectors (physically irrelevant) so that they are positive
+! at their peak (needed for compaisons apparently)
+
+     do jj=1,nn
+       apk=0.0d0
+       do ii=1,mmax
+         if(abs(vso(ii,jj,l1))>apk) then
+           apk=abs(vso(ii,jj,l1))
+           ipk=ii
+         end if
+       end do
+       if(vso(ipk,jj,l1)<0.0d0) then
+         vso(:,jj,l1)=-vso(:,jj,l1)
+       end if
+       apk=0.0d0
+       do ii=1,mmax
+         if(abs(vsr(ii,jj,l1))>apk) then
+           apk=abs(vsr(ii,jj,l1))
+           ipk=ii
+         end if
+       end do
+       if(vsr(ipk,jj,l1)<0.0d0) then
+         vsr(:,jj,l1)=-vsr(:,jj,l1)
+       end if
+     end do
+
+ end do ! l1
+
+ ABI_FREE(vkbt)
+ ABI_FREE(vkbst)
+ return
+end subroutine sr_so_r
+!!***
+
+!
+! Copyright (c) 1989-2019 by D. R. Hamann, Mat-Sim Research LLC and Rutgers
+! University
+!
+!
+! This program is free software: you can redistribute it and/or modify
+! it under the terms of the GNU General Public License as published by
+! the Free Software Foundation, either version 3 of the License, or
+! (at your option) any later version.
+!
+! This program is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+! GNU General Public License for more details.
+!
+! You should have received a copy of the GNU General Public License
+! along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+! subroutine vpinteg(gg,hh,nn,mm,ss,rr)
+!
+!! integrals that go into construction of Vanderbilt separable pseudopotential
+!
+!! product of functions gg*hh goes like rr**mm at rr -> 0
+!! integral on usual log mesh from 1 to nn
+!
+!!Input variables
+! integer,intent(in) :: nn,mm
+! real(dp),intent(in) :: gg(nn),hh(nn),rr(nn)
+!
+!!Output variable
+! real(dp),intent(out) :: ss
+!
+!!Local variables
+! real(dp) :: r0,amesh,al
+! integer :: ii
+!
+! al = 0.01d0 * dlog(rr(101)/rr(1))
+! amesh = exp(al)
+!
+! r0=rr(1)/dsqrt(amesh)
+! ss=r0**(mm+1)*(gg(1)*hh(1)/rr(1)**mm)/dfloat(mm+1)
+!
+! do ii = 4, nn - 3
+!   ss =  ss + al*gg(ii)*hh(ii)*rr(ii)
+! end do
+!
+! ss=ss + al*(23.d0*rr(nn-2)*gg(nn-2)*hh(nn-2) &
+!&        + 28.d0*rr(nn-1)*gg(nn-1)*hh(nn-1) &
+!&        +  9.d0*rr(nn  )*gg(nn  )*hh(nn  ))/24.d0
+!
+!
+! return
+! end subroutine vpinteg
 
 end module m_pspheads
 !!***

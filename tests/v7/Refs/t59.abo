@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v7_t58-t59/t59.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t58-t59/t59.abi
 - output file    -> t59.abo
 - root for input  files -> t59i
 - root for output files -> t59o
-
 
  DATASET    7 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -90,9 +89,8 @@ P          mk1mem           8
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           1
+           prtpot           1
               qpt      6.66666667E-03  0.00000000E+00  0.00000000E+00
-          rfatpol           1       2
-            rfdir           1       1       1
            rfphon           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -149,8 +147,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09340
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -179,13 +177,20 @@ meta: {optdriver: 1, rfphon: 1, }
     6)    idir= 3    ipert=   2
 
 ================================================================================
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3354992  3.3354992  G(1)= -0.1499026  0.1499026  0.1499026
  R(2)=  3.3354992  0.0000000  3.3354992  G(2)=  0.1499026 -0.1499026  0.1499026
  R(3)=  3.3354992  3.3354992  0.0000000  G(3)=  0.1499026  0.1499026 -0.1499026
  Unit cell volume ucvol=  7.4218556E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 1 blocks has been read.
 
 ================================================================================
 
@@ -196,7 +201,7 @@ meta: {optdriver: 1, rfphon: 1, }
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1   -2.861672E+00   -1.428774E-09   -1.171177E-08
@@ -931,9 +936,8 @@ P          mk1mem           8
               occ      2.000000  2.000000  2.000000  2.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           1
+           prtpot           1
               qpt      6.66666667E-03  0.00000000E+00  0.00000000E+00
-          rfatpol           1       2
-            rfdir           1       1       1
            rfphon           1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
@@ -955,6 +959,11 @@ P          mk1mem           8
             znucl        6.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -1052,10 +1061,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.3
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          7.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.2  wall=          8.3
+.Delivered   4 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          7.1  wall=          7.2

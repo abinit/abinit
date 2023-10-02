@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! TODO
 !!  Change the name of the datatype: (MPI_|mpi_) is a reserved keyword
 !!  and should not be used in client code!
@@ -91,7 +87,7 @@ MODULE m_mpinfo
  public :: iwrite_fftdatar  ! Select the subset of processors that will write density/potential files.
 
  public :: distrb2          ! Creates the tabs of repartition of processors for sharing the jobs on k-points, spins and bands.
- public :: distrb2_hf       ! Ceate the tabs of repartition for Hartree-Fock calculations.
+ public :: distrb2_hf       ! Creates the tabs of repartition for Hartree-Fock calculations.
 !!***
 
 CONTAINS  !========================================================================================
@@ -120,11 +116,6 @@ CONTAINS  !=====================================================================
 !!
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=All pointer set to null().
-!!
-!! PARENTS
-!!      lapackprof,m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -160,11 +151,6 @@ end subroutine init_mpi_enreg
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=All pointer set to null().
 !!
-!! PARENTS
-!!      m_fft_prof,m_mpinfo
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine nullify_mpi_enreg(MPI_enreg)
@@ -194,17 +180,6 @@ subroutine nullify_mpi_enreg(MPI_enreg)
 !!
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=Datatype gathering information on the parallelism.
-!!
-!! PARENTS
-!!      abinit,conducti,cut3d,fftprof,lapackprof,m_bethe_salpeter,m_cut3d,m_ddk
-!!      m_dfpt_nstwf,m_dvdb,m_eph_driver,m_epjdos,m_fft,m_fft_prof,m_fftcore
-!!      m_fock,m_gsphere,m_gwls_hamiltonian,m_inwffil,m_ioarr,m_ksdiago,m_kxc
-!!      m_mlwfovlp_qp,m_mover_effpot,m_paw_optics,m_pawpwij,m_positron
-!!      m_ppmodel,m_prcref,m_scfcv_core,m_screening,m_screening_driver
-!!      m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfd,m_wfk,m_wfk_analyze,mrgscr
-!!      ujdet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -257,11 +232,6 @@ end subroutine destroy_mpi_enreg
 !!
 !! OUTPUT
 !!  MPI_enreg2<MPI_type>=output mpi_enreg datastructure
-!!
-!! PARENTS
-!!      m_fft_prof,m_fock,m_gwls_hamiltonian,m_inwffil,m_wfd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -431,11 +401,6 @@ end subroutine copy_mpi_enreg
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
 !!
-!! PARENTS
-!!      m_atm2fft,m_paw_nhat,m_positron
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine set_mpi_enreg_fft(MPI_enreg,comm_fft,distribfft,me_g0,paral_kgb)
@@ -480,11 +445,6 @@ end subroutine set_mpi_enreg_fft
 !!
 !! SIDE EFFECTS
 !!  MPI_enreg<MPI_type>=FFT pointer/flags intialized
-!!
-!! PARENTS
-!!      m_atm2fft,m_paw_nhat,m_positron
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -532,13 +492,6 @@ end subroutine unset_mpi_enreg_fft
 !!  ffti2_local(:) = local i2 indices in fourdp
 !!  fftn3_distrib(:) = rank of the processor which own fft planes in 3rd dimension for fourdp
 !!  ffti3_local(:) = local i3 indices in fourdp
-!!
-!! PARENTS
-!!      m_dens,m_dfpt_elt,m_fft,m_fock,m_ioarr,m_mkcore,m_mklocl
-!!      m_mklocl_realspace,m_mkrho,m_multipoles,m_nucprop,m_positron,m_prcref
-!!      m_spacepar,m_stress,m_xctk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -614,11 +567,6 @@ end subroutine ptabs_fourdp
 !!  fftn3_distrib(:) = rank of the processors which own fft planes in 3rd dimension for fourwf
 !!  ffti3_local(:) = local i3 indices in fourwf
 !!
-!! PARENTS
-!!      m_fft
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine ptabs_fourwf(MPI_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -688,11 +636,6 @@ end subroutine ptabs_fourwf
 !!                                       FALSE otherwise
 !!  [msg]= -optional- warning message to be printed out
 !!
-!! PARENTS
-!!  driver,mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 logical function mpi_distrib_is_ok(MPI_enreg,nband,nkpt,nkpt_current_proc,nsppol,msg)
@@ -745,10 +688,6 @@ end function mpi_distrib_is_ok
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
@@ -785,10 +724,6 @@ end function proc_distrb_cycle
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function proc_distrb_nband(distrb,ikpt,nband_k,isppol,me)
@@ -822,11 +757,6 @@ end function proc_distrb_nband
 !!  return vector of logicals for each band being on present proc
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!      m_dfpt_vtowfk
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -867,10 +797,6 @@ end subroutine proc_distrb_cycle_bands
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
@@ -888,7 +814,7 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
  kpt_band_procs=-1
  if (allocated(distrb)) then
    if (isppol==-1) then
-! TODO : should raise error here - the output rank will be all wrong for isppol 2!
+     ! TODO : should raise error here - the output rank will be all wrong for isppol 2!
      kpt_band_procs=distrb(ikpt,:,1)
      write (msg, "(a)") " for the moment proc_distrb_kptband does not handle the 'any spin' option nsppol -1"
      ABI_ERROR(msg)
@@ -905,44 +831,38 @@ end subroutine proc_distrb_kptband
 !!  proc_distrb_band
 !!
 !! FUNCTION
-!!  return vector of processor me indices for each band, within the band communicator
+!!  return `rank_band` array with the rank of the processor in comm_band treating `band`
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_fef,m_dfpt_nstwf,m_dfpt_vtowfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
-subroutine proc_distrb_band(band_procs,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
+subroutine proc_distrb_band(rank_band,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband, ikpt, isppol
  integer,intent(in) :: me_band,me_kpt,comm_band
  integer,allocatable,intent(in) :: distrib(:,:,:)
- integer,intent(out) :: band_procs(nband)
+ integer,intent(out) :: rank_band(nband)
 
  integer :: ierr, iband
-! character(len=500) :: msg
 
 ! *************************************************************************
 
- band_procs = 0
+ rank_band = 0
 
  if (allocated(distrib)) then
    do iband=1, nband
-! is this band k spin on current proc?
+     ! is this (k, band, spin) on current proc?
      if (distrib(ikpt,iband,isppol)/=me_kpt) cycle
-! if so save rank in band subcommunicator
-     band_procs(iband) = me_band+1
+     ! if so save rank in band subcommunicator
+     rank_band(iband) = me_band+1
    end do
-   call xmpi_sum(band_procs,comm_band,ierr)
+   call xmpi_sum(rank_band,comm_band,ierr)
  end if
 
- band_procs = band_procs-1
+ rank_band = rank_band-1
 
 end subroutine proc_distrb_band
 !!***
@@ -957,11 +877,6 @@ end subroutine proc_distrb_band
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1013,16 +928,6 @@ end subroutine initmpi_world
 !!
 !! OUTPUT
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      cut3d,fftprof,m_atm2fft,m_bethe_salpeter,m_cut3d,m_ddk,m_dfpt_nstwf
-!!      m_dvdb,m_eph_driver,m_epjdos,m_fft,m_fft_prof,m_fftcore,m_gsphere
-!!      m_ioarr,m_ksdiago,m_kxc,m_mlwfovlp_qp,m_mpinfo,m_paw_nhat,m_paw_optics
-!!      m_pawpwij,m_positron,m_ppmodel,m_prcref,m_scfcv_core,m_screening
-!!      m_screening_driver,m_sigma_driver,m_suscep_stat,m_vhxc_me,m_wfd,m_wfk
-!!      m_wfk_analyze,mrgscr,ujdet
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1121,11 +1026,6 @@ end subroutine initmpi_seq
 !!    nproc_atom                =size of the communicator over atoms
 !!    my_natom                  =number of atoms treated by current proc
 !!    my_atmtab(mpi_enreg%natom)=indexes of the atoms treated by current processor
-!!
-!! PARENTS
-!!      m_mpi_setup,m_paral_pert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1229,11 +1129,6 @@ end subroutine initmpi_atom
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_atom(mpi_enreg)
@@ -1277,11 +1172,6 @@ end subroutine clnmpi_atom
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1342,18 +1232,18 @@ subroutine initmpi_grid(mpi_enreg)
     !Effective number of processors used for the grid
    nproc_eff=mpi_enreg%nproc_fft*mpi_enreg%nproc_band *mpi_enreg%nproc_spkpt*mpi_enreg%nproc_spinor
    if(nproc_eff/=nproc) then
-     write(msg,'(4a,5(a,i0))') &
+     write(msg,'(4a,5(a,i0,a))') &
       '  The number of band*FFT*spin*kpt*spinor processors, npband*npfft*np_spkpt*npspinor should be',ch10,&
       '  equal to the total number of processors, nproc.',ch10,&
-      '  However, npband   =',mpi_enreg%nproc_band,&
-      '           npfft    =',mpi_enreg%nproc_fft,&
-      '           np_spkpt =',mpi_enreg%nproc_spkpt,&
-      '           npspinor =',mpi_enreg%nproc_spinor,&
-      '       and nproc    =',nproc
+      '  However, npband   =',mpi_enreg%nproc_band, ch10, &
+      '           npfft    =',mpi_enreg%nproc_fft, ch10, &
+      '           np_spkpt =',mpi_enreg%nproc_spkpt, ch10, &
+      '           npspinor =',mpi_enreg%nproc_spinor, ch10, &
+      '           nproc    =',nproc,ch10
      ABI_WARNING(msg)
    end if
 
-   !Nothing to do if only 1 proc
+   ! Nothing to do if only 1 proc
    if (nproc_eff==1) return
 
    ! Initialize the communicator for Hartree-Fock to xmpi_comm_self
@@ -1537,9 +1427,9 @@ subroutine initmpi_grid(mpi_enreg)
 
 !* Write some data
    write(msg,'(a,2(1x,i0))') 'nphf and np_spkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_spkpt
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    write(msg,'(a,2(1x,i0))') 'me_hf, me_kpt: ',mpi_enreg%me_hf, mpi_enreg%me_kpt
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 #endif
 
@@ -1559,11 +1449,6 @@ end subroutine initmpi_grid
 !!
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1653,11 +1538,6 @@ end subroutine clnmpi_grid
 !!    mpi_enreg%nproc_img=size of comm_img
 !!    mpi_enreg%me_img=my rank in comm_img
 !!    mpi_enreg%distrb_img(:)=index of processor treating each image (in comm_img communicator)
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1956,11 +1836,6 @@ end subroutine initmpi_img
 !! FUNCTION
 !!  Cleans-up the mpi information for parallelism over images of the cell (npimage>1).
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_img(mpi_enreg)
@@ -2013,11 +1888,6 @@ end subroutine clnmpi_img
 !!
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2121,11 +1991,6 @@ end subroutine initmpi_pert
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine clnmpi_pert(mpi_enreg)
@@ -2176,11 +2041,6 @@ end subroutine clnmpi_pert
 !! OUTPUT
 !!  mpi_enreg=information about MPI parallelization
 !!  mpi_enreg%comm_band=communicator of BAND set
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2249,10 +2109,9 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
              if (.not.allocated(ranks)) then
                ABI_MALLOC(ranks,(nrank))
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
-! TODO MJV: still can not lift this restriction...
              else if (nrank/=size(ranks)) then
-               msg='Number of bands per proc should be the same for all k-points!'
-               ABI_BUG(msg)
+               ! TODO MJV: still can not lift this restriction...
+               ABI_BUG('Number of bands per proc should be the same for all k-points!')
              end if
            end if
          end if
@@ -2275,14 +2134,14 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
         ' This is inefficient (load unbalancing). Adjust nband to have a divisor <= nproc/nkpt/nsppol',ch10
        ABI_WARNING(msg)
      end if
-! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
+     ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
-!     mpi_enreg%me_band=mod(me, nrank)
+    ! mpi_enreg%me_band=mod(me, nrank)
 
-     write(msg,'(4(a,i6))') 'Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
-&     ' nband per processor= ', nb_per_proc, ' npband= ',nrank
-     call wrtout(std_out,msg,'COLL')
+     write(msg,'(4(a,i0))') 'P Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
+      ' nband per processor= ', nb_per_proc, ' npband= ',nrank
+     call wrtout(std_out,msg)
 
      ABI_FREE(ranks)
    end if
@@ -2312,11 +2171,6 @@ end subroutine initmpi_band
 !!
 !! SIDE EFFECTS
 !!  array_allgather= gathered data
-!!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2358,11 +2212,6 @@ end subroutine pre_gather
 !! OUTPUT
 !!  array= scattered data
 !!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pre_scatter(array,array_allgather,n1,n2,n3,n4,mpi_enreg)
@@ -2392,10 +2241,6 @@ end subroutine pre_scatter
 !!
 !! INPUTS
 !!  mpi_enreg<MPI_type>=Datatype gathering information on the parallelism
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2446,11 +2291,6 @@ end function iwrite_fftdatar
 !!  of k points for spin up and spin down would conflict with the
 !!  present computation of k+G sphere, independent of the spin.
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lw,m_eig2d,m_mpi_setup
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
@@ -2497,15 +2337,17 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 !  Check if nkpt and nproc_spkpt match
    if(nproc_spkpt>nkpt*nsppol) then
 !    Too many proc. with respect to nkpt
-     write(msg,'(a,i0,a,i0,a,i0,2a)')&
+     write(msg,'(a,i0,a,i0,a,i0,4a)')&
       'nproc_spkpt= ',nproc_spkpt,' >= nkpt= ',nkpt,'* nsppol= ',nsppol,ch10,&
-      'The number of processors is larger than nkpt*nsppol. This is a waste. (Ignore this warning if this is not a GS run)'
+      'The number of processors is larger than nkpt*nsppol. This is a WASTE.',ch10,&
+      ' Ignore this warning if this is not a GS run'
      ABI_WARNING(msg)
    else if (mod(nkpt*nsppol,nproc_spkpt) /= 0) then
 !    nkpt not a multiple of nproc_spkpt
-     write(msg,'(a,i0,a,i0,3a)')&
+     write(msg,'(a,i0,a,i0,5a)')&
       'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_spkpt (',nproc_spkpt, ')', ch10,&
-      'The k-point parallelisation is inefficient. (Ignore this warning if this is not a GS run)'
+      'The k-point parallelisation is INEFFICIENT. ',ch10,&
+      'Ignore this warning if this is not a GS run.'
      ABI_WARNING(msg)
    end if
  end if
@@ -2755,11 +2597,6 @@ end subroutine distrb2
 !!  in the kpgio routine, where a different parallel repartition
 !!  of k points for spin up and spin down would conflict with the
 !!  present computation of k+G sphere, independent of the spin.
-!!
-!! PARENTS
-!!      m_mpi_setup
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

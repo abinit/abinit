@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -22,6 +18,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_vtowfk
 
@@ -59,6 +58,10 @@ module m_vtowfk
  use m_fft,         only : fourwf
  use m_cgtk,        only : cgtk_fixphase
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
+#endif
+
  implicit none
 
  private
@@ -89,11 +92,11 @@ contains
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  fixed_occ=true if electronic occupations are fixed (occopt<3)
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k
-!!  icg=shift to be applied on the location of data in the array cprj
+!!  ibg=shift to be applied on the location of data in the array cprj
 !!  icg=shift to be applied on the location of data in the array cg
 !!  ikpt=number of the k-point
 !!  iscf=(<= 0  =>non-SCF), >0 => SCF
-!!  isppol isppol=1 for unpolarized, 2 for spin-polarized
+!!  isppol= 1 for unpolarized, 2 for spin-polarized
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
 !!  kinpw(npw_k)=(modified) kinetic energy for each plane wave (Hartree)
 !!  mcg=second dimension of the cg array
@@ -149,17 +152,6 @@ contains
 !!                    (cumulative, so input as well as output). Update only
 !!                    for occopt<3 (fixed occupation numbers)
 !!  rmm_diis_status: Status of the RMM-DIIS eigensolver. See m_rmm_diis.
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      build_h,cg_hprotate_and_get_diag,cg_hrotate_and_get_diag,cgtk_fixphase
-!!      cgwf,cgwf_cprj,chebfi,cprj_rotate,cprj_update,cprj_update_oneband
-!!      cwtime,fourwf,getghc_nucdip,lobpcgwf,lobpcgwf2,meanvalue_g,mksubovl
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_put,prep_fourwf
-!!      prep_nonlop,pw_orthon,pw_orthon_cprj,rmm_diis,subdiago
-!!      subdiago_low_memory,timab,wrtout,xmpi_sum
 !!
 !! NOTES
 !!  The cprj are distributed over band and spinors processors.
@@ -250,7 +242,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
  newlobpcg = (dtset%wfoptalg == 114 .and. dtset%use_gpu_cuda == 0)
- newchebfi = (dtset%wfoptalg == 111 .and. dtset%use_gpu_cuda == 0) 
+ newchebfi = (dtset%wfoptalg == 111)
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
@@ -435,7 +427,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
-           if ( .not. newlobpcg ) then
+            if ( .not. newlobpcg ) then
+
+             ABI_NVTX_START_RANGE(NVTX_LOBPCG1)
              call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 &             nband_k,nblockbd,npw_k,prtvol,resid_k,subham,totvnlx,use_totvnlx)
              ! In case of FFT parallelism, exchange subspace arrays
@@ -449,10 +443,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                end if
              end if
              if (use_subovl==1) call xmpi_sum(subovl,spaceComm,ierr)
-           else
+             ABI_NVTX_END_RANGE()
+
+          else
+
+             ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
 &             nband_k,npw_k,my_nspinor,prtvol,resid_k)
-           end if
+             ABI_NVTX_END_RANGE()
+
+          end if
 
          end if
 
@@ -461,12 +461,16 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    =========================================================================
        else if (wfopta10 == 1) then
          if ( .not. newchebfi) then
+           ABI_NVTX_START_RANGE(NVTX_CHEBFI1)
            call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
-         else          
+           ABI_NVTX_END_RANGE()
+        else
+           ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
-&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)          
-         end if            
+&           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
+           ABI_NVTX_END_RANGE()
+        end if
        end if
 
 !      =========================================================================
@@ -519,6 +523,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
    if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
 
+   ABI_NVTX_START_RANGE(NVTX_SUB_SPC_DIAGO)
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
      call timab(585,1,tsec) !"vtowfk(subdiago)"
@@ -536,8 +541,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call timab(585,2,tsec)
      end if
    end if
+   ABI_NVTX_END_RANGE()
 
-!  Print energies
+   !  Print energies
    if(prtvol>2 .or. ikpt<=nkpt_max)then
      do ii=0,(nband_k-1)/8
        write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
@@ -575,6 +581,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if (use_rmm_diis) do_ortho = .False.
 
    if (do_ortho) then
+
+     ABI_NVTX_START_RANGE(NVTX_ORTHO_WF)
+
      if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
      if (has_cprj_in_memory.and.ortalgo==0) then
        ABI_FREE(subovl)
@@ -585,6 +594,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call pw_orthon(icg,igsc,istwf_k,mcg,mgsc,npw_k*my_nspinor,nband_k,ortalgo,gsc,gs_hamk%usepaw,cg,&
 &        mpi_enreg%me_g0,mpi_enreg%comm_bandspinorfft)
      end if
+
+     ABI_NVTX_END_RANGE()
    end if
    call timab(583,2,tsec)
 
@@ -688,6 +699,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_SCF_FOURWF)
 !The code below is more efficient if paral_kgb==1 (less MPI communications)
 !however OMP is not compatible with paral_kgb since we should define
 !which threads performs the call to MPI_ALL_REDUCE.
@@ -710,17 +722,18 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &     cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),0)
 
      ek_k(iband)=ar
-
      if(ANY(ABS(dtset%nucdipmom)>tol8)) then
-       ABI_MALLOC(ghc_vectornd,(2,npw_k))
-       call getghc_nucdip(cwavef,ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
-&        gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
-&        gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
-       end_k(iband)=DOT_PRODUCT(cwavef(1,1:npw_k),ghc_vectornd(1,1:npw_k))+&
-         & DOT_PRODUCT(cwavef(2,1:npw_k),ghc_vectornd(2,1:npw_k))
+       ABI_MALLOC(ghc_vectornd,(2,npw_k*my_nspinor))
+       call getghc_nucdip(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         & ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
+         & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
+         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_cuda)
+       end_k(iband)=DOT_PRODUCT(cg(1,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         &                      ghc_vectornd(1,1:npw_k*my_nspinor))+&
+         &          DOT_PRODUCT(cg(2,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
+         &                      ghc_vectornd(2,1:npw_k*my_nspinor))
        ABI_FREE(ghc_vectornd)
      end if
-
      if(paw_dmft%use_dmft==1) then
        do iband1=1,nband_k
          call meanvalue_g(ar,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
@@ -799,7 +812,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            nskip=nskip+1
          end if
        end do  ! Loop inside a block of bands
-       
+
 !      In case of fixed occupation numbers,in bandFFT mode accumulates the partial density
      else if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
 
@@ -942,9 +955,10 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end if
        end if ! PAW or forces
      end if ! iscf>0 or iscf=-3
-   end if
+  end if
  end do !  End of loop on blocks
  !call cwtime_report(" Block loop", cpu, wall, gflops)
+ ABI_NVTX_END_RANGE()
 
  ABI_FREE(cwavef)
  ABI_FREE(enlout)

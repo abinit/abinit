@@ -161,6 +161,7 @@ type, public :: state_t
   real(dpxml)      :: ee
   integer          :: nn
   integer          :: ll
+  integer          :: kk
 end type state_t
 !!***
 
@@ -255,6 +256,7 @@ type, public :: paw_setup_t
   integer                      :: ngrid
   real(dpxml)                  :: rpaw
   real(dpxml)                  :: ex_cc
+  real(dpxml)                  :: lamb_shielding=0.0D0
   character(len=4)             :: idgrid
   character(len=12)            :: optortho
   type(atom_t)                 :: atom
@@ -339,10 +341,6 @@ CONTAINS
 !!
 !! OUTPUT
 !!  Fills private data in present module.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 subroutine paw_begin_element1(namespaceURI,localName,name,attributes)
@@ -910,10 +908,6 @@ end subroutine paw_begin_element1
 !! OUTPUT
 !!  side effect: private data flags in present module are turned to .false.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 subroutine paw_end_element1(namespaceURI,localName,name)
 
@@ -1046,12 +1040,6 @@ end subroutine paw_end_element1
 !! SIDE EFFECTS
 !!   Copied and translated into module data (side effect)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
-!!
 !! SOURCE
 subroutine pawdata_chunk(chunk)
 
@@ -1128,13 +1116,6 @@ end subroutine pawdata_chunk
 !!
 !! SIDE EFFECTS
 !!  paw_setup<paw_setup_type>=Datatype gathering information on XML paw setup.
-!!
-!! PARENTS
-!!      m_pspheads,m_pspini
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
 !!
 !! SOURCE
 
@@ -1256,12 +1237,6 @@ end subroutine paw_setup_free
 !! OUTPUT
 !!  paw_setupout<paw_setup_type>=output paw_setup datastructure
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
-!!
 !! SOURCE
 
 subroutine paw_setup_copy(paw_setupin,paw_setupout)
@@ -1285,6 +1260,7 @@ subroutine paw_setup_copy(paw_setupin,paw_setupout)
  paw_setupout%optortho=paw_setupin%optortho
  paw_setupout%rpaw=paw_setupin%rpaw
  paw_setupout%ex_cc=paw_setupin%ex_cc
+ paw_setupout%lamb_shielding=paw_setupin%lamb_shielding
  paw_setupout%atom%tread=paw_setupin%atom%tread
  paw_setupout%atom%symbol=paw_setupin%atom%symbol
  paw_setupout%atom%znucl=paw_setupin%atom%znucl
@@ -1493,13 +1469,6 @@ end subroutine paw_setup_copy
 !!  ierr= error code
 !!  output= (string) value of the keyword
 !!
-!! PARENTS
-!!      m_pawxmlps
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
-!!
 !! SOURCE
 
  subroutine paw_rdfromline(keyword,line,output,ierr)
@@ -1544,13 +1513,6 @@ end subroutine paw_setup_copy
 !!
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
-!!
-!! PARENTS
-!!      m_pspheads
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
 !!
 !! SOURCE
 
@@ -1933,13 +1895,6 @@ end subroutine paw_setup_copy
 !!
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
-!!
-!! PARENTS
-!!      m_pspheads
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
 !!
 !! SOURCE
 
@@ -2672,6 +2627,19 @@ end subroutine paw_setup_copy
      cycle
    end if
 
+   !  --Read Lamb shielding
+   if (line(1:25)=='<lamb_shielding shielding') then
+     call paw_rdfromline(" shielding",line,strg,ierr)
+     if (len(trim(strg))<=30) then
+       strg1=trim(strg)
+       read(unit=strg1,fmt=*) paw_setup%lamb_shielding
+     else
+       read(unit=strg,fmt=*) paw_setup%lamb_shielding
+     end if
+     cycle
+   end if
+
+
 !  --Read orthogonalisation scheme
    if (line(1:18)=='<orthogonalisation') then
      call paw_rdfromline(" scheme",line,strg,ierr)
@@ -2746,29 +2714,24 @@ end subroutine paw_setup_copy
 !! OUTPUT
 !!  paw_setup=pseudopotential data structure
 !!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!      bound_deriv,paw_rdfromline,paw_spline,paw_splint,pawrad_free
-!!      pawrad_init
-!!
 !! SOURCE
 
- subroutine rdpawpsxml_core(energy_cor,filename,lcor,ncor,nphicor,pawrad,phi_cor)
+ subroutine rdpawpsxml_core(energy_cor,filename, &
+&           lcor,ncor,nphicor,pawrad,phi_cor,kappacor)
 
 !Arguments ---------------------------------------------
- character (len=fnlen),intent(in) :: filename
+ character (len=*),intent(in) :: filename
  integer,intent(out) :: nphicor
 !arrays
  integer,allocatable,intent(inout) :: lcor(:),ncor(:)
+ integer,allocatable,intent(inout),optional :: kappacor(:)
  real(dp),allocatable,intent(inout) :: phi_cor(:,:),energy_cor(:)
  type(pawrad_type),intent(in) :: pawrad
 
 
 !Local variables ---------------------------------------
  integer :: funit,iaewf,ii,imeshae,imsh,ir,igrid,icor,ierr,maxmeshz,mesh_size,nmesh,shft
- logical :: endfile,found,tread
+ logical :: endfile,found,tread,diracrel
  real(dp) :: yp1,ypn
  character(len=100) :: msg,version
  character (len=XML_RECL) :: line,readline
@@ -2790,7 +2753,7 @@ end subroutine paw_setup_copy
 !Start a reading loop
  endfile=.false.
  found=.false.
-
+ diracrel=.false.
 
  do while ((.not.endfile).and.(.not.found))
    read(funit,'(a)',err=10,end=10) readline
@@ -2809,6 +2772,21 @@ end subroutine paw_setup_copy
      cycle
    end if
 
+!  --Read GENERATOR
+   if (line(1:10)=='<generator') then
+     tread=.true.
+     call paw_rdfromline(" type",line,strg,ierr)
+     if(strg=="dirac-relativistic") then
+       diracrel=.true.
+     else
+       if(present(kappacor)) then
+         write(msg,'(a)') 'Error in pawpsp_read_core: To read kappa a diracrelativistic corewf file has to be provided!'
+         LIBPAW_ERROR(msg)
+       endif
+     endif
+     cycle
+   end if
+
 !  --Read BASIS SIZE, ORBITALS, RC AND OCCUPATIONS/STATE IDs
    if (line(1:13)=='<core_states>') then
      tread=.true.
@@ -2824,8 +2802,8 @@ end subroutine paw_setup_copy
            LIBPAW_ERROR(msg)
          end if
          call paw_rdfromline(" n",line,strg,ierr)
-         if (strg == "" ) then 
-           corestate(icor)%nn=-1    
+         if (strg == "" ) then
+           corestate(icor)%nn=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -2841,8 +2819,19 @@ end subroutine paw_setup_copy
          else
            read(unit=strg,fmt=*) corestate(icor)%ll
          end if
+         if(diracrel) then!does not work if xml file is in the wrong order, which is bad xml, alternatives?
+           call paw_rdfromline(" kappa",line,strg,ierr)
+           if(present(kappacor)) then
+             if (len(trim(strg))<=30) then
+               strg1=trim(strg)
+               read(unit=strg1,fmt=*) corestate(icor)%kk
+             else
+               read(unit=strg,fmt=*) corestate(icor)%kk
+             end if
+           endif
+         endif
          call paw_rdfromline(" f",line,strg,ierr)
-         if (strg == "" ) then 
+         if (strg == "" ) then
            corestate(icor)%ff=-1.d0
          else
            if (len(trim(strg))<=30) then
@@ -2853,8 +2842,8 @@ end subroutine paw_setup_copy
            end if
          end if
          call paw_rdfromline(" rc",line,strg,ierr)
-         if (strg == "" ) then 
-           corestate(icor)%rc=-1    
+         if (strg == "" ) then
+           corestate(icor)%rc=-1
          else
            if (len(trim(strg))<=30) then
              strg1=trim(strg)
@@ -2943,7 +2932,7 @@ end subroutine paw_setup_copy
      call paw_rdfromline(" id",line,strg,ierr)
      grids(igrid)%id = trim(strg)
      if(igrid>10)then
-       close(funit) 
+       close(funit)
        msg="igrid>10"
        LIBPAW_ERROR(msg)
      end if
@@ -3049,10 +3038,14 @@ end subroutine paw_setup_copy
    LIBPAW_ALLOCATE(lcor,(nphicor))
    LIBPAW_ALLOCATE(energy_cor,(nphicor))
    LIBPAW_ALLOCATE(phi_cor,(pawrad%mesh_size,nphicor))
+   if (present(kappacor)) then
+     LIBPAW_ALLOCATE(kappacor,(nphicor))
+   endif
    phi_cor(:,:)=zero
    do ii=1,nphicor
      ncor(ii)=corestate(ii)%nn
      lcor(ii)=corestate(ii)%ll
+     if(present(kappacor)) kappacor(ii)=corestate(ii)%kk
      energy_cor(ii)=corestate(ii)%ee
      do imsh=1,nmesh
        if(trim(gridwf(ii))==trim(grids(imsh)%id)) imeshae=imsh

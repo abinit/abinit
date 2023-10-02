@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -71,12 +67,6 @@ contains
 !! eew=final ewald energy in hartrees
 !! grewtn(3,natom)=grads of eew wrt xred(3,natom), hartrees.
 !!
-!! PARENTS
-!!      m_setvtr
-!!
-!! CHILDREN
-!!      dsyev,matr3inv,wrtout
-!!
 !! SOURCE
 
 subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rmet,rprimd,typat,ucvol,vcutgeo,xred,zion)
@@ -98,8 +88,8 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term ,zcut
- !character(len=500) :: message
+ real(dp) :: t1,term ,zcut !, gcart_para, gcart_perp
+ !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: gcutoff(:)
 
@@ -154,6 +144,7 @@ if(icutcoul.eq.1) then
  !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
+!if (icutcoul.eq.3) then
 !Sum over G space, done shell after shell until all
 !contributions are too small.
  ng=0
@@ -255,6 +246,7 @@ if(icutcoul.eq.1) then
    if (newg==0) exit
 
  end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+!endif
 
  sumg=gsum/(two_pi*ucvol)
 
@@ -411,12 +403,6 @@ end subroutine ewald
 !!      in hartrees/bohr^3
 !! Cartesian components of stress are provided for this symmetric
 !! tensor in the order 11 22 33 32 31 21.
-!!
-!! PARENTS
-!!      m_stress
-!!
-!! CHILDREN
-!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 
@@ -679,12 +665,6 @@ end subroutine ewald2
 !! 3. There can be small numerical variations due to the
 !! fact that the input dielectric tensor is usually
 !! not perfectly symmetric ....
-!!
-!! PARENTS
-!!      m_dynmat,m_effective_potential,m_ifc
-!!
-!! CHILDREN
-!!      dsyev,matr3inv,wrtout
 !!
 !! SOURCE
 

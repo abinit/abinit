@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v8_t57/t57.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t57/t57.abi
 - output file    -> t57.abo
 - root for input  files -> t57i
 - root for output files -> t57o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                      12.093 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.368 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -57,7 +55,6 @@ P This job should need less than                      17.782 Mbytes of memory.
 _ WF disk file :      2.928 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -75,7 +72,6 @@ P This job should need less than                      18.032 Mbytes of memory.
 _ WF disk file :      2.928 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -91,7 +87,6 @@ P This job should need less than                       7.742 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -109,7 +104,6 @@ P This job should need less than                      12.940 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.560 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -338,18 +332,12 @@ P          mk1mem6          2
          prtphdos4          1
          prtphdos5          1
          prtphdos6          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          0       0       0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -471,8 +459,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -486,8 +474,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1127,6 +1115,31 @@ tolerances: {tolvrs: 1.00E-08, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.343379        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.343379        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.343379        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.186598E+00   -3.010136E-15   -1.455685E-15
+         1         2   -1.677868E-15    2.186598E+00    1.453628E-15
+         1         3    1.677868E-15    3.010136E-15    2.186598E+00
+         2         1   -2.186598E+00    3.010136E-15    1.455685E-15
+         2         2    1.677868E-15   -2.186598E+00   -1.453628E-15
+         2         3   -1.677868E-15   -3.010136E-15   -2.186598E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1229,23 +1242,23 @@ tolerances: {tolvrs: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.0363542329         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   1    1         0.0363830433         0.0000000000
+   1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        -0.0363830433         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2        -0.0000000000         0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.0363542329         0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
+   2    1   2    1         0.0363830433         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.0363830433         0.0000000000
    2    1   3    2        -0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1         0.0363542329         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
+   3    1   3    1         0.0363830433         0.0000000000
    3    1   1    2        -0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.0363830433         0.0000000000
@@ -1253,23 +1266,23 @@ tolerances: {tolvrs: 1.00E-08, }
    1    2   1    1        -0.0363828646         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
-   1    2   1    2         0.0381318750         0.0000000000
-   1    2   2    2        -0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   1    2         0.0363828646         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2         0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1        -0.0363828646         0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2        -0.0000000000         0.0000000000
-   2    2   2    2         0.0381318750         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   2    2         0.0363828646         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.0363828646         0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   1    2         0.0000000000         0.0000000000
    3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.0381318750         0.0000000000
+   3    2   3    2         0.0363828646         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
@@ -1289,98 +1302,98 @@ tolerances: {tolvrs: 1.00E-08, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4         2.3582871458         0.0000000000
+   1    1   1    4         2.1865978892         0.0000000000
    2    1   1    4        -0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
-   1    2   1    4        -2.0149086326         0.0000000000
+   1    2   1    4        -2.1865978892         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
   
    1    1   2    4        -0.0000000000         0.0000000000
-   2    1   2    4         2.3582871458         0.0000000000
+   2    1   2    4         2.1865978892         0.0000000000
    3    1   2    4         0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
-   2    2   2    4        -2.0149086326         0.0000000000
+   2    2   2    4        -2.1865978892         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
   
    1    1   3    4        -0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
-   3    1   3    4         2.3582871458         0.0000000000
+   3    1   3    4         2.1865978892         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
    2    2   3    4        -0.0000000000         0.0000000000
-   3    2   3    4        -2.0149086326         0.0000000000
+   3    2   3    4        -2.1865978892         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1         2.3582848101         0.0000000000
-   2    4   1    1        -0.0000000000         0.0000000000
+   1    4   1    1         2.1865897531         0.0000000000
+   2    4   1    1         0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
-   1    4   2    1        -0.0000000000         0.0000000000
-   2    4   2    1         2.3582848101         0.0000000000
-   3    4   2    1         0.0000000000         0.0000000000
+   1    4   2    1         0.0000000000         0.0000000000
+   2    4   2    1         2.1865897531         0.0000000000
+   3    4   2    1        -0.0000000000         0.0000000000
   
-   1    4   3    1         0.0000000000         0.0000000000
-   2    4   3    1         0.0000000000         0.0000000000
-   3    4   3    1         2.3582848101         0.0000000000
+   1    4   3    1        -0.0000000000         0.0000000000
+   2    4   3    1        -0.0000000000         0.0000000000
+   3    4   3    1         2.1865897531         0.0000000000
   
-   1    4   1    2        -2.0148946960         0.0000000000
+   1    4   1    2        -2.1865897531         0.0000000000
    2    4   1    2        -0.0000000000         0.0000000000
    3    4   1    2        -0.0000000000         0.0000000000
   
    1    4   2    2        -0.0000000000         0.0000000000
-   2    4   2    2        -2.0148946960         0.0000000000
+   2    4   2    2        -2.1865897531         0.0000000000
    3    4   2    2         0.0000000000         0.0000000000
   
    1    4   3    2         0.0000000000         0.0000000000
    2    4   3    2         0.0000000000         0.0000000000
-   3    4   3    2        -2.0148946960         0.0000000000
+   3    4   3    2        -2.1865897531         0.0000000000
   
   
   
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.280963E-04  1.280963E-04  1.280963E-04  1.337404E-03  1.337404E-03
-   1.337404E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.321167E-03  1.321167E-03
+   1.321167E-03
  Phonon frequencies in cm-1    :
--  2.811389E+01  2.811389E+01  2.811389E+01  2.935262E+02  2.935262E+02
--  2.935262E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.899627E+02  2.899627E+02
+-  2.899627E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.280963E-04  1.280963E-04  1.619227E-04  1.337404E-03  1.337404E-03
-   2.453527E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.321167E-03  1.321167E-03
+   2.502641E-03
  Phonon frequencies in cm-1    :
--  2.811389E+01  2.811389E+01  3.553792E+01  2.935262E+02  2.935262E+02
--  5.384870E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.899627E+02  2.899627E+02
+-  5.492663E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-   1.280963E-04  1.280963E-04  1.619227E-04  1.337404E-03  1.337404E-03
-   2.453527E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.321167E-03  1.321167E-03
+   2.502641E-03
  Phonon frequencies in cm-1    :
--  2.811389E+01  2.811389E+01  3.553792E+01  2.935262E+02  2.935262E+02
--  5.384870E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.899627E+02  2.899627E+02
+-  5.492663E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-   1.280963E-04  1.280963E-04  1.619227E-04  1.337404E-03  1.337404E-03
-   2.453527E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.321167E-03  1.321167E-03
+   2.502641E-03
  Phonon frequencies in cm-1    :
--  2.811389E+01  2.811389E+01  3.553792E+01  2.935262E+02  2.935262E+02
--  5.384870E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.899627E+02  2.899627E+02
+-  5.492663E+02
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1515,8 +1528,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1530,8 +1543,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1961,13 +1974,20 @@ meta: {optdriver: 7, eph_task: 6, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  4.5680000  4.5680000  G(1)= -0.1094571  0.1094571  0.1094571
  R(2)=  4.5680000  0.0000000  4.5680000  G(2)=  0.1094571 -0.1094571  0.1094571
  R(3)=  4.5680000  4.5680000  0.0000000  G(3)=  0.1094571  0.1094571 -0.1094571
  Unit cell volume ucvol=  1.9063748E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ca
+    2)    0.5000000  0.5000000  0.5000000   O
+
+ DDB file with 1 blocks has been read.
 
 ================================================================================
 
@@ -1978,7 +1998,7 @@ meta: {optdriver: 7, eph_task: 6, }
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.358287E+00   -4.107140E-17   -4.075347E-17
@@ -1998,8 +2018,8 @@ meta: {optdriver: 7, eph_task: 6, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2013,8 +2033,8 @@ meta: {optdriver: 7, eph_task: 6, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2030,6 +2050,14 @@ meta: {optdriver: 7, eph_task: 6, }
 
 --------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+ Dielectric average (EQ. 25 Melo2022)
+--------------------------------------------------------------------------------
+ Mode    <1/epsilon*SQRT(w_LO/2)>              Cumulative sum
+    4              0.000000000000              0.000000000000
+    5              0.000000000000              0.000000000000
+    6              0.007406238433              0.007406238433
+--------------------------------------------------------------------------------
 
  Rough correction to the ZPR, to take into account the missing q=0 piece using Frohlich model:
  (+ for occupied states, - for unoccupied states) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) 
@@ -2232,18 +2260,12 @@ P          mk1mem6          2
          prtphdos4          1
          prtphdos5          1
          prtphdos6          0
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          0       0       0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2418,10 +2440,10 @@ P          mk1mem6          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         36.9  wall=         37.2
+- Proc.   0 individual time (sec): cpu=         33.0  wall=         33.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  21 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         36.9  wall=         37.2
+.Delivered  31 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         33.0  wall=         33.3

@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t14/t14.in
-- output file    -> t14.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t14/t14.abi
+- output file    -> t14.abo
 - root for input  files -> t14i
 - root for output files -> t14o
-
 
  DATASET    8 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          10        mffmem =           1         mkmem =           2
        mpw =          65          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.293 Mbytes of memory.
+P This job should need less than                       1.393 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.022 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   10 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -111,6 +109,9 @@ P          mk1mem10         4
                        1.000000  1.000000  1.000000  1.000000
         optdriver8          0
         optdriver10         1
+           prtpot8          0
+           prtpot10         1
+          rfatpol           1       1
             rfdir           1       0       0
            rfphon8          0
            rfphon10         1
@@ -175,8 +176,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -368,7 +369,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t14o_DS8_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -386,7 +386,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t14o_DS8_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -409,12 +408,12 @@ tolerances: {toldfe: 1.10E-12, }
  ETOT  8   2.4815612474613     -2.760E-08 1.666E-10 5.617E-08
  ETOT  9   2.4815612461604     -1.301E-09 1.135E-11 5.774E-09
  ETOT 10   2.4815612460349     -1.254E-10 6.579E-13 3.411E-11
- ETOT 11   2.4815612460313     -3.624E-12 6.318E-14 1.811E-12
- ETOT 12   2.4815612460313     -5.684E-14 2.510E-15 5.794E-13
- ETOT 13   2.4815612460307     -5.826E-13 2.835E-16 7.556E-15
+ ETOT 11   2.4815612460313     -3.638E-12 6.318E-14 1.811E-12
+ ETOT 12   2.4815612460313     -2.842E-14 2.510E-15 5.794E-13
+ ETOT 13   2.4815612460307     -5.969E-13 2.835E-16 7.556E-15
 
  At SCF step   13, etot is converged : 
-  for the second time, diff in etot=  5.826E-13 < toldfe=  1.100E-12
+  for the second time, diff in etot=  5.969E-13 < toldfe=  1.100E-12
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -500,23 +499,23 @@ tolerances: {toldfe: 1.10E-12, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.0399277183         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   1    1         0.0399273376        -0.0000000000
+   1    1   2    1        -0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
    1    1   1    2        -0.0399273376         0.0000000000
    1    1   2    2         0.0000000000        -0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.0399277183         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   1    1        -0.0000000000         0.0000000000
+   2    1   2    1         0.0399273376        -0.0000000000
+   2    1   3    1        -0.0000000000        -0.0000000000
    2    1   1    2         0.0000000000        -0.0000000000
    2    1   2    2        -0.0399273376         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.0265395516         0.0000000000
+   3    1   2    1        -0.0000000000        -0.0000000000
+   3    1   3    1         0.0265409999        -0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2        -0.0265409999         0.0000000000
@@ -524,31 +523,31 @@ tolerances: {toldfe: 1.10E-12, }
    1    2   1    1        -0.0399273376        -0.0000000000
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
-   1    2   1    2         0.0399277183         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   1    2         0.0399273376         0.0000000000
+   1    2   2    2        -0.0000000000        -0.0000000000
+   1    2   3    2         0.0000000000        -0.0000000000
   
    2    2   1    1         0.0000000000         0.0000000000
    2    2   2    1        -0.0399273376        -0.0000000000
    2    2   3    1         0.0000000000        -0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.0399277183         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   1    2        -0.0000000000        -0.0000000000
+   2    2   2    2         0.0399273376         0.0000000000
+   2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1         0.0000000000        -0.0000000000
    3    2   3    1        -0.0265409999        -0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.0265395516         0.0000000000
+   3    2   1    2         0.0000000000        -0.0000000000
+   3    2   2    2        -0.0000000000         0.0000000000
+   3    2   3    2         0.0265409999         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.949850E-06  9.996953E-07  9.996981E-07  3.732802E-04  4.578449E-04
-   4.578449E-04
+   0.000000E+00  0.000000E+00  0.000000E+00  3.732853E-04  4.578438E-04
+   4.578438E-04
  Phonon frequencies in cm-1    :
-- -4.279427E-01  2.194078E-01  2.194084E-01  8.192553E+01  1.004853E+02
--  1.004853E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  8.192664E+01  1.004851E+02
+-  1.004851E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -603,6 +602,9 @@ P          mk1mem10         4
                        1.000000  1.000000  1.000000  1.000000
         optdriver8          0
         optdriver10         1
+           prtpot8          0
+           prtpot10         1
+          rfatpol           1       1
             rfdir           1       0       0
            rfphon8          0
            rfphon10         1
@@ -721,10 +723,10 @@ P          mk1mem10         4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.2
+.Delivered  15 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.1  wall=          1.1

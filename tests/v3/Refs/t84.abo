@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t84/t84.in
-- output file    -> t84.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t84/t84.abi
+- output file    -> t84.abo
 - root for input  files -> t84i
 - root for output files -> t84o
-
 
  DATASET    1 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          65          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.112 Mbytes of memory.
+P This job should need less than                       1.162 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -57,7 +55,6 @@ P This job should need less than                       1.116 Mbytes of memory.
 _ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -75,7 +72,6 @@ P This job should need less than                       1.129 Mbytes of memory.
 _ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -87,11 +83,10 @@ _ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          65          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.112 Mbytes of memory.
+P This job should need less than                       1.162 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -109,7 +104,6 @@ P This job should need less than                       1.116 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -141,6 +135,8 @@ _ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      9.0000000000E+00  9.0000000000E+00  9.0000000000E+00 Bohr
               amu      2.08980370E+02
+              asr           0
+           chneut           0
              ecut      2.00000000E+00 Hartree
 -          fftalg         312
            getddk1          0
@@ -266,8 +262,12 @@ P          mk1mem6          8
         optdriver4          0
         optdriver5          1
         optdriver6          1
-          rfatpol           1       2
-            rfdir           1       1       1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -394,8 +394,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -581,7 +581,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -600,7 +599,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -657,7 +655,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -714,7 +711,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -817,7 +813,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -871,7 +866,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -890,8 +884,8 @@ tolerances: {tolwfr: 1.00E-12, }
  ETOT  4   2.3549930177130     -7.192E-03 1.317E-06 4.241E-02
  ETOT  5   2.3546653970181     -3.276E-04 1.144E-07 1.282E-03
  ETOT  6   2.3546584497885     -6.947E-06 2.001E-09 7.221E-05
- ETOT  7   2.3546580476816     -4.021E-07 2.850E-10 9.826E-07
- ETOT  8   2.3546580419383     -5.743E-09 3.030E-12 1.834E-08
+ ETOT  7   2.3546580476815     -4.021E-07 2.850E-10 9.826E-07
+ ETOT  8   2.3546580419382     -5.743E-09 3.030E-12 1.834E-08
  ETOT  9   2.3546580418334     -1.048E-10 4.545E-13 2.389E-10
 
  At SCF step    9   max residual=  4.55E-13 < tolwfr=  1.00E-12 =>converged.
@@ -932,7 +926,6 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1145,7 +1138,7 @@ tolerances: {tolwfr: 1.00E-12, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -1172,7 +1165,7 @@ tolerances: {tolwfr: 1.00E-12, }
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -1425,7 +1418,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS4_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1444,7 +1436,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1501,7 +1492,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1558,7 +1548,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1661,7 +1650,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS4_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1715,7 +1703,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1776,7 +1763,6 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t84o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1989,7 +1975,7 @@ tolerances: {tolwfr: 1.00E-12, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2016,7 +2002,7 @@ tolerances: {tolwfr: 1.00E-12, }
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -2088,6 +2074,8 @@ tolerances: {tolwfr: 1.00E-12, }
  -outvars: echo values of variables after computation  --------
             acell      9.0000000000E+00  9.0000000000E+00  9.0000000000E+00 Bohr
               amu      2.08980370E+02
+              asr           0
+           chneut           0
              ecut      2.00000000E+00 Hartree
            etotal1    -1.0689618411E+01
            etotal2    -6.1466096115E+00
@@ -2227,8 +2215,12 @@ P          mk1mem6          8
         optdriver4          0
         optdriver5          1
         optdriver6          1
-          rfatpol           1       2
-            rfdir           1       1       1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2405,10 +2397,10 @@ P          mk1mem6          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          2.4  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  51 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.4  wall=          2.4
+.Delivered  24 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.2  wall=          2.4

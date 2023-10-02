@@ -19,12 +19,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #include "defs.h"
@@ -325,12 +319,6 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_init(op, ostream, istream, bFile, MY_COMM, iBuffer)
@@ -484,12 +472,6 @@ END SUBROUTINE Ctqmcoffdiag_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_setParameters(op,buffer)
@@ -554,12 +536,6 @@ END SUBROUTINE Ctqmcoffdiag_setParameters
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_setSweeps(op,sweeps)
@@ -615,12 +591,6 @@ END SUBROUTINE Ctqmcoffdiag_setSweeps
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_setSeed(op,iseed)
@@ -668,12 +638,6 @@ END SUBROUTINE Ctqmcoffdiag_setSeed
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -731,12 +695,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateAll
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -898,12 +856,6 @@ END SUBROUTINE Ctqmcoffdiag_allocateOpt
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_setG0wTab(op,Gomega,opt_fk)
@@ -986,12 +938,6 @@ END SUBROUTINE Ctqmcoffdiag_setG0wTab
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_setU(op,matU)
@@ -1030,12 +976,6 @@ END SUBROUTINE Ctqmcoffdiag_setU
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1117,12 +1057,6 @@ END SUBROUTINE Ctqmcoffdiag_clear
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_reset(op)
@@ -1184,12 +1118,6 @@ END SUBROUTINE Ctqmcoffdiag_reset
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_setMu(op, levels)
@@ -1231,12 +1159,6 @@ END SUBROUTINE Ctqmcoffdiag_setMu
 !!           op&limit is now filled
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_sethybri_limit(op, hybri_limit)
@@ -1276,12 +1198,6 @@ END SUBROUTINE Ctqmcoffdiag_sethybri_limit
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -1788,12 +1704,6 @@ END SUBROUTINE Ctqmcoffdiag_computeF
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_run(op,opt_order,opt_histo,opt_movie,opt_analysis,opt_check,opt_noise,opt_spectra,opt_gMove)
@@ -1961,12 +1871,6 @@ END SUBROUTINE Ctqmcoffdiag_run
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2221,12 +2125,6 @@ END SUBROUTINE Ctqmcoffdiag_loop
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -2667,12 +2565,6 @@ END SUBROUTINE Ctqmcoffdiag_tryAddRemove
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_trySwap(op,flav_i,flav_j)
@@ -2840,12 +2732,6 @@ END SUBROUTINE Ctqmcoffdiag_trySwap
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_measN(op, iflavor, updated)
@@ -2909,12 +2795,6 @@ END SUBROUTINE Ctqmcoffdiag_measN
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -3002,12 +2882,6 @@ END SUBROUTINE Ctqmcoffdiag_measCorrelation
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_measPerturbation(op, iflavor)
@@ -3058,12 +2932,6 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -3602,12 +3470,6 @@ END SUBROUTINE Ctqmcoffdiag_getResult
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_symmetrizeGreen(op, syms)
@@ -3674,12 +3536,6 @@ END SUBROUTINE Ctqmcoffdiag_symmetrizeGreen
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -3952,12 +3808,6 @@ END SUBROUTINE Ctqmcoffdiag_getGreen
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_getD(op, D)
@@ -4013,12 +3863,6 @@ END SUBROUTINE Ctqmcoffdiag_getD
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_getE(op,E,noise)
@@ -4054,12 +3898,6 @@ END SUBROUTINE Ctqmcoffdiag_getE
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -4112,12 +3950,6 @@ END SUBROUTINE Ctqmcoffdiag_printAll
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -4275,12 +4107,6 @@ END SUBROUTINE Ctqmcoffdiag_printQMC
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_printGreen(op, oFileIn)
@@ -4400,12 +4226,6 @@ END SUBROUTINE Ctqmcoffdiag_printGreen
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_printD(op,oFileIn)
@@ -4462,12 +4282,6 @@ END SUBROUTINE Ctqmcoffdiag_printD
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_printE(op,oFileIn)
@@ -4523,12 +4337,6 @@ END SUBROUTINE Ctqmcoffdiag_printE
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -4593,12 +4401,6 @@ END SUBROUTINE Ctqmcoffdiag_printPerturbation
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -4674,12 +4476,6 @@ END SUBROUTINE Ctqmcoffdiag_printCorrelation
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE Ctqmcoffdiag_printSpectra(op, oFileIn)
@@ -4747,12 +4543,6 @@ END SUBROUTINE Ctqmcoffdiag_printSpectra
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

@@ -1,5 +1,5 @@
 
-.Version 9.5.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  3 Sep 2021.
-- ( at 06h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze/tests/Test_suite/v8_t97/t97.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t97/t97.abi
 - output file    -> t97.abo
 - root for input  files -> t97i
 - root for output files -> t97o
-
 
  DATASET   11 : magnetic group, Shubnikov type III
  Fedorov space group P2/c (# 13); Bravais mP (primitive monocl.)
@@ -41,7 +40,6 @@ P This job should need less than                       5.462 Mbytes of memory.
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.043 Mbytes.
 ================================================================================
 
-
  DATASET   12 : magnetic group, Shubnikov type III
  Fedorov space group P2/c (# 13); Bravais mP (primitive monocl.)
  Magnetic point group 2/m' (#  4)
@@ -59,7 +57,6 @@ P This job should need less than                       5.462 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.043 Mbytes.
 ================================================================================
-
 
  DATASET   21 : magnetic group, Shubnikov type III
  Fedorov space group R3 2 (#155); Bravais hR (rhombohedral)
@@ -79,7 +76,6 @@ P This job should need less than                       5.836 Mbytes of memory.
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
 
-
  DATASET   22 : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -95,7 +91,6 @@ P This job should need less than                       5.836 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET   31 : magnetic group, Shubnikov type III
  Fedorov space group I4/m m m (#139); Bravais tI (body-center tetrag.)
@@ -114,7 +109,6 @@ P This job should need less than                       5.821 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET   32 : magnetic group, Shubnikov type III
  Fedorov space group I-4 2 m (#121); Bravais tI (body-center tetrag.)
@@ -428,8 +422,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2253,10 +2247,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.9
+- Proc.   0 individual time (sec): cpu=         10.4  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  63 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.7  wall=          8.9
+.Delivered  86 WARNINGs and  35 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.4  wall=         10.5

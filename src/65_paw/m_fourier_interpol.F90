@@ -90,14 +90,6 @@ CONTAINS  !=====================================================================
 !!  if optgrid=+1:
 !!    rhorf(cplex*nfftf,nspden)=output density/potential in r space on the fine grid
 !!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_looppert,m_dfpt_vtorho,m_dft_energy
-!!      m_fourier_interpol,m_getgh1c,m_gstate,m_hamiltonian,m_nonlinear
-!!      m_orbmag,m_paw_mkrho,m_respfn_driver,m_scfcv_core,m_vtorho,m_vtorhorec
-!!
-!! CHILDREN
-!!      indgrid,pawfgr_destroy,transgrid
-!!
 !! SOURCE
 
 subroutine transgrid(cplex,mpi_enreg,nspden,optgrid,optin,optout,paral_kgb,pawfgr,rhog,rhogf,rhor,rhorf)
@@ -416,12 +408,6 @@ end subroutine transgrid
 !!  rhor_out(cplex*nfft_out,nspden)=output density/potential in r space on the required FFT mesh.
 !!  if optout=1:
 !!   rhog_out(2,nfftc)=Fourier transform of output density/potential on the coarse grid
-!!
-!! PARENTS
-!!      m_dvdb,m_ioarr,m_qparticles
-!!
-!! CHILDREN
-!!      indgrid,pawfgr_destroy,transgrid
 !!
 !! SOURCE
 

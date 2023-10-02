@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -65,6 +61,8 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
+ use m_gemm_nonlop,      only : make_gemm_nonlop,gemm_nonlop_use_gemm, &
+&                               gemm_nonlop_ikpt_this_proc_being_treated
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -74,6 +72,7 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
+ use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer
 
  implicit none
 
@@ -241,13 +240,6 @@ contains
 !!     the computation of wave functions ; one with nfftf points
 !!     (fine grid) for the computation of total density.
 !!
-!! PARENTS
-!!      m_afterscfloop,m_positron
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
-!!
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
@@ -321,7 +313,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),allocatable :: grnl(:),vlocal(:,:),vxc_hf(:,:),xcart(:,:),ylmbz(:,:),ylmgrbz(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: resid(:,:)
 
-
 ! *************************************************************************
 
  call timab(910,1,tsec)
@@ -389,7 +380,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,fock%fock_BZ%mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         dtset%nsppol,fock%fock_common%my_nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylmbz,ylmgrbz)
          ABI_FREE(ylmbz)
          ABI_FREE(ylmgrbz)
@@ -399,7 +390,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &         fock%fock_BZ%mcprj,dtset%mgfft,fock%fock_BZ%mkpt,mpi_enreg,psps%mpsang,&
 &         dtset%mpw,dtset%natom,nattyp,fock%fock_BZ%nbandocc_bz,dtset%natom,dtset%ngfft,fock%fock_BZ%mkpt,&
 &         dtset%nloalg,fock%fock_BZ%npwarr,dtset%nspinor,&
-&         dtset%nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
+&         dtset%nsppol,fock%fock_common%my_nsppol,dtset%ntypat,dtset%paral_kgb,ph1d,psps,rmet,dtset%typat,ucvol,unpaw,&
 &         xred,ylm,ylmgr)
        end if
      end if
@@ -605,13 +596,6 @@ end subroutine forstr
 !!   npsstr(6)=nonlocal pseudopotential energy part of stress tensor
 !!    (hartree/bohr^3)
 !!
-!! PARENTS
-!!      m_forstr
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
-!!
 !! SOURCE
 
 subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,fock,&
@@ -675,8 +659,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !*************************************************************************
 
- call timab(920,1,tsec)
- call timab(921,1,tsec)
+ call timab(920,1,tsec) ; call timab(921,-1,tsec)
 
 !Init mpicomm and me
  if(mpi_enreg%paral_kgb==1)then
@@ -748,7 +731,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
 & nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
- call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
@@ -944,7 +926,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
      end if
 
-     call timab(922,2,tsec)
+!    Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
+       call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
+&            gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
+&            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
+&            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
+       end if
 
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
@@ -966,6 +955,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          fockcommon%forces_ikpt=zero
        end if
      end if
+
+     call timab(922,2,tsec)
 
      do iblock=1,nblockbd
 
@@ -994,7 +985,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          end if
 
          call timab(923,2,tsec)
-         call timab(926,1,tsec)
+         call timab(924,-1,tsec)
 
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
          if (mpi_enreg%paral_kgb/=1) then
@@ -1007,7 +998,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
            call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
-         call timab(926,2,tsec)
 
 !        Accumulate non-local contributions from n,k
          if (optfor==1) then
@@ -1023,9 +1013,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            end do
          end if
 
+         call timab(924,2,tsec)
+
 !        Accumulate stress tensor kinetic contributions
          if (stress_needed==1) then
-           call timab(924,1,tsec)
+           call timab(925,1,tsec)
            do iblocksize=1,blocksize
              call meanvalue_g(ar,kstr1,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
@@ -1052,12 +1044,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
              kinstr(6)=kinstr(6)+weight(iblocksize)*ar
            end do
-           call timab(924,2,tsec)
+           call timab(925,2,tsec)
          end if
 
 !        Accumulate stress tensor and forces for the Fock part
          if (usefock_loc) then
            if(fockcommon%optstr.or.fockcommon%optfor) then
+             call timab(926,1,tsec)
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
                ABI_BUG(msg)
@@ -1081,11 +1074,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
                end if
              end do
              ABI_FREE(ghc_dum)
+             call timab(926,2,tsec)
            end if
-         end if
+         end if ! usefock_loc
        end if
 
      end do ! End of loop on block of bands
+
+     call timab(927,1,tsec)
 
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
@@ -1134,8 +1130,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(ffnl_str)
      end if
 
+     call timab(927,2,tsec)
+
    end do ! End k point loop
  end do ! End loop over spins
+
+ call timab(928,1,tsec)
 
 !Stress is equal to dE/d_strain * (1/ucvol)
  npsstr(:)=npsstr(:)/gs_hamk%ucvol
@@ -1165,8 +1165,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    end if
  end if
 
- call timab(925,1,tsec)
-
 !Do final normalizations and symmetrizations of stress tensor contributions
  if (stress_needed==1) then
    renorm_factor=-(two_pi**2)/effmass_free/gs_hamk%ucvol
@@ -1192,8 +1190,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  if (usefock_loc) then
    fockcommon%use_ACE=use_ACE_old
  end if
- call timab(925,2,tsec)
- call timab(920,2,tsec)
+ call timab(928,2,tsec) ; call timab(920,-2,tsec)
 
 end subroutine forstrnps
 !!***
@@ -1248,13 +1245,6 @@ end subroutine forstrnps
 !!
 !! OUTPUT
 !! vresid(nfft,nspden)= the output potential residual
-!!
-!! PARENTS
-!!      m_forstr,m_scfcv_core
-!!
-!! CHILDREN
-!!      dfpt_mkvxc,dfpt_mkvxc_noncoll,fourdp,hartre,metric,pawmknhat
-!!      psolver_hartree,rhotoxc,xcdata_init
 !!
 !! SOURCE
 

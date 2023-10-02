@@ -70,6 +70,10 @@
    nstep5   60
   tolwfr5   1.0d-15
 
+#Compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 # Common data
    acell   3*10.00
      amu   1.0d0
@@ -104,6 +108,8 @@
   tolwfr   1.e-22
      wtk   4*0.25
    znucl   32
+
+ rfatpol   1 1  # Only for backward compatibility
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "32ge.SJ_mod"

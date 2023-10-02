@@ -15,10 +15,14 @@
      qpt2   0.5d0 0.0d0 0.0d0
   kptopt2   3
   rfphon2   1
- rfatpol2   1 1
    rfdir2   1 0 0
   tolvrs2   1.0d-11
    nstep2   18
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #Common data
  acell  3*4.09

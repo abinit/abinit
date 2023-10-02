@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -29,9 +25,18 @@ module m_gpu_toolbox
  use m_initcuda
  use m_gpu_detect
 
-#ifdef HAVE_FC_ISO_C_BINDING
- use iso_c_binding
-#endif
+! MG: I had to comment this import to avoid the following error on buda2_gnu_8.5_cuda
+!
+!    type(c_ptr),intent(inout) :: blockvectorbx_gpu, blockvectorx_gpu,sqgram_gpu
+!            1
+!    Error: Type name 'c_ptr' at (1) is ambiguous
+!    abi_gpu_linalg.f90:374:47:
+!
+! I believe this is due to a misconfiguration issue in the Fortran compilers used by the bot.
+
+!#ifdef HAVE_FC_ISO_C_BINDING
+! use, intrinsic :: iso_c_binding
+!#endif
 
  implicit none
 
@@ -40,7 +45,7 @@ module m_gpu_toolbox
 #if defined HAVE_GPU_CUDA
 !interface
 !  integer(C_INT) function cuda_func() bind(C)
-!    use iso_c_binding, only : C_INT,C_PTR
+!    use, intrinsic :: iso_c_binding, only : C_INT,C_PTR
 !    type(C_PTR) :: ptr
 !  end function cuda_func
 #endif

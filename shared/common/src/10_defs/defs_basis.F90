@@ -123,7 +123,7 @@ module defs_basis
  integer,public,parameter :: MAX_NSHIFTK = 210
  ! Maximun number of shifts in input k-mesh.
 
-!Real constants
+!Real dp constants
  real(dp), parameter :: zero=0._dp
  real(dp), parameter :: one=1._dp
  real(dp), parameter :: two=2._dp
@@ -136,6 +136,7 @@ module defs_basis
  real(dp), parameter :: nine=9._dp
  real(dp), parameter :: ten=10._dp
 
+!Real sp constants
  real(sp), parameter :: zero_sp=0._sp
  real(sp), parameter :: one_sp=1._sp
 
@@ -172,7 +173,6 @@ module defs_basis
 !real(dp), parameter :: quarter_pi=pi*quarter
 !real(dp), parameter :: two_thirds_pi=two_thirds*pi
 
-
 !Real precision
  real(dp), parameter :: greatest_real = huge(one)
  real(dp), parameter :: smallest_real = -greatest_real
@@ -196,7 +196,7 @@ module defs_basis
  real(dp), parameter :: tol18=0.000000000000000001_dp
  real(dp), parameter :: tol19=0.0000000000000000001_dp
  real(dp), parameter :: tol20=0.00000000000000000001_dp
- real(dp), parameter :: tol30=1.0d-30
+ real(dp), parameter :: tol30=1.0e-30_dp
 
 !real constants derived from sqrt(n.)
  real(dp), parameter :: sqrt2=1.4142135623730950488016887242096939_dp
@@ -214,6 +214,11 @@ module defs_basis
  ! e.g. stress tensor in NSCF calculations. The sentinel is used the yaml routines to print "undef" instead of the
  ! numerical value.
  real(dp),parameter :: MAGIC_UNDEF = 9.9999999999D+99
+
+ ! Max Memory in Mb available for a MPI processor
+ ! This quantity might be used at runtime to determine how to distribute memory.
+ ! The default value (2Gb) can be changed at runtime via the command line interface.
+ real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
 
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
@@ -302,8 +307,10 @@ module defs_basis
  integer, parameter, public :: RUNL_SCREENING  = 3
  integer, parameter, public :: RUNL_SIGMA      = 4
  integer, parameter, public :: RUNL_NONLINEAR  = 5
+ integer, parameter, public :: RUNL_GWR        = 6
  integer, parameter, public :: RUNL_EPH        = 7
  integer, parameter, public :: RUNL_WFK        = 8
+ integer, parameter, public :: RUNL_RTTDDFT    = 9
  integer, parameter, public :: RUNL_GWLS       = 66
  integer, parameter, public :: RUNL_BSE        = 99
  integer, parameter, public :: RUNL_LONGWAVE   = 10
@@ -318,6 +325,7 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_DDK_DIAGO = 6
  integer,public,parameter :: WFK_TASK_OPTICS_FULLBZ = 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
+ integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -336,7 +344,9 @@ module defs_basis
   integer,parameter,public :: NLO_MBLKPW = 199
   integer,parameter,public :: NLO_MINCAT = 10
 
-! Parameter to compute the maximum index of the perturbation
+! This is used to compute the maximum index of the perturbation as natom + MPERT_MAX
+! GA: But this is not actually the maximum perturbation,
+!     see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
 
 !Parameters for LOG/STATUS files treatment
@@ -421,26 +431,19 @@ CONTAINS  !=====================================================================
 !!  new_do_write_log=new value for do_write_log
 !!  new_do_write_status=new value for do_write_status
 !!
-!! PARENTS
-!!      m_argparse,m_dtfil
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
- subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
+subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
-!scalars
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
-!Local variables ------------------------------
 
 !************************************************************************
 
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
  if (PRESENT(new_do_write_status)) do_write_status=new_do_write_status
 
- end subroutine abi_log_status_state
+end subroutine abi_log_status_state
 !!***
 
 !----------------------------------------------------------------------
@@ -459,20 +462,11 @@ CONTAINS  !=====================================================================
 !!  new_std_out=new value for standard output unit
 !!  new_io_comm=new value for IO MPI communicator
 !!
-!! PARENTS
-!!      abinit,abitk,aim,anaddb,band2eps,conducti,cut3d,dummy_tests,fftprof
-!!      fold2Bloch,ioprof,lapackprof,m_driver,m_io_redirect,m_memeval
-!!      m_mpi_setup,m_mpinfo,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit
-!!      optic,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
- subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
+subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
-!scalars
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
 
 !************************************************************************
@@ -481,7 +475,7 @@ CONTAINS  !=====================================================================
  if (PRESENT(new_std_out)) std_out = new_std_out
  if (PRESENT(new_io_comm)) abinit_comm_output = new_io_comm
 
- end subroutine abi_io_redirect
+end subroutine abi_io_redirect
 !!***
 
 !----------------------------------------------------------------------
@@ -496,53 +490,43 @@ CONTAINS  !=====================================================================
 !! INPUTS
 !!   unit = Unit number for output file.
 !!
-!! OUTPUT
-!!   Only printing.
-!!
-!! PARENTS
-!!      abinit,m_argparse,m_errors
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
- subroutine print_kinds(unit)
+subroutine print_kinds(unit)
 
 !Arguments-------------------------------------
-!scalars
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
-!scalars
  integer :: my_unt
 
- ! *********************************************************************
+! *********************************************************************
 
-  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
+ my_unt=std_out; if (PRESENT(unit)) my_unt = unit
 
-  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
+ write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
-  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
-    ' REAL:      Data type name: REAL(DP) ',&
-    '            Kind value: ',KIND(0.0_dp),&
-    '            Precision:  ',PRECISION(0.0_dp),&
-    '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
-    '            Smallest positive number:                      ',TINY(0.0_dp),&
-    '            Largest representable number:                  ',HUGE(0.0_dp)
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+   ' REAL:      Data type name: REAL(DP) ',&
+   '            Kind value: ',KIND(0.0_dp),&
+   '            Precision:  ',PRECISION(0.0_dp),&
+   '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
+   '            Smallest positive number:                      ',TINY(0.0_dp),&
+   '            Largest representable number:                  ',HUGE(0.0_dp)
 
-  write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
-    ' INTEGER:   Data type name: INTEGER(default) ', &
-    '            Kind value: ',KIND(0),              &
-    '            Bit size:   ',BIT_SIZE(0),          &
-    '            Largest representable number: ',HUGE(0)
+ write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
+   ' INTEGER:   Data type name: INTEGER(default) ', &
+   '            Kind value: ',KIND(0),              &
+   '            Bit size:   ',BIT_SIZE(0),          &
+   '            Largest representable number: ',HUGE(0)
 
-  write(my_unt,'(a,/,a,i0)')&
-    ' LOGICAL:   Data type name: LOGICAL ',&
-    '            Kind value: ',KIND(.TRUE.)
+ write(my_unt,'(a,/,a,i0)')&
+   ' LOGICAL:   Data type name: LOGICAL ',&
+   '            Kind value: ',KIND(.TRUE.)
 
-  write(my_unt,'(2a,i0)')&
-   ' CHARACTER: Data type name: CHARACTER ',&
-   '            Kind value: ',KIND('C')
+ write(my_unt,'(2a,i0)')&
+  ' CHARACTER: Data type name: CHARACTER ',&
+  '            Kind value: ',KIND('C')
 
 end subroutine print_kinds
 !!***
@@ -554,10 +538,6 @@ end subroutine print_kinds
 !! FUNCTION
 !!  Convert a string into one of the integer flags WFK_TASK_*
 !!  Return WFK_TASK_NONE if string is invalid.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -585,11 +565,37 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_KPTS_ERANGE
  case ("optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
+ case ("check_symtab")
+   wfk_task = WFK_TASK_CHECK_SYMTAB
  case default
    wfk_task = WFK_TASK_NONE
  end select
 
 end function str2wfktask
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* defs_basis/set_mem_per_cpu_mb
+!! NAME
+!! set_mem_per_cpu_mb
+!!
+!! FUNCTION
+!!  Set the value of global variable `mem_per_cpu_mb`
+!!
+!! SOURCE
+
+subroutine set_mem_per_cpu_mb(mem_mb)
+
+!Arguments-------------------------------------
+ real(dp),intent(in) :: mem_mb
+
+! *********************************************************************
+
+ !print *, "Setting mem_per_cpu_mb to", mem_mb
+ mem_per_cpu_mb = mem_mb
+
+end subroutine set_mem_per_cpu_mb
 !!***
 
 !----------------------------------------------------------------------

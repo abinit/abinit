@@ -507,9 +507,9 @@ Without SOC:
 With SOC:
 ```
  kpt#   1, nband= 24, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-5d  -0.91133   -0.91133   -0.91133   -0.91133   -0.80022   -0.80022   -0.80022   -0.80022   -0.79954   -0.79954   
-6s  -0.41639   -0.41639   
-6p  -0.09817   -0.09817   -0.02546   -0.02546   -0.02546   -0.02546        
+5d  -0.91225   -0.91225   -0.91225   -0.91225   -0.80130   -0.80130   -0.80130   -0.80130   -0.80062   -0.80062  
+6s  -0.41697   -0.41697  
+6p  -0.09644   -0.09644   -0.02639   -0.02639   -0.02639   -0.02639  
 ...
 ```
 
@@ -517,8 +517,8 @@ Again, the levels are not perfectly degenerate, due to the finite size and non s
 shape of the simulation box.
 We can compute the splitting of the levels, and we obtain:
 
-    5d-channel: 0.91133-0.80022 = 0.11111 Ha
-    6p-channel: 0.09817-0.02546 = 0.07271 Ha
+    5d-channel: 0.91225-0.80062 = 0.11163 Ha
+    6p-channel: 0.09644-0.02639 = 0.07005 Ha
 
 If we now consider the
 [NIST table](https://www.nist.gov/pml/atomic-reference-data-electronic-structure-calculations-bismuth)
@@ -543,7 +543,7 @@ It is at the origin of the magneto crystalline anisotropy (MCA) of paramount tec
 
 The table below can help to know how to handle the different magnetic calculation cases in ABINIT:
 
-|  case         | msppol | nspinor | nspden |
+|  case         | nsppol | nspinor | nspden |
 | ------------- | ------ | ------- | ------ |
 | non-magnetic  | 1      | 1       | 1      |
 | collinear FM  | 2      | 1       | 2      |

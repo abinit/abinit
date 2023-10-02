@@ -26,4 +26,5 @@ includes = [
   "cuda_header.h",
   "cuda_rec_head.h",
   "dummy_functions.inc",
+  "nvtx_macros.h"
 ]

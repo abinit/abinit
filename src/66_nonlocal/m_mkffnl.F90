@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -35,16 +31,76 @@ module m_mkffnl
  use m_time,     only : timab
  use m_kg,       only : mkkin
  use m_sort,     only : sort_dp
+ use defs_datatypes, only : pseudopotential_type
+ use m_crystal,  only : crystal_t
 
  implicit none
 
  private
 !!***
 
+ public :: mkffnl_objs
  public :: mkffnl
 !!***
 
 contains
+!!***
+
+!!****f* ABINIT/mkffnl_objs
+!! NAME
+!! mkffnl_objs
+!!
+!! FUNCTION
+!!  Simplified wrapper around mkffnl in which input parameters are passed via crystal_t and pseudopotential_type.
+!!
+!! INPUTS
+!!  See mkffnl
+!!
+!! OUTPUT
+!!  ffnl(npw,dimffnl,lmnmax,ntypat)=described below
+!! [request]=Used in conjunction with [comm] to perform non-blocking xmpi_isum_ip. Client code must
+!!  wait on request before using ffnl. If not present, blocking API is used.
+!!
+!! SOURCE
+
+subroutine mkffnl_objs(cryst, psps, dimffnl, ffnl, ider, idir, kg, kpg, kpt, nkpg, npw, ylm, ylm_gr, &
+                       comm, request) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst
+ type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: dimffnl, ider, idir, npw, nkpg
+ integer,optional,intent(in) :: comm
+ integer ABI_ASYNC, optional,intent(out):: request
+!arrays
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: kpg(npw, nkpg), kpt(3)
+ real(dp),intent(in) :: ylm(:,:), ylm_gr(:,:,:)
+ real(dp),intent(out) :: ffnl(npw, dimffnl, psps%lmnmax, psps%ntypat)
+!
+!!Local variables-------------------------------
+ integer :: my_comm
+
+! *************************************************************************
+ my_comm = xmpi_comm_self; if (present(comm)) my_comm = comm
+
+ if (present(request)) then
+    call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                comm=comm, request=request)
+
+ else
+    call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, &
+                cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, kg, kpg, kpt, psps%lmnmax, &
+                psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw, psps%ntypat, &
+                psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm, ylm_gr, &
+                comm=comm)
+ end if
+
+end subroutine mkffnl_objs
 !!***
 
 !!****f* ABINIT/mkffnl
@@ -165,7 +221,7 @@ contains
 !!
 !!  1) l may be 0, 1, 2, or 3 in this version.
 !!
-!!  2) Norm-conserving psps : only FFNL for which ekb is not zero are calculated.
+!!  2) Norm-conserving psps: only FFNL for which ekb is not zero are calculated.
 !!
 !!  3) Each expression above approaches a constant as $|k+G| \rightarrow 0 $.
 !!     In the cases where $|k+G|$ is in the denominator, there is always a
@@ -177,20 +233,12 @@ contains
 !! TODO
 !!  Some parts can be rewritten with BLAS1 calls.
 !!
-!! PARENTS
-!!      m_cgprj,m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_pert,m_dft_energy
-!!      m_fock_getghc,m_forstr,m_getgh1c,m_io_kss,m_ksdiago,m_nonlop_test
-!!      m_orbmag,m_pead_nl_loop,m_phgamma,m_sigmaph,m_vkbr,m_vtorho,m_wfd
-!!
-!! CHILDREN
-!!      mkkin,splfit,timab,xmpi_isum_ip,xmpi_sum
-!!
 !! SOURCE
 
 subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, indlmn, &
-                   kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
-                   qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
-                   comm, request) ! optional
+                  kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
+                  qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
+                  comm, request) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -224,8 +272,8 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  real(dp) :: rprimd(3,3),tsec(2)
  real(dp),allocatable :: dffnl_cart(:,:),dffnl_red(:,:),dffnl_tmp(:)
  real(dp),allocatable :: d2ffnl_cart(:,:),d2ffnl_red(:,:),d2ffnl_tmp(:)
- real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:),wk_ffnl1(:)
- real(dp),allocatable :: wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
+ real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:)
+ real(dp),allocatable :: wk_ffnl1(:),wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
 
 ! *************************************************************************
 
@@ -412,10 +460,13 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
          ! -------------------------------
          ! MG: This part is an hotspot of in the EPH code due to the large number of k-points used
          ! To improve memory locality, I tried to:
+         !
          !      1) call a new version of splfit that operates on wk_ffspl with shape: (2,mqgrid)
          !      2) pass a sorted kpgnorm array and then rearrange the output spline
+         !
          ! but I didn't manage to make it significantly faster.
-         ! For the time being, we rely on MPI-parallelsism via the optional MPI communicator.
+         ! For the time being, we rely on MPI-parallelism via the optional MPI communicator.
+
          if (iln > iln0) then
            wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
            ider_tmp = min(ider, 1)

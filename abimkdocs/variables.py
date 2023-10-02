@@ -9,6 +9,8 @@ from collections import OrderedDict, defaultdict
 from itertools import groupby
 
 # Helper functions (coming from AbiPy)
+
+
 class lazy_property(object):
     """
     lazy_property descriptor
@@ -91,6 +93,7 @@ def list_strings(arg):
     else:
         return arg
 
+
 def splitall(path):
     """Return list with all components of a path."""
     allparts = []
@@ -99,7 +102,7 @@ def splitall(path):
         if parts[0] == path:  # sentinel for absolute paths
             allparts.insert(0, parts[0])
             break
-        elif parts[1] == path: # sentinel for relative paths
+        elif parts[1] == path:  # sentinel for relative paths
             allparts.insert(0, parts[1])
             break
         else:
@@ -168,6 +171,7 @@ ABI_TOPICS = [
     "APPA",
     "Artificial",
     "aTDEP",
+    "AtomCentered",
     "AtomManipulator",
     "AtomTypes",
     "Bader",
@@ -181,7 +185,7 @@ ABI_TOPICS = [
     "Control",
     "Coulomb",
     "CrossingBarriers",
-    "CRPA",
+    "CalcUJ",
     "crystal",
     "DFT+U",
     "DeltaSCF",
@@ -207,12 +211,15 @@ ABI_TOPICS = [
     "Git",
     "GSintroduction",
     "GW",
+    "GWR",
     "GWls",
     "Hybrids",
     "k-points",
     "LatticeModel",
+    "LatticeWannier",
+    "LWFModel",
     "LDAminushalf",
-    "longwave" ,
+    "longwave",
     "LOTF",
     "MagField",
     "MagMom",
@@ -283,6 +290,7 @@ class Variable(object):
     It is constructed from the variables_CODENAME.py modules but client code usually
     interact with variables via the :class:`VarDatabase` dictionary.
     """
+
     def __init__(self,
                  abivarname=None,
                  varset=None,
@@ -299,7 +307,7 @@ class Variable(object):
                  added_in_version=None,
                  alternative_name=None,
                  text=None,
-                ):
+                 ):
         """
         Args:
             abivarname (str): Name of the variable (including @code if not abinit e.g asr@anaddb).
@@ -343,7 +351,8 @@ class Variable(object):
             if getattr(self, a) is None:
                 errors.append("attribute %s is mandatory" % a)
         if errors:
-            raise ValueError("Errors in %s:\n%s" % (self.abivarname, "\n".join(errors)))
+            raise ValueError("Errors in %s:\n%s" %
+                             (self.abivarname, "\n".join(errors)))
 
     @lazy_property
     def name(self):
@@ -366,8 +375,8 @@ class Variable(object):
         The absolute URL associated to this variable on the Abinit website.
         """
         # This is gonna be the official API on the server
-        #docs.abinit.org/vardocs/CODENAME/VARNAME?version=8.6.2
-        #return "https://docs.abinit.org/vardocs/%s/%s" % (self.executable, self.name)
+        # docs.abinit.org/vardocs/CODENAME/VARNAME?version=8.6.2
+        # return "https://docs.abinit.org/vardocs/%s/%s" % (self.executable, self.name)
 
         # For the time being, we have to use:
         # variables/eph/#asr
@@ -384,7 +393,8 @@ class Variable(object):
         od = OrderedDict()
         for tok in self.topics:
             topic, relevance = [s.strip() for s in tok.split("_")]
-            if topic not in od: od[topic] = []
+            if topic not in od:
+                od[topic] = []
             od[topic].append(relevance)
         return od
 
@@ -414,7 +424,8 @@ class Variable(object):
         return hash(self.abivarname)
 
     def __eq__(self, other):
-        if other is None: return False
+        if other is None:
+            return False
         return self.abivarname == other.abivarname
 
     def __ne__(self, other):
@@ -428,12 +439,13 @@ class Variable(object):
             "abivarname", "commentdefault", "commentdims", "varset",
             "requires", "excludes",
             "added_in_version", "alternative_name",
-            ]
+        ]
 
         def astr(obj):
             return str(obj).replace("[[", "").replace("]]", "")
 
-        d = {k: astr(getattr(self, k)) for k in attrs if getattr(self, k) is not None}
+        d = {k: astr(getattr(self, k))
+             for k in attrs if getattr(self, k) is not None}
         return json.dumps(d, indent=4, sort_keys=True)
 
     def _repr_html_(self):
@@ -444,7 +456,9 @@ class Variable(object):
             markdown = None
 
         if markdown is None:
-            html = "<h2>Default value:</h2>" + my_unicode(self.defaultval) + "<br/><h2>Description</h2>" + self.text
+            html = "<h2>Default value:</h2>" + \
+                my_unicode(self.defaultval) + \
+                "<br/><h2>Description</h2>" + self.text
             return html.replace("[[", "<b>").replace("]]", "</b>")
         else:
             md = self.text.replace("[[", "<b>").replace("]]", "</b>")
@@ -472,13 +486,16 @@ class Variable(object):
 
         Args: dimname: String of :class:`Variable` object.
         """
-        if not self.isarray: return False
-        if isinstance(dimname, Variable): dimname = dimname.name
+        if not self.isarray:
+            return False
+        if isinstance(dimname, Variable):
+            dimname = dimname.name
         # This test is not very robust and can fail.
         # Assume no space between `[` and name (there should be a test for this...)
         key = "[[%s]]" % dimname
         for d in self.dimensions:
-            if key in str(d): return True
+            if key in str(d):
+                return True
         return False
 
     def html_link(self, label=None):
@@ -492,7 +509,7 @@ class Variable(object):
         i.e. the variables that are connected to this variable
         (either because they are present in dimensions on in requires).
         """
-        #if hasattr(self, ...
+        # if hasattr(self, ...
         import re
         parent_names = []
         WIKILINK_RE = r'\[\[([\w0-9_ -]+)\]\]'
@@ -508,7 +525,8 @@ class Variable(object):
                     parent_names.append(m.group(1))
 
         if self.requires is not None:
-            parent_names.extend([m.group(1) for m in re.finditer(WIKILINK_RE, self.requires) if m])
+            parent_names.extend(
+                [m.group(1) for m in re.finditer(WIKILINK_RE, self.requires) if m])
 
         # Convert to set and remove possibile self-reference.
         parent_names = set(parent_names)
@@ -546,14 +564,16 @@ class Variable(object):
         """
         Return markdown string. Can use Abinit markdown extensions.
         """
-        lines = []; app = lines.append
+        lines = []
+        app = lines.append
 
         app("## **%s** \n\n" % self.name)
         app("*Mnemonics:* %s  " % str(self.mnemonics))
         if self.characteristics:
             app("*Characteristics:* %s  " % ", ".join(self.characteristics))
         if self.topic2relevances:
-            app("*Mentioned in topic(s):* %s  " % ", ".join("[[topic:%s]]" % k for k in self.topic2relevances))
+            app("*Mentioned in topic(s):* %s  " %
+                ", ".join("[[topic:%s]]" % k for k in self.topic2relevances))
         app("*Variable type:* %s  " % str(self.vartype))
         if self.dimensions:
             app("*Dimensions:* %s  " % self.format_dimensions(self.dimensions))
@@ -565,7 +585,8 @@ class Variable(object):
         if self.requires:
             app("*Only relevant if:* %s  " % str(self.requires))
         if self.excludes:
-            app("*The use of this variable forbids the use of:* %s  " % self.excludes)
+            app("*The use of this variable forbids the use of:* %s  " %
+                self.excludes)
         app("*Added in version:* %s  " % self.added_in_version)
 
         # Add links to tests.
@@ -582,7 +603,8 @@ class Variable(object):
                 frequency = "Moderately used"
 
             info = "%s, [%d/%d] in all %s tests, [%d/%d] in %s tutorials" % (
-                frequency, len(self.tests), tests_info["num_all_tests"], self.executable,
+                frequency, len(
+                    self.tests), tests_info["num_all_tests"], self.executable,
                 tests_info["num_tests_in_tutorial"], tests_info["num_all_tutorial_tests"], self.executable)
 
             # Use https://facelessuser.github.io/pymdown-extensions/extensions/details/
@@ -592,23 +614,30 @@ class Variable(object):
             tlist = sorted(self.tests, key=lambda t: t.suite_name)
             d = {}
             for suite_name, tests_in_suite in groupby(tlist, key=lambda t: t.suite_name):
-                ipaths = [os.path.join(*splitall(t.inp_fname)[-4:]) for t in tests_in_suite]
+                ipaths = [os.path.join(*splitall(t.inp_fname)[-4:])
+                          for t in tests_in_suite]
                 count += len(ipaths)
                 d[suite_name] = ipaths
 
             for suite_name, ipaths in d.items():
-                if count > max_ntests: ipaths = ipaths[:min(3, len(ipaths))]
-                s = "- " + suite_name + ":  " + ", ".join("[[%s|%s]]" % (p, os.path.basename(p)) for p in ipaths)
-                if count > max_ntests: s += " ..."
+                if count > max_ntests:
+                    ipaths = ipaths[:min(3, len(ipaths))]
+                s = "- " + suite_name + ":  " + \
+                    ", ".join("[[%s|%s]]" % (p, os.path.basename(p))
+                              for p in ipaths)
+                if count > max_ntests:
+                    s += " ..."
                 app("    " + s)
             app("\n\n")
 
         # Add text with description.
         app(2 * "\n")
         # Replace all occurrences of [[name]] with **name** to reduce number of html links in docs
-        new_text = self.text.replace("[[%s]]" % self.name, " **%s** " % self.name)
+        new_text = self.text.replace(
+            "[[%s]]" % self.name, " **%s** " % self.name)
         app(new_text)
-        if with_hr: app("* * *" + 2*"\n")
+        if with_hr:
+            app("* * *" + 2*"\n")
 
         return "\n".join(lines)
 
@@ -636,30 +665,35 @@ class Variable(object):
 
         for topic, relevances in self.topic2relevances.items():
             if topic not in ABI_TOPICS:
-                eapp("%s delivers topic `%s` that does not belong to the allowed list" % (sname, topic))
+                eapp("%s delivers topic `%s` that does not belong to the allowed list" % (
+                    sname, topic))
             for relevance in relevances:
                 if relevance not in ABI_RELEVANCES:
-                    eapp("%s delivers relevance `%s` that does not belong to the allowed list" % (sname, relevance))
+                    eapp("%s delivers relevance `%s` that does not belong to the allowed list" % (
+                        sname, relevance))
 
-	# Compare the characteristics of this variable with the refs to detect possible typos.
+        # Compare the characteristics of this variable with the refs to detect possible typos.
         if self.characteristics is not None:
             if not isinstance(self.characteristics, list):
                 eapp("The field characteristics of %s is not a list" % svar)
             else:
                 for cat in self.characteristics:
                     if cat.replace("[[", "").replace("]]", "") not in ABI_CHARACTERISTICS:
-                        eapp("The characteristics %s of %s is not valid" % (cat, svar))
+                        eapp("The characteristics %s of %s is not valid" %
+                             (cat, svar))
 
         if self.dimensions is None:
-            eapp("%s does not have a dimension. If it is a *scalar*, it must be declared so." % svar)
+            eapp(
+                "%s does not have a dimension. If it is a *scalar*, it must be declared so." % svar)
         else:
             if self.dimensions != "scalar":
                 if not isinstance(self.dimensions, (list, ValueWithConditions)):
-                    eapp('The dimensions field of %s is not a list neither a valuewithconditions' % svar)
+                    eapp(
+                        'The dimensions field of %s is not a list neither a valuewithconditions' % svar)
 
         if self.varset is None:
             eapp('`%s` does not have a varset' % svar)
-        #else:
+        # else:
         #    if not isinstance(self.varset, str) or self.varset not in ref_varset:
         #        print('The field varset of %s should be one of the valid varsets' % str(self))
 
@@ -674,6 +708,7 @@ class ValueWithUnit(object):
     """
     This type allows to specify values with units:
     """
+
     def __init__(self, value=None, units=None):
         self.value = value
         self.units = units
@@ -728,6 +763,7 @@ class ValueWithConditions(dict):
 
         Means that the variable is set to 6 if paral_kgb == 1 else 2
     """
+
     def __repr__(self):
         s = ''
         for key in self:
@@ -746,6 +782,7 @@ class MultipleValue(object):
     This is the equivalent to the X * Y syntax in the Abinit parser.
     If X is null, it means that you want to do *Y (all Y)
     """
+
     def __init__(self, number=None, value=None):
         self.number = number
         self.value = value
@@ -765,7 +802,9 @@ def my_unicode(s):
 # Public API #
 ##############
 
+
 _VARS = None
+
 
 def get_codevars():
     """
@@ -773,7 +812,8 @@ def get_codevars():
     Main entry point for client code.
     """
     global _VARS
-    if _VARS is None: _VARS = VarDatabase.from_pyfiles()
+    if _VARS is None:
+        _VARS = VarDatabase.from_pyfiles()
     return _VARS
 
 
@@ -824,8 +864,9 @@ class VarDatabase(OrderedDict):
             code_urls[codename] = d = {}
             for vname, var in var.items():
                 # This is the internal convention used to build the mkdocs site.
-                d[vname] = "/variables/%s/%s#%s" % (codename, var.varset, var.name)
-	# TODO: version and change mkdocs.yml
+                d[vname] = "/variables/%s/%s#%s" % (
+                    codename, var.varset, var.name)
+        # TODO: version and change mkdocs.yml
         return version, code_urls
 
     def update_json_endpoints(self, json_path, indent=4):
@@ -848,6 +889,7 @@ class VarDatabase(OrderedDict):
         """
         dirpath = os.path.abspath(dirpath)
         from pprint import pformat
+
         def nones2arg(obj, must_be_string=False):
             if obj is None:
                 if must_be_string:
@@ -855,9 +897,12 @@ class VarDatabase(OrderedDict):
                 return None
             elif isinstance(obj, str):
                 s = str(obj).rstrip()
-                if "\n" in s: return '"""%s"""' % s
-                if "'" in s: return '"%s"' % s
-                if '"' in s: return "'%s'" % s
+                if "\n" in s:
+                    return '"""%s"""' % s
+                if "'" in s:
+                    return '"%s"' % s
+                if '"' in s:
+                    return "'%s'" % s
                 return '"%s"' % s
             else:
                 raise TypeError("%s: %s" % (type(obj), str(obj)))
@@ -868,25 +913,32 @@ class VarDatabase(OrderedDict):
                     obj = [s.strip() for s in obj.split(",")]
                 else:
                     obj = [obj]
-            if isinstance(obj, (list, tuple)): return pformat(obj)
+            if isinstance(obj, (list, tuple)):
+                return pformat(obj)
 
             raise TypeError("%s: %s" % (type(obj), str(obj)))
 
         def dimensions2arg(obj):
-            if isinstance(obj, str) and obj == "scalar": return '"scalar"'
+            if isinstance(obj, str) and obj == "scalar":
+                return '"scalar"'
             if isinstance(obj, (ValueWithUnit, MultipleValue, Range, ValueWithConditions)):
                 return "%s(%s)" % (obj.__class__.__name__, pformat(obj.__dict__))
-            if isinstance(obj, (list, tuple)): return pformat(obj)
+            if isinstance(obj, (list, tuple)):
+                return pformat(obj)
 
             raise TypeError("%s, %s" % (type(obj), str(obj)))
 
         def defaultval2arg(obj):
-            if obj is None: return obj
+            if obj is None:
+                return obj
             if isinstance(obj, (ValueWithUnit, MultipleValue, Range, ValueWithConditions)):
                 return "%s(%s)" % (obj.__class__.__name__, pformat(obj.__dict__))
-            if isinstance(obj, (list, tuple)): return pformat(obj)
-            if isinstance(obj, str): return '"%s"' % str(obj)
-            if isinstance(obj, (int, float)): return obj
+            if isinstance(obj, (list, tuple)):
+                return pformat(obj)
+            if isinstance(obj, str):
+                return '"%s"' % str(obj)
+            if isinstance(obj, (int, float)):
+                return obj
 
             raise TypeError("%s, %s" % (type(obj), str(obj)))
 
@@ -900,7 +952,7 @@ from abimkdocs.variables import ValueWithUnit, MultipleValue, Range
 ValueWithConditions = dict
 
 Variable=dict\nvariables = ["""
-]
+                     ]
             for name in sorted(varsd.keys()):
                 var = varsd[name]
                 text = '"""\n' + var.text.rstrip() + '\n"""'
@@ -923,24 +975,25 @@ Variable(
     text={text},
 ),
 """.format(vartype='"%s"' % var.vartype,
-          characteristics=None if var.characteristics is None else pformat(var.characteristics),
-          mnemonics=nones2arg(var.mnemonics, must_be_string=True),
-          requires=nones2arg(var.requires),
-          excludes=nones2arg(var.excludes),
-          dimensions=dimensions2arg(var.dimensions),
-          varset='"%s"' % var.varset,
-          abivarname='"%s"' % var.abivarname,
-          commentdefault=nones2arg(var.commentdefault),
-          topics=topics2arg(var.topics),
-          commentdims=nones2arg(var.commentdims),
-          defaultval=defaultval2arg(var.defaultval),
-	  added_in_version=var.added_in_version,
-	  alternative_name=var.alternative_name,
-          text=text,
-          )
+                    characteristics=None if var.characteristics is None else pformat(
+                        var.characteristics),
+                    mnemonics=nones2arg(var.mnemonics, must_be_string=True),
+                    requires=nones2arg(var.requires),
+                    excludes=nones2arg(var.excludes),
+                    dimensions=dimensions2arg(var.dimensions),
+                    varset='"%s"' % var.varset,
+                    abivarname='"%s"' % var.abivarname,
+                    commentdefault=nones2arg(var.commentdefault),
+                    topics=topics2arg(var.topics),
+                    commentdims=nones2arg(var.commentdims),
+                    defaultval=defaultval2arg(var.defaultval),
+                    added_in_version=var.added_in_version,
+                    alternative_name=var.alternative_name,
+                    text=text,
+           )
 
                 lines.append(s)
-                #print(s)
+                # print(s)
 
             lines.append("]")
             # Write file
@@ -955,7 +1008,7 @@ class InputVariables(OrderedDict):
 
     .. attributes:
 
-	executable: Name of executable e.g. anaddb
+        executable: Name of executable e.g. anaddb
     """
     @classmethod
     def from_pyfile(cls, filepath):
@@ -990,7 +1043,8 @@ class InputVariables(OrderedDict):
         allchars = []
         for var in self.values():
             if var.characteristics is not None:
-                allchars.extend([c.replace("[", "").replace("]", "") for c in var.characteristics])
+                allchars.extend([c.replace("[", "").replace("]", "")
+                                 for c in var.characteristics])
         return set(allchars)
 
     def get_all_vnames(self, with_internal=False):
@@ -999,7 +1053,8 @@ class InputVariables(OrderedDict):
         """
         doc_vnames = []
         for name, var in self.items():
-            if not with_internal and var.is_internal: continue
+            if not with_internal and var.is_internal:
+                continue
             doc_vnames.append(name)
             if var.alternative_name is not None:
                 doc_vnames.append(var.alternative_name)
@@ -1018,7 +1073,7 @@ class InputVariables(OrderedDict):
         Group a list of variable in sections.
 
         Args:
-	    names: string or list of strings with ABINIT variable names.
+            names: string or list of strings with ABINIT variable names.
 
         Return:
             Ordered dict mapping section_name to the list of variable names belonging to the section.
@@ -1042,9 +1097,9 @@ class InputVariables(OrderedDict):
         var_list = []
         for v in self.values():
             if (v.text and varname in v.text or
-               (v.dimensions is not None and varname in str(v.dimensions)) or
-               (v.requires is not None and varname in v.requires) or
-               (v.excludes is not None and varname in v.excludes)):
+                (v.dimensions is not None and varname in str(v.dimensions)) or
+                (v.requires is not None and varname in v.requires) or
+                    (v.excludes is not None and varname in v.excludes)):
                 var_list.append(v)
 
         return var_list
@@ -1070,7 +1125,8 @@ class InputVariables(OrderedDict):
         chars = ["[[" + c + "]]" for c in list_strings(chars)]
         varlist = []
         for v in self.values():
-            if v.characteristics is None: continue
+            if v.characteristics is None:
+                continue
             if any(c in v.characteristics for c in chars):
                 varlist.append(v)
 
@@ -1093,33 +1149,37 @@ class InputVariables(OrderedDict):
 
         # https://www.graphviz.org/doc/info/
         from graphviz import Digraph
-        graph = Digraph("task", engine="dot" if engine == "automatic" else engine)
-        #graph.attr(label=repr(var))
+        graph = Digraph("task", engine="dot" if engine ==
+                        "automatic" else engine)
+        # graph.attr(label=repr(var))
         #graph.node_attr.update(color='lightblue2', style='filled')
         #cluster_kwargs = dict(rankdir="LR", pagedir="BL", style="rounded", bgcolor="azure2")
 
         # These are the default attrs for graphviz
         default_graph_attr = {
             'rankdir': 'LR',
-            #'size': "8.0, 12.0",
+            # 'size': "8.0, 12.0",
         }
-        if graph_attr is None: graph_attr = default_graph_attr
+        if graph_attr is None:
+            graph_attr = default_graph_attr
 
         default_node_attr = {
-            #'shape': 'box',
-            #'fontsize': 10,
-            #'height': 0.25,
-            #'fontname': '"Vera Sans, DejaVu Sans, Liberation Sans, '
+            # 'shape': 'box',
+            # 'fontsize': 10,
+            # 'height': 0.25,
+            # 'fontname': '"Vera Sans, DejaVu Sans, Liberation Sans, '
             #            'Arial, Helvetica, sans"',
-            #'style': '"setlinewidth(0.5)"',
+            # 'style': '"setlinewidth(0.5)"',
         }
-        if node_attr is None: node_attr = default_node_attr
+        if node_attr is None:
+            node_attr = default_node_attr
 
         default_edge_attr = {
-            #'arrowsize': '0.5',
-            #'style': '"setlinewidth(0.5)"',
+            # 'arrowsize': '0.5',
+            # 'style': '"setlinewidth(0.5)"',
         }
-        if edge_attr is None: edge_attr = default_edge_attr
+        if edge_attr is None:
+            edge_attr = default_edge_attr
 
         # Add input attributes.
         graph.graph_attr.update(**graph_attr)
@@ -1131,7 +1191,7 @@ class InputVariables(OrderedDict):
                 shape="box",
                 fontsize="10",
                 height="0.25",
-                #color=var.color_hex,
+                # color=var.color_hex,
                 label=str(var),
                 URL=var.website_url,
                 target="_top",
@@ -1144,16 +1204,20 @@ class InputVariables(OrderedDict):
         for parent in var.get_parent_names():
             parent = self[parent]
             graph.node(parent.name, **node_kwargs(parent))
-            graph.edge(parent.name, var.name, **edge_kwargs) #, label=edge_label, color=self.color_hex
+            # , label=edge_label, color=self.color_hex
+            graph.edge(parent.name, var.name, **edge_kwargs)
 
         with_children = True
-        if with_children: # > threshold
+        if with_children:  # > threshold
             # Connect task to children.
             for oname, ovar in self.items():
-                if oname == varname: continue
-                if varname not in ovar.get_parent_names(): continue
+                if oname == varname:
+                    continue
+                if varname not in ovar.get_parent_names():
+                    continue
                 graph.node(ovar.name, **node_kwargs(ovar))
-                graph.edge(var.name, ovar.name, **edge_kwargs) #, label=edge_label, color=self.color_hex
+                # , label=edge_label, color=self.color_hex
+                graph.edge(var.name, ovar.name, **edge_kwargs)
 
         return graph
 
@@ -1163,7 +1227,7 @@ class InputVariables(OrderedDict):
 
         Args:
             varset: Select variables with this `varset`. Include all if None
-	    vartype: Select variables with this `vartype`. Include all
+            vartype: Select variables with this `vartype`. Include all
             engine: ['dot', 'neato', 'twopi', 'circo', 'fdp', 'sfdp', 'patchwork', 'osage']
             graph_attr: Mapping of (attribute, value) pairs for the graph.
             node_attr: Mapping of (attribute, value) pairs set for all nodes.
@@ -1173,33 +1237,37 @@ class InputVariables(OrderedDict):
         """
         # https://www.graphviz.org/doc/info/
         from graphviz import Digraph
-        graph = Digraph("task", engine="dot" if engine == "automatic" else engine)
-        #graph.attr(label=repr(var))
+        graph = Digraph("task", engine="dot" if engine ==
+                        "automatic" else engine)
+        # graph.attr(label=repr(var))
         #graph.node_attr.update(color='lightblue2', style='filled')
         #cluster_kwargs = dict(rankdir="LR", pagedir="BL", style="rounded", bgcolor="azure2")
 
         # These are the default attrs for graphviz
         default_graph_attr = {
             'rankdir': 'LR',
-            #'size': "8.0, 12.0",
+            # 'size': "8.0, 12.0",
         }
-        if graph_attr is None: graph_attr = default_graph_attr
+        if graph_attr is None:
+            graph_attr = default_graph_attr
 
         default_node_attr = {
-            #'shape': 'box',
-            #'fontsize': 10,
-            #'height': 0.25,
-            #'fontname': '"Vera Sans, DejaVu Sans, Liberation Sans, '
+            # 'shape': 'box',
+            # 'fontsize': 10,
+            # 'height': 0.25,
+            # 'fontname': '"Vera Sans, DejaVu Sans, Liberation Sans, '
             #            'Arial, Helvetica, sans"',
-            #'style': '"setlinewidth(0.5)"',
+            # 'style': '"setlinewidth(0.5)"',
         }
-        if node_attr is None: node_attr = default_node_attr
+        if node_attr is None:
+            node_attr = default_node_attr
 
         default_edge_attr = {
-            #'arrowsize': '0.5',
-            #'style': '"setlinewidth(0.5)"',
+            # 'arrowsize': '0.5',
+            # 'style': '"setlinewidth(0.5)"',
         }
-        if edge_attr is None: edge_attr = default_edge_attr
+        if edge_attr is None:
+            edge_attr = default_edge_attr
 
         # Add input attributes.
         graph.graph_attr.update(**graph_attr)
@@ -1211,7 +1279,7 @@ class InputVariables(OrderedDict):
                 shape="box",
                 fontsize="10",
                 height="0.25",
-                #color=var.color_hex,
+                # color=var.color_hex,
                 label=str(var),
                 URL=var.website_url,
                 target="_top",
@@ -1222,21 +1290,27 @@ class InputVariables(OrderedDict):
         with_children = False
 
         for name, var in self.items():
-            if vartype is not None and var.vartype != vartype: continue
-            if varset is not None and var.varset != varset: continue
+            if vartype is not None and var.vartype != vartype:
+                continue
+            if varset is not None and var.varset != varset:
+                continue
 
             graph.node(var.name, **node_kwargs(var))
             for parent in var.get_parent_names():
                 parent = self[parent]
                 graph.node(parent.name, **node_kwargs(parent))
-                graph.edge(parent.name, var.name, **edge_kwargs) #, label=edge_label, color=self.color_hex
+                # , label=edge_label, color=self.color_hex
+                graph.edge(parent.name, var.name, **edge_kwargs)
 
-            if with_children: # > threshold
+            if with_children:  # > threshold
                 # Connect task to children.
                 for oname, ovar in self.items():
-                    if oname == varname: continue
-                    if varname not in ovar.get_parent_names(): continue
+                    if oname == varname:
+                        continue
+                    if varname not in ovar.get_parent_names():
+                        continue
                     graph.node(ovar.name, **node_kwargs(ovar))
-                    graph.edge(var.name, ovar.name, **edge_kwargs) #, label=edge_label, color=self.color_hex
+                    # , label=edge_label, color=self.color_hex
+                    graph.edge(var.name, ovar.name, **edge_kwargs)
 
         return graph

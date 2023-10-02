@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h19 )
+.Starting date : Mon 17 Jul 2023.
+- ( at 10h35 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/TestBot_MPI1/seq_tsv4_80/tsv4_80.in
-- output file    -> tsv4_80.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/TestBot_MPI1/seq_tsv4_80/tsv4_80.abi
+- output file    -> tsv4_80.abo
 - root for input  files -> tsv4_80i
 - root for output files -> tsv4_80o
-
 
  DATASET   12 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =          77          nfft =        1728          nkpt =          10
 ================================================================================
-P This job should need less than                       1.356 Mbytes of memory.
+P This job should need less than                       1.405 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.049 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   20 : space group Im m 2 (# 44); Bravais oI (body-center ortho.)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.049 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          77          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.492 Mbytes of memory.
+P This job should need less than                       1.541 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.152 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   30 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -231,15 +228,15 @@ P          mk1mem30        64
         optdriver12         0
         optdriver20         0
         optdriver30         1
+           prtpot12         0
+           prtpot20         0
+           prtpot30         1
               qpt12    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt20    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt30    5.00000000E-01  0.00000000E+00  0.00000000E+00
           rfatpol12         1       1
           rfatpol20         1       1
           rfatpol30         1       2
-            rfdir12         1       1       1
-            rfdir20         0       0       0
-            rfdir30         1       1       1
            rfphon12         0
            rfphon20         0
            rfphon30         1
@@ -352,8 +349,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04949
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -370,8 +367,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -864,8 +861,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -882,8 +879,8 @@ meta: {optdriver: 1, rfphon: 1, }
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -899,7 +896,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -920,10 +916,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -934,21 +928,21 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   100.09857638884      6.634E+01 6.115E-02 3.019E+04
- ETOT  2   17.032346174958     -8.300E+01 4.763E-02 2.700E+03
- ETOT  3   6.8644206456747     -1.017E+01 3.653E-03 1.413E+02
- ETOT  4   6.5482642284078     -3.148E-01 1.465E-04 1.867E+00
- ETOT  5   6.5430148097624     -5.275E-03 2.369E-06 1.601E-01
- ETOT  6   6.5425632037562     -4.510E-04 1.799E-07 3.988E-03
- ETOT  7   6.5425533550710     -9.547E-06 7.604E-09 2.806E-04
- ETOT  8   6.5425525424417     -7.618E-07 3.351E-10 8.720E-06
- ETOT  9   6.5425525155171     -7.741E-08 1.439E-11 5.565E-08
- ETOT 10   6.5425525152257      3.214E-08 1.941E-13 5.588E-09
- ETOT 11   6.5425525152078     -1.907E-09 1.011E-14 1.033E-10
- ETOT 12   6.5425525152075     -6.849E-10 1.413E-16 2.219E-11
+-ETOT  1   100.09857638881      6.634E+01 6.115E-02 3.019E+04
+ ETOT  2   17.032346174944     -8.300E+01 4.763E-02 2.700E+03
+ ETOT  3   6.8644206456786     -1.017E+01 3.653E-03 1.413E+02
+ ETOT  4   6.5482642284101     -3.148E-01 1.465E-04 1.867E+00
+ ETOT  5   6.5430148097631     -5.275E-03 2.369E-06 1.601E-01
+ ETOT  6   6.5425632037570     -4.510E-04 1.799E-07 3.988E-03
+ ETOT  7   6.5425533550717     -9.547E-06 7.604E-09 2.806E-04
+ ETOT  8   6.5425525424424     -7.618E-07 3.351E-10 8.720E-06
+ ETOT  9   6.5425525155178     -7.741E-08 1.439E-11 5.565E-08
+ ETOT 10   6.5425525152264      3.214E-08 1.941E-13 5.588E-09
+ ETOT 11   6.5425525152084     -1.907E-09 1.011E-14 1.033E-10
+ ETOT 12   6.5425525152083     -6.848E-10 1.413E-16 2.219E-11
 
  At SCF step   12, etot is converged : 
-  for the second time, diff in etot=  6.849E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  6.848E-10 < toldfe=  1.000E-08
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -982,10 +976,8 @@ tolerances: {toldfe: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -996,20 +988,20 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   8.6031811330648     -1.276E+01 1.130E-02 4.496E+02
- ETOT  2   5.0627411228515     -3.546E+00 2.490E-03 5.687E+00
- ETOT  3   5.0096292136951     -5.316E-02 3.248E-05 1.524E-01
- ETOT  4   5.0087632621743     -9.125E-04 5.058E-07 4.089E-03
- ETOT  5   5.0087468947516     -2.083E-05 2.067E-08 1.285E-04
- ETOT  6   5.0087463766467     -1.059E-06 2.572E-10 5.586E-06
- ETOT  7   5.0087463580546     -1.320E-07 9.885E-12 3.713E-07
- ETOT  8   5.0087463567730      8.064E-08 7.316E-13 1.013E-08
- ETOT  9   5.0087463567334     -1.487E-08 2.171E-14 4.037E-10
- ETOT 10   5.0087463567318      3.862E-09 7.317E-16 1.074E-11
- ETOT 11   5.0087463567318     -1.000E-10 1.503E-17 1.345E-12
+-ETOT  1   8.6031811343352     -1.276E+01 1.130E-02 4.496E+02
+ ETOT  2   5.0627411242144     -3.546E+00 2.490E-03 5.687E+00
+ ETOT  3   5.0096292150424     -5.316E-02 3.248E-05 1.524E-01
+ ETOT  4   5.0087632635215     -9.125E-04 5.058E-07 4.089E-03
+ ETOT  5   5.0087468960987     -2.083E-05 2.067E-08 1.285E-04
+ ETOT  6   5.0087463779938     -1.059E-06 2.572E-10 5.586E-06
+ ETOT  7   5.0087463594017     -1.320E-07 9.885E-12 3.713E-07
+ ETOT  8   5.0087463581201      8.064E-08 7.316E-13 1.013E-08
+ ETOT  9   5.0087463580805     -1.487E-08 2.171E-14 4.037E-10
+ ETOT 10   5.0087463580789      3.862E-09 7.317E-16 1.074E-11
+ ETOT 11   5.0087463580789     -1.001E-10 1.503E-17 1.345E-12
 
  At SCF step   11, etot is converged : 
-  for the second time, diff in etot=  1.000E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.001E-10 < toldfe=  1.000E-08
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1031,9 +1023,9 @@ tolerances: {toldfe: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -4.78190293E+00  frxc 2 =   3.93161439E+00
  Resulting in :
- 2DEtotal=    0.5012165653E+01 Ha. Also 2DEtotal=    0.136387963565E+03 eV
-    (2DErelax=   -1.6360424994E+01 Ha. 2DEnonrelax=    2.1372590647E+01 Ha)
-    (  non-var. 2DEtotal :    5.0087463694E+00 Ha)
+ 2DEtotal=    0.5012165655E+01 Ha. Also 2DEtotal=    0.136387963602E+03 eV
+    (2DErelax=   -1.6360424993E+01 Ha. 2DEnonrelax=    2.1372590648E+01 Ha)
+    (  non-var. 2DEtotal :    5.0087463708E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1043,10 +1035,8 @@ tolerances: {toldfe: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1057,20 +1047,20 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   8.6031865822521     -1.276E+01 1.130E-02 4.496E+02
- ETOT  2   5.0627424705212     -3.546E+00 2.490E-03 5.687E+00
- ETOT  3   5.0096283863598     -5.317E-02 3.246E-05 1.523E-01
- ETOT  4   5.0087632204390     -9.118E-04 5.051E-07 4.085E-03
- ETOT  5   5.0087468963860     -2.075E-05 2.069E-08 1.288E-04
- ETOT  6   5.0087463803973     -1.066E-06 2.571E-10 5.709E-06
- ETOT  7   5.0087463614000     -1.271E-07 1.014E-11 3.763E-07
- ETOT  8   5.0087463601007      7.870E-08 7.364E-13 1.035E-08
- ETOT  9   5.0087463600604     -1.406E-08 2.176E-14 4.098E-10
- ETOT 10   5.0087463600588      3.571E-09 7.144E-16 1.155E-11
- ETOT 11   5.0087463600588     -4.109E-11 1.499E-17 1.274E-12
+-ETOT  1   8.6031865809825     -1.276E+01 1.130E-02 4.496E+02
+ ETOT  2   5.0627424691572     -3.546E+00 2.490E-03 5.687E+00
+ ETOT  3   5.0096283850113     -5.317E-02 3.246E-05 1.523E-01
+ ETOT  4   5.0087632190907     -9.118E-04 5.051E-07 4.085E-03
+ ETOT  5   5.0087468950378     -2.075E-05 2.069E-08 1.288E-04
+ ETOT  6   5.0087463790489     -1.066E-06 2.571E-10 5.709E-06
+ ETOT  7   5.0087463600518     -1.271E-07 1.014E-11 3.763E-07
+ ETOT  8   5.0087463587525      7.870E-08 7.364E-13 1.035E-08
+ ETOT  9   5.0087463587121     -1.406E-08 2.176E-14 4.098E-10
+ ETOT 10   5.0087463587105      3.571E-09 7.144E-16 1.155E-11
+ ETOT 11   5.0087463587105     -4.102E-11 1.499E-17 1.274E-12
 
  At SCF step   11, etot is converged : 
-  for the second time, diff in etot=  4.109E-11 < toldfe=  1.000E-08
+  for the second time, diff in etot=  4.102E-11 < toldfe=  1.000E-08
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1092,9 +1082,9 @@ tolerances: {toldfe: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -4.78190293E+00  frxc 2 =   3.93161439E+00
  Resulting in :
- 2DEtotal=    0.5012165657E+01 Ha. Also 2DEtotal=    0.136387963657E+03 eV
-    (2DErelax=   -1.6360424994E+01 Ha. 2DEnonrelax=    2.1372590651E+01 Ha)
-    (  non-var. 2DEtotal :    5.0087463728E+00 Ha)
+ 2DEtotal=    0.5012165655E+01 Ha. Also 2DEtotal=    0.136387963620E+03 eV
+    (2DErelax=   -1.6360424994E+01 Ha. 2DEnonrelax=    2.1372590649E+01 Ha)
+    (  non-var. 2DEtotal :    5.0087463715E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1104,10 +1094,8 @@ tolerances: {toldfe: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1118,23 +1106,23 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   592.43518456994      4.721E+02 3.056E-01 1.837E+05
- ETOT  2   70.702263034624     -5.218E+02 2.878E-01 1.746E+04
- ETOT  3   6.8116358129846     -6.387E+01 2.042E-02 1.781E+02
- ETOT  4   6.3414936958539     -4.691E-01 1.611E-04 1.107E+01
- ETOT  5   6.3097753178505     -3.108E-02 1.416E-05 2.564E-01
- ETOT  6   6.3089827092534     -7.637E-04 2.670E-07 8.070E-03
- ETOT  7   6.3089593763426     -3.163E-05 1.214E-08 3.482E-04
- ETOT  8   6.3089583216899      4.864E-06 4.467E-10 3.340E-05
- ETOT  9   6.3089582464014      5.025E-07 2.757E-11 6.951E-07
- ETOT 10   6.3089582449752      3.681E-07 6.914E-13 3.431E-08
- ETOT 11   6.3089582448998      6.951E-08 6.077E-14 4.994E-10
- ETOT 12   6.3089582448972      1.093E-08 1.905E-15 7.091E-11
- ETOT 13   6.3089582448982      2.371E-09 1.256E-16 2.979E-12
- ETOT 14   6.3089582448972      3.523E-10 4.909E-18 2.012E-13
+-ETOT  1   592.43518457020      4.721E+02 3.056E-01 1.837E+05
+ ETOT  2   70.702263034785     -5.218E+02 2.878E-01 1.746E+04
+ ETOT  3   6.8116358129900     -6.387E+01 2.042E-02 1.781E+02
+ ETOT  4   6.3414936958541     -4.691E-01 1.611E-04 1.107E+01
+ ETOT  5   6.3097753178485     -3.108E-02 1.416E-05 2.564E-01
+ ETOT  6   6.3089827092517     -7.637E-04 2.670E-07 8.070E-03
+ ETOT  7   6.3089593763408     -3.163E-05 1.214E-08 3.482E-04
+ ETOT  8   6.3089583216872      4.864E-06 4.467E-10 3.340E-05
+ ETOT  9   6.3089582463985      5.025E-07 2.757E-11 6.951E-07
+ ETOT 10   6.3089582449724      3.681E-07 6.914E-13 3.431E-08
+ ETOT 11   6.3089582448982      6.951E-08 6.077E-14 4.994E-10
+ ETOT 12   6.3089582448961      1.093E-08 1.905E-15 7.091E-11
+ ETOT 13   6.3089582448951      2.369E-09 1.256E-16 2.979E-12
+ ETOT 14   6.3089582448948      3.530E-10 4.909E-18 2.012E-13
 
  At SCF step   14, etot is converged : 
-  for the second time, diff in etot=  3.523E-10 < toldfe=  1.000E-08
+  for the second time, diff in etot=  3.530E-10 < toldfe=  1.000E-08
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1168,10 +1156,8 @@ tolerances: {toldfe: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1182,18 +1168,18 @@ tolerances: {toldfe: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   48.791953976321     -3.760E+01 1.106E-01 5.069E+03
- ETOT  2   6.0856382105755     -4.271E+01 2.398E-02 8.730E+01
- ETOT  3   5.1840080429032     -9.041E-01 7.490E-04 1.011E+00
- ETOT  4   5.1787432458324     -5.141E-03 3.779E-06 2.812E-02
- ETOT  5   5.1786111459434     -1.997E-04 9.462E-08 1.351E-03
- ETOT  6   5.1786054651212      3.888E-06 2.064E-09 3.363E-05
- ETOT  7   5.1786053512249      1.252E-06 8.073E-11 3.240E-06
- ETOT  8   5.1786053396087      3.514E-07 4.410E-12 8.742E-08
- ETOT  9   5.1786053393390      1.379E-07 1.674E-13 3.286E-09
- ETOT 10   5.1786053393199     -3.851E-08 8.998E-15 3.814E-10
- ETOT 11   5.1786053393193     -4.581E-09 4.102E-16 2.261E-11
- ETOT 12   5.1786053393193     -1.196E-09 3.799E-17 1.642E-12
+-ETOT  1   48.791953979882     -3.760E+01 1.106E-01 5.069E+03
+ ETOT  2   6.0856382116419     -4.271E+01 2.398E-02 8.730E+01
+ ETOT  3   5.1840080436108     -9.041E-01 7.490E-04 1.011E+00
+ ETOT  4   5.1787432465394     -5.141E-03 3.779E-06 2.812E-02
+ ETOT  5   5.1786111466506     -1.997E-04 9.462E-08 1.351E-03
+ ETOT  6   5.1786054658290      3.888E-06 2.064E-09 3.363E-05
+ ETOT  7   5.1786053519322      1.252E-06 8.073E-11 3.240E-06
+ ETOT  8   5.1786053403158      3.514E-07 4.410E-12 8.742E-08
+ ETOT  9   5.1786053400458      1.379E-07 1.674E-13 3.286E-09
+ ETOT 10   5.1786053400276     -3.851E-08 8.998E-15 3.814E-10
+ ETOT 11   5.1786053400267     -4.581E-09 4.102E-16 2.261E-11
+ ETOT 12   5.1786053400261     -1.196E-09 3.799E-17 1.642E-12
 
  At SCF step   12, etot is converged : 
   for the second time, diff in etot=  1.196E-09 < toldfe=  1.000E-08
@@ -1202,6 +1188,66 @@ tolerances: {toldfe: 1.00E-08, }
  ----iterations are completed or convergence reached----
 
  Mean square residual over all n,k,spin=   96.882E-19; max=  37.987E-18
+
+ Thirteen components of 2nd-order total energy (hartree) are
+ 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
+     kin0=   9.48148562E+01 eigvalue=  -4.08861921E-01  local=  -4.93972376E+01
+ 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
+ loc psp =  -1.38191512E+02  Hartree=   3.82274705E+01     xc=  -1.06605950E+01
+ note that "loc psp" includes a xc core correction that could be resolved
+ 7,8,9: eventually, occupation + non-local contributions
+    edocc=   0.00000000E+00     enl0=   8.65661049E+00   enl1=  -2.42562966E+01
+ 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
+   erelax=  -8.12155662E+01
+ 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
+ fr.local=   5.65356247E+01 fr.nonlo=   1.24765100E+01  Ewald=   1.45335078E+01
+ 13,14 Frozen wf xc core corrections (1) and (2)
+ frxc 1  =  -1.87936605E+01  frxc 2 =   2.16505278E+01
+ Resulting in :
+ 2DEtotal=    0.5186943554E+01 Ha. Also 2DEtotal=    0.141143912119E+03 eV
+    (2DErelax=   -8.1215566220E+01 Ha. 2DEnonrelax=    8.6402509775E+01 Ha)
+    (  non-var. 2DEtotal :    5.1786052929E+00 Ha)
+
+
+--------------------------------------------------------------------------------
+ Perturbation wavevector (in red.coord.)   0.500000  0.000000  0.000000
+ Perturbation : displacement of atom   2   along direction   3
+ symkpt : not enough symmetry to change the number of k points.
+
+--------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------
+
+ Initialisation of the first-order wave-functions :
+  ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 30, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-08, }
+...
+
+     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
+-ETOT  1   48.791794192698     -3.760E+01 1.106E-01 5.069E+03
+ ETOT  2   6.0853885330449     -4.271E+01 2.398E-02 8.727E+01
+ ETOT  3   5.1839915445731     -9.038E-01 7.485E-04 1.010E+00
+ ETOT  4   5.1787410630336     -5.127E-03 3.868E-06 2.789E-02
+ ETOT  5   5.1786111979794     -1.976E-04 9.377E-08 1.368E-03
+ ETOT  6   5.1786054654650      3.877E-06 2.052E-09 3.395E-05
+ ETOT  7   5.1786053506857      1.281E-06 8.048E-11 3.230E-06
+ ETOT  8   5.1786053390813      3.356E-07 4.434E-12 8.829E-08
+ ETOT  9   5.1786053388074      1.401E-07 1.682E-13 3.271E-09
+ ETOT 10   5.1786053387892     -3.834E-08 9.017E-15 3.796E-10
+ ETOT 11   5.1786053387884     -4.625E-09 4.082E-16 2.280E-11
+ ETOT 12   5.1786053387881     -1.171E-09 3.786E-17 1.683E-12
+
+ At SCF step   12, etot is converged : 
+  for the second time, diff in etot=  1.171E-09 < toldfe=  1.000E-08
+================================================================================
+
+ ----iterations are completed or convergence reached----
+
+ Mean square residual over all n,k,spin=   97.563E-19; max=  37.857E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1218,71 +1264,9 @@ tolerances: {toldfe: 1.00E-08, }
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =  -1.87936605E+01  frxc 2 =   2.16505278E+01
  Resulting in :
- 2DEtotal=    0.5186943553E+01 Ha. Also 2DEtotal=    0.141143912094E+03 eV
-    (2DErelax=   -8.1215566223E+01 Ha. 2DEnonrelax=    8.6402509776E+01 Ha)
-    (  non-var. 2DEtotal :    5.1786052922E+00 Ha)
-
-
---------------------------------------------------------------------------------
- Perturbation wavevector (in red.coord.)   0.500000  0.000000  0.000000
- Perturbation : displacement of atom   2   along direction   3
- symkpt : not enough symmetry to change the number of k points.
-
---------------------------------------------------------------------------------
-
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
---------------------------------------------------------------------------------
-
--inwffil : will read wavefunctions from disk file tsv4_80o_DS20_WFK
- Initialisation of the first-order wave-functions :
-  ireadwf=   0
-
---- !BeginCycle
-iteration_state: {dtset: 30, }
-solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {toldfe: 1.00E-08, }
-...
-
-     iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   48.791794196325     -3.760E+01 1.106E-01 5.069E+03
- ETOT  2   6.0853885341226     -4.271E+01 2.398E-02 8.727E+01
- ETOT  3   5.1839915452838     -9.038E-01 7.485E-04 1.010E+00
- ETOT  4   5.1787410637447     -5.127E-03 3.868E-06 2.789E-02
- ETOT  5   5.1786111986909     -1.976E-04 9.377E-08 1.368E-03
- ETOT  6   5.1786054661753      3.877E-06 2.052E-09 3.395E-05
- ETOT  7   5.1786053513971      1.281E-06 8.048E-11 3.230E-06
- ETOT  8   5.1786053397919      3.356E-07 4.434E-12 8.829E-08
- ETOT  9   5.1786053395183      1.401E-07 1.682E-13 3.271E-09
- ETOT 10   5.1786053395003     -3.834E-08 9.017E-15 3.796E-10
- ETOT 11   5.1786053394996     -4.625E-09 4.082E-16 2.280E-11
- ETOT 12   5.1786053394993     -1.171E-09 3.786E-17 1.683E-12
-
- At SCF step   12, etot is converged : 
-  for the second time, diff in etot=  1.171E-09 < toldfe=  1.000E-08
-================================================================================
-
- ----iterations are completed or convergence reached----
-
- Mean square residual over all n,k,spin=   97.563E-19; max=  37.857E-18
-
- Thirteen components of 2nd-order total energy (hartree) are
- 1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   9.48148562E+01 eigvalue=  -4.08861921E-01  local=  -4.93972376E+01
- 4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
- loc psp =  -1.38191512E+02  Hartree=   3.82274705E+01     xc=  -1.06605950E+01
- note that "loc psp" includes a xc core correction that could be resolved
- 7,8,9: eventually, occupation + non-local contributions
-    edocc=   0.00000000E+00     enl0=   8.65661049E+00   enl1=  -2.42562966E+01
- 1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -8.12155662E+01
- 10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
- fr.local=   5.65356247E+01 fr.nonlo=   1.24765099E+01  Ewald=   1.45335078E+01
- 13,14 Frozen wf xc core corrections (1) and (2)
- frxc 1  =  -1.87936605E+01  frxc 2 =   2.16505278E+01
- Resulting in :
- 2DEtotal=    0.5186943554E+01 Ha. Also 2DEtotal=    0.141143912114E+03 eV
-    (2DErelax=   -8.1215566221E+01 Ha. 2DEnonrelax=    8.6402509775E+01 Ha)
-    (  non-var. 2DEtotal :    5.1786052968E+00 Ha)
+ 2DEtotal=    0.5186943553E+01 Ha. Also 2DEtotal=    0.141143912089E+03 eV
+    (2DErelax=   -8.1215566224E+01 Ha. 2DEnonrelax=    8.6402509777E+01 Ha)
+    (  non-var. 2DEtotal :    5.1786052961E+00 Ha)
 
 ================================================================================
 
@@ -1297,85 +1281,85 @@ tolerances: {toldfe: 1.00E-08, }
   dir pert dir pert     real part     imaginary part
   
    1    1   1    1         6.5430729696         0.0000000000
-   1    1   2    1         2.4696271822        -0.0000281658
-   1    1   3    1         2.4696271679        -0.0000281708
-   1    1   1    2        -0.8215239288        -0.0000339844
-   1    1   2    2        -2.3158032838        -0.0000276515
-   1    1   3    2        -2.3158032840        -0.0000276487
-   1    1   1    4         2.9002397309         0.0000000000
-   1    1   2    4        -0.8916471802         0.0000000000
-   1    1   3    4        -1.4344712965         0.0000000000
+   1    1   2    1         2.4696271821        -0.0000281662
+   1    1   3    1         2.4696271680        -0.0000281712
+   1    1   1    2        -0.8215239288        -0.0000339856
+   1    1   2    2        -2.3158032833        -0.0000276526
+   1    1   3    2        -2.3158032845        -0.0000276498
+   1    1   1    4         2.9002397381         0.0000000000
+   1    1   2    4        -0.8916471764         0.0000000000
+   1    1   3    4        -1.4344712922         0.0000000000
   
-   2    1   1    1         2.4696387848        -0.0000071790
-   2    1   2    1         5.0095120987         0.0000000000
+   2    1   1    1         2.4696387846        -0.0000071786
+   2    1   2    1         5.0095121000         0.0000000000
    2    1   3    1         2.4752845501        -0.0000064575
-   2    1   1    2        -2.3228256696        -0.0000203138
-   2    1   2    2        -4.6055725833        -0.0000152638
-   2    1   3    2        -2.2919593827        -0.0000136681
-   2    1   1    4        -1.8754675159         0.0000000000
-   2    1   2    4        -0.4406064407         0.0000000000
-   2    1   3    4        -2.1916036214         0.0000000000
+   2    1   1    2        -2.3228256696        -0.0000203149
+   2    1   2    2        -4.6055725832        -0.0000152651
+   2    1   3    2        -2.2919593832        -0.0000136693
+   2    1   1    4        -1.8754675164         0.0000000000
+   2    1   2    4        -0.4406064410         0.0000000000
+   2    1   3    4        -2.1916036211         0.0000000000
   
-   3    1   1    1         2.4696387842        -0.0000071785
+   3    1   1    1         2.4696387844        -0.0000071780
    3    1   2    1         2.4752845501        -0.0000064575
-   3    1   3    1         5.0095121020         0.0000000000
-   3    1   1    2        -2.3228256689        -0.0000203138
-   3    1   2    2        -2.2919593830        -0.0000136684
-   3    1   3    2        -4.6055725832        -0.0000152637
-   3    1   1    4        -1.1667259464         0.0000000000
-   3    1   2    4        -1.3205630259         0.0000000000
-   3    1   3    4        -0.1427035226         0.0000000000
+   3    1   3    1         5.0095121007         0.0000000000
+   3    1   1    2        -2.3228256688        -0.0000203149
+   3    1   2    2        -2.2919593824        -0.0000136696
+   3    1   3    2        -4.6055725833        -0.0000152650
+   3    1   1    4        -1.1667259461         0.0000000000
+   3    1   2    4        -1.3205630250         0.0000000000
+   3    1   3    4        -0.1427035233         0.0000000000
   
-   1    2   1    1        -0.8217304501         0.0000224643
-   1    2   2    1        -2.3228465391         0.0000082687
-   1    2   3    1        -2.3228465682         0.0000082606
+   1    2   1    1        -0.8217304501         0.0000224655
+   1    2   2    1        -2.3228465392         0.0000082698
+   1    2   3    1        -2.3228465681         0.0000082618
    1    2   1    2         6.3092116880         0.0000000000
-   1    2   2    2         2.5179484883         0.0000142049
-   1    2   3    2         2.5179484849         0.0000142115
-   1    2   1    4         3.6762282153         0.0000000000
-   1    2   2    4        -0.6018156547         0.0000000000
-   1    2   3    4        -2.3405064290         0.0000000000
+   1    2   2    2         2.5179484877         0.0000142031
+   1    2   3    2         2.5179484856         0.0000142097
+   1    2   1    4         3.6762282123         0.0000000000
+   1    2   2    4        -0.6018156516         0.0000000000
+   1    2   3    4        -2.3405064352         0.0000000000
   
-   2    2   1    1        -2.3158311510         0.0000276087
-   2    2   2    1        -4.6056113770         0.0000128405
-   2    2   3    1        -2.2919784540         0.0000129949
-   2    2   1    2         2.5179471526        -0.0000028581
-   2    2   2    2         5.1788216336         0.0000000000
+   2    2   1    1        -2.3158311505         0.0000276097
+   2    2   2    1        -4.6056113769         0.0000128418
+   2    2   3    1        -2.2919784535         0.0000129961
+   2    2   1    2         2.5179471519        -0.0000028562
+   2    2   2    2         5.1788216343         0.0000000000
    2    2   3    2         2.5562769313         0.0000028724
-   2    2   1    4        -4.9333792787         0.0000000000
-   2    2   2    4         2.8641388148         0.0000000000
-   2    2   3    4        -6.6197109403         0.0000000000
+   2    2   1    4        -4.9333792841         0.0000000000
+   2    2   2    4         2.8641388116         0.0000000000
+   2    2   3    4        -6.6197109509         0.0000000000
   
-   3    2   1    1        -2.3158311503         0.0000276061
-   3    2   2    1        -2.2919784529         0.0000129948
-   3    2   3    1        -4.6056113760         0.0000128405
-   3    2   1    2         2.5179471493        -0.0000028581
+   3    2   1    1        -2.3158311508         0.0000276071
+   3    2   2    1        -2.2919784535         0.0000129960
+   3    2   3    1        -4.6056113761         0.0000128418
+   3    2   1    2         2.5179471500        -0.0000028562
    3    2   2    2         2.5562769300         0.0000028733
-   3    2   3    2         5.1788216383         0.0000000000
-   3    2   1    4        -5.4455394574         0.0000000000
-   3    2   2    4        -4.4312941567         0.0000000000
-   3    2   3    4         1.6363975815         0.0000000000
+   3    2   3    2         5.1788216375         0.0000000000
+   3    2   1    4        -5.4455394644         0.0000000000
+   3    2   2    4        -4.4312941593         0.0000000000
+   3    2   3    4         1.6363975785         0.0000000000
   
-   1    4   1    1         2.9002397309         0.0000000000
-   1    4   2    1        -1.8754675159         0.0000000000
-   1    4   3    1        -1.1667259464         0.0000000000
-   1    4   1    2         3.6762282153         0.0000000000
-   1    4   2    2        -4.9333792787         0.0000000000
-   1    4   3    2        -5.4455394574         0.0000000000
+   1    4   1    1         2.9002397381         0.0000000000
+   1    4   2    1        -1.8754675164         0.0000000000
+   1    4   3    1        -1.1667259461         0.0000000000
+   1    4   1    2         3.6762282123         0.0000000000
+   1    4   2    2        -4.9333792841         0.0000000000
+   1    4   3    2        -5.4455394644         0.0000000000
   
-   2    4   1    1        -0.8916471802         0.0000000000
-   2    4   2    1        -0.4406064407         0.0000000000
-   2    4   3    1        -1.3205630259         0.0000000000
-   2    4   1    2        -0.6018156547         0.0000000000
-   2    4   2    2         2.8641388148         0.0000000000
-   2    4   3    2        -4.4312941567         0.0000000000
+   2    4   1    1        -0.8916471764         0.0000000000
+   2    4   2    1        -0.4406064410         0.0000000000
+   2    4   3    1        -1.3205630250         0.0000000000
+   2    4   1    2        -0.6018156516         0.0000000000
+   2    4   2    2         2.8641388116         0.0000000000
+   2    4   3    2        -4.4312941593         0.0000000000
   
-   3    4   1    1        -1.4344712965         0.0000000000
-   3    4   2    1        -2.1916036214         0.0000000000
-   3    4   3    1        -0.1427035226         0.0000000000
-   3    4   1    2        -2.3405064290         0.0000000000
-   3    4   2    2        -6.6197109403         0.0000000000
-   3    4   3    2         1.6363975815         0.0000000000
+   3    4   1    1        -1.4344712922         0.0000000000
+   3    4   2    1        -2.1916036211         0.0000000000
+   3    4   3    1        -0.1427035233         0.0000000000
+   3    4   1    2        -2.3405064352         0.0000000000
+   3    4   2    2        -6.6197109509         0.0000000000
+   3    4   3    2         1.6363975785         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -1384,7 +1368,7 @@ tolerances: {toldfe: 1.00E-08, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.1031537549         0.0000005123
-   1    1   2    1        -0.0142200108        -0.0000001273
+   1    1   2    1        -0.0142200108        -0.0000001272
    1    1   3    1        -0.0142200111        -0.0000001273
    1    1   1    2        -0.0473410326         0.0000000362
    1    1   2    2        -0.0339065279        -0.0000000589
@@ -1402,7 +1386,7 @@ tolerances: {toldfe: 1.00E-08, }
    3    1   3    1         0.1029533170         0.0000001145
    3    1   1    2        -0.0337820003        -0.0000001890
    3    1   2    2         0.0337431637        -0.0000002730
-   3    1   3    2        -0.0483112055        -0.0000003296
+   3    1   3    2        -0.0483112055        -0.0000003297
   
    1    2   1    1        -0.0473430253         0.0000000212
    1    2   2    1        -0.0337806631         0.0000002905
@@ -1412,9 +1396,9 @@ tolerances: {toldfe: 1.00E-08, }
    1    2   3    2        -0.0112898361        -0.0000000506
   
    2    2   1    1        -0.0339050672        -0.0000000526
-   2    2   2    1        -0.0483133866         0.0000001963
+   2    2   2    1        -0.0483133866         0.0000001964
    2    2   3    1         0.0337416826         0.0000002020
-   2    2   1    2        -0.0112898123         0.0000002520
+   2    2   1    2        -0.0112898123         0.0000002519
    2    2   2    2         0.1024459153        -0.0000000509
    2    2   3    2         0.0094350130         0.0000000509
   
@@ -1450,7 +1434,7 @@ tolerances: {toldfe: 1.00E-08, }
            efield30    1.00000000E-03  0.00000000E+00  0.00000000E+00
            etotal12   -1.0100117677E+01
            etotal20   -1.0092295239E+01
-           etotal30    5.1786053395E+00
+           etotal30    5.1786053388E+00
             fcart12   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart20    1.8166881134E-03  9.3504704643E-20 -9.3504704643E-20
@@ -1592,15 +1576,15 @@ P          mk1mem30        64
         optdriver12         0
         optdriver20         0
         optdriver30         1
+           prtpot12         0
+           prtpot20         0
+           prtpot30         1
               qpt12    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt20    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt30    5.00000000E-01  0.00000000E+00  0.00000000E+00
           rfatpol12         1       1
           rfatpol20         1       1
           rfatpol30         1       2
-            rfdir12         1       1       1
-            rfdir20         0       0       0
-            rfdir30         1       1       1
            rfphon12         0
            rfphon20         0
            rfphon30         1
@@ -1684,61 +1668,69 @@ P          mk1mem30        64
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         16.9        0.28      0.005
-- Total wall clock time (s,m,h):         16.9        0.28      0.005
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
+- Total cpu        time (s,m,h):         17.6        0.29      0.005
+- Total wall clock time (s,m,h):         17.7        0.29      0.005
 -
 - For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           16.9, wall_time =           16.9
+-  as well as % of the time and number of calls for node 0
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   7.048  41.8      6.987  41.3         104991      -1.00        1.01       1.01
-- fourwf%(G->r)                  1.320   7.8      1.344   7.9          36864      -1.00        0.98       0.98
-- dfpt_vtorho-kpt loop           1.025   6.1      1.044   6.2             72      -1.00        0.98       0.98
-- nonlop(apply)                  0.984   5.8      1.005   5.9          86559      -1.00        0.98       0.98
-- getghc-other                   0.763   4.5      0.754   4.5             -1      -1.00        1.01       1.01
-- pspini                         0.648   3.8      0.649   3.8              3      -1.00        1.00       1.00
-- projbd                         0.612   3.6      0.589   3.5         169502      -1.00        1.04       1.04
-- dfpt_vtowfk(contrib)           0.579   3.4      0.592   3.5             -1      -1.00        0.98       0.98
-- nonlop(forces)                 0.364   2.2      0.346   2.0          27648      -1.00        1.05       1.05
-- getgh1c_setup                  0.290   1.7      0.300   1.8           4608      -1.00        0.97       0.97
-- mkffnl                         0.228   1.4      0.233   1.4          10458      -1.00        0.98       0.98
-- invars2                        0.134   0.8      0.135   0.8              3      -1.00        0.99       0.99
-- dfpt_scfcv  (1)                0.125   0.7      0.126   0.7              6      -1.00        0.99       0.99
-- timing timab                   0.106   0.6      0.107   0.6             10      -1.00        1.00       1.00
-- others (113)                  -0.010  -0.1      0.132   0.8             -1      -1.00       -0.08      -0.08
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           17.6, wall_time =           17.7
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              7.377  42.0         7.423  42.0         104991      -1.00        0.99       0.99
+- fourwf%(G->r)                             1.380   7.9         1.374   7.8          36864      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                          1.246   7.1         1.188   6.7             -1      -1.00        1.05       1.05
+- dfpt_vtorho-kpt loop                      1.116   6.4         1.169   6.6             72      -1.00        0.95       0.95
+- nonlop(apply)                             1.033   5.9         1.010   5.7          86559      -1.00        1.02       1.02
+- getghc(/=fourXX,nonlop,fock_XX)           0.741   4.2         0.733   4.2             -1      -1.00        1.01       1.01
+- pspini                                    0.669   3.8         0.671   3.8              3      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)                      0.596   3.4         0.611   3.5             -1      -1.00        0.98       0.98
+- projbd                                    0.581   3.3         0.628   3.6         169502      -1.00        0.92       0.92
+- nonlop(forces)                            0.393   2.2         0.397   2.2          27648      -1.00        0.99       0.99
+- getgh1c_setup                             0.305   1.7         0.302   1.7           4608      -1.00        1.01       1.01
+- mkffnl                                    0.245   1.4         0.241   1.4          10458      -1.00        1.02       1.02
+- get_dtsets_pspheads                       0.175   1.0         0.176   1.0              1      -1.00        1.00       1.00
+- timing timab                              0.144   0.8         0.144   0.8             11      -1.00        1.00       1.00
+- dfpt_scfcv  (1)                           0.124   0.7         0.125   0.7              6      -1.00        0.99       0.99
+- others (145)                              0.551   3.1         0.574   3.3             -1      -1.00        0.96       0.96
 -<END_TIMER>
 -
-- subtotal                      14.215  84.3     14.343  84.7                                  0.99       0.99
+- subtotal                                 16.676  94.9        16.766  95.0                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          16.9, wall_time =          16.9
+- cpu_time =          17.6, wall_time =          17.7
 -
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   7.048  41.8      6.987  41.3         104991      -1.00        1.01       1.01
-- fourwf%(G->r)                  1.320   7.8      1.344   7.9          36864      -1.00        0.98       0.98
-- dfpt_vtorho-kpt loop           1.025   6.1      1.044   6.2             72      -1.00        0.98       0.98
-- nonlop(apply)                  0.984   5.8      1.005   5.9          86559      -1.00        0.98       0.98
-- getghc-other                   0.763   4.5      0.754   4.5             -1      -1.00        1.01       1.01
-- pspini                         0.648   3.8      0.649   3.8              3      -1.00        1.00       1.00
-- projbd                         0.612   3.6      0.589   3.5         169502      -1.00        1.04       1.04
-- dfpt_vtowfk(contrib)           0.579   3.4      0.592   3.5             -1      -1.00        0.98       0.98
-- nonlop(forces)                 0.364   2.2      0.346   2.0          27648      -1.00        1.05       1.05
-- getgh1c_setup                  0.290   1.7      0.300   1.8           4608      -1.00        0.97       0.97
-- mkffnl                         0.228   1.4      0.233   1.4          10458      -1.00        0.98       0.98
-- invars2                        0.134   0.8      0.135   0.8              3      -1.00        0.99       0.99
-- dfpt_scfcv  (1)                0.125   0.7      0.126   0.7              6      -1.00        0.99       0.99
-- timing timab                   0.106   0.6      0.107   0.6             10      -1.00        1.00       1.00
-- others (113)                  -0.010  -0.1      0.132   0.8             -1      -1.00       -0.08      -0.08
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              7.377  42.0         7.423  42.0         104991      -1.00        0.99       0.99
+- fourwf%(G->r)                             1.380   7.9         1.374   7.8          36864      -1.00        1.00       1.00
+- dfpt_cgwf-O(npw)                          1.246   7.1         1.188   6.7             -1      -1.00        1.05       1.05
+- dfpt_vtorho-kpt loop                      1.116   6.4         1.169   6.6             72      -1.00        0.95       0.95
+- nonlop(apply)                             1.033   5.9         1.010   5.7          86559      -1.00        1.02       1.02
+- getghc(/=fourXX,nonlop,fock_XX)           0.741   4.2         0.733   4.2             -1      -1.00        1.01       1.01
+- pspini                                    0.669   3.8         0.671   3.8              3      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)                      0.596   3.4         0.611   3.5             -1      -1.00        0.98       0.98
+- projbd                                    0.581   3.3         0.628   3.6         169502      -1.00        0.92       0.92
+- nonlop(forces)                            0.393   2.2         0.397   2.2          27648      -1.00        0.99       0.99
+- getgh1c_setup                             0.305   1.7         0.302   1.7           4608      -1.00        1.01       1.01
+- mkffnl                                    0.245   1.4         0.241   1.4          10458      -1.00        1.02       1.02
+- get_dtsets_pspheads                       0.175   1.0         0.176   1.0              1      -1.00        1.00       1.00
+- timing timab                              0.144   0.8         0.144   0.8             11      -1.00        1.00       1.00
+- dfpt_scfcv  (1)                           0.124   0.7         0.125   0.7              6      -1.00        0.99       0.99
+- others (145)                              0.551   3.1         0.574   3.3             -1      -1.00        0.96       0.96
 -<END_TIMER>
 
-- subtotal                      14.215  84.3     14.343  84.7                                  0.99       0.99
+- subtotal                                 16.676  94.9        16.766  95.0                                  0.99       0.99
 
 ================================================================================
 
@@ -1818,10 +1810,10 @@ P          mk1mem30        64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         16.9  wall=         16.9
+- Proc.   0 individual time (sec): cpu=         17.6  wall=         17.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered 700 WARNINGs and  51 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.9  wall=         16.9
+.Delivered 700 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.6  wall=         17.7

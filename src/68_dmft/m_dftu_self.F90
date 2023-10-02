@@ -15,10 +15,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -77,12 +73,6 @@ contains
 !! OUTPUT
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      pawpupot,wrtout
 !!
 !! SOURCE
 

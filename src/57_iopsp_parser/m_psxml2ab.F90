@@ -20,12 +20,6 @@
 !! psphead = psp information structure
 !! atmsymb = atomic symbol
 !!
-!! PARENTS
-!!      inpspheads,pspatm_abinit
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -37,7 +31,6 @@
 module m_psxml2ab
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
 #ifdef HAVE_LIBPSML
@@ -59,8 +52,6 @@ public :: psxml2abheader
 CONTAINS
 
 subroutine psxml2abheader(psxmlfile, psphead, atmsymb, creator, iwrite)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -399,17 +390,11 @@ end module m_psxml2ab
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine psml_die(str)
 
   use m_errors
-  implicit none
-
   character(len=*), intent(in) :: str
 
   ABI_BUG(str)

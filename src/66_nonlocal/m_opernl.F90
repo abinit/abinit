@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -123,12 +119,6 @@ contains
 !!
 !! This routine basically replaces getgla (gxa here is the former gla),
 !! except for the calculation of <G|dVnl/dk|C> or strain gradients.
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
-!!      dfpt_mkffkg
 !!
 !! SOURCE
 
@@ -737,12 +727,6 @@ end subroutine opernl2
 !! This routine basically replaces getgla (gxa here is the former gla),
 !! except for the calculation of <G|dVnl/dk|C> or strain gradients.
 !!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
-!!      dfpt_mkffkg
-!!
 !! SOURCE
 
 subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
@@ -1333,12 +1317,6 @@ end subroutine opernl3
 !! except for the calculation of <G|dVnl/dk|C> or strain gradients.
 !!
 !! Present version decomposed according to iffkg
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
-!!      dfpt_mkffkg
 !!
 !! SOURCE
 
@@ -2341,12 +2319,6 @@ end subroutine opernl4a
 !!
 !! Present version decomposed according to iffkg
 !! opernl4a.f is from reciprocal space to projected quantities.
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
-!!      dfpt_mkffkg
 !!
 !! SOURCE
 

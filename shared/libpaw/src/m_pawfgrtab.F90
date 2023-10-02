@@ -172,13 +172,6 @@ CONTAINS
 !! OUTPUT
 !!  Pawfgrtab(natom) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_fock
-!!      m_nonlinear,m_paw_mkaewf,m_paw_mkrho,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawfgrtab_init(Pawfgrtab,cplex,l_size_atm,nspden,typat,&
@@ -263,14 +256,6 @@ end subroutine pawfgrtab_init
 !! SIDE EFFECTS
 !!  Pawfgrtab(natom) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_classify_bands,m_d2frnl,m_exc_analyze,m_fock
-!!      m_nonlinear,m_paral_pert,m_paw_dfpt,m_paw_mkaewf,m_paw_mkrho
-!!      m_pawfgrtab,m_respfn_driver,m_scfcv_core,m_screening_driver
-!!      m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawfgrtab_free(Pawfgrtab)
@@ -337,11 +322,6 @@ end subroutine pawfgrtab_free
 !! SIDE EFFECTS
 !!  Pawfgrtab(:) <type(pawfgrtab_type)>=atomic data given on fine rectangular grid
 !!
-!! PARENTS
-!!      m_fock,m_paw_dfpt,m_pawfgrtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawfgrtab_nullify(Pawfgrtab)
@@ -398,11 +378,6 @@ end subroutine pawfgrtab_nullify
 !!
 !! NOTES
 !!  paw_fgrtab_copy must have been allocated in the calling function.
-!!
-!! PARENTS
-!!      m_pawfgrtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -553,11 +528,6 @@ end subroutine pawfgrtab_copy
 !! OUTPUT
 !! (only writing)
 !!
-!! PARENTS
-!!      m_exc_analyze,m_paw_mkaewf,m_sigma_driver,m_wfd,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawfgrtab_print(Pawfgrtab,natom,unit,prtvol,mode_paral,mpi_atmtab,comm_atom)
@@ -659,11 +629,6 @@ end subroutine pawfgrtab_print
 !! OUTPUT
 !!  istat : 1 if yet gathered in that case, pawfgrtab_gathered contains nothing
 !!  pawfgrtab_gathered : pawfgrtab gathered between comm_atom
-!!
-!! PARENTS
-!!      m_paw_dfpt,m_pawfgrtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -987,11 +952,6 @@ end subroutine pawfgrtab_gather
 !!
 !! SIDE EFFECTS
 !!  pawfgrtab(:)<type(pawfgrtab_type)>= input (and eventually output) pawfgrtab datastructures
-!!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1328,11 +1288,6 @@ end subroutine pawfgrtab_redistribute
 !! OUTPUT
 !!  pawfgrtab= output datastructure filled with buffers receive in a receive operation
 !!
-!! PARENTS
-!!      m_pawfgrtab
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pawfgrtab_isendreceive_getbuffer(pawfgrtab,npawfgrtab_send,atm_indx_recv,buf_int,buf_dp)
@@ -1470,11 +1425,6 @@ end subroutine pawfgrtab_isendreceive_getbuffer
 !!  buf_int_size= size of buffer of integers
 !!  buf_dp= buffer of double precision numbers to be sent
 !!  buf_dp_size= size of buffer of double precision numbers
-!!
-!! PARENTS
-!!      m_pawfgrtab
-!!
-!! CHILDREN
 !!
 !! SOURCE
 !!

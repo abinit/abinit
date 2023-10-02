@@ -347,23 +347,62 @@ In particular one can use the options:
     # with_tdirs = list of directories to execute
     # without_tdirs = list of directories that will be excluded
 
-## How to add a new test
+## How to add a new test in the test suite
 
-Let's assume you want to add a new test `tfoo_1.in` to the directory `v5`.
-This test will be hence located in the `foo` sub-suite within suite `v5` 
-so that we can easily run it with `runtests`:
-    
-    runtests foo[1] 
+In order to introduce a test, one needs to:
 
-In order to add the new test, one has to follow the following steps:
+-  Provide a new input file in e.g. **tests/v9/Input**
+   (or modify an existing one, possibly in another directory, but please do not suppress the existing capability testing!).
 
-1. Add the name of the input file to the `inp_files` list in `v5/__init__.py`
+-  Provide a new reference file in the corresponding **tests/v9/Refs**,
+   that might possibly come from your machine, but better (it will avoid problems with tolnlines, see below) from the reference machine currently present in the test farm (alps at the time of writing).
 
-2. Register the name of the sub-suite to the list sub-suites 
-   defined in `v5/__init__.py` 
+-  Insert the test in the list of tests to be done, by adding its name in **tests/v9/\_\_init\_\_.py**.
+
+-  Document the test by adding a commented section inside the input file
+   (edit an existing input file to follow its style).
+
+- Declare the pseudopotentials, the flow of actions, the files to be analyzed, the tolerances for the test,
+  inside this documentation. For the tolerances, start with
+
+        tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
+
+  The different fields control how strictly the test results will be analysed:
+
+  *  **tolnlines** is the maximal number of lines found to be different between the output and reference file
+     (within a rough tolerance that can be tuned by the option **opt=-medium**, **opt=-easy** or **opt=-ridiculous**,
+     see the added section in other input files).
+  *  the maximum floating point difference found must be less than **tolabs**, for each line individually,
+  *  the maximum relative difference must be less than **tolrel**, for each line individually.
+
+If this procedure fails, contact the code maintainers in order adjust the test case.
+This might mean modifying the tolerances files.
+Unless you are really expert, let the maintainer do the final adjustment.
+
+!!! important
+
+    Please, try to keep preferably the total time per test case to less than 10 seconds.
+    30 seconds is a maximum for most test cases. Going being this needs exceptional reasons.
+
+Supposing now that you have introduced a new test case.
+It can be used, with the other tests of the ABINIT test suite, through different channels:
+
+*  these tests can be triggered on the test farm Web Page.
+
+*  locally (on your machine), the whole set of sequential tests, or particular tests or series of tests,
+   can be triggered by issuing, in the ABINIT/tests directory, the command *./runtests.py*.
+   (see the many capabilities of this scripts by issuing *./runtests.py --help*).
+   Other sets of calculations can be triggered, as described by issuing *make help*.
+   The result will appear in a new subdirectory *Test_suite*
+
+Last but not least: are you sure that your modifications do not deteriorate the performance of the code
+in the regime where your modifications are not used?
+You should inspect your modifications for both memory use and CPU time.
+
+
+Adding a chain of tests is slightly more involved, and imply to
+register the name of the sub-suite to the list of sub-suites in `__init__.py` 
    (this step can be skipped if the test does not belong to a sub-suite)
-
-3. Add the input files to *v5/Input* and the reference files to *v5/Refs*
 
 !!! warning
 

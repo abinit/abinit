@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h30 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h04 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v7_t03/t03.in
-- output file    -> t03.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t03/t03.abi
+- output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
-
 
  DATASET   11 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =         164          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       2.142 Mbytes of memory.
+P This job should need less than                       2.259 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.042 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =         164          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.216 Mbytes of memory.
+P This job should need less than                       2.334 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =         164          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.216 Mbytes of memory.
+P This job should need less than                       2.334 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.102 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           4
        mpw =         164          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       2.284 Mbytes of memory.
+P This job should need less than                       2.519 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   22 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          10
        mpw =         164          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.542 Mbytes of memory.
+P This job should need less than                       2.777 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -119,11 +113,10 @@ _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          10
        mpw =         164          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.542 Mbytes of memory.
+P This job should need less than                       2.777 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   31 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -136,11 +129,10 @@ _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =           4
        mpw =         164          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       2.574 Mbytes of memory.
+P This job should need less than                       2.809 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   32 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -153,11 +145,10 @@ _ WF disk file :      0.082 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          10
        mpw =         164          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.832 Mbytes of memory.
+P This job should need less than                       3.067 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   33 : space group R3 m (#160); Bravais hR (rhombohedral)
 ================================================================================
@@ -170,7 +161,7 @@ _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =           8        mffmem =           1         mkmem =          10
        mpw =         164          nfft =        4096          nkpt =          10
 ================================================================================
-P This job should need less than                       2.832 Mbytes of memory.
+P This job should need less than                       3.067 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.202 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -360,7 +351,6 @@ P           mkmem33        10
               occ33    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000
            prtden           0
-            rfdir           1       1       1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -580,8 +570,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
 - 31.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -606,8 +596,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    0.945855
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2105,8 +2095,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.10419
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/31ga.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for Ga,  from PRB58, 3641 (1998)
 - 31.00000   3.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2133,8 +2123,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
   spin-orbit 2    0.018632
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/33as.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for As,  from PRB58, 3641 (1998)
 - 33.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3074,7 +3064,6 @@ P           mkmem33        10
               occ33    1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000
            prtden           0
-            rfdir           1       1       1
             rprim      0.0000000000E+00  5.0000000000E-01  5.0000000000E-01
                        5.0000000000E-01  0.0000000000E+00  5.0000000000E-01
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
@@ -3352,10 +3341,10 @@ P           mkmem33        10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         18.9  wall=         19.0
+- Proc.   0 individual time (sec): cpu=         17.3  wall=         17.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  26 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.9  wall=         19.0
+.Delivered  90 WARNINGs and  50 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.3  wall=         17.5

@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t06/t06.in
-- output file    -> t06.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t06/t06.abi
+- output file    -> t06.abo
 - root for input  files -> t06i
 - root for output files -> t06o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           4        mffmem =           1         mkmem =           4
        mpw =          82          nfft =        4096          nkpt =           4
 ================================================================================
-P This job should need less than                       1.435 Mbytes of memory.
+P This job should need less than                       1.556 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.022 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -56,7 +54,6 @@ P This job should need less than                       1.283 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.022 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -88,6 +85,8 @@ _ WF disk file :      0.022 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac1     1.00000000E+06
            diemac2     1.00000000E+00
            diemac3     1.00000000E+00
@@ -130,6 +129,9 @@ P          mk1mem           4
         optdriver1          0
         optdriver2          1
         optdriver3          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
           rfatpol           2       2
             rfdir           0       0       1
            rfphon1          0
@@ -189,8 +191,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge.SJ_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/32ge.SJ_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge.SJ_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/32ge.SJ_mod
 -   Starkloff-Joannopoulos local psp ( !!! OLD : only for tests)
 - 32.00000   4.00000    900101                znucl, zion, pspdat
     5    3    0    0       700   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -373,7 +375,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -391,7 +392,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -414,7 +414,7 @@ tolerances: {tolwfr: 1.00E-15, }
  ETOT  8   118.02986138131     -1.304E-06 7.822E-10 7.966E-06
  ETOT  9   118.02986134343     -3.788E-08 8.589E-12 4.245E-07
  ETOT 10   118.02986134090     -2.538E-09 3.054E-13 1.227E-08
- ETOT 11   118.02986134089     -5.024E-12 8.099E-15 3.304E-09
+ ETOT 11   118.02986134089     -5.016E-12 8.099E-15 3.304E-09
  ETOT 12   118.02986134087     -1.781E-11 6.344E-15 2.047E-11
 
  scprqt:  WARNING -
@@ -506,7 +506,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.584705E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  3 ==================================================================
@@ -547,7 +547,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -565,12 +564,10 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t06o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   1
--inwffil : will read wavefunctions from disk file t06o_DS2_1WF6
 
 --- !BeginCycle
 iteration_state: {dtset: 3, }
@@ -667,7 +664,7 @@ tolerances: {tolwfr: 1.00E-15, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  5.584705E+03
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -675,6 +672,8 @@ tolerances: {tolwfr: 1.00E-15, }
  -outvars: echo values of variables after computation  --------
             acell      1.0000000000E+01  1.0000000000E+01  1.0000000000E+01 Bohr
               amu      1.00000000E+00
+              asr           0
+           chneut           0
            diemac1     1.00000000E+06
            diemac2     1.00000000E+00
            diemac3     1.00000000E+00
@@ -726,6 +725,9 @@ P          mk1mem           4
         optdriver1          0
         optdriver2          1
         optdriver3          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
           rfatpol           2       2
             rfdir           0       0       1
            rfphon1          0
@@ -750,6 +752,11 @@ P          mk1mem           4
             znucl       32.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -834,10 +841,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  56 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.7
+.Delivered  67 WARNINGs and  32 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.6  wall=          0.7

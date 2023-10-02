@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -51,6 +47,7 @@ module m_odamix
  use m_spacepar,   only : hartre
  use m_rhotoxc,    only : rhotoxc
  use m_fft,        only : fourdp
+ use m_xc_tb09,    only : xc_tb09_update_c
 
  implicit none
 
@@ -173,13 +170,6 @@ contains
 !!  ! Developpers have to be careful when introducing others arrays:
 !!      they have to be stored on the fine FFT grid.
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_vn,fourdp,hartre,metric,pawdenpot,pawmknhat,pawrhoij_filter
-!!      rhotoxc,timab,xcdata_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -359,6 +349,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 
  call xcdata_init(xcdata,dtset=dtset)
 
+!If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+ if (dtset%xc_tb09_c>99._dp) then
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
+&    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&    computation_type='all')
+ end if
+
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
@@ -397,7 +396,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    end do
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom,dtset%nspden,ntypat,&
 &   dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,&
-&   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&   pawtab,dtset%pawxcdev,dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)
@@ -601,6 +600,15 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
              &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
+!If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+ if (dtset%xc_tb09_c>99._dp) then
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
+&    nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&    computation_type='all')
+ end if
+
 !Compute xc potential (separate up and down if spin-polarized)
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
@@ -636,7 +644,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
    call pawdenpot(compch_sph,energies%e_paw,energies%e_pawdc,0,dtset%ixc,my_natom,dtset%natom, &
 &   dtset%nspden,ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang, &
 &   dtset%pawprtvol,pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&   dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&   dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    do iatom=1,my_natom
      ABI_FREE(paw_ij(iatom)%dijhartree)

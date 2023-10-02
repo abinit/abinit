@@ -23,10 +23,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -182,7 +178,7 @@ module m_xg
   public :: xgBlock_cshift
   public :: xgBlock_colwiseNorm2
   public :: xgBlock_colwiseDotProduct
-  public :: xgBlock_colwiseDivision 
+  public :: xgBlock_colwiseDivision
   public :: xgBlock_colwiseCymax
   public :: xgBlock_saxpy
   public :: xgBlock_colwiseMul
@@ -272,7 +268,7 @@ module m_xg
 !! getClocR
 
   function getClocR(rows,cols,array) result(cptr)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     integer, intent(in) :: rows
     integer, intent(in) :: cols
     double precision, target, intent(inout) :: array(rows,cols)
@@ -287,7 +283,7 @@ module m_xg
 !! getClocC
 
   function getClocC(rows,cols,array) result(cptr)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     integer, intent(in) :: rows
     integer, intent(in) :: cols
     complex(kind=8), target, intent(inout) :: array(rows,cols)
@@ -458,7 +454,7 @@ module m_xg
 !! xgBlock_map
 
   subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, intent(inout) :: array(:,:)
     integer   , intent(in   ) :: space
@@ -502,7 +498,7 @@ module m_xg
 !! xgBlock_reverseMap
 
   subroutine xgBlock_reverseMap(xgBlock,array,rows,cols)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, pointer, intent(inout) :: array(:,:)
     integer   , intent(in   ) :: rows
@@ -639,7 +635,7 @@ module m_xg
 !! xg_setBlock
 
   subroutine xg_setBlock(xg,Xgblock, fcol, rows, cols)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xg_t), intent(inout) :: xg
     type(xgBlock_t), intent(inout) :: xgBlock
     integer, intent(in) :: fcol
@@ -680,7 +676,7 @@ module m_xg
 !! xgBlock_setBlock
 
   subroutine xgBlock_setBlock(xgBlockA,xgBlockB, fcol, rows, cols)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
     integer, intent(in) :: fcol
@@ -848,7 +844,7 @@ module m_xg
 !! xgBlock_pack
 
   subroutine xgBlock_pack(xgBlockA,xgBlockB,uplo)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
     character, intent(in) :: uplo
@@ -1916,20 +1912,17 @@ module m_xg
 
     if ( xgBlock1%space /= xgBlock2%space ) then
       ABI_ERROR("Must be same space for saxpy")
-      stop
     end if
     if ( xgBlock1%LDim /= xgBlock2%LDim ) then
       ABI_ERROR("Must have same LDim for saxpy")
-      stop
     end if
     if ( xgBlock1%cols /= xgBlock2%cols ) then
       ABI_ERROR("Must have same cols for saxpy")
-      stop
     end if
- 
+
     select case(xgBlock1%space)
     case (SPACE_R,SPACE_CR)
-      call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)   
+      call daxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecR,1,xgBlock1%vecR,1)
     case (SPACE_C)
       call zaxpy(xgBlock1%cols*xgBlock1%LDim,dcmplx(da,0.d0),xgBlock2%vecC,1,xgBlock1%vecC,1)
     end select
@@ -1950,19 +1943,15 @@ module m_xg
 
     if ( xgBlock1%space /= xgBlock2%space ) then
       ABI_ERROR("Must be same space for Saxpy")
-      stop
     end if
     if ( xgBlock1%LDim /= xgBlock2%LDim ) then
       ABI_ERROR("Must have same LDim for Saxpy")
-      stop
     end if
     if ( xgBlock1%cols /= xgBlock2%cols ) then
       ABI_ERROR("Must have same cols for Saxpy")
-      stop
     end if
     if ( xgBlock1%space /= SPACE_C ) then
       ABI_ERROR("Not correct space")
-      stop
     end if
 
     call zaxpy(xgBlock1%cols*xgBlock1%LDim,da,xgBlock2%vecC,1,xgBlock1%vecC,1)
@@ -2109,17 +2098,17 @@ module m_xg
     double precision, intent(  out), optional :: max_val
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
-    integer         , intent(  out), optional :: min_elt 
+    integer         , intent(  out), optional :: min_elt
     integer :: icol
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
 
     select case(xgBlockA%space)
-    case(SPACE_R,SPACE_CR)   
+    case(SPACE_R,SPACE_CR)
       !$omp parallel do shared(dot,xgBlockA,xgBlockB) &
       !$omp& schedule(static)
       do icol = 1, xgBlockA%cols
-        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1) 
+        dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1)
       end do
       !$omp end parallel do
 
@@ -2134,8 +2123,8 @@ module m_xg
       end if
       if ( present(min_elt) ) then
         min_elt = minloc(dot%vecR(1:xgBlockA%cols,1),dim=1)
-      end if   
-      
+      end if
+
     case(SPACE_C)
       !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
       !$omp& schedule(static)
@@ -2143,7 +2132,7 @@ module m_xg
         dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
       end do
       !$omp end parallel do
-      
+
       if ( present(max_val) ) then
         max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
       end if
@@ -2155,8 +2144,8 @@ module m_xg
       end if
       if ( present(min_elt) ) then
         min_elt = minloc(dble(dot%vecC(1:xgBlockA%cols,1)),dim=1)
-      end if   
-      
+      end if
+
     end select
 
   end subroutine xgBlock_colwiseDotProduct
@@ -2175,9 +2164,9 @@ module m_xg
     double precision, intent(inout), optional :: max_val
     integer, dimension(2)      , intent(inout), optional :: max_elt
     double precision, intent(inout), optional :: min_val
-    integer, dimension(2)      , intent(inout), optional :: min_elt 
+    integer, dimension(2)      , intent(inout), optional :: min_elt
     integer :: irow
-    
+
     select case(xgBlockA%space)
     case(SPACE_R,SPACE_CR)
       !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
@@ -2186,7 +2175,7 @@ module m_xg
         divResult%vecR(irow,:) = xgBlockA%vecR(irow,:)/xgBlockB%vecR(irow,:)
       end do
       !$omp end parallel do
-      
+
       if ( present(max_val) ) then
         max_val = maxval(dble(divResult%vecR))
       end if
@@ -2199,16 +2188,16 @@ module m_xg
       if ( present(min_elt) ) then
         min_elt = minloc(dble(divResult%vecR(1:xgBlockA%rows,1:xgBlockA%cols)))
       end if
-      
+
     case(SPACE_C)
-      
+
       !$omp parallel do shared(divResult,xgBlockA,xgBlockB), &
       !$omp& schedule(static)
       do irow = 1, xgBlockA%rows
         divResult%vecC(irow,:) = xgBlockA%vecC(irow,:)/xgBlockB%vecC(irow,:)
       end do
       !$omp end parallel do
-      
+
       if ( present(max_val) ) then
         max_val = maxval(dble(divResult%vecC))
       end if
@@ -2219,10 +2208,10 @@ module m_xg
         max_elt = maxloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
       end if
       if ( present(min_elt) ) then
-        min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols))) 
+        min_elt = minloc(dble(divResult%vecC(1:xgBlockA%rows,1:xgBlockA%cols)))
       end if
     end select
-   
+
   end subroutine xgBlock_colwiseDivision
 !!***
 
@@ -2319,7 +2308,7 @@ module m_xg
 !! xgBlock_reshape
 
   subroutine xgBlock_reshape(xgBlock,newShape)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlock
     integer        , intent(in   ) :: newShape(2)
     type(c_ptr) :: cptr
@@ -2607,7 +2596,7 @@ module m_xg
     type(xgBlock_t), intent(inout) :: xgB
     logical :: tf
 
-    if ( associated(xgB%vecR) ) then 
+    if ( associated(xgB%vecR) ) then
       tf = .TRUE.
     end if
 
@@ -2617,6 +2606,6 @@ module m_xg
 
   end function xg_associated
 !!***
- 
+
 end module m_xg
 !!***

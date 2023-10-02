@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -97,7 +93,7 @@ contains
 !!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
-!!   ===== if GGA
+!!   ===== if GGA (or mGGA)
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
 !!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
@@ -126,13 +122,7 @@ contains
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
-!!
-!! PARENTS
-!!      m_dfpt_mkvxc,m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_forstr,m_kxc
-!!      m_pead_nl_loop,m_respfn_driver
-!!
-!! CHILDREN
-!!      xcpotdq
+!!    Note about mGGA: 2nd derivatives involving Tau or Laplacian are not taken into account (yet)
 !!
 !! SOURCE
 
@@ -502,12 +492,6 @@ end subroutine dfpt_mkvxc
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
 !!
-!! PARENTS
-!!      m_dfpt_mkvxc
-!!
-!! CHILDREN
-!!      xcpotdq
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
@@ -781,12 +765,6 @@ end subroutine dfpt_mkvxcgga
 !!  vxc1(cplex*nfft,nspden)=change in exchange-correlation potential (including
 !!   core-correction, if applicable)
 !!
-!! PARENTS
-!!      m_dfpt_nstwf,m_dfpt_rhotov,m_dfpt_scfcv,m_forstr,m_respfn_driver
-!!
-!! CHILDREN
-!!      xcpotdq
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxc_noncoll(cplex,ixc,kxc,mpi_enreg,nfft,ngfft,nhat,nhatdim,nhat1,nhat1dim,&
@@ -974,12 +952,6 @@ end subroutine dfpt_mkvxc_noncoll
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
 !!
-!! PARENTS
-!!      m_dfpt_lw
-!!
-!! CHILDREN
-!!      xcpotdq
-!!
 !! SOURCE
 
 subroutine dfpt_mkvxcggadq(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
@@ -1110,12 +1082,6 @@ end subroutine dfpt_mkvxcggadq
 !!       kxc(:,5)= gradx(rho)
 !!       kxc(:,6)= grady(rho)
 !!       kxc(:,7)= gradz(rho)
-!!
-!! PARENTS
-!!      m_mklocl
-!!
-!! CHILDREN
-!!      xcpotdq
 !!
 !! SOURCE
 

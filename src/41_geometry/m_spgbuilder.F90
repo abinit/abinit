@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -29,7 +25,7 @@ module m_spgbuilder
  use m_errors
  use m_abicore
 
- use m_symtk,   only : chkgrp, print_symmetries
+ use m_symtk,   only : sg_multable, print_symmetries
  use m_symsg,   only : symsgcube, symsghexa, symsgmono, symsgortho, symsgtetra
 
  implicit none
@@ -78,11 +74,6 @@ contains
 !!
 !! SIDE EFFECTS
 !! brvltt = input variable giving Bravais lattice
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -402,8 +393,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
  case (3)
 !    For space groups containing d elements, all the symmetry operations
 !    have already been obtained
-   if(spgroup/=43 .and. spgroup/=203 .and. spgroup/=227 .and. &
-&   spgroup/=228)then
+    if(spgroup/=43 .and. spgroup/=227 .and. spgroup/=228)then  
      do ii=1,nsym
 !        First translation: a/2+b/2
        tnons(1,nsym+ii)=tnons(1,ii)+0.5
@@ -552,7 +542,7 @@ subroutine gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroup
 !write(std_out,*)' gensymspgr  : out of the Bravais lattice, nsym is',nsym
 !ENDDEBUG
 
- call chkgrp(nsym,symafm,symrel,ierr)
+ call sg_multable(nsym,symafm,symrel,ierr,tnons=tnons,tnons_tol=tol5)
  if (ierr/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
  end if
@@ -584,11 +574,6 @@ end subroutine gensymspgr
 !! genafm(3) = in case of shubnikov type IV, translation, generator of the
 !!  anti-ferromagnetic symmetry operations
 !! shubnikov = type of the shubnikov group
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1222,7 +1207,8 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
    case(3,6,9,16,24,28,32,36,40,44,52,56,60,64,78,84,&
 &     90,96,112,116,120,124,128,132,136,142,148,154,160,166,172,&
 &     178,184,190,196,202,208,214,220,226,232,242,252,262,272)
-     brvlttbw=6     !C
+!    brvlttbw=6     !C    XG230719 This is likely erroneous   
+     brvlttbw=3     !c
    case(12,20,48,68,72,102,108)
      brvlttbw=7     !I
    end select
@@ -1257,6 +1243,8 @@ subroutine gensymshub(genafm,spgroup,spgroupma,shubnikov)
 
 !DEBUG
 !write(std_out,*) 'gensymshub : end '
+!write(std_out,*) 'gensymshub : brvlttbw=',brvlttbw
+!write(std_out,*) 'gensymshub : genafm=',genafm
 !write(std_out,*) 'gensymshub, shubnikov =',shubnikov
 !ENDDEBUG
 
@@ -1290,11 +1278,6 @@ end subroutine gensymshub
 !! tnons(3,msym)=nonsymmorphic translations for symmetry operations
 !!  without magnetic operations at input,
 !!  and with magnetic operations at output
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

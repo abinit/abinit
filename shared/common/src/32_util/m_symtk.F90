@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -80,18 +76,9 @@ contains
 !! NOTES
 !! Used for symmetry operations.
 !! This routine applies to ORTHOGONAL matrices only.
-!! Since these form a group, inverses are also integer
-!! arrays.  Returned array is TRANSPOSE of inverse, as needed.
+!! Since these form a group, inverses are also integer arrays.
+!! Returned array is TRANSPOSE of inverse, as needed.
 !! Note use of integer arithmetic.
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_cgtk,m_classify_bands,m_crystal,m_ddb,m_dfpt_scfcv
-!!      m_dtset,m_dvdb,m_dynmat,m_fft_mesh,m_fock,m_geometry,m_ingeo,m_inwffil
-!!      m_iogkk,m_kpts,m_memeval,m_mover_effpot,m_ptgroups,m_spacepar,m_symtk
-!!      m_tdep_sym,m_thmeig,optic
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -120,20 +107,20 @@ subroutine mati3inv(mm, mit)
  tt(1,3) = mm(2,1) * mm(3,2) - mm(3,1) * mm(2,2)
  tt(2,3) = mm(3,1) * mm(1,2) - mm(1,1) * mm(3,2)
  tt(3,3) = mm(1,1) * mm(2,2) - mm(2,1) * mm(1,2)
- dd  = mm(1,1) * tt(1,1) + mm(2,1) * tt(2,1) + mm(3,1) * tt(3,1)
+ dd = mm(1,1) * tt(1,1) + mm(2,1) * tt(2,1) + mm(3,1) * tt(3,1)
 
-!Make sure matrix is not singular
- if (dd/=0) then
+ ! Make sure matrix is not singular
+ if (dd /= 0) then
    mit(:,:)=tt(:,:)/dd
  else
-   write(msg, '(2a,2x,9i5,a)' )'Attempting to invert integer array',ch10,mm(:,:),'   ==> determinant is zero.'
-   ABI_BUG(msg)
+   write(msg, '(2a,2x,9(i0,1x),a)' )'Attempting to invert integer array',ch10,mm,' ==> determinant is zero.'
+   ABI_ERROR(msg)
  end if
 
-!If matrix is orthogonal, determinant must be 1 or -1
- if (abs(dd)/=1) then
-   write(msg, '(2a,2x,9i5,a)' )'Absolute value of determinant should be one',ch10,'but determinant= ',dd
-   ABI_BUG(msg)
+ ! If matrix is orthogonal, determinant must be 1 or -1
+ if (abs(dd) /= 1) then
+   write(msg, '(3a,i0)' )'Absolute value of determinant should be one',ch10,'but determinant= ',dd
+   ABI_ERROR(msg)
  end if
 
 end subroutine mati3inv
@@ -152,12 +139,6 @@ end subroutine mati3inv
 !! OUTPUT
 !! det = determinant of the matrix
 !!
-!! PARENTS
-!!      m_ab7_symmetry,m_anaddb_dataset,m_geometry,m_kpts,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine mati3det(mm, det)
@@ -169,8 +150,8 @@ subroutine mati3det(mm, det)
 
 ! *************************************************************************
  det=mm(1,1)*(mm(2,2) * mm(3,3) - mm(3,2) * mm(2,3)) &
-& + mm(2,1)*(mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)) &
-& + mm(3,1)*(mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3))
+   + mm(2,1)*(mm(3,2) * mm(1,3) - mm(1,2) * mm(3,3)) &
+   + mm(3,1)*(mm(1,2) * mm(2,3) - mm(2,2) * mm(1,3))
 
 end subroutine mati3det
 !!***
@@ -190,19 +171,6 @@ end subroutine mati3det
 !!
 !! NOTES
 !! Returned array is TRANSPOSE of inverse, as needed to get g from r.
-!!
-!! PARENTS
-!!      m_berryphase,m_conducti,m_cut3d,m_ddb,m_dfpt_mkvxc,m_dfpt_mkvxcstr
-!!      m_double_grid,m_dvdb,m_dynmat,m_effective_potential,m_elpolariz
-!!      m_epweights,m_esymm,m_ewald,m_fock,m_fock_getghc,m_fstab,m_geometry
-!!      m_gstate,m_harmonic_thermo,m_ifc,m_inwffil,m_kpts,m_longwave,m_mover
-!!      m_mover_effpot,m_nucprop,m_outwant,m_phonons,m_pimd,m_pimd_langevin
-!!      m_psps,m_raman,m_relaxpol,m_respfn_driver,m_scup_dataset,m_spacepar
-!!      m_strain,m_supercell,m_supercell_maker,m_symfind,m_symtk,m_tddft
-!!      m_tdep_latt,m_thmeig,m_xfpack,optic
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -253,7 +221,7 @@ end subroutine matr3inv
 !!
 !! FUNCTION
 !! Compute determinant of each input symmetry matrix sym(3,3,i)
-!! and check that the determinant is always +/- 1.  Integer arithmetic.
+!! and check that the determinant is always +/- 1. Integer arithmetic.
 !!
 !! INPUTS
 !! nsym=number of symmetry operations
@@ -261,12 +229,6 @@ end subroutine matr3inv
 !!
 !! OUTPUT
 !! determinant(nsym)=determinant of each symmetry operation
-!!
-!! PARENTS
-!!      m_geometry,m_spacepar,m_spgdata,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -290,7 +252,7 @@ subroutine symdet(determinant, nsym, sym)
    call mati3det(sym(:,:,isym),det)
    determinant(isym)=det
    if (abs(det)/=1) then
-     write(msg,'(a,i0,a,i0,a,a,a,a,a)')&
+     write(msg,'(2(a,i0), 5a)')&
       'Abs(determinant) for symmetry number ',isym,' is ',det,' .',ch10,&
       'For a legitimate symmetry, abs(determinant) must be 1.',ch10,&
       'Action: check your symmetry operations (symrel) in input file.'
@@ -319,12 +281,6 @@ end subroutine symdet
 !! TODO
 !! SHOULD ALSO CHECK THE tnons !
 !!
-!! PARENTS
-!!      m_bz_mesh,m_chkinp,m_esymm,m_lgroup,m_spacepar,m_spgbuilder
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine chkgrp(nsym, symafm, symrel, ierr)
@@ -338,7 +294,7 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,jsym,ksym,print_warning=1,symafmchk,testeq=1
+ integer :: isym, jsym, ksym, symafmchk, testeq, print_warning
  logical :: found_inv
  character(len=500) :: msg
 !arrays
@@ -355,55 +311,55 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
 !ENDDEBUG
 
  ierr = 0
+ print_warning = 1
 
-!1) Identity must be the first symmetry.
+ ! 1) Identity must be the first symmetry.
  if (ANY(symrel(:,:,1) /= identity_3d .or. symafm(1)/=1 )) then
    ABI_WARNING("First operation must be the identity operator")
-   ierr = ierr+1
+   ierr = ierr + 1
  end if
- !
+
  ! 2) The inverse of each element must belong to the group.
  do isym=1,nsym
    call mati3inv(symrel(:,:,isym), chk)
-   chk = TRANSPOSE(chk)
+   chk = transpose(chk)
    found_inv = .FALSE.
    do jsym=1,nsym
-     if ( ALL(symrel(:,:,jsym) == chk) .and. (symafm(jsym) * symafm(isym) == 1 )) then
+     if (all(symrel(:,:,jsym) == chk) .and. (symafm(jsym) * symafm(isym) == 1)) then
        found_inv = .TRUE.; EXIT
      end if
    end do
 
-   if (.not.found_inv) then
+   if (.not. found_inv) then
      write(msg,'(a,i0,2a)')&
       "Cannot find the inverse of symmetry operation ",isym,ch10,&
-      "Input symmetries do not form a group "
+      "Input symmetries do not form a group!"
      ABI_WARNING(msg)
-     ierr = ierr+1
+     ierr = ierr + 1
    end if
-
  end do
- !
- ! Closure relation under composition.
+
+ ! Check closure under composition.
  do isym=1,nsym
    do jsym=1,nsym
-     !
+
      ! Compute the product of the two symmetries
      chk = MATMUL(symrel(:,:,jsym), symrel(:,:,isym))
-     symafmchk=symafm(jsym)*symafm(isym)
-     !
+     symafmchk = symafm(jsym) * symafm(isym)
+
      ! Check that product array is one of the original symmetries.
      do ksym=1,nsym
-       testeq=1
-       if ( ANY(chk/=symrel(:,:,ksym) )) testeq=0
+       testeq = 1
+       if ( ANY(chk/=symrel(:,:,ksym) )) testeq = 0
 #if 0
-!      FIXME this check make v4/t26 and v4/t27 fails.
-!      The rotational part is in the group but with different magnetic part!
+       ! FIXME this check make v4/t26 and v4/t27 fails.
+       ! The rotational part is in the group but with different magnetic part!
        if (symafmchk /= symafm(ksym)) testeq=0
 #endif
        if (testeq==1) exit ! The test is positive
      end do
-!
-     if(testeq==0 .and. print_warning==1) then
+
+     if (testeq == 0 .and. print_warning == 1) then
        ! The test is negative
        write(msg, '(a,2i3,a,9a)' )&
         'Product of symmetries',isym,jsym,' is not in group.',ch10,&
@@ -412,8 +368,8 @@ subroutine chkgrp(nsym, symafm, symrel, ierr)
         'ABINIT might stop with an ERROR after trying to correct and making a few more checks.',ch10,&
         'Action: check symrel, symafm and possibly atomic positions, and fix them.'
        ABI_WARNING(msg)
-       ierr = ierr+1
-       print_warning=0
+       ierr = ierr + 1
+       print_warning = 0
      end if
 
    end do ! jsym
@@ -428,15 +384,18 @@ end subroutine chkgrp
 !!
 !! FUNCTION
 !! Checks that a set of input symmetries constitutes a group.
+!! Treat reasonably well large set of symmetries, where pure translations are present.
+!! The translations are optional. This allows to test symrec.
 !!
 !! INPUTS
 !! nsym=number of symmetry operations
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym)=symmetry operations in real space.
-!! tnons(3,nsym)=Fractional translations.
+!! tnons(3,nsym) [optional]=Fractional translations.
+!! tnons_tol [optional]= tolerance on the match for tnons
 !!
 !! OUTPUT
-!!  ierr=Status error. A non-zero value signals a failure.
+!!  ierr=Status error. A non-zero value signals failure.
 !!  [multable(4,nsym,nsym)]= Optional output.
 !!    multable(1,sym1,sym2) gives the index of the symmetry product S1 * S2 in the symrel array. 0 if not found.
 !!    multable(2:4,sym1,sym2)= the lattice vector that has to added to the fractional translation
@@ -450,107 +409,189 @@ end subroutine chkgrp
 !! TODO
 !!  This improved version should replace chkgrp.
 !!
-!! PARENTS
-!!      m_crystal,m_phonons,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, toinv)
+ subroutine sg_multable(nsym, symafm, symrel, ierr, &
+&  tnons, tnons_tol, multable, toinv)    ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
  integer,intent(out) :: ierr
- real(dp),intent(in) :: tnons_tol
+ real(dp),optional,intent(in) :: tnons_tol
 !arrays
  integer,intent(in) :: symafm(nsym),symrel(3,3,nsym)
  integer,optional,intent(out) :: multable(4,nsym,nsym), toinv(4,nsym)
- real(dp),intent(in) :: tnons(3,nsym)
+ real(dp),optional,intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
 !scalars
- integer :: echo,sym1,sym2,sym3,prd_symafm
+ integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
+ integer :: sym1,sym2,sym3
+!integer :: isym
+ real(dp) :: tnons_tol_
  logical :: found_inv,iseq
  character(len=500) :: msg
 !arrays
- integer :: prd_symrel(3,3)
+ integer :: nlist_symrel(48),prd_symrel(3,3),ptmultable(48,48),ptsymrel(3,3,48)
+ integer,allocatable :: ptsymm(:),list_symrel(:,:)
  real(dp) :: prd_tnons(3)
+ real(dp),allocatable :: tnons_(:,:)
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,*)' m_symtk%sg_multable : enter, nsym= ',nsym
+!ENDDEBUG
+
  ierr = 0
 
- ! 1) Identity must be the first symmetry. Do not check if tnon == 0 as cell might not be primitive.
+ ABI_MALLOC(tnons_,(3,nsym))
+ if(present(tnons))then
+   tnons_=tnons
+ else
+   tnons_=zero
+ endif
+ if(present(tnons_tol))then
+   tnons_tol_=tnons_tol
+ else
+   tnons_tol_=tol5
+ endif
+
+!DEBUG
+!write(std_out,*)' present(tnons),present(tnons_tol)=',present(tnons),present(tnons_tol)
+!write(std_out,*)' isym   symrel                      symafm  tnons '
+!do isym=1,nsym
+! write(std_out,'(i5,a,9i3,a,i3,a,3f9.4)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym),'   ',tnons_(:,isym)
+!end do
+!ENDDEBUG
+
+ ! 1) Identity must be the first symmetry. Do not check if tnons_ == 0 as cell might not be primitive.
  if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
    ABI_WARNING("First operation must be the identity operator")
    ierr = ierr + 1
  end if
 
  ! 2) The inverse of each element must belong to the group.
- echo=1
+ echo = 1
  do sym1=1,nsym
    found_inv = .FALSE.
    do sym2=1,nsym
      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
-     prd_tnons = tnons(:,sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
+     prd_tnons = tnons_(:,sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
      prd_symafm = symafm(sym1)*symafm(sym2)
-     if ( all(prd_symrel == identity_3d) .and. isinteger(prd_tnons, tnons_tol) .and. prd_symafm == 1 ) then
+     if ( all(prd_symrel == identity_3d) .and. isinteger(prd_tnons, tnons_tol_) .and. prd_symafm == 1 ) then
        found_inv = .TRUE.
        if (present(toinv)) then
-         toinv(1, sym1) = sym2
-         toinv(2:4, sym1) = nint(prd_tnons)
+         toinv(1, sym1) = sym2; toinv(2:4, sym1) = nint(prd_tnons)
        end if
        exit
      end if
    end do
 
    if (.not. found_inv) then
-     if(echo==1)then
+     if(echo == 1) then
        write(msg,'(a,i0,2a)')&
         "Cannot find the inverse of symmetry operation ",sym1,ch10,&
         "Input symmetries do not form a group "
        ABI_WARNING(msg)
-       echo=0
+       echo = 0
      endif
      ierr = ierr + 1
      exit
    end if
  end do
 
- ! Check closure relation under composition and construct multiplication table.
- echo=1
- do sym1=1,nsym
-   do sym2=1,nsym
+ ! 3)
+ !In order to avoid potential cubic scaling with number of atoms, in exotic cases, with large prefactor, 
+ !set up lookup table for the point symmetry part of the symmetry operations.
+ !Still cubic, but with a reduced prefactor. To fully eliminate cubic scaling, should
+ !set up lookup table for the tnons_ as well.
 
-     ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a+Ab}
-     prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
-     prd_symafm = symafm(sym1) * symafm(sym2)
-     prd_tnons = tnons(:, sym1) + matmul(symrel(:,:,sym1), tnons(:,sym2))
+ ABI_MALLOC(list_symrel,(nsym,48))
+ ABI_MALLOC(ptsymm,(nsym))
 
-     ! Check that product array is one of the original symmetries.
-     iseq = .False.
-     do sym3=1,nsym
-       iseq = (all(prd_symrel == symrel(:,:,sym3) ) .and. &
-               isinteger(prd_tnons - tnons(:,sym3), tnons_tol) .and. &
-               prd_symafm == symafm(sym3) )  ! Here v4/t26 and v4/t27 will fail. XG 2020_10_24 Not anymore
+ nlist_symrel(:)=0
+ ! Initialize with the first symmetry operation
+ ptsymrel(1:3,1:3,1)=symrel(:,:,1)
+ ptsymm(1)=1
+ nptsymm=1
+ list_symrel(1,1)=1
+ nlist_symrel(1)=1
+ !If more than one symmetry operation, then loop on the other ones, find whether the ptsymm has already been found,
+ !or create one new item in the list 
+ if(nsym/=1)then
+   do sym1=2,nsym
+     found=0
+     do ptsymm2=1,nptsymm
+       if(all(symrel(:,:,list_symrel(1,ptsymm2)) == symrel(:,:,sym1)))then
+         ptsymm(sym1)=ptsymm2 ; found=1 
+         nlist_symrel(ptsymm2)=nlist_symrel(ptsymm2)+1
+         list_symrel(nlist_symrel(ptsymm2),ptsymm2)=sym1
+         cycle
+       endif
+     enddo
+     if(found==0)then
+       nptsymm=nptsymm+1
+!DEBUG
+!      write(std_out,*)' current value of nptsymm, sym1=',nptsymm, sym1
+!ENDDEBUG
+       ptsymrel(1:3,1:3,nptsymm)=symrel(:,:,sym1)
+       ptsymm(sym1)=nptsymm
+       nlist_symrel(nptsymm)=1
+       list_symrel(1,nptsymm)=sym1
+     endif
+   enddo
+ endif
 
-       ! The rotational part is in the group but with different magnetic part!
-       if (iseq) then
-         ! The test is positive
-         if (present(multable)) then
-           multable(1,sym1,sym2) = sym3
-           multable(2:4,sym1,sym2) = nint(prd_tnons - tnons(:,sym3))
-         end if
-         exit
+ !Check that each point symmetry is associated to the same number of translations
+ if(nptsymm/=1)then
+   do ptsymm1=1,nptsymm
+     if(nlist_symrel(ptsymm1)/=nlist_symrel(1))then 
+       write(msg, '(9a)' )&
+&        'The number of translations (and possibly symafm) associated to the same symrel',ch10,&
+&        'is not the same for all point symmetries',ch10,&
+&        'This indicates that the input symmetry elements',ch10,&
+&        'do not possess closure under group composition.',ch10,&
+&        'Action: check symrel, symafm and fix them.'
+       ABI_WARNING(msg)
+       echo = 0
+       ierr = ierr + 1
+       if (present(multable)) then
+         multable(1,:,:) = 0; multable(2:4,:,:) = huge(0)
        end if
-     end do
+       exit
+     endif
+   enddo
+ endif
 
-     if (.not. iseq .and. echo==1) then
-       if(echo==1)then
+!DEBUG
+!  write(std_out,*)' final value of nptsymm=',nptsymm
+!ENDDEBUG
+
+ ! 4)
+ !Check closure under composition and construct multiplication table of ptsymrel
+ echo = 1
+ do ptsymm1=1,nptsymm
+   sym1=list_symrel(1,ptsymm1)
+   do ptsymm2=1,nptsymm
+     sym2=list_symrel(1,ptsymm2)
+     ! Compute the product of the two symmetries. 
+     prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
+     ! Check that product array is one of the original point symmetries.
+     iseq= .false.
+     do ptsymm3=1,nptsymm
+       iseq=  all(prd_symrel == symrel(:,:,list_symrel(1,ptsymm3) ))
+       if(iseq)then
+         ptmultable(ptsymm1,ptsymm2) = ptsymm3
+         exit
+       endif
+     end do
+     if (.not. iseq .and. echo == 1) then
+       if (echo == 1)then
          ! The test is negative
+         prd_symafm = symafm(sym1) * symafm(sym2)
+         prd_tnons = tnons_(:, sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
          write(msg, '(a,2(i0,1x),2a,3i3,f11.6,i3,a,2(3i3,f11.6,a),5a)' )&
            'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
            prd_symrel(1,1:3),prd_tnons(1),prd_symafm,ch10,&
@@ -560,21 +601,129 @@ subroutine sg_multable(nsym, symafm, symrel, tnons, tnons_tol, ierr, multable, t
            'do not possess closure under group composition.',ch10,&
            'Action: check symrel, symafm and fix them.'
          ABI_WARNING(msg)
-         echo=0
+         echo = 0
        endif
        ierr = ierr + 1
        if (present(multable)) then
-         multable(1, sym1, sym2) = 0
-         multable(2:4, sym1, sym2) = huge(0)
+         multable(1, sym1, sym2) = 0; multable(2:4, sym1, sym2) = huge(0)
        end if
        exit
      end if
-    
-   end do ! sym2
-   if(echo==0)exit
- end do ! sym1
 
-end subroutine sg_multable
+   end do ! ptsymm2
+
+!DEBUG
+!  write(std_out,*)' ptmultable for ptsymm1=',ptsymm1,' by batch of 16 values '
+!  write(std_out,'(16i3)')ptmultable(ptsymm1,1:16)
+!  write(std_out,'(16i3)')ptmultable(ptsymm1,17:32)
+!  write(std_out,'(16i3)')ptmultable(ptsymm1,33:48)
+!ENDDEBUG
+
+   if (echo == 0) exit
+ end do ! ptsymm1
+
+ ! 5)
+ ! Check closure under composition and construct multiplication table.
+ ! However, does this only if the ptgroup has been successfull.
+ if(echo/=0 .and. ierr==0)then
+   do sym1=1,nsym
+     ptsymm1=ptsymm(sym1)
+     do sym2=1,nsym
+       ptsymm2=ptsymm(sym2)
+
+       !The equal number of translations for each point symmetry has been checked earlier.
+       !If the full table is not requested, it is now sufficient to check that
+       !the product of all symmetry operations sym1 with a pure translation (ptsymm=1), or with one of the instances        
+       !for each point symmetries is indeed present in the table.
+       !This is done to save CPU time when the number of symmetry operations is bigger than 384.
+
+       if (nsym>384 .and. .not.(present(multable))) then
+         if(ptsymm2/=1 .and. sym2/=list_symrel(1,ptsymm2))then
+           cycle
+         endif
+       end if
+
+       !DEBUG
+       !if(ptsymm2<1 .or. ptsymm2>48)then
+       !write(std_out,*)' sym1,sym2,ptsymm1,ptsymm2=',sym1,sym2,ptsymm1,ptsymm2
+       !endif
+       !ENDDEBUG
+
+       ! Compute the product of the two symmetries. Convention {A,a} {B,b} = {AB, a + Ab}
+!      prd_symrel = matmul(symrel(:,:,sym1), symrel(:,:,sym2))
+       prd_ptsymm=ptmultable(ptsymm1,ptsymm2)
+       prd_symrel=ptsymrel(:,:,prd_ptsymm)
+       prd_symafm = symafm(sym1) * symafm(sym2)
+       prd_tnons = tnons_(:, sym1) + matmul(symrel(:,:,sym1), tnons_(:,sym2))
+       !DEBUG
+       !write(std_out,*)' prd_ptsymm,prdsymrel=',prd_ptsymm,prd_symrel
+       !DEBUG
+
+       ! Check that product array is one of the original symmetries.
+       ! Only explore those symmetries that have a symrel that is the product of the two symrel of sym1 and sym2.
+       iseq = .False.
+       do ilist_symrel=1,nlist_symrel(prd_ptsymm)
+         sym3=list_symrel(ilist_symrel,prd_ptsymm)
+         iseq = isinteger(prd_tnons(1) - tnons_(1,sym3), tnons_tol_)
+         if(iseq)then
+           iseq = isinteger(prd_tnons(2) - tnons_(2,sym3), tnons_tol_)
+           if(iseq)then
+             iseq = isinteger(prd_tnons(3) - tnons_(3,sym3), tnons_tol_)
+             if(iseq)then
+               iseq = (prd_symafm == symafm(sym3))
+               if(iseq)then
+                 ! The test is positive
+                 if (present(multable)) then
+                   multable(1,sym1,sym2) = sym3; multable(2:4,sym1,sym2) = nint(prd_tnons - tnons_(:,sym3))
+                 end if
+                 exit
+               endif
+             endif
+           endif
+         endif
+       end do
+       if (.not. iseq .and. echo == 1) then
+         if (echo == 1)then
+           ! The test is negative
+           write(msg, '(a,2(i0,1x),2a,3i3,f11.6,i3,a,2(3i3,f11.6,a),5a)' )&
+             'Product of symmetries:',sym1,sym2,' is not in group.',ch10,&
+             prd_symrel(1,1:3),prd_tnons(1),prd_symafm,ch10,&
+             prd_symrel(2,1:3),prd_tnons(2),ch10,&
+             prd_symrel(3,1:3),prd_tnons(3),ch10,&
+             'This indicates that the input symmetry elements',ch10,&
+             'do not possess closure under group composition.',ch10,&
+             'Action: check symrel, symafm and fix them.'
+           ABI_WARNING(msg)
+           echo = 0
+         endif
+         ierr = ierr + 1
+         if (present(multable)) then
+           multable(1, sym1, sym2) = 0; multable(2:4, sym1, sym2) = huge(0)
+         end if
+         exit
+       end if
+     end do ! sym2
+     if (echo == 0) exit
+   end do ! sym1
+ else
+   if (present(multable)) then
+     do sym1=1,nsym
+       do sym2=1,nsym
+         multable(1, sym1, sym2) = 0; multable(2:4, sym1, sym2) = huge(0)
+       enddo
+     enddo
+   endif
+ endif
+
+ ABI_FREE(list_symrel)
+ ABI_FREE(ptsymm)
+ ABI_FREE(tnons_)
+
+!DEBUG
+!write(std_out,*)' m_symtk%sg_multable : exit '
+!ENDDEBUG
+
+ end subroutine sg_multable
 !!***
 
 !!****f* m_symtk/chkorthsy
@@ -597,12 +746,6 @@ end subroutine sg_multable
 !! iexit= if 0 at input, will do the check, and stop if there is a problem, return 0 if no problem
 !!        if 1 at input, will always output, return 0 if no problem, -1 if there is a problem,
 !!                       also, suppresses printing of problem
-!!
-!! PARENTS
-!!      m_chkinp,m_ingeo,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -771,12 +914,6 @@ end subroutine chkorthsy
 !! OUTPUT
 !!  multi=multiplicity of the unit cell
 !!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
@@ -818,7 +955,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
      'According to the symmetry finder, the unit cell is',ch10,&
      'NOT primitive. The multiplicity is ',multi,' .',ch10,&
      'The use of non-primitive unit cells is allowed',ch10,&
-     'only when the input variable chkprim is 0.',ch10,&
+     'only when the current chkprim is 0.',ch10,&
      'Action: either change your unit cell (rprim or angdeg),',ch10,&
      'or set chkprim to 0.'
      ABI_ERROR(msg)
@@ -826,7 +963,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
      write(msg,'(3a,i0,a,a,a)')&
       'According to the symmetry finder, the unit cell is',ch10,&
       'not primitive, with multiplicity= ',multi,'.',ch10,&
-      'This is allowed, as the input variable chkprim is 0.'
+      'This is allowed, as the current chkprim is 0.'
      ABI_COMMENT(msg)
    end if
  end if
@@ -855,15 +992,9 @@ end subroutine chkprimit
 !! symrel(3,3,nsym)=symmetry operations in real space in terms
 !! of primitive translations rprimd at input and rprimd_new at output
 !!
-!! PARENTS
-!!      m_esymm,m_ingeo,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
+subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym)
 
 !Arguments ------------------------------------
 !scalars
@@ -922,8 +1053,7 @@ subroutine symrelrot(nsym,rprimd,rprimd_new,symrel,tolsym)
        symrel(ii,jj,isym)=nint(val)
      end do
    end do
-!  End loop isym
- end do
+ end do ! isym
 
 end subroutine symrelrot
 !!***
@@ -964,13 +1094,6 @@ end subroutine symrelrot
 !! timrev is put to 1 only for Gamma.
 !! Better handling should be provided in further version.
 !!
-!! PARENTS
-!!      m_bz_mesh,m_ddb,m_dtset,m_dvdb,m_dynmat,m_esymm,m_gkk,m_iogkk,m_lgroup
-!!      m_memeval,m_nonlinear,m_phgamma,m_respfn_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
@@ -996,7 +1119,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
 
 ! *********************************************************************
 
- my_prtvol=0 ; if (PRESENT(prtvol)) my_prtvol=prtvol
+ my_prtvol=0; if (PRESENT(prtvol)) my_prtvol=prtvol
 
 ! Initialise the array symq
  symq = 0
@@ -1027,7 +1150,7 @@ subroutine littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol,use_sym)
      end do
 
      ! SP: When prtgkk is asked (GKK matrix element will be output), one has to
-     ! disable symmetries. There is otherwise a jauge problem with the unperturbed
+     ! disable symmetries. There is otherwise a gauge problem with the unperturbed
      ! and the perturbed wavefunctions. This leads to a +- 5% increase in computational
      ! cost but provide the correct GKKs (i.e. the same as without the use of symmetries.)
 
@@ -1095,12 +1218,6 @@ end subroutine littlegroup_q
 !!
 !! SIDE EFFECTS
 !! mat3(3,3) = matrix to be symmetrized, in cartesian frame
-!!
-!! PARENTS
-!!      m_nucprop,m_paw_nmr
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1208,7 +1325,7 @@ end subroutine matpointsym
 !!
 !! INPUTS
 !!  enforce= if 0, only check; if =1, enforce exactly the holohedry
-!!  iholohedry=required holohegral group (uses its absolute value, since when the multiplicity of the cell is 
+!!  iholohedry=required holohegral group (uses its absolute value, since when the multiplicity of the cell is
 !!   more than one, the sign of iholohedry is changed).
 !!  iholohedry=1   triclinic      1bar
 !!  iholohedry=2   monoclinic     2/m
@@ -1224,12 +1341,6 @@ end subroutine matpointsym
 !!
 !! SIDE EFFECTS
 !!  cell_base(3,3)=basis vectors of the conventional cell  (changed if enforce==1, otherwise unchanged)
-!!
-!! PARENTS
-!!      m_symfind,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1257,7 +1368,7 @@ subroutine holocell(cell_base,enforce,foundc,iholohedry,tolsym)
 
  if(abs(iholohedry)<1 .or. abs(iholohedry)>7)then
    write(msg, '(a,i0)' )&
-&    'Abs(iholohedry) should be between 1 and 7, while iholohedry=',iholohedry 
+&    'Abs(iholohedry) should be between 1 and 7, while iholohedry=',iholohedry
    ABI_BUG(msg)
  end if
 
@@ -1406,8 +1517,7 @@ end subroutine holocell
 !! FUNCTION
 !! Supposing the input rprimd does not preserve the length and angles
 !! following the symmetries, will generates a new set rprimd,
-!! on the basis of the expected characteristics of the conventional cell,
-!! as specified in bravais(:)
+!! on the basis of the expected characteristics of the conventional cell, as specified in bravais(:)
 !!
 !! INPUTS
 !! bravais(11): bravais(1)=iholohedry
@@ -1421,12 +1531,6 @@ end subroutine holocell
 !!
 !! SIDE EFFECTS
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1518,7 +1622,7 @@ end subroutine symmetrize_rprimd
 !! FUNCTION
 !! Given the order of a symmetry operation, make sure that tnons is
 !! such that applying "order" times the symmetry operation
-!! generate the unity operation, accurately. 
+!! generate the unity operation, accurately.
 !!
 !! INPUTS
 !! nsym=actual number of symmetries
@@ -1527,12 +1631,6 @@ end subroutine symmetrize_rprimd
 !!
 !! SIDE EFFECTS
 !! tnons(3,1:nsym)= non-symmorphic translation vectors
-!!
-!! PARENTS
-!!      m_ingeo
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1562,7 +1660,7 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
 !ENDDEBUG
 
  unitmat=0
- unitmat(1,1)=1 ; unitmat(2,2)=1 ; unitmat(3,3)=1 
+ unitmat(1,1)=1 ; unitmat(2,2)=1 ; unitmat(3,3)=1
 
  do isym=1,nsym
 
@@ -1591,7 +1689,7 @@ subroutine symmetrize_tnons(nsym,symrel,tnons,tolsym)
          exit
        endif
      endif
-     
+
    enddo ! iorder
 
    if(order==0)then
@@ -1611,7 +1709,7 @@ end subroutine symmetrize_tnons
 !! symmetrize_xred
 !!
 !! FUNCTION
-!! Symmetrize atomic coordinates. 
+!! Symmetrize atomic coordinates.
 !! Two tasks can be executed :
 !! A. If optional argument indsym is present.
 !! Using input symmetry matrices symrel
@@ -1624,7 +1722,7 @@ end subroutine symmetrize_tnons
 !! This version uses improvement in algorithm suggested by Andrew
 !! Horsfield (see symatm.f).
 !! B. If optional argument tolsym AND tnons_new are defined.
-!! Might also adjust xred in order for tnons to be aligned with the FFT grids. 
+!! Might also adjust xred in order for tnons to be aligned with the FFT grids.
 !! This will deliver new tnons_new.
 !! NOTE : Actually, should make two separate routines !
 !!
@@ -1638,12 +1736,9 @@ end subroutine symmetrize_tnons
 !! tnons(3,nsym)=nonsymmorphic translations for symmetries
 !! tolsym=(optional) tolerance on symmetries. When defined, one will try to align the symmetry operations with the FFT grid,
 !!   if the modification is less than tolsym. Take tolsym equal to 1 to deliver possibly large changes of xred,
-!!   giving suggestions of xred modifications, to pbe proposed to users.
+!!   giving suggestions of xred modifications, to be proposed to users.
 !!
 !! OUTPUT
-!! fixed_mismatch=(optional) 1 if there is a mismatch and this mismatch has been fixed, 0 otherwise
-!! mismatch_fft_tnons=(optional) non-zero if there is a mismatch between the fft grid and the tnons, gives the number 
-!!   of the first symmetry operation for which there is such a mismatch. Zero otherwise.
 !! tnons_new(3,nsym)=(optional)nonsymmorphic translations for symmetries
 !!
 !! SIDE EFFECTS
@@ -1652,13 +1747,12 @@ end subroutine symmetrize_tnons
 !!  (input) atomic coordinates in terms of real space translations
 !!  (output) symmetrized atomic coordinates in terms
 !!    of real space translations
-!!
-!! PARENTS
-!!      m_chkinp,m_ingeo,m_longwave,m_mover,m_nonlinear,m_respfn_driver
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      wrtout
+!! fixed_mismatch=(optional) At input, needs to be present for tnons_new to be computed
+!!    At output : 1 if there is a mismatch and this mismatch has been fixed, 0 otherwise
+!! mismatch_fft_tnons=(optional) At input, needs to be present for tnons_new to be computed
+!!    Atd output : non-zero if there is a mismatch between the fft grid and the tnons, gives the number
+!!   of the first symmetry operation for which there is such a mismatch. Zero otherwise.
+
 !!
 !! SOURCE
 
@@ -1701,7 +1795,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  if (nsym>1) then
 
 !DEBUG
-! write(std_out,*) 
+! write(std_out,*)
 ! write(std_out,'(a,i4)') 'symmetrize_xred: enter, nsym=',nsym
 ! do iatom=1,natom
 !   write(std_out,'(a,i4,3es16.6)') 'iatom,xred=',iatom,xred(:,iatom)
@@ -1710,13 +1804,13 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
 !   write(std_out,'(a,i4,9i3,3es16.6)') 'isym,symrel,tnons',isym,symrel(:,:,isym),tnons(:,isym)
 ! enddo
 ! write(std_out,*)' present(tnons_new),present(tolsym)=',present(tnons_new),present(tolsym)
-! write(std_out,*) 
+! write(std_out,*)
 !ENDDEBUG
 
    ABI_MALLOC(xredsym,(3,natom))
    xredsym(:,:)=xred(:,1:natom)
 
-   if(present(indsym))then 
+   if(present(indsym))then
 
 !    Loop over atoms to determine new, symmetrized positions.
      do iatom=1,natom
@@ -1777,7 +1871,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
            !Select the smallest modification tnons
            delta(:)=tnons(ii,isym)*mult(:)
            delta(:)=(delta(:)-nint(delta(:)))/mult(:)
-           xredshift(ii,1)=delta(1) 
+           xredshift(ii,1)=delta(1)
            do jj=2,4
              if(abs(delta(jj))<abs(xredshift(ii,1)))xredshift(ii,1)=delta(jj)
            enddo
@@ -1863,7 +1957,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
  end if
 
 !DEBUG
-!write(std_out,*) 
+!write(std_out,*)
 !write(std_out,'(a)') 'symmetrize_xred : exit'
 !do iatom=1,natom
 !  write(std_out,'(a,i4,3es20.10)') 'iatom,xred=',iatom,xred(:,iatom)
@@ -1873,7 +1967,7 @@ subroutine symmetrize_xred(natom,nsym,symrel,tnons,xred,fixed_mismatch,indsym,mi
 !    write(std_out,'(a,i4,9i3,3es20.10)') 'isym,symrel,tnons_new',isym,symrel(:,:,isym),tnons_new(:,isym)
 !  enddo
 !endif
-!write(std_out,*) 
+!write(std_out,*)
 !ENDDEBUG
 
 end subroutine symmetrize_xred
@@ -1906,12 +2000,6 @@ end subroutine symmetrize_xred
 !! eatom=atom label of atom which is SAME as tratom to within a primitive
 !!   cell translation ("equivalent atom")
 !! transl(3)=primitive cell translation to make iatom same as tratom (integers)
-!!
-!! PARENTS
-!!      m_polynomial_coeff,m_symtk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2025,9 +2113,9 @@ end subroutine symchk
 !! use of dot product relation which must produce an integer.
 !! Relation:
 !!
-!!      $[inv(S(i))*(x(a)-tnons(i)) - x(inv(S)(i,a))] = integer$
+!!      $[inv(S(i)) * (x(a)-tnons(i)) - x(inv(S)(i,a))] = integer$
 !!
-!! where $S(i) =$ symmetry matrix in real space, tnons=nonsymmorphic translation
+!! where S(i)  is the symmetry matrix in real space, tnons=nonsymmorphic translation
 !! (may be 0 0 0), and $x(inv(S)(i,a))$ is sought atom into which $x(a)$ gets
 !! rotated by $inv(S)$.  Integer gives primitive translation coordinates to get
 !! back to original unit cell.
@@ -2061,14 +2149,6 @@ end subroutine symchk
 !!                      isym; first three elements are the primitive
 !!                      translations which must be subtracted after the
 !!                      transformation to get back to the original unit cell.
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_berryphase_new,m_crystal,m_ddb,m_dtset,m_ingeo
-!!      m_mover_effpot,m_orbmag,m_polynomial_coeff,m_spacepar,m_tdep_sym
-!!      m_thmeig
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2231,12 +2311,6 @@ end subroutine symatm
 !! OUTPUT
 !! label=a human readable text for the characteristic of the symmetry
 !! type_axis=an identifier for the type of symmetry
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2494,12 +2568,6 @@ end subroutine symcharac
 !!  tertiary 2 axis to the "tertiary 2-axis" set (there are always 6),
 !!  and attribute 2 and 2_1 primary axes to the corresponding sets.
 !!
-!! PARENTS
-!!      m_symtk
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine symaxes(center,iholohedry,isym,isymrelconv,label,ordersym,tnons_order,trialt,type_axis)
@@ -2751,12 +2819,6 @@ end subroutine symaxes
 !!  the tertiary m and g mirror planes are to be classified as "m" -> 15,
 !!  while n, a and c are to be classified as "n" -> 18. There is no need
 !!  to distinguish between primary, secondary or tertiary axes.
-!!
-!! PARENTS
-!!      m_symtk
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -3061,12 +3123,6 @@ end subroutine symplanes
 !! The routine might as well be defined without
 !! metmin as argument, but it is more convenient to have it
 !!
-!! PARENTS
-!!      m_kpts,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 
@@ -3284,12 +3340,6 @@ end subroutine smallprim
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_crystal,m_hdr,m_spgbuilder,m_symfind
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

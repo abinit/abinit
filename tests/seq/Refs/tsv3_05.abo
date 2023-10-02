@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h19 )
+.Starting date : Wed 12 Jul 2023.
+- ( at 18h09 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/TestBot_MPI1/seq_tsv3_05/tsv3_05.in
-- output file    -> tsv3_05.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze2/tests/Test_suite/seq_tsv3_05/tsv3_05.abi
+- output file    -> tsv3_05.abo
 - root for input  files -> tsv3_05i
 - root for output files -> tsv3_05o
 
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =          10
        mpw =          67          nfft =        1728          nkpt =          10
 ================================================================================
-P This job should need less than                       1.095 Mbytes of memory.
+P This job should need less than                       1.145 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -87,7 +87,7 @@ _ WF disk file :      0.133 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          67          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.133 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -122,7 +122,7 @@ _ WF disk file :      0.133 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          67          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.005 Mbytes of memory.
+P This job should need less than                       1.054 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.133 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -173,6 +173,7 @@ _ WF disk file :      0.133 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
          berryopt6         -2
          berryopt7          0
       chksymbreak           0
+           chneut           0
            diemac      1.20000000E+01
              ecut      3.00000000E+00 Hartree
 -          fftalg         312
@@ -483,10 +484,17 @@ P          mk1mem7         32
         optdriver5          1
         optdriver6          0
         optdriver7          1
-            rfdir1          0       0       0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
+            rfdir4          1       1       1
             rfdir5          1       1       1
             rfdir6          1       0       0
             rfdir7          1       1       1
@@ -643,8 +651,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.13807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/trunk__gonze2/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -822,7 +830,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.13807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -839,7 +846,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -911,7 +917,7 @@ tolerances: {tolwfr: 3.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -948,7 +954,6 @@ meta: {optdriver: 1, rfelfd: 3, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.13807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -975,7 +980,6 @@ meta: {optdriver: 1, rfelfd: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1029,6 +1033,17 @@ tolerances: {tolwfr: 3.00E-22, }
 
 
  ==> Compute Derivative Database <==
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1   -3.268706E-01    6.737878E-17    2.212853E-15
+         1         2   -2.153067E-15   -3.268706E-01   -2.109779E-15
+         1         3    2.153067E-15   -6.737878E-17   -3.268706E-01
+         2         1   -3.268706E-01    5.114680E-16    2.586263E-15
+         2         2   -2.153067E-15   -3.268706E-01   -2.624548E-15
+         2         3    2.153067E-15   -5.114680E-16   -3.268706E-01
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1108,7 +1123,7 @@ tolerances: {tolwfr: 3.00E-22, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -1264,7 +1279,6 @@ meta: {optdriver: 1, rfelfd: 3, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.13807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1291,7 +1305,6 @@ meta: {optdriver: 1, rfelfd: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1317,7 +1330,7 @@ tolerances: {tolwfr: 3.00E-22, }
  ETOT 10  -200.50118606830     -1.421E-13 1.015E-17 1.962E-14
  ETOT 11  -200.50118606830      5.400E-13 6.167E-20 5.000E-16
  ETOT 12  -200.50118606830     -4.263E-13 1.390E-21 7.480E-18
- ETOT 13  -200.50118606830     -3.979E-13 2.335E-22 6.060E-20
+ ETOT 13  -200.50118606830     -3.695E-13 2.335E-22 6.060E-20
 
  At SCF step   13   max residual=  2.33E-22 < tolwfr=  3.00E-22 =>converged.
 -open ddk wf file :tsv3_05o_DS4_1WF7
@@ -1345,6 +1358,17 @@ tolerances: {tolwfr: 3.00E-22, }
 
 
  ==> Compute Derivative Database <==
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.511863E+00   -3.908707E-16    3.063722E-16
+         1         2   -6.129153E-16    1.511863E+00   -3.078447E-16
+         1         3    6.129153E-16    3.908707E-16    1.511863E+00
+         2         1    1.511863E+00   -3.908707E-16    3.034272E-16
+         2         2   -6.129153E-16    1.511863E+00   -3.107896E-16
+         2         3    6.129153E-16    3.908707E-16    1.511863E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1424,7 +1448,7 @@ tolerances: {tolwfr: 3.00E-22, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -1589,7 +1613,6 @@ meta: {optdriver: 1, rfelfd: 3, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.13807
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1616,7 +1639,6 @@ meta: {optdriver: 1, rfelfd: 3, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file tsv3_05o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1637,12 +1659,12 @@ tolerances: {tolwfr: 3.00E-22, }
  ETOT  5  -200.50118520399     -6.094E-05 3.638E-08 1.642E-04
  ETOT  6  -200.50118606756     -8.636E-07 5.279E-10 2.434E-07
  ETOT  7  -200.50118606828     -7.249E-10 9.433E-13 3.718E-09
- ETOT  8  -200.50118606830     -1.299E-11 1.059E-14 1.146E-10
+ ETOT  8  -200.50118606830     -1.302E-11 1.059E-14 1.146E-10
  ETOT  9  -200.50118606830     -3.411E-13 3.563E-16 2.454E-12
  ETOT 10  -200.50118606830     -8.527E-14 1.015E-17 1.962E-14
  ETOT 11  -200.50118606830      4.832E-13 6.167E-20 5.000E-16
- ETOT 12  -200.50118606830     -7.674E-13 1.390E-21 7.480E-18
- ETOT 13  -200.50118606830      0.000E+00 2.335E-22 6.061E-20
+ ETOT 12  -200.50118606830     -7.958E-13 1.390E-21 7.480E-18
+ ETOT 13  -200.50118606830      2.842E-14 2.335E-22 6.061E-20
 
  At SCF step   13   max residual=  2.33E-22 < tolwfr=  3.00E-22 =>converged.
 -open ddk wf file :tsv3_05o_DS6_1WF7
@@ -1670,6 +1692,17 @@ tolerances: {tolwfr: 3.00E-22, }
 
 
  ==> Compute Derivative Database <==
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.511863E+00    4.183489E-16    4.139314E-16
+         1         2   -2.574034E-17    1.511863E+00   -4.227663E-16
+         1         3    2.574034E-17   -4.183489E-16    1.511863E+00
+         2         1    1.511863E+00   -3.747299E-16   -1.837795E-17
+         2         2   -3.747299E-16    1.511863E+00    3.310274E-17
+         2         3    3.747299E-16    3.747299E-16    1.511863E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1749,7 +1782,7 @@ tolerances: {tolwfr: 3.00E-22, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -1795,6 +1828,7 @@ tolerances: {tolwfr: 3.00E-22, }
          berryopt6         -2
          berryopt7          0
       chksymbreak           0
+           chneut           0
            diemac      1.20000000E+01
              ecut      3.00000000E+00 Hartree
            etotal1    -8.8021920655E+00
@@ -2118,10 +2152,17 @@ P          mk1mem7         32
         optdriver5          1
         optdriver6          0
         optdriver7          1
-            rfdir1          0       0       0
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+           prtpot7          1
+            rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
-            rfdir4          0       0       0
+            rfdir4          1       1       1
             rfdir5          1       1       1
             rfdir6          1       0       0
             rfdir7          1       1       1
@@ -2243,65 +2284,70 @@ P          mk1mem7         32
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          4.9        0.08      0.001
-- Total wall clock time (s,m,h):          5.0        0.08      0.001
+- Total cpu        time (s,m,h):          5.7        0.10      0.002
+- Total wall clock time (s,m,h):          5.8        0.10      0.002
 -
 - For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            4.9, wall_time =            5.0
+-  as well as % of the time and number of calls for node 0
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   1.947  39.4      1.958  39.3          30961      -1.00        0.99       0.99
-- fourwf%(G->r)                  0.371   7.5      0.356   7.1          11136      -1.00        1.04       1.04
-- invars2                        0.308   6.2      0.309   6.2              7      -1.00        1.00       1.00
-- nonlop(apply)                  0.256   5.2      0.244   4.9          25969      -1.00        1.05       1.05
-- dfpt_vtowfk(contrib)           0.226   4.6      0.230   4.6             -1      -1.00        0.98       0.98
-- getghc-other                   0.195   3.9      0.218   4.4             -1      -1.00        0.89       0.89
-- pspini                         0.175   3.5      0.175   3.5              7      -1.00        1.00       1.00
-- projbd                         0.165   3.3      0.171   3.4          51525      -1.00        0.97       0.97
-- timing timab                   0.107   2.2      0.107   2.1             10      -1.00        1.00       1.00
-- abinit(2)                      0.099   2.0      0.099   2.0              1      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           0.053   1.1      0.055   1.1             48      -1.00        0.97       0.97
-- getgh1c_setup                  0.043   0.9      0.048   1.0           1536      -1.00        0.89       0.89
-- ewald                          0.037   0.7      0.037   0.7              3      -1.00        1.00       1.00
-- mkffnl                         0.029   0.6      0.043   0.9           1892      -1.00        0.67       0.67
-- fourwf%(den)                   0.028   0.6      0.026   0.5            744      -1.00        1.09       1.09
-- nonlop(forces)                 0.028   0.6      0.029   0.6           2304      -1.00        0.96       0.96
-- others (111)                   0.107   2.2      0.070   1.4             -1      -1.00        1.53       1.53
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            5.7, wall_time =            5.8
+-
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              2.264  39.6         2.228  38.4          31940      -1.00        1.02       1.02
+- get_dtsets_pspheads                       0.464   8.1         0.465   8.0              1      -1.00        1.00       1.00
+- fourwf%(G->r)                             0.418   7.3         0.425   7.3          11136      -1.00        0.98       0.98
+- dfpt_cgwf-O(npw)                          0.387   6.8         0.401   6.9             -1      -1.00        0.96       0.96
+- nonlop(apply)                             0.300   5.2         0.275   4.7          26948      -1.00        1.09       1.09
+- dfpt_vtowfk(contrib)                      0.264   4.6         0.297   5.1             -1      -1.00        0.89       0.89
+- getghc(/=fourXX,nonlop,fock_XX)           0.241   4.2         0.232   4.0             -1      -1.00        1.04       1.04
+- pspini                                    0.202   3.5         0.203   3.5              7      -1.00        1.00       1.00
+- projbd                                    0.184   3.2         0.225   3.9          52504      -1.00        0.82       0.82
+- abinit(outvars)                           0.114   2.0         0.141   2.4              1      -1.00        0.81       0.81
+- timing timab                              0.111   1.9         0.111   1.9             10      -1.00        1.00       1.00
+- abinit(after driver)                      0.098   1.7         0.103   1.8              1      -1.00        0.95       0.95
+- dfpt_vtorho-kpt loop                      0.065   1.1         0.064   1.1             48      -1.00        1.01       1.01
+- abinit(chkinp,chkvars)                    0.055   1.0         0.055   0.9              1      -1.00        1.00       1.00
+- getgh1c_setup                             0.052   0.9         0.051   0.9           1536      -1.00        1.02       1.02
+- ewald                                     0.042   0.7         0.042   0.7              3      -1.00        0.99       0.99
+- mkffnl                                    0.035   0.6         0.033   0.6           1892      -1.00        1.07       1.07
+- fourwf%(den)                              0.033   0.6         0.039   0.7            744      -1.00        0.84       0.84
+- others (142)                              0.194   3.4         0.193   3.3             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                       4.173  84.4      4.175  83.8                                  1.00       1.00
+- subtotal                                  5.520  96.6         5.583  96.2                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           4.9, wall_time =           5.0
+- cpu_time =           5.7, wall_time =           5.8
 -
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                   1.947  39.4      1.958  39.3          30961      -1.00        0.99       0.99
-- fourwf%(G->r)                  0.371   7.5      0.356   7.1          11136      -1.00        1.04       1.04
-- invars2                        0.308   6.2      0.309   6.2              7      -1.00        1.00       1.00
-- nonlop(apply)                  0.256   5.2      0.244   4.9          25969      -1.00        1.05       1.05
-- dfpt_vtowfk(contrib)           0.226   4.6      0.230   4.6             -1      -1.00        0.98       0.98
-- getghc-other                   0.195   3.9      0.218   4.4             -1      -1.00        0.89       0.89
-- pspini                         0.175   3.5      0.175   3.5              7      -1.00        1.00       1.00
-- projbd                         0.165   3.3      0.171   3.4          51525      -1.00        0.97       0.97
-- timing timab                   0.107   2.2      0.107   2.1             10      -1.00        1.00       1.00
-- abinit(2)                      0.099   2.0      0.099   2.0              1      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           0.053   1.1      0.055   1.1             48      -1.00        0.97       0.97
-- getgh1c_setup                  0.043   0.9      0.048   1.0           1536      -1.00        0.89       0.89
-- ewald                          0.037   0.7      0.037   0.7              3      -1.00        1.00       1.00
-- mkffnl                         0.029   0.6      0.043   0.9           1892      -1.00        0.67       0.67
-- fourwf%(den)                   0.028   0.6      0.026   0.5            744      -1.00        1.09       1.09
-- nonlop(forces)                 0.028   0.6      0.029   0.6           2304      -1.00        0.96       0.96
-- others (111)                   0.107   2.2      0.070   1.4             -1      -1.00        1.53       1.53
+- routine                                    cpu     %          wall   %        number of calls Gflops    Speedup Efficacity
+-                                                                                (-1=no count)
+- fourwf%(pot)                              2.264  39.6         2.228  38.4          31940      -1.00        1.02       1.02
+- get_dtsets_pspheads                       0.464   8.1         0.465   8.0              1      -1.00        1.00       1.00
+- fourwf%(G->r)                             0.418   7.3         0.425   7.3          11136      -1.00        0.98       0.98
+- dfpt_cgwf-O(npw)                          0.387   6.8         0.401   6.9             -1      -1.00        0.96       0.96
+- nonlop(apply)                             0.300   5.2         0.275   4.7          26948      -1.00        1.09       1.09
+- dfpt_vtowfk(contrib)                      0.264   4.6         0.297   5.1             -1      -1.00        0.89       0.89
+- getghc(/=fourXX,nonlop,fock_XX)           0.241   4.2         0.232   4.0             -1      -1.00        1.04       1.04
+- pspini                                    0.202   3.5         0.203   3.5              7      -1.00        1.00       1.00
+- projbd                                    0.184   3.2         0.225   3.9          52504      -1.00        0.82       0.82
+- abinit(outvars)                           0.114   2.0         0.141   2.4              1      -1.00        0.81       0.81
+- timing timab                              0.111   1.9         0.111   1.9             10      -1.00        1.00       1.00
+- abinit(after driver)                      0.098   1.7         0.103   1.8              1      -1.00        0.95       0.95
+- dfpt_vtorho-kpt loop                      0.065   1.1         0.064   1.1             48      -1.00        1.01       1.01
+- abinit(chkinp,chkvars)                    0.055   1.0         0.055   0.9              1      -1.00        1.00       1.00
+- getgh1c_setup                             0.052   0.9         0.051   0.9           1536      -1.00        1.02       1.02
+- ewald                                     0.042   0.7         0.042   0.7              3      -1.00        0.99       0.99
+- mkffnl                                    0.035   0.6         0.033   0.6           1892      -1.00        1.07       1.07
+- fourwf%(den)                              0.033   0.6         0.039   0.7            744      -1.00        0.84       0.84
+- others (142)                              0.194   3.4         0.193   3.3             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                       4.173  84.4      4.175  83.8                                  1.00       1.00
+- subtotal                                  5.520  96.6         5.583  96.2                                  0.99       0.99
 
 ================================================================================
 
@@ -2381,10 +2427,10 @@ P          mk1mem7         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.0
+- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and  40 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          5.0
+.Delivered  19 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.7  wall=          5.8

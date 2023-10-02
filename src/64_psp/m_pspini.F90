@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -40,7 +36,7 @@ module m_pspini
  use m_io_tools,  only : open_file
  use m_pawrad,    only : pawrad_type
  use m_pawtab,    only : pawtab_type, pawtab_set_flags
- use m_psps,      only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch, test_xml_xmlpaw_upf, &
+ use m_psps,      only : psps_print, psps_ncwrite_path, nctab_init, nctab_free, nctab_mixalch, test_xml_xmlpaw_upf, &
                          nctab_eval_tcorespl
  use m_pawpsp,    only : pawpsp_bcast, pawpsp_read_pawheader, pawpsp_read_header_xml,&
                          pawpsp_header_type, pawpsp_wvl, pawpsp_7in, pawpsp_17in
@@ -55,7 +51,7 @@ module m_pspini
  use m_psp6,       only : psp6in
  use m_psp8,       only : psp8in
  use m_psp9,       only : psp9in
- use m_upf2abinit, only : upf2abinit
+ use m_upf2abinit, only : upf1_to_abinit, upf2_to_abinit
  use m_psp_hgh,    only : psp2in, psp3in, psp10in
  use m_wvl_descr_psp,  only : wvl_descr_psp_fill
 
@@ -113,9 +109,8 @@ contains
 !!   At the input, it is already partially or completely initialized.
 !!
 !! NOTES
-!! The interplay with the multi-dataset mode is interesting :
-!! the pseudopotentials
-!! are independent of the dataset, but the largest q vector, the
+!! The interplay with the multi-dataset mode is interesting:
+!! the pseudopotentials are independent of the dataset, but the largest q vector, the
 !! spin-orbit characteristics, the use of Ylm as well as ixc
 !! play a role in the set up of pseudopotentials (ixc plays a very minor
 !! role, however). So, the pseudopotential data ought not be recomputed
@@ -123,12 +118,6 @@ contains
 !! In many cases, this routine is also called just to write the psp line
 !! of the header, without reading again the psp. This psp line
 !! is constant throughout run.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_eph_driver,m_gstate,m_longwave,m_nonlinear
-!!      m_respfn_driver,m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -144,7 +133,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  type(datafiles_type),intent(in) :: dtfil
 !arrays
  real(dp),intent(in) :: rprimd(3,3)
-!no_abirules
  type(pseudopotential_type), target,intent(inout) :: psps
  type(pawrad_type), intent(inout) :: pawrad(psps%ntypat*psps%usepaw)
  type(pawtab_type), intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
@@ -160,7 +148,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
  logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
- real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one
+ real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one,hyb_mixing_old=-999.0_dp
  real(dp) :: dq,epsatm_psp,qmax,rmax,xcccrc
  character(len=500) :: msg
  type(pawrad_type) :: pawrad_dum
@@ -200,9 +188,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_BUG("npsp>npspmax in pspini !")
  end if
 
-!Size of grids for atomic data represented in reciprocal space
-
-!Set up q grids, make qmax 20% larger than largest expected:
+! Set up q grids for atomic data represented in reciprocal space
+! make qmax 20% larger than largest expected:
  qmax=1.2d0 * sqrt(gsqcut)
 !ffnl is always computed in reciprocal space
  dq=qmax/(one*(psps%mqgrid_ff-1))
@@ -229,7 +216,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  paw_options=0;paw_size=0
  if (psps%usepaw==1) then
    paw_size=size(pawtab)
-   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8)
+   has_kij=(dtset%positron/=0.or.abs(dtset%effmass_free-one)>tol8.or.dtset%orbmag>0)
    has_tvale=.true. ! Will be modified later (depending on PAW dataset format)
    has_nabla=.false.
    has_shapefncg=(dtset%optdriver==RUNL_GSTATE.and.((dtset%iprcel>=20.and.dtset%iprcel<70).or.dtset%iprcel>=80))
@@ -273,6 +260,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !Compute the general condition for new computation of pseudopotentials
  gencond=0
  if(   ixc_old /= dtset%ixc                &
+& .or. ABS(hyb_mixing_old - dtset%hyb_mixing)>tol8 &
 & .or. mqgridff_old /= psps%mqgrid_ff      &
 & .or. mqgridvl_old /= psps%mqgrid_vl      &
 & .or. mpssoang_old /= psps%mpssoang       &
@@ -335,10 +323,10 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    end if
 
 !  Read atomic pseudopotential data and get transforms
-!  for each atom type : two cases, alchemy or not.
+!  for each atom type: two cases, alchemy or not.
 
-!  No alchemical pseudoatom, in all datasets, npsp=ntypat
    if(mtypalch==0)then
+     !  No alchemical pseudoatom, in all datasets, npsp=ntypat
 
      do ipsp=1,npsp
 
@@ -352,8 +340,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        write(msg, '(a,i4,a,t38,a)' )'- pspini: atom type',ipsp,'  psp file is',trim(psps%filpsp(ipsp))
        call wrtout([std_out, ab_out], msg)
 
-!      Read atomic psp V(r) and wf(r) to get local and nonlocal psp:
-!      Cannot use the same call in case of bound checking, because of pawrad/pawtab
+       ! Read atomic psp V(r) and wf(r) to get local and nonlocal psp:
+       ! Cannot use the same call in case of bound checking, because of pawrad/pawtab
        if(psps%usepaw==0)then
          call pspatm(dq,dtset,dtfil,ekb,epsatm(ipsp),ffspl,indlmn,ipsp,&
            pawrad_dum,pawtab_dum,psps,vlspl,dvlspl,xcccrc,xccc1d,psps%nctab(ipsp))
@@ -376,7 +364,8 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        if (.not.psps%vlspl_recipSpace) psps%dvlspl(:, :, ipsp) = dvlspl(:, :)
      end do ! ipsp
 
-   else ! if mtypalch/=0
+   else
+     ! mtypalch/=0
 
      npspalch=psps%npspalch
      ntyppure=npsp-npspalch
@@ -604,6 +593,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  mpssoang_old=psps%mpssoang
  spnorbscl_old = dtset%spnorbscl
  ixc_old=dtset%ixc
+ hyb_mixing_old=dtset%hyb_mixing
  gsqcut_old=gsqcut;if (psps%usepaw==1) gsqcutdg_old=gsqcutdg
  lmnmax_old=psps%lmnmax
  lnmax_old=psps%lnmax
@@ -630,7 +620,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
  ! Write the PSPS.nc file and exit here if requested by the user.
  if (abs(dtset%prtpsps) == 1) then
-   if (xmpi_comm_rank(xmpi_world) == 0) call psps_ncwrite(psps, trim(dtfil%filnam_ds(4))//"_PSPS.nc")
+   if (xmpi_comm_rank(xmpi_world) == 0) call psps_ncwrite_path(psps, trim(dtfil%filnam_ds(4))//"_PSPS.nc")
    if (dtset%prtpsps == -1) then
      ABI_ERROR_NODUMP("prtpsps == -1 ==> aborting now")
    end if
@@ -660,11 +650,6 @@ end subroutine pspini
 !!
 !! OUTPUT
 !!  ecore=resulting psion-psion energy in Hartrees
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -717,7 +702,8 @@ end subroutine pspcor
 !! or "Phoney pseudopotentials" (Hamman grid in real space) (pspcod=5)
 !! or "Troullier-Martins pseudopotentials" from the FHI (pspcod=6)
 !! or "XML format" (pspcod=9)
-!! or "UPF PWSCF format" (pspcod=11)
+!! or "UPF1 PWSCF format" (pspcod=11)
+!! or "UPF2 PWSCF format" (pspcod=12)
 !!
 !! INPUTS
 !!  dq= spacing of the q-grid
@@ -795,15 +781,10 @@ end subroutine pspcor
 !!
 !!  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
 !!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
-&  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
+                  psps,vlspl,dvlspl,xcccrc,xccc1d,nctab,comm_mpi)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -830,9 +811,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  integer :: ii,il,ilmn,iln,iln0,lloc,lmax,me,mmax
  integer :: paral_mode,pspcod,pspdat,pspxc,useupf,usexml,xmlpaw,unt
  real(dp) :: maxrad,qchrg,r2well,zion,znucl
+ logical,parameter :: nc_debug = .False.
+ !logical,parameter :: nc_debug = .True.
  character(len=500) :: msg,errmsg
- character(len=fnlen) :: title
- character(len=fnlen) :: filnam
+ character(len=fnlen) :: title, filnam
  type(pawpsp_header_type):: pawpsp_header
  type(pspheader_type) :: pspheads_tmp
 !arrays
@@ -863,6 +845,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  end if
 
  nctab%has_tvale = .False.; nctab%has_tcore = .False.
+ pspcod = -1
 
  if (me==0) then
 !  Dimensions of form factors and Vloc q grids must be the same in Norm-Conserving case
@@ -885,11 +868,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    ABI_MALLOC(nproj,(psps%mpssoang))
    nproj(:)=0
 
-   if (usexml /= 1 .and. useupf /= 1) then
+   if (usexml /= 1 .and. useupf == 0) then
 
-     !    Open the atomic data file, and read the three first lines
-     !    These three first lines have a similar format in all allowed psp files
-     !    Open atomic data file (note: formatted input file)
+     ! Open the atomic data file, and read the three first lines
+     ! These three first lines have a similar format in all allowed psp files
+     ! Open atomic data file (note: formatted input file)
      if (open_file(psps%filpsp(ipsp), msg, unit=tmp_unit, form='formatted', status='old') /= 0) then
        ABI_ERROR(msg)
      end if
@@ -969,17 +952,29 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      pawpsp_header%rshp=pspheads_tmp%pawheader%rshp
      lloc=0; pspcod=17
 
-   else if (useupf == 1) then
+   else if (useupf /= 0) then
      if (psps%usepaw /= 0) then
        ABI_ERROR("UPF format not allowed with PAW (USPP part not read yet)")
      end if
 
-     pspcod = 11
-     r2well = 0
+     r2well = 0; qchrg=zero
 
-!    should initialize znucl,zion,pspxc,lmax,lloc,mmax
-     call upf2abinit (psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
-       psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
+     ! should initialize znucl,zion,pspxc,lmax,lloc,mmax
+     if (useupf == 1) then
+       pspcod = 11
+       call upf1_to_abinit(psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+                       psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
+     else
+       pspcod = 12
+       call upf2_to_abinit(ipsp, psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d, nctab, maxrad)
+
+       if (nc_debug) then
+         call psp_dump_outputs("UPF2", pspcod, psps%lmnmax, psps%lnmax, psps%mpssoang, &
+           psps%mqgrid_ff, psps%n1xccc, mmax, maxrad, epsatm, qchrg, xcccrc, nctab, &
+           indlmn, nproj, ekb, ffspl, vlspl, xccc1d)
+       end if
+     end if
 
    else
      ABI_ERROR("You should not be here! erroneous type or pseudopotential input")
@@ -994,10 +989,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 !  HGH is ok - can always turn SOC on or off.
 !  PAW is ok - can be used with or without SOC
 !  write(std_out,*) pspso
-   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10).and. (pspcod/=7).and.(pspcod/=17))then
+   if((pspcod/=3).and.(pspcod/=5).and.(pspcod/=8).and.(pspcod/=10).and. pspcod /= 12 .and. &
+      (pspcod/=7).and.(pspcod/=17))then
 !    If pspso requires internal characteristics, set it to 1 for non-HGH psps
      if(psps%pspso(ipsp)==1) psps%pspso(ipsp)=0
-     if(psps%pspso(ipsp)/=0)then
+     if(psps%pspso(ipsp) /= 0)then
        write(msg, '(3a,i0,3a)' )&
         'Pseudopotential file cannot give spin-orbit characteristics,',ch10,&
         'while pspso(itypat)= ',psps%pspso(ipsp),'.',ch10,&
@@ -1066,10 +1062,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 
 !  MJV 16/6/2009 added pspcod 11 for upf format
-   if( pspcod<1 .or. (pspcod>11.and.pspcod/=17) ) then
+   !if( pspcod<1 .or. (pspcod>11.and.pspcod/=17) ) then
+   if( pspcod<1)  then
      write(msg, '(a,i0,4a)' )&
       'In reading atomic psp file, finds pspcod= ',pspcod,ch10,&
-      'This is not an allowed value. Allowed values are 1 to 11 .',ch10,&
+      'This is not an allowed value. Allowed values are 1-12 or 17 .',ch10,&
       'Action: check pseudopotential input file.'
      ABI_ERROR(msg)
    end if
@@ -1087,7 +1084,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    rcpsp(:)=zero;rms(:)=zero
    ekb1(:)=zero ;ekb2(:)=zero
    epspsp(:)=zero
-   qchrg=0
+   qchrg=zero
 
 !  ----------------------------------------------------------------------
    if (pspcod==1 .or. pspcod==4)then
@@ -1126,11 +1123,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    else if (pspcod==7)then
      ! PAW "pseudopotentials"
-     call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,dtset%ixc,&
-       lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
-       pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
-       dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
-       dtset%xc_denpos,zion,psps%znuclpsp(ipsp))
+     call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,ABS(dtset%hyb_mixing),dtset%ixc,&
+&      lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
+&      pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
+&      dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
+&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),xc_taupos=dtset%xc_taupos)
 
    else if (pspcod==8)then
 
@@ -1139,29 +1136,29 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
        psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc,psps%pspso(ipsp),&
        qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
 
-#if defined DEV_YP_DEBUG_PSP
-     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
-&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
-#endif
+     if (nc_debug) then
+       call psp_dump_outputs("PSP8",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+         psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+         indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+     end if
 
    else if (pspcod==9)then
 
 #if defined HAVE_LIBPSML
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
-&     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
-&     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
-&     xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
+       psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
+       psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&
+       xcccrc,xccc1d,zion,psps%znuclpsp(ipsp),nctab,maxrad)
 
-#if defined DEV_YP_DEBUG_PSP
-     call psp_dump_outputs("DBG",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
-&     psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&     indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
-#endif
+     if (nc_debug) then
+       call psp_dump_outputs("PSML",pspcod,psps%lmnmax,psps%lnmax,psps%mpssoang, &
+        psps%mqgrid_ff,psps%n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+        indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+     end if
 #else
      write(msg,'(2a)')  &
        'ABINIT is not compiled with XML support for reading this type of pseudopotential ', trim(psps%filpsp(ipsp))
-     ABI_BUG(msg)
+     ABI_ERROR(msg)
 #endif
 
    else if (pspcod==10)then
@@ -1173,11 +1170,12 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      ! NB for pspcod 11 the reading has already been done above.
    else if (pspcod==17)then
      ! PAW XML pseudopotentials
-     call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,dtset%ixc,lmax,&
-      psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
-      dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
-      dtset%usexcnhat_orig,vlspl,xcccrc,&
-      dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp))
+     call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,ABS(dtset%hyb_mixing),dtset%ixc,lmax,&
+&     psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
+&     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
+&     dtset%usexcnhat_orig,vlspl,xcccrc,&
+&     dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp),&
+&     xc_taupos=dtset%xc_taupos)
      call paw_setup_free(paw_setuploc)
    end if
 
@@ -1211,6 +1209,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    if (pspcod/=7.and.pspcod/=17) then
      write(msg, '(a,f14.8,a,a)' ) '  pspatm : epsatm=',epsatm,ch10,'         --- l  ekb(1:nproj) -->'
      call wrtout([std_out, ab_out], msg)
+     !print *, "nproj", nproj
      iln0=0
      do ilmn=1,psps%lmnmax
        iln=indlmn(5,ilmn)
@@ -1220,6 +1219,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
            iln0=iln0+nproj(il+1)
            write(msg, '(13x,i1,4f12.6)' ) il,(ekb(iln+ii),ii=0,nproj(il+1)-1)
          else
+           ! Note il = ll here i.e. the s channel in the SOC part is not included in nproj.
            iln0=iln0+nproj(il+psps%mpsang)
            if (dtset%spnorbscl /= one) then
              call wrtout([std_out, ab_out], &
@@ -1234,7 +1234,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    end if
 
    ! NC: Evalute spline-fit of the model core charge in reciprocal space.
-   ! TODO: Be careful, because we will be using the PAW part in which tcore is always available!
+   ! TODO: Be careful, because we will be using the PAW routines in which tcore is always available!
    ! Should add a test with 2 NC pseudos: one with NLCC and the other without!
    if (psps%usepaw == 0) then
      call nctab_eval_tcorespl(nctab, psps%n1xccc, xcccrc, xccc1d, psps%mqgrid_vl, psps%qgrid_vl)
@@ -1253,7 +1253,6 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    ABI_FREE(nproj)
 
    if (dtset%prtvol > 9 .and. psps%usepaw==0 .and. psps%lmnmax>3) then
-
      write (filnam, '(a,i0,a)') trim(dtfil%fnameabo_pspdata), ipsp, ".dat"
      if (open_file(filnam, msg, newunit=unt) /= 0) then
        ABI_ERROR(msg)
@@ -1287,7 +1286,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      close(unt)
    end if
 
- end if !me=0
+ end if ! me=0
 
  if (paral_mode==1) then
    call timab(48,1,tsec)
@@ -1353,27 +1352,13 @@ end subroutine pspatm
 !! psp_dump_outputs
 !!
 !! FUNCTION
-!! (To be described ...)
-!!
-!! INPUTS
-!! (to be filled)
-!!
-!! OUTPUT
-!! (to be filled)
-!!
-!! SIDE EFFECTS
-!! (to be filled)
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
+!! Debugging routines used to dumo PSP data in Yaml format.
 !!
 !! SOURCE
 
 subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
-&      mqgrid,n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-&      indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
+                            mqgrid,n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
+                            indlmn,nproj,ekb,ffspl,vlspl,xccc1d)
 
 !Arguments ------------------------------------
 !scalars

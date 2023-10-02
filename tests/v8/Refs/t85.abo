@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,19 +14,18 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h35 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v8_t85-t86/t85.in
-- output file    -> t85.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t85-t86/t85.abi
+- output file    -> t85.abo
 - root for input  files -> t85i
 - root for output files -> t85o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -40,11 +39,10 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       4.196 Mbytes of memory.
+P This job should need less than                       4.251 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -59,11 +57,10 @@ _ WF disk file :      0.048 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       4.648 Mbytes of memory.
+P This job should need less than                       4.720 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.373 Mbytes ; DEN or POT disk file :      0.091 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -81,7 +78,6 @@ P This job should need less than                       2.831 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.373 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -251,18 +247,14 @@ P          mk1mem4         16
           prepanl2          0
           prepanl3          0
           prepanl4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
             rfddk1          0
             rfddk2          0
             rfddk3          1
             rfddk4          0
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          0
@@ -394,9 +386,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Al.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.90363307
@@ -414,9 +406,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/As.LDA_PW-JTH_sp.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 2.10391912
@@ -997,7 +989,6 @@ meta: {optdriver: 1, rfddk: 1, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1019,7 +1010,6 @@ meta: {optdriver: 1, rfddk: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1080,7 +1070,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1141,7 +1130,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1249,7 +1237,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.01497
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 -open ddk wf file :t85o_DS3_1WF7
 -open ddk wf file :t85o_DS3_1WF8
 -open ddk wf file :t85o_DS3_1WF9
@@ -1290,7 +1277,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1311,14 +1297,14 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  6   5.3875763050425     -1.214E-06 2.631E-09 1.733E-04
  ETOT  7   5.3875761492333     -1.558E-07 3.158E-10 3.565E-06
  ETOT  8   5.3875761471293     -2.104E-09 9.039E-12 3.216E-08
- ETOT  9   5.3875761471085     -2.085E-11 4.345E-14 2.118E-09
- ETOT 10   5.3875761471073     -1.142E-12 2.770E-15 4.536E-11
- ETOT 11   5.3875761471073     -3.375E-14 2.294E-17 1.650E-12
- ETOT 12   5.3875761471073     -2.487E-14 5.606E-19 1.509E-13
- ETOT 13   5.3875761471073      3.197E-14 6.263E-20 1.139E-14
- ETOT 14   5.3875761471073      3.197E-14 6.148E-21 9.906E-16
+ ETOT  9   5.3875761471085     -2.082E-11 4.345E-14 2.118E-09
+ ETOT 10   5.3875761471073     -1.155E-12 2.770E-15 4.535E-11
+ ETOT 11   5.3875761471073     -8.882E-15 2.294E-17 1.647E-12
+ ETOT 12   5.3875761471073     -2.665E-14 5.525E-19 1.507E-13
+ ETOT 13   5.3875761471073      1.243E-14 6.250E-20 1.140E-14
+ ETOT 14   5.3875761471073     -1.421E-14 6.270E-21 9.914E-16
 
- At SCF step   14   max residual=  6.15E-21 < tolwfr=  1.00E-20 =>converged.
+ At SCF step   14   max residual=  6.27E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF7
 -open ddk wf file :t85o_DS3_1WF8
 -open ddk wf file :t85o_DS3_1WF9
@@ -1326,7 +1312,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   21.261E-22; max=  61.477E-22
+ Mean square residual over all n,k,spin=   22.366E-22; max=  62.702E-22
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1358,7 +1344,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1375,19 +1360,19 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  2   7.9360753680515     -2.457E+01 1.121E-02 2.000E+03
  ETOT  3   5.5005522772020     -2.436E+00 1.711E-03 2.796E+01
  ETOT  4   5.4715346478920     -2.902E-02 2.682E-05 5.968E-01
- ETOT  5   5.4711973526159     -3.373E-04 1.427E-06 7.489E-03
- ETOT  6   5.4711940513362     -3.301E-06 1.313E-08 3.083E-04
- ETOT  7   5.4711938413130     -2.100E-07 2.068E-10 1.371E-05
- ETOT  8   5.4711938235232     -1.779E-08 1.448E-11 6.492E-07
- ETOT  9   5.4711938225298     -9.934E-10 1.497E-12 1.132E-08
- ETOT 10   5.4711938225014     -2.832E-11 3.651E-14 1.637E-09
- ETOT 11   5.4711938224989     -2.544E-12 1.753E-15 4.404E-11
- ETOT 12   5.4711938224993      3.979E-13 3.365E-17 3.077E-12
- ETOT 13   5.4711938224991     -2.274E-13 1.036E-18 2.292E-13
- ETOT 14   5.4711938224992      1.279E-13 1.384E-20 2.105E-14
- ETOT 15   5.4711938224995      3.553E-13 9.286E-21 1.905E-15
+ ETOT  5   5.4711973526160     -3.373E-04 1.427E-06 7.489E-03
+ ETOT  6   5.4711940513357     -3.301E-06 1.313E-08 3.083E-04
+ ETOT  7   5.4711938413127     -2.100E-07 2.068E-10 1.371E-05
+ ETOT  8   5.4711938235224     -1.779E-08 1.448E-11 6.492E-07
+ ETOT  9   5.4711938225295     -9.930E-10 1.497E-12 1.132E-08
+ ETOT 10   5.4711938225010     -2.851E-11 3.651E-14 1.637E-09
+ ETOT 11   5.4711938224999     -1.094E-12 1.753E-15 4.404E-11
+ ETOT 12   5.4711938224986     -1.251E-12 3.365E-17 3.077E-12
+ ETOT 13   5.4711938224990      3.837E-13 1.036E-18 2.292E-13
+ ETOT 14   5.4711938224999      8.527E-13 1.383E-20 2.105E-14
+ ETOT 15   5.4711938224988     -1.052E-12 9.360E-21 1.905E-15
 
- At SCF step   15   max residual=  9.29E-21 < tolwfr=  1.00E-20 =>converged.
+ At SCF step   15   max residual=  9.36E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF7
 -open ddk wf file :t85o_DS3_1WF8
 -open ddk wf file :t85o_DS3_1WF9
@@ -1395,7 +1380,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   27.708E-22; max=  92.858E-22
+ Mean square residual over all n,k,spin=   27.761E-22; max=  93.602E-22
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1427,7 +1412,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1449,13 +1433,13 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  6  -346.04682552864     -4.847E-06 1.443E-08 4.478E-04
  ETOT  7  -346.04682586762     -3.390E-07 4.937E-10 7.394E-06
  ETOT  8  -346.04682587519     -7.564E-09 9.477E-12 2.864E-07
- ETOT  9  -346.04682587569     -5.057E-10 2.757E-13 1.914E-08
+ ETOT  9  -346.04682587569     -5.056E-10 2.757E-13 1.914E-08
  ETOT 10  -346.04682587573     -3.666E-11 2.261E-14 3.367E-10
- ETOT 11  -346.04682587573     -7.958E-13 3.804E-16 2.266E-11
- ETOT 12  -346.04682587573      1.137E-13 9.923E-18 1.634E-12
- ETOT 13  -346.04682587573      2.842E-13 3.303E-19 1.303E-13
- ETOT 14  -346.04682587573     -4.547E-13 2.992E-20 1.106E-14
- ETOT 15  -346.04682587573      5.684E-13 7.724E-21 1.011E-15
+ ETOT 11  -346.04682587573     -3.979E-13 3.803E-16 2.266E-11
+ ETOT 12  -346.04682587573     -2.274E-13 9.923E-18 1.634E-12
+ ETOT 13  -346.04682587573      3.411E-13 3.303E-19 1.303E-13
+ ETOT 14  -346.04682587573     -9.663E-13 2.992E-20 1.106E-14
+ ETOT 15  -346.04682587573      6.821E-13 7.718E-21 1.012E-15
 
  At SCF step   15   max residual=  7.72E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF7
@@ -1465,7 +1449,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.035E-22; max=  77.239E-22
+ Mean square residual over all n,k,spin=   20.008E-22; max=  77.181E-22
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1488,7 +1472,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1511,12 +1494,12 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  7  -346.04682585697     -3.390E-07 4.937E-10 7.394E-06
  ETOT  8  -346.04682586453     -7.563E-09 9.485E-12 2.862E-07
  ETOT  9  -346.04682586504     -5.070E-10 2.762E-13 1.901E-08
- ETOT 10  -346.04682586507     -3.638E-11 2.249E-14 3.366E-10
- ETOT 11  -346.04682586507     -3.979E-13 3.785E-16 2.265E-11
- ETOT 12  -346.04682586507      3.979E-13 9.918E-18 1.633E-12
- ETOT 13  -346.04682586508     -6.821E-13 3.303E-19 1.304E-13
- ETOT 14  -346.04682586507      3.979E-13 3.002E-20 1.106E-14
- ETOT 15  -346.04682586508     -4.547E-13 9.625E-21 1.010E-15
+ ETOT 10  -346.04682586507     -3.689E-11 2.249E-14 3.366E-10
+ ETOT 11  -346.04682586507     -4.547E-13 3.785E-16 2.265E-11
+ ETOT 12  -346.04682586507      2.842E-13 9.918E-18 1.633E-12
+ ETOT 13  -346.04682586508     -3.979E-13 3.303E-19 1.304E-13
+ ETOT 14  -346.04682586507      1.705E-13 3.002E-20 1.106E-14
+ ETOT 15  -346.04682586508     -2.274E-13 9.626E-21 1.010E-15
 
  At SCF step   15   max residual=  9.63E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF8
@@ -1526,7 +1509,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   21.241E-22; max=  96.253E-22
+ Mean square residual over all n,k,spin=   21.241E-22; max=  96.257E-22
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1549,7 +1532,6 @@ tolerances: {tolwfr: 1.00E-20, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1570,14 +1552,14 @@ tolerances: {tolwfr: 1.00E-20, }
  ETOT  5  -346.04682066080     -2.165E-04 7.503E-07 8.543E-03
  ETOT  6  -346.04682550734     -4.847E-06 1.443E-08 4.478E-04
  ETOT  7  -346.04682584633     -3.390E-07 4.937E-10 7.394E-06
- ETOT  8  -346.04682585389     -7.564E-09 9.477E-12 2.864E-07
+ ETOT  8  -346.04682585389     -7.563E-09 9.477E-12 2.864E-07
  ETOT  9  -346.04682585440     -5.056E-10 2.757E-13 1.914E-08
- ETOT 10  -346.04682585443     -3.678E-11 2.261E-14 3.367E-10
- ETOT 11  -346.04682585443     -9.663E-13 3.804E-16 2.266E-11
- ETOT 12  -346.04682585443      8.527E-13 9.923E-18 1.634E-12
- ETOT 13  -346.04682585443     -5.684E-14 3.303E-19 1.303E-13
- ETOT 14  -346.04682585443     -2.842E-13 2.996E-20 1.106E-14
- ETOT 15  -346.04682585443      0.000E+00 9.492E-21 1.007E-15
+ ETOT 10  -346.04682585443     -3.672E-11 2.261E-14 3.367E-10
+ ETOT 11  -346.04682585443     -9.663E-13 3.803E-16 2.266E-11
+ ETOT 12  -346.04682585443      1.023E-12 9.923E-18 1.634E-12
+ ETOT 13  -346.04682585443     -3.979E-13 3.303E-19 1.303E-13
+ ETOT 14  -346.04682585443     -3.411E-13 2.996E-20 1.106E-14
+ ETOT 15  -346.04682585443      5.684E-14 9.492E-21 1.007E-15
 
  At SCF step   15   max residual=  9.49E-21 < tolwfr=  1.00E-20 =>converged.
 -open ddk wf file :t85o_DS3_1WF9
@@ -1587,7 +1569,7 @@ tolerances: {tolwfr: 1.00E-20, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   22.211E-22; max=  94.920E-22
+ Mean square residual over all n,k,spin=   22.212E-22; max=  94.924E-22
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1608,6 +1590,31 @@ tolerances: {tolwfr: 1.00E-20, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -1.416978        0.000000
+       1               2        0.000000        0.000000
+       1               3       -0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -1.416978        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3       -1.416978        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    2.580395E+00   -2.237795E-13    6.018321E-14
+         1         2   -1.999853E-13    2.580395E+00    3.497484E-13
+         1         3    5.970861E-14    3.252539E-13    2.580395E+00
+         2         1   -2.580395E+00    2.237795E-13   -6.018321E-14
+         2         2    1.999853E-13   -2.580395E+00   -3.497484E-13
+         2         3   -5.970861E-14   -3.252539E-13   -2.580395E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1617,7 +1624,7 @@ tolerances: {tolwfr: 1.00E-20, }
    1    1   1    1         5.3875761465         0.0000000000
    1    1   2    1         2.6937880732         0.0000000000
    1    1   3    1         2.6937880732         0.0000000000
-   1    1   1    2        -5.4669298077        -0.0000000000
+   1    1   1    2        -5.4669298076        -0.0000000000
    1    1   2    2        -2.7334649038         0.0000000000
    1    1   3    2        -2.7334649038         0.0000000000
    1    1   1    4        -7.0880245488         0.0000000000
@@ -1628,7 +1635,7 @@ tolerances: {tolwfr: 1.00E-20, }
    2    1   2    1         5.3875761465         0.0000000000
    2    1   3    1         2.6937880732         0.0000000000
    2    1   1    2        -2.7334649038         0.0000000000
-   2    1   2    2        -5.4669298077         0.0000000000
+   2    1   2    2        -5.4669298076         0.0000000000
    2    1   3    2        -2.7334649038        -0.0000000000
    2    1   1    4         0.0000000000         0.0000000000
    2    1   2    4        -7.0880245488         0.0000000000
@@ -1639,7 +1646,7 @@ tolerances: {tolwfr: 1.00E-20, }
    3    1   3    1         5.3875761465         0.0000000000
    3    1   1    2        -2.7334649038         0.0000000000
    3    1   2    2        -2.7334649038        -0.0000000000
-   3    1   3    2        -5.4669298077         0.0000000000
+   3    1   3    2        -5.4669298076         0.0000000000
    3    1   1    4        -0.0000000000         0.0000000000
    3    1   2    4        -0.0000000000         0.0000000000
    3    1   3    4        -7.0880245488         0.0000000000
@@ -1734,47 +1741,47 @@ tolerances: {tolwfr: 1.00E-20, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.0951787860         0.0000000000
+   1    1   1    1         0.0965806753         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
-   1    1   1    2        -0.0965806753        -0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
+   1    1   1    2        -0.0965806753         0.0000000000
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.0951787860         0.0000000000
+   2    1   2    1         0.0965806753         0.0000000000
    2    1   3    1        -0.0000000000         0.0000000000
    2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2        -0.0965806753         0.0000000000
-   2    1   3    2         0.0000000000        -0.0000000000
+   2    1   3    2         0.0000000000         0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1         0.0951787860         0.0000000000
+   3    1   3    1         0.0965806753         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
-   3    1   2    2         0.0000000000        -0.0000000000
+   3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2        -0.0965806753         0.0000000000
   
    1    2   1    1        -0.0965806703         0.0000000000
-   1    2   2    1         0.0000000000        -0.0000000000
-   1    2   3    1         0.0000000000        -0.0000000000
-   1    2   1    2         0.0966560048         0.0000000000
-   1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   2    1         0.0000000000         0.0000000000
+   1    2   3    1         0.0000000000         0.0000000000
+   1    2   1    2         0.0965806703         0.0000000000
+   1    2   2    2        -0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000         0.0000000000
   
-   2    2   1    1         0.0000000000        -0.0000000000
-   2    2   2    1        -0.0965806703        -0.0000000000
+   2    2   1    1         0.0000000000         0.0000000000
+   2    2   2    1        -0.0965806703         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.0966560048         0.0000000000
+   2    2   1    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.0965806703         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
   
-   3    2   1    1         0.0000000000        -0.0000000000
+   3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1         0.0000000000         0.0000000000
-   3    2   3    1        -0.0965806703        -0.0000000000
+   3    2   3    1        -0.0965806703         0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.0966560048         0.0000000000
+   3    2   3    2         0.0965806703         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
@@ -1784,70 +1791,70 @@ tolerances: {tolwfr: 1.00E-20, }
    1    4   2    4         0.0000000000        -0.0000000000
    1    4   3    4         0.0000000000        -0.0000000000
   
-   2    4   1    4        -0.0000000000        -0.0000000000
+   2    4   1    4         0.0000000000        -0.0000000000
    2    4   2    4        14.8032739042        -0.0000000000
    2    4   3    4         0.0000000000        -0.0000000000
   
-   3    4   1    4        -0.0000000000        -0.0000000000
-   3    4   2    4        -0.0000000000        -0.0000000000
+   3    4   1    4         0.0000000000        -0.0000000000
+   3    4   2    4         0.0000000000        -0.0000000000
    3    4   3    4        14.8032739042        -0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4         1.8719058563         0.0000000000
-   2    1   1    4         0.0000000000         0.0000000000
+   1    1   1    4         2.5803949270         0.0000000000
+   2    1   1    4        -0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
-   1    2   1    4        -3.2888839977         0.0000000000
+   1    2   1    4        -2.5803949270         0.0000000000
    2    2   1    4         0.0000000000         0.0000000000
    3    2   1    4        -0.0000000000         0.0000000000
   
-   1    1   2    4         0.0000000000         0.0000000000
-   2    1   2    4         1.8719058563         0.0000000000
-   3    1   2    4        -0.0000000000         0.0000000000
+   1    1   2    4        -0.0000000000         0.0000000000
+   2    1   2    4         2.5803949270         0.0000000000
+   3    1   2    4         0.0000000000         0.0000000000
    1    2   2    4         0.0000000000         0.0000000000
-   2    2   2    4        -3.2888839977         0.0000000000
+   2    2   2    4        -2.5803949270         0.0000000000
    3    2   2    4        -0.0000000000         0.0000000000
   
    1    1   3    4         0.0000000000         0.0000000000
-   2    1   3    4        -0.0000000000         0.0000000000
-   3    1   3    4         1.8719058563         0.0000000000
+   2    1   3    4         0.0000000000         0.0000000000
+   3    1   3    4         2.5803949270         0.0000000000
    1    2   3    4        -0.0000000000         0.0000000000
    2    2   3    4        -0.0000000000         0.0000000000
-   3    2   3    4        -3.2888839977         0.0000000000
+   3    2   3    4        -2.5803949270         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1         1.8719058421         0.0000000000
-   2    4   1    1         0.0000000000         0.0000000000
+   1    4   1    1         2.5803949445         0.0000000000
+   2    4   1    1        -0.0000000000         0.0000000000
    3    4   1    1         0.0000000000         0.0000000000
   
-   1    4   2    1         0.0000000000         0.0000000000
-   2    4   2    1         1.8719058421         0.0000000000
-   3    4   2    1        -0.0000000000         0.0000000000
+   1    4   2    1        -0.0000000000         0.0000000000
+   2    4   2    1         2.5803949445         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
-   2    4   3    1        -0.0000000000         0.0000000000
-   3    4   3    1         1.8719058421         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   3    4   3    1         2.5803949445         0.0000000000
   
-   1    4   1    2        -3.2888840469         0.0000000000
+   1    4   1    2        -2.5803949445         0.0000000000
    2    4   1    2         0.0000000000         0.0000000000
    3    4   1    2        -0.0000000000         0.0000000000
   
    1    4   2    2         0.0000000000         0.0000000000
-   2    4   2    2        -3.2888840469         0.0000000000
+   2    4   2    2        -2.5803949445         0.0000000000
    3    4   2    2        -0.0000000000         0.0000000000
   
    1    4   3    2        -0.0000000000         0.0000000000
    2    4   3    2        -0.0000000000         0.0000000000
-   3    4   3    2        -3.2888840469         0.0000000000
+   3    4   3    2        -2.5803949445         0.0000000000
   
   
   
@@ -1857,38 +1864,38 @@ tolerances: {tolwfr: 1.00E-20, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -8.487136E-05 -8.487136E-05 -8.487136E-05  1.627903E-03  1.627903E-03
-   1.627903E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.634263E-03
  Phonon frequencies in cm-1    :
-- -1.862711E+01 -1.862711E+01 -1.862711E+01  3.572834E+02  3.572834E+02
--  3.572834E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.586793E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -8.487136E-05 -8.487136E-05  1.355777E-04  1.627903E-03  1.627903E-03
-   1.746017E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.786021E-03
  Phonon frequencies in cm-1    :
-- -1.862711E+01 -1.862711E+01  2.975587E+01  3.572834E+02  3.572834E+02
--  3.832065E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.919863E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-  -8.487136E-05 -8.487136E-05  1.355777E-04  1.627903E-03  1.627903E-03
-   1.746017E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.786021E-03
  Phonon frequencies in cm-1    :
-- -1.862711E+01 -1.862711E+01  2.975587E+01  3.572834E+02  3.572834E+02
--  3.832065E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.919863E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-  -8.487136E-05 -8.487136E-05  1.355777E-04  1.627903E-03  1.627903E-03
-   1.746017E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  1.634263E-03  1.634263E-03
+   1.786021E-03
  Phonon frequencies in cm-1    :
-- -1.862711E+01 -1.862711E+01  2.975587E+01  3.572834E+02  3.572834E+02
--  3.832065E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  3.586793E+02  3.586793E+02
+-  3.919863E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2046,18 +2053,14 @@ P          mk1mem4         16
           prepanl2          0
           prepanl3          0
           prepanl4          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       1
-          rfatpol4          1       2
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
+           prtpot4          1
             rfddk1          0
             rfddk2          0
             rfddk3          1
             rfddk4          0
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
-            rfdir4          1       1       1
            rfelfd1          0
            rfelfd2          0
            rfelfd3          0
@@ -2232,10 +2235,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         36.3  wall=         36.5
+- Proc.   0 individual time (sec): cpu=         31.1  wall=         31.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         36.3  wall=         36.5
+.Delivered   6 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=         31.1  wall=         31.3

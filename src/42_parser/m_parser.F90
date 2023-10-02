@@ -206,12 +206,6 @@ CONTAINS  !===========================================================
 !!  ndtset= the number of declared datasets.
 !!  string= contains on output the content of the file, ready for parsing.
 !!
-!! PARENTS
-!!      m_common,m_dtfil,ujdet
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
@@ -316,12 +310,6 @@ end subroutine parsefile
 !! OUTPUT
 !!  outi or outr (integer or real respectively)
 !!  errcod, =0 for success, 1,2 for ini, inr failure resp.
-!!
-!! PARENTS
-!!      m_bader,m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -498,12 +486,6 @@ end subroutine inread
 !!  string*(strln)=preprocessed string of character
 !!  raw_string=string without any preprocessine (comments are included.
 !!
-!! PARENTS
-!!      anaddb,importcml,localorb_S,lwf,parsefile
-!!
-!! CHILDREN
-!!      incomprs,instrng,wrtout
-!!
 !! SOURCE
 
 recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
@@ -520,7 +502,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
+ integer :: b0,b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
  integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign,lenstr_raw
  logical :: include_found, ex
 !arrays
@@ -781,11 +763,12 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
 !Substitute environment variables, if any
- b1=0
+ b0=0
  do
-   b1=b1+1
-   b1 = index(string(b1:lenstr), '$')
+   b0=b0+1
+   b1 = index(string(b0:lenstr), '$')
    if(b1==0 .or. b1>=lenstr)exit
+   b1 = b0 + b1 - 1
    !Identify delimiter, either a '"', or a "'", or a blank, or a /
    b2=index(string(b1+1:lenstr),'"')
    b3=index(string(b1+1:lenstr),"'")
@@ -874,12 +857,6 @@ end subroutine instrng
 !! SIDE EFFECTS
 !!  string=same character string with ASCII (decimal) 0-31 replaced by 32.
 !!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine inreplsp(string)
@@ -936,12 +913,6 @@ end subroutine inreplsp
 !!  string=at input:  character string
 !!         at output: repeated blanks and tabs have been removed and
 !!                    remaining tabs have been replaced by blanks
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1057,7 +1028,7 @@ end subroutine incomprs
 !!   'DPR'=>real(dp) (no special treatment)
 !!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!       and return in au -atomic units=bohr- )
-!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
+!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg, K, Kelvin)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in key_value
 !!
@@ -1073,7 +1044,7 @@ end subroutine incomprs
 !!   one could add more information, eg whether a ? or a : was used, etc...
 !!   [key_value]=Stores the value of key if typevarphys=="KEY".
 !!      The string must be large enough to contain the output. fnlen is OK in many cases
-!!      except when reading a list of files. The routine aborts is key_value cannot store the output.
+!!      except when reading a list of files. The routine aborts if key_value cannot store the output.
 !!      Output string is left justified.
 !!
 !! NOTES
@@ -1128,14 +1099,6 @@ end subroutine incomprs
 !!  (3) if neither (1) nor (2) are found, search for the 'normal'
 !!       string, blank//'token'//blank
 !!
-!!
-!! PARENTS
-!!      m_anaddb_dataset,m_band2eps_dataset,m_dtfil,m_dtset,m_ingeo,m_inkpts
-!!      m_invars1,m_invars2,m_mpi_setup,m_multibinit_dataset,m_parser
-!!      m_scup_dataset,ujdet
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1540,15 +1503,15 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        itoken2=index(string,trial_cs(1:trial_cslen))
        if(itoken2/=0)then
          if(trial_jdtset==0)then
-           write(msg, '(a,a,a,a,a,a,a)' )&
+           write(msg, '(7a)' )&
            'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
            'This is forbidden.',ch10,&
            'Action: remove this occurence.'
          else
-           write(msg, '(a,a,a,a,a,i1,a,a,a,a,a)' )&
+           write(msg, '(5a,i0,5a)' )&
            'In the input file, there is an occurence of the ',ch10,&
            'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
-           'This is forbidden when ndtset==0 .',ch10,&
+           'This is forbidden when ndtset = =0 .',ch10,&
            'Action: remove this occurence, or change ndtset.'
          end if
          ABI_ERROR(msg)
@@ -1576,16 +1539,16 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! Consistency check for keyword (no multidataset, no series)
    if (opttoken>=2) then
      write(msg, '(9a)' )&
-     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-     'a series has been defined in the input file.',ch10,&
-     'This is forbidden.',ch10,'Action: check your input file.'
+       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+       'a series has been defined in the input file.',ch10,&
+       'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
    if (narr>=2) then
      write(msg, '(9a)' )&
-     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-     'the number of data requested is larger than 1.',ch10,&
-     'This is forbidden.',ch10,'Action: check your input file.'
+       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+       'the number of data requested is larger than 1.',ch10,&
+       'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
  end if
@@ -1714,11 +1677,6 @@ end subroutine intagm
 !! The routine is a generic interface calling subroutine according to the
 !! number of arguments of the variable to be read
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
@@ -1844,11 +1802,6 @@ end subroutine intagm_img_1D
 !!  Read input file variables according to images path definition (2D array)
 !!
 !! INPUTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -1977,7 +1930,7 @@ end subroutine intagm_img_2D
 !! Might read instead one word, after the specified blank. Takes care of multipliers.
 !!
 !! INPUTS
-!!  cs=character token
+!!  cs=character token (starts with a blank)
 !!  marr=dimension of the intarr and dprarr arrays, as declared in the
 !!   calling subroutine.
 !!  narr=actual size of array to be read in  (if typevarphys='KEY', only narr=1 is allowed)
@@ -1988,7 +1941,7 @@ end subroutine intagm_img_2D
 !!   'DPR' => real(dp) (no special treatment)
 !!   'LEN' => real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!            and return in au -atomic units=bohr- )
-!!   'ENE' => real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, Rydberg)
+!!   'ENE' => real(dp) (expect a "energy", identify Ha, hartree, eV, meV, Ry, Rydberg)
 !!   'BFI' => real(dp) (expect a "magnetic field", identify T, Tesla)
 !!   'TIM' => real(dp) (expect a "time", identify S, Second)
 !!   'LOG' => integer, but read logical variable T,F,.true., or .false.
@@ -2000,12 +1953,6 @@ end subroutine intagm_img_2D
 !!
 !! SIDE EFFECT
 !!   b1=absolute location in string of blank which follows the token (will be modified in the execution)
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2019,7 +1966,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  character(len=*),intent(in) :: typevarphys
  character(len=*),intent(in) :: cs
 !arrays
- integer,intent(inout) :: intarr(marr) !vz_i
+ integer,intent(inout) :: intarr(marr)
  real(dp),intent(out) :: dprarr(marr)
 
 !Local variables-------------------------------
@@ -2032,10 +1979,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
 
 ! *************************************************************************
 
- !write(std_out,'(2a)' )' inarray: token: ',trim(cs)
- !write(std_out,'(2a)' )'          string: ',trim(string(b1:))
- !write(std_out,'(a,i0)' )'        narr: ',narr
- !write(std_out,'(2a)' )'          typevarphys: ',typevarphys
+!DEBUG
+! write(std_out,'(5a)' )' inarray: token: ',trim(cs),' "',cs(1:6),'"'
+! if(trim(cs)==' UPAWU1')then
+!   write(std_out,'(2a)' )'          string: ',trim(string(b1:))
+!   write(std_out,'(a,i0)' )'        narr: ',narr
+!   write(std_out,'(2a)' )'          typevarphys: ',typevarphys
+! endif
+!ENDDEBUG
 
  ii = 0
  typevar='INT'
@@ -2112,10 +2063,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      ! If no second blank is found put the second blank just beyond strln
      if(b2==0) b2=strln-b1+1
 
-     ! write(std_out,*)' inarray : strln=',strln
-     ! write(std_out,*)' inarray : b1=',b1, b2=',b2
-     ! write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
-     ! write(std_out,*)' typevarphys==',typevarphys
+!DEBUG
+! if(trim(cs)==' UPAWU1')then
+!     write(std_out,*)' inarray : strln=',strln
+!     write(std_out,*)' inarray : b1=',b1,' b2=',b2
+!     write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
+!     write(std_out,*)' typevarphys==',typevarphys
+! endif
+!ENDDEBUG
 
      ! Identify the presence of a non-digit character
      asciichar=iachar(string(b1+1:b1+1))
@@ -2130,8 +2085,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        else if(typevarphys=='ENE' .and. b2>=3)then
          if(string(b1+1:b1+3)=='RY ')then
            factor=half
+         else if(string(b1+1:b1+3)=='RYD')then
+           factor=half
          else if(string(b1+1:b1+3)=='EV ')then
            factor=one/Ha_eV
+         else if(string(b1+1:b1+4)=='MEV ')then
+           factor=one/Ha_meV
+         else if(string(b1+1:b1+7)=='Kelvin ')then
+            factor=kb_HaK
          end if
        else if(typevarphys=='ENE' .and. b2>=2)then
          if(string(b1+1:b1+2)=='K ') factor=kb_HaK
@@ -2145,15 +2106,20 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        exit
      else
        ! A digit has been observed, go to the next sequence
-       b1=b2
+       b1=b1+b2
        cycle
      end if
 
    end do
  end if
 
-!write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
+!DEBUG
+! if(trim(cs)==' UPAWU1')then
+!   write(std_out,*)' dprarr(1:narr)==',dprarr(1:narr)
+!   stop
+! endif
 !write(std_out,*)' inarray : exit '
+!ENDDEBUG
 
 end subroutine inarray
 !!***
@@ -2180,12 +2146,6 @@ end subroutine inarray
 !!  lenstr=actual number of character in string
 !!  string_upper*(strln)=string of character
 !!   the string (with upper case) from the input file, to which the xyz data are appended to it
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2302,12 +2262,6 @@ end subroutine importxyz
 !! SIDE EFFECTS
 !!  lenstr=actual number of characters in string
 !!  string*(strln)=string of characters  (upper case) to which the xyz data are appended
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2482,12 +2436,6 @@ end subroutine append_xyz
 !! must be between -99 and 999 to be printed correctly.
 !! for the time being, at most 3 conditions are allowed.
 !!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
@@ -2620,12 +2568,6 @@ end subroutine chkdpr
 !!
 !!  Conditional cases (examples to be provided - see chkinp.f for the time being)
 !!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine chkint(advice_change_cond,cond_number,cond_string,cond_values,&
@@ -2706,12 +2648,6 @@ end subroutine chkint
 !!
 !! for the time being, at most 3 conditions are allowed.
 !!
-!! PARENTS
-!!      m_chkinp,m_psps
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine chkint_eq(advice_change_cond,cond_number,cond_string,cond_values,&
@@ -2790,12 +2726,6 @@ end subroutine chkint_eq
 !! must be between -99 and 999 to be printed correctly.
 !!
 !! for the time being, at most 3 conditions are allowed.
-!!
-!! PARENTS
-!!      m_chkinp,m_invars1
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2876,12 +2806,6 @@ end subroutine chkint_ge
 !! must be between -99 and 999 to be printed correctly.
 !!
 !! for the time being, at most 3 conditions are allowed.
-!!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -2964,12 +2888,6 @@ end subroutine chkint_le
 !! must be between -99 and 999 to be printed correctly.
 !!
 !! for the time being, at most 3 conditions are allowed.
-!!
-!! PARENTS
-!!      m_chkinp
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3070,12 +2988,6 @@ end subroutine chkint_ne
 !!   call chkint_prt(0,0,cond_string,cond_values,ierr,'nberry',nberry,1,(/limit/),-1,limit,iout)
 !!
 !!  Conditional cases (examples to be provided - see chkinp.f for the time being)
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3228,12 +3140,6 @@ end subroutine chkint_prt
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_outvar_a_h,m_outvar_i_n,m_outvar_o_z,m_parser,m_paw_uj
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -3573,12 +3479,6 @@ end subroutine prttagm
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_outvar_a_h,m_outvar_i_n,m_outvar_o_z
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine prttagm_images(dprarr_images,iout,jdtset_,length,&
@@ -3761,12 +3661,6 @@ end subroutine prttagm_images
 !! OUTPUT
 !!  Abort if variable name is not recognized.
 !!
-!! PARENTS
-!!      m_anaddb_dataset,m_dtset
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, list_strings, string)
@@ -3865,7 +3759,7 @@ subroutine chkvars_in_string(protocol, list_vars, list_vars_img, list_logicals, 
          'Found token: `',string(index_current:index_endfullword),'` in the input file.',ch10,&
          'This name is not one of the registered input variable names (see https://docs.abinit.org/).',ch10,&
          'Action: check your input file. Perhaps you mistyped the input variable,',ch10,&
-&        'or specified "img", although this was not permitted for this input variable.'
+         'or specified "img", although this was not permitted for this input variable.'
          ABI_ERROR(msg)
        end if
      end if
@@ -4318,11 +4212,6 @@ end function geo_from_poscar_unit
 !! FUNCTION
 !!  Print Abinit variables corresponding to POSCAR
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine geo_print_abivars(self, unit)
@@ -4446,11 +4335,6 @@ end function geo_from_netcdf_path
 !! FUNCTION
 !!  Brodcast object
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine geo_bcast(self, master, comm)
@@ -4492,11 +4376,6 @@ end subroutine geo_bcast
 !! FUNCTION
 !!  Allocate memory once %natom and %ntypat are know
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
-!!
 !! SOURCE
 
 subroutine geo_malloc(self)
@@ -4519,11 +4398,6 @@ end subroutine geo_malloc
 !!
 !! FUNCTION
 !!  Free memory.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 
@@ -4560,12 +4434,6 @@ end subroutine geo_free
 !! rprim(3,3)=dimensionless real space primitive translations
 !!
 !! FUNCTION
-!!
-!! PARENTS
-!!      m_ingeo,m_parser
-!!
-!! CHILDREN
-!!      intagm,intagm_img
 !!
 !! SOURCE
 

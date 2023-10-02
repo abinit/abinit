@@ -155,11 +155,6 @@ CONTAINS  !===========================================================
 !!  n_out=Output N value
 !!  ierr=Status error 
 !!
-!! PARENTS
-!!      m_fft_mesh
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine size_goed_fft(m_in,n_out,ierr)

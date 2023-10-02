@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -30,8 +26,8 @@ module m_symfind
  use m_abicore
  use m_symlist
 
- use m_symtk,     only : chkgrp, chkprimit, matr3inv, symrelrot, symdet, symcharac, holocell, &
-                          smallprim, print_symmetries, sg_multable
+ use m_symtk,     only : chkprimit, mati3inv, matr3inv, symrelrot, symdet, symcharac, holocell, &
+                          smallprim, print_symmetries, sg_multable, symatm, symmetrize_tnons, symmetrize_xred
  use m_geometry,  only : acrossb, xred2xcart
  use m_spgdata,   only : getptgroupma, symptgroup, spgdata
 
@@ -41,7 +37,9 @@ module m_symfind
 !!***
 
  public :: symfind     ! From the symmetries of the Bravais lattice,
-                       ! select those that leave invariant the system, and generate tnons
+                       ! select those that leave invariant the system, and generate tnons. Not always robust.
+ public :: symfind_expert     ! Wrap symfind to provide robust determination of the symmetries,
+                       ! for which resymmetrization of atomic positions and tnons is needed.
  public :: symanal     ! Find the space group from the list of symmetries and lattice parameters
  public :: symbrav     ! Determine the Bravais information from the list of symmetry operations, and the lattice vectors.
  public :: symlatt     ! Find the Bravais lattice and its symmetry operations (ptsymrel).
@@ -58,22 +56,21 @@ contains
 !! Symmetry finder.
 !! From the symmetries of the Bravais lattice (ptsymrel),
 !! select those that leave invariant the system, and generate
-!! the corresponding tnons vectors.
-!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worton1972]]
+!! the corresponding tnons vectors and symafm information.
+!! Unlike symfind_expert, does NOT resymmetrize atomic positions and tnons for more robust determination of the symmetries.
+!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worlton1972]]
 !!
 !! INPUTS
-!! berryopt    =  4/14, 6/16, 7/17: electric or displacement field
 !! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
-!! efield=cartesian coordinates of the electric field
+!! invardir_red (optional)=reduced coordinates of an invariant direction (only acting with symrel - not tnons)
+!! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ; 
+!!                     if 2, z must stay invariant and also there cannot be any associated tnons along z.
 !! gprimd(3,3)=dimensional primitive translations for reciprocal space
 !! msym=default maximal number of symmetries
 !! natom=number of atoms in cell.
-!! noncoll=1 if non-collinear magnetism is activated
-!          (3 components of spinat are taken into account)
-!!         else 0
 !! nptsym=number of point symmetries of the Bravais lattice
+!! nspden= number of spin-density components. When 4, the three components of spinat are taken into account, instead of only z-component.
 !! nucdipmom(3,natom) (optional) array of nuclear dipole moments
-!! nzchempot=if non-zero, means that a z-spatially varying chemical potential is added
 !! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
 !!   of the Bravais lattice in real space in terms
 !!   of primitive translations.
@@ -93,31 +90,25 @@ contains
 !! tnons(3,1:msym)=nonsymmorphic translations for each symmetry (would
 !!  be 0 0 0 each for a symmorphic space group)
 !!
-!! PARENTS
-!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
-!!      m_mover_effpot,m_tdep_sym,m_thmeig,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
-!!
 !! SOURCE
 
- subroutine symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&  nzchempot,prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
-&  chrgat,ierr,nucdipmom)  ! Optional
+ subroutine symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+&  prtvol, ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+&  chrgat,ierr,nucdipmom,invardir_red,invar_z)  ! Optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: berryopt,jellslab,msym,natom,noncoll,nptsym,nzchempot,use_inversion
+ integer,intent(in) :: msym,natom,nptsym,nspden,use_inversion
  integer,intent(in) :: prtvol
+ integer,optional,intent(in) :: invar_z
  integer,optional,intent(out) :: ierr
  integer,intent(out) :: nsym
  real(dp),intent(in) :: tolsym
 !arrays
  integer,intent(in) :: ptsymrel(3,3,msym),typat(natom)
  integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
- real(dp),intent(in) :: efield(3),gprimd(3,3),spinat(3,natom),xred(3,natom)
- real(dp),optional,intent(in) :: chrgat(natom)
+ real(dp),intent(in) :: gprimd(3,3),spinat(3,natom),xred(3,natom)
+ real(dp),optional,intent(in) :: invardir_red(3),chrgat(natom)
  real(dp),optional, intent(in) :: nucdipmom(3,natom)
  real(dp),intent(inout) :: tnons(3,msym) !vz_i
 
@@ -125,18 +116,18 @@ contains
 !scalars
  integer :: found3,foundcl,iatom,iatom0,iatom1,iatom2,iatom3,iclass,iclass0,ierr_,ii
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
- real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20
- real(dp) :: spinat2,spinatcl2,spinatcl20
+ real(dp) :: det,diff1,diff2,diff3,diffr1,diffr2,diffr3,ndnorm,nucdipmomcl2,nucdipmomcl20
+ real(dp) :: spinat2,spinatcl2,spinatcl20,tolsym2
 ! TRUE if antiferro symmetries are used with non-collinear magnetism.
- integer :: afm_noncoll=1 !For noncoll==1.  If 1, all symops are permitted ; if 0 symafm must be 1.
-!For noncoll=1. If noncoll_orthorhombic1, require the symmetry operations to be a subset of the orthorhombic symmetries, except if all spinat=0..
+ integer :: afm_noncoll=1 !For nspden==4.  If 1, all symops are permitted ; if 0 symafm must be 1.
+!For nspden=4. If noncoll_orthorhombic1, require the symmetry operations to be a subset of the orthorhombic symmetries, except if all spinat=0..
  integer :: noncoll_orthorhombic=0
  logical :: test_sameabsspin,test_samechrg
  logical :: test_samenucdipmom
  character(len=500) :: msg
 !arrays
  integer,allocatable :: class(:,:),natomcl(:),typecl(:)
- real(dp) :: diff(3),efieldrot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),spinat0(3),xred0(3)
+ real(dp) :: diff(3),invardir_red_rot(3),hand2(3),hand3(3),ndtest(3),rprimd(3,3),spinat0(3),xred0(3)
  !real(dp) :: symnucdipmom2(3)
  real(dp) :: symnucdipmom2cart(3,3),symnucdipmom2red(3,3)
  real(dp) :: symspinat1(3),symspinat2(3),symxred2(3),trialnons(3)
@@ -148,10 +139,14 @@ contains
 !**************************************************************************
 
 !DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : enter '
+!call flush(std_out)
+!ENDDEBUG
+
+!DEBUG
 ! if (prtvol>1) msg="remove me later"
 ! write(std_out,*)' symfind : enter'
 ! call flush(6)
-! write(std_out,*)' symfind : nzchempot= ',nzchempot
 ! write(std_out,*)'   ptsymrel matrices are :'
 ! do isym=1,nptsym
 ! write(std_out,'(i4,4x,9i4)' )isym,ptsymrel(:,:,isym)
@@ -187,6 +182,8 @@ contains
  ABI_MALLOC(local_nucdipmom,(3,3,natom))
  ABI_MALLOC(nucdipmomcl,(3,natom))
 
+ tolsym2=tolsym**2
+
  chrgat_(:)=zero
  if(present(chrgat))then
    chrgat_(:)=chrgat(:)
@@ -221,6 +218,11 @@ contains
  ! need rprimd later to transform back to cart coords
  call matr3inv(gprimd,rprimd)
 
+!DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : before initialise with the first atom '
+!call flush(std_out)
+!ENDDEBUG
+
 !Initialise with the first atom
  nclass=1
  natomcl(1)=1
@@ -241,9 +243,9 @@ contains
 !      At this stage, admit either identical spinat, or spin-flip spinat.
        if( typat(iatom)==typecl(iclass)) then
          test_samechrg= (abs(chrgat_(iatom)-chrgatcl(iclass))<tolsym)
-         if(noncoll==0)then
+         if(nspden/=4)then
            test_sameabsspin=(abs(abs(spinat(3,iatom))-abs(spinatcl(3,iclass)))<tolsym)
-         else if(noncoll==1)then
+         else if(nspden==4)then
            spinat2  =spinat(1,iatom)**2+spinat(2,iatom)**2+spinat(3,iatom)**2
            spinatcl2=spinatcl(1,iclass)**2+spinatcl(2,iclass)**2+spinatcl(3,iclass)**2
            test_sameabsspin=abs(spinat2-spinatcl2)<tolsym
@@ -295,6 +297,11 @@ contains
 !write(std_out,*)' '
 !ENDDEBUG
 
+!DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : before select the class '
+!call flush(std_out)
+!ENDDEBUG
+
 !Select the class with the least number of atoms, and non-zero spinat if any
 !It is important to select a magnetic class of atom, if any, otherwise
 !the determination of the initial (inclusive) set of symmetries takes only
@@ -324,7 +331,7 @@ contains
  printed=0
 
 !If non-collinear spinat have to be used, transfer them in reduced coordinates
- if (noncoll==1) then
+ if (nspden==4) then
    ABI_MALLOC(spinatred,(3,natom))
    do iatom=1,natom
      do ii=1,3
@@ -336,12 +343,12 @@ contains
 !DEBUG
 !write(std_out,*)' '
 !write(std_out,*)' symfind : has selected iclass0=',iclass0
-!write(std_out,*)'  # iatom  xred                          spinat       (spinatred if noncoll=1) '
+!write(std_out,*)'  # iatom  xred                          spinat       (spinatred if nspden=4) '
 !do iatom0=1,natomcl(iclass0)
 !iatom=class(iatom0,iclass0)
-!if(noncoll==0)then
+!if(nspden/=4)then
 !  write(std_out,'(2i4,6f10.4)' )iatom0,iatom,xred(:,iatom),spinat(:,iatom)
-!else if(noncoll==1)then
+!else if(nspden==4)then
 !  write(std_out,'(2i4,9f10.4)' )iatom0,iatom,xred(:,iatom),spinat(:,iatom),spinatred(:,iatom)
 !endif
 !end do
@@ -357,19 +364,33 @@ contains
     end do
  end do
 
+!DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : before big loop '
+!call flush(std_out)
+!ENDDEBUG
+
 !Big loop over each symmetry operation of the Bravais lattice
  nsym=0
  do isym=1,nptsym
 
-!  ji: Check whether symmetry operation leaves efield invariant
-   if (berryopt==4 .or. berryopt==6 .or. berryopt==7 .or. &
-&   berryopt==14 .or. berryopt==16 .or. berryopt==17) then
-     efieldrot(:) = ptsymrel(:,1,isym)*efield(1) +  &
-&     ptsymrel(:,2,isym)*efield(2) +  &
-&     ptsymrel(:,3,isym)*efield(3)
-     diff(:)=efield(:)-efieldrot(:)
+!DEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : enter loop isym=',isym
+!call flush(std_out)
+!ENDDEBUG
+
+   if(present(invardir_red))then
+!    ji: Check whether symmetry operation leaves invardir_red invariant
+     invardir_red_rot(:) = ptsymrel(:,1,isym)*invardir_red(1) +  &
+&     ptsymrel(:,2,isym)*invardir_red(2) +  &
+&     ptsymrel(:,3,isym)*invardir_red(3)
+     diff(:)=invardir_red(:)-invardir_red_rot(:)
      if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 ) cycle
-   end if
+   endif
+
+!DEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 1'
+!call flush(std_out)
+!ENDDEBUG
 
    if (use_inversion==0) then
      det=ptsymrel(1,1,isym)*ptsymrel(2,2,isym)*ptsymrel(3,3,isym)+&
@@ -381,24 +402,41 @@ contains
      if(det==-1) cycle
    end if
 
+!DEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 2'
+!call flush(std_out)
+!ENDDEBUG
+
 !  jellium slab and spatially varying chemical potential cases:
 !  (actually, an inversion symmetry/mirror plane perpendicular to z symmetry operation might still be allowed... TO BE DONE !)
-   if (jellslab/=0 .or. nzchempot/=0) then
-!    check whether symmetry operation produce a rotation only in the xy plane
-     if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
-&     ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
-!    check whether symmetry operation does not change the z
-     if( ptsymrel(3,3,isym)/=1 ) cycle
+   if(present(invar_z))then
+     if (invar_z/=0) then
+!      check whether symmetry operation produce a rotation only in the xy plane
+       if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
+&       ptsymrel(3,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
+!      check whether symmetry operation does not change the z
+       if( ptsymrel(3,3,isym)/=1 ) cycle
+     end if
    end if
 
+!DEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 3'
+!call flush(std_out)
+!ENDDEBUG
+
 !  If noncoll_orthorhombic=1, require orthorhombic operations of symmetries, except if spinat=0.
-   if (noncoll==1 .and. noncoll_orthorhombic==1)then
+   if (nspden==4 .and. noncoll_orthorhombic==1)then
      if(sum(abs(spinat(:,:)))>tol14)then
        if( ptsymrel(1,3,isym)/=0 .or. ptsymrel(2,3,isym)/=0 .or. &
 &          ptsymrel(1,2,isym)/=0 .or. ptsymrel(3,2,isym)/=0 .or. &
 &          ptsymrel(2,1,isym)/=0 .or. ptsymrel(3,2,isym)/=0 ) cycle
      endif
    endif
+
+!DEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 4'
+!call flush(std_out)
+!ENDDEBUG
 
 !  Select a tentative set of associated translations
 !  First compute the symmetric of the first atom in the smallest class,
@@ -407,13 +445,18 @@ contains
    xred0(:)=ptsymrel(:,1,isym)*xred(1,iatom0)+ &
 &   ptsymrel(:,2,isym)*xred(2,iatom0)+ &
 &   ptsymrel(:,3,isym)*xred(3,iatom0)
-   if (noncoll==0) then
+   if (nspden/=4) then
      spinat0(:)=spinat(:,iatom0)
    else
      spinat0(:)=ptsymrel(:,1,isym)*spinatred(1,iatom0)+ &
 &           ptsymrel(:,2,isym)*spinatred(2,iatom0)+ &
 &           ptsymrel(:,3,isym)*spinatred(3,iatom0)
    endif
+
+!DEBUG
+!write(std_out,'(a,i4)')' m_symfind%symfind : 5'
+!call flush(std_out)
+!ENDDEBUG
 
 !  From the set of possible images, deduce tentative translations,
 !  and magnetic factor then test whether it send each atom on a symmetric one
@@ -427,7 +470,7 @@ contains
 !    The tentative translation is found
      trialnons(:)=xred(:,iatom1)-xred0(:)
 !    Compare the spinat vectors
-     if (noncoll==0) then
+     if (nspden/=4) then
        symspinat1(:)=spinat(:,iatom1)
      else
        symspinat1(:)=spinatred(:,iatom1)
@@ -440,7 +483,7 @@ contains
      trialafm=1
      if(sum(abs(symspinat1(:)-spinat0(:)))>tolsym)then
        trialafm=-1
-       if(noncoll==1 .and. afm_noncoll==0)cycle
+       if(nspden==4 .and. afm_noncoll==0)cycle
        if(sum(abs(symspinat1(:)+spinat0(:)))>tolsym)cycle
      endif
 
@@ -450,13 +493,16 @@ contains
        'isym,iatom0,iatom1=',isym,iatom0,iatom1
        ABI_ERROR(msg)
      end if
+
 !    jellium slab case: check whether symmetry operation has no translational
 !    component along z
-     if( jellslab/=0 .and. abs(trialnons(3)) > tolsym ) cycle
+     if(present(invar_z))then
+       if( invar_z==2 .and. abs(trialnons(3)) > tolsym ) cycle
+     endif
      trialok=1
 
 !    DEBUG
-!    write(std_out, '(a,i3,a,i3,a,i3,a,3f12.4,i3)') ' Try isym=',isym,' sending iatom0 ',iatom0,' to iatom1 ',iatom1,' with trialnons(:),trialafm =',trialnons(:),trialafm
+!     write(std_out, '(a,i3,a,i3,a,i3,a,3f12.4,i3)') ' Try isym=',isym,' sending iatom0 ',iatom0,' to iatom1 ',iatom1,' with trialnons(:),trialafm =',trialnons(:),trialafm
 !    ENDDEBUG
 
 !    Loop over all classes, then all atoms in the class,
@@ -470,7 +516,7 @@ contains
 &         ptsymrel(:,2,isym)*xred(2,iatom2)+ &
 &         ptsymrel(:,3,isym)*xred(3,iatom2)+ trialnons(:)
 !        Generate the tentative symmetric spinat of iatom2
-         if (noncoll==0) then
+         if (nspden/=4) then
            symspinat2(:)=trialafm*spinat(:,iatom2)
          else
            symspinat2(:)=trialafm*(ptsymrel(:,1,isym)*spinatred(1,iatom2)+ &
@@ -498,17 +544,34 @@ contains
            found3=1
            iatom3=class(kk,iclass)
 !          Check the location
-           diff(:)=xred(:,iatom3)-symxred2(:)
-           diff(:)=diff(:)-nint(diff(:))
-           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
+           diffr1=xred(1,iatom3)-symxred2(1)
+           diff1=diffr1-nint(diffr1)
+           if(diff1**2>tolsym2)then
+             found3=0 ; cycle
+           else
+             diffr2=xred(2,iatom3)-symxred2(2)
+             diff2=diffr2-nint(diffr2)
+             if(diff2**2>tolsym2)then
+               found3=0 ; cycle
+             else
+               diffr3=xred(3,iatom3)-symxred2(3)
+               diff3=diffr3-nint(diffr3)
+               if( (diff1**2+diff2**2+diff3**2) > tolsym**2 )then
+                 found3=0 ; cycle
+               endif
+             endif
+           endif
 !          Check the spinat
-           if (noncoll==0) then
+           if (nspden/=4) then
              diff(:)=spinat(:,iatom3)-symspinat2(:)
            else
              diff(:)=spinatred(:,iatom3)-symspinat2(:)
            end if
-           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )found3=0
-           !          Check the nucdipmom
+           if( (diff(1)**2+diff(2)**2+diff(3)**2) > tolsym**2 )then
+             found3=0
+             cycle
+           endif  
+           ! Check the nucdipmom
            ! hand3 gives original circulation sense of nuclear dipole
            call acrossb(local_nucdipmom(1:3,2,iatom3),local_nucdipmom(1:3,3,iatom3),hand3)
 
@@ -539,7 +602,7 @@ contains
        nsym=nsym+1
        if(nsym>msym)then
          write(msg,'(a,i0,2a,i0,4a)')&
-         'The number of symmetries (including non-symmorphic translations) is:', nsym, ch10,&
+         'The number of symmetries (including non-symmorphic translations) is: ', nsym, ch10,&
          'is larger than maxnsym: ',msym,ch10,&
          'Action: increase maxnsym in the input, or take a cell that is primitive, ',ch10,&
          'or at least smaller than the present one.'
@@ -554,6 +617,11 @@ contains
    end do ! End the loop on tentative translations
  end do ! End big loop over each symmetry operation of the Bravais lattice
 
+!DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : after big loop, will call ABI_FREE '
+!call flush(std_out)
+!ENDDEBUG
+
  ABI_FREE(class)
  ABI_FREE(natomcl)
  ABI_FREE(chrgat_)
@@ -563,12 +631,27 @@ contains
  ABI_FREE(local_nucdipmom)
  ABI_FREE(nucdipmomcl)
  ABI_FREE(nucdipmomred)
- if (noncoll==1)   then
+ if (nspden==4)   then
    ABI_FREE(spinatred)
  end if
 
-! call chkgrp(nsym,symafm,symrel,ierr_)
- call sg_multable(nsym, symafm, symrel, tnons, tolsym, ierr_)
+!DEBUG
+!write(std_out,'(a,i6)')' m_symfind%symfind : call sg_multable, nsym= ',nsym
+!call flush(std_out)
+!ENDDEBUG
+
+! The algorithm in sg_multable is still cubic in nsym, so avoid calling it uselessly when nsym is too large
+ if(present(ierr) .or. nsym<=384)then
+   call sg_multable(nsym, symafm, symrel, ierr_, tnons=tnons, tnons_tol=tolsym)
+ else
+   ierr_=0
+ endif
+
+!DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : call print_symmetries, ierr_= ',ierr_
+!call flush(std_out)
+!ENDDEBUG
+
  if (ierr_/=0) then
    call print_symmetries(nsym,symrel,tnons,symafm)
  end if
@@ -591,7 +674,182 @@ contains
 !stop
 !ENDDEBUG
 
+!DEBUG
+!write(std_out,'(a)')' m_symfind%symfind : exit '
+!call flush(std_out)
+!ENDDEBUG
+
 end subroutine symfind
+!!***
+
+!!****f* m_symfind/symfind_expert
+!! NAME
+!! symfind_expert
+!!
+!! FUNCTION
+!! Symmetry finder, with an added layer of robustness compared to symfind, 
+!! and for which resymmetrization of atomic positions and tnons is needed..
+!! From the symmetries of the Bravais lattice (ptsymrel),
+!! select those that leave invariant the system, and generate
+!! the corresponding tnons vectors and symafm information.
+!! Unlike symfind_expert, does NOT resymmetrize atomic positions and tnons for more robust determination of the symmetries.
+!! The algorithm is explained in T.G. Worlton and J.L. Warren, Comp. Phys. Comm. 3, 88 (1972) [[cite:Worton1972]]
+!!
+!! INPUTS
+!! chrgat(natom) (optional)=target charge for each atom. Not always used, it depends on the value of constraint_kind
+!! invardir_red (optional)=reduced coordinates of an invariant direction (only acting with symrel - not tnons)
+!! invar_z (optional)= if 1, the z direction must stay invariant for all symrel applied ;
+!!                     if 2, z must stay invariant and also there cannot be any associated tnons along z.
+!! gprimd(3,3)=dimensional primitive translations for reciprocal space
+!! msym=default maximal number of symmetries
+!! natom=number of atoms in cell.
+!! nptsym=number of point symmetries of the Bravais lattice
+!! nspden= number of spin-density components. When 4, the three components of spinat are taken into account, instead of only z-component.
+!! nucdipmom(3,natom) (optional) array of nuclear dipole moments
+!  pawspnorb=flag: 1 if spin-orbit coupling is activated
+!! ptsymrel(3,3,1:msym)= nptsym point-symmetry operations
+!!   of the Bravais lattice in real space in terms
+!!   of primitive translations.
+!! spinat(3,natom)=initial spin of each atom, in unit of hbar/2.
+!! tolsym=tolerance for the symmetries
+!! typat(natom)=integer identifying type of atom.
+!! usepaw= 0 for non paw calculation; =1 for paw calculation
+!!
+!! OUTPUT
+!! nsym=actual number of symmetries
+!! symafm(1:msym)=(anti)ferromagnetic part of nsym symmetry operations
+!! symrel(3,3,1:msym)= nsym symmetry operations in real space in terms of primitive translations
+!! tnons(3,1:msym)=nonsymmorphic translations for each symmetry (would be 0 0 0 each for a symmorphic space group)
+!!
+!! SIDE EFFECTS
+!! xred(3,natom)=reduced coordinates of atoms in terms of real space
+!!   primitive translations. Might be changed during the resymmetrization.
+
+!!
+!! SOURCE
+
+ subroutine symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
+&  pawspnorb,prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,usepaw,xred,&
+&  chrgat,nucdipmom,invardir_red,invar_z)  ! Optional - although for the time being all are required ...
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: msym,natom,nptsym,nspden,pawspnorb,usepaw
+ integer,intent(in) :: prtvol
+ integer,optional,intent(in) :: invar_z
+ integer,intent(out) :: nsym
+ real(dp),intent(in) :: tolsym
+!arrays
+ integer,intent(in) :: ptsymrel(3,3,msym),typat(natom)
+ integer,intent(inout) :: symafm(msym),symrel(3,3,msym) !vz_i
+ real(dp),intent(in) :: gprimd(3,3),spinat(3,natom)
+ real(dp),intent(inout) :: xred(3,natom)
+ real(dp),optional,intent(in) :: invardir_red(3),chrgat(natom)
+ real(dp),optional, intent(in) :: nucdipmom(3,natom)
+ real(dp),intent(inout) :: tnons(3,msym) !vz_i
+
+!Local variables-------------------------------
+!scalars
+ integer, save :: print_comment_tolsym=1
+ integer :: fixed_mismatch,mismatch_fft_tnons
+ integer :: ierr,isym,use_inversion
+ character(len=1000) :: msg
+!arrays
+ integer,allocatable :: indsym(:,:,:),symrec(:,:,:) 
+ real(dp),allocatable :: tnons_new(:,:)
+ 
+
+!**************************************************************************
+
+!DEBUG
+! write(std_out,*)' m_symfind%symfind_expert : enter '
+!ENDDEBUG
+
+  use_inversion=1
+  if (usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+    ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+    use_inversion=0
+  end if
+
+!DEBUG
+! write(std_out,*)' m_symfind%symfind_expert : before call symfind (1) '
+!ENDDEBUG
+
+  call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+    prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+    chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
+
+!DEBUG
+! write(std_out,*)' m_symfind%symfind_expert : after call symfind (1) '
+!ENDDEBUG
+
+  !If the group closure is not obtained, which should be exceptional, try with a larger tolsym (three times larger)
+  if(ierr/=0)then
+    ABI_WARNING('Will try to obtain group closure by using a tripled tolsym.')
+    call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+      prtvol,ptsymrel,spinat,symafm,symrel,tnons,three*tolsym,typat,use_inversion,xred,&
+      chrgat=chrgat,nucdipmom=nucdipmom,ierr=ierr,invardir_red=invardir_red,invar_z=invar_z)
+    ABI_CHECK(ierr==0,"Error in group closure")
+    ABI_WARNING('Succeeded to obtain group closure by using a tripled tolsym.')
+  endif
+
+  ! If the tolerance on symmetries is bigger than 1.e-8, symmetrize tnons for gliding or screw operations,
+  ! symmetrize the atomic positions and recompute the symmetry operations
+  if(tolsym>1.00001e-8)then
+
+    call symmetrize_tnons(nsym,symrel,tnons,tolsym)
+    ABI_MALLOC(indsym,(4,natom,nsym))
+    ABI_MALLOC(symrec,(3,3,nsym))
+    do isym=1,nsym
+      call mati3inv(symrel(:,:,isym),symrec(:,:,isym))
+    end do
+    call symatm(indsym,natom,nsym,symrec,tnons,tolsym,typat,xred)
+    call symmetrize_xred(natom,nsym,symrel,tnons,xred,indsym=indsym)
+    ABI_FREE(indsym)
+    ABI_FREE(symrec)
+
+    if(print_comment_tolsym==1)then
+      write(msg,'(a,es12.3,18a)')&
+&      'The tolerance on symmetries =',tolsym,' is bigger than 1.0e-8.',ch10,&
+&      'In order to avoid spurious effects, the atomic coordinates have been',ch10,&
+&      'symmetrized before storing them in the dataset internal variable.',ch10,&
+&      'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
+&      'do not correspond exactly to the ones echoed by ABINIT, the latter being used to do the calculations.',ch10,&
+&      'This is not a problem per se.',ch10,&
+&      'Still, in order to avoid this symmetrization (e.g. for specific debugging/development),',&
+&      ' decrease tolsym to 1.0e-8 or lower,',ch10,&
+&      'or (much preferred) use input primitive vectors that are accurate to better than 1.0e-8.',ch10,&
+&      'This message will only be printed once, even if there are other datasets where tolsym is bigger than 1.0e-8.'
+      ABI_COMMENT(msg)
+      print_comment_tolsym=0
+    endif
+
+!DEBUG
+!write(std_out,*)' m_symfind%symfind_expert : before call symfind (3) '
+!ENDDEBUG
+
+    call symfind(gprimd,msym,natom,nptsym,nspden,nsym,&
+      prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
+      chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=invardir_red,invar_z=invar_z)
+
+!DEBUG
+! write(std_out,*)' m_symfind%symfind_expert : after call symfind (3) '
+!ENDDEBUG
+
+    !Needs one more resymmetrization, for the tnons
+    ABI_MALLOC(tnons_new,(3,nsym))
+
+    call symmetrize_xred(natom,nsym,symrel,tnons,xred,&
+&     fixed_mismatch=fixed_mismatch,mismatch_fft_tnons=mismatch_fft_tnons,tnons_new=tnons_new,tolsym=tolsym)
+    tnons(:,1:nsym)=tnons_new(:,:)
+    ABI_FREE(tnons_new)
+  end if ! tolsym >1.00001e-8
+
+!DEBUG
+! write(std_out,*)' m_symfind%symfind_expert : exit '
+!ENDDEBUG
+
+end subroutine symfind_expert
 !!***
 
 !!****f* m_symfind/symanal
@@ -621,12 +879,6 @@ end subroutine symfind
 !! genafm(3)=magnetic translation generator (in case of Shubnikov group type IV)
 !! ptgroupma = magnetic point group number
 !! spgroup=symmetry space group
-!!
-!! PARENTS
-!!      m_ab7_symmetry,m_ingeo,m_mover_effpot,m_phonons,m_tdep_sym,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -667,6 +919,11 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 
 !DEBUG
 !write(std_out,*)' symanal : enter'
+!write(std_out,*)' symanal : chkprim =',chkprim
+!write(std_out,*)' symanal : nsym=',nsym
+!do isym=1,nsym
+!  write(std_out,*)' symanal : symrel=',symrel(1:3,1:3,isym)
+!enddo
 !ENDDEBUG
 
  verbose_=.false.
@@ -677,7 +934,7 @@ subroutine symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,sym
 !This routine finds the Bravais characteristics, without actually
 !looking at the symmetry operations.
  ABI_MALLOC(ptsymrel,(3,3,maxsym))
- call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimd,tolsym)
+ call symlatt(bravais,dev_null,maxsym,nptsym,ptsymrel,rprimd,tolsym)
  ABI_FREE(ptsymrel)
 
 !Check whether the cell is primitive or not.
@@ -830,12 +1087,6 @@ end subroutine symanal
 !! [axis(3)]=Invariant axis in the conventional vector coordinates
 !!   Set to (/0,0,0/) if the lattice belongs to the same holohedry as the lattice+atoms (+electric field + ...).
 !!
-!! PARENTS
-!!      m_esymm,m_symfind
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
-!!
 !! SOURCE
 
 subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
@@ -946,7 +1197,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 
    maxsym=max(192,msym)
    ABI_MALLOC(ptsymrel,(3,3,maxsym))
-   call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
+   call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimdtry,tolsym)
    ABI_FREE(ptsymrel)
 
 !DEBUG
@@ -1207,12 +1458,6 @@ end subroutine symbrav
 !!
 !! For the detailed description of the labelling of the axes,
 !! see symaxes.f and symplanes.f
-!!
-!! PARENTS
-!!      m_symfind
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
 !!
 !! SOURCE
 
@@ -1604,6 +1849,7 @@ end subroutine symspgr
 !! 3) Generate the symmetry operations of the holohedral group
 !!
 !! INPUTS
+!! iout=unit number of output file
 !! msym=default maximal number of symmetries. WARNING : cannot be simply set to nsym, because
 !!   the number of symmetries found here will likely be bigger than sym !
 !! rprimd(3,3)=dimensional primitive translations for real space (bohr)
@@ -1638,20 +1884,13 @@ end subroutine symspgr
 !! center=2        B-face centered
 !! center=3        C-face centered
 !!
-!! PARENTS
-!!      m_ab7_symmetry,m_effective_potential_file,m_ingeo,m_inkpts
-!!      m_mover_effpot,m_symfind,m_tdep_sym,m_thmeig,m_use_ga
-!!
-!! CHILDREN
-!!      holocell,matr3inv,smallprim,symrelrot,wrtout
-!!
 !! SOURCE
 
-subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+subroutine symlatt(bravais,iout,msym,nptsym,ptsymrel,rprimd,tolsym)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: msym
+ integer,intent(in) :: iout,msym
  integer,intent(out) :: nptsym
  real(dp),intent(in) :: tolsym
 !arrays
@@ -2438,7 +2677,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
  end if
 
- call wrtout(std_out,msg)
+ call wrtout(iout,msg)
 
 !DEBUG
 !write(std_out,*)' symlatt : after checking conventional orthogonal cell '

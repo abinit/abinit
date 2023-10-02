@@ -43,7 +43,6 @@ sources = [
  "m_optic_tools.F90",
  "m_optics_vloc.F90",
  "m_rot_cg.F90",
- "m_orbmag.F90",
  "m_rhotov.F90",
  "m_common.F90",
  "m_positron.F90",
@@ -52,6 +51,7 @@ sources = [
  "m_stress.F90",
  "m_vtorhotf.F90",
  "m_wvl_rho.F90",
+ "m_xc_tb09.F90"
 ]
 
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.

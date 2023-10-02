@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h34 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
 
 ================================================================================
@@ -44,13 +44,24 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  8.2819417  0.0000000  0.0000000  G(1)=  0.1207446  0.0000000  0.0000000
  R(2)=  0.0000000 12.6669442  0.0000000  G(2)=  0.0000000  0.0789456  0.0000000
  R(3)=  0.0000000  0.0000000 13.1661201  G(3)=  0.0000000  0.0000000  0.0759525
  Unit cell volume ucvol=  1.3812168E+03 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ca
+    2)    0.5000000  0.5000000  0.5000000  Ca
+    3)    0.0000000  0.2745558  0.3299533  Br
+    4)    0.0000000  0.7254442  0.6700467  Br
+    5)    0.5000000  0.7745558  0.1700467  Br
+    6)    0.5000000  0.2254442  0.8299533  Br
+
+ DDB file with 280 blocks has been read.
 
 ================================================================================
 
@@ -75,7 +86,7 @@
        3               3        0.001180        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.605961E+00    0.000000E+00    0.000000E+00
@@ -102,7 +113,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.412  and twall      0.414 sec
+-begin at tcpu      0.306  and twall      0.313 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      539
  greater than 80, so only write 20 of them
@@ -153,10 +164,10 @@
 -   1586    6.0651E-02           0    0.0000E+00     4.4187E+01
 -   1587    6.0031E-02           0    0.0000E+00     4.4187E+01
 -
-- Proc.   0 individual time (sec): cpu=         80.8  wall=         81.0
+- Proc.   0 individual time (sec): cpu=         79.3  wall=         79.5
 
 ================================================================================
 
-+Total cpu time     80.809  and wall time     81.037 sec
++Total cpu time     79.302  and wall time     79.484 sec
 
  anaddb : the run completed succesfully.

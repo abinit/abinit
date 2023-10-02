@@ -10,8 +10,6 @@
  ieig2rf     1
  smdelta     1
  rfphon      1 
- rfatpol     1 2 
- rfdir       1 1 1
 
 #Size-dependent parameters
  acell 3*6.70346805
@@ -30,7 +28,7 @@
  nshiftq  1
  shiftq   0.0 0.0 0.0
  elph2_imagden 0.1 eV
- rfasr    1
+#rfasr    1
 
 # Miscellaneous
  ntypat  1

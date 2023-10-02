@@ -13,10 +13,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -76,12 +72,6 @@ CONTAINS
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 subroutine set_pert_comm(mpi_enreg,nppert)
@@ -120,12 +110,6 @@ end subroutine set_pert_comm
 !!
 !! SIDE EFFECTS
 !!  mpi_enreg=information about MPI parallelization
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
 !!
 !! SOURCE
 
@@ -190,12 +174,6 @@ end  subroutine unset_pert_comm
 !!  paw_ij(my_natom)<type(paw_ij_type)>=PAW arrays given on (i,j) channels
 !!  pawfgrtab(my_natom)<type(pawfgrtab_type)>=PAW atomic data given on fine grid
 !!  pawrhoij(my_natom)<type(pawrhoij_type)>=PAW rhoij occupancies
-!!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
 !!
 !! SOURCE
 
@@ -440,12 +418,6 @@ end  subroutine set_pert_paw
 !!  pawfgrtab(my_natom)<type(pawfgrtab_type)>=PAW atomic data given on fine grid
 !!  pawrhoij(my_natom)<type(pawrhoij_type)>=PAW rhoij occupancies
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
@@ -631,12 +603,6 @@ end  subroutine unset_pert_paw
 !! SendAtomList(:)= indexes of atoms to be sent by me
 !!   SendAtomList(isend) are the atoms sent to SendAtomProc(isend)
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
-!!
 !! SOURCE
 
 
@@ -780,12 +746,6 @@ end subroutine get_exchatom_list
 !! In our purpose, we only need to redistribute the atoms of one mpicomm_in among mpicomm_out
 !! because all structures of atoms we have to exchange have the same value in each mpicomm_in.
 !! The mpicomm_in we choose is the one in which the processor 0 of mpicomm_out belong
-!!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!      get_atm_proc,xmpi_bcast,xmpi_comm_translate_ranks
 !!
 !! SOURCE
 
